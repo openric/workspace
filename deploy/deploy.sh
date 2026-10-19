@@ -13,6 +13,11 @@
 # deployed only when CI passed on its commit. The database is backed up before
 # migrations run. If a step fails, the site is left in maintenance mode and the
 # rollback command is printed.
+#
+# Two stages. Stage 1 (this copy, whatever release is live) checks the tag, backs
+# up, enters maintenance mode and checks the tag out. Stage 2 then runs from the
+# release being deployed, so a release's own deploy steps (a new migration, a key it
+# needs) always run with it, not one release later.
 set -euo pipefail
 
 TAG=${1:-}
@@ -36,46 +41,55 @@ else
   artisan() { sudo -u www-data php artisan "$@"; }
 fi
 
-echo "== 1. Release $TAG"
-owner git fetch --quiet --tags origin
-SHA=$(owner git rev-parse --verify --quiet "refs/tags/$TAG^{commit}") || fail "tag $TAG not found on origin"
-PREVIOUS=$(owner git describe --tags --exact-match HEAD 2>/dev/null || owner git rev-parse --short HEAD)
-echo "commit ${SHA:0:12}; live now runs $PREVIOUS"
-
-echo "== 2. CI on that commit"
-# The public GitHub API, so no token is needed: gh keeps its token in the desktop
-# keyring, which a root session switching user cannot reach.
-CI=$(curl -fsS --max-time 30 "https://api.github.com/repos/$REPO/commits/$SHA/check-runs" \
-  | jq -r --arg name "$CI_CHECK" '[.check_runs[] | select(.name == $name) | .conclusion] | first // "none"') \
-  || fail "could not read CI status from GitHub"
-[[ $CI == success ]] || fail "CI \"$CI_CHECK\" on ${SHA:0:12} is $CI, not success"
-echo "passed"
-
-echo "== 3. Database backup"
-BACKUPS="$LIVE/storage/app/backups"
-owner mkdir -p "$BACKUPS"
-DUMP="$BACKUPS/before-$TAG-$(date -u +%Y%m%dT%H%M%SZ).dump"
-env_value() { grep -E "^$1=" "$LIVE/.env" | head -1 | cut -d= -f2- | sed -e 's/^"//' -e 's/"$//'; }
-# The password goes in the environment, never on a command line other users can see.
-PGPASSWORD=$(env_value DB_PASSWORD) owner pg_dump --format=custom --no-owner \
-  --host="$(env_value DB_HOST)" --port="$(env_value DB_PORT)" \
-  --username="$(env_value DB_USERNAME)" --dbname="$(env_value DB_DATABASE)" --file="$DUMP"
-owner chmod 640 "$DUMP"
-ls -1t "$BACKUPS"/before-*.dump | tail -n +$((KEEP_BACKUPS + 1)) | xargs -r rm --
-echo "$DUMP"
-
 on_error() {
   echo >&2
   echo "deploy: FAILED. The site is in maintenance mode." >&2
   echo "  Roll back:   deploy/deploy.sh $PREVIOUS   (if that was a tag), or restore $DUMP" >&2
   echo "  Bring up as it is:   cd $LIVE && sudo -u www-data php artisan up" >&2
 }
-trap on_error ERR
 
-echo "== 4. Maintenance mode, code, dependencies, migrations, caches"
-# A fresh clone has no dependencies yet, so there is no application to take down.
-if [[ -d vendor ]]; then artisan down --retry=30; fi
-owner git -c advice.detachedHead=false checkout --quiet --detach "$TAG"
+if [[ ${WORKSPACE_DEPLOY_STAGE:-} != 2 ]]; then
+  echo "== 1. Release $TAG"
+  owner git fetch --quiet --tags origin
+  SHA=$(owner git rev-parse --verify --quiet "refs/tags/$TAG^{commit}") || fail "tag $TAG not found on origin"
+  PREVIOUS=$(owner git describe --tags --exact-match HEAD 2>/dev/null || owner git rev-parse --short HEAD)
+  echo "commit ${SHA:0:12}; live now runs $PREVIOUS"
+
+  echo "== 2. CI on that commit"
+  # The public GitHub API, so no token is needed: gh keeps its token in the desktop
+  # keyring, which a root session switching user cannot reach.
+  CI=$(curl -fsS --max-time 30 "https://api.github.com/repos/$REPO/commits/$SHA/check-runs" \
+    | jq -r --arg name "$CI_CHECK" '[.check_runs[] | select(.name == $name) | .conclusion] | first // "none"') \
+    || fail "could not read CI status from GitHub"
+  [[ $CI == success ]] || fail "CI \"$CI_CHECK\" on ${SHA:0:12} is $CI, not success"
+  echo "passed"
+
+  echo "== 3. Database backup"
+  BACKUPS="$LIVE/storage/app/backups"
+  owner mkdir -p "$BACKUPS"
+  DUMP="$BACKUPS/before-$TAG-$(date -u +%Y%m%dT%H%M%SZ).dump"
+  env_value() { grep -E "^$1=" "$LIVE/.env" | head -1 | cut -d= -f2- | sed -e 's/^"//' -e 's/"$//'; }
+  # The password goes in the environment, never on a command line other users can see.
+  PGPASSWORD=$(env_value DB_PASSWORD) owner pg_dump --format=custom --no-owner \
+    --host="$(env_value DB_HOST)" --port="$(env_value DB_PORT)" \
+    --username="$(env_value DB_USERNAME)" --dbname="$(env_value DB_DATABASE)" --file="$DUMP"
+  owner chmod 640 "$DUMP"
+  ls -1t "$BACKUPS"/before-*.dump | tail -n +$((KEEP_BACKUPS + 1)) | xargs -r rm --
+  echo "$DUMP"
+
+  trap on_error ERR
+  echo "== 4. Maintenance mode and code"
+  # A fresh clone has no dependencies yet, so there is no application to take down.
+  if [[ -d vendor ]]; then artisan down --retry=30; fi
+  owner git -c advice.detachedHead=false checkout --quiet --detach "$TAG"
+  trap - ERR
+  export WORKSPACE_DEPLOY_STAGE=2 PREVIOUS DUMP
+  exec "$LIVE/deploy/deploy.sh" "$TAG"
+fi
+
+# Stage 2: from the release being deployed.
+trap on_error ERR
+echo "== 5. Dependencies, migrations, signing key, caches"
 owner composer install --no-dev --optimize-autoloader --no-interaction --no-progress --quiet
 artisan migrate --force
 # Every audit row is signed (ADR 0004): without the key no change can be recorded.
@@ -84,10 +98,11 @@ artisan optimize
 artisan up
 trap - ERR
 
-echo "== 5. Smoke check"
+echo "== 6. Checks"
 for path in /sign-in /vocab/permission/; do
   code=$(curl -s -o /dev/null -w '%{http_code}' "$URL$path")
   [[ $code == 200 ]] || fail "$path answered $code after deploying $TAG; roll back with deploy/deploy.sh $PREVIOUS"
   echo "$path 200"
 done
+artisan workspace:audit:verify
 echo "Deployed $TAG (was $PREVIOUS)."
