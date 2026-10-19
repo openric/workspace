@@ -1,0 +1,95 @@
+# OpenRiC Role-Type Vocabulary
+# SKOS ConceptScheme of the roles an agent plays in a relation, the values of
+# openricx:relationHasAgentRole and of RiC-O 1.1's rico:creationWithRole.
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix rico:    <https://www.ica.org/standards/RiC/ontology#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix rt:      <https://openric.org/vocab/role-type/> .
+
+rt: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Role-Type Vocabulary"@en ;
+    dcterms:description "SKOS ConceptScheme of roles an agent plays in a relation. Each concept is also a rico:RoleType, the range of rico:creationWithRole and of openricx:relationHasAgentRole. RiC-O 1.1 defines the class but publishes no role vocabulary."@en ;
+    dcterms:issued "2026-10-19"^^xsd:date ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
+    skos:hasTopConcept rt:spouse, rt:witness, rt:donor, rt:editor, rt:translator, rt:performer, rt:resident, rt:carer .
+
+rt:spouse a skos:Concept, rico:RoleType ;
+    skos:inScheme rt: ;
+    skos:topConceptOf rt: ;
+    skos:narrower rt:bride, rt:groom ;
+    skos:prefLabel "Spouse"@en ;
+    skos:definition "A party to a marriage or civil union, in the event that creates it."@en ;
+    skos:scopeNote "Use with openricx:relationHasAgentRole on the relation between the marriage event and each party. Use bride or groom where the record names the party that way."@en .
+
+rt:bride a skos:Concept, rico:RoleType ;
+    skos:inScheme rt: ;
+    skos:broader rt:spouse ;
+    skos:prefLabel "Bride"@en ;
+    skos:definition "A woman party to a marriage, as the record names her."@en ;
+    skos:scopeNote "Narrower than spouse. Keep the record's own term; use spouse where the record does not distinguish."@en .
+
+rt:groom a skos:Concept, rico:RoleType ;
+    skos:inScheme rt: ;
+    skos:broader rt:spouse ;
+    skos:prefLabel "Groom"@en ;
+    skos:definition "A man party to a marriage, as the record names him."@en ;
+    skos:scopeNote "Narrower than spouse. Keep the record's own term; use spouse where the record does not distinguish."@en .
+
+rt:witness a skos:Concept, rico:RoleType ;
+    skos:inScheme rt: ;
+    skos:topConceptOf rt: ;
+    skos:prefLabel "Witness"@en ;
+    skos:definition "An agent who attests to an event or to the making of a record, such as a marriage, a signature or a court hearing."@en ;
+    skos:scopeNote "The role on the relation between the event, or the record's creation, and the agent."@en .
+
+rt:donor a skos:Concept, rico:RoleType ;
+    skos:inScheme rt: ;
+    skos:topConceptOf rt: ;
+    skos:prefLabel "Donor"@en ;
+    skos:definition "An agent who gave records or other material to the holding institution."@en ;
+    skos:scopeNote "The role on the relation between an acquisition or custody-transfer activity and the agent who gave the material."@en .
+
+rt:editor a skos:Concept, rico:RoleType ;
+    skos:inScheme rt: ;
+    skos:topConceptOf rt: ;
+    skos:prefLabel "Editor"@en ;
+    skos:definition "An agent who prepared a record or a publication for issue, compiling or revising the work of others."@en ;
+    skos:scopeNote "As a creation role, the value of rico:creationWithRole; on other relations, of openricx:relationHasAgentRole."@en .
+
+rt:translator a skos:Concept, rico:RoleType ;
+    skos:inScheme rt: ;
+    skos:topConceptOf rt: ;
+    skos:prefLabel "Translator"@en ;
+    skos:definition "An agent who rendered a record, or a performance, into another language."@en ;
+    skos:scopeNote "Pairs with openricx:relationHasLanguage on the same relation, which names the language."@en .
+
+rt:performer a skos:Concept, rico:RoleType ;
+    skos:inScheme rt: ;
+    skos:topConceptOf rt: ;
+    skos:narrower rt:conductor ;
+    skos:prefLabel "Performer"@en ;
+    skos:definition "An agent who took part in a performance, such as a recital, a play or a recorded broadcast."@en ;
+    skos:scopeNote "The role on a rico:PerformanceRelation, or on another relation between a performance activity and the agent."@en .
+
+rt:conductor a skos:Concept, rico:RoleType ;
+    skos:inScheme rt: ;
+    skos:broader rt:performer ;
+    skos:prefLabel "Conductor"@en ;
+    skos:definition "An agent who directed a musical performance."@en ;
+    skos:scopeNote "Narrower than performer."@en .
+
+rt:resident a skos:Concept, rico:RoleType ;
+    skos:inScheme rt: ;
+    skos:topConceptOf rt: ;
+    skos:prefLabel "Resident"@en ;
+    skos:definition "A person living in an institution or place of care during an episode of care."@en ;
+    skos:scopeNote "Care in an institution is modelled as an activity whose participants carry their roles, not as a kinship property; see the OpenRiC extension ontology, section 2.15."@en .
+
+rt:carer a skos:Concept, rico:RoleType ;
+    skos:inScheme rt: ;
+    skos:topConceptOf rt: ;
+    skos:prefLabel "Carer"@en ;
+    skos:definition "An agent who provided care to a person during an episode of care."@en ;
+    skos:scopeNote "Used with resident on the same care activity."@en .

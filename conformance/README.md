@@ -1,10 +1,10 @@
 # Conformance matrix
 
-The OpenRiC profiles the Workspace will implement, pinned to **OpenRiC specification v0.52.1** (tag commit `a036bfff`, 19 October 2026; repinned from v0.48.0, the S-GATE baseline). Profile identities, status and versions are copied from that release's `_data/profiles.json`, not typed by hand; when the pinned specification changes, this table is regenerated and the change is recorded here.
+The OpenRiC profiles the Workspace will implement, pinned to **OpenRiC specification v0.53.0** (tag commit `9a492e2b`, 19 October 2026; repinned from v0.48.0, the S-GATE baseline). The same version is `openric_spec_version` in `config/workspace.php`; the two change together. Profile identities, status and versions are copied from that release's `_data/profiles.json`, not typed by hand; when the pinned specification changes, this table is regenerated and the change is recorded here.
 
 No implementation exists yet, so nothing is claimed. Each row will link a profile requirement to its issue, its automated test and the conformance report of each build. There is no blanket "OpenRiC compliant" claim without a scope.
 
-| Profile | Status in v0.52.1 | Profile version | Proposed release (not yet decided) | Implementation | Last conformance report |
+| Profile | Status in v0.53.0 | Profile version | Proposed release (not yet decided) | Implementation | Last conformance report |
 |---|---|---|---|---|---|
 | `core-discovery` | normative | 0.6.0 | V0.1 (WS-009, WS-010) | not started | - |
 | `authority-context` | normative | 0.4.0 | V0.1 (WS-003) | not started | - |
@@ -23,7 +23,10 @@ Test method: the OpenRiC conformance probe (`conformance/probe.sh` in openric/sp
 
 ## Changes from the v0.48.0 pin
 
-Two profile versions moved: `core-discovery` 0.4.0 to 0.6.0, and `graph-traversal` 0.5.0 to 0.6.0. Graph Traversal 0.6.0 requires every graph node that stands for an entity the API serves to carry that entity's API `@id` (Graph Primitives invariant 7), so a node can be followed to its description and matches the SPARQL graph. The extension ontology the Workspace emits against is now 1.3.1 (`https://openric.org/ns/ext/v1.3.1`).
+Profiles are the same in v0.52.1 and v0.53.0; v0.53.0 adds the role-type vocabulary and extension ontology 1.4.0.
+
+
+Two profile versions moved: `core-discovery` 0.4.0 to 0.6.0, and `graph-traversal` 0.5.0 to 0.6.0. Graph Traversal 0.6.0 requires every graph node that stands for an entity the API serves to carry that entity's API `@id` (Graph Primitives invariant 7), so a node can be followed to its description and matches the SPARQL graph. The extension ontology the Workspace emits against is now 1.4.0 (`https://openric.org/ns/ext/v1.4.0`).
 
 ## Checks every build must pass
 

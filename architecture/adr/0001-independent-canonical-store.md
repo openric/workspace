@@ -1,8 +1,8 @@
 # ADR 0001: An independent canonical store; RDF and search as projections
 
-- Status: proposed
+- Status: accepted (19 October 2026, with ADR 0002)
 - Date: 2026-10-19
-- Deciders: technical lead and product owner (to be named at G0)
+- Deciders: Dr Johan Pieterse
 - Gate: G1
 
 ## Context

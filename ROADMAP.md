@@ -26,9 +26,9 @@ Nobody marks a gate passed without named signatories and stored evidence.
 | G5, production release (V1.0) | Accepted workflow, security and accessibility review, full restore, supported import, conformance report, SBOM and licences, runbooks. | Not started |
 | G6, expansion (V2.0+) | Demand evidence, domain discovery, compatibility and migration story, module boundaries. | Not started |
 
-## What may happen before the S-GATE
+## Implementation and the S-GATE
 
-Preparatory research, workflow modelling, UX prototyping, the Heratio source audit (G1) and the database and data-model spikes may run now, as long as they are marked non-normative and do not become de facto definitions of the standard. Implementation against normative OpenRiC contracts waits for the S-GATE.
+Implementation has started before the S-GATE, by decision of Dr Johan Pieterse on 19 October 2026 ([ADR 0003](architecture/adr/0003-implementation-before-the-s-gate.md)). The S-GATE remains the gate for the standard. The Workspace builds against a pinned, released specification version; takes any gap it finds to openric/spec as an issue before using it; passes the probe and term check on every build; and never counts as the independent implementation the OpenRiC v1.0 gate needs.
 
 ## Work moved from the OpenRiC reference service
 
