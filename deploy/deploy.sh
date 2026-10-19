@@ -5,7 +5,7 @@
 #
 # Usage:  sudo deploy/deploy.sh vX.Y.Z
 #
-# Run as root: git, composer, gh and pg_dump then run as the owner of the live
+# Run as root: git, composer and pg_dump then run as the owner of the live
 # directory, and artisan as www-data, so no file in the live tree is owned by root.
 # Run as that owner instead, it uses sudo -u www-data for artisan.
 #
@@ -43,7 +43,11 @@ PREVIOUS=$(owner git describe --tags --exact-match HEAD 2>/dev/null || owner git
 echo "commit ${SHA:0:12}; live now runs $PREVIOUS"
 
 echo "== 2. CI on that commit"
-CI=$(owner gh api "repos/$REPO/commits/$SHA/check-runs" --jq "[.check_runs[] | select(.name == \"$CI_CHECK\") | .conclusion] | first // \"none\"")
+# The public GitHub API, so no token is needed: gh keeps its token in the desktop
+# keyring, which a root session switching user cannot reach.
+CI=$(curl -fsS --max-time 30 "https://api.github.com/repos/$REPO/commits/$SHA/check-runs" \
+  | jq -r --arg name "$CI_CHECK" '[.check_runs[] | select(.name == $name) | .conclusion] | first // "none"') \
+  || fail "could not read CI status from GitHub"
 [[ $CI == success ]] || fail "CI \"$CI_CHECK\" on ${SHA:0:12} is $CI, not success"
 echo "passed"
 
