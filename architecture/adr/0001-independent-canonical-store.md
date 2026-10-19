@@ -23,7 +23,7 @@ PostgreSQL is the preferred candidate and MySQL the comparison; the choice is ma
 
 ## Evidence
 
-To come from the G1 database spike.
+From the G1 database spike (`architecture/spikes/db/`). MySQL 8.0.46 has run (19 October 2026): recursive arrangement, multilingual fallback and access filtering are all in single-digit milliseconds at 131,131 entities, but the database could not be made to refuse an arrangement cycle, because MySQL with binary logging refuses triggers to an application user, and it has no row-level security. PostgreSQL 16.15 is still to run.
 
 ## Consequences
 

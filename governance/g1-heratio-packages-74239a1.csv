@@ -1,0 +1,121 @@
+package,php_files,lines,composer_licence,files_agpl_header,files_no_header,other_headers,atom_schema_files,requires_ahg,external_deps,proposed_scope
+ahg-3d-model,31,7687,none,12,15,Copyright:4,20,ahg/core,,out: GLAM sector
+ahg-access-request,21,1928,none,6,15,,10,ahg/core,,V0.1 candidate
+ahg-accession-manage,36,6795,none,6,30,,29,ahg/core,,later: V1.0+
+ahg-acl,68,9750,AGPL-3.0-or-later,4,64,,19,ahg/core,,V0.1 candidate
+ahg-actor-manage,51,13061,none,14,37,,34,ahg/core,,V0.1 candidate
+ahg-ai-chatbot,22,4924,AGPL-3.0,14,7,copyright:1,9,,,out: AI (V2+)
+ahg-ai-compliance,36,4043,AGPL-3.0-or-later,30,6,,9,ahg/core ahg/inference-receipts,,out: AI (V2+)
+ahg-ai-services,109,30242,AGPL-3.0-or-later,68,34,Copyright:7,59,ahg/core,,out: AI (V2+)
+ahg-annotations,5,1286,none,4,1,,1,ahg/core,,V0.1 candidate
+ahg-api,98,30902,none,34,55,Copyright:7; proprietary:1; copyright:1,74,ahg/core,,V0.1 candidate
+ahg-api-plugin,4,179,none,1,3,,2,,,V0.1 candidate
+ahg-archaeology,21,4291,none,0,16,Copyright:5,11,,,out: GLAM sector
+ahg-archivematica,22,4049,none,21,1,,17,ahg/core,,later: V1.0+
+ahg-articles,11,2447,AGPL-3.0-or-later,5,6,,11,,,later: V1.0+
+ahg-artwork-request,13,1844,none,0,8,Copyright:5,8,,,out: GLAM sector
+ahg-audit-trail,23,4072,none,8,10,Copyright:5,6,ahg/core,,V0.1 candidate
+ahg-authority-resolution,74,12466,AGPL-3.0-or-later,37,17,Copyright:20,29,ahg/core ahg/ric,,V0.1 candidate
+ahg-backup,30,5683,none,19,11,,13,ahg/core,,later: V1.0+
+ahg-biblio-bf,16,3060,AGPL-3.0,6,9,Copyright:1,5,,easyrdf/easyrdf,out: GLAM sector
+ahg-biblio-frbr,17,2006,AGPL-3.0,6,11,,5,,,out: GLAM sector
+ahg-c2pa,68,17272,AGPL-3.0-or-later,50,14,Copyright:3; copyright:1,48,ahg/core ahg/inference-receipts,,V0.1 candidate
+ahg-cart,15,2166,none,3,12,,10,ahg/core,,later: V1.0+
+ahg-cdpa,23,2774,none,13,10,,5,,,later: jurisdiction
+ahg-condition,16,1690,none,7,8,Copyright:1,5,ahg/core ahg/media-processing,,later: V1.0+
+ahg-core,393,60173,AGPL-3.0-or-later,133,202,Copyright:55; COPYRIGHT:1; copyright:2,230,,,V0.1 candidate
+ahg-custom-fields,11,1338,none,4,7,,3,ahg/core,,V0.1 candidate
+ahg-dacs-manage,5,1084,none,2,3,,4,,,V0.1 candidate
+ahg-dam,20,4736,none,10,9,Copyright:1,10,ahg/core,,out: GLAM sector
+ahg-data-migration,24,5270,none,6,16,Copyright:2,12,ahg/core,,later: V1.0+
+ahg-dc-manage,5,639,none,2,3,,4,,,V0.1 candidate
+ahg-dedupe,28,3144,none,3,25,,9,ahg/core,,later: V1.0+
+ahg-discovery,17,5836,none,9,7,Copyright:1,10,,,V0.1 candidate
+ahg-display,51,10111,none,7,44,,24,,,V0.1 candidate
+ahg-doi,0,0,none,0,0,,0,,,later: V1.0+
+ahg-doi-manage,33,4884,none,17,15,copyright:1,13,ahg/core,,later: V1.0+
+ahg-donor-manage,24,3241,none,9,15,,17,ahg/core,,later: V1.0+
+ahg-dropdown-manage,5,1744,none,1,4,,3,ahg/core,,V0.1 candidate
+ahg-exhibition,68,26806,none,44,22,Copyright:2,51,ahg/core,,out: GLAM sector
+ahg-export,11,1256,none,3,8,,2,ahg/core,,V0.1 candidate
+ahg-extended-rights,36,7869,none,8,27,copyright:1,27,ahg/core,,V0.1 candidate
+ahg-favorites,11,2634,none,6,5,,9,ahg/core,,later: V1.0+
+ahg-federation,75,15815,none,42,23,Copyright:10,50,ahg/core ahg/information-object-manage ahg/search ahg/sharepoint ahg/term-taxonomy,,later: V1.0+
+ahg-feedback,9,879,none,1,8,,6,ahg/core,,later: V1.0+
+ahg-forms,16,2541,none,9,4,Copyright:3,9,ahg/core,,V0.1 candidate
+ahg-ftp-upload,5,2301,none,2,3,,3,ahg/core,,later: V1.0+
+ahg-function-manage,14,2606,none,3,11,,11,ahg/core,,V0.1 candidate
+ahg-functions-docs,7,716,none,3,3,Copyright:1,1,ahg/core,league/commonmark,later: V1.0+
+ahg-gallery,33,7210,none,11,22,,17,ahg/core,,out: GLAM sector
+ahg-gis,7,280,none,2,5,,1,ahg/core,,V0.1 candidate
+ahg-graphql,4,764,none,1,3,,2,,,later: V1.0+
+ahg-harris-matrix,6,1343,none,0,3,Copyright:3,1,,,out: GLAM sector
+ahg-help,21,5771,none,9,12,,18,ahg/core,,later: V1.0+
+ahg-heritage-manage,97,12679,none,14,82,copyright:1,49,ahg/core,,V0.1 candidate
+ahg-icip,39,6793,none,15,16,Copyright:8,17,,,later: jurisdiction
+ahg-iiif-collection,50,8745,none,29,21,,22,ahg/core,,out: GLAM sector
+ahg-image-ar,6,896,none,4,2,,4,ahg/core,,out: GLAM sector
+ahg-inference-receipts,13,1569,Apache-2.0,0,13,,0,,,out: AI (V2+)
+ahg-information-object-manage,185,47506,none,48,130,copyright:3; Copyright:4,148,ahg/core,,V0.1 candidate
+ahg-ingest,16,5338,none,8,2,Copyright:6,10,ahg/core,,later: V1.0+
+ahg-integrity,34,3078,none,5,29,,18,ahg/core ahg/records-manage,,later: V1.0+
+ahg-ipsas,16,2129,none,11,5,,6,ahg/core,,later: jurisdiction
+ahg-jobs,6,950,AGPL-3.0-or-later,6,0,,4,,,later: V1.0+
+ahg-jobs-manage,10,691,none,1,9,,5,ahg/core,,later: V1.0+
+ahg-label,14,1383,none,4,10,,6,,,later: V1.0+
+ahg-landing-page,37,3557,none,4,32,Copyright:1,13,ahg/core,,later: V1.0+
+ahg-library,263,45610,none,152,110,Copyright:1,139,ahg/core,,out: GLAM sector
+ahg-loan,13,3798,none,4,9,,9,ahg/core,,out: GLAM sector
+ahg-marketing,7,726,AGPL-3.0-or-later,7,0,,4,,,later: V1.0+
+ahg-marketplace,72,19926,none,43,28,Copyright:1,46,,,out: GLAM sector
+ahg-media-processing,9,2733,AGPL-3.0-or-later,5,4,,2,ahg/core,,V0.1 candidate
+ahg-media-streaming,9,1727,none,5,4,,3,ahg/core,,V0.1 candidate
+ahg-menu-manage,17,1790,none,2,15,,4,ahg/core,,V0.1 candidate
+ahg-metadata-export,59,15322,none,38,10,Copyright:10; copyright:1,47,ahg/core,,V0.1 candidate
+ahg-metadata-extraction,8,2770,none,3,5,,7,ahg/core,,V0.1 candidate
+ahg-mods-manage,5,956,none,2,3,,4,,,out: GLAM sector
+ahg-multi-tenant,20,2626,none,16,3,Copyright:1,10,ahg/core,,later: V1.0+
+ahg-museum,41,7661,none,14,25,Copyright:2,18,ahg/core,,out: GLAM sector
+ahg-narssa,4,581,AGPL-3.0-or-later,4,0,,3,ahg/core,,later: jurisdiction
+ahg-naz,23,3600,none,15,8,,10,,,later: jurisdiction
+ahg-nmmz,21,2666,none,15,6,,12,ahg/core,,later: jurisdiction
+ahg-oai,6,1847,none,3,3,,3,ahg/core,,V0.1 candidate
+ahg-observability,15,1903,AGPL-3.0-or-later,15,0,,4,,open-telemetry/api open-telemetry/exporter-otlp open-telemetry/sdk promphp/prometheus_client_php,later: V1.0+
+ahg-ocfl,22,3106,AGPL-3.0-or-later,21,0,copyright:1,5,ahg/core,paragonie/constant_time_encoding,later: V1.0+
+ahg-pdf-tools,12,2093,none,7,5,,4,ahg/core,,V0.1 candidate
+ahg-portable-export,9,3000,none,1,8,,3,ahg/core,,later: V1.0+
+ahg-preservation,49,10211,none,23,26,,31,ahg/core,,later: V1.0+
+ahg-privacy,99,16854,none,46,52,Copyright:1,56,,,later: jurisdiction
+ahg-provenance-ai,16,2662,AGPL-3.0-or-later,14,2,,7,ahg/core,,out: AI (V2+)
+ahg-rad-manage,5,1233,none,2,3,,4,,,V0.1 candidate
+ahg-rdm,18,2739,AGPL-3.0-or-later,12,6,,14,ahg/ai-services ahg/core ahg/doi-manage ahg/information-object-manage ahg/ingest ahg/pdf-tools ahg/research,,later: V1.0+
+ahg-records-manage,57,10687,none,23,34,,41,ahg/core ahg/integrity,,later: V1.0+
+ahg-reports,77,13861,none,28,48,Copyright:1,38,ahg/core,,later: V1.0+
+ahg-repository-manage,20,4578,none,3,17,,16,ahg/core,,V0.1 candidate
+ahg-request-publish,15,1876,none,7,8,,11,ahg/core,,V0.1 candidate
+ahg-research,444,79899,AGPL-3.0-or-later,184,246,Copyright:14,270,ahg/core,,V0.1 candidate
+ahg-researcher-manage,20,3111,none,2,18,,13,ahg/core,,V0.1 candidate
+ahg-resourcesync,5,926,none,5,0,,1,ahg/core,,later: V1.0+
+ahg-ric,128,28399,none,57,63,Copyright:8,73,ahg/core,,V0.1 candidate
+ahg-ric-manage,7,1464,none,6,1,,6,ahg/ric,,V0.1 candidate
+ahg-rights,0,0,none,0,0,,0,,,V0.1 candidate
+ahg-rights-holder-manage,46,5215,none,7,37,copyright:1; Copyright:1,31,ahg/core,,V0.1 candidate
+ahg-scan,33,7065,none,4,6,Copyright:23,25,ahg/core ahg/ingest,,later: V1.0+
+ahg-search,42,7659,none,12,23,Copyright:6; copyright:1,12,ahg/core,,V0.1 candidate
+ahg-security-clearance,59,9206,none,15,42,COPYRIGHT:1; Copyright:1,14,ahg/core,,later: jurisdiction
+ahg-semantic-search,118,29749,none,73,40,Copyright:3; copyright:2,88,ahg/core,,out: AI (V2+)
+ahg-settings,102,16789,none,30,70,Copyright:2,26,ahg/core,,V0.1 candidate
+ahg-share-link,30,2659,AGPL-3.0-or-later,3,27,,11,ahg/core,,later: V1.0+
+ahg-sharepoint,57,6045,AGPL-3.0-or-later,7,50,,17,ahg/audit-trail ahg/core ahg/ingest ahg/settings,firebase/php-jwt,later: V1.0+
+ahg-spectrum,66,12393,none,19,35,Copyright:12,42,,,out: GLAM sector
+ahg-static-page,9,695,AGPL-3.0-or-later,2,7,,7,ahg/core,,later: V1.0+
+ahg-statistics,14,1906,AGPL-3.0-or-later,12,2,,7,ahg/core,,later: V1.0+
+ahg-storage-manage,40,7645,AGPL-3.0-or-later,16,24,,34,ahg/core,,V0.1 candidate
+ahg-term-taxonomy,29,6138,AGPL-3.0-or-later,14,14,Copyright:1,21,ahg/core,,V0.1 candidate
+ahg-theme-b5,45,4574,AGPL-3.0-or-later,3,41,Copyright:1,15,ahg/core,,V0.1 candidate
+ahg-translation,22,5726,AGPL-3.0-or-later,6,14,Copyright:2,11,ahg/core,,out: AI (V2+)
+ahg-user-manage,48,5651,AGPL-3.0-or-later,5,42,copyright:1,33,ahg/core,,V0.1 candidate
+ahg-vendor,24,6980,AGPL-3.0-or-later,17,2,Copyright:5,19,ahg/core,,later: V1.0+
+ahg-version-control,28,3142,AGPL-3.0-or-later,4,23,Copyright:1,14,ahg/core,,later: V1.0+
+ahg-workflow,55,7830,AGPL-3.0-or-later,20,35,,27,ahg/core,,later: V1.0+
+ahg-z3950,21,5243,AGPL-3.0,11,10,,6,ahg/core,,out: GLAM sector

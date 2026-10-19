@@ -13,7 +13,7 @@ Every file in this repository that was not written for it is listed here before 
 
 | Source | Repository | Commit | Audited on | Audited by |
 |---|---|---|---|---|
-| (none yet) | | | | |
+| Heratio (baseline audit only; nothing cleared to copy) | ArchiveHeritageGroup/heratio | `74239a174a941ca2a6a53ed26395d7be7b4ab134` | 2026-10-19 | draft, for review by Dr Johan Pieterse (see `G1-HERATIO-SOURCE-AUDIT.md`) |
 
 ## Copied files
 
@@ -23,4 +23,11 @@ Every file in this repository that was not written for it is listed here before 
 
 ## Prohibited-copy list
 
-To be drawn up during the G1 source audit.
+Draft from the G1 source audit of 19 October 2026, to be confirmed at G1:
+
+1. Any file whose copyright or authorship is not Johan Pieterse, Plain Sailing Information Systems or The AHG, or cannot be established.
+2. The 12 Heratio views noted as ported from `ahgThemeB5Plugin` templates (`ahg-user-manage`, `ahg-menu-manage`), until each is compared with AtoM's own templates.
+3. Any code that reads or writes the AtoM/Qubit schema, as working code. It may be read for behaviour; its data access is rewritten.
+4. Any code that calls Heratio, its database, its triplestore or its services at run time.
+5. Packages proposed as out of scope for V0.1 (GLAM sector and AI), unless a decision record brings one in.
+6. Anything copied without a row in the table above.
