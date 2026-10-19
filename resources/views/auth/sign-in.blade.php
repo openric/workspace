@@ -3,6 +3,7 @@
 @section('title', 'Sign in')
 @section('content')
     <h1>Sign in</h1>
+    @if(session('status'))<p role="status">{{ session('status') }}</p>@endif
     <form method="post" action="{{ route('sign-in') }}" novalidate>
         @csrf
         @error('email')<p class="error" id="sign-in-error" role="alert">{{ $message }}</p>@enderror

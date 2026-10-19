@@ -11,7 +11,14 @@
     @empty
         <p>You have no roles yet, so there is nothing you can change. An administrator can grant you one.</p>
     @endforelse
-    @can(\App\Support\Vocab::permission('view-audit-log'))
-        <p><a href="{{ route('audit') }}">Audit log</a></p>
-    @endcan
+    @if(session('status'))<p role="status">{{ session('status') }}</p>@endif
+    <ul>
+        <li><a href="{{ route('password.edit') }}">Change your password</a></li>
+        @can(\App\Support\Vocab::permission('manage-accounts'))
+            <li><a href="{{ route('accounts.index') }}">Accounts</a></li>
+        @endcan
+        @can(\App\Support\Vocab::permission('view-audit-log'))
+            <li><a href="{{ route('audit') }}">Audit log</a></li>
+        @endcan
+    </ul>
 @endsection

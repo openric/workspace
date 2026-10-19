@@ -16,15 +16,20 @@ class ImportVocabulary extends Command
 {
     protected $signature = 'workspace:vocabulary:import
         {source?* : URL or file path of a SKOS vocabulary in Turtle}
-        {--configured : Import every vocabulary listed in config/workspace.php}';
+        {--configured : Import every vocabulary listed in config/workspace.php}
+        {--bundled : Import the Workspace\'s own vocabularies (resources/vocabularies)}';
 
     protected $description = 'Load SKOS vocabularies into the Workspace; safe to run again';
 
     public function handle(SkosImporter $importer): int
     {
-        $sources = $this->option('configured') ? config('workspace.vocabularies') : $this->argument('source');
+        $sources = match (true) {
+            (bool) $this->option('bundled') => array_map(fn ($f) => resource_path("vocabularies/$f"), config('workspace.bundled_vocabularies')),
+            (bool) $this->option('configured') => config('workspace.vocabularies'),
+            default => $this->argument('source'),
+        };
         if ($sources === []) {
-            $this->error('Give at least one source, or --configured.');
+            $this->error('Give at least one source, or --bundled or --configured.');
 
             return self::INVALID;
         }

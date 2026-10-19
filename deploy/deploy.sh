@@ -92,6 +92,8 @@ trap on_error ERR
 echo "== 5. Dependencies, migrations, signing key, caches"
 owner composer install --no-dev --optimize-autoloader --no-interaction --no-progress --quiet
 artisan migrate --force
+# The Workspace's own vocabularies may gain concepts in a release; importing is idempotent.
+artisan workspace:vocabulary:import --bundled
 # Every audit row is signed (ADR 0004): without the key no change can be recorded.
 artisan workspace:audit:create-key --if-missing
 artisan optimize

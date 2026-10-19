@@ -85,12 +85,12 @@ class AccessAndAuditTest extends TestCase
 
     public function test_a_disabled_account_cannot_sign_in_or_do_anything(): void
     {
-        $user = $this->account('administrator');
+        $user = $this->account('archivist');
         $this->accounts->disable($user);
 
         $this->post('/sign-in', ['email' => 'archivist@example.org', 'password' => self::PASSWORD])->assertSessionHasErrors('email');
         $this->assertGuest();
-        $this->assertFalse($user->fresh()->hasPermission(Vocab::permission('view-audit-log')));
+        $this->assertFalse($user->fresh()->hasPermission(Vocab::permission('describe')));
     }
 
     public function test_a_password_change_is_audited_without_the_password(): void
@@ -117,6 +117,7 @@ class AccessAndAuditTest extends TestCase
     public function test_the_audit_log_is_readable_with_the_permission_and_lost_with_the_role(): void
     {
         $admin = $this->account('administrator');
+        $this->account('administrator', 'second-admin@example.org');
         $this->actingAs($admin)->get('/audit')->assertOk()->assertSee('Grant role');
 
         $this->accounts->revokeRole($admin, Vocab::role('administrator'));
