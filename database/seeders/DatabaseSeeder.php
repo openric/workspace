@@ -1,25 +1,17 @@
 <?php
 
+// OpenRiC Workspace - database seeder.
+// Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+// SPDX-License-Identifier: AGPL-3.0-or-later
+//
+// Empty on purpose: a Workspace is set up with `php artisan workspace:install`,
+// which loads the vocabularies and creates the institution and its administrator.
+
 namespace Database\Seeders;
 
-use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
-    /**
-     * Seed the application's database.
-     */
-    public function run(): void
-    {
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
-    }
+    public function run(): void {}
 }

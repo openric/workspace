@@ -1,0 +1,34 @@
+# OpenRiC Workspace - OpenRiC Workspace Account Roles.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# The roles an account can hold. What each role may do is data (the role_grants table), seeded at installation from config/workspace.php and changed by an administrator, never by code.
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/account-role/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Account Roles"@en ;
+    dcterms:description "Roles an account holds in one institution. An account with no role can sign in and do nothing else."@en ;
+    dcterms:issued "2026-10-19"^^xsd:date ;
+    skos:hasTopConcept v:administrator, v:archivist, v:reviewer .
+
+v:administrator a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Administrator"@en ;
+    skos:definition "Manages the institution and its accounts, and reads the audit log."@en .
+
+v:archivist a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Archivist"@en ;
+    skos:definition "Describes and arranges holdings and records their context."@en .
+
+v:reviewer a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Reviewer"@en ;
+    skos:definition "Reviews described material and publishes what may be published."@en .

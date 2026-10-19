@@ -1,0 +1,64 @@
+# OpenRiC Workspace - OpenRiC Workspace Audit Actions.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# The kinds of event the audit log records. Every audit row cites one of these concepts.
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/audit-action/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Audit Actions"@en ;
+    dcterms:description "Kinds of event recorded in the append-only audit log."@en ;
+    dcterms:issued "2026-10-19"^^xsd:date ;
+    skos:hasTopConcept v:create, v:update, v:sign-in, v:sign-in-failed, v:sign-out, v:grant-role, v:revoke-role, v:install .
+
+v:create a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Create"@en ;
+    skos:definition "A record was created."@en .
+
+v:update a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Update"@en ;
+    skos:definition "A record was changed."@en .
+
+v:sign-in a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Sign in"@en ;
+    skos:definition "An account signed in."@en .
+
+v:sign-in-failed a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Sign-in failed"@en ;
+    skos:definition "A sign-in attempt failed."@en .
+
+v:sign-out a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Sign out"@en ;
+    skos:definition "An account signed out."@en .
+
+v:grant-role a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Grant role"@en ;
+    skos:definition "A role was granted to an account."@en .
+
+v:revoke-role a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Revoke role"@en ;
+    skos:definition "A role was revoked from an account."@en .
+
+v:install a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Install"@en ;
+    skos:definition "The Workspace was installed and its first institution created."@en .

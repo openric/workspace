@@ -1,0 +1,32 @@
+<?php
+
+// OpenRiC Workspace - audit every create and change of a model.
+// Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
+namespace App\Audit;
+
+use App\Support\Vocab;
+use Illuminate\Database\Eloquent\Model;
+
+trait Audited
+{
+    /** Columns whose change alone is not worth an audit row. */
+    private static array $unaudited = ['updated_at', 'remember_token'];
+
+    public static function bootAudited(): void
+    {
+        static::created(function (Model $model) {
+            AuditLog::record(Vocab::action('create'), $model, null, $model->attributesToArray());
+        });
+
+        static::updated(function (Model $model) {
+            $changed = array_diff_key($model->getChanges(), array_flip(self::$unaudited));
+            if ($changed === []) {
+                return;
+            }
+            $before = array_intersect_key($model->getPrevious(), $changed);
+            AuditLog::record(Vocab::action('update'), $model, $before, $changed);
+        });
+    }
+}

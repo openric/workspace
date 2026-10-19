@@ -10,6 +10,18 @@ return [
     // conformance/README.md). Raised only together with the conformance matrix.
     'openric_spec_version' => '0.53.0',
 
+    // The Workspace's own vocabularies, bundled with the code (resources/vocabularies).
+    'bundled_vocabularies' => ['account-role.ttl', 'permission.ttl', 'audit-action.ttl'],
+
+    // Role grants a new institution starts with, by notation. After installation
+    // the grants are data in role_grants, changed by an administrator; this list is
+    // read only by workspace:install. A role not listed here can do nothing.
+    'default_grants' => [
+        'administrator' => ['manage-institution', 'manage-accounts', 'view-audit-log'],
+        'archivist' => ['describe'],
+        'reviewer' => ['review', 'publish'],
+    ],
+
     // Vocabularies every installation loads (`php artisan workspace:vocabulary:import --configured`).
     // Published OpenRiC vocabularies are used as they are, never copied into local ones
     // (logical model, section 2).
