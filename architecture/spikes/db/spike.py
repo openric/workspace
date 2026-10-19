@@ -141,7 +141,12 @@ def load():
     for sql, rows in (("INSERT INTO entity VALUES (%s,%s,%s,%s,%s,%s,%s,%s)", ents),
                       ("INSERT INTO entity_i18n VALUES (%s,%s,%s,%s)", i18n),
                       ("INSERT INTO relation VALUES (%s,%s,%s,%s,%s,%s,%s)", rels)):
-        for k in range(0, len(rows), 5000): cur.executemany(sql, rows[k:k + 5000])
+        for k in range(0, len(rows), 5000):
+            if PG:  # psycopg2's executemany sends one statement per row; pymysql batches. Batch both.
+                from psycopg2.extras import execute_values
+                execute_values(cur, sql.split(" VALUES ")[0] + " VALUES %s", rows[k:k + 5000], page_size=5000)
+            else:
+                cur.executemany(sql, rows[k:k + 5000])
     cur.executemany("INSERT INTO user_grant VALUES (%s,%s)", [(7, r) for r in fonds_ids[:5]])
     conn.commit()
     return {"entities": len(ents), "i18n_rows": len(i18n), "relations": len(rels)}

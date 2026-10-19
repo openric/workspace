@@ -1,0 +1,64 @@
+{
+  "engine": "postgres",
+  "fonds": 100,
+  "repeat": 5,
+  "server": "PostgreSQL 16.15 (Ubuntu 16.15-0ubuntu0.24.04.1) on x86_64-pc-linux-gnu, compiled by gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0, 64-bit",
+  "load": {
+    "median_ms": 21769.21,
+    "min_ms": 21769.21,
+    "result": {
+      "entities": 131131,
+      "i18n_rows": 175732,
+      "relations": 104929
+    }
+  },
+  "descendants_of_fonds": {
+    "median_ms": 3.12,
+    "min_ms": 2.61,
+    "result": 1111
+  },
+  "ancestors_depth_31": {
+    "median_ms": 0.34,
+    "min_ms": 0.33,
+    "result": 30
+  },
+  "multilingual_page": {
+    "median_ms": 2.11,
+    "min_ms": 1.85,
+    "result": {
+      "rows": 50,
+      "distinct_ids": 50
+    }
+  },
+  "access_filter_granted": {
+    "median_ms": 0.84,
+    "min_ms": 0.75,
+    "result": 1081
+  },
+  "access_filter_not_granted": {
+    "median_ms": 0.78,
+    "min_ms": 0.76,
+    "result": 967
+  },
+  "assertions_by_certainty": {
+    "median_ms": 58.02,
+    "min_ms": 57.93,
+    "result": {
+      "asserted": 100000,
+      "inferred": 4929
+    }
+  },
+  "constraints": {
+    "cycle_refused": "RaiseException: arrangement cycle",
+    "self_parent_refused": "RaiseException: arrangement cycle",
+    "dangling_parent_refused": "ForeignKeyViolation: insert or update on table \"entity\" violates foreign key constraint \"entity_paren",
+    "bad_access_value_refused": "CheckViolation: new row for relation \"entity\" violates check constraint \"access_ok\"",
+    "duplicate_assertion_refused": "UniqueViolation: duplicate key value violates unique constraint \"one_assertion\""
+  },
+  "capabilities": {
+    "cycle_trigger_created": true,
+    "row_level_security": "available, not exercised (needs a role to test)",
+    "transactional_ddl": true,
+    "deferrable_constraints": true
+  }
+}

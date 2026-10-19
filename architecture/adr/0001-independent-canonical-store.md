@@ -23,7 +23,7 @@ PostgreSQL is the preferred candidate and MySQL the comparison; the choice is ma
 
 ## Evidence
 
-From the G1 database spike (`architecture/spikes/db/`). MySQL 8.0.46 has run (19 October 2026): recursive arrangement, multilingual fallback and access filtering are all in single-digit milliseconds at 131,131 entities, but the database could not be made to refuse an arrangement cycle, because MySQL with binary logging refuses triggers to an application user, and it has no row-level security. PostgreSQL 16.15 is still to run.
+From the G1 database spike (`architecture/spikes/db/`). MySQL 8.0.46 has run (19 October 2026): recursive arrangement, multilingual fallback and access filtering are all in single-digit milliseconds at 131,131 entities, but the database could not be made to refuse an arrangement cycle, because MySQL with binary logging refuses triggers to an application user, and it has no row-level security. PostgreSQL 16.15 ran the same workload at comparable speed (load 21.8 s against 16.4 s; queries 0.3 to 3.1 ms) and refused every invalid write, the arrangement cycle included, with row-level security, transactional DDL and deferrable constraints available. On this evidence PostgreSQL is recommended; row-level security under a second role and concurrent writers are still to be tested before the choice is recorded in its own ADR.
 
 ## Consequences
 

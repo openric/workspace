@@ -30,9 +30,33 @@ MySQL 8.0.46 (`results/mysql-8.0.46.json`, 19 October 2026), in the disposable `
 - **A trap found on the way:** MySQL accepts a foreign key written inline on a column (`parent_id BIGINT REFERENCES entity(id)`) and silently ignores it. The first run accepted a dangling parent for that reason. The harness now writes table-level `FOREIGN KEY` clauses.
 - No row-level security, no transactional DDL, no deferrable constraints.
 
-PostgreSQL 16.15: not yet run. The session user has no PostgreSQL role. Once one exists (`sudo -u postgres createuser --createdb johanpiet`, then `createdb openric_spike`):
+PostgreSQL 16.15 (`results/postgresql-16.15.json`, 19 October 2026), in the disposable `openric_spike` database:
+
+- Load: 21.8 s. Descendants of a fonds: 3.1 ms. Ancestors over 31 levels: 0.3 ms. Multilingual page: 2.1 ms, no duplicated rows. Access filter: about 0.8 ms. Assertions grouped by certainty: 58 ms.
+- Refused by the database: all five, **including the arrangement cycle**, through a trigger the application user could create without extra privileges.
+- Row-level security, transactional DDL and deferrable constraints are all available.
+- The first PostgreSQL load took 56.7 s because psycopg2's `executemany` sends one statement per row while pymysql batches. The harness now batches on both (`execute_values` for PostgreSQL), so the load figures compare engines, not drivers.
+
+| | MySQL 8.0.46 | PostgreSQL 16.15 |
+|---|---|---|
+| Load, 131,131 entities | 16.4 s | 21.8 s |
+| Descendants of a fonds | 3.5 ms | 3.1 ms |
+| Ancestors, 31 levels | 0.4 ms | 0.3 ms |
+| Multilingual page | 1.4 ms | 2.1 ms |
+| Access filter | 2.8 ms | 0.8 ms |
+| Assertions by certainty | 159 ms | 58 ms |
+| Arrangement cycle refused by the database | no | yes |
+| Row-level security | no | yes (not yet exercised) |
+| Transactional DDL (a failed migration rolls back) | no | yes |
+
+: MySQL and PostgreSQL on the spike workload
+
+Speed does not separate them at this size. Integrity does: PostgreSQL enforces every rule the workload needs inside the database, and MySQL leaves the arrangement rule to application code.
+
+To re-run either:
 
     python3 -I spike.py postgres "dbname=openric_spike" > results/postgresql-16.15.json
+    python3 -I spike.py mysql "db=openric_staging socket=/var/run/mysqld/mysqld.sock" > results/mysql-8.0.46.json
 
 ## Not covered yet
 
