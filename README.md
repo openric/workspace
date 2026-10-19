@@ -9,6 +9,8 @@ This repository holds the Workspace's governance and planning work until impleme
 - [ROADMAP.md](ROADMAP.md): releases, delivery gates and their status;
 - [SPECIFICATION.md](SPECIFICATION.md): the functional requirements, WS-001 onwards;
 - [architecture/adr/](architecture/adr/): architecture decision records;
+- [architecture/logical-model.md](architecture/logical-model.md): the G1 logical model (draft, non-normative);
+- [governance/V0.1-DEMONSTRATION-SCENARIO.md](governance/V0.1-DEMONSTRATION-SCENARIO.md): the V0.1 demonstration scenario and sample dataset (draft for freezing);
 - [governance/CODE_PROVENANCE.md](governance/CODE_PROVENANCE.md): the ledger of any code taken from elsewhere;
 - [conformance/](conformance/): the OpenRiC profiles the Workspace will implement, pinned to a specification version.
 

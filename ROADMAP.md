@@ -6,7 +6,7 @@ From the OpenRiC Workspace specification and delivery plan of 18 October 2026 (d
 
 | Release | Purpose | Not claimed |
 |---|---|---|
-| V0.1, proof of concept | Archivists and reviewers validate one end-to-end workflow on representative test data, on an independently deployed instance. | Production service, complete archival lifecycle, certification. |
+| V0.1, proof of concept | Archivists and reviewers validate one end-to-end workflow on representative test data, on an independently deployed instance. Built to production standard (see the hard constraints in `SPECIFICATION.md`): the proof is narrow, the code is not throwaway. | Production service, complete archival lifecycle, certification. |
 | V0.5, pilot | Controlled testing with real archivists and agreed non-critical data: import, search, roles, accessibility, restore. | Unattended institution-wide use. |
 | V1.0, operational | A small archive does ordinary work safely: accession, arrangement, description, authorities, digital objects, controlled publication, import and export, backup and restore, monitoring. | A comprehensive GLAM platform or an OAIS-certified repository. |
 | V2.0 and later | Broader institutions and integrations. | No fixed scope or date until discovery and funding. |
@@ -29,6 +29,24 @@ Nobody marks a gate passed without named signatories and stored evidence.
 ## What may happen before the S-GATE
 
 Preparatory research, workflow modelling, UX prototyping, the Heratio source audit (G1) and the database and data-model spikes may run now, as long as they are marked non-normative and do not become de facto definitions of the standard. Implementation against normative OpenRiC contracts waits for the S-GATE.
+
+## Work moved from the OpenRiC reference service
+
+On 19 October 2026 the open feature issues of `openric/service` were moved here, because editing and assertion management are Workspace work and the reference service is not to grow into a second application. The specification-side part of each stays with `openric/spec`.
+
+| Service issue | Workspace requirement | Release | What stays in the specification |
+|---|---|---|---|
+| #11 role an agent plays in a relation (picker and editing) | WS-003, WS-006 | V0.1 | The [role-type vocabulary](https://openric.org/vocab/role-type.html) and `openricx:relationHasAgentRole` |
+| #17 competing assertions and supersession | WS-006 | V0.1 | The Inferred-Provenance profile and its assertion-status terms |
+| #14 EAC-F to RiC-O crosswalk, import and export | WS-015 | V1.0 | The crosswalk as a mapping document |
+| #15 RiC and IIIF integration pattern | WS-019 | V2.0 | The pattern as specification guidance |
+| #16 mapping to Wikidata, Linked Art and CIDOC CRM | WS-019 | V2.0 | The mappings as research notes |
+
+: Service issues moved to the Workspace
+
+Issues #8, #12 and #13 stay with the service and the specification: they wait on ICA-EGAD (RiC-O 1.2, issue #146, PROF profile PR #159).
+
+The V0.1 demonstration scenario should carry #11 and #17 together: a participant whose role is recorded with its evidence, and later corrected on new evidence, with both assertions kept.
 
 ## Next actions
 
