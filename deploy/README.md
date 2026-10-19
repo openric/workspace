@@ -10,6 +10,10 @@ The live instance at https://workspace.openric.org runs from `/usr/share/nginx/o
 
 `deploy.sh` refuses a tag whose commit did not pass CI. It backs up the database with `pg_dump` to `storage/app/backups/` (the last ten are kept), puts the site in maintenance mode, checks out the tag, installs dependencies without development packages, runs the migrations, caches configuration, routes and views, and brings the site back. It then checks that `/sign-in` and `/vocab/permission/` answer 200.
 
+## The audit signing key
+
+Every audit row is signed (ADR 0004). The key is `storage/keys/audit-signing.sk` in the live directory, created by the first deploy that needs it (`workspace:audit:create-key --if-missing`) and never replaced. Back it up separately from the database dumps, which do not contain it: if it is lost, the Workspace refuses every change until it is restored. `php artisan workspace:audit:verify` checks the whole chain.
+
 ## When a deploy fails
 
 The site stays in maintenance mode and the script prints two commands: one to deploy the previous release again, and one to bring the site up as it is. A failed migration inside PostgreSQL rolls back by itself; to undo a migration that completed, restore the backup the script named:

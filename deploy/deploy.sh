@@ -78,6 +78,8 @@ if [[ -d vendor ]]; then artisan down --retry=30; fi
 owner git -c advice.detachedHead=false checkout --quiet --detach "$TAG"
 owner composer install --no-dev --optimize-autoloader --no-interaction --no-progress --quiet
 artisan migrate --force
+# Every audit row is signed (ADR 0004): without the key no change can be recorded.
+artisan workspace:audit:create-key --if-missing
 artisan optimize
 artisan up
 trap - ERR

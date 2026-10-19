@@ -10,6 +10,10 @@ return [
     // conformance/README.md). Raised only together with the conformance matrix.
     'openric_spec_version' => '0.53.0',
 
+    // Ed25519 key that signs every audit row (ADR 0004). Kept outside git and the
+    // database, readable only by the application; back it up with the database.
+    'audit_signing_key' => env('WORKSPACE_AUDIT_SIGNING_KEY', storage_path('keys/audit-signing.sk')),
+
     // The Workspace's own vocabularies, bundled with the code (resources/vocabularies).
     'bundled_vocabularies' => ['account-role.ttl', 'permission.ttl', 'audit-action.ttl'],
 

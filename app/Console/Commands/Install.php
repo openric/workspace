@@ -76,6 +76,9 @@ class Install extends Command
             return self::INVALID;
         }
 
+        // Every audit row is signed (ADR 0004), so the key comes before the first one.
+        $this->call('workspace:audit:create-key', ['--if-missing' => true]);
+
         $admin = DB::transaction(function () use ($input, $password, $accounts) {
             $institution = Institution::create(['name' => $input['institution'], 'base_iri' => $input['base_iri']]);
             $accounts->seedDefaultGrants($institution);

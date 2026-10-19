@@ -1,0 +1,11 @@
+{
+    "preset": "laravel",
+    "notPath": [
+        "app/Audit/Crypto/JcsEncoder.php",
+        "app/Audit/Crypto/KeyPair.php",
+        "app/Audit/Crypto/Signer.php",
+        "tests/Unit/Crypto/JcsEncoderTest.php",
+        "tests/Unit/Crypto/KeyPairTest.php",
+        "tests/Unit/Crypto/SignerTest.php"
+    ]
+}

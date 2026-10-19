@@ -4,9 +4,10 @@
 // Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
 // SPDX-License-Identifier: AGPL-3.0-or-later
 //
-// The audit log is append-only in the database (migration 2026_10_19_000200).
-// A row is written on the same connection as the change it records, so when
-// the change runs in a transaction, the two commit or roll back together.
+// The audit log is append-only in the database (migration 2026_10_19_000200),
+// and every row is chained and signed (AuditChain, ADR 0004). A row is written
+// in the same transaction as the change it records, so the two commit or roll
+// back together; if the row cannot be signed, the change does not happen.
 
 namespace App\Audit;
 
@@ -14,7 +15,6 @@ use App\Models\Concept;
 use App\Models\Institution;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use RuntimeException;
 
@@ -60,7 +60,7 @@ class AuditLog
         };
         $request = app()->runningInConsole() ? null : request();
 
-        DB::table('audit_log')->insert([
+        AuditChain::append([
             'id' => (string) Str::uuid7(),
             'institution_id' => $institutionId,
             'actor_id' => $actor?->getKey(),
