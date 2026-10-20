@@ -13,6 +13,7 @@ use App\Models\Concept;
 use App\Vocabulary\SkosImporter;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 use Tests\TestCase;
 
@@ -112,5 +113,20 @@ class VocabularyImportTest extends TestCase
     {
         $this->expectException(InvalidArgumentException::class);
         app(SkosImporter::class)->import('@prefix skos: <http://www.w3.org/2004/02/skos/core#> . <https://example.org/x> a skos:Concept .');
+    }
+
+    public function test_a_changed_label_changes_that_label_only(): void
+    {
+        $importer = app(SkosImporter::class);
+        $importer->import($this->fixture());
+        $before = DB::table('concept_labels')->orderBy('concept_id')->orderBy('language')->pluck('pref_label', 'concept_id')->all();
+        $concept = Concept::where('iri', 'https://openric.org/vocab/role-type/editor')->sole();
+        $old = $concept->label(['en']);
+        $importer->import(str_replace('"'.$old.'"@en', '"Editor, changed"@en', $this->fixture()));
+
+        $after = DB::table('concept_labels')->orderBy('concept_id')->orderBy('language')->pluck('pref_label', 'concept_id')->all();
+        $this->assertSame('Editor, changed', $after[$concept->id]);
+        unset($before[$concept->id], $after[$concept->id]);
+        $this->assertSame($before, $after, 'no other label is touched');
     }
 }

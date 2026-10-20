@@ -287,4 +287,14 @@ class RolesAndPermissionsTest extends TestCase
         $editor = $this->account('ed@example.org', 'editor');
         $this->actingAs($editor)->get("/records/{$this->fonds->id}")->assertOk()->assertSee('Edit description');
     }
+
+    public function test_changing_or_removing_a_role_name_in_one_language_keeps_the_others(): void
+    {
+        $roles = app(RoleService::class);
+        $role = $roles->create($this->institution, ['en' => ['name' => 'Cataloguer'], 'af' => ['name' => 'Katalogiseerder']]);
+        $roles->update($role, ['en' => ['name' => 'Senior cataloguer']], null);
+        $this->assertSame(['af' => 'Katalogiseerder', 'en' => 'Senior cataloguer'], $role->labels()->orderBy('language')->pluck('name', 'language')->all());
+        $roles->update($role, ['af' => ['name' => '']], null);
+        $this->assertSame(['en' => 'Senior cataloguer'], $role->labels()->pluck('name', 'language')->all());
+    }
 }
