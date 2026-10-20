@@ -15,7 +15,7 @@
         <input id="identifier" name="identifier" value="{{ old('identifier', $record->identifier) }}">
         <label for="level">Level of description (3.1.4)</label> <small>(each choice names its RiC-O class)</small>
         <select id="level" name="level" style="font: inherit; padding: .5rem">
-            @foreach($levels as $level)<option value="{{ $level->iri }}" @selected(old('level', $record->level->iri) === $level->iri)>{{ $level->label(['en', 'und']) }} ({{ $level->ricTerm() }})</option>@endforeach
+            @foreach($levels as $level)<option value="{{ $level->iri }}" @selected(old('level', $record->level->iri) === $level->iri)>{{ $level->label(['en', 'und']) }} ({{ $level->ricTerm() ?? 'rico:RecordResource' }})</option>@endforeach
         </select>
         @include('description._fields', ['subject' => $record, 'standard' => \App\Description\Elements::ISAD_G, 'language' => $language])
         @if($mayUpdate)

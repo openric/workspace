@@ -14,7 +14,7 @@
         <input id="language" name="language" required value="{{ old('language', 'en') }}">
         <label for="level">Level of description (3.1.4)</label> <small>(each choice names its RiC-O class)</small>
         <select id="level" name="level" required style="font: inherit; padding: .5rem">
-            @foreach($levels as $level)<option value="{{ $level->iri }}" @selected(old('level') === $level->iri)>{{ $level->label(['en', 'und']) }} ({{ $level->ricTerm() }})</option>@endforeach
+            @foreach($levels as $level)<option value="{{ $level->iri }}" @selected(old('level') === $level->iri)>{{ $level->label(['en', 'und']) }} ({{ $level->ricTerm() ?? 'rico:RecordResource' }})</option>@endforeach
         </select>
         <label for="identifier">Reference code (3.1.1, optional)</label> @include('description._ric', ['term' => 'rico:Identifier'])
         <input id="identifier" name="identifier" value="{{ old('identifier') }}">

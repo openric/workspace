@@ -385,11 +385,7 @@ class StorageService
 
     private function bundledThenLocal(string $vocabulary, string $kind, string $institutionId): Collection
     {
-        $sort = fn (Collection $c) => $c->sortBy(fn (Concept $t) => mb_strtolower($t->anyLabel(['en'])))->values();
-
-        return Concept::choices($vocabulary)->with('vocabulary')->get()->merge($sort(
-            Concept::where('institution_id', $institutionId)->whereNull('deprecated_at')
-                ->whereHas('vocabulary.kind', fn ($q) => $q->where('iri', Vocab::SCHEME_KINDS.$kind))->with('labels', 'vocabulary')->get()));
+        return Concept::bundledThenLocal($vocabulary, $kind, $institutionId);
     }
 
     private function choice(Collection $choices, ?string $id, string $message): ?Concept

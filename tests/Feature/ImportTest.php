@@ -99,14 +99,15 @@ class ImportTest extends TestCase
         $this->assertSame(0, RecordResource::count(), 'a dry run writes nothing');
         $this->assertSame(0, Agent::count());
         $this->assertNull($import->committed_at);
-        $this->assertEquals(['created' => 2, 'updated' => 0, 'unchanged' => 0, 'rejected' => 2], $import->report['actions']);
+        $this->assertEquals(['created' => 4, 'updated' => 0, 'unchanged' => 0, 'rejected' => 0], $import->report['actions']);
         $issues = collect($import->report['issues']);
         foreach (['myOwnColumn', 'digitalObjectPath', 'publicationStatus'] as $field) {
             $this->assertTrue($issues->contains('field', $field), "$field is reported");
         }
         $units = collect($import->report['units']);
-        $this->assertStringContainsString('"Bundle" is not a level of description', $units->firstWhere('key', '3')['message']);
-        $this->assertSame('the unit it is inside was not imported', $units->firstWhere('key', '4')['message']);
+        // A level the Workspace does not have becomes one of the institution's, as the import may make terms.
+        $this->assertTrue($issues->contains(fn ($i) => $i['field'] === 'level' && $i['value'] === 'Bundle' && $i['kind'] === 'created'));
+        $this->assertSame('created', $units->firstWhere('key', '4')['action']);
         $this->actingAs($this->editor)->get("/imports/{$import->id}")->assertOk()->assertSee('Dry run: nothing has been written.')
             ->assertSee('would be created')->assertSee('Import now')->assertSee('not a column of AtoM');
     }
@@ -132,10 +133,10 @@ class ImportTest extends TestCase
 
         // The same source again: nothing new; a changed value updates its unit only.
         $again = $this->commit($this->upload($this->atomFile(), 'csv', ['agent_type' => 'corporate-body', 'create_terms' => '1', 'source' => 'AtoM Riverside']));
-        $this->assertEquals(['created' => 0, 'updated' => 0, 'unchanged' => 2, 'rejected' => 2], $again->report['actions']);
+        $this->assertEquals(['created' => 0, 'updated' => 0, 'unchanged' => 4, 'rejected' => 0], $again->report['actions']);
         $changed = $this->commit($this->upload($this->atomFile('Minutes, correspondence and accounts.'), 'csv', ['source' => 'AtoM Riverside']));
-        $this->assertEquals(['created' => 0, 'updated' => 1, 'unchanged' => 1, 'rejected' => 2], $changed->report['actions']);
-        $this->assertSame([2, 2, 5], [RecordResource::count(), Agent::count(), Relation::count()], 'the council and the name access point, created as the import was asked to');
+        $this->assertEquals(['created' => 0, 'updated' => 1, 'unchanged' => 3, 'rejected' => 0], $changed->report['actions']);
+        $this->assertSame([4, 2, 5], [RecordResource::count(), Agent::count(), Relation::count()], 'the council and the name access point, created as the import was asked to');
         $this->assertSame('Minutes, correspondence and accounts.', $fonds->fresh()->described('scope-and-content', ['en']));
         $this->assertSame('draft', $fonds->fresh()->descriptionValues->first(fn ($v) => $v->value === 'Minutes, correspondence and accounts.')->state->notation);
     }

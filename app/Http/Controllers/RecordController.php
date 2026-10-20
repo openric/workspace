@@ -68,7 +68,7 @@ class RecordController extends Controller
         // Permissions can be set on a single unit, so the page shows only what the account may read.
         $units->setCollection($units->getCollection()->filter(fn (RecordResource $r) => $user->may('read', 'description', $r))->values());
 
-        return view('records.index', ['units' => $units, 'query' => $query, 'filters' => $filters, 'levels' => $this->concepts(self::LEVELS),
+        return view('records.index', ['units' => $units, 'query' => $query, 'filters' => $filters, 'levels' => $this->levels($request),
             'repositories' => $this->repositories($request)]);
     }
 
@@ -116,7 +116,7 @@ class RecordController extends Controller
         $parent = $request->query('parent') ? $this->find($request, (string) $request->query('parent')) : null;
         abort_unless($parent ? $request->user()->may('create', 'description', $parent) : $request->user()->mayAnywhere('create', 'description'), 403);
 
-        return view('records.create', ['parent' => $parent, 'levels' => $this->concepts(self::LEVELS), 'repositories' => $this->repositories($request)]);
+        return view('records.create', ['parent' => $parent, 'levels' => $this->levels($request), 'repositories' => $this->repositories($request)]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -124,7 +124,7 @@ class RecordController extends Controller
         $data = $request->validate([
             'title' => ['required', 'string', 'max:2000'],
             'language' => ['required', 'string', fn ($a, $v, $fail) => Bcp47::valid((string) $v) || $fail('Give a BCP 47 language tag, such as en or af.')],
-            'level' => ['required', Rule::in($this->concepts(self::LEVELS)->pluck('iri'))],
+            'level' => ['required', Rule::in($this->levels($request)->pluck('iri'))],
             'identifier' => ['nullable', 'string', 'max:255'],
             'parent' => ['nullable', 'uuid'],
             'repository' => ['nullable', 'uuid'],
@@ -165,7 +165,7 @@ class RecordController extends Controller
         $record->load('descriptionValues.element', 'names.nameType', 'identifiers.identifierType', 'level');
         abort_unless($this->mayWrite($request, $record, $language), 403);
 
-        return view('records.edit', ['record' => $record, 'elements' => Elements::of(Elements::ISAD_G), 'levels' => $this->concepts(self::LEVELS), 'language' => $language,
+        return view('records.edit', ['record' => $record, 'elements' => Elements::of(Elements::ISAD_G), 'levels' => $this->levels($request), 'language' => $language,
             'mayUpdate' => $request->user()->may('update', 'description', $record),
             'statuses' => Concept::choices(Vocab::DESCRIPTION_STATUSES)->get(), 'details' => Concept::choices(Vocab::DESCRIPTION_DETAILS)->get()]);
     }
@@ -176,7 +176,7 @@ class RecordController extends Controller
         $data = $request->validate([
             'language' => ['required', 'string', fn ($a, $v, $fail) => Bcp47::valid((string) $v) || $fail('Give a BCP 47 language tag, such as en or af.')],
             'identifier' => ['nullable', 'string', 'max:255'],
-            'level' => ['required', Rule::in($this->concepts(self::LEVELS)->pluck('iri'))],
+            'level' => ['required', Rule::in($this->levels($request)->pluck('iri'))],
             'values' => ['array'],
             'values.*' => ['nullable', 'string', 'max:65535'],
             'description_identifier' => ['nullable', 'string', 'max:255'],
@@ -271,8 +271,9 @@ class RecordController extends Controller
         return Repository::where('institution_id', $request->user()->institution_id)->whereNull('deleted_at')->with('descriptionValues.element', 'names.nameType', 'identifiers.identifierType')->get();
     }
 
-    private function concepts(string $vocabularyIri)
+    /** The levels a unit may have: the bundled ones, then the institution's own. */
+    private function levels(Request $request)
     {
-        return Concept::current()->whereHas('vocabulary', fn ($q) => $q->where('iri', $vocabularyIri))->with('labels')->orderBy('id')->get();
+        return Concept::bundledThenLocal(self::LEVELS, 'level-of-description', $request->user()->institution_id);
     }
 }

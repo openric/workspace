@@ -33,6 +33,7 @@ use App\Models\RecordResource;
 use App\Models\Relation;
 use App\Models\Repository;
 use App\Models\User;
+use App\Relations\EntityKinds;
 use App\Relations\RelationService;
 use App\Support\Vocab;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -283,5 +284,36 @@ class AtomMigrationTest extends TestCase
             'format' => 'repository-csv', 'language' => 'en'])->assertSessionHasErrors('format');
         $this->assertSame(0, Import::count());
         $this->assertSame(0, Place::count());
+    }
+
+    public function test_a_level_the_workspace_does_not_have_becomes_one_of_the_institutions_levels_with_the_class_its_units_take(): void
+    {
+        $holder = Repository::firstOrFail();
+        $file = $this->csv([['legacyId', 'parentId', 'title', 'levelOfDescription', 'culture'],
+            ['1', '', 'Herbarium', 'Fonds', 'en'], ['2', '1', 'Book of pressed flowers', 'Book', 'en'], ['3', '2', 'Page with a rose', 'Document', 'en'], ['4', '1', 'Loose sheet', 'document', 'en']]);
+        $import = $this->import($file, 'csv', ['repository' => $holder->id]);
+        $this->assertEquals(['created' => 4, 'updated' => 0, 'unchanged' => 0, 'rejected' => 0], $import->report['actions']);
+
+        // One level per name, in the institution's level-of-description vocabulary; a level with units inside is a record set.
+        $levels = Concept::bundledThenLocal('https://workspace.openric.org/vocab/level-of-description/', 'level-of-description', $this->institution->id)
+            ->filter(fn (Concept $c) => $c->institution_id !== null);
+        $this->assertEquals(['Book', 'Document'], $levels->map(fn (Concept $c) => $c->label(['en']))->sort()->values()->all());
+        $book = RecordResource::whereHas('names', fn ($q) => $q->where('value', 'Book of pressed flowers'))->firstOrFail();
+        $page = RecordResource::whereHas('names', fn ($q) => $q->where('value', 'Page with a rose'))->firstOrFail();
+        $this->assertSame('rico:RecordSet', EntityKinds::ricClass($book));
+        $this->assertSame('rico:Record', EntityKinds::ricClass($page));
+        $this->assertStringContainsString('otherlevel="Book"', app(Ead::class)->export($book->parent, new ExportView($this->editor, true)));
+
+        // The record forms offer it, and importing again changes nothing.
+        $this->actingAs($this->editor)->get(route('records.edit', $book))->assertOk()->assertSee('>Book (rico:RecordSet)<', false);
+        $again = $this->import($file, 'csv', ['repository' => $holder->id]);
+        $this->assertEquals(['created' => 0, 'updated' => 0, 'unchanged' => 4, 'rejected' => 0], $again->report['actions']);
+        $this->assertSame(2, $levels->count());
+
+        // Without leave to make terms, a unit at a level the Workspace does not have is not imported.
+        $refused = $this->import($this->csv([['legacyId', 'parentId', 'title', 'levelOfDescription', 'culture'], ['9', '', 'Atlas', 'Monograph', 'en']]),
+            'csv', ['repository' => $holder->id, 'create_terms' => '0']);
+        $this->assertSame(1, $refused->report['actions']['rejected']);
+        $this->assertStringContainsString('"Monograph" is not a level of description', $refused->report['units'][0]['message']);
     }
 }

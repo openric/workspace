@@ -91,6 +91,9 @@ class ImportService
     /** @var array<string, ?Model> agents, places and concepts already resolved in this file */
     private array $resolved = [];
 
+    /** @var array<string, int> keys of the units the file puts other units inside */
+    private array $parents = [];
+
     public function __construct(private RecordService $records, private IdentifierService $identifiers, private DateService $dates,
         private RelationService $relations, private AgentService $agents, private PlaceService $places, private ConceptService $concepts,
         private RepositoryService $repositories, private ContactPointService $contacts, private InstantiationService $instantiations,
@@ -109,7 +112,7 @@ class ImportService
         $this->user = $import->user;
         $this->institution = Institution::findOrFail($import->institution_id);
         $this->report = new Report;
-        $this->byKey = $this->failed = $this->resolved = [];
+        $this->byKey = $this->failed = $this->resolved = $this->parents = [];
         $this->commit = $commit;
         try {
             $drafts = match ($import->format) {
@@ -125,6 +128,7 @@ class ImportService
             return $this->report;
         }
 
+        $this->parents = array_flip(array_filter(array_map(fn ($d) => $d->parentKey, $drafts), fn ($k) => $k !== null));
         try {
             DB::transaction(function () use ($drafts, $commit) {
                 AuditLog::actingAs($this->user, function () use ($drafts) {
@@ -579,17 +583,43 @@ class ImportService
         }
         $wanted = mb_strtolower($draft->level);
         $wanted = array_flip(Ead::LEVEL_NAMES)[$wanted] ?? $wanted;
-        $levels = Concept::choices(self::LEVELS)->get();
-        $level = $levels->first(fn (Concept $c) => mb_strtolower((string) $c->notation) === $wanted)
-            ?? $levels->first(fn (Concept $c) => $c->labels->contains(fn ($l) => mb_strtolower($l->pref_label) === $wanted));
+        // The bundled levels, then the institution's own, by notation or by label.
+        $levels = Concept::bundledThenLocal(self::LEVELS, 'level-of-description', $this->institution->id);
+        $level = $levels->first(fn (Concept $c) => $c->notation !== null && mb_strtolower((string) $c->notation) === $wanted)
+            ?? $levels->first(fn (Concept $c) => $c->labels->contains(fn ($l) => mb_strtolower($l->pref_label) === $wanted))
+            ?? $this->newLevel($draft);
         if ($level === null) {
             if ($new) {
-                throw new InvalidArgumentException('"'.$draft->level.'" is not a level of description the Workspace knows');
+                throw new InvalidArgumentException('"'.$draft->level.'" is not a level of description the Workspace knows; let the import make new terms, or add the level to a level-of-description vocabulary');
             }
             $this->report->issue($draft->location, 'level', $draft->level, 'not a level of description the Workspace knows; the level is kept', 'left-out');
         }
 
         return $level?->iri;
+    }
+
+    /**
+     * A level the file names and the Workspace does not have (AtoM lets an institution add levels): made in the
+     * institution's level-of-description vocabulary where the import may make terms. What its units are exported as
+     * is read from the file: a level with units inside it is a rico:RecordSet, one without a rico:Record. It can be
+     * changed in the vocabulary afterwards.
+     */
+    private function newLevel(UnitDraft $draft): ?Concept
+    {
+        $cacheKey = 'level:'.mb_strtolower((string) $draft->level);
+        if (array_key_exists($cacheKey, $this->resolved)) {
+            return $this->resolved[$cacheKey];
+        }
+        if (! ($this->import->options['create_terms'] ?? false) || ! $this->user->may('create', 'vocabulary')) {
+            return null;
+        }
+        $class = isset($this->parents[$draft->key]) ? 'rico:RecordSet' : 'rico:Record';
+        $concept = $this->concepts->create($this->concepts->schemeOfKind($this->institution, 'level-of-description', $this->user), ['label' => $draft->level,
+            'language' => $this->import->language, 'scope_note' => "A level of description from {$this->import->source}; its units are exported as $class."], $this->user);
+        $this->report->counts['concepts']++;
+        $this->report->issue($draft->location, 'level', $draft->level, "a new level of description, its units exported as $class", 'created');
+
+        return $this->resolved[$cacheKey] = $concept;
     }
 
     private function otherIdentifiers(UnitDraft $draft, RecordResource $unit): void

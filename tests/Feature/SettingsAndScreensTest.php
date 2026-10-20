@@ -79,7 +79,9 @@ class SettingsAndScreensTest extends TestCase
     public function test_every_page_has_the_main_navigation(): void
     {
         $this->actingAs($this->admin)->get('/repositories')->assertSee('aria-label="Main"', false)
-            ->assertSee('>Home<', false)->assertSee('>Settings<', false)->assertSee('aria-current="page"', false);
+            ->assertSee('>Home<', false)->assertSee('>Settings<', false)->assertSee('aria-current="page"', false)
+            // Grouped in submenus, and the group holding the page is marked.
+            ->assertSeeInOrder(['<summary class="here">Describe</summary>', '>Repositories<', '>Storage</summary>', '>Imports<', '>Manage</summary>', '>Audit log<'], false);
     }
 
     public function test_a_new_repository_opens_its_full_description_form(): void

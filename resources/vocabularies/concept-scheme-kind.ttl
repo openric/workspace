@@ -13,7 +13,7 @@ v: a skos:ConceptScheme ;
     dcterms:title "OpenRiC Workspace Concept Scheme Kinds"@en ;
     dcterms:description "The kinds of vocabulary an institution keeps for its access points and types."@en ;
     dcterms:issued "2026-10-20"^^xsd:date ;
-    skos:hasTopConcept v:subject, v:occupation-type, v:place-type, v:documentary-form-type, v:legal-status, v:activity-type, v:container-type, v:storage-place-type .
+    skos:hasTopConcept v:subject, v:occupation-type, v:place-type, v:documentary-form-type, v:legal-status, v:activity-type, v:container-type, v:storage-place-type, v:level-of-description .
 
 v:subject a skos:Concept ;
     skos:inScheme v: ;
@@ -70,3 +70,10 @@ v:storage-place-type a skos:Concept ;
     skos:prefLabel "Storage place types"@en ;
     skos:scopeNote "Concepts exported as rico:PlaceType; a storage place is linked to one by rico:hasOrHadPlaceType. They add to the bundled storage-place-type vocabulary, and a place of one of these types is a storage place."@en ;
     skos:definition "Kinds of place in which containers are kept, such as strongroom, aisle or shelf."@en .
+
+v:level-of-description a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Levels of description"@en ;
+    skos:scopeNote "The institution's own levels, beside the bundled level-of-description vocabulary (ISAD(G) 3.1.4), as AtoM's levels of description taxonomy allows. Each level's scope note names what its units are, rico:RecordSet, rico:Record or rico:RecordPart (rico:RecordResource where it names none); a record set is linked to its level by rico:hasRecordSetType, and EAD carries the level as otherlevel."@en ;
+    skos:definition "Levels of arrangement an institution uses that the bundled list does not have, such as volume or document."@en .

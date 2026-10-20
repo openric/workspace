@@ -4,6 +4,18 @@
 @section('content')
     <nav aria-label="Hierarchy"><a href="{{ route('records.index') }}">Archival descriptions</a>
         @foreach($record->ancestors() as $ancestor) / <a href="{{ route('records.show', $ancestor) }}">{{ $ancestor->described('title', ['en']) }}</a>@endforeach</nav>
+    @php
+        $preview = $record->instantiations->map(fn ($i) => [$i, $i->file('reference') ?? $i->file('thumbnail')])
+            ->filter(fn ($p) => $p[1] && app(\App\Description\InstantiationService::class)->deliverable(auth()->user(), $p[1]));
+    @endphp
+    @if($preview->isNotEmpty())
+        {{-- The images first, as AtoM shows the digital object above the description; the instantiations are managed below. --}}
+        <section aria-label="Digital copies" style="display: flex; gap: 1rem; flex-wrap: wrap; margin: 1rem 0">
+            @foreach($preview as [$instantiation, $file])
+                <a href="{{ route('instantiations.show', $instantiation) }}"><img src="{{ route('files.show', $file) }}" alt="{{ $instantiation->described('instantiation-title', [app()->getLocale(), 'en']) }}" width="{{ $file->width }}" height="{{ $file->height }}" style="max-width: 100%; max-height: 28rem; width: auto; height: auto; border: 1px solid var(--line)"></a>
+            @endforeach
+        </section>
+    @endif
     <h1>{{ $record->described('title', ['en']) }}</h1>
     @if(session('status'))<p role="status">{{ session('status') }}</p>@endif
     @if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif

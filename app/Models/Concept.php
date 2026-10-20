@@ -13,6 +13,7 @@
 namespace App\Models;
 
 use App\Audit\Audited;
+use App\Support\Vocab;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
@@ -108,6 +109,19 @@ class Concept extends Model
         return $query->whereNull('deprecated_at')->whereHas('vocabulary', fn ($q) => $q->where('iri', $vocabularyIri))->with('labels')->orderBy('id');
     }
 
+    /**
+     * The current concepts of a bundled vocabulary, in vocabulary order, then those of the institution's own
+     * vocabularies of a kind, by label: what a field takes when an institution may add to a bundled list.
+     */
+    public static function bundledThenLocal(string $vocabularyIri, string $kind, ?string $institutionId): Collection
+    {
+        $local = $institutionId === null ? collect() : static::where('institution_id', $institutionId)->whereNull('deprecated_at')
+            ->whereHas('vocabulary.kind', fn ($q) => $q->where('iri', Vocab::SCHEME_KINDS.$kind))->with('labels', 'vocabulary')->get()
+            ->sortBy(fn (Concept $c) => mb_strtolower($c->anyLabel(['en'])))->values();
+
+        return static::choices($vocabularyIri)->with('vocabulary')->get()->merge($local);
+    }
+
     /** The label in the first of the given languages that has one, or null. */
     public function label(array $languages): ?string
     {
@@ -128,7 +142,7 @@ class Concept extends Model
      */
     public function ricTerm(): ?string
     {
-        $note = (string) $this->labels->firstWhere('language', 'en')?->scope_note;
+        $note = (string) ($this->labels->firstWhere('language', 'en') ?? $this->labels->first(fn ($l) => $l->scope_note !== null))?->scope_note;
 
         return preg_match('/(?:exported|kept) as (?:an? |the )?((?:rico|openricx):\w+)/i', $note, $m)
             || preg_match('/((?:rico|openricx):\w+)/', $note, $m) ? $m[1] : null;

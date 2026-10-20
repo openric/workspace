@@ -176,7 +176,8 @@ final class EntityKinds
     public static function ricClass(Model $entity): ?string
     {
         return match (true) {
-            $entity instanceof RecordResource => $entity->level?->ricTerm(),
+            // An institution's own level may name no class: every unit is at least a rico:RecordResource.
+            $entity instanceof RecordResource => $entity->level?->ricTerm() ?? 'rico:RecordResource',
             $entity instanceof Agent => $entity->agentType?->ricTerm(),
             default => self::KINDS[self::of($entity)]['ric_class'],
         };

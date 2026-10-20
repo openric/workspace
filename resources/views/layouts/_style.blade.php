@@ -14,5 +14,16 @@
         table { border-collapse: collapse; width: 100%; }
         th, td { text-align: left; padding: .4rem; border-bottom: 1px solid var(--line); }
         :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+        .main-nav { max-width: 60rem; margin: 0 auto; padding: .5rem 1rem; border-bottom: 1px solid var(--line); }
+        .main-nav ul { list-style: none; margin: 0; padding: 0; }
+        .main-nav > ul { display: flex; gap: .25rem 1.25rem; flex-wrap: wrap; align-items: center; }
+        .main-nav li { position: relative; }
+        .main-nav summary { cursor: pointer; color: var(--accent); padding: .25rem 0; }
+        .main-nav summary.here, .main-nav [aria-current="page"] { font-weight: 700; }
+        .main-nav details ul { position: absolute; z-index: 10; top: 100%; left: 0; min-width: 13rem; padding: .35rem 0; background: var(--bg); border: 1px solid var(--line); box-shadow: 0 4px 12px rgb(0 0 0 / .12); }
+        .main-nav > ul > li:nth-last-child(-n+2) details ul { left: auto; right: 0; }
+        .main-nav details a { display: block; padding: .35rem .9rem; text-decoration: none; }
+        .main-nav details a:hover { text-decoration: underline; }
+        @media (max-width: 40rem) { .main-nav details ul { position: static; box-shadow: none; border: 0; border-left: 2px solid var(--line); margin: .25rem 0 .25rem .25rem; } }
         .ric { font-weight: normal; font-size: .8rem; color: var(--muted); margin-left: .35rem; } .ric a { color: var(--muted); }
     </style>
