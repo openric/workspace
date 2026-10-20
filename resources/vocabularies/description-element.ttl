@@ -13,7 +13,7 @@ v: a skos:ConceptScheme ;
     dcterms:title "OpenRiC Workspace Description Elements"@en ;
     dcterms:description "Elements of archival description, grouped under the ICA standard they come from. Only the elements, not the groups, are values of a description."@en ;
     dcterms:issued "2026-10-19"^^xsd:date ;
-    skos:hasTopConcept v:isdiah, v:isad-g, v:place, v:isaar-cpf, v:activity .
+    skos:hasTopConcept v:isdiah, v:isad-g, v:place, v:isaar-cpf, v:activity, v:instantiation .
 
 v:authorised-name a skos:Concept ;
     skos:inScheme v: ;
@@ -558,3 +558,59 @@ v:activity-legislation a skos:Concept ;
     skos:prefLabel "Legislation"@en ;
     skos:scopeNote "ISDF 5.2.4; exported as rico:isOrWasRegulatedBy a rico:Rule."@en ;
     skos:definition "The laws, regulations or other rules the activity followed."@en .
+
+v:instantiation a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Instantiation"@en ;
+    skos:scopeNote "The elements of an instantiation (rico:Instantiation, RiC-CM 1.0): one carrier of a unit of description, such as a digital file or a paper copy. No ICA description standard covers instantiations."@en ;
+    skos:definition "The elements an instantiation is described with."@en .
+
+v:instantiation-title a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:instantiation ;
+    skos:prefLabel "Title"@en ;
+    skos:scopeNote "Kept as a rico:Title entity of name type authorised, one in each language; RiC-O 1.1 gives an instantiation a rico:title."@en ;
+    skos:definition "The name of this carrier of the unit, such as the scan of the minute book."@en .
+
+v:instantiation-description a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:instantiation ;
+    skos:prefLabel "Description"@en ;
+    skos:scopeNote "Exported as rico:generalDescription."@en ;
+    skos:definition "What this instantiation is and how it came to be."@en .
+
+v:instantiation-production-technique a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:instantiation ;
+    skos:prefLabel "Production technique"@en ;
+    skos:scopeNote "Exported as rico:productionTechnique."@en ;
+    skos:definition "How the information was put on the carrier, such as a 600 dpi colour scan."@en .
+
+v:instantiation-physical-characteristics a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:instantiation ;
+    skos:prefLabel "Physical characteristics"@en ;
+    skos:scopeNote "Exported as rico:physicalCharacteristicsNote."@en ;
+    skos:definition "The physical features, completeness or condition of the carrier."@en .
+
+v:instantiation-quality a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:instantiation ;
+    skos:prefLabel "Quality of representation"@en ;
+    skos:scopeNote "Exported as rico:qualityOfRepresentationNote."@en ;
+    skos:definition "What affects how well the content can be recovered from it, such as missing pages in the scan."@en .
+
+v:instantiation-conditions-of-access a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:instantiation ;
+    skos:prefLabel "Conditions of access"@en ;
+    skos:scopeNote "Exported as rico:conditionsOfAccess."@en ;
+    skos:definition "Terms affecting who may see this carrier, beside its availability."@en .
+
+v:instantiation-rights a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:instantiation ;
+    skos:prefLabel "Rights and conditions of use"@en ;
+    skos:scopeNote "Exported as rico:conditionsOfUse."@en ;
+    skos:definition "The rights in this carrier and the terms of its use, such as a licence."@en .

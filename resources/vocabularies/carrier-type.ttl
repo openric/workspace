@@ -1,0 +1,79 @@
+# OpenRiC Workspace - OpenRiC Workspace Carrier Types.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# The kinds of carrier an instantiation is on (rico:CarrierType), the values of rico:hasCarrierType.
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/carrier-type/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Carrier Types"@en ;
+    dcterms:description "The kinds of carrier an instantiation of a unit of description is on."@en ;
+    dcterms:issued "2026-10-20"^^xsd:date ;
+    skos:hasTopConcept v:digital-file, v:paper, v:parchment, v:photographic-print, v:photographic-negative, v:microform, v:magnetic-tape, v:optical-disc, v:motion-picture-film .
+
+v:digital-file a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Digital file"@en ;
+    skos:scopeNote "Exported as a rico:CarrierType, linked by rico:hasCarrierType."@en ;
+    skos:definition "A file held in digital storage."@en .
+
+v:paper a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Paper"@en ;
+    skos:scopeNote "Exported as a rico:CarrierType, linked by rico:hasCarrierType."@en ;
+    skos:definition "Sheets or volumes of paper."@en .
+
+v:parchment a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Parchment"@en ;
+    skos:scopeNote "Exported as a rico:CarrierType, linked by rico:hasCarrierType."@en ;
+    skos:definition "Prepared animal skin."@en .
+
+v:photographic-print a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Photographic print"@en ;
+    skos:scopeNote "Exported as a rico:CarrierType, linked by rico:hasCarrierType."@en ;
+    skos:definition "A photograph printed on paper or card."@en .
+
+v:photographic-negative a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Photographic negative"@en ;
+    skos:scopeNote "Exported as a rico:CarrierType, linked by rico:hasCarrierType."@en ;
+    skos:definition "A negative on film or glass."@en .
+
+v:microform a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Microform"@en ;
+    skos:scopeNote "Exported as a rico:CarrierType, linked by rico:hasCarrierType."@en ;
+    skos:definition "Microfilm or microfiche."@en .
+
+v:magnetic-tape a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Magnetic tape"@en ;
+    skos:scopeNote "Exported as a rico:CarrierType, linked by rico:hasCarrierType."@en ;
+    skos:definition "Audio, video or data tape."@en .
+
+v:optical-disc a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Optical disc"@en ;
+    skos:scopeNote "Exported as a rico:CarrierType, linked by rico:hasCarrierType."@en ;
+    skos:definition "A CD, DVD or similar disc."@en .
+
+v:motion-picture-film a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Motion picture film"@en ;
+    skos:scopeNote "Exported as a rico:CarrierType, linked by rico:hasCarrierType."@en ;
+    skos:definition "Film for moving images."@en .

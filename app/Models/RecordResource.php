@@ -69,6 +69,12 @@ class RecordResource extends Model
         return $this->belongsTo(self::class, 'parent_id');
     }
 
+    /** rico:hasOrHadInstantiation: its carriers, such as digital files and paper copies, in order. */
+    public function instantiations(): HasMany
+    {
+        return $this->hasMany(Instantiation::class)->whereNull('deleted_at')->orderBy('position')->orderBy('created_at');
+    }
+
     public function children(): HasMany
     {
         return $this->hasMany(self::class, 'parent_id')->whereNull('deleted_at')->orderBy('position');

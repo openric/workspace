@@ -19,6 +19,7 @@ use App\Http\Controllers\ExportController;
 use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\IdentifierController;
 use App\Http\Controllers\ImportController;
+use App\Http\Controllers\InstantiationController;
 use App\Http\Controllers\IriController;
 use App\Http\Controllers\LocalVocabularyController;
 use App\Http\Controllers\NameController;
@@ -58,7 +59,7 @@ Route::get('/vocab/{scheme}/{notation}', [VocabularyController::class, 'concept'
 Route::get('/branding/logo', [SettingsController::class, 'logo'])->name('branding.logo');
 
 // Persistent IRIs resolve, for anyone: the controller sends a page only to those signed in.
-Route::get('/{segment}/{id}', [IriController::class, 'resolve'])->where(['segment' => 'record|agent|repository|activity|place|concept', 'id' => '[0-9a-f-]{36}'])->name('iri');
+Route::get('/{segment}/{id}', [IriController::class, 'resolve'])->where(['segment' => 'record|agent|repository|activity|place|concept|instantiation', 'id' => '[0-9a-f-]{36}'])->name('iri');
 
 Route::middleware('guest')->group(function () {
     Route::get('/sign-in', [SessionController::class, 'create'])->name('sign-in');
@@ -107,6 +108,14 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/{record}/export', [ExportController::class, 'form'])->name('export');
         Route::get('/{record}/export/{format}', [ExportController::class, 'download'])->where('format', 'ead|ead3|csv|dc|mods')->name('export.download');
     });
+
+    // Instantiations and their files (rico:Instantiation, WS-007); the controller checks the unit's permissions.
+    Route::post('/records/{record}/instantiations', [InstantiationController::class, 'store'])->name('instantiations.store');
+    Route::get('/instantiations/{instantiation}', [InstantiationController::class, 'show'])->name('instantiations.show');
+    Route::get('/instantiations/{instantiation}/edit', [InstantiationController::class, 'edit'])->name('instantiations.edit');
+    Route::post('/instantiations/{instantiation}', [InstantiationController::class, 'update'])->name('instantiations.update');
+    Route::get('/files/{file}', [InstantiationController::class, 'file'])->name('files.show');
+    Route::post('/files/{file}/fixity', [InstantiationController::class, 'fixity'])->name('files.fixity');
 
     // Activities (rico:Activity); the controller checks the authority permissions.
     Route::middleware('access:read,authority')->prefix('activities')->name('activities.')->group(function () {
@@ -197,7 +206,7 @@ Route::middleware(['auth', 'active'])->group(function () {
     // Dates, names and identifiers of any described entity (ADR 0006); each controller checks update on the entity.
     // A concept has labels instead (ConceptController).
     foreach (['dates' => [DateController::class, 'date'], 'names' => [NameController::class, 'name'], 'identifiers' => [IdentifierController::class, 'identifier']] as $part => [$controller, $parameter]) {
-        Route::prefix("{kind}/{id}/$part")->where(['kind' => 'records|repositories|places|agents|activities', 'id' => '[0-9a-f-]{36}', $parameter => '[0-9a-f-]{36}'])->name("$part.")
+        Route::prefix("{kind}/{id}/$part")->where(['kind' => 'records|repositories|places|agents|activities|instantiations', 'id' => '[0-9a-f-]{36}', $parameter => '[0-9a-f-]{36}'])->name("$part.")
             ->group(function () use ($controller, $parameter) {
                 Route::post('/', [$controller, 'store'])->name('store');
                 Route::post("/{{$parameter}}", [$controller, 'update'])->name('update');
@@ -206,15 +215,15 @@ Route::middleware(['auth', 'active'])->group(function () {
     }
 
     // Delete a unit of description, a repository or a place, after confirming (EntityDeletion).
-    Route::get('{kind}/{id}/delete', [DeletionController::class, 'confirm'])->where(['kind' => 'records|repositories|places|agents|activities', 'id' => '[0-9a-f-]{36}'])->name('deletion.confirm');
-    Route::post('{kind}/{id}/delete', [DeletionController::class, 'destroy'])->where(['kind' => 'records|repositories|places|agents|activities', 'id' => '[0-9a-f-]{36}'])->name('deletion.destroy');
+    Route::get('{kind}/{id}/delete', [DeletionController::class, 'confirm'])->where(['kind' => 'records|repositories|places|agents|activities|instantiations', 'id' => '[0-9a-f-]{36}'])->name('deletion.confirm');
+    Route::post('{kind}/{id}/delete', [DeletionController::class, 'destroy'])->where(['kind' => 'records|repositories|places|agents|activities|instantiations', 'id' => '[0-9a-f-]{36}'])->name('deletion.destroy');
 
     // The modification history of an entity and its parts, from the audit log.
-    Route::get('{kind}/{id}/history', [HistoryController::class, 'show'])->where(['kind' => 'records|repositories|places|agents|activities|concepts', 'id' => '[0-9a-f-]{36}'])->name('history');
+    Route::get('{kind}/{id}/history', [HistoryController::class, 'show'])->where(['kind' => 'records|repositories|places|agents|activities|instantiations|concepts', 'id' => '[0-9a-f-]{36}'])->name('history');
 
     // Review, publish and withdraw an entity's description (PublicationService).
-    Route::get('{kind}/{id}/publication', [PublicationController::class, 'edit'])->where(['kind' => 'records|repositories|places|agents|activities', 'id' => '[0-9a-f-]{36}'])->name('publication.edit');
-    Route::post('{kind}/{id}/publication', [PublicationController::class, 'update'])->where(['kind' => 'records|repositories|places|agents|activities', 'id' => '[0-9a-f-]{36}'])->name('publication.update');
+    Route::get('{kind}/{id}/publication', [PublicationController::class, 'edit'])->where(['kind' => 'records|repositories|places|agents|activities|instantiations', 'id' => '[0-9a-f-]{36}'])->name('publication.edit');
+    Route::post('{kind}/{id}/publication', [PublicationController::class, 'update'])->where(['kind' => 'records|repositories|places|agents|activities|instantiations', 'id' => '[0-9a-f-]{36}'])->name('publication.update');
 
     // Relations of any described entity, their assertions and evidence (ADR 0006, WS-006).
     Route::prefix('{kind}/{id}/relations')->where(['kind' => EntityKinds::segments(), 'id' => '[0-9a-f-]{36}', 'relation' => '[0-9a-f-]{36}',

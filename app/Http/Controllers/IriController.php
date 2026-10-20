@@ -7,13 +7,14 @@
 // A unit of description, agent or repository answers with a 303 to its
 // OpenRiC JSON-LD in the read API, or, for a browser of someone signed in,
 // to its page. Activities, places and concepts are not yet in a profile the
-// API declares, so their IRIs go to the page, behind sign-in.
+// API declares, so their IRIs go to the page, behind sign-in; so do instantiations.
 
 namespace App\Http\Controllers;
 
 use App\Models\Activity;
 use App\Models\Agent;
 use App\Models\Concept;
+use App\Models\Instantiation;
 use App\Models\Place;
 use App\Models\RecordResource;
 use App\Models\Repository;
@@ -30,6 +31,7 @@ class IriController extends Controller
         Activity::IRI_SEGMENT => [Activity::class, 'activities.show', null],
         Place::IRI_SEGMENT => [Place::class, 'places.show', null],
         Concept::IRI_SEGMENT => [Concept::class, 'concepts.show', null],
+        Instantiation::IRI_SEGMENT => [Instantiation::class, 'instantiations.show', null],
     ];
 
     public function resolve(Request $request, string $segment, string $id): RedirectResponse

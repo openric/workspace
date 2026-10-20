@@ -14,6 +14,7 @@ namespace App\Relations;
 use App\Models\Activity;
 use App\Models\Agent;
 use App\Models\Concept;
+use App\Models\Instantiation;
 use App\Models\Place;
 use App\Models\RecordResource;
 use App\Models\Repository;
@@ -41,6 +42,8 @@ final class EntityKinds
             'route' => 'places.show', 'index' => 'places.index', 'label' => 'place-name', 'with' => ['names.nameType', 'descriptionValues.element', 'identifiers.identifierType', 'parent.names.nameType'], 'noun' => 'place', 'ric_class' => 'rico:Place', 'ric_name' => 'rico:PlaceName'],
         'activity' => ['class' => Activity::class, 'segment' => 'activities', 'permission' => 'authority', 'readable' => true,
             'route' => 'activities.show', 'index' => 'activities.index', 'label' => 'activity-name', 'with' => ['names.nameType', 'descriptionValues.element', 'identifiers.identifierType', 'activityType.labels'], 'noun' => 'activity', 'ric_class' => 'rico:Activity', 'ric_name' => 'rico:Name'],
+        'instantiation' => ['class' => Instantiation::class, 'segment' => 'instantiations', 'permission' => 'description', 'readable' => true,
+            'route' => 'instantiations.show', 'index' => null, 'label' => 'instantiation-title', 'with' => ['names.nameType', 'descriptionValues.element', 'identifiers.identifierType'], 'noun' => 'instantiation', 'ric_class' => 'rico:Instantiation', 'ric_name' => 'rico:Title'],
         'concept' => ['class' => Concept::class, 'segment' => 'concepts', 'permission' => 'vocabulary', 'readable' => false,
             'route' => 'concepts.show', 'index' => null, 'label' => null, 'with' => ['labels', 'vocabulary'], 'noun' => 'concept', 'ric_class' => null, 'ric_name' => null],
     ];

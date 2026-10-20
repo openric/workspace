@@ -44,8 +44,11 @@ jobs:
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
-          extensions: pdo_pgsql, intl, mbstring, xmlreader, dom
+          extensions: pdo_pgsql, intl, mbstring, xmlreader, dom, imagick, gd, fileinfo
           coverage: none
+      # pdftoppm makes the copies of a PDF's first page (App\Files\FileStore).
+      - name: PDF tools
+        run: sudo apt-get install -y --no-install-recommends poppler-utils
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist --no-progress
       - name: Application key

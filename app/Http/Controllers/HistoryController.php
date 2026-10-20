@@ -31,7 +31,9 @@ class HistoryController extends Controller
         $end = fn ($json) => fn ($q) => $q->where(fn ($q) => $q->whereRaw("($json ->> 'source_table') = ? AND ($json ->> 'source_id') = ?", [$table, $id])
             ->orWhereRaw("($json ->> 'target_table') = ? AND ($json ->> 'target_id') = ?", [$table, $id]));
         // An update records only what changed, so the parts that exist now are found by their ids.
-        $partIds = collect(self::PARTS)->flatMap(fn ($t) => DB::table($t)->where(['subject_table' => $table, 'subject_id' => $id])->pluck('id'))->all();
+        $partIds = collect(self::PARTS)->flatMap(fn ($t) => DB::table($t)->where(['subject_table' => $table, 'subject_id' => $id])->pluck('id'))
+            // An instantiation's files are its parts too.
+            ->merge($table === 'instantiations' ? DB::table('digital_files')->where('instantiation_id', $id)->pluck('id') : [])->all();
         $relationIds = DB::table('relations')->where(fn ($q) => $q->where(['source_table' => $table, 'source_id' => $id])->orWhere(fn ($q) => $q->where(['target_table' => $table, 'target_id' => $id])))->pluck('id')->all();
         $rows = DB::table('audit_log as a')->leftJoin('users as u', 'u.id', '=', 'a.actor_id')->leftJoin('concepts as c', 'c.id', '=', 'a.action_id')
             ->where('a.institution_id', $request->user()->institution_id)

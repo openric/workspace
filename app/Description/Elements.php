@@ -28,6 +28,9 @@ final class Elements
     /** An activity: numbered after ISDF where ISDF has the element. */
     public const ACTIVITY = 'activity';
 
+    /** An instantiation: no ICA description standard covers it. */
+    public const INSTANTIATION = 'instantiation';
+
     /** @var array<string, Collection<int, Concept>> */
     private static array $cache = [];
 

@@ -1,6 +1,6 @@
 <?php
 
-// OpenRiC Workspace - the OpenRiC read API, Core Discovery profile 0.6.0 (spec 0.53.0).
+// OpenRiC Workspace - the OpenRiC read API, Core Discovery profile 0.7.0 (spec 0.54.0).
 // Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
 // SPDX-License-Identifier: AGPL-3.0-or-later
 //
@@ -27,7 +27,7 @@ use Illuminate\Support\Facades\DB;
 class DiscoveryController extends Controller
 {
     /** The profiles this service declares, with the versions it implements. */
-    public const PROFILES = [['id' => 'core-discovery', 'version' => '0.6.0', 'conformance' => 'full'], ['id' => 'export-only', 'version' => '0.9.0', 'conformance' => 'full']];
+    public const PROFILES = [['id' => 'core-discovery', 'version' => '0.7.0', 'conformance' => 'full'], ['id' => 'export-only', 'version' => '0.10.0', 'conformance' => 'full']];
 
     /** The list type of each list. */
     private const LISTS = ['records' => 'openricx:RecordList', 'agents' => 'openricx:AgentList', 'repositories' => 'openricx:RepositoryList'];
@@ -70,8 +70,7 @@ class DiscoveryController extends Controller
         $properties = array_map($label, $properties);
 
         return $this->json(['@context' => JsonLd::CONTEXT, '@type' => 'openric:Vocabulary', 'classes' => array_map($label, $classes),
-            // The profile calls the list "properties" (3.2) and the schema "predicates"; both are sent.
-            'properties' => $properties, 'predicates' => $properties]);
+            'properties' => $properties]);
     }
 
     public function records(Request $request): JsonResponse

@@ -27,10 +27,17 @@
       "description": "RiC-O classes this server emits (e.g. rico:Record, rico:Agent)."
     },
 
+    "properties": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/term" },
+      "description": "RiC-O and OpenRiC properties this server emits (Core Discovery 3.2)."
+    },
+
     "predicates": {
       "type": "array",
       "items": { "$ref": "#/$defs/term" },
-      "description": "RiC-O predicates this server emits (optional)."
+      "deprecated": true,
+      "description": "Former name of properties: deprecated since v0.54.0, accepted until v0.55.0."
     }
   },
 

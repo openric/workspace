@@ -22,7 +22,10 @@
         "description": "Short entity class — Place, Rule, Activity, Instantiation, Agent, Record, Repository, DigitalObject, Thing."
       },
       "slug": { "type": ["string", "null"] },
-      "culture": { "type": ["string", "null"] }
+      "culture": { "type": ["string", "null"] },
+      "@id": { "type": "string", "description": "The entity's IRI (Core Discovery 3.5)." },
+      "@type": { "type": ["string", "array"], "description": "The entity's RiC-O class, such as rico:Person." },
+      "score": { "type": "number", "description": "How well the entity matches; higher first." }
     },
     "additionalProperties": true
   }

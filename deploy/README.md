@@ -24,7 +24,17 @@ Every audit row is signed (ADR 0004). The key is `storage/keys/audit-signing.sk`
 
 ## Files outside the database
 
-Back these up with the database dumps, which do not contain them: the audit signing key (`storage/keys/`) and the institution logo (`storage/app/private/branding/`).
+Back these up with the database dumps, which do not contain them: the audit signing key (`storage/keys/`), the institution logo (`storage/app/private/branding/`), and the files of digital instantiations (`storage/app/objects/`, or `WORKSPACE_OBJECT_STORE` where set). A database restored without the files has instantiations whose files fail their fixity check; a restore is complete only when `php artisan workspace:fixity` reports no failure.
+
+## Fixity
+
+`php artisan workspace:fixity` rehashes every kept file and compares it with the SHA-256 recorded when it came in. A failure is recorded on the file, audited, shown on its instantiation's page, and makes the command exit with failure. Run it daily from cron as the owner of the live tree, for example in `/etc/cron.d/openric-workspace`:
+
+    15 2 * * * www-data /usr/bin/php /usr/share/nginx/openric-workspace-live/artisan workspace:fixity >> /usr/share/nginx/openric-workspace-live/storage/logs/fixity.log 2>&1
+
+## Uploads
+
+A file may be as large as `WORKSPACE_MAX_UPLOAD_MB` (60 MB unless set). nginx's `client_max_body_size` and PHP's `upload_max_filesize` and `post_max_size` must allow at least that. Every upload is scanned with `clamdscan`, which needs the ClamAV daemon running; set `WORKSPACE_VIRUS_SCANNER=` to keep files as not scanned where there is no scanner.
 
 ## When a deploy fails
 

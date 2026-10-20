@@ -14,6 +14,12 @@ trait Audited
     /** Columns whose change alone is not worth an audit row. */
     private static array $unaudited = ['updated_at', 'remember_token'];
 
+    /** Further columns of this model whose change alone is not worth an audit row. */
+    public function notAudited(): array
+    {
+        return [];
+    }
+
     public static function bootAudited(): void
     {
         static::created(function (Model $model) {
@@ -27,7 +33,7 @@ trait Audited
             if (! $model->isAudited()) {
                 return;
             }
-            $changed = array_diff_key($model->getChanges(), array_flip(self::$unaudited));
+            $changed = array_diff_key($model->getChanges(), array_flip([...self::$unaudited, ...$model->notAudited()]));
             if ($changed === []) {
                 return;
             }

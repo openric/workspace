@@ -14,6 +14,7 @@
 namespace App\Description;
 
 use App\Audit\AuditLog;
+use App\Models\Instantiation;
 use App\Models\Place;
 use App\Models\RecordResource;
 use App\Models\Relation;
@@ -39,7 +40,14 @@ class EntityDeletion
             default => [0, '', ''],
         };
 
-        return $count[0] > 0 ? ["It has {$count[0]} ".($count[0] === 1 ? $count[1] : $count[2]).'; move or delete '.($count[0] === 1 ? 'it' : 'them').' first.'] : [];
+        $blockers = $count[0] > 0 ? ["It has {$count[0]} ".($count[0] === 1 ? $count[1] : $count[2]).'; move or delete '.($count[0] === 1 ? 'it' : 'them').' first.'] : [];
+        // Its files would be kept but reach no one: the instantiations go first, each a decision of its own.
+        $carriers = $entity instanceof RecordResource ? Instantiation::where('record_resource_id', $entity->id)->whereNull('deleted_at')->count() : 0;
+        if ($carriers > 0) {
+            $blockers[] = "It has $carriers ".($carriers === 1 ? 'instantiation' : 'instantiations').'; delete '.($carriers === 1 ? 'it' : 'them').' first.';
+        }
+
+        return $blockers;
     }
 
     /** @return array{relations: int, evidence: int} what is removed with the entity */

@@ -1,6 +1,6 @@
 <?php
 
-// OpenRiC Workspace - OAI-PMH 2.0 harvesting of the published units of description (Export-Only 0.9.0).
+// OpenRiC Workspace - OAI-PMH 2.0 harvesting of the published units of description (Export-Only 0.10.0).
 // Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
 // SPDX-License-Identifier: AGPL-3.0-or-later
 //

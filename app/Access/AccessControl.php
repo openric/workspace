@@ -29,6 +29,7 @@ declare(strict_types=1);
 namespace App\Access;
 
 use App\Models\Concept;
+use App\Models\Instantiation;
 use App\Models\Institution;
 use App\Models\RecordResource;
 use App\Models\Repository;
@@ -161,6 +162,10 @@ final class AccessControl
     /** @return list<array{0: string, 1: ?string}> */
     private function scopes(?Model $subject): array
     {
+        // An instantiation is read and changed as its unit of description is.
+        if ($subject instanceof Instantiation) {
+            $subject = $subject->record;
+        }
         $scopes = [];
         if ($subject instanceof RecordResource) {
             for ($unit = $subject; $unit !== null; $unit = $unit->parent) {

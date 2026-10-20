@@ -1,6 +1,6 @@
 <?php
 
-// OpenRiC Workspace - the OpenRiC read API at /api/ric/v1: the Core Discovery (0.6.0) and Export-Only (0.9.0) profiles.
+// OpenRiC Workspace - the OpenRiC read API at /api/ric/v1: the Core Discovery (0.7.0) and Export-Only (0.10.0) profiles.
 // Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
 // SPDX-License-Identifier: AGPL-3.0-or-later
 

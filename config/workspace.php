@@ -8,14 +8,14 @@ return [
 
     // The OpenRiC specification release this build implements (ADR 0003, rule 1;
     // conformance/README.md). Raised only together with the conformance matrix.
-    'openric_spec_version' => '0.53.0',
+    'openric_spec_version' => '0.54.0',
 
     // Ed25519 key that signs every audit row (ADR 0004). Kept outside git and the
     // database, readable only by the application; back it up with the database.
     'audit_signing_key' => env('WORKSPACE_AUDIT_SIGNING_KEY', storage_path('keys/audit-signing.sk')),
 
     // The Workspace's own vocabularies, bundled with the code (resources/vocabularies).
-    'bundled_vocabularies' => ['account-role.ttl', 'permission.ttl', 'audit-action.ttl', 'description-element.ttl', 'language-value-state.ttl', 'description-status.ttl', 'description-detail.ttl', 'level-of-description.ttl', 'record-kind.ttl', 'date-property.ttl', 'date-qualifier.ttl', 'name-type.ttl', 'identifier-type.ttl', 'relation-type.ttl', 'relation-state.ttl', 'relation-certainty.ttl', 'assertion-origin.ttl', 'assertion-status.ttl', 'concept-scheme-kind.ttl', 'concept-match-type.ttl', 'agent-type.ttl'],
+    'bundled_vocabularies' => ['account-role.ttl', 'permission.ttl', 'audit-action.ttl', 'description-element.ttl', 'language-value-state.ttl', 'description-status.ttl', 'description-detail.ttl', 'level-of-description.ttl', 'record-kind.ttl', 'date-property.ttl', 'date-qualifier.ttl', 'name-type.ttl', 'identifier-type.ttl', 'relation-type.ttl', 'relation-state.ttl', 'relation-certainty.ttl', 'assertion-origin.ttl', 'assertion-status.ttl', 'concept-scheme-kind.ttl', 'concept-match-type.ttl', 'agent-type.ttl', 'carrier-type.ttl', 'file-use.ttl', 'file-availability.ttl'],
 
     // The shape of the permission matrix: for each kind of record (record-kind
     // vocabulary), the actions that apply to it (permission vocabulary), as
@@ -39,6 +39,7 @@ return [
         'relation' => ['beginning', 'end', 'relation'],
         'place' => ['existence', 'associated'],
         'activity' => ['associated', 'beginning', 'end'],
+        'instantiation' => ['creation', 'associated'],
     ],
 
     // Which kinds of entity each relation type (relation-type vocabulary) connects,
@@ -132,6 +133,7 @@ return [
         'activity-name' => 'authorised',
         'activity-parallel-name' => 'parallel',
         'activity-other-name' => 'other',
+        'instantiation-title' => 'authorised',
     ],
 
     // The roles a new institution starts with, by account-role template, with
@@ -166,4 +168,13 @@ return [
         'https://openric.org/vocab/rule-type.ttl',
     ],
 
+    // Digital files (WS-007). Uploads larger than this are refused; nginx and PHP must allow
+    // at least as much. The scanner is a ClamAV client run on every upload (clamdscan, which
+    // uses the running daemon); empty, files are kept as not scanned.
+    'max_upload_megabytes' => (int) env('WORKSPACE_MAX_UPLOAD_MB', 60),
+    'object_store' => env('WORKSPACE_OBJECT_STORE'),
+    'virus_scanner' => env('WORKSPACE_VIRUS_SCANNER', 'clamdscan'),
+
+    // The OAI-PMH adminEmail when no repository gives a contact email (Export-Only).
+    'oai_admin_email' => env('WORKSPACE_OAI_ADMIN_EMAIL'),
 ];

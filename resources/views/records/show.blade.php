@@ -21,6 +21,7 @@
     @include('description._view', ['subject' => $record, 'standard' => \App\Description\Elements::ISAD_G, 'drafts' => $drafts])
     @include('records._creators', ['relations' => $relations, 'drafts' => $drafts])
     @include('records._provenance', ['record' => $record, 'relations' => $relations])
+    @include('records._instantiations', ['record' => $record, 'canUpdate' => $canUpdate])
     <h2>Description control</h2>
     <p>Description identifier: {{ $record->description_identifier ?? 'none' }}. Status: {{ $record->descriptionStatus?->label(['en', 'und']) ?? 'not set' }}. Level of detail: {{ $record->descriptionDetail?->label(['en', 'und']) ?? 'not set' }}.</p>
     <h2>Cite as</h2>

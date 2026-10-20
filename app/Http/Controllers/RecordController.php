@@ -147,7 +147,8 @@ class RecordController extends Controller
         $this->own($request, $record);
         $user = $request->user();
         $record->load('descriptionValues.element.labels', 'descriptionValues.state.labels', 'names.nameType.labels', 'names.state.labels', 'names.dates.property', 'identifiers.identifierType.labels', 'level.labels', 'repository.descriptionValues.element', 'repository.names.nameType',
-            'children.descriptionValues.element', 'children.names.nameType', 'children.identifiers.identifierType', 'children.level.labels', 'dates.property.labels', 'dates.dateType.labels', 'dates.qualifier.labels');
+            'children.descriptionValues.element', 'children.names.nameType', 'children.identifiers.identifierType', 'children.level.labels', 'dates.property.labels', 'dates.dateType.labels', 'dates.qualifier.labels',
+            'instantiations.files.use', 'instantiations.names.nameType', 'instantiations.carrierType.labels', 'instantiations.availability.labels');
 
         $record->setRelation('children', $record->children->filter(fn ($child) => $user->may('read', 'description', $child))->values());
 

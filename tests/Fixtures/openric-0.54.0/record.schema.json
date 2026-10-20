@@ -203,11 +203,15 @@
     },
 
     "extent": {
+      "description": "A rico:RecordResourceExtent: the text on rico:textualValue, or a counted extent on rico:quantity with rico:hasUnitOfMeasurement (mapping 7.1). A literal on rico:hasExtentType, an object property in RiC-O 1.1, is deprecated since v0.54.0 and accepted until v0.55.0.",
       "type": "object",
-      "required": ["rico:hasExtentType"],
+      "anyOf": [{ "required": ["rico:textualValue"] }, { "required": ["rico:quantity"] }, { "required": ["rico:hasExtentType"] }],
       "properties": {
         "@type":           { "type": "string" },
-        "rico:hasExtentType": { "type": "string" }
+        "rico:textualValue": { "$ref": "#/$defs/langString" },
+        "rico:quantity":   { "type": ["number", "string"] },
+        "rico:hasUnitOfMeasurement": { "type": "object" },
+        "rico:hasExtentType": { "anyOf": [{ "$ref": "#/$defs/ref" }, { "type": "string", "deprecated": true }] }
       }
     },
 

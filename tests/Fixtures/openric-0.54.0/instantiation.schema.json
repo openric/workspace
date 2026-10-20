@@ -121,11 +121,14 @@
     },
 
     "extent": {
+      "description": "A rico:InstantiationExtent: rico:quantity with rico:hasUnitOfMeasurement to a rico:UnitOfMeasurement, or the text on rico:textualValue (Digital Object Linkage 3.1). A literal unit on rico:hasExtentType, an object property in RiC-O 1.1, is deprecated since v0.54.0 and accepted until v0.55.0.",
       "type": "object",
       "properties": {
         "@type":            { "type": "string" },
-        "rico:hasExtentType":  { "type": "string" },
-        "rico:quantity":    { "type": ["number", "string"] }
+        "rico:quantity":    { "type": ["number", "string"] },
+        "rico:hasUnitOfMeasurement": { "type": "object", "properties": { "@type": { "type": "string" }, "rico:name": { "type": "string" } } },
+        "rico:textualValue": { "type": ["string", "object"] },
+        "rico:hasExtentType":  { "anyOf": [{ "type": "object", "required": ["@id"] }, { "type": "string", "deprecated": true }] }
       }
     }
   }

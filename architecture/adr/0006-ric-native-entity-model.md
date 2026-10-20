@@ -106,4 +106,14 @@ The ISAD(G), ISAAR(CPF) and ISDIAH screens stay organised by their standards, bu
     - deletedRecord is no; deleted units are kept, so tombstones can follow.
   - **Per-record export** at `/api/ric/v1/records/{UUID}/export`: the record with its holder and creators described in full, as a JSON-LD `@graph`. Turtle and RDF/XML are made from it by an RDF library (EasyRdf with ml/json-ld), so all three carry one triple set.
   - **Shared visibility.** `App\Api\PublicCatalogue` decides what the public may find, for the read API and for OAI-PMH alike.
+- **v0.0.25, instantiations and digital files (WS-007; the V0.1 demonstration step 8).**
+  - **The entity.** An instantiation is a rico:Instantiation of a unit of description (rico:isOrWasInstantiationOf), with its own persistent IRI, a title (rico:title), values (description, production technique, physical characteristics, quality of representation, conditions of access, rights and conditions of use), dates and identifiers. It also has a carrier type: a rico:CarrierType concept, so the Workspace does not repeat the specification's known issue K-13. It is read and changed as its unit is, and the access layer gives it the unit's scopes.
+  - **Files.** A digital instantiation has at most one master, the file as received, and a reference copy and a thumbnail made from images and from a PDF's first page, without the master's embedded metadata. On upload the SHA-256 is taken and compared with one the uploader gives, the type is read from the content, and ClamAV scans the file. Each file is kept by its checksum outside the web root, and the database refuses any change to a file's content, place or use.
+  - **Delivery.** There is one rule, `InstantiationService::deliverable()`:
+    - each use needs its read permission on the unit (read-master, read-reference, read-thumbnail);
+    - an instantiation on request goes only to those who may update the unit, and a withdrawn one to nobody;
+    - files are sent with their type, nosniff, a sandboxing Content-Security-Policy, Cache-Control private and a SHA-256 Digest.
+  - **Fixity.** `workspace:fixity` rehashes every file, records and audits a failure, and exits with failure. A passing check is recorded but not audited.
+  - **Deletion.** A unit with instantiations cannot be deleted until they are.
+  - **Specification 0.54.0.** The Workspace is repinned to it and declares core-discovery 0.7.0 and export-only 0.10.0. Digital Object Linkage is not declared until its endpoints are served.
 - **Still to come for archival description:** physical storage, the DACS, RAD, DC and MODS templates, bulk edit, and links to digital objects and rights. Each comes with its work package in the estimate of 20 October.
