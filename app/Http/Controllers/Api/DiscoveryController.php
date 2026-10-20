@@ -14,33 +14,26 @@ namespace App\Http\Controllers\Api;
 
 use App\Api\JsonLd;
 use App\Api\Problem;
+use App\Api\PublicCatalogue;
+use App\Api\Rdf;
 use App\Exchange\ExportView;
 use App\Http\Controllers\Controller;
-use App\Models\Agent;
 use App\Models\Institution;
-use App\Models\Name;
-use App\Models\RecordResource;
-use App\Models\Repository;
-use App\Support\Vocab;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Collection;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 
 class DiscoveryController extends Controller
 {
     /** The profiles this service declares, with the versions it implements. */
-    public const PROFILES = [['id' => 'core-discovery', 'version' => '0.6.0', 'conformance' => 'full']];
+    public const PROFILES = [['id' => 'core-discovery', 'version' => '0.6.0', 'conformance' => 'full'], ['id' => 'export-only', 'version' => '0.9.0', 'conformance' => 'full']];
 
-    /** What each list holds: its model, the name type that names it, its list type, its own table. */
-    private const KINDS = [
-        'records' => [RecordResource::class, 'openricx:RecordList'],
-        'agents' => [Agent::class, 'openricx:AgentList'],
-        'repositories' => [Repository::class, 'openricx:RepositoryList'],
-    ];
+    /** The list type of each list. */
+    private const LISTS = ['records' => 'openricx:RecordList', 'agents' => 'openricx:AgentList', 'repositories' => 'openricx:RepositoryList'];
 
-    private const WITH = ['names.nameType', 'names.state', 'descriptionValues.element', 'descriptionValues.state', 'identifiers.identifierType', 'dates.property', 'dates.dateType'];
+    /** What a record needs loaded for its JSON-LD. */
+    public const RECORD_WITH = ['level.labels', 'repository.names.nameType', 'repository.names.state', 'parent.names.state', 'children.names.state'];
 
     public function service(Request $request): JsonResponse
     {
@@ -99,23 +92,59 @@ class DiscoveryController extends Controller
 
     public function record(Request $request, string $key): JsonResponse
     {
-        $unit = $this->find($request, 'records', $key, ['level.labels', 'repository.names.nameType', 'repository.names.state', 'parent.names.state', 'children.names.state']);
+        $unit = $this->catalogue($request)->find('records', $key, self::RECORD_WITH);
 
         return $unit ? $this->json($this->jsonLd($request)->record($unit)) : $this->missing($request, 'Record', $key);
     }
 
     public function agent(Request $request, string $key): JsonResponse
     {
-        $agent = $this->find($request, 'agents', $key, ['agentType.labels']);
+        $agent = $this->catalogue($request)->find('agents', $key, ['agentType.labels']);
 
         return $agent ? $this->json($this->jsonLd($request)->agent($agent)) : $this->missing($request, 'Agent', $key);
     }
 
     public function repository(Request $request, string $key): JsonResponse
     {
-        $repository = $this->find($request, 'repositories', $key, ['contactPoints']);
+        $repository = $this->catalogue($request)->find('repositories', $key, ['contactPoints']);
 
         return $repository ? $this->json($this->jsonLd($request)->repository($repository)) : $this->missing($request, 'Repository', $key);
+    }
+
+    /**
+     * One record with the authorities it reaches in one hop, as a download (Export-Only 2.4): JSON-LD with a @graph,
+     * or the same triples in Turtle or RDF/XML. ?format= wins over Accept.
+     */
+    public function export(Request $request, string $key): Response|JsonResponse
+    {
+        $format = match (mb_strtolower((string) $request->query('format', ''))) {
+            '' => null, 'jsonld', 'json-ld', 'json' => 'jsonld', 'ttl', 'turtle' => 'turtle', 'rdf', 'rdfxml', 'rdf+xml', 'xml' => 'rdfxml', default => false,
+        };
+        if ($format === false) {
+            return Problem::response($request, 400, 'format is jsonld, ttl or rdf.');
+        }
+        $accept = (string) $request->header('Accept', '');
+        $format ??= match (true) {
+            str_contains($accept, 'text/turtle') => 'turtle',
+            str_contains($accept, 'application/rdf+xml') => 'rdfxml',
+            $accept === '' || str_contains($accept, 'json') || str_contains($accept, '*/*') => 'jsonld',
+            default => null,
+        };
+        if ($format === null) {
+            return Problem::response($request, 406, 'This export is given as application/ld+json, text/turtle or application/rdf+xml.');
+        }
+        $unit = $this->catalogue($request)->find('records', $key, self::RECORD_WITH);
+        if ($unit === null) {
+            return $this->missing($request, 'Record', $key);
+        }
+        $dump = $this->jsonLd($request)->dump($unit);
+        [$body, $type, $extension] = match ($format) {
+            'jsonld' => [json_encode($dump, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT), 'application/ld+json', 'jsonld'],
+            'turtle' => [Rdf::serialise($dump, 'turtle'), 'text/turtle; charset=utf-8', 'ttl'],
+            'rdfxml' => [Rdf::serialise($dump, 'rdfxml'), 'application/rdf+xml; charset=utf-8', 'rdf'],
+        };
+
+        return response($body, 200, ['Content-Type' => $type, 'Content-Disposition' => 'attachment; filename="'.$unit->id.'-ric.'.$extension.'"']);
     }
 
     /** Names that start with the query, of records, agents and repositories: id, label and type (autocomplete.schema.json). */
@@ -139,7 +168,7 @@ class DiscoveryController extends Controller
             if (! in_array($type, $types, true)) {
                 continue;
             }
-            foreach ($this->visible($request, $kind, $query, true)->take($limit) as $entity) {
+            foreach ($this->catalogue($request)->visible($kind, $query, true)->take($limit) as $entity) {
                 $label = (string) $this->view($request)->label($entity);
                 $items[] = ['id' => $entity->iri, '@id' => $entity->iri, 'label' => $label, 'type' => ucfirst($type), '@type' => $this->jsonLd($request)->type($entity),
                     'score' => round(mb_strlen($query) / max(mb_strlen($label), 1), 2)];
@@ -158,47 +187,12 @@ class DiscoveryController extends Controller
         if ($page === null || $limit === null) {
             return Problem::response($request, 400, 'page is a whole number from 1, and limit one from 1 to 200.');
         }
-        $all = $this->visible($request, $kind, trim((string) $request->query('q', '')));
+        $all = $this->catalogue($request)->visible($kind, trim((string) $request->query('q', '')));
         $link = fn (int $to) => $request->url().'?'.http_build_query([...$request->query(), 'page' => $to, 'limit' => $limit]);
 
-        return $this->json(['@context' => JsonLd::CONTEXT, '@type' => self::KINDS[$kind][1], 'openric:total' => $all->count(), 'openric:page' => $page,
+        return $this->json(['@context' => JsonLd::CONTEXT, '@type' => self::LISTS[$kind], 'openric:total' => $all->count(), 'openric:page' => $page,
             'openric:limit' => $limit, 'openric:next' => $page * $limit < $all->count() ? $link($page + 1) : null, 'openric:prev' => $page > 1 ? $link($page - 1) : null,
             'openric:items' => $all->slice(($page - 1) * $limit, $limit)->map($item)->values()->all()]);
-    }
-
-    /**
-     * Every entity of a kind the public may read, in name order; with a query, those whose name or identifier contains it
-     * (or, for autocomplete, whose name starts with it).
-     * ponytail: visibility is decided entity by entity in PHP; past some tens of thousands of entities it wants deciding in SQL.
-     */
-    private function visible(Request $request, string $kind, string $query = '', bool $prefix = false): Collection
-    {
-        [$class] = self::KINDS[$kind];
-        $table = (new $class)->getTable();
-        $like = ($prefix ? '' : '%').addcslashes($query, '%_\\').'%';
-        $published = Name::where('subject_table', $table)->whereHas('state', fn ($q) => $q->where('iri', Vocab::valueState('published')))
-            ->whereHas('nameType', fn ($q) => $q->where('iri', Vocab::NAME_TYPES.'authorised'));
-        $view = $this->view($request);
-
-        return $class::where('institution_id', $this->institution($request)->id)->whereNull('deleted_at')
-            ->whereIn('id', (clone $published)->select('subject_id'))
-            ->when($query !== '', fn (Builder $q) => $q->where(fn ($q) => $q
-                ->whereIn('id', (clone $published)->where('value', 'ilike', $like)->select('subject_id'))
-                ->when(! $prefix, fn ($q) => $q->orWhereIn('id', DB::table('identifiers')->where('subject_table', $table)->where('value', 'ilike', $like)->select('subject_id')))))
-            ->with(self::WITH)->get()
-            ->filter(fn ($entity) => $view->readable($entity))
-            ->sortBy(fn ($entity) => mb_strtolower((string) $view->label($entity)))->values();
-    }
-
-    private function find(Request $request, string $kind, string $key, array $with): mixed
-    {
-        if (! preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/', $key)) {
-            return null;
-        }
-        [$class] = self::KINDS[$kind];
-        $entity = $class::where('institution_id', $this->institution($request)->id)->whereNull('deleted_at')->with([...self::WITH, ...$with])->find($key);
-
-        return $entity && $this->view($request)->readable($entity) ? $entity : null;
     }
 
     private function missing(Request $request, string $what, string $key): JsonResponse
@@ -222,9 +216,14 @@ class DiscoveryController extends Controller
         return $request->attributes->get('institution');
     }
 
+    private function catalogue(Request $request): PublicCatalogue
+    {
+        return $request->attributes->get('catalogue') ?? tap(new PublicCatalogue($this->institution($request)), fn ($c) => $request->attributes->set('catalogue', $c));
+    }
+
     private function view(Request $request): ExportView
     {
-        return $request->attributes->get('view') ?? tap(new ExportView(null, false, null, $this->institution($request)), fn ($v) => $request->attributes->set('view', $v));
+        return $this->catalogue($request)->view;
     }
 
     private function jsonLd(Request $request): JsonLd

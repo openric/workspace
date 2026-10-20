@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- OpenRiC Workspace - validates an OAI-PMH response with every metadata format the Workspace gives, strictly (tests/Feature/OaiTest). -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:import namespace="http://www.openarchives.org/OAI/2.0/" schemaLocation="../../../resources/schemas/OAI-PMH.xsd"/>
+  <xs:import namespace="http://www.openarchives.org/OAI/2.0/oai_dc/" schemaLocation="../../../resources/schemas/oai_dc.xsd"/>
+  <xs:import namespace="http://www.openarchives.org/OAI/2.0/oai-identifier" schemaLocation="../../../resources/schemas/oai-identifier.xsd"/>
+  <xs:import namespace="https://www.ica.org/standards/RiC/ontology#" schemaLocation="rico-ld-wrapper.xsd"/>
+</xs:schema>

@@ -154,6 +154,24 @@ class JsonLd
         return $out;
     }
 
+    /**
+     * A record with the authorities it reaches in one hop, each described in full (Export-Only 3.2): the record first,
+     * then its holding repository and its creators.
+     */
+    public function dump(RecordResource $unit): array
+    {
+        $graph = [$this->record($unit, false)];
+        if ($unit->repository && $this->view->readable($unit->repository)) {
+            $graph[] = $this->repository($unit->repository->load('names.nameType', 'names.state', 'descriptionValues.element', 'descriptionValues.state', 'identifiers.identifierType', 'contactPoints'), false);
+        }
+        foreach ($this->view->creators($unit) as $relation) {
+            $other = $relation->other->load('names.nameType', 'names.state', 'descriptionValues.element', 'descriptionValues.state', 'identifiers.identifierType', 'dates.property', 'dates.dateType');
+            $graph[] = $other instanceof Agent ? $this->agent($other, false) : $this->repository($other->load('contactPoints'), false);
+        }
+
+        return ['@context' => self::CONTEXT, '@graph' => collect($graph)->unique('@id')->values()->all()];
+    }
+
     /** A reference to an entity described elsewhere: its IRI, class and published name. */
     public function stub(Model $entity): array
     {

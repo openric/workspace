@@ -13,9 +13,9 @@ final class Problem
 {
     /** The registered OpenRiC error types by HTTP status; any other status takes one under the Workspace's own prefix. */
     private const TYPES = [400 => 'bad-request', 401 => 'authentication-required', 403 => 'forbidden', 404 => 'not-found', 409 => 'conflict',
-        413 => 'payload-too-large', 415 => 'unsupported-media-type', 422 => 'validation-failed', 500 => 'internal-error'];
+        406 => 'not-acceptable', 413 => 'payload-too-large', 415 => 'unsupported-media-type', 422 => 'validation-failed', 500 => 'internal-error'];
 
-    private const TITLES = [400 => 'Bad Request', 401 => 'Authentication Required', 403 => 'Forbidden', 404 => 'Not Found', 405 => 'Method Not Allowed',
+    private const TITLES = [400 => 'Bad Request', 401 => 'Authentication Required', 403 => 'Forbidden', 404 => 'Not Found', 405 => 'Method Not Allowed', 406 => 'Not Acceptable',
         409 => 'Conflict', 413 => 'Payload Too Large', 415 => 'Unsupported Media Type', 422 => 'Validation Failed', 429 => 'Too Many Requests', 500 => 'Internal Error'];
 
     public static function response(Request $request, int $status, string $detail, array $headers = []): JsonResponse

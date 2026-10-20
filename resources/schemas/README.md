@@ -11,5 +11,7 @@ Copies of the published XML schemas that the export formats are checked against 
 | oai_dc.xsd | OAI-PMH Dublin Core container | https://www.openarchives.org/OAI/2.0/oai_dc.xsd |
 | simpledc20021212.xsd | Simple Dublin Core elements (DCMI) | https://dublincore.org/schemas/xmls/simpledc20021212.xsd |
 | xml.xsd | The xml: namespace (W3C) | https://www.w3.org/2001/xml.xsd |
+| OAI-PMH.xsd | OAI-PMH 2.0 protocol responses | https://www.openarchives.org/OAI/2.0/OAI-PMH.xsd |
+| oai-identifier.xsd | OAI-PMH 2.0 oai-identifier description | https://www.openarchives.org/OAI/2.0/oai-identifier.xsd |
 
 Each schema remains under its publisher's terms. They are bundled unchanged except for the import locations.

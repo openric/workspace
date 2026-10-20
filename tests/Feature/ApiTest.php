@@ -101,7 +101,8 @@ class ApiTest extends TestCase
     public function test_the_service_description_health_and_vocabulary(): void
     {
         $service = $this->valid($this->get(self::API.'/')->assertOk()->assertHeader('Vary', 'Accept')->assertHeader('Access-Control-Allow-Origin', '*'), 'service-description');
-        $this->assertSame(['spec_version' => '0.53.0', 'profiles' => [['id' => 'core-discovery', 'version' => '0.6.0', 'conformance' => 'full']]], $service['openric_conformance']);
+        $this->assertSame(['spec_version' => '0.53.0', 'profiles' => [['id' => 'core-discovery', 'version' => '0.6.0', 'conformance' => 'full'],
+            ['id' => 'export-only', 'version' => '0.9.0', 'conformance' => 'full']]], $service['openric_conformance']);
         $this->assertSame(trim(file_get_contents(base_path('VERSION'))), $service['version']);
         $this->get(self::API.'/health')->assertOk()->assertExactJson(['status' => 'ok']);
         $vocabulary = $this->valid($this->get(self::API.'/vocabulary')->assertOk(), 'vocabulary');

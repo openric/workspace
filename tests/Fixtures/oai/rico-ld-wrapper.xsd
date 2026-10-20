@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- OpenRiC Workspace - the rico_ld wrapper of the OpenRiC reference service: rico:Record holding openricx:jsonld, whose text is the JSON-LD. -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:openricx="https://openric.org/ns/ext/v1#"
+           targetNamespace="https://www.ica.org/standards/RiC/ontology#" elementFormDefault="qualified">
+  <xs:import namespace="https://openric.org/ns/ext/v1#" schemaLocation="openricx-jsonld.xsd"/>
+  <xs:element name="Record">
+    <xs:complexType><xs:sequence><xs:element ref="openricx:jsonld"/></xs:sequence></xs:complexType>
+  </xs:element>
+</xs:schema>

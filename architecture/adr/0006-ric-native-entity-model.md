@@ -97,4 +97,13 @@ The ISAD(G), ISAAR(CPF) and ISDIAH screens stay organised by their standards, bu
   - **Checked.** The tests validate every response against the specification's JSON Schemas and check every rico: and openricx: term against RiC-O 1.1 and extension ontology 1.4.0. On a rehearsal of live, the conformance probe passed 11 of 11, and the output conformed to the Core Discovery and main SHACL shapes.
   - **Mapping alignment.** Three element notes now follow the specification's mapping: extent (rico:hasExtent), the archivist's note (openricx:descriptiveNote) and the publication note (openricx:publicationInformation).
   - **Departures.** Where the profile, schemas and probe disagree, conformance/README.md records how the Workspace answers.
+- **v0.0.24, harvesting and RiC-O export (Export-Only 0.9.0, WS-010).**
+  - **OAI-PMH 2.0** at `/api/ric/v1/oai`: all six verbs, by GET or POST, with the protocol's own error envelope.
+    - Records come as `oai_dc` or `rico_ld`, the RiC-O JSON-LD in CDATA inside the reference service's wrapper.
+    - A record's datestamp is the latest change to it or its parts, so publishing a value is harvested again.
+    - Sets are hierarchical: `records`, and `records:{UUID}` for each fonds.
+    - Lists come 100 at a time with a resumption token.
+    - deletedRecord is no; deleted units are kept, so tombstones can follow.
+  - **Per-record export** at `/api/ric/v1/records/{UUID}/export`: the record with its holder and creators described in full, as a JSON-LD `@graph`. Turtle and RDF/XML are made from it by an RDF library (EasyRdf with ml/json-ld), so all three carry one triple set.
+  - **Shared visibility.** `App\Api\PublicCatalogue` decides what the public may find, for the read API and for OAI-PMH alike.
 - **Still to come for archival description:** physical storage, the DACS, RAD, DC and MODS templates, bulk edit, and links to digital objects and rights. Each comes with its work package in the estimate of 20 October.

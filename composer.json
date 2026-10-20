@@ -15,6 +15,7 @@
         "php": "^8.3",
         "laravel/framework": "^13.17",
         "laravel/tinker": "^3.0",
+        "ml/json-ld": "^1.2",
         "sweetrdf/easyrdf": "^1.19"
     },
     "require-dev": {
