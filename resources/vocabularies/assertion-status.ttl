@@ -1,0 +1,37 @@
+# OpenRiC Workspace - OpenRiC Workspace Assertion Statuses.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# The review status of an assertion (ADR 0006, WS-006). A proposed assertion is not authoritative until a person accepts it.
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/assertion-status/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Assertion Statuses"@en ;
+    dcterms:description "Where an assertion stands in review."@en ;
+    dcterms:issued "2026-10-20"^^xsd:date ;
+    skos:hasTopConcept v:proposed, v:accepted, v:rejected .
+
+v:proposed a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Proposed"@en ;
+    skos:scopeNote "Not authoritative."@en ;
+    skos:definition "Awaiting review by a person."@en .
+
+v:accepted a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Accepted"@en ;
+    skos:scopeNote "Authoritative."@en ;
+    skos:definition "Asserted, or confirmed by a person."@en .
+
+v:rejected a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Rejected"@en ;
+    skos:scopeNote "Kept, never deleted, so the history shows it."@en ;
+    skos:definition "Refused, or asserted not to hold, by a person."@en .

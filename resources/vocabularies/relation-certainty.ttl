@@ -1,0 +1,37 @@
+# OpenRiC Workspace - OpenRiC Workspace Relation Certainty.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# How certain the accuracy of a relation is (rico:relationCertainty).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/relation-certainty/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Relation Certainty"@en ;
+    dcterms:description "The level of certitude of a relation."@en ;
+    dcterms:issued "2026-10-20"^^xsd:date ;
+    skos:hasTopConcept v:certain, v:probable, v:possible .
+
+v:certain a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Certain"@en ;
+    skos:scopeNote "Exported as rico:relationCertainty."@en ;
+    skos:definition "The relation is established."@en .
+
+v:probable a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Probable"@en ;
+    skos:scopeNote "Exported as rico:relationCertainty."@en ;
+    skos:definition "The relation is likely but not established."@en .
+
+v:possible a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Possible"@en ;
+    skos:scopeNote "Exported as rico:relationCertainty."@en ;
+    skos:definition "The relation may hold; the evidence is weak."@en .

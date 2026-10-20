@@ -1,0 +1,37 @@
+# OpenRiC Workspace - OpenRiC Workspace Assertion Origins.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Who or what asserted a relation (ADR 0006, WS-006). An assertion by an import or a model exports with the Inferred-Provenance markers (extension ontology 1.4.0).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/assertion-origin/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Assertion Origins"@en ;
+    dcterms:description "Where an assertion came from."@en ;
+    dcterms:issued "2026-10-20"^^xsd:date ;
+    skos:hasTopConcept v:account, v:import, v:model .
+
+v:account a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Account"@en ;
+    skos:scopeNote "Asserted fact."@en ;
+    skos:definition "A person, signed in with an account."@en .
+
+v:import a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Import"@en ;
+    skos:scopeNote "Exported with openricx: assertion provenance markers."@en ;
+    skos:definition "An import from another system."@en .
+
+v:model a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Model"@en ;
+    skos:scopeNote "Exported as inferred (Inferred-Provenance profile)."@en ;
+    skos:definition "A machine model, such as a suggestion service."@en .

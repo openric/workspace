@@ -18,6 +18,7 @@ use App\Description\RepositoryService;
 use App\Models\Concept;
 use App\Models\ContactPoint;
 use App\Models\Repository;
+use App\Relations\RelationService;
 use App\Support\Vocab;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -71,7 +72,7 @@ class RepositoryController extends Controller
         $repository->load('descriptionValues.element.labels', 'descriptionValues.state.labels', 'names.nameType.labels', 'names.state.labels', 'names.dates.property', 'identifiers.identifierType.labels', 'contactPoints', 'descriptionStatus.labels', 'descriptionDetail.labels',
             'dates.property.labels', 'dates.dateType.labels', 'dates.qualifier.labels');
 
-        return view('repositories.show', ['repository' => $repository, 'elements' => $this->elements(), 'dateChoices' => app(DateService::class)->choices('repository')]);
+        return view('repositories.show', ['repository' => $repository, 'elements' => $this->elements(), 'dateChoices' => app(DateService::class)->choices('repository'), 'relations' => app(RelationService::class)->of($repository)]);
     }
 
     public function edit(Request $request, Repository $repository): View

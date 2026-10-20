@@ -17,6 +17,7 @@ use App\Description\RecordService;
 use App\Models\Concept;
 use App\Models\RecordResource;
 use App\Models\Repository;
+use App\Relations\RelationService;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -80,7 +81,7 @@ class RecordController extends Controller
 
         $record->setRelation('children', $record->children->filter(fn ($child) => $user->may('read', 'description', $child))->values());
 
-        return view('records.show', ['record' => $record, 'elements' => Elements::of(Elements::ISAD_G), 'dateChoices' => app(DateService::class)->choices('description'),
+        return view('records.show', ['record' => $record, 'elements' => Elements::of(Elements::ISAD_G), 'dateChoices' => app(DateService::class)->choices('description'), 'relations' => app(RelationService::class)->of($record),
             'drafts' => $user->may('view-draft', 'description', $record), 'canUpdate' => $user->may('update', 'description', $record),
             'canCreateInside' => $user->may('create', 'description', $record)]);
     }

@@ -15,7 +15,7 @@ return [
     'audit_signing_key' => env('WORKSPACE_AUDIT_SIGNING_KEY', storage_path('keys/audit-signing.sk')),
 
     // The Workspace's own vocabularies, bundled with the code (resources/vocabularies).
-    'bundled_vocabularies' => ['account-role.ttl', 'permission.ttl', 'audit-action.ttl', 'description-element.ttl', 'language-value-state.ttl', 'description-status.ttl', 'description-detail.ttl', 'level-of-description.ttl', 'record-kind.ttl', 'date-property.ttl', 'date-qualifier.ttl', 'name-type.ttl', 'identifier-type.ttl'],
+    'bundled_vocabularies' => ['account-role.ttl', 'permission.ttl', 'audit-action.ttl', 'description-element.ttl', 'language-value-state.ttl', 'description-status.ttl', 'description-detail.ttl', 'level-of-description.ttl', 'record-kind.ttl', 'date-property.ttl', 'date-qualifier.ttl', 'name-type.ttl', 'identifier-type.ttl', 'relation-type.ttl', 'relation-state.ttl', 'relation-certainty.ttl', 'assertion-origin.ttl', 'assertion-status.ttl'],
 
     // The shape of the permission matrix: for each kind of record (record-kind
     // vocabulary), the actions that apply to it (permission vocabulary), as
@@ -34,6 +34,31 @@ return [
         'agent' => ['existence', 'birth', 'death', 'associated'],
         'repository' => ['existence', 'associated'],
         'name' => ['used-from', 'used-to'],
+        'relation' => ['beginning', 'end', 'relation'],
+    ],
+
+    // Which kinds of entity each relation type (relation-type vocabulary) connects,
+    // as [source kind, target kind] pairs; "agent" stands for every kind of agent
+    // (relation_kind_groups). symmetric: the order of the two carries no meaning.
+    // role: the relation may carry an agent role (OpenRiC role-type vocabulary).
+    // forward and inverse: how the relation reads from its source and from its
+    // target, on screen.
+    'relation_kind_groups' => [
+        'agent' => ['repository'],
+    ],
+    'relation_types' => [
+        'associated-record' => ['pairs' => [['record', 'record']], 'symmetric' => true, 'forward' => 'is associated with', 'inverse' => 'is associated with'],
+        'genetic' => ['pairs' => [['record', 'record']], 'symmetric' => true, 'forward' => 'has a genetic link to', 'inverse' => 'has a genetic link to'],
+        'sequential' => ['pairs' => [['record', 'record'], ['agent', 'agent']], 'forward' => 'precedes or preceded', 'inverse' => 'follows or followed'],
+        'holding' => ['pairs' => [['agent', 'record']], 'role' => true, 'forward' => 'holds or held', 'inverse' => 'is or was held by'],
+        'creation' => ['pairs' => [['record', 'agent']], 'role' => true, 'forward' => 'was created by', 'inverse' => 'created'],
+        'accumulation' => ['pairs' => [['record', 'agent']], 'role' => true, 'forward' => 'was accumulated by', 'inverse' => 'accumulated'],
+        'management' => ['pairs' => [['agent', 'record']], 'role' => true, 'forward' => 'manages or managed', 'inverse' => 'is or was managed by'],
+        'ownership' => ['pairs' => [['agent', 'record']], 'role' => true, 'forward' => 'owns or owned', 'inverse' => 'is or was owned by'],
+        'agent-hierarchical' => ['pairs' => [['agent', 'agent']], 'forward' => 'has or had as a subordinate', 'inverse' => 'is or was subordinate to'],
+        'agent-temporal' => ['pairs' => [['agent', 'agent']], 'forward' => 'was succeeded by', 'inverse' => 'succeeded'],
+        'agent-control' => ['pairs' => [['agent', 'agent']], 'forward' => 'controls or controlled', 'inverse' => 'is or was controlled by'],
+        'agent-associated' => ['pairs' => [['agent', 'agent']], 'symmetric' => true, 'forward' => 'is or was associated with', 'inverse' => 'is or was associated with'],
     ],
 
     // Description elements that are names (ADR 0006): what the description form

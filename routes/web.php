@@ -15,6 +15,7 @@ use App\Http\Controllers\IdentifierController;
 use App\Http\Controllers\NameController;
 use App\Http\Controllers\PasswordController;
 use App\Http\Controllers\RecordController;
+use App\Http\Controllers\RelationController;
 use App\Http\Controllers\RepositoryController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SessionController;
@@ -95,6 +96,20 @@ Route::middleware(['auth', 'active'])->group(function () {
                 Route::post("/{{$parameter}}/remove", [$controller, 'destroy'])->name('destroy');
             });
     }
+
+    // Relations of any described entity, their assertions and evidence (ADR 0006, WS-006).
+    Route::prefix('{kind}/{id}/relations')->where(['kind' => 'records|repositories', 'id' => '[0-9a-f-]{36}', 'relation' => '[0-9a-f-]{36}',
+        'assertion' => '[0-9a-f-]{36}', 'evidence' => '[0-9a-f-]{36}'])->name('relations.')->group(function () {
+            Route::get('/new', [RelationController::class, 'create'])->name('create');
+            Route::post('/', [RelationController::class, 'store'])->name('store');
+            Route::post('/{relation}', [RelationController::class, 'update'])->name('update');
+            Route::post('/{relation}/remove', [RelationController::class, 'destroy'])->name('destroy');
+            Route::post('/{relation}/assertions', [RelationController::class, 'assert'])->name('assert');
+            Route::post('/{relation}/assertions/{assertion}/review', [RelationController::class, 'review'])->name('review');
+            Route::get('/{relation}/evidence', [RelationController::class, 'evidenceForm'])->name('evidence');
+            Route::post('/{relation}/evidence', [RelationController::class, 'addEvidence'])->name('evidence.store');
+            Route::post('/{relation}/evidence/{evidence}/remove', [RelationController::class, 'removeEvidence'])->name('evidence.destroy');
+        });
 
     Route::middleware('can:'.Vocab::permission('manage-roles'))->group(function () {
         Route::get('/roles', [RoleController::class, 'index'])->name('roles.index');

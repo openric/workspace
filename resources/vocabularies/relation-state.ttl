@@ -1,0 +1,44 @@
+# OpenRiC Workspace - OpenRiC Workspace Relation States.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# The state of a relation (rico:relationState).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/relation-state/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Relation States"@en ;
+    dcterms:description "Whether a relation holds now."@en ;
+    dcterms:issued "2026-10-20"^^xsd:date ;
+    skos:hasTopConcept v:present, v:past, v:ongoing, v:unknown .
+
+v:present a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Present"@en ;
+    skos:scopeNote "Exported as rico:relationState."@en ;
+    skos:definition "The relation holds now."@en .
+
+v:past a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Past"@en ;
+    skos:scopeNote "Exported as rico:relationState."@en ;
+    skos:definition "The relation held before and no longer does."@en .
+
+v:ongoing a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Ongoing"@en ;
+    skos:scopeNote "Exported as rico:relationState."@en ;
+    skos:definition "The relation began and continues."@en .
+
+v:unknown a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Unknown"@en ;
+    skos:scopeNote "Exported as rico:relationState."@en ;
+    skos:definition "Whether the relation holds now is not known."@en .

@@ -26,3 +26,11 @@ Every term below is defined in RiC-O 1.1 unless it says otherwise; a gap goes to
 ## Consequences
 
 The ISAD(G), ISAAR(CPF) and ISDIAH screens stay organised by their standards, but what they write is RiC: a field such as "dates of existence" writes `rico:Date` entities and the relation that connects them. Export to OpenRiC JSON-LD becomes a direct reading of the store. The cost is more tables and more joins than AtoM's flat model, and a migration of the v0.0.7 record dates.
+
+## Implementation notes
+
+- **v0.0.10, dates.** One `dates` table for every entity; the date-property vocabulary names the RiC-O property of each link; the normalised value is EDTF, with its earliest and latest day derived for sorting.
+- **v0.0.11, names and identifiers.** Name elements of the ISAD(G) and ISDIAH forms (`config workspace.name_elements`) write `rico:Name` entities; the name type waits on openric/spec#64. One authorised name per language and one local identifier per entity are enforced in the database.
+- **v0.0.12, relations and assertions.** Relation types are checked against the RiC-O 1.1 ontology file: each concept names its Relation subclass, `_role` property and shortcut. `config workspace.relation_types` says which kinds each connects, as source and target pairs, in the direction of the shortcut, whichever page the relation is made from. A person's assertion is accepted as made; an import's or a model's is proposed until a person reviews it. A relation's standing is derived from its current assertions: accepted, disputed, proposed or rejected. Assertions are never edited, only superseded.
+- **Kept as columns, exported as relations.** The arrangement of units (`parent_id`, exported as `rico:hasOrHadPart`) and the current holding repository (`repository_id`, `rico:hasOrHadHolder`) stay columns: the cycle and ordering guards depend on them. Former holders and other custody are relations.
+- **Context.** `rico:relationHasContext` is stored and checked in the database. It has no screen until activities exist, because an activity is what a context usually is.

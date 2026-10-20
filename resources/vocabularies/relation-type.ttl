@@ -1,0 +1,100 @@
+# OpenRiC Workspace - OpenRiC Workspace Relation Types.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# The type of a reified relation between two entities (ADR 0006): each concept names the RiC-O 1.1 Relation subclass and its shortcut properties. Which kinds of entity each type connects is set in config workspace.relation_types.
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/relation-type/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Relation Types"@en ;
+    dcterms:description "What kind of relation connects two entities."@en ;
+    dcterms:issued "2026-10-20"^^xsd:date ;
+    skos:hasTopConcept v:associated-record, v:genetic, v:sequential, v:holding, v:creation, v:accumulation, v:management, v:ownership, v:agent-hierarchical, v:agent-temporal, v:agent-control, v:agent-associated .
+
+v:associated-record a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Associated record resources"@en ;
+    skos:scopeNote "Exported as a rico:RecordResourceToRecordResourceRelation, linked by rico:recordResourceToRecordResourceRelation_role; shortcut rico:isRecordResourceAssociatedWithRecordResource (symmetric). ISAD(G) 3.5.3."@en ;
+    skos:definition "Two record resources that are related, such as related units of description."@en .
+
+v:genetic a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Genetic link"@en ;
+    skos:scopeNote "Exported as a rico:RecordResourceGeneticRelation, linked by rico:recordResourceGeneticRelation_role; shortcut rico:hasGeneticLinkToRecordResource (symmetric)."@en ;
+    skos:definition "Two record resources linked by the way one was developed from the other, such as a draft and its final version."@en .
+
+v:sequential a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Sequence"@en ;
+    skos:scopeNote "Exported as a rico:SequentialRelation, linked by rico:sequentialRelation_role; shortcut rico:precedesOrPreceded, inverse rico:followsOrFollowed."@en ;
+    skos:definition "One thing precedes or preceded another in a sequence."@en .
+
+v:holding a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Holding"@en ;
+    skos:scopeNote "Exported as a rico:RecordResourceHoldingRelation, linked by rico:recordResourceHoldingRelation_role; shortcut rico:isOrWasHolderOf, inverse rico:hasOrHadHolder. ISAD(G) 3.2.3, ISDIAH 5.3.7."@en ;
+    skos:definition "An agent holds or held a record resource."@en .
+
+v:creation a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Creation"@en ;
+    skos:scopeNote "Exported as a rico:CreationRelation, linked by rico:creationRelation_role; shortcut rico:hasCreator, inverse rico:isCreatorOf. Role: rico:creationWithRole. ISAD(G) 3.2.1."@en ;
+    skos:definition "An agent created a record resource, in a role."@en .
+
+v:accumulation a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Accumulation"@en ;
+    skos:scopeNote "Exported as a rico:AccumulationRelation, linked by rico:accumulationRelation_role; shortcut rico:hasAccumulator, inverse rico:isAccumulatorOf. ISAD(G) 3.2.1."@en ;
+    skos:definition "An agent accumulated a record resource."@en .
+
+v:management a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Management"@en ;
+    skos:scopeNote "Exported as a rico:ManagementRelation, linked by rico:managementRelation_role; shortcut rico:isOrWasManagerOf, inverse rico:hasOrHadManager."@en ;
+    skos:definition "An agent manages or managed a record resource."@en .
+
+v:ownership a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Ownership"@en ;
+    skos:scopeNote "Exported as a rico:OwnershipRelation, linked by rico:ownershipRelation_role; shortcut rico:isOrWasOwnerOf, inverse rico:hasOrHadOwner."@en ;
+    skos:definition "An agent owns or owned a thing."@en .
+
+v:agent-hierarchical a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Hierarchical (agents)"@en ;
+    skos:scopeNote "Exported as a rico:AgentHierarchicalRelation, linked by rico:agentHierarchicalRelation_role; shortcut rico:hasOrHadSubordinate, inverse rico:isOrWasSubordinateTo. ISAAR(CPF) 5.3.2."@en ;
+    skos:definition "One agent is or was subordinate to another."@en .
+
+v:agent-temporal a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Succession (agents)"@en ;
+    skos:scopeNote "Exported as a rico:AgentTemporalRelation, linked by rico:agentTemporalRelation_role; shortcut rico:hasSuccessor, inverse rico:isSuccessorOf. ISAAR(CPF) 5.3.2."@en ;
+    skos:definition "One agent succeeded another."@en .
+
+v:agent-control a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Control (agents)"@en ;
+    skos:scopeNote "Exported as a rico:AgentControlRelation, linked by rico:agentControlRelation_role; shortcut rico:isOrWasControllerOf, inverse rico:hasOrHadController."@en ;
+    skos:definition "One agent controls or controlled another."@en .
+
+v:agent-associated a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Associated agents"@en ;
+    skos:scopeNote "Exported as a rico:AgentToAgentRelation, linked by rico:agentToAgentRelation_role; shortcut rico:isAgentAssociatedWithAgent (symmetric). ISAAR(CPF) 5.3.2."@en ;
+    skos:definition "Two agents that are or were associated."@en .

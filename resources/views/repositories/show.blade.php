@@ -15,6 +15,7 @@
 
     @include('description._names', ['subject' => $repository, 'kind' => 'repositories', 'canUpdate' => $canUpdate])
     @include('description._identifiers', ['subject' => $repository, 'kind' => 'repositories', 'canUpdate' => $canUpdate])
+    @include('description._relations', ['subject' => $repository, 'kind' => 'repositories', 'relations' => $relations, 'canUpdate' => $canUpdate])
     @include('description._dates', ['subject' => $repository, 'kind' => 'repositories', 'heading' => 'Dates', 'canUpdate' => $canUpdate, 'choices' => $dateChoices])
 
     <h2>Contact points</h2>
