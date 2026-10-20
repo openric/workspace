@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openric.org/schemas/relations-for.schema.json",
+  "title": "OpenRiC relations-for response",
+  "description": "Response shape for GET /api/ric/v1/relations-for/{entity-id}. Relations from the entity's point of view — grouped by direction.",
+  "type": "object",
+  "required": ["entity_id", "outgoing", "incoming", "total"],
+  "properties": {
+    "entity_id": {
+      "type": "integer",
+      "description": "The entity the relations are listed from."
+    },
+    "outgoing": {
+      "type": "array",
+      "description": "Relations where the given entity is the subject.",
+      "items": { "$ref": "#/$defs/relation" }
+    },
+    "incoming": {
+      "type": "array",
+      "description": "Relations where the given entity is the object.",
+      "items": { "$ref": "#/$defs/relation" }
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0
+    }
+  },
+  "$defs": {
+    "relation": {
+      "type": "object",
+      "required": ["id", "target_id", "rico_predicate"],
+      "properties": {
+        "id":               { "type": "integer" },
+        "direction":        { "enum": ["outgoing", "incoming"] },
+        "target_id":        { "type": "integer" },
+        "target_name":      { "type": ["string", "null"] },
+        "target_type":      { "type": ["string", "null"] },
+        "rico_predicate":   { "type": "string", "description": "Canonical RiC-O property, e.g. rico:hasOrHadSubject, rico:isAssociatedWithPlace." },
+        "dropdown_code":    { "type": ["string", "null"] },
+        "relation_label":   { "type": ["string", "null"] },
+        "start_date":       { "type": ["string", "null"] },
+        "end_date":         { "type": ["string", "null"] },
+        "certainty":        { "type": ["string", "null"] },
+        "evidence":         { "type": ["string", "null"] }
+      },
+      "additionalProperties": true
+    }
+  }
+}

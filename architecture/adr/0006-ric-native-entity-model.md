@@ -85,4 +85,16 @@ The ISAD(G), ISAAR(CPF) and ISDIAH screens stay organised by their standards, bu
     - Places and subjects also take activities.
   - **Assertions and evidence.** Every relation of an activity carries assertions and evidence like any other, so a corrected witness is a new assertion that supersedes the old one, which is kept.
   - **Permissions.** Activities are context entities like agents, so the authority permissions govern them. An activity is made on the spot from the relation screen.
+- **v0.0.23, the OpenRiC read API and RiC-O JSON-LD (Core Discovery 0.6.0, WS-009 and WS-010 in part).**
+  - **The API.** `/api/ric/v1` serves the ten Core Discovery endpoints to anyone. The service description declares that profile only; no endpoint of another profile is served, and every error is RFC 7807 problem details. The API serves the institution whose base IRI has the request's host, or the only institution installed.
+  - **Default deny, decided once.** The API reads as the institution's Public role (ADR 0005) through the same view the exports use (`App\Exchange\ExportView`). An entity appears only once its name or title is published and the Public role may read it. An embargoed authority record never appears, and of what appears, only published values are sent.
+  - **The RiC-O.** `App\Api\JsonLd` writes the mapping of spec 0.53.0:
+    - titles and names with their language tags;
+    - dates as openricx:DateRange with literal endpoints typed as precisely as the EDTF value, and a date-type concept;
+    - holders, creators and the units above and inside as stubs with their persistent IRIs;
+    - the level as rico:hasRecordSetType.
+  - **Persistent IRIs resolve.** {base}/record, /agent and /repository/{uuid} answer 303 with the JSON-LD, or the page for someone signed in.
+  - **Checked.** The tests validate every response against the specification's JSON Schemas and check every rico: and openricx: term against RiC-O 1.1 and extension ontology 1.4.0. On a rehearsal of live, the conformance probe passed 11 of 11, and the output conformed to the Core Discovery and main SHACL shapes.
+  - **Mapping alignment.** Three element notes now follow the specification's mapping: extent (rico:hasExtent), the archivist's note (openricx:descriptiveNote) and the publication note (openricx:publicationInformation).
+  - **Departures.** Where the profile, schemas and probe disagree, conformance/README.md records how the Workspace answers.
 - **Still to come for archival description:** physical storage, the DACS, RAD, DC and MODS templates, bulk edit, and links to digital objects and rights. Each comes with its work package in the estimate of 20 October.

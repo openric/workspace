@@ -1,0 +1,134 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openric.org/schemas/v0.1.0/subgraph.schema.json",
+  "title": "OpenRiC Subgraph response",
+  "description": "Validates a /graph response. A Subgraph is the viewing-API primitive defined in graph-primitives.md §3: a root URI plus nodes and edges suitable for a viewer to render.",
+
+  "type": "object",
+  "required": ["@type", "openric:root", "openric:nodes", "openric:edges"],
+
+  "properties": {
+    "@context": {
+      "oneOf": [
+        { "type": "string", "format": "uri" },
+        { "type": "object" },
+        { "type": "array" }
+      ]
+    },
+
+    "@type": {
+      "type": "string",
+      "const": "openric:Subgraph"
+    },
+
+    "openric:root": {
+      "type": "string",
+      "format": "uri",
+      "description": "Canonical URI of the entity the subgraph was built around. MUST appear as a node in openric:nodes."
+    },
+
+    "openric:depth": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 10
+    },
+
+    "openric:nodes": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/node" }
+    },
+
+    "openric:edges": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/edge" }
+    },
+
+    "openric:clusters": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/cluster" }
+    },
+
+    "openric:hints": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/$defs/layoutHint" }
+    }
+  },
+
+  "additionalProperties": true,
+
+  "$defs": {
+    "node": {
+      "type": "object",
+      "required": ["id", "type"],
+      "properties": {
+        "id":    { "type": "string", "format": "uri" },
+        "type":  { "type": "string", "description": "RiC-O class with optional rico: prefix, or an OpenRiC extension class" },
+        "label": { "type": ["string", "null"] },
+        "attributes": {
+          "type": "object",
+          "additionalProperties": {
+            "type": ["string", "number", "boolean", "null"]
+          }
+        },
+        "openric:localType":  { "type": ["string", "null"] },
+        "openric:layoutHint": { "$ref": "#/$defs/layoutHint" }
+      },
+      "additionalProperties": true
+    },
+
+    "edge": {
+      "type": "object",
+      "required": ["source", "target"],
+      "properties": {
+        "source":    { "type": "string", "format": "uri" },
+        "target":    { "type": "string", "format": "uri" },
+        "predicate": {
+          "type": "string",
+          "description": "Canonical RiC-O or OpenRiC predicate, with prefix. STRONGLY recommended for L3 conformance."
+        },
+        "label":     { "type": ["string", "null"] },
+        "directed":  { "type": "boolean" },
+        "attributes": {
+          "type": "object",
+          "additionalProperties": {
+            "type": ["string", "number", "boolean", "null"]
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+
+    "cluster": {
+      "type": "object",
+      "required": ["id", "strategy", "members"],
+      "properties": {
+        "id":       { "type": "string" },
+        "label":    { "type": ["string", "null"] },
+        "strategy": {
+          "type": "string",
+          "enum": ["by-type", "by-fonds", "by-date-range", "by-repository", "custom"]
+        },
+        "members": {
+          "type": "array",
+          "items": { "type": "string", "format": "uri" }
+        }
+      }
+    },
+
+    "layoutHint": {
+      "type": "object",
+      "properties": {
+        "preferred_position": {
+          "type": "object",
+          "properties": {
+            "x": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+            "y": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+            "z": { "type": ["number", "null"], "minimum": 0, "maximum": 1 }
+          }
+        },
+        "weight": { "type": ["number", "null"] },
+        "group":  { "type": ["string", "null"] }
+      }
+    }
+  }
+}

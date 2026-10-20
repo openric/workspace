@@ -1,0 +1,132 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openric.org/schemas/v0.1.0/instantiation.schema.json",
+  "title": "OpenRiC Instantiation response",
+  "description": "Validates a single /instantiations/{id} response. Instantiations are the digital or physical manifestations of a record (TIFF, JPEG, PDF, bound volume, etc.).",
+
+  "type": "object",
+  "required": ["@id", "@type"],
+
+  "properties": {
+    "@context": {
+      "oneOf": [
+        { "type": "string", "format": "uri" },
+        { "type": "object" },
+        { "type": "array" }
+      ]
+    },
+
+    "@id": {
+      "type": "string",
+      "format": "uri"
+    },
+
+    "@type": {
+      "oneOf": [
+        {
+          "type": "string",
+          "pattern": "^(rico:Instantiation|https://www\\.ica\\.org/standards/RiC/ontology#Instantiation)$"
+        },
+        {
+          "type": "array",
+          "items": { "type": "string" },
+          "contains": {
+            "type": "string",
+            "pattern": "^(rico:Instantiation|https://www\\.ica\\.org/standards/RiC/ontology#Instantiation)$"
+          },
+          "minItems": 1
+        }
+      ]
+    },
+
+    "rico:identifier":   { "type": ["string", "null"] },
+    "rico:title":        { "$ref": "#/$defs/langString" },
+    "openricx:description":  { "$ref": "#/$defs/langString" },
+
+    "openricx:hasMimeType": {
+      "type": ["string", "null"],
+      "pattern": "^[a-zA-Z0-9!#$&^_.+-]+/[a-zA-Z0-9!#$&^_.+-]+$"
+    },
+
+    "rico:hasCarrierType": { "type": ["string", "null"] },
+
+    "rico:hasExtent": {
+      "anyOf": [
+        { "$ref": "#/$defs/extent" },
+        { "$ref": "#/$defs/ref" },
+        { "type": "array", "items": { "anyOf": [ { "$ref": "#/$defs/extent" }, { "$ref": "#/$defs/ref" } ] } }
+      ]
+    },
+
+    "openricx:technicalCharacteristics":            { "$ref": "#/$defs/langString" },
+    "openricx:productionTechnicalCharacteristics":  { "$ref": "#/$defs/langString" },
+
+    "rico:isOrWasInstantiationOf": {
+      "anyOf": [
+        { "type": "string", "format": "uri" },
+        {
+          "type": "object",
+          "properties": {
+            "@id":       { "type": "string", "format": "uri" },
+            "@type":     { "type": "string" },
+            "rico:title": { "$ref": "#/$defs/langString" }
+          }
+        },
+        { "type": "array", "items": { "anyOf": [ { "type": "string", "format": "uri" }, { "$ref": "#/$defs/ref" } ] } }
+      ]
+    },
+
+    "rico:isOrWasRegulatedBy":    { "type": ["array", "object"] },
+    "openricx:hasChecksum":             { "type": ["string", "object"] }
+  },
+
+  "additionalProperties": true,
+
+  "$defs": {
+    "ref": {
+      "description": "A reference to a resource described elsewhere, as JSON-LD compaction gives it: an object carrying only (or mainly) its @id.",
+      "type": "object",
+      "required": ["@id"],
+      "properties": { "@id": { "type": "string" } }
+    },
+    "langString": {
+      "oneOf": [
+        { "type": "string" },
+        { "type": "null" },
+        {
+          "type": "object",
+          "required": ["@value"],
+          "properties": {
+            "@value":    { "type": "string" },
+            "@language": { "type": "string" }
+          }
+        },
+        {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              { "type": "string" },
+              {
+                "type": "object",
+                "required": ["@value"],
+                "properties": {
+                  "@value":    { "type": "string" },
+                  "@language": { "type": "string" }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+
+    "extent": {
+      "type": "object",
+      "properties": {
+        "@type":            { "type": "string" },
+        "rico:hasExtentType":  { "type": "string" },
+        "rico:quantity":    { "type": ["number", "string"] }
+      }
+    }
+  }
+}

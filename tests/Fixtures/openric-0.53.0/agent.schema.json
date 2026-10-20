@@ -1,0 +1,170 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openric.org/schemas/v0.1.0/agent.schema.json",
+  "title": "OpenRiC Agent response",
+  "description": "Validates a single /agents/{id} response. Covers rico:Agent, rico:Person, rico:CorporateBody, and rico:Family.",
+
+  "type": "object",
+  "required": ["@id", "@type"],
+
+  "properties": {
+    "@context": {
+      "oneOf": [
+        { "type": "string", "format": "uri" },
+        { "type": "object" },
+        { "type": "array" }
+      ]
+    },
+
+    "@id": {
+      "type": "string",
+      "format": "uri"
+    },
+
+    "@type": {
+      "oneOf": [
+        {
+          "type": "string",
+          "pattern": "^(rico:(Agent|Person|CorporateBody|Family)|https://www\\.ica\\.org/standards/RiC/ontology#(Agent|Person|CorporateBody|Family))$"
+        },
+        {
+          "type": "array",
+          "items": { "type": "string" },
+          "contains": {
+            "type": "string",
+            "pattern": "^(rico:(Agent|Person|CorporateBody|Family)|https://www\\.ica\\.org/standards/RiC/ontology#(Agent|Person|CorporateBody|Family))$"
+          },
+          "minItems": 1
+        }
+      ]
+    },
+
+    "rico:name":                 { "$ref": "#/$defs/langString" },
+    "openricx:normalizedForm":       { "$ref": "#/$defs/langString" },
+    "openricx:alternativeForm":      { "$ref": "#/$defs/langString" },
+    "openricx:otherName":            { "$ref": "#/$defs/langString" },
+
+    "rico:hasOrHadAgentName": {
+      "anyOf": [
+        { "$ref": "#/$defs/agentName" },
+        { "$ref": "#/$defs/ref" },
+        { "type": "array", "items": { "anyOf": [ { "$ref": "#/$defs/agentName" }, { "$ref": "#/$defs/ref" } ] } }
+      ]
+    },
+
+    "openricx:hasDateRangeSet": {
+      "anyOf": [
+        { "$ref": "#/$defs/dateRange" },
+        { "$ref": "#/$defs/ref" },
+        { "type": "array", "items": { "anyOf": [ { "$ref": "#/$defs/dateRange" }, { "$ref": "#/$defs/ref" } ] } }
+      ]
+    },
+
+    "rico:date":             { "$ref": "#/$defs/langString" },
+    "rico:hasBeginningDate": { "anyOf": [ { "$ref": "#/$defs/ref" }, { "type": "object" } ] },
+    "rico:hasEndDate":       { "anyOf": [ { "$ref": "#/$defs/ref" }, { "type": "object" } ] },
+    "rico:history":              { "$ref": "#/$defs/langString" },
+    "openricx:generalContext":       { "$ref": "#/$defs/langString" },
+    "rico:hasOrHadLegalStatus": {
+      "anyOf": [
+        { "$ref": "#/$defs/legalStatus" },
+        { "$ref": "#/$defs/ref" },
+        { "type": "array", "items": { "anyOf": [ { "$ref": "#/$defs/legalStatus" }, { "$ref": "#/$defs/ref" } ] } }
+      ]
+    },
+
+    "rico:isAssociatedWithPlace":             { "type": ["array", "object"] },
+    "rico:authorizingMandate":           { "type": ["array", "object"] },
+    "rico:performsOrPerformed":             { "type": ["array", "object"] },
+    "openricx:hasOccupation":    { "$ref": "#/$defs/langString" },
+
+    "openricx:contact":              { "type": "object" },
+
+    "rico:isOrWasSubordinateTo":      { "type": ["string","array","object"] },
+    "rico:hasOrHadSubordinate":       { "type": ["array","object"] },
+    "rico:isOrWasMemberOf":           { "type": ["string","array","object"] },
+    "rico:followsInTime":                  { "type": ["string","array","object"] },
+    "rico:precedesInTime":                  { "type": ["string","array","object"] },
+    "rico:isRelatedTo":               { "type": ["string","array","object"] }
+  },
+
+  "additionalProperties": true,
+
+  "$defs": {
+    "legalStatus": {
+      "type": "object",
+      "required": ["rico:name"],
+      "properties": {
+        "@type":     { "type": "string" },
+        "rico:name": { "$ref": "#/$defs/langString" }
+      }
+    },
+
+    "ref": {
+      "description": "A reference to a resource described elsewhere, as JSON-LD compaction gives it: an object carrying only (or mainly) its @id.",
+      "type": "object",
+      "required": ["@id"],
+      "properties": { "@id": { "type": "string" } }
+    },
+    "langString": {
+      "oneOf": [
+        { "type": "string" },
+        { "type": "null" },
+        {
+          "type": "object",
+          "required": ["@value"],
+          "properties": {
+            "@value":    { "type": "string" },
+            "@language": { "type": "string" }
+          }
+        },
+        {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              { "type": "string" },
+              {
+                "type": "object",
+                "required": ["@value"],
+                "properties": {
+                  "@value":    { "type": "string" },
+                  "@language": { "type": "string" }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+
+    "agentName": {
+      "type": "object",
+      "required": ["rico:textualValue"],
+      "properties": {
+        "@type":             { "type": "string" },
+        "rico:textualValue": { "$ref": "#/$defs/langString" },
+        "openricx:hasDateRangeSet": { "$ref": "#/$defs/dateRange" }
+      }
+    },
+
+    "dateRange": {
+      "type": "object",
+      "anyOf": [
+        { "required": ["rico:beginningDate"] },
+        { "required": ["rico:endDate"] },
+        { "required": ["rico:normalizedDateValue"] },
+        { "required": ["rico:expressedDate"] }
+      ],
+      "properties": {
+        "@type":                 { "type": "string" },
+        "rico:beginningDate":    { "type": ["string","object"] },
+        "rico:endDate":          { "type": ["string","object"] },
+        "rico:hasBeginningDate": { "anyOf": [ { "$ref": "#/$defs/ref" }, { "type": "object" } ] },
+        "rico:hasEndDate":       { "anyOf": [ { "$ref": "#/$defs/ref" }, { "type": "object" } ] },
+        "rico:expressedDate":    { "type": ["string","object"] },
+        "rico:normalizedDateValue":   { "type": "string" },
+        "rico:hasDateType":      { "$ref": "#/$defs/ref" }
+      }
+    }
+  }
+}

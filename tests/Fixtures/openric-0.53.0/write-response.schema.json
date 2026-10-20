@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openric.org/schemas/write-response.schema.json",
+  "title": "OpenRiC write-operation response",
+  "description": "Response shapes for write-side endpoints. POST returns create-response; PATCH/DELETE returns success-response.",
+  "anyOf": [
+    { "$ref": "#/$defs/create" },
+    { "$ref": "#/$defs/success" }
+  ],
+  "$defs": {
+    "create": {
+      "type": "object",
+      "description": "201 Created response for POST /{type}.",
+      "required": ["id"],
+      "properties": {
+        "id":   { "type": "integer", "description": "Assigned entity id." },
+        "slug": { "type": ["string", "null"] },
+        "type": { "type": ["string", "null"] },
+        "href": { "type": ["string", "null"], "description": "Path of the show endpoint for the new entity." }
+      },
+      "additionalProperties": true
+    },
+    "success": {
+      "type": "object",
+      "description": "200 OK response for PATCH / DELETE / relation ops.",
+      "required": ["success"],
+      "properties": {
+        "success": { "const": true },
+        "id":      { "type": ["integer", "null"] }
+      },
+      "additionalProperties": true
+    }
+  }
+}

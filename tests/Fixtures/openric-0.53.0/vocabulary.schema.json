@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openric.org/schemas/v0.1.0/vocabulary.schema.json",
+  "title": "OpenRiC Vocabulary response",
+  "description": "Validates a /vocabulary response. Advertises which RiC-O classes and predicates a conformant server emits, allowing clients to discover server capabilities before constructing queries.",
+
+  "type": "object",
+  "required": ["@type"],
+
+  "properties": {
+    "@context": {
+      "oneOf": [
+        { "type": "string", "format": "uri" },
+        { "type": "object" },
+        { "type": "array" }
+      ]
+    },
+
+    "@type": {
+      "type": "string",
+      "pattern": "^(skos:ConceptScheme|openric:Vocabulary|ric:Vocabulary)$"
+    },
+
+    "classes": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/term" },
+      "description": "RiC-O classes this server emits (e.g. rico:Record, rico:Agent)."
+    },
+
+    "predicates": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/term" },
+      "description": "RiC-O predicates this server emits (optional)."
+    }
+  },
+
+  "additionalProperties": true,
+
+  "$defs": {
+    "term": {
+      "type": "object",
+      "required": ["@id"],
+      "properties": {
+        "@id":          { "type": "string" },
+        "rdfs:label":   { "type": ["string", "object"] },
+        "rdfs:comment": { "type": ["string", "object"] }
+      }
+    }
+  }
+}

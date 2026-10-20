@@ -1,0 +1,126 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openric.org/schemas/v0.1.0/activity.schema.json",
+  "title": "OpenRiC Activity response",
+  "description": "Validates a single /activities/{id} response. Every event is rico:Activity (RiC-O 1.1 has no concrete Activity subclasses); kind is carried in rico:hasActivityType as an IRI from the OpenRiC activity-type vocabulary (production, accumulation, custody, transfer, publication, reproduction).",
+
+  "type": "object",
+  "required": ["@id", "@type"],
+
+  "properties": {
+    "@context": {
+      "oneOf": [
+        { "type": "string", "format": "uri" },
+        { "type": "object" },
+        { "type": "array" }
+      ]
+    },
+
+    "@id": {
+      "type": "string",
+      "format": "uri"
+    },
+
+    "@type": {
+      "oneOf": [
+        {
+          "type": "string",
+          "pattern": "^(rico:(Production|Accumulation|Activity)|https://www\\.ica\\.org/standards/RiC/ontology#(Production|Accumulation|Activity))$"
+        },
+        {
+          "type": "array",
+          "items": { "type": "string" },
+          "contains": {
+            "type": "string",
+            "pattern": "^(rico:(Production|Accumulation|Activity)|https://www\\.ica\\.org/standards/RiC/ontology#(Production|Accumulation|Activity))$"
+          },
+          "minItems": 1
+        }
+      ]
+    },
+
+    "rico:name":          { "$ref": "#/$defs/langString" },
+    "openricx:description":   { "$ref": "#/$defs/langString" },
+    "openric:localType":  { "type": "string" },
+
+    "rico:isAssociatedWithDate": {
+      "anyOf": [
+        { "$ref": "#/$defs/dateRange" },
+        { "$ref": "#/$defs/ref" },
+        { "type": "array", "items": { "anyOf": [ { "$ref": "#/$defs/dateRange" }, { "$ref": "#/$defs/ref" } ] } }
+      ]
+    },
+
+    "rico:hasOrHadLocation": {
+      "anyOf": [
+        { "type": "string", "format": "uri" },
+        {
+          "type": "object",
+          "properties": {
+            "@id":       { "type": "string", "format": "uri" },
+            "@type":     { "type": "string" },
+            "rico:name": { "$ref": "#/$defs/langString" }
+          }
+        },
+        { "type": "array", "items": { "anyOf": [ { "type": "string", "format": "uri" }, { "$ref": "#/$defs/ref" } ] } }
+      ]
+    },
+
+    "rico:hasOrHadParticipant": { "type": ["array", "object"] },
+    "rico:resultsOrResultedIn": { "type": ["array", "object", "string"] },
+    "rico:hasActivityType":     { "oneOf": [ { "type": "string", "format": "uri" }, { "type": "object", "required": ["@id"], "properties": { "@id": { "type": "string", "format": "uri" } } } ] }
+  },
+
+  "additionalProperties": true,
+
+  "$defs": {
+    "ref": {
+      "description": "A reference to a resource described elsewhere, as JSON-LD compaction gives it: an object carrying only (or mainly) its @id.",
+      "type": "object",
+      "required": ["@id"],
+      "properties": { "@id": { "type": "string" } }
+    },
+    "langString": {
+      "oneOf": [
+        { "type": "string" },
+        { "type": "null" },
+        {
+          "type": "object",
+          "required": ["@value"],
+          "properties": {
+            "@value":    { "type": "string" },
+            "@language": { "type": "string" }
+          }
+        },
+        {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              { "type": "string" },
+              {
+                "type": "object",
+                "required": ["@value"],
+                "properties": {
+                  "@value":    { "type": "string" },
+                  "@language": { "type": "string" }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+
+    "dateRange": {
+      "type": "object",
+      "properties": {
+        "@type":                 { "type": "string" },
+        "rico:beginningDate":    { "type": ["string", "object"] },
+        "rico:endDate":          { "type": ["string", "object"] },
+        "rico:hasBeginningDate": { "anyOf": [ { "$ref": "#/$defs/ref" }, { "type": "object" } ] },
+        "rico:expressedDate":    { "type": ["string", "object"] },
+        "rico:normalizedDateValue":   { "type": "string" }
+      }
+    }
+  }
+}

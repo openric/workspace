@@ -13,9 +13,11 @@
 
 namespace App\Exchange;
 
+use App\Access\AccessControl;
 use App\Description\Elements;
 use App\Models\Agent;
 use App\Models\Concept;
+use App\Models\Institution;
 use App\Models\Place;
 use App\Models\RecordResource;
 use App\Models\Relation;
@@ -32,7 +34,24 @@ class ExportView
     /** @var array<string, Collection<int, Relation>> relations by unit id */
     private array $relations = [];
 
-    public function __construct(public readonly User $user, public readonly bool $drafts, public readonly ?string $language = null) {}
+    /** With no account, it reads as the public of $institution reads (ADR 0005: the Public role), and never sees drafts. */
+    public function __construct(public readonly ?User $user, public readonly bool $drafts, public readonly ?string $language = null, private ?Institution $institution = null)
+    {
+        if ($user === null && $drafts) {
+            throw new \InvalidArgumentException('the public never sees drafts');
+        }
+    }
+
+    /** May the account, or the public, take the action on the entity? */
+    public function may(string $action, string $kind, ?Model $entity = null): bool
+    {
+        if ($this->user !== null) {
+            return $this->user->may($action, $kind, $entity);
+        }
+        $this->institution ??= Institution::find($entity?->getAttribute('institution_id'));
+
+        return $this->institution !== null && app(AccessControl::class)->allows(null, $action, $kind, $entity, $this->institution);
+    }
 
     /** The language the unit is exported in. */
     public function languageOf(Model $unit): string
@@ -136,7 +155,19 @@ class ExportView
 
     public function readable(Model $entity): bool
     {
-        return EntityKinds::readable($this->user, $entity) && $entity->getAttribute('deleted_at') === null;
+        if ($entity->getAttribute('deleted_at') !== null || ($this->institution && $entity->getAttribute('institution_id') !== $this->institution->id)) {
+            return false;
+        }
+        if ($this->user !== null) {
+            return EntityKinds::readable($this->user, $entity);
+        }
+        // The public: an embargoed authority record is never read, and an entity is read only once its name is published.
+        $definition = EntityKinds::get(EntityKinds::of($entity));
+        if (($entity instanceof Agent && $entity->isEmbargoed()) || ($definition['label'] !== null && $this->label($entity) === null)) {
+            return false;
+        }
+
+        return ! $definition['readable'] || $this->may('read', $definition['permission'], $entity);
     }
 
     /** The EDTF bounds of a date as ISO 8601, a year when it covers whole years, for EAD's normal and the like. */

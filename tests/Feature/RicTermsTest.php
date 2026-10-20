@@ -72,7 +72,7 @@ class RicTermsTest extends TestCase
 
         $this->actingAs($editor)->get("/records/{$fonds->id}/edit")->assertOk()
             ->assertSee('<a href="https://www.ica.org/standards/RiC/ontology#scopeAndContent"', false)
-            ->assertSee('openricx:hasAppraisalInformation')->assertSee('rico:recordResourceExtent')->assertSee('Fonds (rico:RecordSet)');
+            ->assertSee('openricx:hasAppraisalInformation')->assertSee('rico:hasExtent')->assertSee('Fonds (rico:RecordSet)');
         $this->actingAs($editor)->get("/records/{$fonds->id}")->assertOk()
             ->assertSee('rico:RecordSet')->assertSee('rico:Title')->assertSee('rico:Identifier')->assertSee('rico:Date')->assertSee('rico:scopeAndContent');
         $this->actingAs($editor)->get("/repositories/{$repository->id}")->assertOk()->assertSee('rico:CorporateBody')->assertSee('rico:AgentName');

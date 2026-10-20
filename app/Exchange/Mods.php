@@ -160,7 +160,7 @@ class Mods
             $this->name($relation->other, null);
             $x->endElement();
         }
-        if ($unit->parent && $view->user->may('read', 'description', $unit->parent)) {
+        if ($unit->parent && $view->may('read', 'description', $unit->parent)) {
             $unit->parent->loadMissing('names.nameType', 'names.state');
             $this->related('host', $unit->parent);
         }

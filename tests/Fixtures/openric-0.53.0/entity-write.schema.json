@@ -1,0 +1,181 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openric.org/schemas/entity-write.schema.json",
+  "title": "OpenRiC entity write request",
+  "description": "Request body for POST /api/ric/v1/{type} and PATCH /api/ric/v1/{type}/{id}. Fields vary by entity type; this is the per-type union. A body may satisfy more than one branch (a Place and an Activity both need only a name), so the union is anyOf, and a client picks the branch by the endpoint it posts to. Unknown properties accepted (forward-compatible).",
+  "anyOf": [
+    { "$ref": "#/$defs/place" },
+    { "$ref": "#/$defs/rule" },
+    { "$ref": "#/$defs/activity" },
+    { "$ref": "#/$defs/instantiation" },
+    { "$ref": "#/$defs/relation" },
+    { "$ref": "#/$defs/agent" },
+    { "$ref": "#/$defs/record" },
+    { "$ref": "#/$defs/repository" },
+    { "$ref": "#/$defs/function" }
+  ],
+  "$defs": {
+    "place": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name":          { "type": "string", "maxLength": 1024 },
+        "type_id":       { "type": ["string", "null"] },
+        "parent_id":     { "type": ["integer", "null"] },
+        "latitude":      { "type": ["number", "null"] },
+        "longitude":     { "type": ["number", "null"] },
+        "authority_uri": { "type": ["string", "null"], "format": "uri" },
+        "address":       { "type": ["string", "null"] },
+        "description":   { "type": ["string", "null"] }
+      },
+      "additionalProperties": true
+    },
+    "rule": {
+      "type": "object",
+      "required": ["title"],
+      "properties": {
+        "title":         { "type": "string", "maxLength": 1024 },
+        "type_id":       { "type": ["string", "null"] },
+        "jurisdiction":  { "type": ["string", "null"] },
+        "start_date":    { "type": ["string", "null"] },
+        "end_date":      { "type": ["string", "null"] },
+        "authority_uri": { "type": ["string", "null"], "format": "uri" },
+        "description":   { "type": ["string", "null"] },
+        "legislation":   { "type": ["string", "null"] },
+        "sources":       { "type": ["string", "null"] }
+      },
+      "additionalProperties": true
+    },
+    "activity": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name":         { "type": "string", "maxLength": 1024 },
+        "type_id":      { "type": ["string", "null"] },
+        "place_id":     { "type": ["integer", "null"] },
+        "start_date":   { "type": ["string", "null"] },
+        "end_date":     { "type": ["string", "null"] },
+        "date_display": { "type": ["string", "null"] },
+        "description":  { "type": ["string", "null"] }
+      },
+      "additionalProperties": true
+    },
+    "instantiation": {
+      "type": "object",
+      "required": ["title"],
+      "properties": {
+        "title":                    { "type": "string", "maxLength": 1024 },
+        "carrier_type":             { "type": ["string", "null"] },
+        "mime_type":                { "type": ["string", "null"] },
+        "extent_value":             { "type": ["number", "null"] },
+        "extent_unit":              { "type": ["string", "null"] },
+        "record_id":                { "type": ["integer", "null"] },
+        "digital_object_id":        { "type": ["integer", "null"] },
+        "description":              { "type": ["string", "null"] },
+        "technical_characteristics": { "type": ["string", "null"] },
+        "production_technical_characteristics": { "type": ["string", "null"] }
+      },
+      "additionalProperties": true
+    },
+    "relation": {
+      "type": "object",
+      "required": ["subject_id", "object_id", "relation_type"],
+      "properties": {
+        "subject_id":     { "type": "integer" },
+        "object_id":      { "type": "integer" },
+        "relation_type":  { "type": "string", "description": "Code from ric_relation_type vocabulary." },
+        "start_date":     { "type": ["string", "null"] },
+        "end_date":       { "type": ["string", "null"] },
+        "certainty":      { "type": ["string", "null"] },
+        "evidence":       { "type": ["string", "null"] }
+      },
+      "additionalProperties": true
+    },
+    "agent": {
+      "description": "POST/PATCH /agents (ISAAR(CPF)). entity_type_id selects person, corporate body or family.",
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1, "maxLength": 1024 },
+        "entity_type_id": { "type": ["integer", "null"] },
+        "parent_id": { "type": ["integer", "null"] },
+        "dates_of_existence": { "type": ["string", "null"] },
+        "history": { "type": ["string", "null"] },
+        "places": { "type": ["string", "null"] },
+        "legal_status": { "type": ["string", "null"] },
+        "functions": { "type": ["string", "null"] },
+        "mandates": { "type": ["string", "null"] },
+        "internal_structures": { "type": ["string", "null"] },
+        "general_context": { "type": ["string", "null"] },
+        "corporate_body_identifiers": { "type": ["string", "null"] }
+      },
+      "additionalProperties": true
+    },
+    "record": {
+      "description": "POST/PATCH /records (ISAD(G)). parent_id places the record in a hierarchy.",
+      "type": "object",
+      "required": ["title"],
+      "properties": {
+        "title": { "type": "string", "minLength": 1, "maxLength": 1024 },
+        "level_of_description_id": { "type": ["integer", "null"] },
+        "parent_id": { "type": ["integer", "null"] },
+        "repository_id": { "type": ["integer", "null"] },
+        "identifier": { "type": ["string", "null"] },
+        "alternate_title": { "type": ["string", "null"] },
+        "extent_and_medium": { "type": ["string", "null"] },
+        "scope_and_content": { "type": ["string", "null"] },
+        "archival_history": { "type": ["string", "null"] },
+        "acquisition": { "type": ["string", "null"] },
+        "appraisal": { "type": ["string", "null"] },
+        "accruals": { "type": ["string", "null"] },
+        "arrangement": { "type": ["string", "null"] },
+        "access_conditions": { "type": ["string", "null"] },
+        "reproduction_conditions": { "type": ["string", "null"] },
+        "physical_characteristics": { "type": ["string", "null"] },
+        "finding_aids": { "type": ["string", "null"] },
+        "location_of_originals": { "type": ["string", "null"] },
+        "location_of_copies": { "type": ["string", "null"] },
+        "related_units_of_description": { "type": ["string", "null"] }
+      },
+      "additionalProperties": true
+    },
+    "repository": {
+      "description": "POST/PATCH /repositories (ISDIAH).",
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1, "maxLength": 1024 },
+        "parent_id": { "type": ["integer", "null"] },
+        "identifier": { "type": ["string", "null"] },
+        "history": { "type": ["string", "null"] },
+        "geocultural_context": { "type": ["string", "null"] },
+        "collecting_policies": { "type": ["string", "null"] },
+        "buildings": { "type": ["string", "null"] },
+        "holdings": { "type": ["string", "null"] },
+        "finding_aids": { "type": ["string", "null"] },
+        "opening_times": { "type": ["string", "null"] },
+        "access_conditions": { "type": ["string", "null"] },
+        "disabled_access": { "type": ["string", "null"] },
+        "research_services": { "type": ["string", "null"] },
+        "reproduction_services": { "type": ["string", "null"] },
+        "public_facilities": { "type": ["string", "null"] }
+      },
+      "additionalProperties": true
+    },
+    "function": {
+      "description": "POST/PATCH /functions (ISDF).",
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1, "maxLength": 1024 },
+        "type_id": { "type": ["integer", "null"] },
+        "classification": { "type": ["string", "null"] },
+        "dates": { "type": ["string", "null"] },
+        "description": { "type": ["string", "null"] },
+        "history": { "type": ["string", "null"] },
+        "legislation": { "type": ["string", "null"] }
+      },
+      "additionalProperties": true
+    }
+  }
+}

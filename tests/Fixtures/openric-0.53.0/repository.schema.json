@@ -1,0 +1,129 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openric.org/schemas/v0.1.0/repository.schema.json",
+  "title": "OpenRiC Repository response",
+  "description": "Validates a single /repositories/{id} response. A repository is emitted as rico:CorporateBody per ISDIAH; OpenRiC optionally annotates it with openric:role = \"repository\" for viewer convenience.",
+
+  "type": "object",
+  "required": ["@id", "@type"],
+
+  "properties": {
+    "@context": {
+      "oneOf": [
+        { "type": "string", "format": "uri" },
+        { "type": "object" },
+        { "type": "array" }
+      ]
+    },
+
+    "@id": {
+      "type": "string",
+      "format": "uri"
+    },
+
+    "@type": {
+      "oneOf": [
+        {
+          "type": "string",
+          "pattern": "^(rico:CorporateBody|https://www\\.ica\\.org/standards/RiC/ontology#CorporateBody)$"
+        },
+        {
+          "type": "array",
+          "items": { "type": "string" },
+          "contains": {
+            "type": "string",
+            "pattern": "^(rico:CorporateBody|https://www\\.ica\\.org/standards/RiC/ontology#CorporateBody)$"
+          },
+          "minItems": 1
+        }
+      ]
+    },
+
+    "openric:role": {
+      "type": "string",
+      "const": "repository"
+    },
+
+    "rico:name":                 { "$ref": "#/$defs/langString" },
+    "openricx:alternativeForm":      { "$ref": "#/$defs/langString" },
+    "openricx:otherName":            { "$ref": "#/$defs/langString" },
+
+    "rico:hasOrHadAgentName": {
+      "anyOf": [
+        { "$ref": "#/$defs/agentName" },
+        { "$ref": "#/$defs/ref" },
+        { "type": "array", "items": { "anyOf": [ { "$ref": "#/$defs/agentName" }, { "$ref": "#/$defs/ref" } ] } }
+      ]
+    },
+
+    "rico:history":              { "$ref": "#/$defs/langString" },
+    "openricx:generalContext":       { "$ref": "#/$defs/langString" },
+
+    "rico:isAssociatedWithPlace": {
+      "oneOf": [
+        { "type": "object" },
+        { "type": "array", "items": { "type": "object" } }
+      ]
+    },
+
+    "rico:authorizingMandate":           { "type": ["array", "object"] },
+    "openricx:hasOrHadPolicy":       { "type": ["array", "object"] },
+    "openricx:hasInternalStructure": { "$ref": "#/$defs/langString" },
+
+    "rico:isOrWasHolderOf":           { "type": ["array", "object"] },
+    "rico:isOrWasDescribedBy":        { "type": ["array", "object"] },
+
+    "openricx:contact":              { "type": "object" },
+    "rico:conditionsOfAccess":   { "type": "string" }
+  },
+
+  "additionalProperties": true,
+
+  "$defs": {
+    "ref": {
+      "description": "A reference to a resource described elsewhere, as JSON-LD compaction gives it: an object carrying only (or mainly) its @id.",
+      "type": "object",
+      "required": ["@id"],
+      "properties": { "@id": { "type": "string" } }
+    },
+    "langString": {
+      "oneOf": [
+        { "type": "string" },
+        { "type": "null" },
+        {
+          "type": "object",
+          "required": ["@value"],
+          "properties": {
+            "@value":    { "type": "string" },
+            "@language": { "type": "string" }
+          }
+        },
+        {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              { "type": "string" },
+              {
+                "type": "object",
+                "required": ["@value"],
+                "properties": {
+                  "@value":    { "type": "string" },
+                  "@language": { "type": "string" }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+
+    "agentName": {
+      "type": "object",
+      "required": ["rico:textualValue"],
+      "properties": {
+        "@type":             { "type": "string" },
+        "rico:textualValue": { "$ref": "#/$defs/langString" }
+      }
+    }
+  }
+}

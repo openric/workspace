@@ -192,7 +192,7 @@ v:extent a skos:Concept ;
     skos:inScheme v: ;
     skos:broader v:isad-g ;
     skos:prefLabel "Extent and medium"@en ;
-    skos:scopeNote "ISAD(G) 3.1.5; exported as rico:recordResourceExtent."@en ;
+    skos:scopeNote "ISAD(G) 3.1.5; exported as rico:hasExtent, a rico:RecordResourceExtent whose rico:textualValue is the text (mapping 7.1)."@en ;
     skos:definition "The extent and medium of the unit."@en .
 
 v:creator-history a skos:Concept ;
@@ -304,7 +304,7 @@ v:publication-note a skos:Concept ;
     skos:inScheme v: ;
     skos:broader v:isad-g ;
     skos:prefLabel "Publication note"@en ;
-    skos:scopeNote "ISAD(G) 3.5.4; exported as rico:note."@en ;
+    skos:scopeNote "ISAD(G) 3.5.4; exported as openricx:publicationInformation (mapping 7.1)."@en ;
     skos:definition "Publications about or based on the unit."@en .
 
 v:note a skos:Concept ;
@@ -318,7 +318,7 @@ v:archivists-note a skos:Concept ;
     skos:inScheme v: ;
     skos:broader v:isad-g ;
     skos:prefLabel "Archivist's note"@en ;
-    skos:scopeNote "ISAD(G) 3.7.1; exported as rico:note."@en ;
+    skos:scopeNote "ISAD(G) 3.7.1; exported as openricx:descriptiveNote (mapping 7.1)."@en ;
     skos:definition "How the description was prepared and by whom."@en .
 
 v:rules-or-conventions a skos:Concept ;

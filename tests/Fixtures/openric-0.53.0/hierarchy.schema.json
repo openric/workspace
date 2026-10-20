@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openric.org/schemas/hierarchy.schema.json",
+  "title": "OpenRiC hierarchy walk response",
+  "description": "Response shape for GET /api/ric/v1/hierarchy/{entity-id}?include=parent,children,siblings. Returns containment relationships for hierarchical entity types (Places from parent_id; other types from has_part/is_part_of relations).",
+  "type": "object",
+  "required": ["entity_id"],
+  "properties": {
+    "entity_id": { "type": "integer" },
+    "class": {
+      "type": ["string", "null"],
+      "description": "RiC-O class of the subject entity."
+    },
+    "parent": {
+      "oneOf": [
+        { "type": "null" },
+        { "$ref": "#/$defs/ref" }
+      ]
+    },
+    "children": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/ref" }
+    },
+    "siblings": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/ref" }
+    }
+  },
+  "$defs": {
+    "ref": {
+      "type": "object",
+      "required": ["id"],
+      "properties": {
+        "id":       { "type": "integer" },
+        "name":     { "type": ["string", "null"] },
+        "slug":     { "type": ["string", "null"] },
+        "type_id":  { "type": ["string", "null"] },
+        "class":    { "type": ["string", "null"] },
+        "dropdown_code": { "type": ["string", "null"] }
+      },
+      "additionalProperties": true
+    }
+  }
+}

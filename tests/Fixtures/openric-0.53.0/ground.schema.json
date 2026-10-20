@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openric.org/schemas/ground.schema.json",
+  "title": "OpenRiC graph-grounding response",
+  "description": "GET /api/ric/v1/ground — disambiguation packs plus a prompt-ready grounding_text block, per the Graph-Grounding profile.",
+  "type": "object",
+  "required": ["query", "entities", "grounding_text"],
+  "properties": {
+    "query": { "type": "string" },
+    "grounding_text": { "type": "string" },
+    "entities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["iri", "types", "label"],
+        "properties": {
+          "iri": { "type": "string", "format": "uri", "description": "The canonical public entity IRI — the vector↔graph join key." },
+          "types": { "type": "array", "items": { "type": "string" } },
+          "label": { "type": "string" },
+          "dates": { "type": "array" },
+          "properties": { "type": "object" },
+          "relations": { "type": "array" },
+          "provenance": { "type": "string", "enum": ["asserted", "inferred"] }
+        }
+      }
+    }
+  }
+}

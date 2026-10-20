@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openric.org/schemas/v0.1.0/list.schema.json",
+  "title": "OpenRiC List response",
+  "description": "Validates a paginated list response from a /records, /agents, /repositories, /places, /activities, /rules, /instantiations endpoint. The openric: keys are required (Core Discovery 0.4.0 §3.3); the deprecated ric: aliases are still accepted alongside them.",
+
+  "type": "object",
+  "required": ["@type", "openric:total", "openric:page", "openric:limit", "openric:items"],
+
+  "properties": {
+    "@context": {
+      "oneOf": [
+        { "type": "string", "format": "uri" },
+        { "type": "object" }
+      ]
+    },
+
+    "@type": {
+      "type": "string",
+      "pattern": "^(rico:|openric:|openricx:)[A-Z][A-Za-z]+List$"
+    },
+
+    "ric:total":      { "type": "integer", "minimum": 0 },
+    "ric:page":       { "type": "integer", "minimum": 1 },
+    "ric:limit":      { "type": "integer", "minimum": 1 },
+    "ric:items":      { "type": "array" },
+
+    "openric:total":  { "type": "integer", "minimum": 0 },
+    "openric:page":   { "type": "integer", "minimum": 1 },
+    "openric:limit":  { "type": "integer", "minimum": 1 },
+    "openric:items":  { "type": "array" },
+    "openric:next":   { "type": ["string", "null"], "format": "uri" },
+    "openric:prev":   { "type": ["string", "null"], "format": "uri" }
+  },
+
+  "anyOf": [
+    { "required": ["ric:items"] },
+    { "required": ["openric:items"] }
+  ],
+
+  "additionalProperties": true
+}

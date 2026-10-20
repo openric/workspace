@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openric.org/schemas/entity-info.schema.json",
+  "title": "OpenRiC entity-info card",
+  "description": "Response shape for GET /api/ric/v1/entities/{id}/info. Minimal card for popovers / hover tooltips / autocomplete result expansion. Deliberately cheap.",
+  "type": "object",
+  "required": ["id", "class"],
+  "properties": {
+    "id":          { "type": "integer" },
+    "class":       { "type": "string", "description": "Internal class name — RicPlace, RicRule, RicActivity, RicInstantiation, QubitActor, QubitInformationObject, etc." },
+    "slug":        { "type": ["string", "null"] },
+    "name":        { "type": ["string", "null"] },
+    "type":        { "type": ["string", "null"] },
+    "description": { "type": ["string", "null"] }
+  },
+  "additionalProperties": true
+}

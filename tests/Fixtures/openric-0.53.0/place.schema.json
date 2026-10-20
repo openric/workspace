@@ -1,0 +1,140 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openric.org/schemas/v0.1.0/place.schema.json",
+  "title": "OpenRiC Place response",
+  "description": "Validates a single /places/{id} response. Places carry name, optional coordinates, optional authority URI (e.g. GeoNames), and optional hierarchical parent.",
+
+  "type": "object",
+  "required": ["@id", "@type"],
+
+  "properties": {
+    "@context": {
+      "oneOf": [
+        { "type": "string", "format": "uri" },
+        { "type": "object" },
+        { "type": "array" }
+      ]
+    },
+
+    "@id": {
+      "type": "string",
+      "format": "uri"
+    },
+
+    "@type": {
+      "oneOf": [
+        {
+          "type": "string",
+          "pattern": "^(rico:Place|https://www\\.ica\\.org/standards/RiC/ontology#Place)$"
+        },
+        {
+          "type": "array",
+          "items": { "type": "string" },
+          "contains": {
+            "type": "string",
+            "pattern": "^(rico:Place|https://www\\.ica\\.org/standards/RiC/ontology#Place)$"
+          },
+          "minItems": 1
+        }
+      ]
+    },
+
+    "rico:name":           { "$ref": "#/$defs/langString" },
+    "openricx:description":    { "$ref": "#/$defs/langString" },
+    "openricx:streetAddress":  { "type": ["string", "null"] },
+
+    "rico:latitude":  { "type": ["number", "null"], "minimum": -90,  "maximum": 90 },
+    "rico:longitude": { "type": ["number", "null"], "minimum": -180, "maximum": 180 },
+
+    "owl:sameAs": {
+      "anyOf": [
+        { "type": "string", "format": "uri" },
+        { "$ref": "#/$defs/ref" },
+        { "type": "array", "items": { "anyOf": [ { "type": "string", "format": "uri" }, { "$ref": "#/$defs/ref" } ] } }
+      ]
+    },
+
+    "openric:localType": { "type": "string" },
+
+    "rico:isOrWasPartOf": {
+      "oneOf": [
+        { "type": "string", "format": "uri" },
+        {
+          "type": "object",
+          "properties": {
+            "@id":       { "type": "string", "format": "uri" },
+            "@type":     { "type": "string" },
+            "rico:name": { "$ref": "#/$defs/langString" }
+          }
+        },
+        {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              { "type": "string", "format": "uri" },
+              { "type": "object" }
+            ]
+          }
+        }
+      ]
+    },
+
+    "rico:hasOrHadPlaceName": {
+      "anyOf": [
+        { "$ref": "#/$defs/placeName" },
+        { "$ref": "#/$defs/ref" },
+        { "type": "array", "items": { "anyOf": [ { "$ref": "#/$defs/placeName" }, { "$ref": "#/$defs/ref" } ] } }
+      ]
+    }
+  },
+
+  "additionalProperties": true,
+
+  "$defs": {
+    "ref": {
+      "description": "A reference to a resource described elsewhere, as JSON-LD compaction gives it: an object carrying only (or mainly) its @id.",
+      "type": "object",
+      "required": ["@id"],
+      "properties": { "@id": { "type": "string" } }
+    },
+    "langString": {
+      "oneOf": [
+        { "type": "string" },
+        { "type": "null" },
+        {
+          "type": "object",
+          "required": ["@value"],
+          "properties": {
+            "@value":    { "type": "string" },
+            "@language": { "type": "string" }
+          }
+        },
+        {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              { "type": "string" },
+              {
+                "type": "object",
+                "required": ["@value"],
+                "properties": {
+                  "@value":    { "type": "string" },
+                  "@language": { "type": "string" }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+
+    "placeName": {
+      "type": "object",
+      "required": ["rico:textualValue"],
+      "properties": {
+        "@type":             { "type": "string" },
+        "rico:textualValue": { "$ref": "#/$defs/langString" }
+      }
+    }
+  }
+}

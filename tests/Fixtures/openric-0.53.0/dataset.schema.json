@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openric.org/schemas/dataset.schema.json",
+  "title": "OpenRiC dataset descriptor (DCAT + VoID)",
+  "description": "GET /api/ric/v1/dataset — the self-describing dataset descriptor required by the Portability profile. Names every distribution and the standards the dataset conforms to.",
+  "type": "object",
+  "required": ["@type", "dcterms:title", "dcterms:conformsTo", "dcat:distribution"],
+  "properties": {
+    "@context": {
+      "oneOf": [
+        { "type": "string", "format": "uri" },
+        { "type": "object" }
+      ]
+    },
+    "@id": { "type": "string", "format": "uri" },
+    "@type": { "type": "string", "pattern": "^dcat:Dataset$" },
+    "dcterms:title": { "type": "string" },
+    "dcterms:publisher": { "type": ["string", "object"] },
+    "dcterms:license": { "type": "string" },
+    "dcat:version": { "type": "string" },
+    "dcterms:conformsTo": {
+      "type": "array",
+      "minItems": 1,
+      "description": "The pinned standards (RiC-O version, SKOS, PROV-O, CIDOC-CRM) — see the Governance profile.",
+      "items": { "type": ["string", "object"] }
+    },
+    "void:sparqlEndpoint": { "type": "string", "format": "uri" },
+    "dcat:distribution": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Every access path the server offers (SPARQL, JSON-LD, Turtle, RDF/XML, OAI-PMH).",
+      "items": {
+        "type": "object",
+        "required": ["dcat:mediaType", "dcat:accessURL"],
+        "properties": {
+          "dcat:mediaType": { "type": "string" },
+          "dcat:accessURL": { "type": "string", "format": "uri" },
+          "dcterms:title": { "type": "string" }
+        }
+      }
+    }
+  }
+}

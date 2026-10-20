@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openric.org/schemas/v0.1.0/error.schema.json",
+  "title": "OpenRiC error",
+  "description": "Every error response is an RFC 7807 problem document served as application/problem+json (Core Discovery §4). Since v0.47.0 the legacy shapes ({\"error\": ...} and the openric:Error envelope) are no longer accepted.",
+  "type": "object",
+  "required": ["type", "title", "status"],
+  "properties": {
+    "type":     { "type": "string", "description": "An error type IRI, for example https://openric.org/errors/not-found." },
+    "title":    { "type": "string" },
+    "status":   { "type": "integer", "minimum": 400, "maximum": 599 },
+    "detail":   { "type": "string" },
+    "instance": { "type": "string" }
+  },
+  "additionalProperties": true
+}

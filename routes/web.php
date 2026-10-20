@@ -19,6 +19,7 @@ use App\Http\Controllers\ExportController;
 use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\IdentifierController;
 use App\Http\Controllers\ImportController;
+use App\Http\Controllers\IriController;
 use App\Http\Controllers\LocalVocabularyController;
 use App\Http\Controllers\NameController;
 use App\Http\Controllers\PasswordController;
@@ -55,6 +56,9 @@ Route::get('/vocab/{scheme}/{notation}', [VocabularyController::class, 'concept'
 
 // Public: the logo appears on the sign-in page too.
 Route::get('/branding/logo', [SettingsController::class, 'logo'])->name('branding.logo');
+
+// Persistent IRIs resolve, for anyone: the controller sends a page only to those signed in.
+Route::get('/{segment}/{id}', [IriController::class, 'resolve'])->where(['segment' => 'record|agent|repository|activity|place|concept', 'id' => '[0-9a-f-]{36}'])->name('iri');
 
 Route::middleware('guest')->group(function () {
     Route::get('/sign-in', [SessionController::class, 'create'])->name('sign-in');

@@ -67,7 +67,7 @@ class DublinCore
         $element('identifier', $unit->referenceCode());
         $element('identifier', $unit->iri);
         $text('language', 'languages-of-material');
-        if ($unit->parent && $view->user->may('read', 'description', $unit->parent)) {
+        if ($unit->parent && $view->may('read', 'description', $unit->parent)) {
             $element('relation', $unit->parent->iri);
         }
         foreach ($view->relations($unit, 'associated-record') as $relation) {

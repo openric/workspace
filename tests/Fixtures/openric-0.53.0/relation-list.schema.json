@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openric.org/schemas/relation-list.schema.json",
+  "title": "OpenRiC relation list",
+  "description": "Response shape for GET /api/ric/v1/relations?q=&page=&per_page=. Paginated global relation browse.",
+  "type": "object",
+  "required": ["data", "pagination"],
+  "properties": {
+    "data": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "subject_id", "object_id", "rico_predicate"],
+        "properties": {
+          "id":                 { "type": "integer" },
+          "subject_id":         { "type": "integer" },
+          "object_id":          { "type": "integer" },
+          "subject_class":      { "type": ["string", "null"] },
+          "object_class":       { "type": ["string", "null"] },
+          "rico_predicate":     { "type": "string" },
+          "inverse_predicate":  { "type": ["string", "null"] },
+          "dropdown_code":      { "type": ["string", "null"] },
+          "domain_class":       { "type": ["string", "null"] },
+          "range_class":        { "type": ["string", "null"] },
+          "start_date":         { "type": ["string", "null"] },
+          "end_date":           { "type": ["string", "null"] },
+          "certainty":          { "type": ["string", "null"] },
+          "evidence":           { "type": ["string", "null"] }
+        },
+        "additionalProperties": true
+      }
+    },
+    "pagination": {
+      "type": "object",
+      "required": ["page", "per_page", "total", "last_page"],
+      "properties": {
+        "page":      { "type": "integer", "minimum": 1 },
+        "per_page":  { "type": "integer", "minimum": 1, "maximum": 200 },
+        "total":     { "type": "integer", "minimum": 0 },
+        "last_page": { "type": "integer", "minimum": 0 }
+      }
+    }
+  }
+}
