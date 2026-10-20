@@ -9,23 +9,11 @@
     @if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif
     <p>{{ $record->level->label(['en', 'und']) }}@if($record->identifier), {{ $record->identifier }}@endif. Held by {{ $record->repository->described('authorised-name', ['en']) }}.<br>
        <strong>Persistent IRI:</strong> <code>{{ $record->iri }}</code></p>
-    @php($languages = $record->descriptionValues->pluck('language')->unique()->sort()->values())
-    <p>Edit in: @foreach($languages as $lang)<a href="{{ route('records.edit', [$record, 'language' => $lang]) }}">{{ $lang }}</a> @endforeach
-        <a href="{{ route('records.edit', [$record, 'language' => 'en']) }}">another language</a>.
-        <a href="{{ route('records.move-form', $record) }}">Move</a>.
-        <a href="{{ route('records.create', ['parent' => $record->id]) }}">Add a unit inside</a>.</p>
+    <p><a href="{{ route('records.move-form', $record) }}">Move</a> · <a href="{{ route('records.create', ['parent' => $record->id]) }}">Add a unit inside</a></p>
+    @include('description._actions', ['subject' => $record, 'editRoute' => 'records.edit', 'required' => 'title'])
+    @include('description._view', ['subject' => $record, 'standard' => \App\Description\Elements::ISAD_G])
 
-    @foreach($elements as $element)
-        @php($values = $record->descriptionValues->where('element_id', $element->id))
-        @continue($values->isEmpty())
-        <h2>{{ $element->label(['en', 'und']) }}</h2>
-        @foreach($values->sortBy('language') as $value)
-            <p lang="{{ $value->language }}">{{ $value->value }}</p>
-            <p><small>{{ $value->language }}, {{ $value->is_original ? 'original' : 'translation' }}, {{ $value->state->label(['en', 'und']) }}</small></p>
-        @endforeach
-    @endforeach
-
-    <h2>Dates (3.1.3)</h2>
+    <h2>Structured dates (3.1.3)</h2>
     @foreach($record->dates as $date)
         <form method="post" action="{{ route('records.dates.destroy', [$record, $date]) }}">
             @csrf

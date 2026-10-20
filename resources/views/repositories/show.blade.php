@@ -6,19 +6,8 @@
     <h1>{{ $repository->described('authorised-name', [app()->getLocale(), 'en']) }}</h1>
     @if(session('status'))<p role="status">{{ session('status') }}</p>@endif
     <p><strong>Persistent IRI:</strong> <code>{{ $repository->iri }}</code>@if($repository->identifier)<br><strong>Identifier:</strong> {{ $repository->identifier }}@endif</p>
-    @php($languages = $repository->descriptionValues->pluck('language')->unique()->sort()->values())
-    <p>Edit in:
-        @foreach($languages as $lang)<a href="{{ route('repositories.edit', [$repository, 'language' => $lang]) }}">{{ $lang }}</a> @endforeach
-        <a href="{{ route('repositories.edit', [$repository, 'language' => 'en']) }}">another language</a></p>
-    @foreach($elements as $element)
-        @php($values = $repository->descriptionValues->where('element_id', $element->id))
-        @continue($values->isEmpty())
-        <h2>{{ $element->label(['en', 'und']) }}</h2>
-        @foreach($values->sortBy('language') as $value)
-            <p lang="{{ $value->language }}">{{ $value->value }}</p>
-            <p><small>{{ $value->language }}, {{ $value->is_original ? 'original' : 'translation' }}, {{ $value->state->label(['en', 'und']) }}</small></p>
-        @endforeach
-    @endforeach
+    @include('description._actions', ['subject' => $repository, 'editRoute' => 'repositories.edit', 'required' => 'authorised-name'])
+    @include('description._view', ['subject' => $repository, 'standard' => \App\Description\Elements::ISDIAH])
 
     <h2>Contact points</h2>
     @if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif

@@ -22,6 +22,10 @@ It grants nothing new: the owner of the live directory can already change the co
 
 Every audit row is signed (ADR 0004). The key is `storage/keys/audit-signing.sk` in the live directory, created by the first deploy that needs it (`workspace:audit:create-key --if-missing`) and never replaced. Back it up separately from the database dumps, which do not contain it: if it is lost, the Workspace refuses every change until it is restored. `php artisan workspace:audit:verify` checks the whole chain.
 
+## Files outside the database
+
+Back these up with the database dumps, which do not contain them: the audit signing key (`storage/keys/`) and the institution logo (`storage/app/private/branding/`).
+
 ## When a deploy fails
 
 The site stays in maintenance mode and the script prints two commands: one to deploy the previous release again, and one to bring the site up as it is. A failed migration inside PostgreSQL rolls back by itself; to undo a migration that completed, restore the backup the script named:

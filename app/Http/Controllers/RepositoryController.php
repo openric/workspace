@@ -52,7 +52,8 @@ class RepositoryController extends Controller
         ]);
         $repository = $this->repositories->create($request->user()->institution, $data['name'], $data['language'], $data['identifier'] ?? null, $request->user());
 
-        return redirect()->route('repositories.show', $repository)->with('status', 'Repository created.');
+        // Straight to the full description, so every ISDIAH element is in view.
+        return redirect()->route('repositories.edit', [$repository, 'language' => $data['language']])->with('status', 'Repository created. Describe it now, or later.');
     }
 
     public function show(Request $request, Repository $repository): View

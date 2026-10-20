@@ -36,6 +36,45 @@ final class Elements
         return self::of($standard)->pluck('notation')->all();
     }
 
+    /**
+     * Area headings of the two standards, keyed by area number. These are the
+     * standards' own section titles, used only as headings on screen; which
+     * area an element belongs to comes from the number in its scope note.
+     */
+    private const AREAS = [
+        '5.1' => 'Identity', '5.2' => 'Contact', '5.3' => 'Description', '5.4' => 'Access',
+        '5.5' => 'Services', '5.6' => 'Control',
+        '3.1' => 'Identity', '3.2' => 'Context', '3.3' => 'Content and structure',
+        '3.4' => 'Conditions of access and use', '3.5' => 'Allied materials', '3.6' => 'Notes', '3.7' => 'Description control',
+    ];
+
+    /** The element's number in its standard, such as 5.3.1 or 3.1.2, from its scope note. */
+    public static function number(Concept $element): ?string
+    {
+        $note = (string) $element->labels->firstWhere('language', 'en')?->scope_note;
+
+        return preg_match('/(?:ISDIAH|ISAD\(G\)) (\d+\.\d+\.\d+)/', $note, $m) ? $m[1] : null;
+    }
+
+    /**
+     * The standard's elements grouped under their areas, in order.
+     *
+     * @return array<string, Collection<int, Concept>> area heading => elements
+     */
+    public static function byArea(string $standard): array
+    {
+        $areas = [];
+        foreach (self::of($standard) as $element) {
+            $number = self::number($element);
+            $area = $number ? implode('.', array_slice(explode('.', $number), 0, 2)) : null;
+            $heading = $area ? ($area.' '.(self::AREAS[$area] ?? '')) : 'Other';
+            $areas[$heading] ??= new Collection;
+            $areas[$heading]->push($element);
+        }
+
+        return $areas;
+    }
+
     public static function flush(): void
     {
         self::$cache = [];

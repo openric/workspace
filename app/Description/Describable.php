@@ -17,6 +17,21 @@ trait Describable
         return $this->hasMany(DescriptionValue::class, 'subject_id')->where('subject_table', $this->getTable());
     }
 
+    /** The language the required element was first written in: where a description starts. */
+    public function originalLanguage(string $requiredNotation): string
+    {
+        $iri = Vocab::element($requiredNotation);
+        $original = $this->descriptionValues->first(fn (DescriptionValue $v) => $v->element->iri === $iri && $v->is_original);
+
+        return $original?->language ?? 'en';
+    }
+
+    /** @return list<string> every language the description has a value in */
+    public function languages(): array
+    {
+        return $this->descriptionValues->pluck('language')->unique()->sort()->values()->all();
+    }
+
     /** The value of one element in the first of the given languages that has one. */
     public function described(string $elementNotation, array $languages): ?string
     {

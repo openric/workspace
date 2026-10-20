@@ -65,7 +65,8 @@ class RecordController extends Controller
             return back()->withInput()->withErrors(['repository' => $e->getMessage()]);
         }
 
-        return redirect()->route('records.show', $record)->with('status', 'Unit of description created.');
+        // Straight to the full description, so every ISAD(G) element is in view.
+        return redirect()->route('records.edit', [$record, 'language' => $data['language']])->with('status', 'Created. Describe it now, or later.');
     }
 
     public function show(Request $request, RecordResource $record): View

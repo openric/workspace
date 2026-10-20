@@ -14,6 +14,7 @@ use App\Http\Controllers\PasswordController;
 use App\Http\Controllers\RecordController;
 use App\Http\Controllers\RepositoryController;
 use App\Http\Controllers\SessionController;
+use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\VocabularyController;
 use App\Support\Vocab;
 use Illuminate\Support\Facades\Route;
@@ -30,6 +31,9 @@ Route::pattern('repository', '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0
 Route::get('/vocab/{scheme}.ttl', [VocabularyController::class, 'turtleFile'])->where('scheme', '[a-z-]+');
 Route::get('/vocab/{scheme}', [VocabularyController::class, 'scheme'])->where('scheme', '[a-z-]+');
 Route::get('/vocab/{scheme}/{notation}', [VocabularyController::class, 'concept'])->where(['scheme' => '[a-z-]+', 'notation' => '[a-z0-9-]+']);
+
+// Public: the logo appears on the sign-in page too.
+Route::get('/branding/logo', [SettingsController::class, 'logo'])->name('branding.logo');
 
 Route::middleware('guest')->group(function () {
     Route::get('/sign-in', [SessionController::class, 'create'])->name('sign-in');
@@ -71,6 +75,11 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::post('/{record}/reorder', [RecordController::class, 'reorder'])->name('reorder');
         Route::post('/{record}/dates', [RecordController::class, 'storeDate'])->name('dates.store');
         Route::post('/{record}/dates/{date}/remove', [RecordController::class, 'destroyDate'])->name('dates.destroy');
+    });
+
+    Route::middleware('can:'.Vocab::permission('manage-institution'))->group(function () {
+        Route::get('/settings', [SettingsController::class, 'edit'])->name('settings.edit');
+        Route::post('/settings', [SettingsController::class, 'update'])->name('settings.update');
     });
 
     Route::middleware('can:'.Vocab::permission('manage-accounts'))->prefix('accounts')->name('accounts.')->group(function () {

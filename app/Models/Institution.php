@@ -12,10 +12,21 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['name', 'base_iri'])]
+#[Fillable(['name', 'base_iri', 'header_title', 'logo_path', 'logo_mime'])]
 class Institution extends Model
 {
     use Audited, HasUuids;
+
+    /** The institution whose branding a page shows: the signed-in account's, or the installation's only one. */
+    public static function current(): ?self
+    {
+        return auth()->user()?->institution ?? self::orderBy('created_at')->first();
+    }
+
+    public function headerTitle(): string
+    {
+        return $this->header_title ?: (string) config('app.name');
+    }
 
     public function users(): HasMany
     {
