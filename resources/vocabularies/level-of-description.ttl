@@ -14,7 +14,7 @@ v: a skos:ConceptScheme ;
     dcterms:title "OpenRiC Workspace Levels of Description"@en ;
     dcterms:description "Levels of arrangement of a unit of description (ISAD(G) 3.1.4)."@en ;
     dcterms:issued "2026-10-20"^^xsd:date ;
-    skos:hasTopConcept v:fonds, v:collection, v:subfonds, v:series, v:subseries, v:file, v:item, v:part .
+    skos:hasTopConcept v:fonds, v:collection, v:record-group, v:subfonds, v:series, v:subseries, v:file, v:item, v:part .
 
 v:fonds a skos:Concept ;
     skos:inScheme v: ;
@@ -29,6 +29,13 @@ v:collection a skos:Concept ;
     skos:prefLabel "Collection"@en ;
     skos:scopeNote "A level of AtoM and EAD beside the ISAD(G) levels; exported as rico:RecordSet."@en ;
     skos:definition "Records brought together on the basis of some common characteristic, without regard to their provenance; not a fonds."@en .
+
+v:record-group a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Record group"@en ;
+    skos:scopeNote "A level of AtoM, after the North American practice (RAD, DACS), beside the ISAD(G) levels; exported as rico:RecordSet."@en ;
+    skos:definition "The records of an organisation, or of a part of it, kept together as one body for arrangement and control, in the way a fonds is."@en .
 
 v:subfonds a skos:Concept ;
     skos:inScheme v: ;

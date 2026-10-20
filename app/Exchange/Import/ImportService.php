@@ -23,13 +23,21 @@ namespace App\Exchange\Import;
 
 use App\Audit\AuditLog;
 use App\Description\AgentService;
+use App\Description\ContactPointService;
 use App\Description\DateService;
+use App\Description\DescriptionService;
 use App\Description\Edtf;
+use App\Description\Elements;
 use App\Description\IdentifierService;
+use App\Description\InstantiationService;
 use App\Description\PlaceService;
 use App\Description\RecordService;
+use App\Description\RepositoryService;
+use App\Exchange\Ead;
 use App\Models\Agent;
 use App\Models\Concept;
+use App\Models\ContactPoint;
+use App\Models\DigitalFile;
 use App\Models\Import;
 use App\Models\Institution;
 use App\Models\Name;
@@ -51,7 +59,14 @@ use RuntimeException;
 
 class ImportService
 {
-    public const FORMATS = ['csv' => 'CSV (AtoM ISAD(G) columns)', 'ead' => 'EAD 2002 or EAD3'];
+    public const FORMATS = ['csv' => 'Archival descriptions: CSV (AtoM ISAD(G) columns)', 'ead' => 'Archival descriptions: EAD 2002 or EAD3',
+        'authority-csv' => 'Authority records: CSV (AtoM ISAAR(CPF) columns)', 'repository-csv' => 'Repositories: CSV (AtoM ISDIAH columns)'];
+
+    /** The table each format's entries become. */
+    public const TABLES = ['csv' => 'record_resources', 'ead' => 'record_resources', 'authority-csv' => 'agents', 'repository-csv' => 'repositories'];
+
+    /** The permission kind that governs each table's entries. */
+    private const PERMISSIONS = ['record_resources' => 'description', 'agents' => 'authority', 'repositories' => 'repository'];
 
     private const LEVELS = Vocab::BASE.'level-of-description/';
 
@@ -66,6 +81,8 @@ class ImportService
     /** @var array<string, RecordResource> units by their key in this file */
     private array $byKey = [];
 
+    private bool $commit = false;
+
     /** @var array<string, bool> keys of units not imported, so the units inside them are not either */
     private array $failed = [];
 
@@ -73,7 +90,15 @@ class ImportService
     private array $resolved = [];
 
     public function __construct(private RecordService $records, private IdentifierService $identifiers, private DateService $dates,
-        private RelationService $relations, private AgentService $agents, private PlaceService $places, private ConceptService $concepts) {}
+        private RelationService $relations, private AgentService $agents, private PlaceService $places, private ConceptService $concepts,
+        private RepositoryService $repositories, private ContactPointService $contacts, private InstantiationService $instantiations,
+        private DescriptionService $descriptions) {}
+
+    /** The permission kind an import of this format needs: description, authority or repository. */
+    public static function permission(string $format): string
+    {
+        return self::PERMISSIONS[self::TABLES[$format] ?? 'record_resources'];
+    }
 
     /** Read the file and import it; a dry run rolls everything back. The report is stored on the import. */
     public function run(Import $import, bool $commit): Report
@@ -83,10 +108,14 @@ class ImportService
         $this->institution = Institution::findOrFail($import->institution_id);
         $this->report = new Report;
         $this->byKey = $this->failed = $this->resolved = [];
+        $this->commit = $commit;
         try {
-            $drafts = $import->format === 'ead'
-                ? app(EadReader::class)->read($import->content, $import->language, $this->report)
-                : app(CsvReader::class)->read($import->content, $import->language, $this->report);
+            $drafts = match ($import->format) {
+                'ead' => app(EadReader::class)->read($import->content, $import->language, $this->report),
+                'authority-csv' => app(AtomEntityReader::class)->read('authority', $import->content, $import->language, $this->report),
+                'repository-csv' => app(AtomEntityReader::class)->read('repository', $import->content, $import->language, $this->report),
+                default => app(CsvReader::class)->read($import->content, $import->language, $this->report),
+            };
         } catch (InvalidArgumentException $e) {
             $this->report->issue('whole file', 'file', $import->file_name, $e->getMessage(), 'rejected');
             $import->update(['report' => $this->report->toArray()]);
@@ -101,8 +130,11 @@ class ImportService
                         $this->unit($draft);
                     }
                 });
-                // The database's deferred checks run now, so a dry run meets them too.
+                // The database's deferred checks run now, so a dry run meets them too; then they are deferred
+                // again, as every deferrable constraint of the schema is by default, for whatever the
+                // surrounding transaction does next.
                 DB::statement('SET CONSTRAINTS ALL IMMEDIATE');
+                DB::statement('SET CONSTRAINTS ALL DEFERRED');
                 if (! $commit) {
                     throw new DryRun;
                 }
@@ -126,7 +158,7 @@ class ImportService
         return $this->report;
     }
 
-    private function unit(UnitDraft $draft): void
+    private function unit(UnitDraft|EntityDraft $draft): void
     {
         if ($draft->parentKey !== null && isset($this->failed[$draft->parentKey])) {
             $this->failed[$draft->key] = true;
@@ -137,7 +169,11 @@ class ImportService
         $before = $this->seq();
         [$resolved, $counts, $issues] = [$this->resolved, $this->report->counts, count($this->report->issues)];
         try {
-            $unit = DB::transaction(fn () => $this->write($draft));
+            $unit = DB::transaction(fn () => match (true) {
+                $draft instanceof UnitDraft => $this->write($draft),
+                $this->import->format === 'authority-csv' => $this->authority($draft),
+                default => $this->repository($draft),
+            });
         } catch (InvalidArgumentException|QueryException|RuntimeException $e) {
             // Rolled back to before this unit: what it created does not exist, so forget it.
             $this->resolved = $resolved;
@@ -149,7 +185,9 @@ class ImportService
 
             return;
         }
-        $this->byKey[$draft->key] = $unit;
+        if ($draft instanceof UnitDraft) {
+            $this->byKey[$draft->key] = $unit;
+        }
         $this->report->unit($draft, $unit->wasRecentlyCreated ? 'created' : ($this->seq() !== $before ? 'updated' : 'unchanged'), $unit->id);
     }
 
@@ -162,7 +200,7 @@ class ImportService
         $levelIri = $this->level($draft, $unit === null);
 
         if ($unit === null) {
-            $holder = $parent?->repository ?? Repository::findOrFail($this->import->repository_id);
+            $holder = $parent ? $this->holder($parent) : ($this->namedRepository($draft) ?? Repository::findOrFail($this->import->repository_id));
             if (! $this->user->may('create', 'description', $parent ?? $holder)) {
                 throw new InvalidArgumentException('you may not create units of description '.($parent ? 'inside that unit' : 'in that repository'));
             }
@@ -178,8 +216,11 @@ class ImportService
                 $this->records->updateIdentity($unit, $draft->identifier ?? $unit->identifier, $levelIri ?? $unit->level->iri, $this->user);
             }
         }
-        if ($draft->repositoryName !== null && $parent === null && mb_strtolower($draft->repositoryName) !== mb_strtolower((string) EntityKinds::label($unit->repository))) {
-            $this->report->issue($draft->location, 'repository', $draft->repositoryName, 'imported into '.EntityKinds::label($unit->repository).', the repository chosen for the import', 'note');
+        $holder = $this->holder($unit);
+        if ($draft->repositoryName !== null && mb_strtolower($draft->repositoryName) !== mb_strtolower((string) EntityKinds::label($holder))) {
+            $this->report->issue($draft->location, 'repository', $draft->repositoryName, $unit->parent_id
+                ? 'a unit inside another is held by the holder of the unit at the top, '.EntityKinds::label($holder)
+                : 'held by '.EntityKinds::label($holder).', the repository chosen for the import: no one repository here has this name', 'note');
         }
         foreach ($values as $valueLanguage => $byElement) {
             $this->records->describe($unit, $byElement, $valueLanguage, $this->user);
@@ -189,17 +230,282 @@ class ImportService
         $this->control($draft, $unit);
         $this->unitDates($draft, $unit);
         $this->links($draft, $unit, $language);
-        DB::table('import_keys')->upsert([['id' => (string) Str::uuid7(), 'institution_id' => $this->institution->id, 'source' => $this->import->source,
-            'key' => $draft->key, 'record_resource_id' => $unit->id, 'import_id' => $this->import->id, 'created_at' => now(), 'updated_at' => now()]],
-            ['institution_id', 'source', 'key'], ['record_resource_id', 'import_id', 'updated_at']);
+        foreach ($draft->files as $file) {
+            $this->file($draft, $unit, $file['uri'], $file['sha256'], $language);
+        }
+        $this->key($draft->key, $unit);
 
         return $unit;
+    }
+
+    /** Tie the entry's key in this source to the entity it became, so importing again updates it. */
+    private function key(string $key, Model $entity): void
+    {
+        DB::table('import_keys')->upsert([['id' => (string) Str::uuid7(), 'institution_id' => $this->institution->id, 'source' => $this->import->source,
+            'subject_table' => $entity->getTable(), 'key' => $key, 'subject_id' => $entity->getKey(), 'import_id' => $this->import->id,
+            'created_at' => now(), 'updated_at' => now()]],
+            ['institution_id', 'source', 'subject_table', 'key'], ['subject_id', 'import_id', 'updated_at']);
+    }
+
+    /** The repository that holds a unit: its own, or that of the unit at the top. */
+    private function holder(RecordResource $unit): Repository
+    {
+        return $unit->repository ?? ($unit->ancestors()[0] ?? null)?->repository ?? Repository::findOrFail($this->import->repository_id);
+    }
+
+    /** The one repository with the authorised name the file gives, where the account may describe; else null. */
+    private function namedRepository(UnitDraft $draft): ?Repository
+    {
+        if ($draft->repositoryName === null) {
+            return null;
+        }
+        $found = Repository::where('institution_id', $this->institution->id)->whereNull('deleted_at')
+            ->whereIn('id', $this->namedQuery('repositories', $draft->repositoryName))->get();
+
+        return $found->count() === 1 && $this->user->may('create', 'description', $found->first()) ? $found->first() : null;
+    }
+
+    /**
+     * The file AtoM kept for the unit, read from the copy of AtoM's uploads folder an administrator made
+     * (WORKSPACE_IMPORT_FILES), where the path of digitalObjectURI after /uploads/ finds it, and checked
+     * against AtoM's checksum. A path that climbs out of the folder is refused. A dry run checks the file and keeps
+     * nothing; a unit that has the file already (the same SHA-256) does not take it again.
+     * ponytail: files are hashed and kept one by one inside the import's transaction; many large files want a queued job.
+     */
+    private function file(UnitDraft $draft, RecordResource $unit, string $uri, ?string $sha256, string $language): void
+    {
+        if ($sha256 !== null && DigitalFile::where('sha256', $sha256)->whereHas('use', fn ($q) => $q->where('notation', 'master'))
+            ->whereHas('instantiation', fn ($q) => $q->where('record_resource_id', $unit->id)->whereNull('deleted_at'))->exists()) {
+            return;
+        }
+        $root = config('workspace.import_files');
+        $root = $root ? realpath($root) : false;
+        if ($root === false) {
+            $this->report->issue($draft->location, 'digitalObjectURI', $uri, 'no copy of AtoM\'s uploads folder is set up for imports (WORKSPACE_IMPORT_FILES); the file is not kept', 'left-out');
+
+            return;
+        }
+        // The file's path inside the folder, from the URI: a segment that climbs out (..) is refused. The folder's
+        // own symbolic links are the administrator's (AtoM's uploads often link to other storage) and are followed.
+        $path = (string) parse_url($uri, PHP_URL_PATH);
+        $at = strpos($path, '/uploads/');
+        $segments = $at === false ? [] : explode('/', rawurldecode(substr($path, $at + strlen('/uploads/'))));
+        $safe = $segments !== [] && ! array_filter($segments, fn ($s) => $s === '' || $s === '.' || $s === '..' || str_contains($s, "\0"));
+        $local = $safe ? $root.DIRECTORY_SEPARATOR.implode(DIRECTORY_SEPARATOR, $segments) : false;
+        if ($local === false || ! is_file($local) || ! is_readable($local)) {
+            $this->report->issue($draft->location, 'digitalObjectURI', $uri, 'not in the copy of AtoM\'s uploads folder; the file is not kept', 'left-out');
+
+            return;
+        }
+        if (filesize($local) > config('workspace.max_upload_megabytes') * 1024 * 1024) {
+            $this->report->issue($draft->location, 'digitalObjectURI', $uri, 'larger than '.config('workspace.max_upload_megabytes').' MB; the file is not kept', 'left-out');
+
+            return;
+        }
+        if ($sha256 !== null && ! hash_equals($sha256, hash_file('sha256', $local))) {
+            $this->report->issue($draft->location, 'digitalObjectChecksum', $sha256, 'the file in the copy is not the one AtoM kept: its SHA-256 differs; not kept', 'left-out');
+
+            return;
+        }
+        if (! $this->commit) {
+            $this->report->issue($draft->location, 'digitalObjectURI', basename($local), 'found'.($sha256 ? ' and its SHA-256 matches' : ', with no checksum to compare').'; kept as a digital instantiation when imported', 'note');
+
+            return;
+        }
+        if (! $this->user->may('update', 'description', $unit)) {
+            $this->report->issue($draft->location, 'digitalObjectURI', $uri, 'you may not add instantiations to this unit; the file is not kept', 'left-out');
+
+            return;
+        }
+        // The store takes the file it is given; a copy keeps the uploads folder as it was.
+        $copy = tempnam(sys_get_temp_dir(), 'import');
+        try {
+            copy($local, $copy);
+            $this->instantiations->upload($unit, $copy, basename($local), $language, null, $sha256, 'online', $this->user);
+            $this->report->counts['files']++;
+        } catch (RuntimeException|InvalidArgumentException $e) {
+            $this->report->issue($draft->location, 'digitalObjectURI', $uri, 'not kept: '.$e->getMessage(), 'left-out');
+        } finally {
+            @unlink($copy);
+        }
+    }
+
+    /** An authority record (ISAAR(CPF)): matched by its key in this source, or, when asked, by its one authorised name. */
+    private function authority(EntityDraft $draft): Agent
+    {
+        $type = $this->agentType($draft);
+        $agent = $this->keyed(Agent::class, $draft->key) ?? $this->byName(Agent::class, 'agents', $draft, $type);
+        $language = $draft->language($this->import->language);
+        if ($agent === null) {
+            if (! $this->user->may('create', 'authority')) {
+                throw new InvalidArgumentException('you may not create authority records');
+            }
+            $type ?? throw new InvalidArgumentException('it has no type of entity: choose a kind for authority records with none, or give typeOfEntity');
+            $name = $draft->title() ?? throw new InvalidArgumentException('it has no authorised form of name, and a new authority record needs one');
+            $agent = $this->agents->create($this->institution, $type, $name, $language, $draft->identifier, $this->user);
+            $agent->wasRecentlyCreated = true;
+        } else {
+            if ($agent->merged_into_id !== null || ! $this->user->may('update', 'authority', $agent)) {
+                throw new InvalidArgumentException('it matches '.$agent->iri.', which you may not update');
+            }
+            $agent->wasRecentlyCreated = false;
+            if ($type !== null && $type !== $agent->agentType->notation) {
+                $this->report->issue($draft->location, 'typeOfEntity', $draft->type, 'the authority record here is a '.$agent->agentType->label(['en']).'; its type is kept', 'left-out');
+            }
+            if ($draft->identifier !== null && $draft->identifier !== $agent->identifier) {
+                $this->identifiers->setLocal($agent, $draft->identifier, $this->user);
+            }
+        }
+        $this->describeEntity($agent, Elements::ISAAR_CPF, $draft, 'agent-authorised-name');
+        [$status, $detail] = [$this->controlConcept($draft, $draft->status, Vocab::DESCRIPTION_STATUSES, 'status'), $this->controlConcept($draft, $draft->detail, Vocab::DESCRIPTION_DETAILS, 'levelOfDetail')];
+        if ($draft->descriptionIdentifier !== null || $status !== null || $detail !== null) {
+            $this->agents->updateControl($agent, ['type' => $agent->agentType->notation, 'description_identifier' => $draft->descriptionIdentifier ?? $agent->description_identifier,
+                'maintainer' => $agent->maintainer_id, 'status' => $status ?? $agent->descriptionStatus?->iri, 'detail' => $detail ?? $agent->descriptionDetail?->iri,
+                'embargo_until' => $agent->embargo_until?->format('Y-m-d')], $this->user);
+        }
+        foreach ($draft->occupations as $occupation) {
+            if ($agent->agentType->notation !== 'person') {
+                $this->report->issue($draft->location, 'actorOccupations', $occupation['name'], 'in RiC-O an occupation is a person\'s; not linked', 'left-out');
+            } elseif ($concept = $this->term($draft, 'occupation-type', 'actorOccupations', $occupation['name'], $language)) {
+                $this->relate($draft, $agent, 'occupation', $concept, array_filter(['description' => $occupation['note'], 'language' => $occupation['note'] ? $language : null]));
+            }
+        }
+        foreach ($draft->places as $name) {
+            if ($place = $this->place($draft, $name, null, $language)) {
+                $this->relate($draft, $place, 'place', $agent);
+            }
+        }
+        $this->key($draft->key, $agent);
+
+        return $agent;
+    }
+
+    /** A repository (ISDIAH): matched by its key in this source, or, when asked, by its one authorised name. */
+    private function repository(EntityDraft $draft): Repository
+    {
+        $repository = $this->keyed(Repository::class, $draft->key) ?? $this->byName(Repository::class, 'repositories', $draft);
+        $language = $draft->language($this->import->language);
+        if ($repository === null) {
+            if (! $this->user->may('create', 'repository')) {
+                throw new InvalidArgumentException('you may not create repositories');
+            }
+            $name = $draft->title() ?? throw new InvalidArgumentException('it has no authorised form of name, and a new repository needs one');
+            $repository = $this->repositories->create($this->institution, $name, $language, $draft->identifier, $this->user);
+            $repository->wasRecentlyCreated = true;
+        } else {
+            if (! $this->user->may('update', 'repository', $repository)) {
+                throw new InvalidArgumentException('it matches '.$repository->iri.', which you may not update');
+            }
+            $repository->wasRecentlyCreated = false;
+            if ($draft->identifier !== null && $draft->identifier !== $repository->identifier) {
+                $this->repositories->updateIdentity($repository, $draft->identifier, $this->user);
+            }
+        }
+        $this->describeEntity($repository, Elements::ISDIAH, $draft, 'authorised-name');
+        [$status, $detail] = [$this->controlConcept($draft, $draft->status, Vocab::DESCRIPTION_STATUSES, 'descriptionStatus'), $this->controlConcept($draft, $draft->detail, Vocab::DESCRIPTION_DETAILS, 'levelOfDetail')];
+        if ($draft->descriptionIdentifier !== null || $status !== null || $detail !== null) {
+            $this->repositories->updateControl($repository, $draft->descriptionIdentifier ?? $repository->description_identifier,
+                $status ?? $repository->descriptionStatus?->iri, $detail ?? $repository->descriptionDetail?->iri, $this->user);
+        }
+        if ($draft->contact !== []) {
+            // The file's contact fills the primary contact point; an empty field leaves what is there.
+            $contact = $repository->contactPoints()->orderByDesc('is_primary')->first();
+            $fields = [...array_filter($contact?->only(ContactPoint::FIELDS) ?? [], fn ($v) => $v !== null), ...$draft->contact];
+            if (isset($fields['country_code']) && ! preg_match('/^[A-Za-z]{2}$/', $fields['country_code'])) {
+                $this->report->issue($draft->location, 'country', $fields['country_code'], 'not an ISO 3166 two-letter country code; left out', 'left-out');
+                unset($fields['country_code']);
+            }
+            if ($contact === null || array_diff_assoc(array_map('strval', $fields), array_map('strval', array_filter($contact->only(ContactPoint::FIELDS), fn ($v) => $v !== null))) !== []) {
+                $this->contacts->save($repository, [...$fields, 'is_primary' => true], $contact, $this->user);
+            }
+        }
+        $this->key($draft->key, $repository);
+
+        return $repository;
+    }
+
+    /**
+     * Write the entry's values in each language. Names of a type other than authorised are added to the
+     * names already there, never put in their place, so an import never removes a name.
+     */
+    private function describeEntity(Model $entity, string $standard, EntityDraft $draft, string $required): void
+    {
+        foreach ($draft->values as $language => $values) {
+            foreach ($values as $notation => $text) {
+                $type = Elements::nameType($notation);
+                if ($type !== null && $type !== 'authorised') {
+                    $have = Name::where(['subject_table' => $entity->getTable(), 'subject_id' => $entity->getKey(), 'language' => $language])
+                        ->whereHas('nameType', fn ($q) => $q->where('iri', Vocab::NAME_TYPES.$type))->pluck('value')->all();
+                    $values[$notation] = implode("\n", array_unique([...$have, ...explode("\n", $text)]));
+                }
+            }
+            $this->descriptions->describe($entity, $standard, $values, $language, $required, $this->user);
+            $this->report->counts['values'] += count($values);
+        }
+    }
+
+    /** An authority record's type from the file's type of entity, by notation or label, or the kind chosen for the import. */
+    private function agentType(EntityDraft $draft): ?string
+    {
+        if ($draft->type === null) {
+            $chosen = ($this->import->options['agent_type'] ?? '') ?: null;
+            if ($chosen !== null) {
+                $this->report->issue($draft->location, 'typeOfEntity', null, 'no type of entity in the file; a '.str_replace('-', ' ', $chosen).', as chosen for the import', 'note');
+            }
+
+            return $chosen;
+        }
+        $wanted = mb_strtolower($draft->type);
+        $type = Concept::choices(Agent::TYPES)->get()->first(fn (Concept $c) => mb_strtolower((string) $c->notation) === $wanted
+            || $c->labels->contains(fn ($l) => mb_strtolower($l->pref_label) === $wanted));
+
+        return $type?->notation ?? throw new InvalidArgumentException('"'.$draft->type.'" is not a type of entity the Workspace knows');
+    }
+
+    /**
+     * The one entity of this class with the entry's authorised name (and type), when the import was asked to match by name.
+     *
+     * @template T of Model
+     *
+     * @param  class-string<T>  $class
+     * @return ?T
+     */
+    private function byName(string $class, string $table, EntityDraft $draft, ?string $type = null): ?Model
+    {
+        if (! ($this->import->options['match_identifier'] ?? false) || $draft->title() === null) {
+            return null;
+        }
+        $same = $class::where('institution_id', $this->institution->id)->whereNull('deleted_at')
+            ->when($class === Agent::class, fn ($q) => $q->whereNull('merged_into_id'))
+            ->when($type !== null, fn ($q) => $q->whereHas('agentType', fn ($q) => $q->where('iri', Agent::TYPES.$type)))
+            ->whereIn('id', $this->namedQuery($table, $draft->title()))->get();
+        if ($same->count() > 1) {
+            $this->report->issue($draft->location, 'authorizedFormOfName', $draft->title(), $same->count().' entries here have this name; a new one is made', 'ambiguous');
+        }
+
+        return $same->count() === 1 ? $same->first() : null;
+    }
+
+    /** A status or level of detail by notation or label, as a concept IRI; null when the file gives none or one the Workspace does not know. */
+    private function controlConcept(EntityDraft $draft, ?string $label, string $vocabulary, string $field): ?string
+    {
+        if ($label === null) {
+            return null;
+        }
+        $wanted = mb_strtolower($label);
+        $found = Concept::choices($vocabulary)->get()->first(fn (Concept $c) => mb_strtolower((string) $c->notation) === $wanted
+            || $c->labels->contains(fn ($l) => mb_strtolower($l->pref_label) === $wanted));
+        if ($found === null) {
+            $this->report->issue($draft->location, $field, $label, 'not a value the Workspace knows; left as it was', 'left-out');
+        }
+
+        return $found?->iri;
     }
 
     private function parent(UnitDraft $draft): ?RecordResource
     {
         if ($draft->parentKey !== null) {
-            return $this->byKey[$draft->parentKey] ?? $this->keyed($draft->parentKey)
+            return $this->byKey[$draft->parentKey] ?? $this->keyed(RecordResource::class, $draft->parentKey)
                 ?? throw new InvalidArgumentException('the unit it is inside ('.$draft->parentKey.') is not earlier in the file nor imported before from this source');
         }
         if ($draft->parentIri !== null && ($found = $this->existing(RecordResource::where('iri', $draft->parentIri)))) {
@@ -215,7 +521,7 @@ class ImportService
         if ($draft->iri !== null && ($unit = $this->existing(RecordResource::where('iri', $draft->iri)))) {
             return $unit;
         }
-        if ($unit = $this->keyed($draft->key)) {
+        if ($unit = $this->keyed(RecordResource::class, $draft->key)) {
             return $unit;
         }
         if (($this->import->options['match_identifier'] ?? false) && $draft->identifier !== null) {
@@ -232,11 +538,20 @@ class ImportService
         return null;
     }
 
-    private function keyed(string $key): ?RecordResource
+    /**
+     * The entity a key of this source became, unless it was deleted since.
+     *
+     * @template T of Model
+     *
+     * @param  class-string<T>  $class
+     * @return ?T
+     */
+    private function keyed(string $class, string $key): ?Model
     {
-        $id = DB::table('import_keys')->where(['institution_id' => $this->institution->id, 'source' => $this->import->source, 'key' => $key])->value('record_resource_id');
+        $table = (new $class)->getTable();
+        $id = DB::table('import_keys')->where(['institution_id' => $this->institution->id, 'source' => $this->import->source, 'subject_table' => $table, 'key' => $key])->value('subject_id');
 
-        return $id ? $this->existing(RecordResource::whereKey($id)) : null;
+        return $id ? $class::whereKey($id)->where('institution_id', $this->institution->id)->whereNull('deleted_at')->first() : null;
     }
 
     private function existing($query): ?RecordResource
@@ -248,13 +563,20 @@ class ImportService
     private function level(UnitDraft $draft, bool $new): ?string
     {
         if ($draft->level === null) {
-            if ($new) {
-                throw new InvalidArgumentException('it has no level of description, and a new unit needs one');
+            if (! $new) {
+                return null;
             }
+            $default = ($this->import->options['default_level'] ?? '') ?: null;
+            $level = $default ? Concept::choices(self::LEVELS)->get()->first(fn (Concept $c) => $c->notation === $default) : null;
+            if ($level === null) {
+                throw new InvalidArgumentException('it has no level of description, and a new unit needs one: choose a level for units with none, or give one in the file');
+            }
+            $this->report->issue($draft->location, 'level', null, 'no level of description in the file; '.$level->label(['en']).', as chosen for the import', 'note');
 
-            return null;
+            return $level->iri;
         }
         $wanted = mb_strtolower($draft->level);
+        $wanted = array_flip(Ead::LEVEL_NAMES)[$wanted] ?? $wanted;
         $levels = Concept::choices(self::LEVELS)->get();
         $level = $levels->first(fn (Concept $c) => mb_strtolower((string) $c->notation) === $wanted)
             ?? $levels->first(fn (Concept $c) => $c->labels->contains(fn ($l) => mb_strtolower($l->pref_label) === $wanted));
@@ -371,7 +693,7 @@ class ImportService
         }
     }
 
-    private function relate(UnitDraft $draft, Model $source, string $type, Model $target): void
+    private function relate(UnitDraft|EntityDraft $draft, Model $source, string $type, Model $target, array $fields = []): void
     {
         $exists = Relation::where(['source_table' => $source->getTable(), 'source_id' => $source->getKey(), 'target_table' => $target->getTable(), 'target_id' => $target->getKey()])
             ->whereHas('relationType', fn ($q) => $q->where('iri', Vocab::BASE.'relation-type/'.$type))->exists()
@@ -381,7 +703,7 @@ class ImportService
             return;
         }
         try {
-            $this->relations->create($source, $type, $target, [], null, ['origin' => 'import', 'label' => $this->import->source]);
+            $this->relations->create($source, $type, $target, $fields, null, ['origin' => 'import', 'label' => $this->import->source]);
             $this->report->counts['relations']++;
         } catch (InvalidArgumentException $e) {
             $this->report->issue($draft->location, $type, EntityKinds::label($target), $e->getMessage().'; not linked', 'left-out');
@@ -389,7 +711,7 @@ class ImportService
     }
 
     /** An agent by the IRI the file gives, else the one agent of that authorised name, else a new one where allowed. */
-    private function agent(UnitDraft $draft, string $name, ?string $type, ?string $iri, string $language, ?string $history, string $field): ?Model
+    private function agent(UnitDraft|EntityDraft $draft, string $name, ?string $type, ?string $iri, string $language, ?string $history, string $field): ?Model
     {
         if ($iri !== null) {
             $found = Agent::where('iri', $iri)->where('institution_id', $this->institution->id)->whereNull('deleted_at')->first()
@@ -431,20 +753,28 @@ class ImportService
         return $this->resolved[$cacheKey] = $agent;
     }
 
-    private function subject(UnitDraft $draft, string $label, ?string $iri, string $language): ?Concept
+    private function subject(UnitDraft|EntityDraft $draft, string $label, ?string $iri, string $language): ?Concept
     {
         if ($iri !== null && ($found = Concept::where(['iri' => $iri, 'institution_id' => $this->institution->id])->whereNull('deprecated_at')->first())) {
             return $found;
         }
-        $cacheKey = 'subject:'.mb_strtolower($label);
+
+        return $this->term($draft, 'subject', 'subject', $label, $language);
+    }
+
+    /** The one concept of this label in the institution's vocabularies of a kind (subject, occupation-type), else a new one where allowed. */
+    private function term(UnitDraft|EntityDraft $draft, string $kind, string $field, string $label, string $language): ?Concept
+    {
+        $cacheKey = $kind.':'.mb_strtolower($label);
         if (array_key_exists($cacheKey, $this->resolved)) {
             return $this->resolved[$cacheKey];
         }
+        $what = str_replace('-type', '', $kind);
         $matches = Concept::where('institution_id', $this->institution->id)->whereNull('deprecated_at')
-            ->whereHas('vocabulary.kind', fn ($q) => $q->where('iri', Vocab::BASE.'concept-scheme-kind/subject'))
+            ->whereHas('vocabulary.kind', fn ($q) => $q->where('iri', Vocab::BASE.'concept-scheme-kind/'.$kind))
             ->whereHas('labels', fn ($q) => $q->whereRaw('lower(pref_label) = ?', [mb_strtolower($label)]))->get();
         if ($matches->count() > 1) {
-            $this->report->issue($draft->location, 'subject', $label, $matches->count().' subjects have this label; not linked', 'ambiguous');
+            $this->report->issue($draft->location, $field, $label, $matches->count()." {$what}s have this label; not linked", 'ambiguous');
 
             return $this->resolved[$cacheKey] = null;
         }
@@ -452,18 +782,18 @@ class ImportService
             return $this->resolved[$cacheKey] = $matches->first();
         }
         if (! ($this->import->options['create_terms'] ?? false) || ! $this->user->may('create', 'vocabulary')) {
-            $this->report->issue($draft->location, 'subject', $label, 'no subject has this label; not linked', 'left-out');
+            $this->report->issue($draft->location, $field, $label, "no $what has this label; not linked", 'left-out');
 
             return $this->resolved[$cacheKey] = null;
         }
-        $concept = $this->concepts->create($this->concepts->schemeOfKind($this->institution, 'subject', $this->user), ['label' => $label, 'language' => $language], $this->user);
+        $concept = $this->concepts->create($this->concepts->schemeOfKind($this->institution, $kind, $this->user), ['label' => $label, 'language' => $language], $this->user);
         $this->report->counts['concepts']++;
-        $this->report->issue($draft->location, 'subject', $label, 'a new subject', 'created');
+        $this->report->issue($draft->location, $field, $label, "a new $what", 'created');
 
         return $this->resolved[$cacheKey] = $concept;
     }
 
-    private function place(UnitDraft $draft, string $name, ?string $iri, string $language): ?Place
+    private function place(UnitDraft|EntityDraft $draft, string $name, ?string $iri, string $language): ?Place
     {
         if ($iri !== null && ($found = Place::where(['iri' => $iri, 'institution_id' => $this->institution->id])->whereNull('deleted_at')->first())) {
             return $found;
@@ -501,21 +831,24 @@ class ImportService
     }
 
     /**
-     * After an import: every unit the report says was imported exists, has its title and is keyed to this source;
-     * the number of units in the file is the number imported or matched plus the number not imported.
+     * After an import: every entry the report says was imported exists, has its authorised name or title and is
+     * keyed to this source; the number of entries in the file is the number imported or matched plus the number not imported.
      */
     private function reconcile(): array
     {
+        $table = self::TABLES[$this->import->format] ?? 'record_resources';
         $imported = collect($this->report->units)->where('action', '!=', 'rejected');
-        $ids = $imported->pluck('unit_id')->filter()->all();
-        $present = RecordResource::whereKey($ids)->whereNull('deleted_at')->whereHas('names', fn ($q) => $q->whereHas('nameType', fn ($q) => $q->where('iri', Vocab::NAME_TYPES.'authorised')))->count();
-        $keyed = DB::table('import_keys')->where(['institution_id' => $this->institution->id, 'source' => $this->import->source])->whereIn('record_resource_id', $ids)->distinct()->count('record_resource_id');
+        $ids = $imported->pluck('unit_id')->filter()->unique()->values()->all();
+        $present = DB::table($table)->whereIn('id', $ids)->whereNull('deleted_at')
+            ->whereIn('id', Name::where('subject_table', $table)->whereHas('nameType', fn ($q) => $q->where('iri', Vocab::NAME_TYPES.'authorised'))->select('subject_id'))->count();
+        $keyed = DB::table('import_keys')->where(['institution_id' => $this->institution->id, 'source' => $this->import->source, 'subject_table' => $table])
+            ->whereIn('subject_id', $ids)->distinct()->count('subject_id');
         $actions = $this->report->actions();
 
         return [
             'in_file' => count($this->report->units), 'imported_or_matched' => $imported->count(), 'not_imported' => $actions['rejected'],
             'present_with_title' => $present, 'keyed_to_source' => $keyed,
-            'holds' => $present === count(array_unique($ids)) && $keyed === count(array_unique($ids)) && $imported->count() + $actions['rejected'] === count($this->report->units),
+            'holds' => $present === count($ids) && $keyed === count($ids) && $imported->count() + $actions['rejected'] === count($this->report->units),
         ];
     }
 

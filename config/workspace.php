@@ -175,6 +175,10 @@ return [
     'object_store' => env('WORKSPACE_OBJECT_STORE'),
     'virus_scanner' => env('WORKSPACE_VIRUS_SCANNER', 'clamdscan'),
 
+    // A copy of AtoM's uploads folder (the one holding r/), from which an import of
+    // archival descriptions takes the file each digitalObjectURI names; empty, none is.
+    'import_files' => env('WORKSPACE_IMPORT_FILES'),
+
     // The OAI-PMH adminEmail when no repository gives a contact email (Export-Only).
     'oai_admin_email' => env('WORKSPACE_OAI_ADMIN_EMAIL'),
 ];

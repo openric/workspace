@@ -44,6 +44,9 @@ class Ead
     /** The levels EAD names; any other is otherlevel with its label. */
     public const LEVELS = ['collection', 'fonds', 'class', 'recordgrp', 'series', 'subfonds', 'subgrp', 'subseries', 'file', 'item'];
 
+    /** Level notations EAD spells otherwise. */
+    public const LEVEL_NAMES = ['record-group' => 'recordgrp'];
+
     /** The EAD name element for each agent type; a repository is a corporate body. */
     private const NAME_ELEMENTS = ['person' => 'persname', 'family' => 'famname'];
 
@@ -224,8 +227,9 @@ class Ead
     private function level(XMLWriter $x, RecordResource $unit): void
     {
         $level = $unit->level;
-        if (in_array($level->notation, self::LEVELS, true)) {
-            $x->writeAttribute('level', $level->notation);
+        $name = self::LEVEL_NAMES[$level->notation] ?? $level->notation;
+        if (in_array($name, self::LEVELS, true)) {
+            $x->writeAttribute('level', $name);
         } else {
             $x->writeAttribute('level', 'otherlevel');
             $x->writeAttribute('otherlevel', (string) $level->label(['en', 'und']));

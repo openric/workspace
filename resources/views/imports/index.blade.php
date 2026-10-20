@@ -1,4 +1,4 @@
-{{-- OpenRiC Workspace - imports of archival description. Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems. SPDX-License-Identifier: AGPL-3.0-or-later --}}
+{{-- OpenRiC Workspace - imports of archival description, authority records and repositories. Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems. SPDX-License-Identifier: AGPL-3.0-or-later --}}
 @extends('layouts.app')
 @section('title', 'Imports')
 @section('content')
@@ -9,13 +9,14 @@
         <p>No imports yet.</p>
     @else
         <table>
-            <thead><tr><th>When</th><th>File</th><th>Source</th><th>By</th><th>State</th><th>Units</th></tr></thead>
+            <thead><tr><th>When</th><th>File</th><th>Source</th><th>By</th><th>What</th><th>State</th><th>Entries</th></tr></thead>
             <tbody>
             @foreach($imports as $import)
                 @php($actions = $import->report['actions'] ?? null)
                 <tr>
                     <td><a href="{{ route('imports.show', $import) }}">{{ $import->created_at->format('Y-m-d H:i') }}</a></td>
                     <td>{{ $import->file_name }}</td><td>{{ $import->source }}</td><td>{{ $import->user->name }}</td>
+                    <td>{{ \App\Exchange\Import\ImportService::FORMATS[$import->format] ?? $import->format }}</td>
                     <td>{{ $import->committed_at ? 'Imported '.$import->committed_at->format('Y-m-d H:i') : 'Dry run' }}</td>
                     <td>@if($actions){{ $actions['created'] }} new, {{ $actions['updated'] }} updated, {{ $actions['unchanged'] }} unchanged, {{ $actions['rejected'] }} not imported @endif</td>
                 </tr>

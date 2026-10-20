@@ -17,6 +17,7 @@ use App\Models\Concept;
 use App\Models\Import;
 use App\Models\RecordResource;
 use App\Models\Repository;
+use App\Support\Vocab;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -24,41 +25,46 @@ use Illuminate\View\View;
 
 class ImportController extends Controller
 {
+    private const LEVELS = Vocab::BASE.'level-of-description/';
+
     public function __construct(private ImportService $imports) {}
 
     public function index(Request $request): View
     {
-        abort_unless($request->user()->mayAnywhere('create', 'description'), 403);
+        abort_unless($this->mayImport($request), 403);
 
         return view('imports.index', ['imports' => Import::where('institution_id', $request->user()->institution_id)->with('user')->latest()->limit(100)->get()]);
     }
 
     public function create(Request $request): View
     {
-        abort_unless($request->user()->mayAnywhere('create', 'description'), 403);
+        abort_unless($this->mayImport($request), 403);
         $parent = $request->query('parent') ? $this->unit($request, (string) $request->query('parent')) : null;
 
-        return view('imports.create', ['parent' => $parent, 'formats' => ImportService::FORMATS, 'repositories' => $this->repositories($request),
-            'agentTypes' => Concept::choices(Agent::TYPES)->get()->filter(fn ($t) => in_array($t->notation, ['person', 'family', 'corporate-body'], true))]);
+        return view('imports.create', ['parent' => $parent, 'formats' => $this->formats($request), 'repositories' => $this->repositories($request),
+            'agentTypes' => Concept::choices(Agent::TYPES)->get()->filter(fn ($t) => in_array($t->notation, ['person', 'family', 'corporate-body'], true)),
+            'levels' => Concept::choices(self::LEVELS)->get()]);
     }
 
     public function store(Request $request): RedirectResponse
     {
         $user = $request->user();
-        abort_unless($user->mayAnywhere('create', 'description'), 403);
+        abort_unless($this->mayImport($request), 403);
         $data = $request->validate([
             'file' => ['required', 'file', 'max:20480'],
-            'format' => ['required', Rule::in(array_keys(ImportService::FORMATS))],
+            'format' => ['required', Rule::in(array_keys($this->formats($request)))],
             'source' => ['nullable', 'string', 'max:255'],
-            'repository' => ['required', 'uuid'],
+            'repository' => [Rule::requiredIf(fn () => ImportService::permission((string) $request->input('format')) === 'description'), 'nullable', 'uuid'],
             'parent' => ['nullable', 'uuid'],
             'language' => ['required', 'string', fn ($a, $v, $fail) => Bcp47::valid((string) $v) || $fail('Give a BCP 47 language tag, such as en or af.')],
             'agent_type' => ['nullable', Rule::in(['person', 'family', 'corporate-body'])],
             'create_terms' => ['nullable', 'boolean'],
             'match_identifier' => ['nullable', 'boolean'],
+            'default_level' => ['nullable', Rule::in(Concept::choices(self::LEVELS)->pluck('notation')->all())],
         ]);
-        $repository = $this->repositories($request)->firstWhere('id', $data['repository']) ?? abort(404);
-        $parent = isset($data['parent']) ? $this->unit($request, $data['parent']) : null;
+        $describes = ImportService::permission($data['format']) === 'description';
+        $repository = $describes ? ($this->repositories($request)->firstWhere('id', $data['repository']) ?? abort(404)) : null;
+        $parent = $describes && isset($data['parent']) ? $this->unit($request, $data['parent']) : null;
         $content = (string) file_get_contents($request->file('file')->getRealPath());
         if (! mb_check_encoding($content, 'UTF-8')) {
             return back()->withInput()->withErrors(['file' => 'The file is not UTF-8. Save it as UTF-8 (in a spreadsheet, "CSV UTF-8") and upload it again.']);
@@ -67,8 +73,9 @@ class ImportController extends Controller
         $import = Import::create([
             'institution_id' => $user->institution_id, 'user_id' => $user->id, 'format' => $data['format'],
             'source' => trim((string) ($data['source'] ?? '')) ?: $name, 'file_name' => $name, 'file_sha256' => hash('sha256', $content),
-            'content' => $content, 'language' => $data['language'], 'repository_id' => $repository->id, 'parent_id' => $parent?->id,
-            'options' => ['agent_type' => $data['agent_type'] ?? null, 'create_terms' => (bool) ($data['create_terms'] ?? false), 'match_identifier' => (bool) ($data['match_identifier'] ?? false)],
+            'content' => $content, 'language' => $data['language'], 'repository_id' => $repository?->id, 'parent_id' => $parent?->id,
+            'options' => ['agent_type' => $data['agent_type'] ?? null, 'create_terms' => (bool) ($data['create_terms'] ?? false),
+                'match_identifier' => (bool) ($data['match_identifier'] ?? false), 'default_level' => $describes ? ($data['default_level'] ?? null) : null],
         ]);
         $this->imports->run($import, false);
 
@@ -98,7 +105,18 @@ class ImportController extends Controller
     private function own(Request $request, Import $import): void
     {
         abort_unless($import->institution_id === $request->user()->institution_id, 404);
-        abort_unless($request->user()->mayAnywhere('create', 'description'), 403);
+        abort_unless($this->mayImport($request), 403);
+    }
+
+    /** The formats the account may import: each needs the create permission of the kind of entity it makes. */
+    private function formats(Request $request): array
+    {
+        return array_filter(ImportService::FORMATS, fn ($name, $format) => $request->user()->mayAnywhere('create', ImportService::permission($format)), ARRAY_FILTER_USE_BOTH);
+    }
+
+    private function mayImport(Request $request): bool
+    {
+        return $this->formats($request) !== [];
     }
 
     private function unit(Request $request, string $id): RecordResource

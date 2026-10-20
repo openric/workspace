@@ -24,37 +24,85 @@ class CsvReader
     /** Columns that hold several entries, separated by |. */
     private const SPLIT = '|';
 
-    /** @return list<UnitDraft> in the order of the file */
-    public function read(string $content, string $language, Report $report): array
+    /**
+     * Columns AtoM's own export adds to its import template, and what becomes of them; an empty
+     * reason means the column is read with another.
+     */
+    private const ATOM_EXPORT = [
+        'slug' => 'AtoM\'s web address name for a unit is not kept: the Workspace mints a persistent IRI, and legacyId keys the unit to its source',
+        'digitalObjectChecksum' => '',
+        'eventDescriptions' => 'a note on an AtoM event is not kept: a creator is a relation and a date is a date; not read',
+        'eventPlaces' => 'the place of an AtoM event is not kept: a creator is a relation, not an activity with a place; not read',
+    ];
+
+    /**
+     * The rows of a CSV file as column => cell, with the line each starts on. A cell loses the control
+     * characters XML cannot carry (each removal is reported), and AtoM's NULL, which stands for
+     * nothing in a list of several, reads as empty.
+     *
+     * @param  list<string>  $needs  columns of which the header must have at least one
+     * @return \Generator<int, array{0: int, 1: array<string, string>}>
+     */
+    public static function rows(string $content, array $needs, string $what, Report $report): \Generator
     {
         $content = preg_replace('/^\xEF\xBB\xBF/', '', $content);
         $stream = fopen('php://memory', 'r+');
         fwrite($stream, $content);
         rewind($stream);
         $header = fgetcsv($stream, escape: '');
-        if (! is_array($header) || ! array_intersect(['title', 'legacyId'], $header = array_map('trim', $header))) {
+        if (! is_array($header) || ! array_intersect($needs, $header = array_map('trim', $header))) {
             fclose($stream);
-            throw new \InvalidArgumentException('the file has no header row with a title or legacyId column, so it is not CSV in AtoM\'s columns');
+            throw new \InvalidArgumentException('the file has no header row with a '.implode(' or ', $needs).' column, so it is not CSV in AtoM\'s columns for '.$what);
         }
+        $line = 1;
+        try {
+            while (($row = fgetcsv($stream, escape: '')) !== false) {
+                $line++;
+                if ($row === [null] || implode('', $row) === '') {
+                    continue;
+                }
+                $cells = [];
+                foreach ($header as $i => $column) {
+                    $cell = (string) ($row[$i] ?? '');
+                    $clean = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', '', $cell, -1, $removed);
+                    if ($removed > 0) {
+                        $report->issue("row $line", $column, null, $removed.' control '.($removed === 1 ? 'character' : 'characters').' removed: XML, and so EAD and RDF, cannot carry them', 'note');
+                    }
+                    $cells[$column] = self::nothing($clean) ? '' : trim($clean);
+                }
+                yield [$line, $cells];
+            }
+        } finally {
+            fclose($stream);
+        }
+    }
+
+    /** A cell that holds nothing but AtoM's NULL, alone or in a list: NULL, NULL|NULL. */
+    private static function nothing(string $cell): bool
+    {
+        return trim(str_replace(['NULL', self::SPLIT], '', $cell)) === '' && trim($cell) !== '' && str_contains($cell, 'NULL');
+    }
+
+    /** @return list<UnitDraft> in the order of the file */
+    public function read(string $content, string $language, Report $report): array
+    {
         $report->once('publicationStatus', 'imported values are drafts until someone publishes them, whatever the file says', 'note');
 
         /** @var array<string, UnitDraft> $drafts */
         $drafts = [];
-        $line = 1;
-        while (($row = fgetcsv($stream, escape: '')) !== false) {
-            $line++;
-            if ($row === [null] || implode('', $row) === '') {
-                continue;
-            }
-            $cells = [];
-            foreach ($header as $i => $column) {
-                $cells[$column] = trim((string) ($row[$i] ?? ''));
-            }
+        foreach (self::rows($content, ['title', 'legacyId'], 'archival descriptions', $report) as [$line, $cells]) {
             // A column the import does not read is listed once, where it holds something.
             foreach ($cells as $column => $cell) {
-                if ($cell !== '' && ! array_key_exists($column, DescriptionCsv::COLUMNS)) {
+                if ($cell === '') {
+                    continue;
+                }
+                if (isset(self::ATOM_EXPORT[$column])) {
+                    if (self::ATOM_EXPORT[$column] !== '') {
+                        $report->once($column, self::ATOM_EXPORT[$column], 'note');
+                    }
+                } elseif (! array_key_exists($column, DescriptionCsv::COLUMNS)) {
                     $report->once($column, 'not a column of AtoM\'s ISAD(G) template or the Workspace; not read');
-                } elseif ($cell !== '' && DescriptionCsv::COLUMNS[$column] === null && $column !== 'qubitParentSlug') {
+                } elseif (DescriptionCsv::COLUMNS[$column] === null && ! in_array($column, ['qubitParentSlug', 'digitalObjectURI'], true)) {
                     $report->once($column, $this->why($column));
                 }
             }
@@ -107,9 +155,11 @@ class CsvReader
                 }
             }
             $this->events($draft, $cells, $rowLanguage, $report);
+            if (($cells['digitalObjectURI'] ?? '') !== '') {
+                $draft->files[] = ['uri' => $cells['digitalObjectURI'], 'sha256' => strtolower($cells['digitalObjectChecksum'] ?? '') ?: null];
+            }
             $drafts[$draft->key] = $draft;
         }
-        fclose($stream);
 
         return array_values($drafts);
     }
@@ -188,7 +238,8 @@ class CsvReader
         if (trim($value) === '') {
             return [];
         }
-        $parts = array_map('trim', explode(self::SPLIT, $value));
+        // AtoM writes NULL for an entry that is empty, so the lists of one event stay in step.
+        $parts = array_map(fn ($p) => trim($p) === 'NULL' ? '' : trim($p), explode(self::SPLIT, $value));
 
         return $dropEmpty ? array_values(array_filter($parts, fn ($p) => $p !== '')) : $parts;
     }
@@ -197,7 +248,7 @@ class CsvReader
     {
         return match ($column) {
             'accessionNumber' => 'accessions are not kept yet; not read',
-            'digitalObjectPath', 'digitalObjectURI' => 'digital objects are not kept yet; not read',
+            'digitalObjectPath' => 'a path on the AtoM server is not fetched; export with digitalObjectURI to bring the file',
             'physicalObjectName', 'physicalObjectLocation', 'physicalObjectType' => 'physical storage is not kept yet; not read',
             'language', 'script', 'scriptOfDescription' => 'language and script codes are not kept yet; the narrative languageNote is read',
             'genreAccessPoints' => 'documentary form types are not linked to units yet; not read',

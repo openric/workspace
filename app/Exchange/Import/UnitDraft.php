@@ -62,6 +62,9 @@ final class UnitDraft
 
     public ?string $repositoryName = null;
 
+    /** @var list<array{uri: string, sha256: ?string}> files AtoM kept for the unit, to fetch on import */
+    public array $files = [];
+
     public function value(string $language, string $notation, ?string $text): void
     {
         $text = trim((string) $text);
@@ -70,6 +73,18 @@ final class UnitDraft
         }
         $current = $this->values[$language][$notation] ?? null;
         $this->values[$language][$notation] = $current === null ? $text : $current."\n\n".$text;
+    }
+
+    /** The title, in the first language the file gives one. */
+    public function title(): ?string
+    {
+        foreach ($this->values as $values) {
+            if (isset($values['title'])) {
+                return $values['title'];
+            }
+        }
+
+        return null;
     }
 
     /** The language the unit is first described in: the first one the file gives. */

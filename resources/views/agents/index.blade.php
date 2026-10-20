@@ -5,7 +5,7 @@
     <h1>Authority records</h1>
     @if(session('status'))<p role="status">{{ session('status') }}</p>@endif
     <p>
-        @if(auth()->user()->may('create', 'authority'))<a href="{{ route('agents.create') }}">New authority record</a> · @endif
+        @if(auth()->user()->may('create', 'authority'))<a href="{{ route('agents.create') }}">New authority record</a> · <a href="{{ route('imports.create') }}">Import</a> · @endif
         <a href="{{ route('agents.dashboard') }}">Dashboard and work queue</a>
         @if(auth()->user()->may('update', 'authority')) · <a href="{{ route('agents.duplicates') }}">Possible duplicates</a>@endif
     </p>

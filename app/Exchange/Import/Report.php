@@ -20,7 +20,7 @@ final class Report
     public array $issues = [];
 
     /** @var array<string, int> */
-    public array $counts = ['relations' => 0, 'agents' => 0, 'places' => 0, 'concepts' => 0, 'values' => 0];
+    public array $counts = ['relations' => 0, 'agents' => 0, 'places' => 0, 'concepts' => 0, 'values' => 0, 'files' => 0];
 
     /** @var array<string, bool> issues reported once per file, such as a column the import does not read */
     private array $once = [];
@@ -38,13 +38,10 @@ final class Report
         }
     }
 
-    public function unit(UnitDraft $draft, string $action, ?string $unitId, ?string $message = null): void
+    /** What became of an entry of the file: a unit of description, an authority record, a repository, a subject or a place. */
+    public function unit(UnitDraft|EntityDraft $draft, string $action, ?string $unitId, ?string $message = null): void
     {
-        $title = null;
-        foreach ($draft->values as $values) {
-            $title ??= $values['title'] ?? null;
-        }
-        $this->units[] = ['location' => $draft->location, 'key' => $draft->key, 'title' => $title, 'action' => $action, 'unit_id' => $unitId, 'message' => $message];
+        $this->units[] = ['location' => $draft->location, 'key' => $draft->key, 'title' => $draft->title(), 'action' => $action, 'unit_id' => $unitId, 'message' => $message];
     }
 
     /** @return array<string, int> units by what became of them */

@@ -16,7 +16,6 @@ namespace App\Files;
 
 use finfo;
 use Illuminate\Support\Facades\Log;
-use Imagick;
 use InvalidArgumentException;
 use RuntimeException;
 use Symfony\Component\Process\Process;
@@ -83,18 +82,16 @@ class FileStore
             }
             $copies = [];
             foreach (self::COPIES as $use => $side) {
-                $image = new Imagick;
-                $image->readImage($source.'[0]');
-                $image->autoOrient();
-                $image->setImageBackgroundColor('white');
-                $image = $image->mergeImageLayers(Imagick::LAYERMETHOD_FLATTEN);
-                $image->thumbnailImage(min($side, $image->getImageWidth()), min($side, $image->getImageHeight()), true);
-                $image->stripImage();
-                $image->setImageFormat('jpeg');
-                $image->setImageCompressionQuality(85);
+                // ImageMagick runs in its own process, held to a memory and time limit, so a file that makes it
+                // crash or run away (a damaged TIFF can) costs only the copies, never the request or import.
                 $temp = tempnam(sys_get_temp_dir(), 'wsc');
-                $image->writeImage($temp);
-                $image->clear();
+                $process = new Process(['convert', '-limit', 'memory', '512MiB', '-limit', 'map', '1GiB', '-limit', 'time', '120',
+                    $source.'[0]', '-auto-orient', '-background', 'white', '-flatten', '-thumbnail', "{$side}x{$side}>", '-strip', '-quality', '85', 'jpeg:'.$temp]);
+                $process->setTimeout(150)->run();
+                if (! $process->isSuccessful() || filesize($temp) === 0) {
+                    @unlink($temp);
+                    throw new RuntimeException('ImageMagick could not read it: '.trim(mb_substr($process->getErrorOutput() ?: 'exit '.$process->getExitCode(), 0, 300)));
+                }
                 $sha = hash_file('sha256', $temp);
                 $copies[$use] = [...$this->keep($institutionId, $temp, $sha), 'sha256' => $sha, 'size_bytes' => (int) filesize($temp), 'mime_type' => 'image/jpeg',
                     ...$this->dimensions($temp), 'scanned_with' => null, 'scanned_at' => null];
@@ -151,12 +148,18 @@ class FileStore
         return (new finfo(FILEINFO_MIME_TYPE))->file($path) ?: 'application/octet-stream';
     }
 
-    /** @return array{width: ?int, height: ?int} */
+    /**
+     * The width and height a file's header gives, or null where it gives none a real image could have:
+     * a damaged header can claim billions of pixels.
+     *
+     * @return array{width: ?int, height: ?int}
+     */
     private function dimensions(string $path): array
     {
         $size = @getimagesize($path);
+        $plausible = fn ($n) => is_int($n) && $n > 0 && $n <= 1_000_000 ? $n : null;
 
-        return ['width' => $size[0] ?? null, 'height' => $size[1] ?? null];
+        return ['width' => $plausible($size[0] ?? null), 'height' => $plausible($size[1] ?? null)];
     }
 
     /** The scanner that passed the file, or null when none is configured; a virus, or a scanner that cannot answer, refuses it. */
