@@ -19,7 +19,7 @@ use Illuminate\Support\Str;
 
 class RepositoryService
 {
-    public function __construct(private DescriptionService $descriptions) {}
+    public function __construct(private DescriptionService $descriptions, private IdentifierService $identifiers) {}
 
     public function create(Institution $institution, string $name, string $language, ?string $identifier = null, ?User $actor = null): Repository
     {
@@ -30,19 +30,20 @@ class RepositoryService
             $repository = new Repository([
                 'institution_id' => $institution->id,
                 'iri' => $institution->base_iri.'/'.Repository::IRI_SEGMENT.'/'.$id,
-                'identifier' => $identifier === '' ? null : $identifier,
             ]);
             $repository->id = $id;
             $repository->save();
             $this->describe($repository, ['authorised-name' => $name], $language);
+            $this->identifiers->setLocal($repository, $identifier);
 
             return $repository;
         }));
     }
 
+    /** ISDIAH 5.1.1: the local identifier, a rico:Identifier unique in the institution. */
     public function updateIdentity(Repository $repository, ?string $identifier, ?User $actor = null): void
     {
-        DB::transaction(fn () => AuditLog::actingAs($actor, fn () => $repository->update(['identifier' => $identifier === '' ? null : $identifier])));
+        $this->identifiers->setLocal($repository, $identifier, $actor);
     }
 
     /** ISDIAH 5.6.1, 5.6.4 and 5.6.5; status and detail are concept IRIs or null. */

@@ -5,7 +5,7 @@
     <section>
         <h2>{{ $area }}</h2>
         @foreach($elements as $element)
-            @php($values = $subject->descriptionValues->where('element_id', $element->id)
+            @php($values = $subject->valuesOf($element)
                 ->filter(fn ($v) => $drafts || $v->state->iri === \App\Support\Vocab::valueState('published'))
                 ->sortBy(fn ($v) => [! $v->is_original, $v->language]))
             <h3 style="margin-bottom: .2rem">{{ \App\Description\Elements::number($element) }} {{ $element->label(['en', 'und']) }}</h3>

@@ -13,7 +13,7 @@ v: a skos:ConceptScheme ;
     dcterms:title "OpenRiC Workspace Date Properties"@en ;
     dcterms:description "The meaning of a date for the entity it belongs to."@en ;
     dcterms:issued "2026-10-20"^^xsd:date ;
-    skos:hasTopConcept v:creation, v:accumulation, v:existence, v:birth, v:death, v:beginning, v:end, v:modification, v:relation, v:associated .
+    skos:hasTopConcept v:creation, v:accumulation, v:existence, v:birth, v:death, v:beginning, v:end, v:modification, v:relation, v:used-from, v:used-to, v:associated .
 
 v:creation a skos:Concept ;
     skos:inScheme v: ;
@@ -77,6 +77,20 @@ v:relation a skos:Concept ;
     skos:prefLabel "Date of a relation"@en ;
     skos:scopeNote "Exported as rico:relationHasDate. ISAAR(CPF) 5.3.4."@en ;
     skos:definition "When a relation held."@en .
+
+v:used-from a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Used from"@en ;
+    skos:scopeNote "Exported as rico:usedFromDate. ISAAR(CPF) 5.1.2 to 5.1.5."@en ;
+    skos:definition "When a name was first used."@en .
+
+v:used-to a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Used to"@en ;
+    skos:scopeNote "Exported as rico:usedToDate. ISAAR(CPF) 5.1.2 to 5.1.5."@en ;
+    skos:definition "When a name was last used."@en .
 
 v:associated a skos:Concept ;
     skos:inScheme v: ;

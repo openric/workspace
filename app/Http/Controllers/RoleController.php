@@ -177,9 +177,9 @@ class RoleController extends Controller
         $cells = $this->matrix->cells($holder, $kind);
         $institutionId = $holder->institution_id;
         $repositories = in_array($kind, ['repository', 'description'], true)
-            ? Repository::where('institution_id', $institutionId)->whereNull('deleted_at')->with('descriptionValues.element')->get() : collect();
+            ? Repository::where('institution_id', $institutionId)->whereNull('deleted_at')->with('descriptionValues.element', 'names.nameType', 'identifiers.identifierType')->get() : collect();
         $records = $kind === 'description'
-            ? RecordResource::where('institution_id', $institutionId)->whereNull('deleted_at')->with('descriptionValues.element')->get()
+            ? RecordResource::where('institution_id', $institutionId)->whereNull('deleted_at')->with('descriptionValues.element', 'names.nameType', 'identifiers.identifierType')->get()
                 ->sortBy(fn ($r) => mb_strtolower((string) $r->described('title', ['en']))) : collect();
         // Scopes shown: those with cells, plus one being added from the form below.
         $shownRepositories = array_unique(array_filter([...array_keys($cells['repositories']), $request->query('repository')]));

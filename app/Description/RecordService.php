@@ -20,7 +20,7 @@ use InvalidArgumentException;
 
 class RecordService
 {
-    public function __construct(private DescriptionService $descriptions) {}
+    public function __construct(private DescriptionService $descriptions, private IdentifierService $identifiers) {}
 
     public function create(Institution $institution, string $levelIri, string $title, string $language, ?RecordResource $parent = null, ?Repository $repository = null, ?string $identifier = null, ?User $actor = null): RecordResource
     {
@@ -35,7 +35,6 @@ class RecordService
             $record = new RecordResource([
                 'institution_id' => $institution->id,
                 'iri' => $institution->base_iri.'/'.RecordResource::IRI_SEGMENT.'/'.$id,
-                'identifier' => $identifier === '' ? null : $identifier,
                 'level_id' => $this->descriptions->concept($levelIri)->id,
                 'repository_id' => $repository->id,
                 'parent_id' => $parent?->id,
@@ -44,6 +43,7 @@ class RecordService
             $record->id = $id;
             $record->save();
             $this->describe($record, ['title' => $title], $language);
+            $this->identifiers->setLocal($record, $identifier);
 
             return $record;
         }));
@@ -57,10 +57,10 @@ class RecordService
 
     public function updateIdentity(RecordResource $record, ?string $identifier, string $levelIri, ?User $actor = null): void
     {
-        DB::transaction(fn () => AuditLog::actingAs($actor, fn () => $record->update([
-            'identifier' => $identifier === '' ? null : $identifier,
-            'level_id' => $this->descriptions->concept($levelIri)->id,
-        ])));
+        DB::transaction(fn () => AuditLog::actingAs($actor, function () use ($record, $identifier, $levelIri) {
+            $record->update(['level_id' => $this->descriptions->concept($levelIri)->id]);
+            $this->identifiers->setLocal($record, $identifier);
+        }));
     }
 
     /** Move under another unit, or to the top level when $parent is null; it goes last among its new siblings. */

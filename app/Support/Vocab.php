@@ -30,6 +30,10 @@ final class Vocab
 
     public const DESCRIPTION_DETAILS = self::BASE.'description-detail/';
 
+    public const NAME_TYPES = self::BASE.'name-type/';
+
+    public const IDENTIFIER_TYPES = self::BASE.'identifier-type/';
+
     public static function role(string $notation): string
     {
         return self::ACCOUNT_ROLES.$notation;

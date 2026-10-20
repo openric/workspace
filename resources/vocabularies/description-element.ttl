@@ -19,15 +19,22 @@ v:authorised-name a skos:Concept ;
     skos:inScheme v: ;
     skos:broader v:isdiah ;
     skos:prefLabel "Authorised form of name"@en ;
-    skos:scopeNote "ISDIAH 5.1.2; exported as rico:name."@en ;
+    skos:scopeNote "ISDIAH 5.1.2; kept as a rico:Name entity of name type authorised, one in each language."@en ;
     skos:definition "The standardised name of the institution."@en .
+
+v:parallel-name a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:isdiah ;
+    skos:prefLabel "Parallel form of name"@en ;
+    skos:scopeNote "ISDIAH 5.1.3; kept as rico:Name entities of name type parallel."@en ;
+    skos:definition "The authorised form of name in another language or script, one per line."@en .
 
 v:other-name a skos:Concept ;
     skos:inScheme v: ;
     skos:broader v:isdiah ;
     skos:prefLabel "Other form of name"@en ;
-    skos:scopeNote "ISDIAH 5.1.3; exported as openricx:otherName."@en ;
-    skos:definition "A parallel or other name by which the institution is known."@en .
+    skos:scopeNote "ISDIAH 5.1.4; kept as rico:Name entities of name type other."@en ;
+    skos:definition "Any other name by which the institution is or was known, such as an abbreviation or an earlier name, one per line."@en .
 
 v:history a skos:Concept ;
     skos:inScheme v: ;
@@ -171,7 +178,7 @@ v:title a skos:Concept ;
     skos:inScheme v: ;
     skos:broader v:isad-g ;
     skos:prefLabel "Title"@en ;
-    skos:scopeNote "ISAD(G) 3.1.2; exported as rico:title."@en ;
+    skos:scopeNote "ISAD(G) 3.1.2; kept as a rico:Title entity of name type authorised, one in each language."@en ;
     skos:definition "The name of the unit of description."@en .
 
 v:dates-expressed a skos:Concept ;

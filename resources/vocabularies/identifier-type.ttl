@@ -1,0 +1,44 @@
+# OpenRiC Workspace - OpenRiC Workspace Identifier Types.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# The type of a rico:Identifier (rico:hasIdentifierType; ADR 0006).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/identifier-type/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Identifier Types"@en ;
+    dcterms:description "What kind of identifier an identifier is."@en ;
+    dcterms:issued "2026-10-20"^^xsd:date ;
+    skos:hasTopConcept v:local, v:isil, v:previous, v:other .
+
+v:local a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Local identifier"@en ;
+    skos:scopeNote "ISDIAH 5.1.1, ISAD(G) 3.1.1, ISAAR(CPF) 5.1.6. Exported as a rico:Identifier with rico:hasIdentifierType."@en ;
+    skos:definition "The identifier the institution gives the entity: a repository code, the reference code of a unit of description at its level, or an authority record identifier. One per entity."@en .
+
+v:isil a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "ISIL"@en ;
+    skos:scopeNote "ISDIAH 5.1.1. Exported as a rico:Identifier with rico:hasIdentifierType."@en ;
+    skos:definition "An International Standard Identifier for Libraries and Related Organisations (ISO 15511)."@en .
+
+v:previous a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Previous identifier"@en ;
+    skos:scopeNote "Exported as a rico:Identifier with rico:hasIdentifierType."@en ;
+    skos:definition "An identifier the entity had before, such as a former reference code."@en .
+
+v:other a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Other identifier"@en ;
+    skos:scopeNote "Exported as a rico:Identifier with rico:hasIdentifierType."@en ;
+    skos:definition "Any other identifier, such as one given by another system."@en .

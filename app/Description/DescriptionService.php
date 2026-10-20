@@ -8,12 +8,15 @@
 // empty value removes it (audited with its text); a changed value goes back
 // to draft; the first language an element is written in is its original,
 // later ones are translations; a required element keeps at least one value.
+// Name elements (config workspace.name_elements) are written as rico:Name
+// entities by NameService, under the same rules.
 
 namespace App\Description;
 
 use App\Audit\AuditLog;
 use App\Models\Concept;
 use App\Models\DescriptionValue;
+use App\Models\Name;
 use App\Models\User;
 use App\Support\Vocab;
 use Illuminate\Database\Eloquent\Model;
@@ -22,6 +25,8 @@ use InvalidArgumentException;
 
 class DescriptionService
 {
+    public function __construct(private NameService $names) {}
+
     /**
      * @param  string  $standard  Elements::ISDIAH or Elements::ISAD_G
      * @param  array<string, ?string>  $values  element notation => text
@@ -39,6 +44,11 @@ class DescriptionService
         DB::transaction(fn () => AuditLog::actingAs($actor, function () use ($subject, $values, $language, $required) {
             $draft = $this->concept(Vocab::valueState('draft'));
             foreach ($values as $notation => $text) {
+                if ($type = Elements::nameType($notation)) {
+                    $this->names->writeElement($subject, $type, $language, (string) $text);
+
+                    continue;
+                }
                 $element = $this->concept(Vocab::element($notation));
                 $text = trim((string) $text);
                 $where = ['subject_table' => $subject->getTable(), 'subject_id' => $subject->getKey(), 'element_id' => $element->id];
@@ -56,11 +66,16 @@ class DescriptionService
                 }
             }
             $requiredElement = $this->concept(Vocab::element($required));
-            if (! DescriptionValue::where(['subject_table' => $subject->getTable(), 'subject_id' => $subject->getKey(), 'element_id' => $requiredElement->id])->exists()) {
+            $where = ['subject_table' => $subject->getTable(), 'subject_id' => $subject->getKey()];
+            $kept = ($type = Elements::nameType($required))
+                ? Name::where([...$where, 'name_type_id' => $this->concept(Vocab::NAME_TYPES.$type)->id])->exists()
+                : DescriptionValue::where([...$where, 'element_id' => $requiredElement->id])->exists();
+            if (! $kept) {
                 $label = $requiredElement->labels()->where('language', 'en')->value('pref_label') ?? $required;
                 throw new InvalidArgumentException("a description needs a value for $label");
             }
             $subject->unsetRelation('descriptionValues');
+            $subject->unsetRelation('names');
         }));
     }
 

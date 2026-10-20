@@ -15,7 +15,7 @@ return [
     'audit_signing_key' => env('WORKSPACE_AUDIT_SIGNING_KEY', storage_path('keys/audit-signing.sk')),
 
     // The Workspace's own vocabularies, bundled with the code (resources/vocabularies).
-    'bundled_vocabularies' => ['account-role.ttl', 'permission.ttl', 'audit-action.ttl', 'description-element.ttl', 'language-value-state.ttl', 'description-status.ttl', 'description-detail.ttl', 'level-of-description.ttl', 'record-kind.ttl', 'date-property.ttl', 'date-qualifier.ttl'],
+    'bundled_vocabularies' => ['account-role.ttl', 'permission.ttl', 'audit-action.ttl', 'description-element.ttl', 'language-value-state.ttl', 'description-status.ttl', 'description-detail.ttl', 'level-of-description.ttl', 'record-kind.ttl', 'date-property.ttl', 'date-qualifier.ttl', 'name-type.ttl', 'identifier-type.ttl'],
 
     // The shape of the permission matrix: for each kind of record (record-kind
     // vocabulary), the actions that apply to it (permission vocabulary), as
@@ -33,6 +33,18 @@ return [
         'description' => ['creation', 'accumulation', 'associated'],
         'agent' => ['existence', 'birth', 'death', 'associated'],
         'repository' => ['existence', 'associated'],
+        'name' => ['used-from', 'used-to'],
+    ],
+
+    // Description elements that are names (ADR 0006): what the description form
+    // writes there is kept as rico:Name entities of this name type (name-type
+    // vocabulary). An authorised name is single, one in each language; the others
+    // take one name per line.
+    'name_elements' => [
+        'title' => 'authorised',
+        'authorised-name' => 'authorised',
+        'parallel-name' => 'parallel',
+        'other-name' => 'other',
     ],
 
     // The roles a new institution starts with, by account-role template, with

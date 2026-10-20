@@ -33,7 +33,7 @@ class RepositoryController extends Controller
     public function index(Request $request): View
     {
         $repositories = Repository::where('institution_id', $request->user()->institution_id)->whereNull('deleted_at')
-            ->with('descriptionValues.element')->get()
+            ->with('descriptionValues.element', 'names.nameType', 'identifiers.identifierType')->get()
             ->filter(fn (Repository $r) => $request->user()->may('read', 'repository', $r))
             ->sortBy(fn (Repository $r) => mb_strtolower((string) $r->described('authorised-name', [app()->getLocale(), 'en'])));
 
@@ -52,10 +52,14 @@ class RepositoryController extends Controller
         abort_unless($request->user()->may('create', 'repository'), 403);
         $data = $request->validate([
             'name' => ['required', 'string', 'max:1024'],
-            'identifier' => ['nullable', 'string', 'max:255', Rule::unique('repositories')->where('institution_id', $request->user()->institution_id)],
+            'identifier' => ['nullable', 'string', 'max:255'],
             'language' => ['required', 'string', fn ($a, $v, $fail) => Bcp47::valid((string) $v) || $fail('Give a BCP 47 language tag, such as en or af.')],
         ]);
-        $repository = $this->repositories->create($request->user()->institution, $data['name'], $data['language'], $data['identifier'] ?? null, $request->user());
+        try {
+            $repository = $this->repositories->create($request->user()->institution, $data['name'], $data['language'], $data['identifier'] ?? null, $request->user());
+        } catch (InvalidArgumentException $e) {
+            return back()->withInput()->withErrors(['identifier' => $e->getMessage()]);
+        }
 
         // Straight to the full description, so every ISDIAH element is in view.
         return redirect()->route('repositories.edit', [$repository, 'language' => $data['language']])->with('status', 'Repository created. Describe it now, or later.');
@@ -64,7 +68,7 @@ class RepositoryController extends Controller
     public function show(Request $request, Repository $repository): View
     {
         $this->own($request, $repository);
-        $repository->load('descriptionValues.element.labels', 'descriptionValues.state.labels', 'contactPoints', 'descriptionStatus.labels', 'descriptionDetail.labels',
+        $repository->load('descriptionValues.element.labels', 'descriptionValues.state.labels', 'names.nameType.labels', 'names.state.labels', 'names.dates.property', 'identifiers.identifierType.labels', 'contactPoints', 'descriptionStatus.labels', 'descriptionDetail.labels',
             'dates.property.labels', 'dates.dateType.labels', 'dates.qualifier.labels');
 
         return view('repositories.show', ['repository' => $repository, 'elements' => $this->elements(), 'dateChoices' => app(DateService::class)->choices('repository')]);
@@ -75,7 +79,7 @@ class RepositoryController extends Controller
         $this->own($request, $repository, 'update');
         $language = (string) $request->query('language', 'en');
         abort_unless(Bcp47::valid($language), 404);
-        $repository->load('descriptionValues.element', 'descriptionStatus', 'descriptionDetail');
+        $repository->load('descriptionValues.element', 'names.nameType', 'identifiers.identifierType', 'descriptionStatus', 'descriptionDetail');
 
         return view('repositories.edit', ['repository' => $repository, 'elements' => $this->elements(), 'language' => $language,
             'statuses' => $this->concepts(Vocab::DESCRIPTION_STATUSES), 'details' => $this->concepts(Vocab::DESCRIPTION_DETAILS)]);
@@ -87,7 +91,7 @@ class RepositoryController extends Controller
         $notations = $this->elements()->pluck('notation')->all();
         $data = $request->validate([
             'language' => ['required', 'string', fn ($a, $v, $fail) => Bcp47::valid((string) $v) || $fail('Give a BCP 47 language tag, such as en or af.')],
-            'identifier' => ['nullable', 'string', 'max:255', Rule::unique('repositories')->where('institution_id', $repository->institution_id)->ignore($repository->id)],
+            'identifier' => ['nullable', 'string', 'max:255'],
             'values' => ['array'],
             'values.*' => ['nullable', 'string', 'max:65535'],
             'description_identifier' => ['nullable', 'string', 'max:255'],

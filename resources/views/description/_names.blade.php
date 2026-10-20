@@ -1,0 +1,41 @@
+{{-- OpenRiC Workspace - the names of a described entity, as rico:Name entities (ADR 0006). Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems. SPDX-License-Identifier: AGPL-3.0-or-later --}}
+{{-- Needs: $subject (Describable), $kind (URL segment), $canUpdate. Shows drafts only with $drafts (default true). --}}
+@php($drafts ??= true)
+@php($nameTypes = \App\Models\Concept::choices(\App\Support\Vocab::NAME_TYPES)->get())
+@php($names = $subject->names->filter(fn ($n) => $drafts || $n->state->iri === \App\Support\Vocab::valueState('published'))
+    ->sortBy(fn ($n) => [$nameTypes->search(fn ($t) => $t->id === $n->name_type_id), ! $n->is_original, $n->language]))
+<h2>Names</h2>
+@forelse($names as $name)
+    @php($from = $name->usedDate('used-from')?->normalized_value)
+    @php($to = $name->usedDate('used-to')?->normalized_value)
+    @php($summary = $name->nameType->label(['en', 'und']).': '.$name->value.' ('.$name->language.', '.$name->state->label(['en', 'und']).(($from || $to) ? ', used '.($from ?? '?').' to '.($to ?? '?') : '').')')
+    @unless($canUpdate)
+        <p lang="{{ $name->language }}">{{ $summary }}</p>
+        @continue
+    @endunless
+    <details>
+        <summary lang="{{ $name->language }}">{{ $summary }}</summary>
+        <form method="post" action="{{ route('names.update', [$kind, $subject->getKey(), $name]) }}">
+            @csrf
+            @include('description._name-fields', ['name' => $name, 'prefix' => 'n'.$loop->index, 'from' => $from, 'to' => $to])
+            <button type="submit">Save name</button>
+        </form>
+        <form method="post" action="{{ route('names.destroy', [$kind, $subject->getKey(), $name]) }}">
+            @csrf
+            <button type="submit">Remove name</button>
+        </form>
+        <p><strong>Persistent IRI:</strong> <code>{{ $name->iri }}</code></p>
+    </details>
+@empty
+    <p>None yet.</p>
+@endforelse
+@if($canUpdate)
+<details>
+    <summary>Add a name</summary>
+    <form method="post" action="{{ route('names.store', [$kind, $subject->getKey()]) }}">
+        @csrf
+        @include('description._name-fields', ['name' => null, 'prefix' => 'new-name', 'from' => null, 'to' => null])
+        <button type="submit">Add name</button>
+    </form>
+</details>
+@endif

@@ -36,7 +36,8 @@ class AuditLog
     public static function actingAs(?User $actor, callable $work): mixed
     {
         $previous = self::$actingAs;
-        self::$actingAs = $actor;
+        // A nested call without an actor keeps the actor of the call around it.
+        self::$actingAs = $actor ?? $previous;
         try {
             return $work();
         } finally {

@@ -11,21 +11,15 @@
 namespace App\Http\Controllers;
 
 use App\Description\DateService;
-use App\Models\RecordResource;
-use App\Models\Repository;
+use App\Http\Controllers\Concerns\ResolvesDescribedEntity;
 use App\Models\RicDate;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use InvalidArgumentException;
 
 class DateController extends Controller
 {
-    /** URL segment => [model class, record kind for permissions, route of its page]. */
-    private const SUBJECTS = [
-        'records' => [RecordResource::class, 'description', 'records.show'],
-        'repositories' => [Repository::class, 'repository', 'repositories.show'],
-    ];
+    use ResolvesDescribedEntity;
 
     public function __construct(private DateService $dates) {}
 
@@ -63,25 +57,9 @@ class DateController extends Controller
         return redirect()->route($route, $subject)->with('status', 'Date removed.');
     }
 
-    /** @return array{0: Model, 1: string} */
-    private function subject(Request $request, string $kind, string $id): array
-    {
-        [$class, $permissionKind, $route] = self::SUBJECTS[$kind] ?? abort(404);
-        $subject = $class::find($id);
-        abort_unless($subject && $subject->institution_id === $request->user()->institution_id && $subject->deleted_at === null, 404);
-        abort_unless($request->user()->may('update', $permissionKind, $subject), 403);
-
-        return [$subject, $route];
-    }
-
-    private function belongs(Model $subject, RicDate $date): void
-    {
-        abort_unless($date->subject_table === $subject->getTable() && $date->subject_id === $subject->getKey(), 404);
-    }
-
     private function fields(Request $request, string $kind): array
     {
-        $properties = config('workspace.date_properties.'.self::SUBJECTS[$kind][1]);
+        $properties = config('workspace.date_properties.'.$this->recordKind($kind));
 
         return $request->validate([
             'property' => ['required', 'string', 'in:'.implode(',', $properties)],

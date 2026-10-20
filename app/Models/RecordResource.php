@@ -9,16 +9,17 @@ namespace App\Models;
 use App\Audit\Audited;
 use App\Description\Describable;
 use App\Description\HasDates;
+use App\Description\HasIdentifiers;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['institution_id', 'iri', 'identifier', 'level_id', 'repository_id', 'parent_id', 'position'])]
+#[Fillable(['institution_id', 'iri', 'level_id', 'repository_id', 'parent_id', 'position'])]
 class RecordResource extends Model
 {
-    use Audited, Describable, HasDates, HasUuids;
+    use Audited, Describable, HasDates, HasIdentifiers, HasUuids;
 
     /** The URL path segment of its persistent IRI: {base IRI}/record/{UUID}. */
     public const IRI_SEGMENT = 'record';

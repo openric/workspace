@@ -51,7 +51,9 @@ class RepositoryTest extends TestCase
         $repository = Repository::firstOrFail();
         $this->assertSame("https://archives.example.org/repository/{$repository->id}", $repository->iri);
         $this->assertSame('ZA-RPC', $repository->identifier);
-        $name = $repository->descriptionValues()->firstOrFail();
+        $name = $repository->names()->firstOrFail();
+        $this->assertSame('authorised', $name->nameType->notation);
+        $this->assertSame("https://archives.example.org/name/{$name->id}", $name->iri);
         $this->assertSame('Riverside Parish Council Archives', $name->value);
         $this->assertTrue($name->is_original);
         $this->assertSame(Vocab::valueState('draft'), $name->state->iri);
@@ -66,8 +68,9 @@ class RepositoryTest extends TestCase
         ])->assertRedirect(route('repositories.show', $repository));
 
         $values = DescriptionValue::where('subject_id', $repository->id)->get()->keyBy(fn ($v) => $v->element->notation.'/'.$v->language);
-        $this->assertTrue($values['authorised-name/en']->is_original);
-        $this->assertFalse($values['authorised-name/af']->is_original);
+        $names = $repository->names()->get()->keyBy('language');
+        $this->assertTrue($names['en']->is_original);
+        $this->assertFalse($names['af']->is_original);
         $this->assertTrue($values['history/af']->is_original);
         $this->assertSame('Riverside Parish Council Archives', $repository->fresh()->described('authorised-name', ['en']));
         $this->assertSame('Riverside Gemeenteraad Argief', $repository->fresh()->described('authorised-name', ['af', 'en']));
@@ -88,13 +91,13 @@ class RepositoryTest extends TestCase
     public function test_a_changed_value_goes_back_to_draft_and_is_audited(): void
     {
         $repository = $this->repositories->create($this->institution, 'Riverside Parish Council Archives', 'en');
-        $value = $repository->descriptionValues()->firstOrFail();
+        $value = $repository->names()->firstOrFail();
         $value->update(['state_id' => Concept::where('iri', Vocab::valueState('published'))->value('id')]);
 
         $this->repositories->describe($repository, ['authorised-name' => 'Riverside Parish Council Archive'], 'en', $this->archivist);
 
         $this->assertSame(Vocab::valueState('draft'), $value->fresh()->state->iri);
-        $this->assertTrue(DB::table('audit_log')->where('subject_table', 'description_values')->where('after', 'like', '%Riverside Parish Council Archive"%')->exists());
+        $this->assertTrue(DB::table('audit_log')->where('subject_table', 'names')->where('after', 'like', '%Riverside Parish Council Archive"%')->exists());
     }
 
     public function test_a_language_tag_must_be_bcp47(): void
@@ -141,6 +144,6 @@ class RepositoryTest extends TestCase
 
         $this->expectException(QueryException::class);
         $this->expectExceptionMessage('must be a concept of');
-        $repository->descriptionValues()->firstOrFail()->update(['state_id' => Concept::where('iri', Vocab::role('archivist'))->value('id')]);
+        $repository->names()->firstOrFail()->update(['state_id' => Concept::where('iri', Vocab::role('archivist'))->value('id')]);
     }
 }

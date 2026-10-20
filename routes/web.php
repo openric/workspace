@@ -11,6 +11,8 @@
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\DateController;
+use App\Http\Controllers\IdentifierController;
+use App\Http\Controllers\NameController;
 use App\Http\Controllers\PasswordController;
 use App\Http\Controllers\RecordController;
 use App\Http\Controllers\RepositoryController;
@@ -84,12 +86,15 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::post('/settings', [SettingsController::class, 'update'])->name('settings.update');
     });
 
-    // Dates of any described entity (ADR 0006); DateController checks update on the entity.
-    Route::prefix('{kind}/{id}/dates')->where(['kind' => 'records|repositories', 'id' => '[0-9a-f-]{36}'])->name('dates.')->group(function () {
-        Route::post('/', [DateController::class, 'store'])->name('store');
-        Route::post('/{date}', [DateController::class, 'update'])->name('update');
-        Route::post('/{date}/remove', [DateController::class, 'destroy'])->name('destroy');
-    });
+    // Dates, names and identifiers of any described entity (ADR 0006); each controller checks update on the entity.
+    foreach (['dates' => [DateController::class, 'date'], 'names' => [NameController::class, 'name'], 'identifiers' => [IdentifierController::class, 'identifier']] as $part => [$controller, $parameter]) {
+        Route::prefix("{kind}/{id}/$part")->where(['kind' => 'records|repositories', 'id' => '[0-9a-f-]{36}', $parameter => '[0-9a-f-]{36}'])->name("$part.")
+            ->group(function () use ($controller, $parameter) {
+                Route::post('/', [$controller, 'store'])->name('store');
+                Route::post("/{{$parameter}}", [$controller, 'update'])->name('update');
+                Route::post("/{{$parameter}}/remove", [$controller, 'destroy'])->name('destroy');
+            });
+    }
 
     Route::middleware('can:'.Vocab::permission('manage-roles'))->group(function () {
         Route::get('/roles', [RoleController::class, 'index'])->name('roles.index');

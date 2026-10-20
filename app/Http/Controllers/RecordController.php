@@ -34,7 +34,7 @@ class RecordController extends Controller
     public function index(Request $request): View
     {
         $top = RecordResource::where('institution_id', $request->user()->institution_id)->whereNull('parent_id')->whereNull('deleted_at')
-            ->with('descriptionValues.element', 'level.labels', 'repository.descriptionValues.element')->orderBy('position')->get()
+            ->with('descriptionValues.element', 'names.nameType', 'identifiers.identifierType', 'level.labels', 'repository.descriptionValues.element', 'repository.names.nameType')->orderBy('position')->get()
             ->filter(fn (RecordResource $r) => $request->user()->may('read', 'description', $r));
 
         return view('records.index', ['groups' => $top->groupBy('repository_id')]);
@@ -75,8 +75,8 @@ class RecordController extends Controller
     {
         $this->own($request, $record);
         $user = $request->user();
-        $record->load('descriptionValues.element.labels', 'descriptionValues.state.labels', 'level.labels', 'repository.descriptionValues.element',
-            'children.descriptionValues.element', 'children.level.labels', 'dates.property.labels', 'dates.dateType.labels', 'dates.qualifier.labels');
+        $record->load('descriptionValues.element.labels', 'descriptionValues.state.labels', 'names.nameType.labels', 'names.state.labels', 'names.dates.property', 'identifiers.identifierType.labels', 'level.labels', 'repository.descriptionValues.element', 'repository.names.nameType',
+            'children.descriptionValues.element', 'children.names.nameType', 'children.identifiers.identifierType', 'children.level.labels', 'dates.property.labels', 'dates.dateType.labels', 'dates.qualifier.labels');
 
         $record->setRelation('children', $record->children->filter(fn ($child) => $user->may('read', 'description', $child))->values());
 
@@ -90,7 +90,7 @@ class RecordController extends Controller
         $this->own($request, $record);
         $language = (string) $request->query('language', 'en');
         abort_unless(Bcp47::valid($language), 404);
-        $record->load('descriptionValues.element', 'level');
+        $record->load('descriptionValues.element', 'names.nameType', 'identifiers.identifierType', 'level');
         abort_unless($this->mayWrite($request, $record, $language), 403);
 
         return view('records.edit', ['record' => $record, 'elements' => Elements::of(Elements::ISAD_G), 'levels' => $this->concepts(self::LEVELS), 'language' => $language]);
@@ -130,7 +130,7 @@ class RecordController extends Controller
         $this->own($request, $record, 'update');
         $excluded = [$record->id, ...$record->descendantIds()];
         $candidates = RecordResource::where('institution_id', $record->institution_id)->whereNull('deleted_at')->whereNotIn('id', $excluded)
-            ->with('descriptionValues.element')->get()
+            ->with('descriptionValues.element', 'names.nameType', 'identifiers.identifierType')->get()
             ->filter(fn ($r) => $request->user()->may('create', 'description', $r))
             ->sortBy(fn ($r) => mb_strtolower((string) $r->described('title', ['en'])));
 
@@ -186,7 +186,7 @@ class RecordController extends Controller
 
     private function repositories(Request $request)
     {
-        return Repository::where('institution_id', $request->user()->institution_id)->whereNull('deleted_at')->with('descriptionValues.element')->get();
+        return Repository::where('institution_id', $request->user()->institution_id)->whereNull('deleted_at')->with('descriptionValues.element', 'names.nameType', 'identifiers.identifierType')->get();
     }
 
     private function concepts(string $vocabularyIri)

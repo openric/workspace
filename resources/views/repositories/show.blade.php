@@ -13,6 +13,8 @@
     @endif
     @include('description._view', ['subject' => $repository, 'standard' => \App\Description\Elements::ISDIAH, 'drafts' => $canUpdate])
 
+    @include('description._names', ['subject' => $repository, 'kind' => 'repositories', 'canUpdate' => $canUpdate])
+    @include('description._identifiers', ['subject' => $repository, 'kind' => 'repositories', 'canUpdate' => $canUpdate])
     @include('description._dates', ['subject' => $repository, 'kind' => 'repositories', 'heading' => 'Dates', 'canUpdate' => $canUpdate, 'choices' => $dateChoices])
 
     <h2>Contact points</h2>

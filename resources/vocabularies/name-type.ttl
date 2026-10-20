@@ -1,0 +1,44 @@
+# OpenRiC Workspace - OpenRiC Workspace Name Types.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# The type of a rico:Name (ADR 0006). RiC-O 1.1 has no property for it; openricx:hasNameType is proposed in openric/spec#64.
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/name-type/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Name Types"@en ;
+    dcterms:description "Which form of the name of an entity a name is."@en ;
+    dcterms:issued "2026-10-20"^^xsd:date ;
+    skos:hasTopConcept v:authorised, v:parallel, v:standardised, v:other .
+
+v:authorised a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Authorised form of name"@en ;
+    skos:scopeNote "ISAAR(CPF) 5.1.2, ISDIAH 5.1.2, ISAD(G) 3.1.2 (title, exported as rico:Title). Proposed export: openricx:hasNameType (openric/spec#64)."@en ;
+    skos:definition "The standardised form of the name, one in each language; for a unit of description, its title."@en .
+
+v:parallel a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Parallel form of name"@en ;
+    skos:scopeNote "ISAAR(CPF) 5.1.3, ISDIAH 5.1.3. Proposed export: openricx:hasNameType (openric/spec#64)."@en ;
+    skos:definition "The authorised form of name in another language or script."@en .
+
+v:standardised a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Standardised form of name by other rules"@en ;
+    skos:scopeNote "ISAAR(CPF) 5.1.4. Proposed export: openricx:hasNameType (openric/spec#64)."@en ;
+    skos:definition "The name as another set of rules forms it."@en .
+
+v:other a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Other form of name"@en ;
+    skos:scopeNote "ISAAR(CPF) 5.1.5, ISDIAH 5.1.4. Proposed export: openricx:hasNameType (openric/spec#64)."@en ;
+    skos:definition "Any other name by which the entity is or was known, such as an abbreviation or an earlier name."@en .

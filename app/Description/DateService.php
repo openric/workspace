@@ -63,7 +63,7 @@ class DateService
     public function choices(string $recordKind): array
     {
         $allowed = config('workspace.date_properties.'.$recordKind, []);
-        $concepts = fn (string $vocabulary) => Concept::current()->whereHas('vocabulary', fn ($q) => $q->where('iri', $vocabulary))->with('labels')->orderBy('id')->get();
+        $concepts = fn (string $vocabulary) => Concept::choices($vocabulary)->get();
 
         return [
             'properties' => $concepts(self::PROPERTIES)->filter(fn (Concept $c) => in_array($c->notation, $allowed, true))

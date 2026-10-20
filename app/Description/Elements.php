@@ -22,12 +22,19 @@ final class Elements
     /** @var array<string, Collection<int, Concept>> */
     private static array $cache = [];
 
-    /** Current elements of the standard, in vocabulary order (concepts are created in file order; ids are time-ordered). */
+    /** Current elements of the standard, in the order of their numbers in it (an element added later still takes its place). */
     public static function of(string $standard): Collection
     {
         return self::$cache[$standard] ??= Concept::current()
             ->whereHas('broader', fn ($q) => $q->where('iri', Vocab::element($standard)))
-            ->with('labels')->orderBy('id')->get();
+            ->with('labels')->orderBy('id')->get()
+            ->sort(fn (Concept $a, Concept $b) => version_compare(self::number($a) ?? '9', self::number($b) ?? '9') ?: strcmp($a->id, $b->id))->values();
+    }
+
+    /** The name type (name-type notation) an element's values are kept as, or null if it is not a name element. */
+    public static function nameType(string $notation): ?string
+    {
+        return config('workspace.name_elements')[$notation] ?? null;
     }
 
     /** @return list<string> */

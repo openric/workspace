@@ -53,6 +53,12 @@ class Concept extends Model
         return $query->whereNull('deprecated_at');
     }
 
+    /** The current concepts of one vocabulary (its IRI), with their labels, in vocabulary order. */
+    public function scopeChoices(Builder $query, string $vocabularyIri): Builder
+    {
+        return $query->whereNull('deprecated_at')->whereHas('vocabulary', fn ($q) => $q->where('iri', $vocabularyIri))->with('labels')->orderBy('id');
+    }
+
     /** The label in the first of the given languages that has one, or null. */
     public function label(array $languages): ?string
     {
