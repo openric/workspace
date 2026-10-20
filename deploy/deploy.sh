@@ -7,7 +7,8 @@
 #
 # Run as root: git, composer and pg_dump then run as the owner of the live
 # directory, and artisan as www-data, so no file in the live tree is owned by root.
-# Run as that owner instead, it uses sudo -u www-data for artisan.
+# Run as that owner instead, it uses sudo -u www-data for artisan, by its full path, so a
+# narrow sudoers rule can allow exactly that without a password (deploy/README.md).
 #
 # The live instance runs only tagged releases, never a working copy. A tag is
 # deployed only when CI passed on its commit. The database is backed up before
@@ -34,11 +35,11 @@ OWNER=$(stat -c %U "$LIVE")
 if [[ $EUID -eq 0 ]]; then
   OWNER_HOME=$(getent passwd "$OWNER" | cut -d: -f6)
   owner() { runuser -u "$OWNER" -- env HOME="$OWNER_HOME" "$@"; }
-  artisan() { runuser -u www-data -- php artisan "$@"; }
+  artisan() { runuser -u www-data -- /usr/bin/php "$LIVE/artisan" "$@"; }
 else
   [[ $(id -un) == "$OWNER" ]] || fail "run as root or as $OWNER, the owner of $LIVE"
   owner() { "$@"; }
-  artisan() { sudo -u www-data php artisan "$@"; }
+  artisan() { sudo -u www-data /usr/bin/php "$LIVE/artisan" "$@"; }
 fi
 
 on_error() {
