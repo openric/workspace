@@ -5,29 +5,28 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 //
 // Started from the Laravel skeleton's User model (MIT). An account is disabled,
-// never deleted. It may do only what one of its roles is granted in its
-// institution's role_grants; everything else is denied.
+// never deleted. What it may do is decided by AccessControl from its own
+// permissions and its roles' (ADR 0005); everything else is denied.
 
 namespace App\Models;
 
+use App\Access\AccessControl;
 use App\Audit\Audited;
+use App\Support\Vocab;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Facades\DB;
 
 #[Fillable(['institution_id', 'name', 'email', 'password', 'disabled_at'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
     use Audited, HasUuids, Notifiable;
-
-    /** Permission IRIs, loaded once per request. */
-    private ?array $permissions = null;
 
     protected function casts(): array
     {
@@ -45,8 +44,7 @@ class User extends Authenticatable
 
     public function roles(): BelongsToMany
     {
-        return $this->belongsToMany(Concept::class, 'account_roles', 'user_id', 'role_id')
-            ->withPivot('granted_by_id', 'granted_at');
+        return $this->belongsToMany(Role::class, 'role_members')->withPivot('granted_by_id', 'granted_at');
     }
 
     public function isDisabled(): bool
@@ -54,24 +52,34 @@ class User extends Authenticatable
         return $this->disabled_at !== null;
     }
 
+    /**
+     * An administrative permission (institution kind) by its IRI, for the Gate and
+     * the can: middleware. Record permissions go through AccessControl with the record.
+     */
     public function hasPermission(string $permissionIri): bool
     {
-        if ($this->isDisabled()) {
+        if (! str_starts_with($permissionIri, Vocab::PERMISSIONS)) {
             return false;
         }
-        $this->permissions ??= DB::table('account_roles as ar')
-            ->join('role_grants as g', fn ($j) => $j->on('g.role_id', '=', 'ar.role_id')->where('g.institution_id', '=', $this->institution_id))
-            ->join('concepts as p', 'p.id', '=', 'g.permission_id')
-            ->where('ar.user_id', $this->id)
-            ->whereNull('p.deprecated_at')
-            ->pluck('p.iri')->unique()->values()->all();
 
-        return in_array($permissionIri, $this->permissions, true);
+        return app(AccessControl::class)->allows($this, substr($permissionIri, strlen(Vocab::PERMISSIONS)), 'institution');
     }
 
-    /** Forget cached permissions after a role or grant changes. */
+    /** May this account take the action on this kind of record, on this record or in general? */
+    public function may(string $action, string $kind, ?Model $subject = null): bool
+    {
+        return app(AccessControl::class)->allows($this, $action, $kind, $subject);
+    }
+
+    /** May this account take the action on this kind somewhere, at any scope? (Lists and menus.) */
+    public function mayAnywhere(string $action, string $kind): bool
+    {
+        return app(AccessControl::class)->allowsAnywhere($this, $action, $kind);
+    }
+
+    /** Forget cached roles after a membership changes. */
     public function refreshPermissions(): void
     {
-        $this->permissions = null;
+        app(AccessControl::class)->forget($this);
     }
 }

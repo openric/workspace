@@ -6,6 +6,7 @@
 
 namespace App\Providers;
 
+use App\Access\AccessControl;
 use App\Models\User;
 use App\Support\Vocab;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -16,13 +17,17 @@ use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
-    public function register(): void {}
+    public function register(): void
+    {
+        // One per request, so its cache of roles and concepts lives as long as the request.
+        $this->app->scoped(AccessControl::class);
+    }
 
     public function boot(): void
     {
-        // Default deny: an ability that is a permission IRI is allowed only if one of
-        // the account's roles is granted it (role_grants). Gate denies every other
-        // ability unless a policy explicitly allows it.
+        // Default deny: an ability that is a permission IRI is an administrative
+        // permission (institution kind), decided by AccessControl (ADR 0005). Gate
+        // denies every other ability unless a policy explicitly allows it.
         Gate::before(function (User $user, string $ability) {
             return str_starts_with($ability, Vocab::PERMISSIONS) ? $user->hasPermission($ability) : null;
         });

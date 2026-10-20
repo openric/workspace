@@ -15,15 +15,36 @@ return [
     'audit_signing_key' => env('WORKSPACE_AUDIT_SIGNING_KEY', storage_path('keys/audit-signing.sk')),
 
     // The Workspace's own vocabularies, bundled with the code (resources/vocabularies).
-    'bundled_vocabularies' => ['account-role.ttl', 'permission.ttl', 'audit-action.ttl', 'description-element.ttl', 'language-value-state.ttl', 'description-status.ttl', 'description-detail.ttl', 'level-of-description.ttl'],
+    'bundled_vocabularies' => ['account-role.ttl', 'permission.ttl', 'audit-action.ttl', 'description-element.ttl', 'language-value-state.ttl', 'description-status.ttl', 'description-detail.ttl', 'level-of-description.ttl', 'record-kind.ttl'],
 
-    // Role grants a new institution starts with, by notation. After installation
-    // the grants are data in role_grants, changed by an administrator; this list is
-    // read only by workspace:install. A role not listed here can do nothing.
-    'default_grants' => [
-        'administrator' => ['manage-institution', 'manage-accounts', 'view-audit-log'],
-        'archivist' => ['describe'],
-        'reviewer' => ['review', 'publish'],
+    // The shape of the permission matrix: for each kind of record (record-kind
+    // vocabulary), the actions that apply to it (permission vocabulary), as
+    // Heratio has one action list per class (ADR 0005).
+    'permission_matrix' => [
+        'institution' => ['manage-institution', 'manage-accounts', 'manage-roles', 'view-audit-log'],
+        'repository' => ['read', 'create', 'update', 'delete'],
+        'description' => ['read', 'create', 'update', 'delete', 'view-draft', 'publish', 'read-master', 'read-reference', 'read-thumbnail', 'translate'],
+        'vocabulary' => ['create', 'update', 'delete'],
+    ],
+
+    // The roles a new institution starts with, by account-role template, with
+    // their parent and their permissions on everything (* = every action of
+    // every kind), after Heratio's and AtoM's standard groups. Read only when
+    // an institution is installed; afterwards roles and permissions are data.
+    'default_roles' => [
+        'public' => ['parent' => null, 'grants' => ['repository' => ['read'], 'description' => ['read', 'read-reference', 'read-thumbnail']]],
+        'signed-in' => ['parent' => 'public', 'grants' => []],
+        'administrator' => ['parent' => 'signed-in', 'grants' => '*'],
+        'editor' => ['parent' => 'signed-in', 'grants' => [
+            'repository' => ['read', 'create', 'update'],
+            'description' => ['read', 'create', 'update', 'delete', 'view-draft', 'publish', 'read-master', 'read-reference', 'read-thumbnail'],
+            'vocabulary' => ['create', 'update'],
+        ]],
+        'contributor' => ['parent' => 'signed-in', 'grants' => [
+            'repository' => ['read'],
+            'description' => ['read', 'create', 'update', 'view-draft', 'read-reference', 'read-thumbnail'],
+        ]],
+        'translator' => ['parent' => 'signed-in', 'grants' => ['description' => ['read', 'view-draft', 'translate']]],
     ],
 
     // Vocabularies every installation loads (`php artisan workspace:vocabulary:import --configured`).

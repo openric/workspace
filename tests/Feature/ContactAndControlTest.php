@@ -6,6 +6,7 @@
 
 namespace Tests\Feature;
 
+use App\Access\RoleService;
 use App\Accounts\AccountService;
 use App\Description\RepositoryService;
 use App\Models\Concept;
@@ -34,9 +35,9 @@ class ContactAndControlTest extends TestCase
         $this->loadBundledVocabularies();
         $accounts = app(AccountService::class);
         $institution = Institution::create(['name' => 'Riverside Parish Council Archives', 'base_iri' => 'https://archives.example.org']);
-        $accounts->seedDefaultGrants($institution);
+        app(RoleService::class)->seedDefaults($institution);
         $this->archivist = $accounts->create($institution, 'An Archivist', 'archivist@example.org', 'correct horse battery staple');
-        $accounts->grantRole($this->archivist, Vocab::role('archivist'));
+        $accounts->grantTemplateRole($this->archivist, 'editor');
         $this->repository = app(RepositoryService::class)->create($institution, 'Riverside Parish Council Archives', 'en');
     }
 

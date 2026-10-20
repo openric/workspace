@@ -3,7 +3,7 @@
 @section('title', 'Archival descriptions')
 @section('content')
     <h1>Archival descriptions</h1>
-    <p><a href="{{ route('records.create') }}">New top-level unit (fonds or collection)</a></p>
+    @if(auth()->user()->mayAnywhere('create', 'description'))<p><a href="{{ route('records.create') }}">New top-level unit (fonds or collection)</a></p>@endif
     @forelse($groups as $units)
         <h2>{{ $units->first()->repository->described('authorised-name', ['en']) }}</h2>
         @foreach($units as $unit)

@@ -33,18 +33,22 @@ class RepositoryController extends Controller
     {
         $repositories = Repository::where('institution_id', $request->user()->institution_id)->whereNull('deleted_at')
             ->with('descriptionValues.element')->get()
+            ->filter(fn (Repository $r) => $request->user()->may('read', 'repository', $r))
             ->sortBy(fn (Repository $r) => mb_strtolower((string) $r->described('authorised-name', [app()->getLocale(), 'en'])));
 
         return view('repositories.index', ['repositories' => $repositories]);
     }
 
-    public function create(): View
+    public function create(Request $request): View
     {
+        abort_unless($request->user()->may('create', 'repository'), 403);
+
         return view('repositories.create');
     }
 
     public function store(Request $request): RedirectResponse
     {
+        abort_unless($request->user()->may('create', 'repository'), 403);
         $data = $request->validate([
             'name' => ['required', 'string', 'max:1024'],
             'identifier' => ['nullable', 'string', 'max:255', Rule::unique('repositories')->where('institution_id', $request->user()->institution_id)],
@@ -66,7 +70,7 @@ class RepositoryController extends Controller
 
     public function edit(Request $request, Repository $repository): View
     {
-        $this->own($request, $repository);
+        $this->own($request, $repository, 'update');
         $language = (string) $request->query('language', 'en');
         abort_unless(Bcp47::valid($language), 404);
         $repository->load('descriptionValues.element', 'descriptionStatus', 'descriptionDetail');
@@ -77,7 +81,7 @@ class RepositoryController extends Controller
 
     public function update(Request $request, Repository $repository): RedirectResponse
     {
-        $this->own($request, $repository);
+        $this->own($request, $repository, 'update');
         $notations = $this->elements()->pluck('notation')->all();
         $data = $request->validate([
             'language' => ['required', 'string', fn ($a, $v, $fail) => Bcp47::valid((string) $v) || $fail('Give a BCP 47 language tag, such as en or af.')],
@@ -105,7 +109,7 @@ class RepositoryController extends Controller
 
     public function storeContact(Request $request, Repository $repository): RedirectResponse
     {
-        $this->own($request, $repository);
+        $this->own($request, $repository, 'update');
         $this->contacts->save($repository, $this->contactFields($request), null, $request->user());
 
         return redirect()->route('repositories.show', $repository)->with('status', 'Contact point added.');
@@ -151,7 +155,7 @@ class RepositoryController extends Controller
 
     private function ownContact(Request $request, Repository $repository, ContactPoint $contact): void
     {
-        $this->own($request, $repository);
+        $this->own($request, $repository, 'update');
         abort_unless($contact->subject_table === $repository->getTable() && $contact->subject_id === $repository->id, 404);
     }
 
@@ -160,9 +164,11 @@ class RepositoryController extends Controller
         return Concept::current()->whereHas('vocabulary', fn ($q) => $q->where('iri', $vocabularyIri))->with('labels')->orderBy('id')->get();
     }
 
-    private function own(Request $request, Repository $repository): void
+    /** Another institution's repository does not exist here (404); without the permission, 403 (ADR 0005). */
+    private function own(Request $request, Repository $repository, string $action = 'read'): void
     {
         abort_unless($repository->institution_id === $request->user()->institution_id && $repository->deleted_at === null, 404);
+        abort_unless($request->user()->may($action, 'repository', $repository), 403);
     }
 
     private function elements()

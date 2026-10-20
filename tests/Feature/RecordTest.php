@@ -9,6 +9,7 @@
 
 namespace Tests\Feature;
 
+use App\Access\RoleService;
 use App\Accounts\AccountService;
 use App\Description\RecordService;
 use App\Description\RepositoryService;
@@ -50,9 +51,9 @@ class RecordTest extends TestCase
         $accounts = app(AccountService::class);
         $this->records = app(RecordService::class);
         $this->institution = Institution::create(['name' => 'Riverside Parish Council Archives', 'base_iri' => 'https://archives.example.org']);
-        $accounts->seedDefaultGrants($this->institution);
+        app(RoleService::class)->seedDefaults($this->institution);
         $this->archivist = $accounts->create($this->institution, 'An Archivist', 'archivist@example.org', 'correct horse battery staple');
-        $accounts->grantRole($this->archivist, Vocab::role('archivist'));
+        $accounts->grantTemplateRole($this->archivist, 'editor');
         $this->repository = app(RepositoryService::class)->create($this->institution, 'Riverside Parish Council Archives', 'en');
     }
 

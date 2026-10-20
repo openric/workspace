@@ -1,17 +1,19 @@
 <?php
 
-// OpenRiC Workspace - create accounts, grant and revoke roles, disable accounts.
+// OpenRiC Workspace - create, disable and enable accounts, set their roles and passwords.
 // Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
 // SPDX-License-Identifier: AGPL-3.0-or-later
 //
 // Every operation runs in one transaction with its audit row, so a change is
-// never stored without its record, or recorded without being stored.
+// never stored without its record, or recorded without being stored. Role
+// membership itself is RoleService's (ADR 0005).
 
 namespace App\Accounts;
 
+use App\Access\RoleService;
 use App\Audit\AuditLog;
-use App\Models\Concept;
 use App\Models\Institution;
+use App\Models\Role;
 use App\Models\User;
 use App\Support\Vocab;
 use Illuminate\Support\Facades\DB;
@@ -20,6 +22,8 @@ use InvalidArgumentException;
 
 class AccountService
 {
+    public function __construct(private RoleService $roles) {}
+
     public function create(Institution $institution, string $name, string $email, string $password, ?User $actor = null): User
     {
         return DB::transaction(fn () => AuditLog::actingAs($actor, fn () => User::create([
@@ -30,35 +34,37 @@ class AccountService
         ])));
     }
 
-    public function grantRole(User $account, string $roleIri, ?User $actor = null): void
+    /** Make the account a member of exactly these roles of its institution. */
+    public function setRoles(User $account, array $roleIds, ?User $actor = null): void
     {
-        $role = $this->role($roleIri);
-        DB::transaction(function () use ($account, $role, $actor) {
-            $inserted = DB::table('account_roles')->insertOrIgnore([
-                'user_id' => $account->id,
-                'role_id' => $role->id,
-                'granted_by_id' => $actor?->id,
-            ]);
-            if ($inserted > 0) {
-                AuditLog::record(Vocab::action('grant-role'), $account, null, ['role' => $role->iri], $actor);
+        $wanted = Role::where('institution_id', $account->institution_id)->where('is_system', false)->whereIn('id', $roleIds)->get();
+        if ($wanted->count() !== count(array_unique($roleIds))) {
+            throw new InvalidArgumentException('every role must be one of the institution\'s own roles');
+        }
+        DB::transaction(function () use ($account, $wanted, $actor) {
+            $current = $account->roles()->get();
+            foreach ($wanted->whereNotIn('id', $current->pluck('id')) as $role) {
+                $this->roles->addMember($role, $account, $actor);
+            }
+            foreach ($current->whereNotIn('id', $wanted->pluck('id')) as $role) {
+                $this->roles->removeMember($role, $account, $actor);
             }
         });
-        $account->refreshPermissions();
     }
 
-    public function revokeRole(User $account, string $roleIri, ?User $actor = null): void
+    /** Make the account a member of the institution's role made from this template, such as administrator. */
+    public function grantTemplateRole(User $account, string $template, ?User $actor = null): void
     {
-        $role = $this->role($roleIri);
-        DB::transaction(function () use ($account, $role, $actor) {
-            if ($role->iri === Vocab::role('administrator')) {
-                $this->keepAnAdministrator($account);
-            }
-            $deleted = DB::table('account_roles')->where(['user_id' => $account->id, 'role_id' => $role->id])->delete();
-            if ($deleted > 0) {
-                AuditLog::record(Vocab::action('revoke-role'), $account, ['role' => $role->iri], null, $actor);
-            }
-        });
-        $account->refreshPermissions();
+        $role = $this->roles->byTemplate($account->institution, $template)
+            ?? throw new InvalidArgumentException("the institution has no $template role");
+        $this->roles->addMember($role, $account, $actor);
+    }
+
+    public function revokeTemplateRole(User $account, string $template, ?User $actor = null): void
+    {
+        $role = $this->roles->byTemplate($account->institution, $template)
+            ?? throw new InvalidArgumentException("the institution has no $template role");
+        $this->roles->removeMember($role, $account, $actor);
     }
 
     public function disable(User $account, ?User $actor = null): void
@@ -74,24 +80,6 @@ class AccountService
     {
         DB::transaction(fn () => AuditLog::actingAs($actor, fn () => $account->update(['disabled_at' => null])));
         $account->refreshPermissions();
-    }
-
-    /**
-     * Grant exactly the given roles: grant the missing ones, revoke the rest.
-     *
-     * @param  list<string>  $roleIris
-     */
-    public function setRoles(User $account, array $roleIris, ?User $actor = null): void
-    {
-        DB::transaction(function () use ($account, $roleIris, $actor) {
-            $current = $account->roles()->pluck('iri')->all();
-            foreach (array_diff($roleIris, $current) as $iri) {
-                $this->grantRole($account, $iri, $actor);
-            }
-            foreach (array_diff($current, $roleIris) as $iri) {
-                $this->revokeRole($account, $iri, $actor);
-            }
-        });
     }
 
     /**
@@ -136,53 +124,22 @@ class AccountService
     }
 
     /**
-     * Refuse a change that would leave the institution with no active
-     * administrator, so nobody can lock the institution out of its own accounts.
-     * ponytail: two administrators removing each other at the same instant could
+     * Refuse to disable the last active member of the Administrator role, so
+     * nobody can lock the institution out of its own accounts.
+     * ponytail: two administrators disabling each other at the same instant could
      * both pass; a per-institution advisory lock closes that if it ever matters.
      */
     private function keepAnAdministrator(User $account): void
     {
-        $admin = Concept::where('iri', Vocab::role('administrator'))->value('id');
-        $isActiveAdmin = $account->disabled_at === null
-            && DB::table('account_roles')->where(['user_id' => $account->id, 'role_id' => $admin])->exists();
-        if (! $isActiveAdmin) {
+        $admin = $this->roles->byTemplate($account->institution, 'administrator');
+        if ($admin === null || $account->disabled_at !== null
+            || ! DB::table('role_members')->where(['role_id' => $admin->id, 'user_id' => $account->id])->exists()) {
             return;
         }
-        $others = DB::table('account_roles as ar')->join('users as u', 'u.id', '=', 'ar.user_id')
-            ->where('ar.role_id', $admin)->where('u.institution_id', $account->institution_id)
-            ->whereNull('u.disabled_at')->where('u.id', '<>', $account->id)->exists();
+        $others = DB::table('role_members as m')->join('users as u', 'u.id', '=', 'm.user_id')
+            ->where('m.role_id', $admin->id)->whereNull('u.disabled_at')->where('u.id', '<>', $account->id)->exists();
         if (! $others) {
-            throw new AccountException('This is the last active administrator of the institution; give another account the administrator role first.');
+            throw new AccountException('This is the last active administrator of the institution; give another account the Administrator role first.');
         }
-    }
-
-    /** Seed an institution's role grants from config/workspace.php (installation only). */
-    public function seedDefaultGrants(Institution $institution): void
-    {
-        foreach (config('workspace.default_grants') as $role => $permissions) {
-            foreach ($permissions as $permission) {
-                DB::table('role_grants')->insertOrIgnore([
-                    'institution_id' => $institution->id,
-                    'role_id' => $this->role(Vocab::role($role))->id,
-                    'permission_id' => $this->concept(Vocab::permission($permission), 'permission')->id,
-                ]);
-            }
-        }
-    }
-
-    private function role(string $iri): Concept
-    {
-        return $this->concept($iri, 'account role');
-    }
-
-    private function concept(string $iri, string $kind): Concept
-    {
-        $concept = Concept::where('iri', $iri)->first();
-        if ($concept === null || $concept->deprecated_at !== null) {
-            throw new InvalidArgumentException("$iri is not a current $kind");
-        }
-
-        return $concept;
     }
 }

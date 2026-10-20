@@ -6,12 +6,19 @@
     <h1>{{ $repository->described('authorised-name', [app()->getLocale(), 'en']) }}</h1>
     @if(session('status'))<p role="status">{{ session('status') }}</p>@endif
     <p><strong>Persistent IRI:</strong> <code>{{ $repository->iri }}</code>@if($repository->identifier)<br><strong>Identifier:</strong> {{ $repository->identifier }}@endif</p>
-    @include('description._actions', ['subject' => $repository, 'editRoute' => 'repositories.edit', 'required' => 'authorised-name'])
-    @include('description._view', ['subject' => $repository, 'standard' => \App\Description\Elements::ISDIAH])
+    @php($canUpdate = auth()->user()->may('update', 'repository', $repository))
+    @if($canUpdate)
+        @include('description._actions', ['subject' => $repository, 'editRoute' => 'repositories.edit', 'required' => 'authorised-name'])
+    @endif
+    @include('description._view', ['subject' => $repository, 'standard' => \App\Description\Elements::ISDIAH, 'drafts' => $canUpdate])
 
     <h2>Contact points</h2>
     @if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif
     @foreach($repository->contactPoints as $contact)
+        @unless($canUpdate)
+            <p>{{ $contact->label ?: 'Contact' }}@if($contact->is_primary) (primary)@endif: {{ collect([$contact->contact_person, $contact->street_address, $contact->city, $contact->region, $contact->postal_code, $contact->country_code, $contact->telephone, $contact->fax, $contact->email, $contact->website])->filter()->join(', ') }}</p>
+            @continue
+        @endunless
         <details>
             <summary>{{ $contact->label ?: 'Contact' }}@if($contact->is_primary) (primary)@endif: {{ collect([$contact->street_address, $contact->city, $contact->country_code, $contact->telephone, $contact->email])->filter()->join(', ') }}</summary>
             <form method="post" action="{{ route('repositories.contacts.update', [$repository, $contact]) }}">
@@ -25,6 +32,7 @@
             </form>
         </details>
     @endforeach
+    @if($canUpdate)
     <details>
         <summary>Add a contact point</summary>
         <form method="post" action="{{ route('repositories.contacts.store', $repository) }}">
@@ -33,6 +41,7 @@
             <button type="submit">Add contact point</button>
         </form>
     </details>
+    @endif
 
     <h2>Control</h2>
     <p>Description identifier: {{ $repository->description_identifier ?? 'none' }}.

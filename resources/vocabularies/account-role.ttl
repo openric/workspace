@@ -2,7 +2,9 @@
 # Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
 # SPDX-License-Identifier: AGPL-3.0-or-later
 #
-# The roles an account can hold. What each role may do is data (the role_grants table), seeded at installation from config/workspace.php and changed by an administrator, never by code.
+# Role templates. Each institution creates its roles from these at installation
+# and adds its own; a role's permissions are data (the permissions table), seeded
+# from config/workspace.php and changed by an administrator, never by code.
 
 @prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
@@ -11,9 +13,9 @@
 
 v: a skos:ConceptScheme ;
     dcterms:title "OpenRiC Workspace Account Roles"@en ;
-    dcterms:description "Roles an account holds in one institution. An account with no role can sign in and do nothing else."@en ;
+    dcterms:description "Templates of the roles an institution starts with, after Heratio's standard groups. Public and signed-in are system roles that cannot be removed."@en ;
     dcterms:issued "2026-10-19"^^xsd:date ;
-    skos:hasTopConcept v:administrator, v:archivist, v:reviewer .
+    skos:hasTopConcept v:administrator, v:archivist, v:reviewer, v:public, v:signed-in, v:editor, v:contributor, v:translator .
 
 v:administrator a skos:Concept ;
     skos:inScheme v: ;
@@ -32,3 +34,38 @@ v:reviewer a skos:Concept ;
     skos:topConceptOf v: ;
     skos:prefLabel "Reviewer"@en ;
     skos:definition "Reviews described material and publishes what may be published."@en .
+
+v:public a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Public"@en ;
+    skos:scopeNote "Heratio and AtoM anonymous group; system role."@en ;
+    skos:definition "Everyone, signed in or not. Its permissions say what the public may see."@en .
+
+v:signed-in a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Signed in"@en ;
+    skos:scopeNote "Heratio and AtoM authenticated group; system role."@en ;
+    skos:definition "Every signed-in account, whatever its other roles. Inherits from Public."@en .
+
+v:editor a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Editor"@en ;
+    skos:scopeNote "Heratio and AtoM editor group."@en ;
+    skos:definition "Creates, changes, publishes and removes descriptions."@en .
+
+v:contributor a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Contributor"@en ;
+    skos:scopeNote "Heratio and AtoM contributor group."@en ;
+    skos:definition "Creates descriptions and changes them; does not publish."@en .
+
+v:translator a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Translator"@en ;
+    skos:scopeNote "Heratio and AtoM translator group."@en ;
+    skos:definition "Translates descriptions into the languages the role allows."@en .

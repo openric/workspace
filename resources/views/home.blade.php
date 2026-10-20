@@ -7,19 +7,20 @@
     <p>Signed in as {{ $user->name }} ({{ $user->email }}).</p>
     <h2>Your roles</h2>
     @forelse($user->roles as $role)
-        <p>{{ $role->label(['en', 'und']) ?? $role->iri }}</p>
+        <p>{{ $role->name() }}</p>
     @empty
-        <p>You have no roles yet, so there is nothing you can change. An administrator can grant you one.</p>
+        <p>You have no roles of your own yet, so you can do only what every signed-in account may. An administrator can give you a role.</p>
     @endforelse
     @if(session('status'))<p role="status">{{ session('status') }}</p>@endif
     <ul>
         <li><a href="{{ route('password.edit') }}">Change your password</a></li>
-        @can(\App\Support\Vocab::permission('describe'))
-            <li><a href="{{ route('repositories.index') }}">Repositories</a></li>
-            <li><a href="{{ route('records.index') }}">Archival descriptions</a></li>
-        @endcan
+        @if($user->mayAnywhere('read', 'repository'))<li><a href="{{ route('repositories.index') }}">Repositories</a></li>@endif
+        @if($user->mayAnywhere('read', 'description'))<li><a href="{{ route('records.index') }}">Archival descriptions</a></li>@endif
         @can(\App\Support\Vocab::permission('manage-accounts'))
             <li><a href="{{ route('accounts.index') }}">Accounts</a></li>
+        @endcan
+        @can(\App\Support\Vocab::permission('manage-roles'))
+            <li><a href="{{ route('roles.index') }}">Roles and permissions</a></li>
         @endcan
         @can(\App\Support\Vocab::permission('view-audit-log'))
             <li><a href="{{ route('audit') }}">Audit log</a></li>

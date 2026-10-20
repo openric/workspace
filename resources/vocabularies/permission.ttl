@@ -6,14 +6,15 @@
 
 @prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix owl:     <http://www.w3.org/2002/07/owl#> .
 @prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
 @prefix v:       <https://workspace.openric.org/vocab/permission/> .
 
 v: a skos:ConceptScheme ;
     dcterms:title "OpenRiC Workspace Permissions"@en ;
-    dcterms:description "Actions that require a permission. Access is denied unless one of the account roles is granted the permission."@en ;
+    dcterms:description "Actions a role or an account may be granted or denied, on a kind of record, at the scope of everything, one repository or one record. Anything not granted is denied, and a denial wins over a grant at the same scope (ADR 0005)."@en ;
     dcterms:issued "2026-10-19"^^xsd:date ;
-    skos:hasTopConcept v:manage-institution, v:manage-accounts, v:view-audit-log, v:describe, v:review, v:publish .
+    skos:hasTopConcept v:manage-institution, v:manage-accounts, v:view-audit-log, v:describe, v:review, v:publish, v:manage-roles, v:read, v:create, v:update, v:delete, v:view-draft, v:read-master, v:read-reference, v:read-thumbnail, v:translate .
 
 v:manage-institution a skos:Concept ;
     skos:inScheme v: ;
@@ -36,12 +37,16 @@ v:view-audit-log a skos:Concept ;
 v:describe a skos:Concept ;
     skos:inScheme v: ;
     skos:topConceptOf v: ;
+    owl:deprecated true ;
+    dcterms:isReplacedBy v:update ;
     skos:prefLabel "Describe"@en ;
     skos:definition "Create and edit descriptions, relations and their evidence."@en .
 
 v:review a skos:Concept ;
     skos:inScheme v: ;
     skos:topConceptOf v: ;
+    owl:deprecated true ;
+    dcterms:isReplacedBy v:view-draft ;
     skos:prefLabel "Review"@en ;
     skos:definition "Approve or return described material."@en .
 
@@ -50,3 +55,73 @@ v:publish a skos:Concept ;
     skos:topConceptOf v: ;
     skos:prefLabel "Publish"@en ;
     skos:definition "Publish or withdraw approved material."@en .
+
+v:manage-roles a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Manage roles"@en ;
+    skos:scopeNote "Administrative; Heratio admin ACL pages."@en ;
+    skos:definition "Create and change roles, their members and their permissions."@en .
+
+v:read a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Read"@en ;
+    skos:scopeNote "Heratio ACL action read."@en ;
+    skos:definition "See a record."@en .
+
+v:create a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Create"@en ;
+    skos:scopeNote "Heratio ACL action create."@en ;
+    skos:definition "Create a record of this kind."@en .
+
+v:update a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Update"@en ;
+    skos:scopeNote "Heratio ACL action update."@en ;
+    skos:definition "Change a record in its original language."@en .
+
+v:delete a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Delete"@en ;
+    skos:scopeNote "Heratio ACL action delete."@en ;
+    skos:definition "Remove a record."@en .
+
+v:view-draft a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "View draft"@en ;
+    skos:scopeNote "Heratio ACL action viewDraft."@en ;
+    skos:definition "See values that are not yet published."@en .
+
+v:read-master a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Access master"@en ;
+    skos:scopeNote "Heratio ACL action readMaster."@en ;
+    skos:definition "Open the master file of a digital object."@en .
+
+v:read-reference a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Access reference"@en ;
+    skos:scopeNote "Heratio ACL action readReference."@en ;
+    skos:definition "Open the reference copy of a digital object."@en .
+
+v:read-thumbnail a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Access thumbnail"@en ;
+    skos:scopeNote "Heratio ACL action readThumbnail."@en ;
+    skos:definition "See the thumbnail of a digital object."@en .
+
+v:translate a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Translate"@en ;
+    skos:scopeNote "Heratio ACL action translate."@en ;
+    skos:definition "Add or change values in another language than the original, in the languages the role may translate into."@en .

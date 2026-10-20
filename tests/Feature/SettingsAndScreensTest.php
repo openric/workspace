@@ -6,12 +6,12 @@
 
 namespace Tests\Feature;
 
+use App\Access\RoleService;
 use App\Accounts\AccountService;
 use App\Description\RepositoryService;
 use App\Models\Institution;
 use App\Models\Repository;
 use App\Models\User;
-use App\Support\Vocab;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -32,10 +32,10 @@ class SettingsAndScreensTest extends TestCase
         $this->loadBundledVocabularies();
         $accounts = app(AccountService::class);
         $this->institution = Institution::create(['name' => 'Riverside Parish Council Archives', 'base_iri' => 'https://archives.example.org']);
-        $accounts->seedDefaultGrants($this->institution);
+        app(RoleService::class)->seedDefaults($this->institution);
         $this->admin = $accounts->create($this->institution, 'The Administrator', 'admin@example.org', 'correct horse battery staple');
-        $accounts->grantRole($this->admin, Vocab::role('administrator'));
-        $accounts->grantRole($this->admin, Vocab::role('archivist'));
+        $accounts->grantTemplateRole($this->admin, 'administrator');
+        $accounts->grantTemplateRole($this->admin, 'editor');
     }
 
     public function test_an_administrator_changes_the_name_header_and_logo(): void
@@ -71,7 +71,7 @@ class SettingsAndScreensTest extends TestCase
     public function test_settings_need_manage_institution(): void
     {
         $archivist = app(AccountService::class)->create($this->institution, 'An Archivist', 'archivist@example.org', 'correct horse battery staple');
-        app(AccountService::class)->grantRole($archivist, Vocab::role('archivist'));
+        app(AccountService::class)->grantTemplateRole($archivist, 'editor');
         $this->actingAs($archivist)->get('/settings')->assertForbidden();
         $this->actingAs($archivist)->get('/')->assertDontSee('Settings')->assertSee('Home');
     }

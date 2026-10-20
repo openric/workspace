@@ -13,6 +13,7 @@ use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\PasswordController;
 use App\Http\Controllers\RecordController;
 use App\Http\Controllers\RepositoryController;
+use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\VocabularyController;
@@ -23,6 +24,8 @@ use Illuminate\Support\Facades\Route;
 // deliberate exception to default deny; they hold only published vocabulary data.
 // An account is addressed by its UUID; anything else is a 404, never a database error.
 Route::pattern('account', '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}');
+Route::pattern('role', '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}');
+Route::pattern('kind', '[a-z-]+');
 Route::pattern('record', '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}');
 Route::pattern('date', '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}');
 Route::pattern('contact', '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}');
@@ -51,7 +54,7 @@ Route::middleware(['auth', 'active'])->group(function () {
         ->middleware('can:'.Vocab::permission('view-audit-log'))
         ->name('audit');
 
-    Route::middleware('can:'.Vocab::permission('describe'))->prefix('repositories')->name('repositories.')->group(function () {
+    Route::middleware('access:read,repository')->prefix('repositories')->name('repositories.')->group(function () {
         Route::get('/', [RepositoryController::class, 'index'])->name('index');
         Route::get('/new', [RepositoryController::class, 'create'])->name('create');
         Route::post('/', [RepositoryController::class, 'store'])->name('store');
@@ -63,7 +66,7 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::post('/{repository}/contacts/{contact}/remove', [RepositoryController::class, 'destroyContact'])->name('contacts.destroy');
     });
 
-    Route::middleware('can:'.Vocab::permission('describe'))->prefix('records')->name('records.')->group(function () {
+    Route::middleware('access:read,description')->prefix('records')->name('records.')->group(function () {
         Route::get('/', [RecordController::class, 'index'])->name('index');
         Route::get('/new', [RecordController::class, 'create'])->name('create');
         Route::post('/', [RecordController::class, 'store'])->name('store');
@@ -80,6 +83,22 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::middleware('can:'.Vocab::permission('manage-institution'))->group(function () {
         Route::get('/settings', [SettingsController::class, 'edit'])->name('settings.edit');
         Route::post('/settings', [SettingsController::class, 'update'])->name('settings.update');
+    });
+
+    Route::middleware('can:'.Vocab::permission('manage-roles'))->group(function () {
+        Route::get('/roles', [RoleController::class, 'index'])->name('roles.index');
+        Route::get('/roles/new', [RoleController::class, 'create'])->name('roles.create');
+        Route::post('/roles', [RoleController::class, 'store'])->name('roles.store');
+        Route::get('/roles/{role}', [RoleController::class, 'show'])->name('roles.show');
+        Route::post('/roles/{role}', [RoleController::class, 'update'])->name('roles.update');
+        Route::post('/roles/{role}/remove', [RoleController::class, 'destroy'])->name('roles.destroy');
+        Route::post('/roles/{role}/members', [RoleController::class, 'addMember'])->name('roles.members.add');
+        Route::post('/roles/{role}/members/{account}/remove', [RoleController::class, 'removeMember'])->name('roles.members.remove');
+        Route::post('/roles/{role}/languages', [RoleController::class, 'languages'])->name('roles.languages');
+        Route::get('/roles/{role}/permissions/{kind}', [RoleController::class, 'permissions'])->name('roles.permissions');
+        Route::post('/roles/{role}/permissions/{kind}', [RoleController::class, 'updatePermissions'])->name('roles.permissions.update');
+        Route::get('/accounts/{account}/permissions/{kind}', [RoleController::class, 'accountPermissions'])->name('accounts.permissions');
+        Route::post('/accounts/{account}/permissions/{kind}', [RoleController::class, 'updateAccountPermissions'])->name('accounts.permissions.update');
     });
 
     Route::middleware('can:'.Vocab::permission('manage-accounts'))->prefix('accounts')->name('accounts.')->group(function () {

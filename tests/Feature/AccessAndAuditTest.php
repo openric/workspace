@@ -7,6 +7,9 @@
 
 namespace Tests\Feature;
 
+use App\Access\AccessControl;
+use App\Access\PermissionMatrix;
+use App\Access\RoleService;
 use App\Accounts\AccountService;
 use App\Models\Concept;
 use App\Models\Institution;
@@ -15,6 +18,7 @@ use App\Support\Vocab;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class AccessAndAuditTest extends TestCase
@@ -33,14 +37,14 @@ class AccessAndAuditTest extends TestCase
         $this->loadBundledVocabularies();
         $this->accounts = app(AccountService::class);
         $this->institution = Institution::create(['name' => 'Riverside Parish Council Archives', 'base_iri' => 'https://archives.example.org']);
-        $this->accounts->seedDefaultGrants($this->institution);
+        app(RoleService::class)->seedDefaults($this->institution);
     }
 
     private function account(?string $role = null, string $email = 'archivist@example.org'): User
     {
         $user = $this->accounts->create($this->institution, 'An Archivist', $email, self::PASSWORD);
         if ($role) {
-            $this->accounts->grantRole($user, Vocab::role($role));
+            $this->accounts->grantTemplateRole($user, $role);
         }
 
         return $user;
@@ -61,7 +65,7 @@ class AccessAndAuditTest extends TestCase
 
     public function test_signing_in_and_out_is_audited(): void
     {
-        $this->account('archivist');
+        $this->account('editor');
 
         $this->post('/sign-in', ['email' => 'Archivist@Example.org', 'password' => self::PASSWORD])->assertRedirect(route('home'));
         $this->assertAuthenticated();
@@ -74,7 +78,7 @@ class AccessAndAuditTest extends TestCase
 
     public function test_a_wrong_password_is_refused_and_audited_without_the_password(): void
     {
-        $this->account('archivist');
+        $this->account('editor');
 
         $this->post('/sign-in', ['email' => 'archivist@example.org', 'password' => 'not the password'])->assertSessionHasErrors('email');
         $this->assertGuest();
@@ -85,7 +89,7 @@ class AccessAndAuditTest extends TestCase
 
     public function test_a_disabled_account_cannot_sign_in_or_do_anything(): void
     {
-        $user = $this->account('archivist');
+        $user = $this->account('editor');
         $this->accounts->disable($user);
 
         $this->post('/sign-in', ['email' => 'archivist@example.org', 'password' => self::PASSWORD])->assertSessionHasErrors('email');
@@ -95,7 +99,7 @@ class AccessAndAuditTest extends TestCase
 
     public function test_a_password_change_is_audited_without_the_password(): void
     {
-        $user = $this->account('archivist');
+        $user = $this->account('editor');
         $user->update(['password' => 'a new long password 456']);
 
         $row = DB::table('audit_log')->whereNotNull('after')->orderByDesc('occurred_at')->first();
@@ -111,7 +115,7 @@ class AccessAndAuditTest extends TestCase
 
     public function test_a_role_only_has_the_permissions_it_is_granted(): void
     {
-        $this->actingAs($this->account('archivist'))->get('/audit')->assertForbidden();
+        $this->actingAs($this->account('editor'))->get('/audit')->assertForbidden();
     }
 
     public function test_the_audit_log_is_readable_with_the_permission_and_lost_with_the_role(): void
@@ -120,40 +124,39 @@ class AccessAndAuditTest extends TestCase
         $this->account('administrator', 'second-admin@example.org');
         $this->actingAs($admin)->get('/audit')->assertOk()->assertSee('Grant role');
 
-        $this->accounts->revokeRole($admin, Vocab::role('administrator'));
+        $this->accounts->revokeTemplateRole($admin, 'administrator');
         $this->actingAs($admin->fresh())->get('/audit')->assertForbidden();
         $this->assertContains('revoke-role', $this->auditActions());
     }
 
     public function test_a_grant_is_data_not_code(): void
     {
-        $archivist = $this->account('archivist');
+        $archivist = $this->account('editor');
         $this->assertFalse($archivist->hasPermission(Vocab::permission('view-audit-log')));
 
-        DB::table('role_grants')->insert([
-            'institution_id' => $this->institution->id,
-            'role_id' => Concept::where('iri', Vocab::role('archivist'))->value('id'),
-            'permission_id' => Concept::where('iri', Vocab::permission('view-audit-log'))->value('id'),
-        ]);
-        $archivist->refreshPermissions();
+        $editor = app(RoleService::class)->byTemplate($this->institution, 'editor');
+        app(PermissionMatrix::class)->apply($editor, 'institution', ['view-audit-log|all' => 'grant']);
+        app(AccessControl::class)->flush();
 
         $this->assertTrue($archivist->hasPermission(Vocab::permission('view-audit-log')));
     }
 
     public function test_the_database_refuses_a_concept_from_the_wrong_vocabulary(): void
     {
-        $user = $this->account();
+        $editor = app(RoleService::class)->byTemplate($this->institution, 'editor');
         $this->expectException(QueryException::class);
         $this->expectExceptionMessage('must be a concept of');
-        DB::table('account_roles')->insert([
-            'user_id' => $user->id,
-            'role_id' => Concept::where('iri', Vocab::permission('publish'))->value('id'),
+        DB::table('permissions')->insert([
+            'id' => (string) Str::uuid7(), 'institution_id' => $this->institution->id, 'role_id' => $editor->id,
+            'kind_id' => Concept::where('iri', Vocab::kind('description'))->value('id'),
+            'action_id' => Concept::where('iri', Vocab::role('editor'))->value('id'),
+            'is_grant' => true,
         ]);
     }
 
     public function test_the_database_refuses_to_change_an_audit_row(): void
     {
-        $this->account('archivist');
+        $this->account('editor');
         $this->expectException(QueryException::class);
         $this->expectExceptionMessage('append-only');
         DB::table('audit_log')->update(['ip' => '10.0.0.1']);
@@ -161,7 +164,7 @@ class AccessAndAuditTest extends TestCase
 
     public function test_the_database_refuses_to_delete_an_audit_row(): void
     {
-        $this->account('archivist');
+        $this->account('editor');
         $this->expectException(QueryException::class);
         $this->expectExceptionMessage('append-only');
         DB::table('audit_log')->delete();
@@ -176,7 +179,7 @@ class AccessAndAuditTest extends TestCase
 
     public function test_repeated_failed_sign_ins_are_throttled(): void
     {
-        $this->account('archivist');
+        $this->account('editor');
         for ($i = 0; $i < 5; $i++) {
             $this->post('/sign-in', ['email' => 'archivist@example.org', 'password' => 'wrong']);
         }

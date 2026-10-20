@@ -6,6 +6,7 @@
 
 namespace Tests\Feature;
 
+use App\Access\RoleService;
 use App\Accounts\AccountService;
 use App\Models\Institution;
 use App\Models\User;
@@ -32,7 +33,7 @@ class AccountManagementTest extends TestCase
         $this->loadBundledVocabularies();
         $this->accounts = app(AccountService::class);
         $this->institution = Institution::create(['name' => 'Riverside Parish Council Archives', 'base_iri' => 'https://archives.example.org']);
-        $this->accounts->seedDefaultGrants($this->institution);
+        app(RoleService::class)->seedDefaults($this->institution);
         $this->admin = $this->account('The Administrator', 'admin@example.org', 'administrator');
     }
 
@@ -40,7 +41,7 @@ class AccountManagementTest extends TestCase
     {
         $user = $this->accounts->create($institution ?? $this->institution, $name, $email, self::PASSWORD);
         if ($role) {
-            $this->accounts->grantRole($user, Vocab::role($role));
+            $this->accounts->grantTemplateRole($user, $role);
         }
 
         return $user;
@@ -53,7 +54,7 @@ class AccountManagementTest extends TestCase
 
     public function test_only_an_account_with_manage_accounts_reaches_the_screens(): void
     {
-        $archivist = $this->account('An Archivist', 'archivist@example.org', 'archivist');
+        $archivist = $this->account('An Archivist', 'archivist@example.org', 'editor');
 
         $this->actingAs($archivist)->get('/accounts')->assertForbidden();
         $this->actingAs($this->admin)->get('/accounts')->assertOk()->assertSee('An Archivist');
@@ -75,12 +76,12 @@ class AccountManagementTest extends TestCase
         $response = $this->actingAs($this->admin)->post('/accounts', [
             'name' => 'New Reviewer',
             'email' => 'Reviewer@Example.org',
-            'roles' => [Vocab::role('reviewer')],
+            'roles' => [app(RoleService::class)->byTemplate($this->institution, 'translator')->id],
         ]);
 
         $account = User::where('email', 'reviewer@example.org')->firstOrFail();
         $response->assertRedirect(route('accounts.show', $account))->assertSessionHas('password_link');
-        $this->assertSame([Vocab::role('reviewer')], $account->roles->pluck('iri')->all());
+        $this->assertSame(['Translator'], $account->roles->map(fn ($r) => $r->name())->all());
         $this->assertSame(['create', 'grant-role', 'issue-password-link'], array_slice($this->actions(), -3));
     }
 
@@ -94,7 +95,7 @@ class AccountManagementTest extends TestCase
 
     public function test_the_link_sets_the_password_once(): void
     {
-        $account = $this->account('New Archivist', 'new@example.org', 'archivist');
+        $account = $this->account('New Archivist', 'new@example.org', 'editor');
         $link = $this->accounts->issuePasswordLink($account, $this->admin);
         parse_str((string) parse_url($link, PHP_URL_QUERY), $query);
         $token = basename((string) parse_url($link, PHP_URL_PATH));
@@ -150,7 +151,7 @@ class AccountManagementTest extends TestCase
 
     public function test_a_disabled_account_is_signed_out_on_its_next_request(): void
     {
-        $archivist = $this->account('An Archivist', 'archivist@example.org', 'archivist');
+        $archivist = $this->account('An Archivist', 'archivist@example.org', 'editor');
         $this->post('/sign-in', ['email' => 'archivist@example.org', 'password' => self::PASSWORD]);
         $this->assertAuthenticated();
 

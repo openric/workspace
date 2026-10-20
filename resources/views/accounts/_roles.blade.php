@@ -3,8 +3,9 @@
     <legend>Roles</legend>
     @foreach($roles as $role)
         <label style="font-weight: normal">
-            <input type="checkbox" name="roles[]" value="{{ $role->iri }}" style="width: auto" @checked(in_array($role->iri, $selected, true))>
-            {{ $role->label(['en', 'und']) }}: {{ $role->labels->firstWhere('language', 'en')?->definition }}
+            <input type="checkbox" name="roles[]" value="{{ $role->id }}" style="width: auto" @checked(in_array($role->id, $selected, true))>
+            {{ $role->name() }}@if($description = $role->labels->firstWhere('language', 'en')?->description): {{ $description }}@endif
         </label>
     @endforeach
+    <p><small>Every account also has the Signed in and Public roles.</small></p>
 </fieldset>

@@ -11,7 +11,7 @@
             <tr>
                 <td><a href="{{ route('accounts.show', $user) }}">{{ $user->name }}</a></td>
                 <td>{{ $user->email }}</td>
-                <td>{{ $user->roles->map(fn ($r) => $r->label(['en', 'und']))->join(', ') ?: 'none' }}</td>
+                <td>{{ $user->roles->map(fn ($r) => $r->name())->join(', ') ?: 'none of its own' }}</td>
                 <td>{{ $user->isDisabled() ? 'Disabled' : 'Active' }}</td>
             </tr>
         @endforeach

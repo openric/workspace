@@ -1,0 +1,43 @@
+# OpenRiC Workspace - OpenRiC Workspace Record Kinds.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# The kinds of record a permission applies to: one permission matrix each, as
+# Heratio has one ACL editor per class. Which actions apply to which kind is
+# workspace.permission_matrix in config/workspace.php.
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/record-kind/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Record Kinds"@en ;
+    dcterms:description "Kinds of record that permissions are granted on."@en ;
+    dcterms:issued "2026-10-20"^^xsd:date ;
+    skos:hasTopConcept v:institution, v:repository, v:description, v:vocabulary .
+
+v:institution a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Institution"@en ;
+    skos:definition "The institution itself: its settings, accounts, roles and audit log."@en .
+
+v:repository a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Repository"@en ;
+    skos:definition "Repositories (ISDIAH)."@en .
+
+v:description a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Archival description"@en ;
+    skos:definition "Record sets, records and record parts (ISAD(G))."@en .
+
+v:vocabulary a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Vocabulary term"@en ;
+    skos:definition "Terms of the institution's vocabularies."@en .
+

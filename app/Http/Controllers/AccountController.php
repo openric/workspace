@@ -14,6 +14,7 @@ namespace App\Http\Controllers;
 use App\Accounts\AccountException;
 use App\Accounts\AccountService;
 use App\Models\Concept;
+use App\Models\Role;
 use App\Models\User;
 use App\Support\Vocab;
 use Illuminate\Http\RedirectResponse;
@@ -34,9 +35,9 @@ class AccountController extends Controller
         return view('accounts.index', ['users' => $users]);
     }
 
-    public function create(): View
+    public function create(Request $request): View
     {
-        return view('accounts.create', ['roles' => $this->roles()]);
+        return view('accounts.create', ['roles' => $this->roles($request)]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -45,7 +46,7 @@ class AccountController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')],
             'roles' => ['array'],
-            'roles.*' => ['string', Rule::in($this->roles()->pluck('iri'))],
+            'roles.*' => ['uuid', Rule::in($this->roles($request)->pluck('id'))],
         ]);
         $actor = $request->user();
         // The account starts with a long random password nobody knows; its owner sets one from the link.
@@ -60,7 +61,8 @@ class AccountController extends Controller
     {
         $this->sameInstitution($request, $account);
 
-        return view('accounts.show', ['account' => $account->load('roles'), 'roles' => $this->roles()]);
+        return view('accounts.show', ['account' => $account->load('roles.labels'), 'roles' => $this->roles($request),
+            'kinds' => collect(array_keys(config('workspace.permission_matrix')))->map(fn ($n) => Concept::where('iri', Vocab::kind($n))->with('labels')->firstOrFail())]);
     }
 
     public function updateRoles(Request $request, User $account): RedirectResponse
@@ -68,7 +70,7 @@ class AccountController extends Controller
         $this->sameInstitution($request, $account);
         $data = $request->validate([
             'roles' => ['array'],
-            'roles.*' => ['string', Rule::in($this->roles()->pluck('iri'))],
+            'roles.*' => ['uuid', Rule::in($this->roles($request)->pluck('id'))],
         ]);
 
         return $this->attempt(fn () => $this->accounts->setRoles($account, $data['roles'] ?? [], $request->user()), $account, 'Roles saved.');
@@ -114,9 +116,10 @@ class AccountController extends Controller
         abort_unless($account->institution_id === $request->user()->institution_id, 404);
     }
 
-    private function roles()
+    /** The institution's roles an account can be a member of: all but Public and Signed in. */
+    private function roles(Request $request)
     {
-        return Concept::current()->whereHas('vocabulary', fn ($q) => $q->where('iri', Vocab::ACCOUNT_ROLES))
-            ->with('labels')->orderBy('notation')->get();
+        return Role::where('institution_id', $request->user()->institution_id)->where('is_system', false)
+            ->with('labels')->get()->sortBy(fn ($r) => mb_strtolower($r->name()))->values();
     }
 }

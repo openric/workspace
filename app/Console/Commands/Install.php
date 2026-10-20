@@ -7,6 +7,7 @@
 
 namespace App\Console\Commands;
 
+use App\Access\RoleService;
 use App\Accounts\AccountService;
 use App\Audit\AuditLog;
 use App\Description\Bcp47;
@@ -33,7 +34,7 @@ class Install extends Command
 
     protected $description = 'Install the Workspace: vocabularies, the institution and its first administrator';
 
-    public function handle(SkosImporter $importer, AccountService $accounts, RepositoryService $repositories): int
+    public function handle(SkosImporter $importer, AccountService $accounts, RepositoryService $repositories, RoleService $roles): int
     {
         if (Institution::exists()) {
             $this->error('The Workspace is already installed: an institution exists.');
@@ -89,12 +90,12 @@ class Install extends Command
         // Every audit row is signed (ADR 0004), so the key comes before the first one.
         $this->call('workspace:audit:create-key', ['--if-missing' => true]);
 
-        $admin = DB::transaction(function () use ($input, $password, $accounts, $repositories, $language) {
+        $admin = DB::transaction(function () use ($input, $password, $accounts, $repositories, $language, $roles) {
             $institution = Institution::create(['name' => $input['institution'], 'base_iri' => $input['base_iri']]);
             $repositories->create($institution, (string) ($this->option('repository') ?: $input['institution']), $language);
-            $accounts->seedDefaultGrants($institution);
+            $roles->seedDefaults($institution);
             $admin = $accounts->create($institution, $input['name'], $input['email'], $password);
-            $accounts->grantRole($admin, Vocab::role('administrator'));
+            $accounts->grantTemplateRole($admin, 'administrator');
             AuditLog::record(Vocab::action('install'), $institution, null, ['administrator' => $admin->email]);
 
             return $admin;

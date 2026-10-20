@@ -3,7 +3,7 @@
 @section('title', 'Repositories')
 @section('content')
     <h1>Repositories</h1>
-    <p><a href="{{ route('repositories.create') }}">New repository</a></p>
+    @if(auth()->user()->may('create', 'repository'))<p><a href="{{ route('repositories.create') }}">New repository</a></p>@endif
     @forelse($repositories as $repository)
         <p><a href="{{ route('repositories.show', $repository) }}">{{ $repository->described('authorised-name', [app()->getLocale(), 'en']) }}</a>@if($repository->identifier) ({{ $repository->identifier }})@endif</p>
     @empty

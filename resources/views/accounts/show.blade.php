@@ -17,9 +17,17 @@
     <h2>Roles</h2>
     <form method="post" action="{{ route('accounts.roles', $account) }}">
         @csrf
-        @include('accounts._roles', ['roles' => $roles, 'selected' => $account->roles->pluck('iri')->all()])
+        @include('accounts._roles', ['roles' => $roles, 'selected' => $account->roles->pluck('id')->all()])
         <button type="submit">Save roles</button>
     </form>
+
+    @can(\App\Support\Vocab::permission('manage-roles'))
+        <h2>Permissions of this account</h2>
+        <p>Permissions set for this account alone come before those of its roles.</p>
+        <ul>
+            @foreach($kinds as $kind)<li><a href="{{ route('accounts.permissions', [$account, $kind->notation]) }}">{{ $kind->label(['en', 'und']) }}</a></li>@endforeach
+        </ul>
+    @endcan
 
     <h2>Access</h2>
     <form method="post" action="{{ route('accounts.password-link', $account) }}">

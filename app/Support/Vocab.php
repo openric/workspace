@@ -24,6 +24,8 @@ final class Vocab
 
     public const VALUE_STATES = self::BASE.'language-value-state/';
 
+    public const RECORD_KINDS = self::BASE.'record-kind/';
+
     public const DESCRIPTION_STATUSES = self::BASE.'description-status/';
 
     public const DESCRIPTION_DETAILS = self::BASE.'description-detail/';
@@ -41,6 +43,11 @@ final class Vocab
     public static function action(string $notation): string
     {
         return self::AUDIT_ACTIONS.$notation;
+    }
+
+    public static function kind(string $notation): string
+    {
+        return self::RECORD_KINDS.$notation;
     }
 
     public static function element(string $notation): string

@@ -6,6 +6,7 @@
 
 namespace Tests\Feature;
 
+use App\Access\RoleService;
 use App\Accounts\AccountService;
 use App\Description\RepositoryService;
 use App\Models\Concept;
@@ -37,9 +38,9 @@ class RepositoryTest extends TestCase
         $accounts = app(AccountService::class);
         $this->repositories = app(RepositoryService::class);
         $this->institution = Institution::create(['name' => 'Riverside Parish Council Archives', 'base_iri' => 'https://archives.example.org']);
-        $accounts->seedDefaultGrants($this->institution);
+        app(RoleService::class)->seedDefaults($this->institution);
         $this->archivist = $accounts->create($this->institution, 'An Archivist', 'archivist@example.org', 'correct horse battery staple');
-        $accounts->grantRole($this->archivist, Vocab::role('archivist'));
+        $accounts->grantTemplateRole($this->archivist, 'editor');
     }
 
     public function test_an_archivist_creates_a_repository_with_a_persistent_iri(): void
@@ -103,11 +104,16 @@ class RepositoryTest extends TestCase
         $this->repositories->create($this->institution, 'X', 'EN_gb');
     }
 
-    public function test_describing_needs_the_describe_permission(): void
+    public function test_an_account_without_a_role_may_read_but_not_change(): void
     {
+        // Every account has Signed in and Public, and Public may read repositories (ADR 0005).
+        $repository = $this->repositories->create($this->institution, 'Riverside Parish Council Archives', 'en');
         $plain = app(AccountService::class)->create($this->institution, 'No Role', 'norole@example.org', 'correct horse battery staple');
-        $this->actingAs($plain)->get('/repositories')->assertForbidden();
+        $this->actingAs($plain)->get('/repositories')->assertOk()->assertDontSee('New repository');
+        $this->actingAs($plain)->get("/repositories/{$repository->id}")->assertOk()->assertDontSee('Edit description');
         $this->actingAs($plain)->post('/repositories', ['name' => 'X', 'language' => 'en'])->assertForbidden();
+        $this->actingAs($plain)->get("/repositories/{$repository->id}/edit")->assertForbidden();
+        $this->actingAs($plain)->post("/repositories/{$repository->id}", ['language' => 'en', 'values' => ['history' => 'x']])->assertForbidden();
     }
 
     public function test_another_institutions_repository_does_not_exist_here(): void

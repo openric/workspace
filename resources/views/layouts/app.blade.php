@@ -39,9 +39,10 @@
 @auth
     @php($nav = array_filter([
         'home' => ['Home', true],
-        'repositories.index' => ['Repositories', auth()->user()->can(\App\Support\Vocab::permission('describe'))],
-        'records.index' => ['Archival descriptions', auth()->user()->can(\App\Support\Vocab::permission('describe'))],
+        'repositories.index' => ['Repositories', auth()->user()->mayAnywhere('read', 'repository')],
+        'records.index' => ['Archival descriptions', auth()->user()->mayAnywhere('read', 'description')],
         'accounts.index' => ['Accounts', auth()->user()->can(\App\Support\Vocab::permission('manage-accounts'))],
+        'roles.index' => ['Roles', auth()->user()->can(\App\Support\Vocab::permission('manage-roles'))],
         'audit' => ['Audit log', auth()->user()->can(\App\Support\Vocab::permission('view-audit-log'))],
         'settings.edit' => ['Settings', auth()->user()->can(\App\Support\Vocab::permission('manage-institution'))],
     ], fn ($item) => $item[1]))

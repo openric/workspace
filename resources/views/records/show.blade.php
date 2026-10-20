@@ -9,18 +9,23 @@
     @if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif
     <p>{{ $record->level->label(['en', 'und']) }}@if($record->identifier), {{ $record->identifier }}@endif. Held by {{ $record->repository->described('authorised-name', ['en']) }}.<br>
        <strong>Persistent IRI:</strong> <code>{{ $record->iri }}</code></p>
-    <p><a href="{{ route('records.move-form', $record) }}">Move</a> · <a href="{{ route('records.create', ['parent' => $record->id]) }}">Add a unit inside</a></p>
-    @include('description._actions', ['subject' => $record, 'editRoute' => 'records.edit', 'required' => 'title'])
-    @include('description._view', ['subject' => $record, 'standard' => \App\Description\Elements::ISAD_G])
+    <p>@if($canUpdate)<a href="{{ route('records.move-form', $record) }}">Move</a>@endif
+       @if($canUpdate && $canCreateInside) · @endif
+       @if($canCreateInside)<a href="{{ route('records.create', ['parent' => $record->id]) }}">Add a unit inside</a>@endif</p>
+    @if($canUpdate || auth()->user()->may('translate', 'description', $record))
+        @include('description._actions', ['subject' => $record, 'editRoute' => 'records.edit', 'required' => 'title'])
+    @endif
+    @include('description._view', ['subject' => $record, 'standard' => \App\Description\Elements::ISAD_G, 'drafts' => $drafts])
 
     <h2>Structured dates (3.1.3)</h2>
     @foreach($record->dates as $date)
         <form method="post" action="{{ route('records.dates.destroy', [$record, $date]) }}">
             @csrf
             {{ $date->dateType->label(['en', 'und']) }}: {{ $date->begin_date?->format('Y-m-d') ?? '?' }} to {{ $date->end_date?->format('Y-m-d') ?? '?' }}
-            <button type="submit">Remove</button>
+            @if($canUpdate)<button type="submit">Remove</button>@endif
         </form>
     @endforeach
+    @if($canUpdate)
     <details>
         <summary>Add a date</summary>
         <form method="post" action="{{ route('records.dates.store', $record) }}">
@@ -36,13 +41,16 @@
             <button type="submit">Add date</button>
         </form>
     </details>
+    @endif
 
     <h2>Units inside</h2>
     @forelse($record->children as $child)
         <div>
             <a href="{{ route('records.show', $child) }}">{{ $child->described('title', ['en']) }}</a> ({{ $child->level->label(['en', 'und']) }})
+            @if(auth()->user()->may('update', 'description', $child))
             <form method="post" action="{{ route('records.reorder', $child) }}" style="display: inline">@csrf<input type="hidden" name="direction" value="up"><button type="submit" aria-label="Move {{ $child->described('title', ['en']) }} up">Up</button></form>
             <form method="post" action="{{ route('records.reorder', $child) }}" style="display: inline">@csrf<input type="hidden" name="direction" value="down"><button type="submit" aria-label="Move {{ $child->described('title', ['en']) }} down">Down</button></form>
+            @endif
         </div>
     @empty
         <p>None yet.</p>
