@@ -4,7 +4,7 @@
 @section('content')
     <h1>Archival descriptions</h1>
     @if(session('status'))<p role="status">{{ session('status') }}</p>@endif
-    <p>@if(auth()->user()->mayAnywhere('create', 'description'))<a href="{{ route('records.create') }}">New top-level unit (fonds or collection)</a> · @endif<a href="{{ route('records.export-all') }}">Export as CSV</a></p>
+    <p>@if(auth()->user()->mayAnywhere('create', 'description'))<a href="{{ route('records.create') }}">New top-level unit (fonds or collection)</a> · @endif<a href="{{ route('records.export-all') }}">Export as CSV</a>@if(auth()->user()->mayAnywhere('create', 'description')) · <a href="{{ route('imports.create') }}">Import</a> · <a href="{{ route('imports.index') }}">Imports</a>@endif</p>
     <form method="get" action="{{ route('records.index') }}" style="display: flex; gap: .75rem; flex-wrap: wrap; align-items: end">
         <div><label for="q" style="margin-top: 0">Title, other name or reference code</label><input id="q" name="q" value="{{ $query }}" maxlength="200"></div>
         <div><label for="repository" style="margin-top: 0">Repository</label>

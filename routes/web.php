@@ -17,6 +17,7 @@ use App\Http\Controllers\DeletionController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\IdentifierController;
+use App\Http\Controllers\ImportController;
 use App\Http\Controllers\LocalVocabularyController;
 use App\Http\Controllers\NameController;
 use App\Http\Controllers\PasswordController;
@@ -100,6 +101,15 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::post('/{record}/calculate-dates', [RecordController::class, 'calculateDates'])->name('calculate-dates');
         Route::get('/{record}/export', [ExportController::class, 'form'])->name('export');
         Route::get('/{record}/export/{format}', [ExportController::class, 'download'])->where('format', 'ead|ead3|csv|dc|mods')->name('export.download');
+    });
+
+    // Imports of archival description: a dry run, its report, then the import (WS-015).
+    Route::prefix('imports')->name('imports.')->group(function () {
+        Route::get('/', [ImportController::class, 'index'])->name('index');
+        Route::get('/new', [ImportController::class, 'create'])->name('create');
+        Route::post('/', [ImportController::class, 'store'])->name('store');
+        Route::get('/{import}', [ImportController::class, 'show'])->name('show');
+        Route::post('/{import}/commit', [ImportController::class, 'commit'])->name('commit');
     });
 
     // Authority records (ISAAR(CPF)); the controller checks the authority permissions and embargoes.

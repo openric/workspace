@@ -1,0 +1,219 @@
+<?php
+
+// OpenRiC Workspace - import of units of description from CSV and EAD: dry run, report, import, repeat (WS-015).
+// Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
+namespace Tests\Feature;
+
+use App\Access\RoleService;
+use App\Accounts\AccountService;
+use App\Description\AgentService;
+use App\Description\DateService;
+use App\Description\RecordService;
+use App\Description\RepositoryService;
+use App\Models\Agent;
+use App\Models\Import;
+use App\Models\Institution;
+use App\Models\Place;
+use App\Models\RecordResource;
+use App\Models\Relation;
+use App\Models\Repository;
+use App\Models\User;
+use App\Relations\RelationService;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
+use Tests\TestCase;
+
+class ImportTest extends TestCase
+{
+    use RefreshDatabase;
+
+    private const LEVEL = 'https://workspace.openric.org/vocab/level-of-description/';
+
+    private Institution $institution;
+
+    private Repository $holder;
+
+    private User $editor;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->loadBundledVocabularies();
+        $this->institution = Institution::create(['name' => 'Riverside Archives', 'base_iri' => 'https://archives.example.org']);
+        app(RoleService::class)->seedDefaults($this->institution);
+        $this->editor = app(AccountService::class)->create($this->institution, 'Editor', 'editor@example.org', 'correct horse battery staple');
+        app(AccountService::class)->grantTemplateRole($this->editor, 'editor');
+        $this->holder = app(RepositoryService::class)->create($this->institution, 'Riverside Archives', 'en', 'RA');
+    }
+
+    private function upload(string $content, string $format, array $fields = [], string $name = 'file'): Import
+    {
+        $location = $this->actingAs($this->editor)->post('/imports', [
+            'file' => UploadedFile::fake()->createWithContent($name.($format === 'csv' ? '.csv' : '.xml'), $content),
+            'format' => $format, 'repository' => $this->holder->id, 'language' => 'en', ...$fields,
+        ])->assertRedirect()->assertSessionHasNoErrors()->headers->get('Location');
+
+        return Import::findOrFail(basename($location));
+    }
+
+    private function commit(Import $import): Import
+    {
+        $this->actingAs($this->editor)->post("/imports/{$import->id}/commit")->assertRedirect(route('imports.show', $import));
+
+        return $import->fresh();
+    }
+
+    private function csv(array $rows): string
+    {
+        $out = fopen('php://memory', 'r+');
+        foreach ($rows as $row) {
+            fputcsv($out, $row, escape: '');
+        }
+        rewind($out);
+
+        return stream_get_contents($out);
+    }
+
+    private const HEADER = ['legacyId', 'parentId', 'identifier', 'title', 'levelOfDescription', 'scopeAndContent', 'extentAndMedium', 'repository',
+        'subjectAccessPoints', 'placeAccessPoints', 'nameAccessPoints', 'eventTypes', 'eventDates', 'eventStartDates', 'eventEndDates', 'eventActors',
+        'eventActorHistories', 'digitalObjectPath', 'culture', 'myOwnColumn'];
+
+    private function atomFile(string $scope = 'Minutes and correspondence.'): string
+    {
+        return $this->csv([self::HEADER,
+            ['1', '', 'RPC', 'Riverside Parish Council records', 'Fonds', $scope, '3 boxes', 'Riverside Archives', 'Local government|Elections', 'Riverside',
+                'Engelbrecht, Johanna', 'Creation', '1902 to 1950', '1902-01-01', '1950-12-31', 'Riverside Parish Council', 'Established in 1902.', 'files/a.tif', 'en', 'x'],
+            ['1', '', '', 'Rekords van die Riverside-gemeenteraad', '', 'Notules en korrespondensie.', '', '', '', '', '', '', '', '', '', '', '', '', 'af', ''],
+            ['2', '1', '1', 'Minutes', 'Series', '', '', '', '', '', '', '', '', '', '', '', '', '', 'en', ''],
+            ['3', '2', '3', 'Minutes, 1902', 'Bundle', '', '', '', '', '', '', '', '', '', '', '', '', '', 'en', ''],
+            ['4', '3', '1', 'Inside the bundle', 'Item', '', '', '', '', '', '', '', '', '', '', '', '', '', 'en', ''],
+        ]);
+    }
+
+    public function test_a_csv_dry_run_writes_nothing_and_reports_every_field_it_cannot_take(): void
+    {
+        $import = $this->upload($this->atomFile(), 'csv', ['agent_type' => 'corporate-body', 'create_terms' => '1', 'source' => 'AtoM Riverside']);
+        $this->assertSame(0, RecordResource::count(), 'a dry run writes nothing');
+        $this->assertSame(0, Agent::count());
+        $this->assertNull($import->committed_at);
+        $this->assertEquals(['created' => 2, 'updated' => 0, 'unchanged' => 0, 'rejected' => 2], $import->report['actions']);
+        $issues = collect($import->report['issues']);
+        foreach (['myOwnColumn', 'digitalObjectPath', 'publicationStatus'] as $field) {
+            $this->assertTrue($issues->contains('field', $field), "$field is reported");
+        }
+        $units = collect($import->report['units']);
+        $this->assertStringContainsString('"Bundle" is not a level of description', $units->firstWhere('key', '3')['message']);
+        $this->assertSame('the unit it is inside was not imported', $units->firstWhere('key', '4')['message']);
+        $this->actingAs($this->editor)->get("/imports/{$import->id}")->assertOk()->assertSee('Dry run: nothing has been written.')
+            ->assertSee('would be created')->assertSee('Import now')->assertSee('not a column of AtoM');
+    }
+
+    public function test_a_csv_is_imported_with_translations_events_creators_and_access_points_and_imports_again_without_duplicates(): void
+    {
+        $import = $this->commit($this->upload($this->atomFile(), 'csv', ['agent_type' => 'corporate-body', 'create_terms' => '1', 'source' => 'AtoM Riverside']));
+        $this->assertNotNull($import->committed_at);
+        $this->assertTrue($import->report['reconciliation']['holds']);
+        $fonds = RecordResource::whereNull('parent_id')->sole();
+        $this->assertSame(['RPC', 'Riverside Parish Council records', 'Rekords van die Riverside-gemeenteraad', 'Notules en korrespondensie.', '3 boxes'],
+            [$fonds->identifier, $fonds->described('title', ['en']), $fonds->described('title', ['af']), $fonds->described('scope-and-content', ['af']), $fonds->described('extent', ['en'])]);
+        $this->assertSame('1902/1950', $fonds->dates()->sole()->normalized_value);
+        $this->assertSame('1902 to 1950', $fonds->dates()->sole()->expressed);
+        $council = Agent::whereHas('names', fn ($q) => $q->where('value', 'Riverside Parish Council'))->sole();
+        $this->assertSame('corporate-body', $council->typeNotation());
+        $this->assertSame('Established in 1902.', $council->described('agent-history', ['en']));
+        $relations = app(RelationService::class)->of($fonds);
+        $this->assertSame(['creation', 'place', 'subject', 'subject', 'subject'], $relations->map(fn ($r) => $r->relationType->notation)->sort()->values()->all());
+        $this->assertTrue($relations->every(fn (Relation $r) => $r->standing() === 'proposed'), 'an import proposes its relations');
+        $this->assertSame(1, Place::count());
+        $this->assertSame('Minutes', RecordResource::where('parent_id', $fonds->id)->sole()->described('title', ['en']));
+
+        // The same source again: nothing new; a changed value updates its unit only.
+        $again = $this->commit($this->upload($this->atomFile(), 'csv', ['agent_type' => 'corporate-body', 'create_terms' => '1', 'source' => 'AtoM Riverside']));
+        $this->assertEquals(['created' => 0, 'updated' => 0, 'unchanged' => 2, 'rejected' => 2], $again->report['actions']);
+        $changed = $this->commit($this->upload($this->atomFile('Minutes, correspondence and accounts.'), 'csv', ['source' => 'AtoM Riverside']));
+        $this->assertEquals(['created' => 0, 'updated' => 1, 'unchanged' => 1, 'rejected' => 2], $changed->report['actions']);
+        $this->assertSame([2, 2, 5], [RecordResource::count(), Agent::count(), Relation::count()], 'the council and the name access point, created as the import was asked to');
+        $this->assertSame('Minutes, correspondence and accounts.', $fonds->fresh()->described('scope-and-content', ['en']));
+        $this->assertSame('draft', $fonds->fresh()->descriptionValues->first(fn ($v) => $v->value === 'Minutes, correspondence and accounts.')->state->notation);
+    }
+
+    public function test_a_finding_aid_the_workspace_exported_reads_back_unchanged_and_matches_by_iri(): void
+    {
+        $records = app(RecordService::class);
+        $fonds = $records->create($this->institution, self::LEVEL.'fonds', 'Council records', 'en', null, $this->holder, 'C');
+        $series = $records->create($this->institution, self::LEVEL.'series', 'Minutes', 'en', $fonds, null, '1');
+        $part = $records->create($this->institution, self::LEVEL.'part', 'A part', 'en', $series, null, '2');
+        $records->describe($fonds, ['scope-and-content' => "One.\n\nTwo.", 'rules-or-conventions' => 'ISAD(G)', 'archivists-note' => 'Described by A.'], 'en');
+        app(DateService::class)->add($fonds, ['property' => 'creation', 'normalized' => '1900/1950-06', 'expressed' => 'c. 1900-1950', 'language' => 'en']);
+        // Found in the rehearsal: a date with no written form is exported with its EDTF as text, which is not a new written form.
+        app(DateService::class)->add($series, ['property' => 'creation', 'normalized' => '1902/1950-06']);
+        $agent = app(AgentService::class)->create($this->institution, 'person', 'Doe, Jane', 'en');
+        app(RelationService::class)->create($fonds, 'creation', $agent, [], $this->editor);
+        app(RelationService::class)->create($series, 'associated-record', $part, [], $this->editor);
+        $audit = DB::table('audit_log')->count();
+
+        foreach (['ead', 'ead3'] as $format) {
+            $xml = $this->actingAs($this->editor)->get("/records/{$fonds->id}/export/$format?drafts=1")->getContent();
+            $import = $this->commit($this->upload($xml, 'ead', [], $format));
+            $this->assertEquals(['created' => 0, 'updated' => 0, 'unchanged' => 3, 'rejected' => 0], $import->report['actions'], "$format reads back unchanged");
+            $this->assertSame([], collect($import->report['issues'])->where('kind', '!=', 'note')->values()->all(), "$format: every field read");
+        }
+        $this->assertSame([3, 1, 2], [RecordResource::count(), Agent::count(), Relation::count()]);
+        $this->assertSame($audit, DB::table('audit_log')->count(), 'nothing was written');
+
+        $xml = str_replace('<p>Two.</p>', '<p>Two, changed.</p>', $this->actingAs($this->editor)->get("/records/{$fonds->id}/export/ead?drafts=1")->getContent());
+        $this->assertEquals(['created' => 0, 'updated' => 1, 'unchanged' => 2, 'rejected' => 0], $this->commit($this->upload($xml, 'ead'))->report['actions']);
+        $this->assertSame("One.\n\nTwo, changed.", $fonds->fresh()->described('scope-and-content', ['en']));
+    }
+
+    public function test_a_foreign_ead_2002_finding_aid_without_a_namespace(): void
+    {
+        $xml = <<<'XML'
+            <?xml version="1.0" encoding="UTF-8"?>
+            <ead><eadheader><eadid>US-XX-1</eadid></eadheader>
+            <archdesc level="collection"><did><unittitle>Smith family papers</unittitle><unitid>SFP</unitid>
+              <unitdate normal="19020101/19501231" type="inclusive">1902-1950</unitdate><physdesc><extent>2 linear feet</extent></physdesc>
+              <origination><famname>Smith family</famname></origination><dao href="x.jpg"/></did>
+              <scopecontent><head>Scope</head><p>Letters.</p><p>Diaries.</p></scopecontent>
+              <controlaccess><persname>Smith, John</persname><genreform>Diaries</genreform><geogname>Riverside</geogname></controlaccess>
+              <dsc><c01 level="series" id="s1"><did><unittitle>Letters</unittitle></did>
+                <c02 level="file"><did><unittitle>Letters, 1902</unittitle><container type="box">1</container></did></c02></c01></dsc>
+            </archdesc></ead>
+            XML;
+        $import = $this->upload($xml, 'ead', ['create_terms' => '1']);
+        $this->assertEquals(['created' => 3, 'updated' => 0, 'unchanged' => 0, 'rejected' => 0], $import->report['actions']);
+        $issues = collect($import->report['issues']);
+        foreach (['dao', 'container', 'controlaccess/genreform'] as $field) {
+            $this->assertTrue($issues->contains(fn ($i) => $i['field'] === $field && $i['kind'] === 'left-out'), "$field is listed");
+        }
+        $this->commit($import);
+        $top = RecordResource::whereNull('parent_id')->sole();
+        $this->assertSame(['collection', 'SFP', '1902/1950', "Letters.\n\nDiaries.", '2 linear feet'],
+            [$top->level->notation, $top->identifier, $top->dates()->sole()->normalized_value, $top->described('scope-and-content', ['en']), $top->described('extent', ['en'])]);
+        $this->assertSame(['family', 'person'], Agent::all()->map->typeNotation()->sort()->values()->all(), 'EAD says which kind of agent a name is');
+        $this->assertSame('Letters, 1902', RecordResource::where('parent_id', RecordResource::where('parent_id', $top->id)->sole()->id)->sole()->described('title', ['en']));
+    }
+
+    public function test_who_may_import_and_bad_files(): void
+    {
+        $reader = app(AccountService::class)->create($this->institution, 'Reader', 'reader@example.org', 'correct horse battery staple');
+        $this->actingAs($reader)->get('/imports/new')->assertForbidden();
+        $this->actingAs($this->editor)->get('/imports/new')->assertOk()->assertSee('Upload and make a dry run');
+
+        $this->actingAs($this->editor)->post('/imports', ['file' => UploadedFile::fake()->createWithContent('a.csv', "title\n\xE9t\xE9"), 'format' => 'csv',
+            'repository' => $this->holder->id, 'language' => 'en'])->assertSessionHasErrors('file');
+        $import = $this->upload('<html>not a finding aid</html>', 'ead');
+        $this->assertSame('rejected', $import->report['issues'][0]['kind']);
+        $this->actingAs($this->editor)->get("/imports/{$import->id}")->assertOk()->assertDontSee('Import now');
+
+        $other = Institution::create(['name' => 'Elsewhere', 'base_iri' => 'https://elsewhere.example.org']);
+        app(RoleService::class)->seedDefaults($other);
+        $stranger = app(AccountService::class)->create($other, 'Stranger', 'stranger@example.org', 'correct horse battery staple');
+        app(AccountService::class)->grantTemplateRole($stranger, 'editor');
+        $this->actingAs($stranger)->get("/imports/{$import->id}")->assertNotFound();
+        $this->actingAs($stranger)->post("/imports/{$import->id}/commit")->assertNotFound();
+    }
+}

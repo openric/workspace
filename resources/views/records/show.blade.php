@@ -14,7 +14,7 @@
            · <form method="post" action="{{ route('records.calculate-dates', $record) }}" style="display: inline">@csrf<button type="submit" style="margin-top: 0; padding: .1rem .5rem">Calculate dates from the units inside</button></form>@endif</p>
     <p>@if($canUpdate)<a href="{{ route('records.move-form', $record) }}">Move</a>@endif
        @if($canUpdate && $canCreateInside) · @endif
-       @if($canCreateInside)<a href="{{ route('records.create', ['parent' => $record->id]) }}">Add a unit inside</a>@endif</p>
+       @if($canCreateInside)<a href="{{ route('records.create', ['parent' => $record->id]) }}">Add a unit inside</a> · <a href="{{ route('imports.create', ['parent' => $record->id]) }}">Import units into it</a>@endif</p>
     @if($canUpdate || auth()->user()->may('translate', 'description', $record))
         @include('description._actions', ['subject' => $record, 'editRoute' => 'records.edit', 'required' => 'title'])
     @endif
