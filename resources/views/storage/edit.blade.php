@@ -15,6 +15,7 @@
         <input id="identifier" name="identifier" maxlength="255" value="{{ old('identifier', $container->identifier) }}">
         <label for="barcode">Barcode</label> @include('description._ric', ['term' => 'rico:Identifier'])
         <input id="barcode" name="barcode" maxlength="255" value="{{ old('barcode', $barcode) }}">
+        @include('storage._levels', ['levels' => $levels, 'current' => $current])
         @include('description._fields', ['subject' => $container, 'standard' => \App\Description\Elements::CONTAINER, 'language' => $language])
 
         <fieldset><legend>Collection management (not in RiC-O)</legend>

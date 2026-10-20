@@ -75,7 +75,8 @@ class StorageController extends Controller
     {
         abort_unless($request->user()->may('create', 'storage'), 403);
 
-        return view('storage.create', ['types' => $this->storage->types($request->user()->institution_id), 'places' => $this->storage->storagePlaces($request->user()->institution_id)]);
+        return view('storage.create', ['types' => $this->storage->types($request->user()->institution_id), 'places' => $this->storage->storagePlaces($request->user()->institution_id),
+            'levels' => $this->levelChoices(), 'current' => []]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -89,22 +90,24 @@ class StorageController extends Controller
             'identifier' => ['nullable', 'string', 'max:255'],
             'barcode' => ['nullable', 'string', 'max:255'],
             'place' => ['nullable', 'uuid'],
+            ...$this->levelRules(),
         ]);
         try {
             $container = DB::transaction(function () use ($user, $data) {
                 $container = $this->storage->create($user->institution, $data['name'], $data['language'], $data['type'] ?? null, $data['identifier'] ?? null, $user);
                 $this->storage->setBarcode($container, $data['barcode'] ?? null, $user);
-                if ($data['place'] ?? null) {
-                    $this->storage->move($container, $this->storagePlace($user->institution_id, $data['place']), null, null, $user);
-                }
 
                 return $container;
             });
         } catch (InvalidArgumentException $e) {
             return back()->withInput()->withErrors(['container' => $e->getMessage()]);
         }
+        // A container that cannot be placed is still kept, and the reason shown.
+        $placed = $this->placeFromForm($request, $container, $data);
 
-        return redirect()->route('containers.show', $container)->with('status', 'Container created. Add what it holds from each unit of description, or here.');
+        $redirect = redirect()->route('containers.show', $container)->with('status', 'Container created'.$placed.'. Add what it holds from each unit of description, or here.');
+
+        return $this->placementError ? $redirect->withErrors(['placement' => $this->placementError]) : $redirect;
     }
 
     public function show(Request $request, Container $container): View
@@ -131,7 +134,8 @@ class StorageController extends Controller
 
         return view('storage.edit', ['container' => $container, 'language' => $language, 'types' => $this->storage->types($container->institution_id),
             'statuses' => Concept::choices(StorageService::STATUSES)->get(), 'securityLevels' => Concept::choices(StorageService::SECURITY_LEVELS)->get(),
-            'units' => Concept::choices(StorageService::CAPACITY_UNITS)->get(), 'barcode' => $this->barcode($container)]);
+            'units' => Concept::choices(StorageService::CAPACITY_UNITS)->get(), 'barcode' => $this->barcode($container),
+            'levels' => $this->levelChoices(), 'current' => $this->storage->levelsOf($this->storage->place($container))]);
     }
 
     public function update(Request $request, Container $container): RedirectResponse
@@ -150,6 +154,7 @@ class StorageController extends Controller
             'capacity_unit' => ['nullable', Rule::in($notations(StorageService::CAPACITY_UNITS))],
             'climate_controlled' => ['nullable', Rule::in(['', '0', '1'])],
             ...array_fill_keys(['width_cm', 'height_cm', 'depth_cm', 'capacity', 'capacity_used', 'temperature_min', 'temperature_max', 'humidity_min', 'humidity_max'], ['nullable', 'string', 'max:20']),
+            ...$this->levelRules(),
         ]);
         $values = array_intersect_key($data['values'] ?? [], array_flip(Elements::notations(Elements::CONTAINER)));
         try {
@@ -162,8 +167,11 @@ class StorageController extends Controller
         } catch (InvalidArgumentException $e) {
             return back()->withInput()->withErrors(['values' => $e->getMessage()]);
         }
+        $placed = $this->placeFromForm($request, $container, $data);
 
-        return redirect()->route('containers.show', $container)->with('status', 'Container saved.');
+        $redirect = redirect()->route('containers.show', $container)->with('status', 'Container saved'.$placed.'.');
+
+        return $this->placementError ? $redirect->withErrors(['placement' => $this->placementError.' The rest was saved.']) : $redirect;
     }
 
     /** Keep the container in a storage place, or take it out of storage, with a note. */
@@ -285,6 +293,45 @@ class StorageController extends Controller
         }
 
         return redirect()->route('storage.place', $here)->with('status', "$moved ".($moved === 1 ? 'container' : 'containers').' moved'.($destination ? ' to '.$this->storage->path($destination) : ' out of storage').'.');
+    }
+
+    private ?string $placementError = null;
+
+    /**
+     * Put the container where the form says: the levels typed (Building to Shelf), else the storage place chosen. Every level
+     * empty and nothing chosen leaves it where it is: clearing the form never takes a container out of storage.
+     *
+     * @return string ", and kept in ..." when it moved, else ""
+     */
+    private function placeFromForm(Request $request, Container $container, array $data): string
+    {
+        try {
+            $place = $this->storage->placeByLevels($request->user()->institution, $data['levels'] ?? [], 'en', $request->user())
+                ?? (($data['place'] ?? null) ? $this->storagePlace($container->institution_id, $data['place']) : null);
+            if ($place === null || $this->storage->place($container)?->id === $place->id) {
+                return '';
+            }
+            $this->storage->move($container, $place, 'Placed with the storage form.', 'en', $request->user());
+
+            return ', and kept in '.$this->storage->path($place);
+        } catch (InvalidArgumentException $e) {
+            $this->placementError = 'It was not placed: '.$e->getMessage().'.';
+
+            return '';
+        }
+    }
+
+    /** @return array<string, string> level notation => label, from the top */
+    private function levelChoices(): array
+    {
+        $types = Concept::choices(StorageService::PLACE_TYPES)->get()->keyBy('notation');
+
+        return collect(StorageService::LEVELS)->mapWithKeys(fn ($level) => [$level => (string) $types[$level]?->label(['en'])])->all();
+    }
+
+    private function levelRules(): array
+    {
+        return ['levels' => ['nullable', 'array'], ...collect(StorageService::LEVELS)->mapWithKeys(fn ($l) => ["levels.$l" => ['nullable', 'string', 'max:255']])->all()];
     }
 
     private function storagePlace(string $institutionId, string $id): Place

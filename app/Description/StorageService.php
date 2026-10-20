@@ -23,6 +23,7 @@ use App\Models\Concept;
 use App\Models\Container;
 use App\Models\Identifier;
 use App\Models\Institution;
+use App\Models\Name;
 use App\Models\Place;
 use App\Models\Relation;
 use App\Models\User;
@@ -45,7 +46,80 @@ class StorageService
 
     public const PLACE_TYPES = Vocab::BASE.'storage-place-type/';
 
-    public function __construct(private DescriptionService $descriptions, private IdentifierService $identifiers, private RelationService $relations) {}
+    /** The levels of the placement form, from the top: the bundled storage place types, as Heratio's box form has them. */
+    public const LEVELS = ['building', 'floor', 'room', 'strongroom', 'aisle', 'bay', 'rack', 'shelf'];
+
+    public function __construct(private DescriptionService $descriptions, private IdentifierService $identifiers, private RelationService $relations,
+        private PlaceService $places) {}
+
+    /**
+     * The name a storage place is kept under. Below building level a bare number or code ("1", "C3", "12B") gets its
+     * level in front ("Floor 1", "Room C3"), so the tree reads on its own; a name already in words is kept as typed.
+     * Heratio names its places so; the rule is the same so that both find the same place.
+     */
+    public function placeName(string $level, string $name): string
+    {
+        $name = trim($name);
+        if ($level !== 'building' && in_array($level, self::LEVELS, true) && preg_match('/^[A-Za-z]{0,3}\d+[A-Za-z]{0,3}$/', $name)) {
+            return $this->concept(self::PLACE_TYPES.$level)->label(['en']).' '.$name;
+        }
+
+        return $name;
+    }
+
+    /**
+     * The storage place the levels of the placement form name (level => name; empty levels are skipped), found level by
+     * level under the one above by its type and its name without regard to case or surrounding space, and made where it
+     * is missing if the account may make places. Null when every level is empty. Nothing is made unless every level is found or may be made.
+     *
+     * @param  array<string, ?string>  $levels
+     */
+    public function placeByLevels(Institution $institution, array $levels, string $language, User $actor): ?Place
+    {
+        $named = [];
+        foreach (self::LEVELS as $level) {
+            if (($name = trim((string) ($levels[$level] ?? ''))) !== '') {
+                $named[$level] = $this->placeName($level, $name);
+            }
+        }
+        if ($named === []) {
+            return null;
+        }
+
+        return DB::transaction(fn () => AuditLog::actingAs($actor, function () use ($institution, $named, $language, $actor) {
+            $parent = null;
+            foreach ($named as $level => $name) {
+                $type = $this->concept(self::PLACE_TYPES.$level);
+                $found = Place::where(['institution_id' => $institution->id, 'place_type_id' => $type->id, 'parent_id' => $parent?->id])->whereNull('deleted_at')
+                    ->whereIn('id', Name::where('subject_table', 'places')->whereRaw('lower(trim(value)) = ?', [mb_strtolower($name)])
+                        ->whereHas('nameType', fn ($q) => $q->where('iri', Vocab::NAME_TYPES.'authorised'))->select('subject_id'))->orderBy('created_at')->first();
+                if ($found === null) {
+                    if (! $actor->may('create', 'vocabulary')) {
+                        throw new InvalidArgumentException('there is no '.mb_strtolower((string) $type->label(['en']))." $name ".($parent ? 'in '.$this->path($parent) : 'at the top').', and you may not make storage places');
+                    }
+                    $found = $this->places->create($institution, $name, $language, $parent, $actor);
+                    $this->places->updateFacts($found, $type->id, null, null, null, $actor);
+                }
+                $parent = $found;
+            }
+
+            return $parent;
+        }));
+    }
+
+    /** @return array<string, string> level => name of the place and the places it lies in, for the placement form */
+    public function levelsOf(?Place $place): array
+    {
+        $levels = [];
+        foreach ($place ? [...$place->ancestors(), $place] : [] as $p) {
+            $p->loadMissing('placeType');
+            if ($p->placeType && str_starts_with($p->placeType->iri, self::PLACE_TYPES)) {
+                $levels[$p->placeType->notation] = (string) $p->described('place-name', ['en']);
+            }
+        }
+
+        return $levels;
+    }
 
     public function create(Institution $institution, string $name, string $language, ?string $typeId = null, ?string $identifier = null, ?User $actor = null): Container
     {

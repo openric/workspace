@@ -18,7 +18,8 @@
         <label for="barcode">Barcode</label> @include('description._ric', ['term' => 'rico:Identifier'])
         <input id="barcode" name="barcode" maxlength="255" value="{{ old('barcode') }}" aria-describedby="barcode-help">
         <small id="barcode-help">One container per barcode, so scanning it finds this one.</small>
-        <label for="place">Kept in</label> @include('description._ric', ['term' => 'rico:hasOrHadLocation'])
+        @include('storage._levels', ['levels' => $levels, 'current' => $current])
+        <label for="place">Or choose a storage place already there</label>
         <select id="place" name="place" style="font: inherit; padding: .5rem">
             <option value="">Nowhere yet</option>
             @foreach($places as $p)<option value="{{ $p->id }}" @selected(old('place') === $p->id)>{{ $p->path }}</option>@endforeach

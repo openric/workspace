@@ -136,6 +136,47 @@ class StorageTest extends TestCase
         $this->actingAs($this->account('Administrator', 'administrator'))->get(route('deletion.confirm', ['places', $shelfB->id]))->assertOk()->assertSee('what came and went would be lost');
     }
 
+    public function test_the_typed_levels_find_or_make_the_storage_place_as_heratio_s_box_form_does(): void
+    {
+        $storage = app(StorageService::class);
+        $this->actingAs($this->editor)->post(route('containers.store'), ['name' => 'Box 1', 'language' => 'en',
+            'levels' => ['building' => 'Main building', 'room' => '12', 'shelf' => '4']])->assertRedirect()->assertSessionHasNoErrors();
+        $box = Container::whereIn('id', Name::where('value', 'Box 1')->select('subject_id'))->sole();
+        $this->assertSame('Main building, Room 12, Shelf 4', $storage->path($storage->place($box)));
+        $this->assertSame('Placed with the storage form.', $storage->currentLocation($box)->description);
+        $places = Place::count();
+
+        // The same levels typed another way are the same places: case and surrounding space do not matter.
+        $this->post(route('containers.store'), ['name' => 'Box 2', 'language' => 'en',
+            'levels' => ['building' => '  main BUILDING ', 'room' => 'room 12', 'shelf' => '4']])->assertSessionHasNoErrors();
+        $this->assertSame($places, Place::count());
+        $two = Container::whereIn('id', Name::where('value', 'Box 2')->select('subject_id'))->sole();
+        $this->assertSame($storage->place($box)->id, $storage->place($two)->id);
+
+        // The edit form shows the levels; emptying them leaves the box where it is; a new shelf is made and the box moves to it.
+        $this->get(route('containers.edit', $box))->assertOk()->assertSee('value="Room 12"', false)->assertSee('value="Shelf 4"', false);
+        $this->post(route('containers.update', $box), ['language' => 'en', 'values' => [], 'levels' => []])->assertSessionHasNoErrors();
+        $this->assertSame('Main building, Room 12, Shelf 4', $storage->path($storage->place($box)));
+        $this->post(route('containers.update', $box), ['language' => 'en', 'values' => [], 'levels' => ['building' => 'Main building', 'room' => '12', 'shelf' => '5']])->assertSessionHasNoErrors();
+        $this->assertSame('Main building, Room 12, Shelf 5', $storage->path($storage->place($box)));
+        $this->assertSame($places + 1, Place::count());
+        $this->assertCount(2, $storage->locations($box));
+
+        // Someone who may not make places is held to those already there; nothing is made, and nothing half-made.
+        $contributor = $this->account('Contributor', 'contributor');
+        $this->assertSame('Main building, Room 12, Shelf 5', $storage->path($storage->placeByLevels($this->institution, ['building' => 'Main building', 'room' => '12', 'shelf' => '5'], 'en', $contributor)));
+        try {
+            $storage->placeByLevels($this->institution, ['building' => 'Annexe', 'room' => '1'], 'en', $contributor);
+            $this->fail('a place was made by someone who may not');
+        } catch (InvalidArgumentException $e) {
+            $this->assertStringContainsString('there is no building Annexe at the top', $e->getMessage());
+        }
+        $this->assertSame($places + 1, Place::count());
+        $this->assertSame('Strongroom B', $storage->placeName('strongroom', 'Strongroom B'));
+        $this->assertSame('Aisle C3', $storage->placeName('aisle', 'C3'));
+        $this->assertSame('12', $storage->placeName('building', '12'));
+    }
+
     public function test_only_storage_places_keep_containers_one_at_a_time_and_they_stay_apart_from_other_places(): void
     {
         $shelf = $this->storagePlace('Shelf A', 'shelf');
@@ -159,7 +200,7 @@ class StorageTest extends TestCase
         $names = fn ($found) => $found->map(fn ($p) => $p->described('place-name', ['en']))->sort()->values()->all();
         $this->assertSame(['Riverside'], $names($relations->candidates($this->editor, ['place'], 'i', null, [], 'place')));
         $this->assertSame(['Shelf A', 'Shelf B'], $names($relations->candidates($this->editor, ['place'], 'Shelf', null, [], 'location')));
-        $this->actingAs($this->editor)->get(route('places.index'))->assertOk()->assertSee('Riverside')->assertDontSee('Shelf A');
+        $this->actingAs($this->editor)->get(route('places.index'))->assertOk()->assertSee('Riverside')->assertDontSee(route('places.show', $shelf), false);
     }
 
     public function test_what_a_unit_is_kept_in_shows_on_its_page_box_list_and_holdings_and_never_to_the_public(): void
