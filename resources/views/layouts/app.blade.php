@@ -28,34 +28,38 @@
         $may = fn (string $permission) => $user->can(\App\Support\Vocab::permission($permission));
         $mayImport = collect(array_keys(\App\Exchange\Import\ImportService::FORMATS))
             ->contains(fn ($format) => $user->mayAnywhere('create', \App\Exchange\Import\ImportService::permission($format)));
-        // group => [route name => [label, shown, the routes it is current for]]; a group with nothing shown is left out.
+        // group => [route name => [label, shown, the routes it is current for, "!" before one it is not]]; a group with nothing shown is left out.
+        // As AtoM: what is described, then the working tools (its Manage), then administration (its Admin).
         $nav = array_filter(array_map(fn ($items) => array_filter($items, fn ($item) => $item[1]), [
             'Describe' => [
-                'records.index' => ['Archival descriptions', $user->mayAnywhere('read', 'description'), 'records.*'],
-                'agents.index' => ['Authority records', $user->mayAnywhere('read', 'authority'), 'agents.*'],
+                'records.index' => ['Archival descriptions', $user->mayAnywhere('read', 'description'), 'records.*|!records.export-all'],
+                'agents.index' => ['Authority records', $user->mayAnywhere('read', 'authority'), 'agents.*|!agents.duplicates'],
                 'activities.index' => ['Activities', $user->mayAnywhere('read', 'authority'), 'activities.*'],
                 'places.index' => ['Places', true, 'places.*'],
                 'repositories.index' => ['Repositories', $user->mayAnywhere('read', 'repository'), 'repositories.*'],
             ],
-            'Storage' => [
-                'containers.index' => ['Containers', $user->mayAnywhere('read', 'storage'), 'containers.*'],
-                'storage.places' => ['Storage places', $user->mayAnywhere('read', 'storage'), 'storage.*'],
-            ],
-            'Import and export' => [
-                'imports.index' => ['Imports', $mayImport, 'imports.index|imports.show'],
-                'imports.create' => ['New import', $mayImport, 'imports.create'],
-                'records.export-all' => ['Export descriptions', $user->mayAnywhere('read', 'description'), 'records.export-all'],
-            ],
             'Manage' => [
                 'vocabularies.index' => ['Vocabularies', true, 'vocabularies.*'],
+                'containers.index' => ['Containers', $user->mayAnywhere('read', 'storage'), 'containers.*'],
+                'storage.places' => ['Storage places', $user->mayAnywhere('read', 'storage'), 'storage.*'],
+                'imports.index' => ['Imports', $mayImport, 'imports.*'],
+                'records.export-all' => ['Export descriptions', $user->mayAnywhere('read', 'description'), 'records.export-all'],
+                'agents.duplicates' => ['Duplicate authority records', $user->may('update', 'authority'), 'agents.duplicates'],
+            ],
+            'Admin' => [
                 'accounts.index' => ['Accounts', $may('manage-accounts'), 'accounts.*'],
                 'roles.index' => ['Roles', $may('manage-roles'), 'roles.*'],
                 'audit' => ['Audit log', $may('view-audit-log'), 'audit'],
                 'settings.edit' => ['Settings', $may('manage-institution'), 'settings.*'],
             ],
         ]));
-        $current = fn (array $item) => collect(explode('|', $item[2]))->contains(fn ($p) => request()->routeIs($p))
-            && ! ($item[2] === 'records.*' && request()->routeIs('records.export-all'));
+        $current = function (array $item): bool {
+            $patterns = collect(explode('|', $item[2]));
+            $not = $patterns->filter(fn ($p) => str_starts_with($p, '!'))->map(fn ($p) => substr($p, 1));
+
+            return $patterns->reject(fn ($p) => str_starts_with($p, '!'))->contains(fn ($p) => request()->routeIs($p))
+                && ! $not->contains(fn ($p) => request()->routeIs($p));
+        };
     @endphp
     <nav aria-label="Main" class="main-nav">
         <ul>

@@ -73,7 +73,9 @@ class SettingsAndScreensTest extends TestCase
         $archivist = app(AccountService::class)->create($this->institution, 'An Archivist', 'archivist@example.org', 'correct horse battery staple');
         app(AccountService::class)->grantTemplateRole($archivist, 'editor');
         $this->actingAs($archivist)->get('/settings')->assertForbidden();
-        $this->actingAs($archivist)->get('/')->assertDontSee('Settings')->assertSee('Home');
+        // An archivist has the working tools under Manage and no Admin menu.
+        $this->actingAs($archivist)->get('/')->assertDontSee('Settings')->assertSee('Home')
+            ->assertSee('>Manage</summary>', false)->assertSee('>Vocabularies<', false)->assertDontSee('>Admin</summary>', false);
     }
 
     public function test_every_page_has_the_main_navigation(): void
@@ -81,7 +83,8 @@ class SettingsAndScreensTest extends TestCase
         $this->actingAs($this->admin)->get('/repositories')->assertSee('aria-label="Main"', false)
             ->assertSee('>Home<', false)->assertSee('>Settings<', false)->assertSee('aria-current="page"', false)
             // Grouped in submenus, and the group holding the page is marked.
-            ->assertSeeInOrder(['<summary class="here">Describe</summary>', '>Repositories<', '>Storage</summary>', '>Imports<', '>Manage</summary>', '>Audit log<'], false);
+            ->assertSeeInOrder(['<summary class="here">Describe</summary>', '>Repositories<', '>Manage</summary>', '>Vocabularies<', '>Containers<', '>Imports<',
+                '>Duplicate authority records<', '>Admin</summary>', '>Accounts<', '>Audit log<', '>Settings<'], false);
     }
 
     public function test_a_new_repository_opens_its_full_description_form(): void
