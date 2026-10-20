@@ -11,6 +11,7 @@
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\PasswordController;
+use App\Http\Controllers\RecordController;
 use App\Http\Controllers\RepositoryController;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\VocabularyController;
@@ -21,6 +22,8 @@ use Illuminate\Support\Facades\Route;
 // deliberate exception to default deny; they hold only published vocabulary data.
 // An account is addressed by its UUID; anything else is a 404, never a database error.
 Route::pattern('account', '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}');
+Route::pattern('record', '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}');
+Route::pattern('date', '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}');
 Route::pattern('contact', '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}');
 Route::pattern('repository', '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}');
 
@@ -54,6 +57,20 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::post('/{repository}/contacts', [RepositoryController::class, 'storeContact'])->name('contacts.store');
         Route::post('/{repository}/contacts/{contact}', [RepositoryController::class, 'updateContact'])->name('contacts.update');
         Route::post('/{repository}/contacts/{contact}/remove', [RepositoryController::class, 'destroyContact'])->name('contacts.destroy');
+    });
+
+    Route::middleware('can:'.Vocab::permission('describe'))->prefix('records')->name('records.')->group(function () {
+        Route::get('/', [RecordController::class, 'index'])->name('index');
+        Route::get('/new', [RecordController::class, 'create'])->name('create');
+        Route::post('/', [RecordController::class, 'store'])->name('store');
+        Route::get('/{record}', [RecordController::class, 'show'])->name('show');
+        Route::get('/{record}/edit', [RecordController::class, 'edit'])->name('edit');
+        Route::post('/{record}', [RecordController::class, 'update'])->name('update');
+        Route::get('/{record}/move', [RecordController::class, 'moveForm'])->name('move-form');
+        Route::post('/{record}/move', [RecordController::class, 'move'])->name('move');
+        Route::post('/{record}/reorder', [RecordController::class, 'reorder'])->name('reorder');
+        Route::post('/{record}/dates', [RecordController::class, 'storeDate'])->name('dates.store');
+        Route::post('/{record}/dates/{date}/remove', [RecordController::class, 'destroyDate'])->name('dates.destroy');
     });
 
     Route::middleware('can:'.Vocab::permission('manage-accounts'))->prefix('accounts')->name('accounts.')->group(function () {

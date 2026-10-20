@@ -1,0 +1,66 @@
+# OpenRiC Workspace - OpenRiC Workspace Levels of Description.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# ISAD(G) levels of arrangement. Each level names the RiC-O 1.1 class a unit
+# at that level is exported as: rico:RecordSet, rico:Record or rico:RecordPart.
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/level-of-description/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Levels of Description"@en ;
+    dcterms:description "Levels of arrangement of a unit of description (ISAD(G) 3.1.4)."@en ;
+    dcterms:issued "2026-10-20"^^xsd:date ;
+    skos:hasTopConcept v:fonds, v:subfonds, v:series, v:subseries, v:file, v:item, v:part .
+
+v:fonds a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Fonds"@en ;
+    skos:scopeNote "ISAD(G) 3.1.4; exported as rico:RecordSet."@en ;
+    skos:definition "The whole of the records created or accumulated by one creator."@en .
+
+v:subfonds a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Subfonds"@en ;
+    skos:scopeNote "ISAD(G) 3.1.4; exported as rico:RecordSet."@en ;
+    skos:definition "A subdivision of a fonds, such as the records of one office."@en .
+
+v:series a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Series"@en ;
+    skos:scopeNote "ISAD(G) 3.1.4; exported as rico:RecordSet."@en ;
+    skos:definition "Records kept together because they share a function, form or subject."@en .
+
+v:subseries a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Subseries"@en ;
+    skos:scopeNote "ISAD(G) 3.1.4; exported as rico:RecordSet."@en ;
+    skos:definition "A subdivision of a series."@en .
+
+v:file a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "File"@en ;
+    skos:scopeNote "ISAD(G) 3.1.4; exported as rico:RecordSet."@en ;
+    skos:definition "Records put together for use, usually about one matter."@en .
+
+v:item a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Item"@en ;
+    skos:scopeNote "ISAD(G) 3.1.4; exported as rico:Record."@en ;
+    skos:definition "The smallest unit managed as a whole, such as a letter."@en .
+
+v:part a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Part"@en ;
+    skos:scopeNote "ISAD(G) 3.1.4; exported as rico:RecordPart."@en ;
+    skos:definition "A component of an item, such as one page of a minute book."@en .

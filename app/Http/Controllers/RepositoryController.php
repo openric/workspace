@@ -12,6 +12,7 @@ namespace App\Http\Controllers;
 
 use App\Description\Bcp47;
 use App\Description\ContactPointService;
+use App\Description\Elements;
 use App\Description\RepositoryService;
 use App\Models\Concept;
 use App\Models\ContactPoint;
@@ -163,10 +164,8 @@ class RepositoryController extends Controller
         abort_unless($repository->institution_id === $request->user()->institution_id && $repository->deleted_at === null, 404);
     }
 
-    /** Elements of the vocabulary in its own order (concepts are created in file order, and ids are time-ordered). */
     private function elements()
     {
-        return Concept::current()->whereHas('vocabulary', fn ($q) => $q->where('iri', Vocab::DESCRIPTION_ELEMENTS))
-            ->with('labels')->orderBy('id')->get();
+        return Elements::of(Elements::ISDIAH);
     }
 }

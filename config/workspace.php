@@ -15,7 +15,7 @@ return [
     'audit_signing_key' => env('WORKSPACE_AUDIT_SIGNING_KEY', storage_path('keys/audit-signing.sk')),
 
     // The Workspace's own vocabularies, bundled with the code (resources/vocabularies).
-    'bundled_vocabularies' => ['account-role.ttl', 'permission.ttl', 'audit-action.ttl', 'description-element.ttl', 'language-value-state.ttl', 'description-status.ttl', 'description-detail.ttl'],
+    'bundled_vocabularies' => ['account-role.ttl', 'permission.ttl', 'audit-action.ttl', 'description-element.ttl', 'language-value-state.ttl', 'description-status.ttl', 'description-detail.ttl', 'level-of-description.ttl'],
 
     // Role grants a new institution starts with, by notation. After installation
     // the grants are data in role_grants, changed by an administrator; this list is

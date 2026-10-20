@@ -9,6 +9,7 @@ namespace Tests;
 use App\Audit\AuditChain;
 use App\Audit\AuditLog;
 use App\Audit\Crypto\KeyPair;
+use App\Description\Elements;
 use App\Vocabulary\SkosImporter;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
@@ -22,6 +23,7 @@ abstract class TestCase extends BaseTestCase
         // Concept ids change with every rebuilt test database.
         AuditLog::flush();
         AuditChain::flush();
+        Elements::flush();
         if (in_array(RefreshDatabase::class, class_uses_recursive($this), true)) {
             $this->useTestSigningKey();
         }

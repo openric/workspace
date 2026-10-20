@@ -11,146 +11,312 @@
 
 v: a skos:ConceptScheme ;
     dcterms:title "OpenRiC Workspace Description Elements"@en ;
-    dcterms:description "Elements of archival description, by source standard element."@en ;
+    dcterms:description "Elements of archival description, grouped under the ICA standard they come from. Only the elements, not the groups, are values of a description."@en ;
     dcterms:issued "2026-10-19"^^xsd:date ;
-    skos:hasTopConcept v:authorised-name, v:other-name, v:history, v:geocultural-context, v:mandates, v:administrative-structure, v:records-policies, v:buildings, v:holdings, v:finding-aids, v:opening-times, v:access-conditions, v:accessibility, v:research-services, v:reproduction-services, v:public-areas, v:rules-conventions, v:description-dates, v:description-sources, v:maintenance-notes .
+    skos:hasTopConcept v:isdiah, v:isad-g .
 
 v:authorised-name a skos:Concept ;
     skos:inScheme v: ;
-    skos:topConceptOf v: ;
+    skos:broader v:isdiah ;
     skos:prefLabel "Authorised form of name"@en ;
     skos:scopeNote "ISDIAH 5.1.2; exported as rico:name."@en ;
     skos:definition "The standardised name of the institution."@en .
 
 v:other-name a skos:Concept ;
     skos:inScheme v: ;
-    skos:topConceptOf v: ;
+    skos:broader v:isdiah ;
     skos:prefLabel "Other form of name"@en ;
     skos:scopeNote "ISDIAH 5.1.3; exported as openricx:otherName."@en ;
     skos:definition "A parallel or other name by which the institution is known."@en .
 
 v:history a skos:Concept ;
     skos:inScheme v: ;
-    skos:topConceptOf v: ;
+    skos:broader v:isdiah ;
     skos:prefLabel "History"@en ;
     skos:scopeNote "ISDIAH 5.3.1; exported as rico:history."@en ;
     skos:definition "The history of the institution."@en .
 
 v:geocultural-context a skos:Concept ;
     skos:inScheme v: ;
-    skos:topConceptOf v: ;
+    skos:broader v:isdiah ;
     skos:prefLabel "Geographical and cultural context"@en ;
     skos:scopeNote "ISDIAH 5.3.2; exported as openricx:generalContext."@en ;
     skos:definition "The geographical and cultural context of the institution."@en .
 
 v:mandates a skos:Concept ;
     skos:inScheme v: ;
-    skos:topConceptOf v: ;
+    skos:broader v:isdiah ;
     skos:prefLabel "Mandates or sources of authority"@en ;
     skos:scopeNote "ISDIAH 5.3.3."@en ;
     skos:definition "The legal or other sources of the institution's authority."@en .
 
 v:administrative-structure a skos:Concept ;
     skos:inScheme v: ;
-    skos:topConceptOf v: ;
+    skos:broader v:isdiah ;
     skos:prefLabel "Administrative structure"@en ;
     skos:scopeNote "ISDIAH 5.3.4; exported as openricx:hasInternalStructure."@en ;
     skos:definition "How the institution is organised."@en .
 
 v:records-policies a skos:Concept ;
     skos:inScheme v: ;
-    skos:topConceptOf v: ;
+    skos:broader v:isdiah ;
     skos:prefLabel "Records management and collecting policies"@en ;
     skos:scopeNote "ISDIAH 5.3.5; exported as openricx:hasOrHadPolicy."@en ;
     skos:definition "The institution's records management and collecting policies."@en .
 
 v:buildings a skos:Concept ;
     skos:inScheme v: ;
-    skos:topConceptOf v: ;
+    skos:broader v:isdiah ;
     skos:prefLabel "Buildings"@en ;
     skos:scopeNote "ISDIAH 5.3.6."@en ;
     skos:definition "The buildings of the institution and their facilities."@en .
 
 v:holdings a skos:Concept ;
     skos:inScheme v: ;
-    skos:topConceptOf v: ;
+    skos:broader v:isdiah ;
     skos:prefLabel "Archival and other holdings"@en ;
     skos:scopeNote "ISDIAH 5.3.7."@en ;
     skos:definition "A summary of the institution's holdings."@en .
 
 v:finding-aids a skos:Concept ;
     skos:inScheme v: ;
-    skos:topConceptOf v: ;
+    skos:broader v:isdiah ;
     skos:prefLabel "Finding aids, guides and publications"@en ;
     skos:scopeNote "ISDIAH 5.3.8."@en ;
     skos:definition "The finding aids, guides and publications of the institution."@en .
 
 v:opening-times a skos:Concept ;
     skos:inScheme v: ;
-    skos:topConceptOf v: ;
+    skos:broader v:isdiah ;
     skos:prefLabel "Opening times"@en ;
     skos:scopeNote "ISDIAH 5.4.1; exported as openricx:openingHours."@en ;
     skos:definition "When the institution is open to the public."@en .
 
 v:access-conditions a skos:Concept ;
     skos:inScheme v: ;
-    skos:topConceptOf v: ;
+    skos:broader v:isdiah ;
     skos:prefLabel "Conditions and requirements for access"@en ;
     skos:scopeNote "ISDIAH 5.4.2; exported as rico:conditionsOfAccess."@en ;
     skos:definition "What a visitor needs to consult the holdings."@en .
 
 v:accessibility a skos:Concept ;
     skos:inScheme v: ;
-    skos:topConceptOf v: ;
+    skos:broader v:isdiah ;
     skos:prefLabel "Accessibility"@en ;
     skos:scopeNote "ISDIAH 5.4.3; exported as openricx:accessibility."@en ;
     skos:definition "How to reach the institution and the access it offers to people with disabilities."@en .
 
 v:research-services a skos:Concept ;
     skos:inScheme v: ;
-    skos:topConceptOf v: ;
+    skos:broader v:isdiah ;
     skos:prefLabel "Research services"@en ;
     skos:scopeNote "ISDIAH 5.5.1."@en ;
     skos:definition "The research services the institution offers."@en .
 
 v:reproduction-services a skos:Concept ;
     skos:inScheme v: ;
-    skos:topConceptOf v: ;
+    skos:broader v:isdiah ;
     skos:prefLabel "Reproduction services"@en ;
     skos:scopeNote "ISDIAH 5.5.2."@en ;
     skos:definition "The reproduction services the institution offers."@en .
 
 v:public-areas a skos:Concept ;
     skos:inScheme v: ;
-    skos:topConceptOf v: ;
+    skos:broader v:isdiah ;
     skos:prefLabel "Public areas"@en ;
     skos:scopeNote "ISDIAH 5.5.3."@en ;
     skos:definition "The areas of the institution open to the public."@en .
 
 v:rules-conventions a skos:Concept ;
     skos:inScheme v: ;
-    skos:topConceptOf v: ;
+    skos:broader v:isdiah ;
     skos:prefLabel "Rules and conventions"@en ;
     skos:scopeNote "ISDIAH 5.6.3; exported as rico:isOrWasRegulatedBy a rico:Rule."@en ;
     skos:definition "The rules or conventions followed in writing the description."@en .
 
 v:description-dates a skos:Concept ;
     skos:inScheme v: ;
-    skos:topConceptOf v: ;
+    skos:broader v:isdiah ;
     skos:prefLabel "Dates of creation, revision or deletion"@en ;
     skos:scopeNote "ISDIAH 5.6.6."@en ;
     skos:definition "When the description was created, revised or deleted."@en .
 
 v:description-sources a skos:Concept ;
     skos:inScheme v: ;
-    skos:topConceptOf v: ;
+    skos:broader v:isdiah ;
     skos:prefLabel "Sources"@en ;
     skos:scopeNote "ISDIAH 5.6.8; exported as rico:generalDescription."@en ;
     skos:definition "The sources used in writing the description."@en .
 
 v:maintenance-notes a skos:Concept ;
     skos:inScheme v: ;
-    skos:topConceptOf v: ;
+    skos:broader v:isdiah ;
     skos:prefLabel "Maintenance notes"@en ;
     skos:scopeNote "ISDIAH 5.6.9; exported as rico:generalDescription."@en ;
     skos:definition "Notes on how the description was created and maintained."@en .
+
+v:isdiah a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "ISDIAH"@en ;
+    skos:definition "Elements of ISDIAH, the International Standard for Describing Institutions with Archival Holdings (2008), used to describe repositories."@en .
+
+v:isad-g a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "ISAD(G)"@en ;
+    skos:definition "Elements of ISAD(G), the General International Standard Archival Description (second edition, 2000), used to describe record sets, records and record parts."@en .
+
+v:title a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:isad-g ;
+    skos:prefLabel "Title"@en ;
+    skos:scopeNote "ISAD(G) 3.1.2; exported as rico:title."@en ;
+    skos:definition "The name of the unit of description."@en .
+
+v:dates-expressed a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:isad-g ;
+    skos:prefLabel "Dates as written"@en ;
+    skos:scopeNote "ISAD(G) 3.1.3, the written form; the structured dates are kept separately."@en ;
+    skos:definition "The dates of the unit as the archivist writes them, such as circa 1902-1950."@en .
+
+v:extent a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:isad-g ;
+    skos:prefLabel "Extent and medium"@en ;
+    skos:scopeNote "ISAD(G) 3.1.5."@en ;
+    skos:definition "The extent and medium of the unit."@en .
+
+v:creator-history a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:isad-g ;
+    skos:prefLabel "Administrative or biographical history"@en ;
+    skos:scopeNote "ISAD(G) 3.2.2."@en ;
+    skos:definition "The history of the creator, where it is described with the unit."@en .
+
+v:archival-history a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:isad-g ;
+    skos:prefLabel "Archival history"@en ;
+    skos:scopeNote "ISAD(G) 3.2.3; exported as rico:history."@en ;
+    skos:definition "The custodial history of the unit."@en .
+
+v:acquisition a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:isad-g ;
+    skos:prefLabel "Immediate source of acquisition or transfer"@en ;
+    skos:scopeNote "ISAD(G) 3.2.4."@en ;
+    skos:definition "Where and how the unit came to the repository."@en .
+
+v:scope-and-content a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:isad-g ;
+    skos:prefLabel "Scope and content"@en ;
+    skos:scopeNote "ISAD(G) 3.3.1; exported as rico:scopeAndContent."@en ;
+    skos:definition "What the unit is about and what it contains."@en .
+
+v:appraisal a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:isad-g ;
+    skos:prefLabel "Appraisal, destruction and scheduling"@en ;
+    skos:scopeNote "ISAD(G) 3.3.2; exported as openricx:hasAppraisalInformation."@en ;
+    skos:definition "Appraisal decisions and retention schedules."@en .
+
+v:accruals a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:isad-g ;
+    skos:prefLabel "Accruals"@en ;
+    skos:scopeNote "ISAD(G) 3.3.3; exported as rico:accruals."@en ;
+    skos:definition "Expected additions to the unit."@en .
+
+v:arrangement a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:isad-g ;
+    skos:prefLabel "System of arrangement"@en ;
+    skos:scopeNote "ISAD(G) 3.3.4; exported as rico:structure."@en ;
+    skos:definition "How the unit is arranged."@en .
+
+v:conditions-governing-access a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:isad-g ;
+    skos:prefLabel "Conditions governing access"@en ;
+    skos:scopeNote "ISAD(G) 3.4.1; exported as rico:conditionsOfAccess."@en ;
+    skos:definition "The legal or other conditions on access."@en .
+
+v:conditions-governing-reproduction a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:isad-g ;
+    skos:prefLabel "Conditions governing reproduction"@en ;
+    skos:scopeNote "ISAD(G) 3.4.2; exported as rico:conditionsOfUse."@en ;
+    skos:definition "The conditions on reproducing the unit."@en .
+
+v:physical-characteristics a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:isad-g ;
+    skos:prefLabel "Physical characteristics and technical requirements"@en ;
+    skos:scopeNote "ISAD(G) 3.4.4; exported as rico:physicalCharacteristicsNote."@en ;
+    skos:definition "Physical conditions or technical needs that affect use."@en .
+
+v:finding-aids-note a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:isad-g ;
+    skos:prefLabel "Finding aids"@en ;
+    skos:scopeNote "ISAD(G) 3.4.5."@en ;
+    skos:definition "The finding aids that describe the unit."@en .
+
+v:location-of-originals a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:isad-g ;
+    skos:prefLabel "Existence and location of originals"@en ;
+    skos:scopeNote "ISAD(G) 3.5.1."@en ;
+    skos:definition "Where the originals are, when the unit is a copy."@en .
+
+v:location-of-copies a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:isad-g ;
+    skos:prefLabel "Existence and location of copies"@en ;
+    skos:scopeNote "ISAD(G) 3.5.2."@en ;
+    skos:definition "Where copies of the unit are."@en .
+
+v:related-units a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:isad-g ;
+    skos:prefLabel "Related units of description"@en ;
+    skos:scopeNote "ISAD(G) 3.5.3."@en ;
+    skos:definition "Related material held elsewhere or in the same repository."@en .
+
+v:publication-note a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:isad-g ;
+    skos:prefLabel "Publication note"@en ;
+    skos:scopeNote "ISAD(G) 3.5.4."@en ;
+    skos:definition "Publications about or based on the unit."@en .
+
+v:note a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:isad-g ;
+    skos:prefLabel "Note"@en ;
+    skos:scopeNote "ISAD(G) 3.6.1; exported as rico:generalDescription."@en ;
+    skos:definition "Anything that fits no other element."@en .
+
+v:archivists-note a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:isad-g ;
+    skos:prefLabel "Archivist's note"@en ;
+    skos:scopeNote "ISAD(G) 3.7.1."@en ;
+    skos:definition "How the description was prepared and by whom."@en .
+
+v:rules-or-conventions a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:isad-g ;
+    skos:prefLabel "Rules or conventions"@en ;
+    skos:scopeNote "ISAD(G) 3.7.2."@en ;
+    skos:definition "The rules the description follows."@en .
+
+v:dates-of-descriptions a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:isad-g ;
+    skos:prefLabel "Dates of descriptions"@en ;
+    skos:scopeNote "ISAD(G) 3.7.3."@en ;
+    skos:definition "When the description was prepared or revised."@en .
