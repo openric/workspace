@@ -11,8 +11,8 @@ declare(strict_types=1);
 
 namespace App\Audit\Crypto;
 
-use RuntimeException;
 use InvalidArgumentException;
+use RuntimeException;
 use SodiumException;
 
 /**
@@ -38,10 +38,10 @@ final class KeyPair
     private function __construct(string $secretKey, string $publicKey)
     {
         if (strlen($secretKey) !== SODIUM_CRYPTO_SIGN_SECRETKEYBYTES) {
-            throw new InvalidArgumentException('KeyPair: secret key must be ' . SODIUM_CRYPTO_SIGN_SECRETKEYBYTES . ' bytes');
+            throw new InvalidArgumentException('KeyPair: secret key must be '.SODIUM_CRYPTO_SIGN_SECRETKEYBYTES.' bytes');
         }
         if (strlen($publicKey) !== SODIUM_CRYPTO_SIGN_PUBLICKEYBYTES) {
-            throw new InvalidArgumentException('KeyPair: public key must be ' . SODIUM_CRYPTO_SIGN_PUBLICKEYBYTES . ' bytes');
+            throw new InvalidArgumentException('KeyPair: public key must be '.SODIUM_CRYPTO_SIGN_PUBLICKEYBYTES.' bytes');
         }
         $this->secretKey = $secretKey;
         $this->publicKey = $publicKey;
@@ -54,7 +54,7 @@ final class KeyPair
             $sk = sodium_crypto_sign_secretkey($kp);
             $pk = sodium_crypto_sign_publickey($kp);
         } catch (SodiumException $e) {
-            throw new RuntimeException('KeyPair: sodium failure: ' . $e->getMessage(), 0, $e);
+            throw new RuntimeException('KeyPair: sodium failure: '.$e->getMessage(), 0, $e);
         }
 
         return new self($sk, $pk);
@@ -63,12 +63,12 @@ final class KeyPair
     public static function fromSecretKey(string $secretKey): self
     {
         if (strlen($secretKey) !== SODIUM_CRYPTO_SIGN_SECRETKEYBYTES) {
-            throw new InvalidArgumentException('KeyPair: secret key must be ' . SODIUM_CRYPTO_SIGN_SECRETKEYBYTES . ' bytes');
+            throw new InvalidArgumentException('KeyPair: secret key must be '.SODIUM_CRYPTO_SIGN_SECRETKEYBYTES.' bytes');
         }
         try {
             $pk = sodium_crypto_sign_publickey_from_secretkey($secretKey);
         } catch (SodiumException $e) {
-            throw new RuntimeException('KeyPair: sodium failure deriving public key: ' . $e->getMessage(), 0, $e);
+            throw new RuntimeException('KeyPair: sodium failure deriving public key: '.$e->getMessage(), 0, $e);
         }
 
         return new self($secretKey, $pk);
@@ -112,10 +112,10 @@ final class KeyPair
     {
         $secretDir = dirname($secretPath);
         $publicDir = dirname($publicPath);
-        if (!is_dir($secretDir) && !mkdir($secretDir, 0700, true) && !is_dir($secretDir)) {
+        if (! is_dir($secretDir) && ! mkdir($secretDir, 0700, true) && ! is_dir($secretDir)) {
             throw new RuntimeException("KeyPair: cannot create directory {$secretDir}");
         }
-        if (!is_dir($publicDir) && !mkdir($publicDir, 0755, true) && !is_dir($publicDir)) {
+        if (! is_dir($publicDir) && ! mkdir($publicDir, 0755, true) && ! is_dir($publicDir)) {
             throw new RuntimeException("KeyPair: cannot create directory {$publicDir}");
         }
 
@@ -132,13 +132,14 @@ final class KeyPair
 
     public static function loadFrom(string $secretPath): self
     {
-        if (!is_readable($secretPath)) {
+        if (! is_readable($secretPath)) {
             throw new RuntimeException("KeyPair: cannot read secret key from {$secretPath}");
         }
         $sk = file_get_contents($secretPath);
         if ($sk === false || strlen($sk) !== SODIUM_CRYPTO_SIGN_SECRETKEYBYTES) {
             throw new RuntimeException("KeyPair: secret key at {$secretPath} is invalid");
         }
+
         return self::fromSecretKey($sk);
     }
 }

@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Route;
 // deliberate exception to default deny; they hold only published vocabulary data.
 // An account is addressed by its UUID; anything else is a 404, never a database error.
 Route::pattern('account', '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}');
+Route::pattern('contact', '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}');
 Route::pattern('repository', '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}');
 
 Route::get('/vocab/{scheme}.ttl', [VocabularyController::class, 'turtleFile'])->where('scheme', '[a-z-]+');
@@ -50,6 +51,9 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/{repository}', [RepositoryController::class, 'show'])->name('show');
         Route::get('/{repository}/edit', [RepositoryController::class, 'edit'])->name('edit');
         Route::post('/{repository}', [RepositoryController::class, 'update'])->name('update');
+        Route::post('/{repository}/contacts', [RepositoryController::class, 'storeContact'])->name('contacts.store');
+        Route::post('/{repository}/contacts/{contact}', [RepositoryController::class, 'updateContact'])->name('contacts.update');
+        Route::post('/{repository}/contacts/{contact}/remove', [RepositoryController::class, 'destroyContact'])->name('contacts.destroy');
     });
 
     Route::middleware('can:'.Vocab::permission('manage-accounts'))->prefix('accounts')->name('accounts.')->group(function () {

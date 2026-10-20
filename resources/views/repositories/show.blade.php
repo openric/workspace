@@ -19,4 +19,34 @@
             <p><small>{{ $value->language }}, {{ $value->is_original ? 'original' : 'translation' }}, {{ $value->state->label(['en', 'und']) }}</small></p>
         @endforeach
     @endforeach
+
+    <h2>Contact points</h2>
+    @if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif
+    @foreach($repository->contactPoints as $contact)
+        <details>
+            <summary>{{ $contact->label ?: 'Contact' }}@if($contact->is_primary) (primary)@endif: {{ collect([$contact->street_address, $contact->city, $contact->country_code, $contact->telephone, $contact->email])->filter()->join(', ') }}</summary>
+            <form method="post" action="{{ route('repositories.contacts.update', [$repository, $contact]) }}">
+                @csrf
+                @include('repositories._contact-fields', ['contact' => $contact, 'prefix' => 'c'.$loop->index])
+                <button type="submit">Save contact point</button>
+            </form>
+            <form method="post" action="{{ route('repositories.contacts.destroy', [$repository, $contact]) }}">
+                @csrf
+                <button type="submit">Remove contact point</button>
+            </form>
+        </details>
+    @endforeach
+    <details>
+        <summary>Add a contact point</summary>
+        <form method="post" action="{{ route('repositories.contacts.store', $repository) }}">
+            @csrf
+            @include('repositories._contact-fields', ['contact' => null, 'prefix' => 'new'])
+            <button type="submit">Add contact point</button>
+        </form>
+    </details>
+
+    <h2>Control</h2>
+    <p>Description identifier: {{ $repository->description_identifier ?? 'none' }}.
+       Status: {{ $repository->descriptionStatus?->label(['en', 'und']) ?? 'not set' }}.
+       Level of detail: {{ $repository->descriptionDetail?->label(['en', 'und']) ?? 'not set' }}.</p>
 @endsection

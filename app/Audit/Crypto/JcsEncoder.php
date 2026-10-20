@@ -78,10 +78,11 @@ final class JcsEncoder
                 return '{}';
             }
             $arr = json_decode(json_encode($value, JSON_THROW_ON_ERROR), true, 512, JSON_THROW_ON_ERROR);
+
             return self::serialize($arr, $depth);
         }
 
-        throw new InvalidArgumentException('JCS encoder: unsupported type ' . get_debug_type($value));
+        throw new InvalidArgumentException('JCS encoder: unsupported type '.get_debug_type($value));
     }
 
     private static function serializeFloat(float $value): string
@@ -139,7 +140,7 @@ final class JcsEncoder
             return rtrim(rtrim(sprintf('%.20F', (float) $str), '0'), '.');
         }
 
-        return $mantissa . 'e' . ($expInt < 0 ? '-' : '+') . abs($expInt);
+        return $mantissa.'e'.($expInt < 0 ? '-' : '+').abs($expInt);
     }
 
     private static function serializeString(string $value): string
@@ -172,7 +173,7 @@ final class JcsEncoder
             }
         }
 
-        return $out . '"';
+        return $out.'"';
     }
 
     private static function serializeArrayOrObject(array $value, int $depth): string
@@ -186,12 +187,13 @@ final class JcsEncoder
             foreach ($value as $item) {
                 $parts[] = self::serialize($item, $depth + 1);
             }
-            return '[' . implode(',', $parts) . ']';
+
+            return '['.implode(',', $parts).']';
         }
 
         $keys = array_keys($value);
         foreach ($keys as $k) {
-            if (!is_string($k)) {
+            if (! is_string($k)) {
                 throw new InvalidArgumentException('JCS encoder: object keys must be strings');
             }
         }
@@ -200,10 +202,10 @@ final class JcsEncoder
 
         $parts = [];
         foreach ($keys as $k) {
-            $parts[] = self::serializeString($k) . ':' . self::serialize($value[$k], $depth + 1);
+            $parts[] = self::serializeString($k).':'.self::serialize($value[$k], $depth + 1);
         }
 
-        return '{' . implode(',', $parts) . '}';
+        return '{'.implode(',', $parts).'}';
     }
 
     private static function compareUtf16(string $a, string $b): int

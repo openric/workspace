@@ -24,6 +24,10 @@ final class Vocab
 
     public const VALUE_STATES = self::BASE.'language-value-state/';
 
+    public const DESCRIPTION_STATUSES = self::BASE.'description-status/';
+
+    public const DESCRIPTION_DETAILS = self::BASE.'description-detail/';
+
     public static function role(string $notation): string
     {
         return self::ACCOUNT_ROLES.$notation;

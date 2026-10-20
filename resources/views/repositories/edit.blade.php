@@ -18,6 +18,19 @@
             <small>{{ $en?->scope_note }}</small>
             <textarea id="v-{{ $element->notation }}" name="values[{{ $element->notation }}]" rows="{{ $element->notation === 'authorised-name' || $element->notation === 'other-name' ? 1 : 4 }}" style="width: 100%; font: inherit">{{ old('values.'.$element->notation, $current?->value) }}</textarea>
         @endforeach
+        <h2>Control (ISDIAH 5.6)</h2>
+        <label for="description_identifier">Description identifier (5.6.1)</label>
+        <input id="description_identifier" name="description_identifier" value="{{ old('description_identifier', $repository->description_identifier) }}">
+        <label for="description_status">Status (5.6.4)</label>
+        <select id="description_status" name="description_status" style="font: inherit; padding: .5rem">
+            <option value="">Not set</option>
+            @foreach($statuses as $status)<option value="{{ $status->iri }}" @selected(old('description_status', $repository->descriptionStatus?->iri) === $status->iri)>{{ $status->label(['en', 'und']) }}</option>@endforeach
+        </select>
+        <label for="description_detail">Level of detail (5.6.5)</label>
+        <select id="description_detail" name="description_detail" style="font: inherit; padding: .5rem">
+            <option value="">Not set</option>
+            @foreach($details as $detail)<option value="{{ $detail->iri }}" @selected(old('description_detail', $repository->descriptionDetail?->iri) === $detail->iri)>{{ $detail->label(['en', 'und']) }}</option>@endforeach
+        </select>
         <button type="submit">Save</button>
     </form>
 @endsection

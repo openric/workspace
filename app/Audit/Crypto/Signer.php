@@ -24,9 +24,7 @@ use SodiumException;
  */
 final class Signer
 {
-    public function __construct(private KeyPair $keyPair)
-    {
-    }
+    public function __construct(private KeyPair $keyPair) {}
 
     public function keyPair(): KeyPair
     {
@@ -38,7 +36,7 @@ final class Signer
         try {
             return sodium_crypto_sign_detached($message, $this->keyPair->secretKey());
         } catch (SodiumException $e) {
-            throw new RuntimeException('Signer: sodium signing failed: ' . $e->getMessage(), 0, $e);
+            throw new RuntimeException('Signer: sodium signing failed: '.$e->getMessage(), 0, $e);
         }
     }
 
@@ -73,14 +71,16 @@ final class Signer
         if ($sig === false) {
             return false;
         }
+
         return self::verify($sig, $message, $publicKey);
     }
 
     public static function verifyHex(string $signatureHex, string $message, string $publicKey): bool
     {
-        if (!ctype_xdigit($signatureHex) || strlen($signatureHex) !== SODIUM_CRYPTO_SIGN_BYTES * 2) {
+        if (! ctype_xdigit($signatureHex) || strlen($signatureHex) !== SODIUM_CRYPTO_SIGN_BYTES * 2) {
             return false;
         }
+
         return self::verify(hex2bin($signatureHex), $message, $publicKey);
     }
 }

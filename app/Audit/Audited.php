@@ -1,6 +1,6 @@
 <?php
 
-// OpenRiC Workspace - audit every create and change of a model.
+// OpenRiC Workspace - audit every create, change and removal of a model.
 // Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
@@ -27,6 +27,11 @@ trait Audited
             }
             $before = array_intersect_key($model->getPrevious(), $changed);
             AuditLog::record(Vocab::action('update'), $model, $before, $changed);
+        });
+
+        // A removed row is recorded with everything it held, so nothing is lost silently.
+        static::deleted(function (Model $model) {
+            AuditLog::record(Vocab::action('delete'), $model, $model->attributesToArray(), null);
         });
     }
 }

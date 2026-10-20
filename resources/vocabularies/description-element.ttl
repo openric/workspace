@@ -13,7 +13,7 @@ v: a skos:ConceptScheme ;
     dcterms:title "OpenRiC Workspace Description Elements"@en ;
     dcterms:description "Elements of archival description, by source standard element."@en ;
     dcterms:issued "2026-10-19"^^xsd:date ;
-    skos:hasTopConcept v:authorised-name, v:other-name, v:history, v:geocultural-context, v:mandates, v:administrative-structure, v:records-policies, v:buildings, v:holdings, v:finding-aids, v:opening-times, v:access-conditions, v:accessibility, v:research-services, v:reproduction-services, v:public-areas .
+    skos:hasTopConcept v:authorised-name, v:other-name, v:history, v:geocultural-context, v:mandates, v:administrative-structure, v:records-policies, v:buildings, v:holdings, v:finding-aids, v:opening-times, v:access-conditions, v:accessibility, v:research-services, v:reproduction-services, v:public-areas, v:rules-conventions, v:description-dates, v:description-sources, v:maintenance-notes .
 
 v:authorised-name a skos:Concept ;
     skos:inScheme v: ;
@@ -126,3 +126,31 @@ v:public-areas a skos:Concept ;
     skos:prefLabel "Public areas"@en ;
     skos:scopeNote "ISDIAH 5.5.3."@en ;
     skos:definition "The areas of the institution open to the public."@en .
+
+v:rules-conventions a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Rules and conventions"@en ;
+    skos:scopeNote "ISDIAH 5.6.3; exported as rico:isOrWasRegulatedBy a rico:Rule."@en ;
+    skos:definition "The rules or conventions followed in writing the description."@en .
+
+v:description-dates a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Dates of creation, revision or deletion"@en ;
+    skos:scopeNote "ISDIAH 5.6.6."@en ;
+    skos:definition "When the description was created, revised or deleted."@en .
+
+v:description-sources a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Sources"@en ;
+    skos:scopeNote "ISDIAH 5.6.8; exported as rico:generalDescription."@en ;
+    skos:definition "The sources used in writing the description."@en .
+
+v:maintenance-notes a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Maintenance notes"@en ;
+    skos:scopeNote "ISDIAH 5.6.9; exported as rico:generalDescription."@en ;
+    skos:definition "Notes on how the description was created and maintained."@en .

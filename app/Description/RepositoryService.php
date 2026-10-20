@@ -46,6 +46,16 @@ class RepositoryService
         DB::transaction(fn () => AuditLog::actingAs($actor, fn () => $repository->update(['identifier' => $identifier === '' ? null : $identifier])));
     }
 
+    /** ISDIAH 5.6.1, 5.6.4 and 5.6.5; status and detail are concept IRIs or null. */
+    public function updateControl(Repository $repository, ?string $descriptionIdentifier, ?string $statusIri, ?string $detailIri, ?User $actor = null): void
+    {
+        DB::transaction(fn () => AuditLog::actingAs($actor, fn () => $repository->update([
+            'description_identifier' => $descriptionIdentifier === '' ? null : $descriptionIdentifier,
+            'description_status_id' => $statusIri ? $this->concept($statusIri)->id : null,
+            'description_detail_id' => $detailIri ? $this->concept($detailIri)->id : null,
+        ])));
+    }
+
     /**
      * Set the values of elements in one language. An empty value removes it;
      * a changed value goes back to draft. The first language an element is
