@@ -129,4 +129,13 @@ class VocabularyImportTest extends TestCase
         unset($before[$concept->id], $after[$concept->id]);
         $this->assertSame($before, $after, 'no other label is touched');
     }
+
+    public function test_a_concept_whose_note_alone_changed_counts_as_updated(): void
+    {
+        $importer = app(SkosImporter::class);
+        $importer->import($this->fixture());
+        $result = $importer->import(str_replace('Use bride or groom where', 'Use bride or groom, changed, where', $this->fixture()));
+        $this->assertSame([0, 1], [$result->created, $result->updated]);
+        $this->assertSame(0, $importer->import(str_replace('Use bride or groom where', 'Use bride or groom, changed, where', $this->fixture()))->updated, 'importing again changes nothing');
+    }
 }

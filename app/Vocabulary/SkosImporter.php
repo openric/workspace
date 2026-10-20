@@ -75,7 +75,10 @@ class SkosImporter
                     $outcome[$concept->iri] = 'updated';
                 }
                 $concept->save();
-                $this->labels($concept, $resource);
+                // A changed label, definition or note is an update too.
+                if ($this->labels($concept, $resource) && $outcome[$concept->iri] === 'unchanged') {
+                    $outcome[$concept->iri] = 'updated';
+                }
             }
 
             foreach ($outcome as $kind) {
@@ -128,7 +131,8 @@ class SkosImporter
         return ($byIri[$target->getUri()] ?? Concept::where('iri', $target->getUri())->first())?->id;
     }
 
-    private function labels(Concept $concept, Resource $resource): void
+    /** Write the concept's labels, definitions and notes per language; returns whether any changed. */
+    private function labels(Concept $concept, Resource $resource): bool
     {
         $rows = [];
         foreach (['pref_label' => 'skos:prefLabel', 'definition' => 'skos:definition', 'scope_note' => 'skos:scopeNote'] as $column => $property) {
@@ -139,13 +143,16 @@ class SkosImporter
         }
         $rows = array_filter($rows, fn (array $row) => isset($row['pref_label']));
 
-        ConceptLabel::where('concept_id', $concept->id)->whereNotIn('language', array_keys($rows))->delete();
+        $changed = ConceptLabel::where('concept_id', $concept->id)->whereNotIn('language', array_keys($rows))->delete() > 0;
         foreach ($rows as $language => $row) {
-            ConceptLabel::updateOrCreate(
+            $label = ConceptLabel::updateOrCreate(
                 ['concept_id' => $concept->id, 'language' => $language],
                 ['pref_label' => $row['pref_label'], 'definition' => $row['definition'] ?? null, 'scope_note' => $row['scope_note'] ?? null],
             );
+            $changed = $changed || $label->wasRecentlyCreated || $label->wasChanged();
         }
+
+        return $changed;
     }
 
     private function language(Literal $literal): string
