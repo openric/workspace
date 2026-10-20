@@ -53,3 +53,10 @@ The ISAD(G), ISAAR(CPF) and ISDIAH screens stay organised by their standards, bu
   - Heratio's external lookups (Wikidata, VIAF, ULAN, LCNAF) stay parked and its NER is out of scope, as decided on 20 October.
   - Subject access points on agents are not offered: RiC-O 1.1 gives subjects only to record resources, so a topic of an agent is a unit about it, or its occupations and functions.
   - Heratio's parent actor and per-field configuration screen have no counterpart; agent hierarchy is a relation.
+- **v0.0.17, archival description (first of the remaining releases).**
+  - **Publication workflow.** Publication moves the state of each value and name: review, publish, withdraw. It works on a unit alone or with the units inside it, as AtoM's update-publication-status does, and the same way for repositories, places and authority records. Repositories, vocabularies and places, and authority records gain the publish permission.
+  - **Required names.** The database keeps an authorised name on every unit, repository, place and agent that is not deleted, with a constraint trigger checked at commit.
+  - **Description control.** Units get a description identifier, status and level of detail, and ISAD(G) 3.4.3 is added.
+  - **Pages.** Browse searches every level. There are a hierarchy view, an inventory and a finding aid, and print shows one unit. Calculate-dates sets a unit's creation date to the span of the units inside it.
+  - **Derived, not stored.** The full reference code comes from the repository code and the identifiers down the hierarchy; an identifier that already includes the code above it is taken as written. A unit's page shows its creators with the history from their authority records (ISAAR(CPF) 5.2.2 feeding ISAD(G) 3.2.2), custody in time order, and a citation. Every entity has a modification history read from the audit log.
+- **Still to come for archival description:** export and import (EAD, CSV), physical storage, the DACS, RAD, DC and MODS templates, bulk edit, and links to digital objects and rights. Each comes with its work package in the estimate of 20 October.

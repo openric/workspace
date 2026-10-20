@@ -18,6 +18,23 @@
             @foreach($levels as $level)<option value="{{ $level->iri }}" @selected(old('level', $record->level->iri) === $level->iri)>{{ $level->label(['en', 'und']) }}</option>@endforeach
         </select>
         @include('description._fields', ['subject' => $record, 'standard' => \App\Description\Elements::ISAD_G, 'language' => $language])
+        @if($mayUpdate)
+        <fieldset style="margin-top: 1.5rem; border: 1px solid var(--line); padding: 0 1rem 1rem">
+            <legend><strong>Description control</strong></legend>
+            <label for="description_identifier">Description identifier</label>
+            <input id="description_identifier" name="description_identifier" maxlength="255" value="{{ old('description_identifier', $record->description_identifier) }}">
+            <label for="description_status">Status</label>
+            <select id="description_status" name="description_status" style="font: inherit; padding: .5rem">
+                <option value="">Not set</option>
+                @foreach($statuses as $status)<option value="{{ $status->iri }}" @selected(old('description_status', $record->descriptionStatus?->iri) === $status->iri)>{{ $status->label(['en', 'und']) }}</option>@endforeach
+            </select>
+            <label for="description_detail">Level of detail</label>
+            <select id="description_detail" name="description_detail" style="font: inherit; padding: .5rem">
+                <option value="">Not set</option>
+                @foreach($details as $detail)<option value="{{ $detail->iri }}" @selected(old('description_detail', $record->descriptionDetail?->iri) === $detail->iri)>{{ $detail->label(['en', 'und']) }}</option>@endforeach
+            </select>
+        </fieldset>
+        @endif
         <button type="submit">Save</button>
     </form>
 @endsection

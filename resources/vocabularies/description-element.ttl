@@ -258,6 +258,13 @@ v:conditions-governing-reproduction a skos:Concept ;
     skos:scopeNote "ISAD(G) 3.4.2; exported as rico:conditionsOfUse."@en ;
     skos:definition "The conditions on reproducing the unit."@en .
 
+v:languages-of-material a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:isad-g ;
+    skos:prefLabel "Language/scripts of material"@en ;
+    skos:scopeNote "ISAD(G) 3.4.3; the narrative, exported as rico:note until the languages are linked as rico:Language entities (rico:hasOrHadLanguage)."@en ;
+    skos:definition "The languages, scripts and symbol systems the material is written in."@en .
+
 v:physical-characteristics a skos:Concept ;
     skos:inScheme v: ;
     skos:broader v:isad-g ;

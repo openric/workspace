@@ -14,11 +14,13 @@ use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\ConceptController;
 use App\Http\Controllers\DateController;
 use App\Http\Controllers\DeletionController;
+use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\IdentifierController;
 use App\Http\Controllers\LocalVocabularyController;
 use App\Http\Controllers\NameController;
 use App\Http\Controllers\PasswordController;
 use App\Http\Controllers\PlaceController;
+use App\Http\Controllers\PublicationController;
 use App\Http\Controllers\RecordController;
 use App\Http\Controllers\RelationController;
 use App\Http\Controllers\RepositoryController;
@@ -89,6 +91,11 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/{record}/move', [RecordController::class, 'moveForm'])->name('move-form');
         Route::post('/{record}/move', [RecordController::class, 'move'])->name('move');
         Route::post('/{record}/reorder', [RecordController::class, 'reorder'])->name('reorder');
+        Route::get('/{record}/tree', [RecordController::class, 'tree'])->name('tree');
+        Route::get('/{record}/inventory', [RecordController::class, 'inventory'])->name('inventory');
+        Route::get('/{record}/finding-aid', [RecordController::class, 'findingAid'])->name('finding-aid');
+        Route::get('/{record}/print', [RecordController::class, 'findingAid'])->name('print');
+        Route::post('/{record}/calculate-dates', [RecordController::class, 'calculateDates'])->name('calculate-dates');
     });
 
     // Authority records (ISAAR(CPF)); the controller checks the authority permissions and embargoes.
@@ -172,6 +179,13 @@ Route::middleware(['auth', 'active'])->group(function () {
     // Delete a unit of description, a repository or a place, after confirming (EntityDeletion).
     Route::get('{kind}/{id}/delete', [DeletionController::class, 'confirm'])->where(['kind' => 'records|repositories|places|agents', 'id' => '[0-9a-f-]{36}'])->name('deletion.confirm');
     Route::post('{kind}/{id}/delete', [DeletionController::class, 'destroy'])->where(['kind' => 'records|repositories|places|agents', 'id' => '[0-9a-f-]{36}'])->name('deletion.destroy');
+
+    // The modification history of an entity and its parts, from the audit log.
+    Route::get('{kind}/{id}/history', [HistoryController::class, 'show'])->where(['kind' => 'records|repositories|places|agents|concepts', 'id' => '[0-9a-f-]{36}'])->name('history');
+
+    // Review, publish and withdraw an entity's description (PublicationService).
+    Route::get('{kind}/{id}/publication', [PublicationController::class, 'edit'])->where(['kind' => 'records|repositories|places|agents', 'id' => '[0-9a-f-]{36}'])->name('publication.edit');
+    Route::post('{kind}/{id}/publication', [PublicationController::class, 'update'])->where(['kind' => 'records|repositories|places|agents', 'id' => '[0-9a-f-]{36}'])->name('publication.update');
 
     // Relations of any described entity, their assertions and evidence (ADR 0006, WS-006).
     Route::prefix('{kind}/{id}/relations')->where(['kind' => EntityKinds::segments(), 'id' => '[0-9a-f-]{36}', 'relation' => '[0-9a-f-]{36}',

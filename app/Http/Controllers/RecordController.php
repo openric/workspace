@@ -15,12 +15,15 @@ use App\Description\DateService;
 use App\Description\Elements;
 use App\Description\RecordService;
 use App\Models\Concept;
+use App\Models\Name;
 use App\Models\RecordResource;
 use App\Models\Repository;
 use App\Relations\RelationService;
+use App\Support\Vocab;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
@@ -32,13 +35,81 @@ class RecordController extends Controller
 
     public function __construct(private RecordService $records) {}
 
+    /**
+     * Browse units of description: search titles, other names and identifiers; filter by
+     * repository, level and publication; the top level only unless a search is given;
+     * sort by title, identifier or last change.
+     */
     public function index(Request $request): View
     {
-        $top = RecordResource::where('institution_id', $request->user()->institution_id)->whereNull('parent_id')->whereNull('deleted_at')
-            ->with('descriptionValues.element', 'names.nameType', 'identifiers.identifierType', 'level.labels', 'repository.descriptionValues.element', 'repository.names.nameType')->orderBy('position')->get()
-            ->filter(fn (RecordResource $r) => $request->user()->may('read', 'description', $r));
+        $user = $request->user();
+        $query = trim((string) $request->query('q', ''));
+        $filters = ['repository' => (string) $request->query('repository', ''), 'level' => (string) $request->query('level', ''),
+            'publication' => (string) $request->query('publication', ''), 'sort' => in_array($request->query('sort'), ['identifier', 'updated'], true) ? $request->query('sort') : 'title',
+            'top' => $request->has('top') ? $request->boolean('top') : $query === ''];
+        $like = '%'.addcslashes($query, '%_\\').'%';
+        $published = Concept::where('iri', Vocab::valueState('published'))->value('id');
+        $title = Name::select('value')->whereColumn('subject_id', 'record_resources.id')->where('subject_table', 'record_resources')
+            ->whereHas('nameType', fn ($q) => $q->where('iri', Vocab::NAME_TYPES.'authorised'))->orderBy('created_at')->limit(1);
+        $units = RecordResource::where('institution_id', $user->institution_id)->whereNull('deleted_at')
+            ->with('descriptionValues.element', 'names.nameType', 'identifiers.identifierType', 'level.labels', 'repository.names.nameType', 'repository.descriptionValues.element',
+                'repository.identifiers.identifierType', 'parent.names.nameType', 'parent.descriptionValues.element')
+            ->when($filters['top'], fn ($q) => $q->whereNull('parent_id'))
+            ->when($query !== '', fn ($q) => $q->where(fn ($q) => $q
+                ->whereIn('id', Name::where('subject_table', 'record_resources')->where('value', 'ilike', $like)->select('subject_id'))
+                ->orWhereIn('id', DB::table('identifiers')->where('subject_table', 'record_resources')->where('value', 'ilike', $like)->select('subject_id'))))
+            ->when($filters['repository'] !== '', fn ($q) => $q->where('repository_id', $filters['repository']))
+            ->when($filters['level'] !== '', fn ($q) => $q->where('level_id', $filters['level']))
+            ->when($filters['publication'] === 'published', fn ($q) => $q->whereIn('id', Name::where(['subject_table' => 'record_resources', 'state_id' => $published])->select('subject_id')))
+            ->when($filters['publication'] === 'unpublished', fn ($q) => $q->whereNotIn('id', Name::where(['subject_table' => 'record_resources', 'state_id' => $published])->select('subject_id')))
+            ->when($filters['sort'] === 'updated', fn ($q) => $q->orderByDesc('updated_at'))
+            ->when($filters['sort'] === 'identifier', fn ($q) => $q->orderBy(DB::table('identifiers')->select('value')->whereColumn('subject_id', 'record_resources.id')->where('subject_table', 'record_resources')->limit(1)))
+            ->when($filters['sort'] === 'title', fn ($q) => $q->orderBy($title))
+            ->paginate(50)->withQueryString();
+        // Permissions can be set on a single unit, so the page shows only what the account may read.
+        $units->setCollection($units->getCollection()->filter(fn (RecordResource $r) => $user->may('read', 'description', $r))->values());
 
-        return view('records.index', ['groups' => $top->groupBy('repository_id')]);
+        return view('records.index', ['units' => $units, 'query' => $query, 'filters' => $filters, 'levels' => $this->concepts(self::LEVELS),
+            'repositories' => $this->repositories($request)]);
+    }
+
+    /** The whole hierarchy the unit belongs to, from its top unit down. */
+    public function tree(Request $request, RecordResource $record): View
+    {
+        $this->own($request, $record);
+        $top = $record->ancestors()[0] ?? $record;
+
+        return view('records.tree', ['record' => $record, 'top' => $top, 'byParent' => $this->hierarchy($request, $top)]);
+    }
+
+    /** Every unit inside this one, in order, with its reference code, level, dates and extent. */
+    public function inventory(Request $request, RecordResource $record): View
+    {
+        $this->own($request, $record);
+
+        return view('records.inventory', ['record' => $record, 'rows' => $this->flatten($this->hierarchy($request, $record), $record->id, 1),
+            'drafts' => $request->user()->may('view-draft', 'description', $record)]);
+    }
+
+    /** The description of the unit and, for a finding aid, every unit inside it, ready to print. */
+    public function findingAid(Request $request, RecordResource $record): View
+    {
+        $this->own($request, $record);
+        $withInside = ! $request->routeIs('records.print');
+        $units = [[$record, 0], ...($withInside ? $this->flatten($this->hierarchy($request, $record), $record->id, 1) : [])];
+
+        return view('records.finding-aid', ['record' => $record, 'units' => $units, 'withInside' => $withInside,
+            'drafts' => $request->user()->may('view-draft', 'description', $record) && $request->boolean('drafts')]);
+    }
+
+    public function calculateDates(Request $request, RecordResource $record): RedirectResponse
+    {
+        $this->own($request, $record, 'update');
+        $edtf = $this->records->calculateDates($record, $request->user());
+
+        return redirect()->route('records.show', $record)->with('status', $edtf
+            ? "Creation date set to $edtf, the span of the units inside it."
+            : 'No unit inside it has a creation date, so nothing was calculated.');
     }
 
     public function create(Request $request): View
@@ -94,7 +165,9 @@ class RecordController extends Controller
         $record->load('descriptionValues.element', 'names.nameType', 'identifiers.identifierType', 'level');
         abort_unless($this->mayWrite($request, $record, $language), 403);
 
-        return view('records.edit', ['record' => $record, 'elements' => Elements::of(Elements::ISAD_G), 'levels' => $this->concepts(self::LEVELS), 'language' => $language]);
+        return view('records.edit', ['record' => $record, 'elements' => Elements::of(Elements::ISAD_G), 'levels' => $this->concepts(self::LEVELS), 'language' => $language,
+            'mayUpdate' => $request->user()->may('update', 'description', $record),
+            'statuses' => Concept::choices(Vocab::DESCRIPTION_STATUSES)->get(), 'details' => Concept::choices(Vocab::DESCRIPTION_DETAILS)->get()]);
     }
 
     public function update(Request $request, RecordResource $record): RedirectResponse
@@ -106,16 +179,24 @@ class RecordController extends Controller
             'level' => ['required', Rule::in($this->concepts(self::LEVELS)->pluck('iri'))],
             'values' => ['array'],
             'values.*' => ['nullable', 'string', 'max:65535'],
+            'description_identifier' => ['nullable', 'string', 'max:255'],
+            'description_status' => ['nullable', 'string', Rule::in(Concept::choices(Vocab::DESCRIPTION_STATUSES)->pluck('iri'))],
+            'description_detail' => ['nullable', 'string', Rule::in(Concept::choices(Vocab::DESCRIPTION_DETAILS)->pluck('iri'))],
         ]);
         $values = array_intersect_key($data['values'] ?? [], array_flip(Elements::notations(Elements::ISAD_G)));
         abort_unless($this->mayWrite($request, $record, $data['language']), 403);
         // A translator writes values only: the reference code and level need update.
-        $identityChanged = ($data['identifier'] ?? null) !== $record->identifier || $data['level'] !== $record->level->iri;
+        $control = [($data['description_identifier'] ?? null) ?: null, ($data['description_status'] ?? null) ?: null, ($data['description_detail'] ?? null) ?: null];
+        $controlChanged = $request->has('description_identifier') && $control !== [$record->description_identifier, $record->descriptionStatus?->iri, $record->descriptionDetail?->iri];
+        $identityChanged = ($data['identifier'] ?? null) !== $record->identifier || $data['level'] !== $record->level->iri || $controlChanged;
         abort_if($identityChanged && ! $request->user()->may('update', 'description', $record), 403);
         try {
-            DB::transaction(function () use ($record, $data, $values, $request, $identityChanged) {
+            DB::transaction(function () use ($record, $data, $values, $request, $identityChanged, $controlChanged, $control) {
                 if ($identityChanged) {
                     $this->records->updateIdentity($record, $data['identifier'] ?? null, $data['level'], $request->user());
+                }
+                if ($controlChanged) {
+                    $this->records->updateControl($record, ...[...$control, $request->user()]);
                 }
                 $this->records->describe($record, $values, $data['language'], $request->user());
             });
@@ -161,6 +242,35 @@ class RecordController extends Controller
         $this->records->reorder($record, $data['direction'] === 'up' ? -1 : 1, $request->user());
 
         return $record->parent_id ? redirect()->route('records.show', $record->parent_id) : redirect()->route('records.index');
+    }
+
+    /**
+     * Every readable unit below $top, by parent id, in order, with what the pages show loaded.
+     * ponytail: the whole hierarchy in memory; a fonds past some tens of thousands of units wants loading by level.
+     *
+     * @return Collection<string, Collection<int, RecordResource>>
+     */
+    private function hierarchy(Request $request, RecordResource $top)
+    {
+        $ids = [$top->id, ...$top->descendantIds()];
+
+        return RecordResource::whereKey($ids)->whereNull('deleted_at')->whereKeyNot($top->id)
+            ->with('descriptionValues.element', 'descriptionValues.state', 'names.nameType', 'names.state', 'identifiers.identifierType', 'level.labels', 'dates.property', 'dates.qualifier.labels')
+            ->orderBy('position')->orderBy('id')->get()
+            ->filter(fn (RecordResource $r) => $request->user()->may('read', 'description', $r))
+            ->groupBy('parent_id');
+    }
+
+    /** @return list<array{0: RecordResource, 1: int}> the units below $parentId depth first, with their depth */
+    private function flatten($byParent, string $parentId, int $depth): array
+    {
+        $rows = [];
+        foreach ($byParent[$parentId] ?? [] as $unit) {
+            $rows[] = [$unit, $depth];
+            $rows = [...$rows, ...$this->flatten($byParent, $unit->id, $depth + 1)];
+        }
+
+        return $rows;
     }
 
     private function find(Request $request, string $id): RecordResource

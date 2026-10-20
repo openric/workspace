@@ -7,8 +7,11 @@
     <h1>{{ $record->described('title', ['en']) }}</h1>
     @if(session('status'))<p role="status">{{ session('status') }}</p>@endif
     @if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif
-    <p>{{ $record->level->label(['en', 'und']) }}@if($record->identifier), {{ $record->identifier }}@endif. Held by {{ $record->repository->described('authorised-name', ['en']) }}.<br>
+    <p>{{ $record->level->label(['en', 'und']) }}@if($record->referenceCode()), {{ $record->referenceCode() }}@endif. Held by <a href="{{ route('repositories.show', $record->repository) }}">{{ $record->repository->described('authorised-name', ['en']) }}</a>.<br>
        <strong>Persistent IRI:</strong> <code>{{ $record->iri }}</code></p>
+    <p><a href="{{ route('records.tree', $record) }}">Hierarchy</a> · <a href="{{ route('records.inventory', $record) }}">Inventory</a> · <a href="{{ route('records.finding-aid', $record) }}">Finding aid</a> · <a href="{{ route('records.print', $record) }}">Print view</a>
+       @if($canUpdate) · <a href="{{ route('history', ['records', $record->id]) }}">History</a>
+           · <form method="post" action="{{ route('records.calculate-dates', $record) }}" style="display: inline">@csrf<button type="submit" style="margin-top: 0; padding: .1rem .5rem">Calculate dates from the units inside</button></form>@endif</p>
     <p>@if($canUpdate)<a href="{{ route('records.move-form', $record) }}">Move</a>@endif
        @if($canUpdate && $canCreateInside) · @endif
        @if($canCreateInside)<a href="{{ route('records.create', ['parent' => $record->id]) }}">Add a unit inside</a>@endif</p>
@@ -16,6 +19,12 @@
         @include('description._actions', ['subject' => $record, 'editRoute' => 'records.edit', 'required' => 'title'])
     @endif
     @include('description._view', ['subject' => $record, 'standard' => \App\Description\Elements::ISAD_G, 'drafts' => $drafts])
+    @include('records._creators', ['relations' => $relations, 'drafts' => $drafts])
+    @include('records._provenance', ['record' => $record, 'relations' => $relations])
+    <h2>Description control</h2>
+    <p>Description identifier: {{ $record->description_identifier ?? 'none' }}. Status: {{ $record->descriptionStatus?->label(['en', 'und']) ?? 'not set' }}. Level of detail: {{ $record->descriptionDetail?->label(['en', 'und']) ?? 'not set' }}.</p>
+    <h2>Cite as</h2>
+    <p>{{ collect([$record->described('title', ['en']), $record->referenceCode(), $record->repository->described('authorised-name', ['en'])])->filter()->join(', ') }}. {{ $record->iri }} (accessed {{ now()->format('j F Y') }}).</p>
 
     @include('description._names', ['subject' => $record, 'kind' => 'records', 'canUpdate' => $canUpdate, 'drafts' => $drafts])
     @include('description._identifiers', ['subject' => $record, 'kind' => 'records', 'canUpdate' => $canUpdate])

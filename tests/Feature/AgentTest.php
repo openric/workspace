@@ -112,7 +112,7 @@ class AgentTest extends TestCase
         app(AccessControl::class)->flush();
         $this->assertTrue($this->contributor->fresh()->may('create', 'authority'));
         $this->assertTrue($this->administrator->fresh()->may('delete', 'authority'));
-        $this->assertSame(1 + 3 + 3 + 1 + 4, Permission::where(['institution_id' => $this->institution->id, 'kind_id' => $kind])->count(), 'public, editor, contributor, translator, administrator');
+        $this->assertSame(1 + 4 + 3 + 1 + 5, Permission::where(['institution_id' => $this->institution->id, 'kind_id' => $kind])->count(), 'public, editor, contributor, translator, administrator');
     }
 
     public function test_relations_take_the_agents_their_ric_class_allows(): void

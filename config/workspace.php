@@ -22,10 +22,10 @@ return [
     // Heratio has one action list per class (ADR 0005).
     'permission_matrix' => [
         'institution' => ['manage-institution', 'manage-accounts', 'manage-roles', 'view-audit-log'],
-        'repository' => ['read', 'create', 'update', 'delete'],
+        'repository' => ['read', 'create', 'update', 'delete', 'publish'],
         'description' => ['read', 'create', 'update', 'delete', 'view-draft', 'publish', 'read-master', 'read-reference', 'read-thumbnail', 'translate'],
-        'vocabulary' => ['create', 'update', 'delete'],
-        'authority' => ['read', 'create', 'update', 'delete'],
+        'vocabulary' => ['create', 'update', 'delete', 'publish'],
+        'authority' => ['read', 'create', 'update', 'delete', 'publish'],
     ],
 
     // Which date properties (date-property vocabulary) each kind of entity (App\Relations\EntityKinds,
@@ -132,10 +132,10 @@ return [
         'signed-in' => ['parent' => 'public', 'grants' => []],
         'administrator' => ['parent' => 'signed-in', 'grants' => '*'],
         'editor' => ['parent' => 'signed-in', 'grants' => [
-            'repository' => ['read', 'create', 'update'],
+            'repository' => ['read', 'create', 'update', 'publish'],
             'description' => ['read', 'create', 'update', 'delete', 'view-draft', 'publish', 'read-master', 'read-reference', 'read-thumbnail'],
-            'vocabulary' => ['create', 'update'],
-            'authority' => ['read', 'create', 'update'],
+            'vocabulary' => ['create', 'update', 'publish'],
+            'authority' => ['read', 'create', 'update', 'publish'],
         ]],
         'contributor' => ['parent' => 'signed-in', 'grants' => [
             'repository' => ['read'],

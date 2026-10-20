@@ -20,7 +20,7 @@ use InvalidArgumentException;
 
 class RecordService
 {
-    public function __construct(private DescriptionService $descriptions, private IdentifierService $identifiers) {}
+    public function __construct(private DescriptionService $descriptions, private IdentifierService $identifiers, private DateService $dates) {}
 
     public function create(Institution $institution, string $levelIri, string $title, string $language, ?RecordResource $parent = null, ?Repository $repository = null, ?string $identifier = null, ?User $actor = null): RecordResource
     {
@@ -61,6 +61,47 @@ class RecordService
             $record->update(['level_id' => $this->descriptions->concept($levelIri)->id]);
             $this->identifiers->setLocal($record, $identifier);
         }));
+    }
+
+    /** The description identifier and the status and level of detail (concept IRIs, or null), which AtoM keeps beside ISAD(G) 3.7. */
+    public function updateControl(RecordResource $record, ?string $descriptionIdentifier, ?string $statusIri, ?string $detailIri, ?User $actor = null): void
+    {
+        DB::transaction(fn () => AuditLog::actingAs($actor, fn () => $record->update([
+            'description_identifier' => ($descriptionIdentifier = trim((string) $descriptionIdentifier)) === '' ? null : $descriptionIdentifier,
+            'description_status_id' => $statusIri ? $this->descriptions->concept($statusIri)->id : null,
+            'description_detail_id' => $detailIri ? $this->descriptions->concept($detailIri)->id : null,
+        ])));
+    }
+
+    /**
+     * Set the unit's creation date (3.1.3) to the span of the creation dates of the units
+     * inside it, as Heratio's calculate-dates does: from the earliest day to the latest.
+     * Returns the EDTF interval, or null when no unit inside has a creation date.
+     */
+    public function calculateDates(RecordResource $record, ?User $actor = null): ?string
+    {
+        $ids = RecordResource::whereKey($record->descendantIds())->whereNull('deleted_at')->pluck('id');
+        $span = DB::table('dates as d')->join('concepts as p', 'p.id', '=', 'd.property_id')
+            ->where('d.subject_table', 'record_resources')->whereIn('d.subject_id', $ids)
+            ->where('p.iri', 'https://workspace.openric.org/vocab/date-property/creation')
+            ->selectRaw('min(d.earliest) as earliest, max(d.latest) as latest')->first();
+        if ($span === null || $span->earliest === null || $span->latest === null) {
+            return null;
+        }
+        $bound = fn (string $day, bool $end) => substr($day, 5) === ($end ? '12-31' : '01-01') ? substr($day, 0, 4) : substr($day, 0, 10);
+        $edtf = $bound((string) $span->earliest, false).'/'.$bound((string) $span->latest, true);
+        if ($bound((string) $span->earliest, false) === $bound((string) $span->latest, true)) {
+            $edtf = $bound((string) $span->earliest, false);
+        }
+        DB::transaction(fn () => AuditLog::actingAs($actor, function () use ($record, $edtf) {
+            $current = $record->dates()->whereHas('property', fn ($q) => $q->where('notation', 'creation'))->first();
+            $current
+                ? $this->dates->update($current, ['property' => 'creation', 'normalized' => $edtf, 'expressed' => $current->expressed, 'language' => $current->expressed_language,
+                    'qualifier' => $current->qualifier?->notation, 'type' => $current->dateType?->notation])
+                : $this->dates->add($record, ['property' => 'creation', 'normalized' => $edtf]);
+        }));
+
+        return $edtf;
     }
 
     /** Move under another unit, or to the top level when $parent is null; it goes last among its new siblings. */

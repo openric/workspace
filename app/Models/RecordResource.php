@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['institution_id', 'iri', 'level_id', 'repository_id', 'parent_id', 'position'])]
+#[Fillable(['institution_id', 'iri', 'level_id', 'repository_id', 'parent_id', 'position', 'description_identifier', 'description_status_id', 'description_detail_id'])]
 class RecordResource extends Model
 {
     use Audited, Describable, HasDates, HasIdentifiers, HasUuids;
@@ -27,6 +27,36 @@ class RecordResource extends Model
     public function level(): BelongsTo
     {
         return $this->belongsTo(Concept::class, 'level_id');
+    }
+
+    public function descriptionStatus(): BelongsTo
+    {
+        return $this->belongsTo(Concept::class, 'description_status_id');
+    }
+
+    public function descriptionDetail(): BelongsTo
+    {
+        return $this->belongsTo(Concept::class, 'description_detail_id');
+    }
+
+    /**
+     * The full reference code (ISAD(G) 3.1.1): the repository's code, then the local
+     * identifiers from the top of the hierarchy down. A unit whose identifier already
+     * starts with the code above it (RPC/1 under RPC) is taken as written.
+     */
+    public function referenceCode(string $separator = '/'): ?string
+    {
+        $code = '';
+        foreach ([...$this->ancestors(), $this] as $unit) {
+            $own = (string) $unit->identifier;
+            if ($own === '') {
+                continue;
+            }
+            $code = ($code !== '' && ! str_starts_with($own, $code)) ? $code.$separator.$own : $own;
+        }
+        $repository = (string) $this->repository?->identifier;
+
+        return $code === '' ? null : trim($repository.' '.$code);
     }
 
     public function repository(): BelongsTo
