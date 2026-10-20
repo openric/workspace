@@ -289,6 +289,19 @@ class Ead
             $x->text($extent[0]);
             $x->endElement();
         }
+        $locations = [];
+        foreach ($this->view->storage($unit) as $container) {
+            $x->startElement('container');
+            if ($container['type']) {
+                $x->writeAttribute($this->three ? 'localtype' : 'type', $container['type']);
+            }
+            $x->text($container['name']);
+            $x->endElement();
+            $locations[] = $container['location'];
+        }
+        foreach (array_unique(array_filter($locations)) as $location) {
+            $x->writeElement('physloc', $location);
+        }
         if ($material = $this->view->valueWithLanguage($unit, 'languages-of-material')) {
             $x->startElement('langmaterial');
             $x->writeAttribute('encodinganalog', '3.4.3');

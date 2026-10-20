@@ -65,6 +65,9 @@ final class UnitDraft
 
     public ?string $repositoryName = null;
 
+    /** @var list<array{name: string, type: ?string, location: ?string}> containers the unit is kept in, as the file names them (AtoM physical objects, EAD container) */
+    public array $containers = [];
+
     /** @var list<array{uri: string, sha256: ?string}> files AtoM kept for the unit, to fetch on import */
     public array $files = [];
 

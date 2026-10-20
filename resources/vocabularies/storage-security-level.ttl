@@ -1,0 +1,51 @@
+# OpenRiC Workspace - OpenRiC Workspace Storage Security Levels.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# How closely a container is guarded, as Heratio grades it. Not in RiC-O 1.1: kept for collection management, not exported as RiC; access to the records themselves is decided by permissions and rules.
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/storage-security-level/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Storage Security Levels"@en ;
+    dcterms:description "How closely a container is guarded."@en ;
+    dcterms:issued "2026-10-20"^^xsd:date ;
+    skos:hasTopConcept v:open, v:restricted, v:confidential, v:secure, v:vault .
+
+v:open a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Open store"@en ;
+    skos:scopeNote "Not in RiC-O; collection management."@en ;
+    skos:definition "Kept where staff work freely."@en .
+
+v:restricted a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Restricted"@en ;
+    skos:scopeNote "Not in RiC-O; collection management."@en ;
+    skos:definition "Kept where only named staff go."@en .
+
+v:confidential a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Confidential"@en ;
+    skos:scopeNote "Not in RiC-O; collection management."@en ;
+    skos:definition "Kept locked, opened by named staff only."@en .
+
+v:secure a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Secure"@en ;
+    skos:scopeNote "Not in RiC-O; collection management."@en ;
+    skos:definition "Kept locked under a register of who opens it."@en .
+
+v:vault a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Vault"@en ;
+    skos:scopeNote "Not in RiC-O; collection management."@en ;
+    skos:definition "Kept in a vault under dual control."@en .

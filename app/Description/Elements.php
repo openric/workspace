@@ -31,6 +31,9 @@ final class Elements
     /** An instantiation: no ICA description standard covers it. */
     public const INSTANTIATION = 'instantiation';
 
+    /** A storage container (openricx:Container): no ICA description standard covers it. */
+    public const CONTAINER = 'container';
+
     /** @var array<string, Collection<int, Concept>> */
     private static array $cache = [];
 

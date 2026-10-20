@@ -13,7 +13,7 @@ v: a skos:ConceptScheme ;
     dcterms:title "OpenRiC Workspace Concept Scheme Kinds"@en ;
     dcterms:description "The kinds of vocabulary an institution keeps for its access points and types."@en ;
     dcterms:issued "2026-10-20"^^xsd:date ;
-    skos:hasTopConcept v:subject, v:occupation-type, v:place-type, v:documentary-form-type, v:legal-status, v:activity-type .
+    skos:hasTopConcept v:subject, v:occupation-type, v:place-type, v:documentary-form-type, v:legal-status, v:activity-type, v:container-type, v:storage-place-type .
 
 v:subject a skos:Concept ;
     skos:inScheme v: ;
@@ -56,3 +56,17 @@ v:activity-type a skos:Concept ;
     skos:prefLabel "Activity types"@en ;
     skos:scopeNote "Concepts exported as rico:ActivityType; an activity is linked to one by rico:hasActivityType. The institution's own kinds of activity, such as marriage, beside the OpenRiC activity-type vocabulary (mapping section 6.5)."@en ;
     skos:definition "Kinds of activity, such as marriage or appointment."@en .
+
+v:container-type a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Container types"@en ;
+    skos:scopeNote "Concepts exported as openricx:ContainerType (extension ontology 1.6.0); a container is linked to one by openricx:hasContainerType. They add to the bundled container-type vocabulary."@en ;
+    skos:definition "Kinds of storage container, such as box, folder or map drawer."@en .
+
+v:storage-place-type a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Storage place types"@en ;
+    skos:scopeNote "Concepts exported as rico:PlaceType; a storage place is linked to one by rico:hasOrHadPlaceType. They add to the bundled storage-place-type vocabulary, and a place of one of these types is a storage place."@en ;
+    skos:definition "Kinds of place in which containers are kept, such as strongroom, aisle or shelf."@en .

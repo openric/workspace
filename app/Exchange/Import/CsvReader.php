@@ -102,7 +102,7 @@ class CsvReader
                     }
                 } elseif (! array_key_exists($column, DescriptionCsv::COLUMNS)) {
                     $report->once($column, 'not a column of AtoM\'s ISAD(G) template or the Workspace; not read');
-                } elseif (DescriptionCsv::COLUMNS[$column] === null && ! in_array($column, ['qubitParentSlug', 'digitalObjectURI'], true)) {
+                } elseif (DescriptionCsv::COLUMNS[$column] === null && ! in_array($column, ['qubitParentSlug', 'digitalObjectURI', 'physicalObjectName', 'physicalObjectLocation', 'physicalObjectType'], true)) {
                     $report->once($column, $this->why($column));
                 }
             }
@@ -143,6 +143,13 @@ class CsvReader
             }
             foreach ($this->split($cells['placeAccessPoints'] ?? '') as $name) {
                 $draft->places[] = ['name' => $name, 'iri' => null];
+            }
+            $types = $this->split($cells['physicalObjectType'] ?? '', false);
+            $locations = $this->split($cells['physicalObjectLocation'] ?? '', false);
+            foreach ($this->split($cells['physicalObjectName'] ?? '', false) as $i => $name) {
+                if ($name !== '') {
+                    $draft->containers[] = ['name' => $name, 'type' => ($types[$i] ?? '') ?: null, 'location' => ($locations[$i] ?? '') ?: null];
+                }
             }
             foreach ($this->split($cells['genreAccessPoints'] ?? '') as $name) {
                 $draft->genres[] = ['name' => $name, 'iri' => null];
@@ -252,7 +259,6 @@ class CsvReader
         return match ($column) {
             'accessionNumber' => 'accessions are not kept yet; not read',
             'digitalObjectPath' => 'a path on the AtoM server is not fetched; export with digitalObjectURI to bring the file',
-            'physicalObjectName', 'physicalObjectLocation', 'physicalObjectType' => 'physical storage is not kept yet; not read',
             'language', 'script', 'scriptOfDescription' => 'language and script codes are not kept yet; the narrative languageNote is read',
             default => 'not read',
         };

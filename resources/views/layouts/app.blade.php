@@ -30,6 +30,7 @@
         'agents.index' => ['Authority records', auth()->user()->mayAnywhere('read', 'authority')],
         'activities.index' => ['Activities', auth()->user()->mayAnywhere('read', 'authority')],
         'places.index' => ['Places', true],
+        'containers.index' => ['Storage', auth()->user()->mayAnywhere('read', 'storage')],
         'vocabularies.index' => ['Vocabularies', true],
         'accounts.index' => ['Accounts', auth()->user()->can(\App\Support\Vocab::permission('manage-accounts'))],
         'roles.index' => ['Roles', auth()->user()->can(\App\Support\Vocab::permission('manage-roles'))],

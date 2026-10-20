@@ -40,6 +40,10 @@ class EntityDeletion
             default => [0, '', ''],
         };
 
+        // The movements of containers are relations to the storage place; deleting it would lose them.
+        if ($entity instanceof Place && Relation::where(['target_table' => 'places', 'target_id' => $entity->id])->whereHas('relationType', fn ($q) => $q->where('notation', 'location'))->exists()) {
+            return ['Containers are or were kept here; its record of what came and went would be lost. Move them, and keep the place.'];
+        }
         $blockers = $count[0] > 0 ? ["It has {$count[0]} ".($count[0] === 1 ? $count[1] : $count[2]).'; move or delete '.($count[0] === 1 ? 'it' : 'them').' first.'] : [];
         // Its files would be kept but reach no one: the instantiations go first, each a decision of its own.
         $carriers = $entity instanceof RecordResource ? Instantiation::where('record_resource_id', $entity->id)->whereNull('deleted_at')->count() : 0;

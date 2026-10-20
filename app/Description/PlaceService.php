@@ -52,14 +52,15 @@ class PlaceService
         $this->descriptions->describe($place, Elements::PLACE, $values, $language, 'place-name', $actor);
     }
 
-    /** The place type (a concept id of a place-type vocabulary of the institution, or null) and coordinates (decimal degrees, metres). */
+    /** The place type (a concept id of a place-type or storage-place-type vocabulary of the institution or of the bundled storage-place-type vocabulary, or null) and coordinates (decimal degrees, metres). */
     public function updateFacts(Place $place, ?string $typeId, ?string $latitude, ?string $longitude, ?string $altitude, ?User $actor = null): void
     {
         $type = null;
         if ($typeId !== null && $typeId !== '') {
             $type = Concept::where(['id' => $typeId, 'institution_id' => $place->institution_id])->whereNull('deprecated_at')
-                ->whereHas('vocabulary.kind', fn ($q) => $q->where('iri', Vocab::SCHEME_KINDS.'place-type'))->first()
-                ?? throw new InvalidArgumentException('a place type is a current concept of one of the institution\'s place-type vocabularies');
+                ->whereHas('vocabulary.kind', fn ($q) => $q->whereIn('iri', [Vocab::SCHEME_KINDS.'place-type', Vocab::SCHEME_KINDS.'storage-place-type']))->first()
+                ?? Concept::choices(StorageService::PLACE_TYPES)->whereKey($typeId)->first()
+                ?? throw new InvalidArgumentException('a place type is a current concept of one of the institution\'s place-type or storage-place-type vocabularies, or of the storage-place-type vocabulary');
         }
         [$latitude, $longitude, $altitude] = array_map(fn ($v) => ($v = trim((string) $v)) === '' ? null : $v, [$latitude, $longitude, $altitude]);
         foreach (['latitude' => [$latitude, 90], 'longitude' => [$longitude, 180]] as $what => [$value, $limit]) {

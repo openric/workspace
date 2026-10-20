@@ -13,7 +13,7 @@ v: a skos:ConceptScheme ;
     dcterms:title "OpenRiC Workspace Description Elements"@en ;
     dcterms:description "Elements of archival description, grouped under the ICA standard they come from. Only the elements, not the groups, are values of a description."@en ;
     dcterms:issued "2026-10-19"^^xsd:date ;
-    skos:hasTopConcept v:isdiah, v:isad-g, v:place, v:isaar-cpf, v:activity, v:instantiation .
+    skos:hasTopConcept v:isdiah, v:isad-g, v:place, v:isaar-cpf, v:activity, v:instantiation, v:container .
 
 v:authorised-name a skos:Concept ;
     skos:inScheme v: ;
@@ -614,3 +614,52 @@ v:instantiation-rights a skos:Concept ;
     skos:prefLabel "Rights and conditions of use"@en ;
     skos:scopeNote "Exported as rico:conditionsOfUse."@en ;
     skos:definition "The rights in this carrier and the terms of its use, such as a licence."@en .
+
+v:container a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Container"@en ;
+    skos:scopeNote "The elements of a container (openricx:Container, extension ontology 1.6.0). No ICA description standard covers containers."@en ;
+    skos:definition "The elements a storage container is described with."@en .
+
+v:container-name a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:container ;
+    skos:prefLabel "Name"@en ;
+    skos:scopeNote "Kept as a rico:Name entity of name type authorised, one in each language (rico:hasOrHadName)."@en ;
+    skos:definition "What the container is called on its label and in finding aids, such as Box 12."@en .
+
+v:container-other-name a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:container ;
+    skos:prefLabel "Other name"@en ;
+    skos:scopeNote "Kept as rico:Name entities of name type other."@en ;
+    skos:definition "Any other name the container has or had, such as an earlier box number, one per line."@en .
+
+v:container-description a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:container ;
+    skos:prefLabel "Description"@en ;
+    skos:scopeNote "Exported as rico:generalDescription."@en ;
+    skos:definition "What the container is and holds, in general."@en .
+
+v:container-access a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:container ;
+    skos:prefLabel "Who may open it"@en ;
+    skos:scopeNote "Exported as rico:note: a statement on one feature of the container, who may open it. Who may read the records is decided by their own conditions and permissions, not by this."@en ;
+    skos:definition "Keys, registers and who may open the container."@en .
+
+v:container-location-as-written a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:container ;
+    skos:prefLabel "Location as written"@en ;
+    skos:scopeNote "Exported as rico:note. AtoM keeps a physical object location as free text; it is kept here as written, not made into places."@en ;
+    skos:definition "The location as an earlier system wrote it, such as Floor 1, before the container was placed in a storage place."@en .
+
+v:container-note a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:container ;
+    skos:prefLabel "Note"@en ;
+    skos:scopeNote "Exported as rico:note."@en ;
+    skos:definition "Anything else about the container."@en .

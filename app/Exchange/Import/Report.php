@@ -20,7 +20,7 @@ final class Report
     public array $issues = [];
 
     /** @var array<string, int> */
-    public array $counts = ['relations' => 0, 'agents' => 0, 'places' => 0, 'concepts' => 0, 'values' => 0, 'files' => 0];
+    public array $counts = ['relations' => 0, 'agents' => 0, 'places' => 0, 'concepts' => 0, 'values' => 0, 'files' => 0, 'containers' => 0];
 
     /** @var array<string, bool> issues reported once per file, such as a column the import does not read */
     private array $once = [];

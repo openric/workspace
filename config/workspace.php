@@ -8,14 +8,14 @@ return [
 
     // The OpenRiC specification release this build implements (ADR 0003, rule 1;
     // conformance/README.md). Raised only together with the conformance matrix.
-    'openric_spec_version' => '0.54.0',
+    'openric_spec_version' => '0.55.0',
 
     // Ed25519 key that signs every audit row (ADR 0004). Kept outside git and the
     // database, readable only by the application; back it up with the database.
     'audit_signing_key' => env('WORKSPACE_AUDIT_SIGNING_KEY', storage_path('keys/audit-signing.sk')),
 
     // The Workspace's own vocabularies, bundled with the code (resources/vocabularies).
-    'bundled_vocabularies' => ['account-role.ttl', 'permission.ttl', 'audit-action.ttl', 'description-element.ttl', 'language-value-state.ttl', 'description-status.ttl', 'description-detail.ttl', 'level-of-description.ttl', 'record-kind.ttl', 'date-property.ttl', 'date-qualifier.ttl', 'name-type.ttl', 'identifier-type.ttl', 'relation-type.ttl', 'relation-state.ttl', 'relation-certainty.ttl', 'assertion-origin.ttl', 'assertion-status.ttl', 'concept-scheme-kind.ttl', 'concept-match-type.ttl', 'agent-type.ttl', 'carrier-type.ttl', 'file-use.ttl', 'file-availability.ttl'],
+    'bundled_vocabularies' => ['account-role.ttl', 'permission.ttl', 'audit-action.ttl', 'description-element.ttl', 'language-value-state.ttl', 'description-status.ttl', 'description-detail.ttl', 'level-of-description.ttl', 'record-kind.ttl', 'date-property.ttl', 'date-qualifier.ttl', 'name-type.ttl', 'identifier-type.ttl', 'relation-type.ttl', 'relation-state.ttl', 'relation-certainty.ttl', 'assertion-origin.ttl', 'assertion-status.ttl', 'concept-scheme-kind.ttl', 'concept-match-type.ttl', 'agent-type.ttl', 'carrier-type.ttl', 'file-use.ttl', 'file-availability.ttl', 'container-type.ttl', 'storage-place-type.ttl', 'container-status.ttl', 'capacity-unit.ttl', 'storage-security-level.ttl'],
 
     // The shape of the permission matrix: for each kind of record (record-kind
     // vocabulary), the actions that apply to it (permission vocabulary), as
@@ -26,6 +26,7 @@ return [
         'description' => ['read', 'create', 'update', 'delete', 'view-draft', 'publish', 'read-master', 'read-reference', 'read-thumbnail', 'translate'],
         'vocabulary' => ['create', 'update', 'delete', 'publish'],
         'authority' => ['read', 'create', 'update', 'delete', 'publish'],
+        'storage' => ['read', 'create', 'update', 'delete'],
     ],
 
     // Which date properties (date-property vocabulary) each kind of entity (App\Relations\EntityKinds,
@@ -40,6 +41,7 @@ return [
         'place' => ['existence', 'associated'],
         'activity' => ['associated', 'beginning', 'end'],
         'instantiation' => ['creation', 'associated'],
+        'container' => ['existence', 'associated'],
     ],
 
     // Which kinds of entity each relation type (relation-type vocabulary) connects,
@@ -51,7 +53,8 @@ return [
     // forward and inverse: how the relation reads from its source and from its
     // target, on screen. schemes: a concept at either end must be in a vocabulary
     // of one of these kinds (concept-scheme-kind vocabulary). access_point: the
-    // relation is shown with the access points of a page, not with its relations.
+    // relation is shown with the access points of a page, not with its relations;
+    // own_section: it is shown only in a section of its own, such as physical storage.
     'relation_kind_groups' => [
         'agent' => ['repository', 'agent'],
         'person' => ['agent:person'],
@@ -104,6 +107,10 @@ return [
         'result' => ['pairs' => [['activity', 'record']], 'forward' => 'results or resulted in', 'inverse' => 'results or resulted from'],
         'documentation' => ['pairs' => [['record', 'activity']], 'forward' => 'documents', 'inverse' => 'is documented by'],
         'subevent' => ['pairs' => [['activity', 'activity']], 'forward' => 'has or had as a part', 'inverse' => 'is or was part of'],
+        // Physical storage (extension ontology 1.6.0): what is kept in a container, and where a container is
+        // kept; the dates of a location are the container's movements, and only a storage place takes one.
+        'storage' => ['pairs' => [['record', 'container'], ['instantiation', 'container'], ['container', 'container']], 'forward' => 'is or was stored in', 'inverse' => 'stores or stored', 'own_section' => true],
+        'location' => ['pairs' => [['container', 'place']], 'forward' => 'is or was kept in', 'inverse' => 'keeps or kept', 'own_section' => true],
     ],
 
     // The RiC-O 1.1 class the concepts of each kind of local vocabulary (concept-scheme-kind
@@ -115,6 +122,8 @@ return [
         'documentary-form-type' => 'https://www.ica.org/standards/RiC/ontology#DocumentaryFormType',
         'legal-status' => 'https://www.ica.org/standards/RiC/ontology#LegalStatus',
         'activity-type' => 'https://www.ica.org/standards/RiC/ontology#ActivityType',
+        'container-type' => 'https://openric.org/ns/ext/v1#ContainerType',
+        'storage-place-type' => 'https://www.ica.org/standards/RiC/ontology#PlaceType',
     ],
 
     // Description elements that are names (ADR 0006): what the description form
@@ -137,6 +146,8 @@ return [
         'activity-parallel-name' => 'parallel',
         'activity-other-name' => 'other',
         'instantiation-title' => 'authorised',
+        'container-name' => 'authorised',
+        'container-other-name' => 'other',
     ],
 
     // The roles a new institution starts with, by account-role template, with
@@ -152,11 +163,13 @@ return [
             'description' => ['read', 'create', 'update', 'delete', 'view-draft', 'publish', 'read-master', 'read-reference', 'read-thumbnail'],
             'vocabulary' => ['create', 'update', 'publish'],
             'authority' => ['read', 'create', 'update', 'publish'],
+            'storage' => ['read', 'create', 'update'],
         ]],
         'contributor' => ['parent' => 'signed-in', 'grants' => [
             'repository' => ['read'],
             'description' => ['read', 'create', 'update', 'view-draft', 'read-reference', 'read-thumbnail'],
             'authority' => ['read', 'create', 'update'],
+            'storage' => ['read'],
         ]],
         'translator' => ['parent' => 'signed-in', 'grants' => ['description' => ['read', 'view-draft', 'translate'], 'authority' => ['read']]],
     ],

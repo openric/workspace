@@ -3,6 +3,8 @@ AgentList
 Carrier
 Checksum
 ContactPoint
+Container
+ContainerType
 DateRange
 DateRangeSet
 Function
@@ -39,6 +41,7 @@ hasAppraisalInformation
 hasBroaderGeographicalContext
 hasCarrier
 hasChecksum
+hasContainerType
 hasDateOfExistence
 hasDateRange
 hasDateRangeSet
@@ -54,10 +57,12 @@ humanConfirmed
 inferenceReceipt
 institutionType
 isCarrierOf
+isContainerTypeOf
 isCurrent
 isOrWasAdoptedChildOf
 isOrWasFosterChildOf
 isOrWasGuardianOf
+isOrWasStoredIn
 isOrWasUnderGuardianshipOf
 jurisdiction
 languageCode
@@ -76,6 +81,7 @@ restrictionType
 securityLevel
 securityLevelCode
 size
+storesOrStored
 streetAddress
 technicalCharacteristics
 telephone

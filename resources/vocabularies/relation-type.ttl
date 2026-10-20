@@ -13,7 +13,7 @@ v: a skos:ConceptScheme ;
     dcterms:title "OpenRiC Workspace Relation Types"@en ;
     dcterms:description "What kind of relation connects two entities."@en ;
     dcterms:issued "2026-10-20"^^xsd:date ;
-    skos:hasTopConcept v:associated-record, v:genetic, v:sequential, v:holding, v:creation, v:accumulation, v:management, v:ownership, v:agent-hierarchical, v:agent-temporal, v:agent-control, v:agent-associated, v:subject, v:place, v:place-containment, v:family, v:child, v:descendance, v:sibling, v:spouse, v:guardianship, v:adoption, v:fostering, v:membership, v:leadership, v:position-holding, v:position-in-group, v:group-subdivision, v:knowing, v:knowing-of, v:correspondence, v:teaching, v:study-at, v:work, v:occupation, v:legal-status, v:documentary-form, v:performance, v:participation, v:result, v:documentation, v:subevent .
+    skos:hasTopConcept v:associated-record, v:genetic, v:sequential, v:holding, v:creation, v:accumulation, v:management, v:ownership, v:agent-hierarchical, v:agent-temporal, v:agent-control, v:agent-associated, v:subject, v:place, v:place-containment, v:family, v:child, v:descendance, v:sibling, v:spouse, v:guardianship, v:adoption, v:fostering, v:membership, v:leadership, v:position-holding, v:position-in-group, v:group-subdivision, v:knowing, v:knowing-of, v:correspondence, v:teaching, v:study-at, v:work, v:occupation, v:legal-status, v:documentary-form, v:storage, v:location, v:performance, v:participation, v:result, v:documentation, v:subevent .
 
 v:associated-record a skos:Concept ;
     skos:inScheme v: ;
@@ -273,6 +273,20 @@ v:documentary-form a skos:Concept ;
     skos:prefLabel "Documentary form type"@en ;
     skos:scopeNote "Shortcut rico:hasDocumentaryFormType from a rico:Record or rico:RecordPart to a rico:DocumentaryFormType, inverse rico:isDocumentaryFormTypeOf; from a rico:RecordSet, which RiC-O 1.1 types only through its members, it is rico:hasOrHadSomeMembersWithDocumentaryFormType. RiC-O 1.1 has no Relation subclass for it. Genre access points of AtoM and EAD (genreform)."@en ;
     skos:definition "A record is of a documentary form, such as a letter, a minute book or a photograph album; a record set has members of that form."@en .
+
+v:storage a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Storage"@en ;
+    skos:scopeNote "Shortcut openricx:isOrWasStoredIn (extension ontology 1.6.0), inverse openricx:storesOrStored; RiC-O 1.1 has no storage relation, so its dates go on a rico:Relation. AtoM's link from a description to a physical object."@en ;
+    skos:definition "A unit of description, an instantiation or a smaller container is or was kept in a container."@en .
+
+v:location a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Storage location"@en ;
+    skos:scopeNote "Shortcut rico:hasOrHadLocation, inverse rico:isOrWasLocationOf, from a container to a storage place; RiC-O 1.1 has no Relation subclass for it, so its dates go on a rico:Relation. Its dates are the container's movements."@en ;
+    skos:definition "A container is or was kept in a storage place, from one date to another."@en .
 
 v:performance a skos:Concept ;
     skos:inScheme v: ;

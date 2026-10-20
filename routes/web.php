@@ -33,6 +33,7 @@ use App\Http\Controllers\RepositoryController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\StorageController;
 use App\Http\Controllers\VocabularyController;
 use App\Http\Middleware\ServeDiscovery;
 use App\Relations\EntityKinds;
@@ -143,6 +144,27 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::post('/{activity}', [ActivityController::class, 'update'])->name('update');
     });
 
+    // Physical storage (openricx:Container): containers under the storage permissions, storage places
+    // (places of a storage place type) made under the vocabulary permissions, as every place is.
+    Route::middleware('access:read,storage')->group(function () {
+        Route::prefix('containers')->name('containers.')->group(function () {
+            Route::get('/', [StorageController::class, 'index'])->name('index');
+            Route::get('/new', [StorageController::class, 'create'])->name('create');
+            Route::get('/scan', [StorageController::class, 'scan'])->name('scan');
+            Route::get('/holdings.csv', [StorageController::class, 'holdings'])->name('holdings');
+            Route::post('/', [StorageController::class, 'store'])->name('store');
+            Route::get('/{container}', [StorageController::class, 'show'])->name('show');
+            Route::get('/{container}/edit', [StorageController::class, 'edit'])->name('edit');
+            Route::post('/{container}', [StorageController::class, 'update'])->name('update');
+            Route::post('/{container}/move', [StorageController::class, 'move'])->name('move');
+            Route::get('/{container}/box-list', [StorageController::class, 'boxList'])->name('box-list');
+        });
+        Route::get('/storage-places', [StorageController::class, 'places'])->name('storage.places');
+        Route::post('/storage-places', [StorageController::class, 'storePlace'])->name('storage.places.store');
+        Route::get('/storage-places/{id}', [StorageController::class, 'place'])->where('id', '[0-9a-f-]{36}')->name('storage.place');
+        Route::post('/storage-places/{id}/containers', [StorageController::class, 'moveHere'])->where('id', '[0-9a-f-]{36}')->name('storage.place.move');
+    });
+
     // Imports of archival description: a dry run, its report, then the import (WS-015).
     Route::prefix('imports')->name('imports.')->group(function () {
         Route::get('/', [ImportController::class, 'index'])->name('index');
@@ -222,7 +244,7 @@ Route::middleware(['auth', 'active'])->group(function () {
     // Dates, names and identifiers of any described entity (ADR 0006); each controller checks update on the entity.
     // A concept has labels instead (ConceptController).
     foreach (['dates' => [DateController::class, 'date'], 'names' => [NameController::class, 'name'], 'identifiers' => [IdentifierController::class, 'identifier']] as $part => [$controller, $parameter]) {
-        Route::prefix("{kind}/{id}/$part")->where(['kind' => 'records|repositories|places|agents|activities|instantiations', 'id' => '[0-9a-f-]{36}', $parameter => '[0-9a-f-]{36}'])->name("$part.")
+        Route::prefix("{kind}/{id}/$part")->where(['kind' => 'records|repositories|places|agents|activities|instantiations|containers', 'id' => '[0-9a-f-]{36}', $parameter => '[0-9a-f-]{36}'])->name("$part.")
             ->group(function () use ($controller, $parameter) {
                 Route::post('/', [$controller, 'store'])->name('store');
                 Route::post("/{{$parameter}}", [$controller, 'update'])->name('update');
@@ -231,11 +253,11 @@ Route::middleware(['auth', 'active'])->group(function () {
     }
 
     // Delete a unit of description, a repository or a place, after confirming (EntityDeletion).
-    Route::get('{kind}/{id}/delete', [DeletionController::class, 'confirm'])->where(['kind' => 'records|repositories|places|agents|activities|instantiations', 'id' => '[0-9a-f-]{36}'])->name('deletion.confirm');
-    Route::post('{kind}/{id}/delete', [DeletionController::class, 'destroy'])->where(['kind' => 'records|repositories|places|agents|activities|instantiations', 'id' => '[0-9a-f-]{36}'])->name('deletion.destroy');
+    Route::get('{kind}/{id}/delete', [DeletionController::class, 'confirm'])->where(['kind' => 'records|repositories|places|agents|activities|instantiations|containers', 'id' => '[0-9a-f-]{36}'])->name('deletion.confirm');
+    Route::post('{kind}/{id}/delete', [DeletionController::class, 'destroy'])->where(['kind' => 'records|repositories|places|agents|activities|instantiations|containers', 'id' => '[0-9a-f-]{36}'])->name('deletion.destroy');
 
     // The modification history of an entity and its parts, from the audit log.
-    Route::get('{kind}/{id}/history', [HistoryController::class, 'show'])->where(['kind' => 'records|repositories|places|agents|activities|instantiations|concepts', 'id' => '[0-9a-f-]{36}'])->name('history');
+    Route::get('{kind}/{id}/history', [HistoryController::class, 'show'])->where(['kind' => 'records|repositories|places|agents|activities|instantiations|containers|concepts', 'id' => '[0-9a-f-]{36}'])->name('history');
 
     // Review, publish and withdraw an entity's description (PublicationService).
     Route::get('{kind}/{id}/publication', [PublicationController::class, 'edit'])->where(['kind' => 'records|repositories|places|agents|activities|instantiations', 'id' => '[0-9a-f-]{36}'])->name('publication.edit');

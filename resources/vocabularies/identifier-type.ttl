@@ -13,7 +13,7 @@ v: a skos:ConceptScheme ;
     dcterms:title "OpenRiC Workspace Identifier Types"@en ;
     dcterms:description "What kind of identifier an identifier is."@en ;
     dcterms:issued "2026-10-20"^^xsd:date ;
-    skos:hasTopConcept v:local, v:isil, v:previous, v:gazetteer, v:other .
+    skos:hasTopConcept v:local, v:isil, v:previous, v:gazetteer, v:barcode, v:other .
 
 v:local a skos:Concept ;
     skos:inScheme v: ;
@@ -35,6 +35,13 @@ v:previous a skos:Concept ;
     skos:prefLabel "Previous identifier"@en ;
     skos:scopeNote "Exported as a rico:Identifier with rico:hasIdentifierType."@en ;
     skos:definition "An identifier the entity had before, such as a former reference code."@en .
+
+v:barcode a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Barcode"@en ;
+    skos:scopeNote "The code on a label scanned to find a container. Exported as a rico:Identifier with rico:hasIdentifierType."@en ;
+    skos:definition "The code a barcode label on a container carries."@en .
 
 v:other a skos:Concept ;
     skos:inScheme v: ;

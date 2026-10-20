@@ -1,0 +1,58 @@
+# OpenRiC Workspace - OpenRiC Workspace Capacity Units.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# The units a container or storage place capacity is counted in, as Heratio counts them. Exported as a rico:UnitOfMeasurement where a capacity is exported.
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/capacity-unit/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Capacity Units"@en ;
+    dcterms:description "Units of storage capacity."@en ;
+    dcterms:issued "2026-10-20"^^xsd:date ;
+    skos:hasTopConcept v:boxes, v:files, v:folders, v:items, v:volumes, v:linear-metres .
+
+v:boxes a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Boxes"@en ;
+    skos:scopeNote "A rico:UnitOfMeasurement."@en ;
+    skos:definition "Counted in boxes."@en .
+
+v:files a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Files"@en ;
+    skos:scopeNote "A rico:UnitOfMeasurement."@en ;
+    skos:definition "Counted in files."@en .
+
+v:folders a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Folders"@en ;
+    skos:scopeNote "A rico:UnitOfMeasurement."@en ;
+    skos:definition "Counted in folders."@en .
+
+v:items a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Items"@en ;
+    skos:scopeNote "A rico:UnitOfMeasurement."@en ;
+    skos:definition "Counted in items."@en .
+
+v:volumes a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Volumes"@en ;
+    skos:scopeNote "A rico:UnitOfMeasurement."@en ;
+    skos:definition "Counted in bound volumes."@en .
+
+v:linear-metres a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Linear metres"@en ;
+    skos:scopeNote "A rico:UnitOfMeasurement."@en ;
+    skos:definition "Measured in metres of shelving."@en .

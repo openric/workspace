@@ -3,7 +3,8 @@
 <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: end; margin: 1rem 0">
     <a href="{{ route($editRoute, [$subject, 'language' => $subject->originalLanguage($required)]) }}" style="display: inline-block; padding: .5rem 1rem; background: var(--accent); color: var(--bg); text-decoration: none">Edit description</a>
     @php($deletable = \App\Relations\EntityKinds::get(\App\Relations\EntityKinds::of($subject)))
-    @if(auth()->user()->may('publish', $deletable['permission'], $subject) || auth()->user()->may('update', $deletable['permission'], $subject))
+    {{-- A container is never published: storage is not for the public. --}}
+    @if(! $subject instanceof \App\Models\Container && (auth()->user()->may('publish', $deletable['permission'], $subject) || auth()->user()->may('update', $deletable['permission'], $subject)))
         <a href="{{ route('publication.edit', [$deletable['segment'], $subject->getKey()]) }}" style="display: inline-block; padding: .5rem 1rem; border: 1px solid var(--accent); text-decoration: none">Publication</a>
     @endif
     @if(auth()->user()->may('update', $deletable['permission'], $subject) && ! $subject instanceof \App\Models\RecordResource)

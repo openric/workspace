@@ -20,6 +20,7 @@ use App\Models\Concept;
 use App\Models\DigitalFile;
 use App\Models\Instantiation;
 use App\Models\RecordResource;
+use App\Relations\RelationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -71,7 +72,7 @@ class InstantiationController extends Controller
 
         return view('instantiations.show', ['instantiation' => $instantiation, 'unit' => $unit, 'canUpdate' => $user->may('update', 'description', $unit),
             'deliverable' => $instantiation->files->mapWithKeys(fn (DigitalFile $f) => [$f->id => $this->instantiations->deliverable($user, $f)]),
-            'dateChoices' => app(DateService::class)->choices('instantiation')]);
+            'dateChoices' => app(DateService::class)->choices('instantiation'), 'relations' => app(RelationService::class)->of($instantiation)]);
     }
 
     public function edit(Request $request, Instantiation $instantiation): View

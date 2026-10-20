@@ -39,4 +39,8 @@
     @include('description._names', ['subject' => $instantiation, 'kind' => 'instantiations', 'canUpdate' => $canUpdate])
     @include('description._identifiers', ['subject' => $instantiation, 'kind' => 'instantiations', 'canUpdate' => $canUpdate])
     @include('description._dates', ['subject' => $instantiation, 'kind' => 'instantiations', 'heading' => 'Dates', 'canUpdate' => $canUpdate, 'choices' => $dateChoices])
+    @if(auth()->user()->mayAnywhere('read', 'storage'))
+        @include('description._relations', ['subject' => $instantiation, 'kind' => 'instantiations', 'relations' => $relations->filter(fn ($r) => auth()->user()->may('read', 'storage', $r->other)), 'canUpdate' => $canUpdate,
+            'heading' => 'Physical storage', 'types' => ['storage'], 'section' => 'ps', 'add' => 'storage|source', 'addLabel' => 'Add a container it is kept in'])
+    @endif
 @endsection

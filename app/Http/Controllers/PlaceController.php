@@ -14,6 +14,7 @@ use App\Description\Bcp47;
 use App\Description\DateService;
 use App\Description\Elements;
 use App\Description\PlaceService;
+use App\Description\StorageService;
 use App\Models\Concept;
 use App\Models\Name;
 use App\Models\Place;
@@ -40,13 +41,13 @@ class PlaceController extends Controller
         $with = ['names.nameType', 'placeType.labels', 'identifiers.identifierType', 'parent.names.nameType'];
         if ($tree) {
             // ponytail: the whole hierarchy in one page; past some thousands of places this wants lazy loading by level.
-            $all = $this->existing($institution)->with($with)->get();
+            $all = app(StorageService::class)->scopeStorage($this->existing($institution), $institution, false)->with($with)->get();
             $byParent = $all->groupBy(fn (Place $p) => $p->parent_id ?? 'top');
 
             return view('places.index', ['tree' => $byParent, 'places' => null, 'query' => '', 'type' => '', 'types' => $this->types($institution)]);
         }
         $like = '%'.addcslashes($query, '%_\\').'%';
-        $places = $this->existing($institution)->with($with)
+        $places = app(StorageService::class)->scopeStorage($this->existing($institution), $institution, false)->with($with)
             ->when($query !== '', fn (Builder $q) => $q->where(fn ($q) => $q
                 ->whereIn('id', Name::where('subject_table', 'places')->where('value', 'ilike', $like)->select('subject_id'))
                 ->orWhereIn('id', DB::table('identifiers')->where('subject_table', 'places')->where('value', 'ilike', $like)->select('subject_id'))))

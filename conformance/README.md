@@ -1,12 +1,12 @@
 # Conformance matrix
 
-The OpenRiC profiles the Workspace will implement, pinned to **OpenRiC specification v0.54.0** (tag commit `8e82de5`, 20 October 2026; repinned from v0.53.0, and from v0.48.0, the S-GATE baseline, before that). The same version is `openric_spec_version` in `config/workspace.php`; the two change together. Profile identities, status and versions are copied from that release's `_data/profiles.json`, not typed by hand; when the pinned specification changes, this table is regenerated and the change is recorded here.
+The OpenRiC profiles the Workspace will implement, pinned to **OpenRiC specification v0.55.0** (tag commit `104dc97`, 20 October 2026; repinned from v0.54.0, v0.53.0, and from v0.48.0, the S-GATE baseline, before that). The same version is `openric_spec_version` in `config/workspace.php`; the two change together. Profile identities, status and versions are copied from that release's `_data/profiles.json`, not typed by hand; when the pinned specification changes, this table is regenerated and the change is recorded here.
 
 The Workspace declares two profiles in its service description (`GET /api/ric/v1/`): Core Discovery from v0.0.23 and Export-Only from v0.0.24. Every other profile is not claimed, and its endpoints are not served. Each row links a profile to its tests and its last conformance report. There is no blanket "OpenRiC compliant" claim without a scope.
 
-| Profile | Status in v0.54.0 | Profile version | Proposed release (not yet decided) | Implementation | Last conformance report |
+| Profile | Status in v0.55.0 | Profile version | Proposed release (not yet decided) | Implementation | Last conformance report |
 |---|---|---|---|---|---|
-| `core-discovery` | normative | 0.7.0 | V0.1 (WS-009, WS-010) | v0.0.23: `app/Http/Controllers/Api`, `app/Api/JsonLd.php`; tests `tests/Feature/ApiTest.php` (JSON Schemas of spec 0.54.0, term check) | 20 October 2026, a rehearsal of live: probe 11 of 11 pass, verdict pass; SHACL `core-discovery.shacl.ttl` and `openric.shacl.ttl` conform |
+| `core-discovery` | normative | 0.7.0 | V0.1 (WS-009, WS-010) | v0.0.23: `app/Http/Controllers/Api`, `app/Api/JsonLd.php`; tests `tests/Feature/ApiTest.php` (JSON Schemas of spec 0.55.0, term check) | 20 October 2026, a rehearsal of live: probe 11 of 11 pass, verdict pass; SHACL `core-discovery.shacl.ttl` and `openric.shacl.ttl` conform |
 | `authority-context` | normative | 0.4.0 | V0.1 (WS-003) | not started | - |
 | `graph-traversal` | normative | 0.6.0 | V0.1 (WS-009) | not started | - |
 | `digital-object-linkage` | normative | 0.7.0 | V0.1 (WS-007) | v0.0.25: the data model (instantiations, files with SHA-256, controlled delivery); the API endpoints are not served yet, so the profile is not declared | - |
@@ -20,6 +20,10 @@ The Workspace declares two profiles in its service description (`GET /api/ric/v1
 | `graph-grounding` | draft | 0.43.0 | Not planned; draft profile, review at G6 | not started | - |
 
 Test method: the OpenRiC conformance probe (`conformance/probe.sh` in openric/spec) run against a Workspace build, together with the specification's JSON Schemas, SHACL shapes and fixtures, including the independent ones once published.
+
+## Changes from the v0.54.0 pin
+
+v0.55.0 (20 October 2026) adds physical storage to the extension ontology, 1.6.0: `openricx:Container`, `openricx:ContainerType`, `openricx:isOrWasStoredIn` and `openricx:storesOrStored`, `openricx:hasContainerType` and `openricx:isContainerTypeOf`, with mapping section 6.6 placing a container in a `rico:Place` by `rico:hasOrHadLocation`. No profile, schema or fixture changed; the Workspace asked for the terms when it began keeping containers (v0.0.29), and its term lists come from that release.
 
 ## Changes from the v0.53.0 pin
 

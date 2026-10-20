@@ -10,7 +10,7 @@
 @php($add ??= null)
 @php($addLabel ??= 'Add a relation')
 <h2>{{ $heading }}</h2>
-@php($shown = $relations->filter(fn ($r) => $types === null ? ! (config('workspace.relation_types.'.$r->relationType->notation)['access_point'] ?? false) : in_array($r->relationType->notation, $types, true))
+@php($shown = $relations->filter(fn ($r) => $types === null ? ! ((config('workspace.relation_types.'.$r->relationType->notation)['access_point'] ?? false) || (config('workspace.relation_types.'.$r->relationType->notation)['own_section'] ?? false)) : in_array($r->relationType->notation, $types, true))
     ->filter(fn ($r) => $canUpdate || in_array($r->standing(), ['accepted', 'disputed'], true)))
 @forelse($shown as $relation)
     @php($from = $relation->datedAs('beginning')?->normalized_value)

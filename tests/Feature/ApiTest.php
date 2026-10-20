@@ -1,11 +1,11 @@
 <?php
 
-// OpenRiC Workspace - the read API: Core Discovery 0.7.0, checked against the spec's JSON Schemas (spec 0.54.0).
+// OpenRiC Workspace - the read API: Core Discovery 0.7.0, checked against the spec's JSON Schemas (spec 0.55.0).
 // Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
 // SPDX-License-Identifier: AGPL-3.0-or-later
 //
-// tests/Fixtures/openric-0.54.0 holds the JSON Schemas of the OpenRiC
-// specification 0.54.0 (https://openric.org/schemas/, CC BY 4.0).
+// tests/Fixtures/openric-0.55.0 holds the JSON Schemas of the OpenRiC
+// specification 0.55.0 (https://openric.org/schemas/, CC BY 4.0).
 
 namespace Tests\Feature;
 
@@ -92,7 +92,7 @@ class ApiTest extends TestCase
     private function valid(TestResponse $response, string $schema): array
     {
         $json = $response->getContent();
-        $result = (new Validator)->validate(json_decode($json), file_get_contents(base_path("tests/Fixtures/openric-0.54.0/$schema.schema.json")));
+        $result = (new Validator)->validate(json_decode($json), file_get_contents(base_path("tests/Fixtures/openric-0.55.0/$schema.schema.json")));
         $this->assertTrue($result->isValid(), "valid against $schema.schema.json: ".json_encode($result->isValid() ? [] : (new ErrorFormatter)->format($result->error())));
 
         return json_decode($json, true);
@@ -101,7 +101,7 @@ class ApiTest extends TestCase
     public function test_the_service_description_health_and_vocabulary(): void
     {
         $service = $this->valid($this->get(self::API.'/')->assertOk()->assertHeader('Vary', 'Accept')->assertHeader('Access-Control-Allow-Origin', '*'), 'service-description');
-        $this->assertSame(['spec_version' => '0.54.0', 'profiles' => [['id' => 'core-discovery', 'version' => '0.7.0', 'conformance' => 'full'],
+        $this->assertSame(['spec_version' => '0.55.0', 'profiles' => [['id' => 'core-discovery', 'version' => '0.7.0', 'conformance' => 'full'],
             ['id' => 'export-only', 'version' => '0.10.0', 'conformance' => 'full']]], $service['openric_conformance']);
         $this->assertSame(trim(file_get_contents(base_path('VERSION'))), $service['version']);
         $this->get(self::API.'/health')->assertOk()->assertExactJson(['status' => 'ok']);

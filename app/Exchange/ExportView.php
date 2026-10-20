@@ -15,8 +15,10 @@ namespace App\Exchange;
 
 use App\Access\AccessControl;
 use App\Description\Elements;
+use App\Description\StorageService;
 use App\Models\Agent;
 use App\Models\Concept;
+use App\Models\Container;
 use App\Models\Institution;
 use App\Models\Place;
 use App\Models\RecordResource;
@@ -121,6 +123,25 @@ class ExportView
             ->filter(fn (Relation $r) => in_array($r->standing(), ['accepted', 'disputed'], true) && $this->readable($r->other))->values();
 
         return $type === null ? $this->relations[$unit->id] : $this->relations[$unit->id]->filter(fn (Relation $r) => $r->relationType->notation === $type)->values();
+    }
+
+    /**
+     * The containers the unit is kept in now, as the view may see them (the public never does: storage is not public),
+     * each with its type and where it is kept: the storage place's path, else its location as written.
+     *
+     * @return list<array{name: string, type: ?string, location: ?string}>
+     */
+    public function storage(RecordResource $unit): array
+    {
+        $storage = app(StorageService::class);
+
+        return $this->relations($unit, 'storage')->filter(fn (Relation $r) => $r->datedAs('end') === null && $r->other instanceof Container)
+            ->map(function (Relation $r) use ($storage) {
+                $place = $storage->place($r->other);
+
+                return ['name' => (string) $this->label($r->other), 'type' => $r->other->containerType?->anyLabel(['en']),
+                    'location' => $place && $this->readable($place) ? $storage->path($place) : $this->value($r->other, 'container-location-as-written')];
+            })->filter(fn ($c) => $c['name'] !== '')->values()->all();
     }
 
     /** Creators and accumulators (ISAD(G) 3.2.1): agents the unit was created or accumulated by. */

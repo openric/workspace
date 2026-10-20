@@ -186,9 +186,8 @@ class ImportTest extends TestCase
         $import = $this->upload($xml, 'ead', ['create_terms' => '1']);
         $this->assertEquals(['created' => 3, 'updated' => 0, 'unchanged' => 0, 'rejected' => 0], $import->report['actions']);
         $issues = collect($import->report['issues']);
-        foreach (['dao', 'container'] as $field) {
-            $this->assertTrue($issues->contains(fn ($i) => $i['field'] === $field && $i['kind'] === 'left-out'), "$field is listed");
-        }
+        $this->assertTrue($issues->contains(fn ($i) => $i['field'] === 'dao' && $i['kind'] === 'left-out'), 'dao is listed');
+        $this->assertTrue($issues->contains(fn ($i) => $i['field'] === 'physicalObjectName' && $i['value'] === '1' && $i['kind'] === 'created'), 'the box becomes a container');
         $this->assertTrue($issues->contains(fn ($i) => $i['field'] === 'genre' && $i['value'] === 'Diaries' && $i['problem'] === 'a new documentary form type'));
         $this->commit($import);
         $top = RecordResource::whereNull('parent_id')->sole();

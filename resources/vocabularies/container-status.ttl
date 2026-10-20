@@ -1,0 +1,44 @@
+# OpenRiC Workspace - OpenRiC Workspace Container Status.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Whether a container is in use, as Heratio tracks it. Not in RiC-O 1.1 or the extension: kept for collection management, not exported as RiC.
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/container-status/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Container Status"@en ;
+    dcterms:description "Whether a container is in use."@en ;
+    dcterms:issued "2026-10-20"^^xsd:date ;
+    skos:hasTopConcept v:active, v:full, v:maintenance, v:decommissioned .
+
+v:active a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "In use"@en ;
+    skos:scopeNote "Not in RiC-O; collection management."@en ;
+    skos:definition "The container is in use and may take more."@en .
+
+v:full a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Full"@en ;
+    skos:scopeNote "Not in RiC-O; collection management."@en ;
+    skos:definition "The container is in use and takes nothing more."@en .
+
+v:maintenance a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Under maintenance"@en ;
+    skos:scopeNote "Not in RiC-O; collection management."@en ;
+    skos:definition "The container is being repaired, replaced or cleaned."@en .
+
+v:decommissioned a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Decommissioned"@en ;
+    skos:scopeNote "Not in RiC-O; collection management."@en ;
+    skos:definition "The container is no longer used."@en .

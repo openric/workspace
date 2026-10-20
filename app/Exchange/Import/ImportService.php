@@ -33,10 +33,12 @@ use App\Description\InstantiationService;
 use App\Description\PlaceService;
 use App\Description\RecordService;
 use App\Description\RepositoryService;
+use App\Description\StorageService;
 use App\Exchange\Ead;
 use App\Models\Agent;
 use App\Models\Concept;
 use App\Models\ContactPoint;
+use App\Models\Container;
 use App\Models\DigitalFile;
 use App\Models\Import;
 use App\Models\Institution;
@@ -682,6 +684,11 @@ class ImportService
                 $this->relate($draft, $found, 'place', $unit);
             }
         }
+        foreach ($draft->containers as $named) {
+            if ($container = $this->container($draft, $named, $language)) {
+                $this->relate($draft, $unit, 'storage', $container);
+            }
+        }
         foreach ($draft->genres as $genre) {
             $concept = $genre['iri'] !== null ? Concept::where(['iri' => $genre['iri'], 'institution_id' => $this->institution->id])->whereNull('deprecated_at')->first() : null;
             if ($concept ??= $this->term($draft, 'documentary-form-type', 'genre', $genre['name'], $language)) {
@@ -775,7 +782,7 @@ class ImportService
         if (array_key_exists($cacheKey, $this->resolved)) {
             return $this->resolved[$cacheKey];
         }
-        $what = ['occupation-type' => 'occupation', 'documentary-form-type' => 'documentary form type'][$kind] ?? $kind;
+        $what = ['occupation-type' => 'occupation', 'documentary-form-type' => 'documentary form type', 'container-type' => 'container type'][$kind] ?? $kind;
         $matches = Concept::where('institution_id', $this->institution->id)->whereNull('deprecated_at')
             ->whereHas('vocabulary.kind', fn ($q) => $q->where('iri', Vocab::BASE.'concept-scheme-kind/'.$kind))
             ->whereHas('labels', fn ($q) => $q->whereRaw('lower(pref_label) = ?', [mb_strtolower($label)]))->get();
@@ -797,6 +804,52 @@ class ImportService
         $this->report->issue($draft->location, $field, $label, "a new $what", 'created');
 
         return $this->resolved[$cacheKey] = $concept;
+    }
+
+    /**
+     * The container a unit is kept in, as the file names it: the one container of that name (and type), else a new one
+     * where the account may make containers. Its type is found by label, or made in the institution's container-type
+     * vocabulary where allowed. Where it is, as the file writes it, is kept as written: AtoM's location is free text.
+     *
+     * @param  array{name: string, type: ?string, location: ?string}  $named
+     */
+    private function container(UnitDraft $draft, array $named, string $language): ?Container
+    {
+        $cacheKey = 'container:'.mb_strtolower($named['name']).':'.mb_strtolower((string) $named['type']);
+        if (array_key_exists($cacheKey, $this->resolved)) {
+            return $this->resolved[$cacheKey];
+        }
+        $storage = app(StorageService::class);
+        $type = null;
+        if ($named['type'] !== null) {
+            $wanted = mb_strtolower($named['type']);
+            $type = $storage->types($this->institution->id)->first(fn (Concept $c) => mb_strtolower((string) $c->notation) === $wanted
+                || $c->labels->contains(fn ($l) => mb_strtolower($l->pref_label) === $wanted))
+                ?? $this->term($draft, 'container-type', 'physicalObjectType', $named['type'], $language);
+        }
+        $matches = Container::where('institution_id', $this->institution->id)->whereNull('deleted_at')->whereIn('id', $this->namedQuery('containers', $named['name']))
+            ->when($type !== null, fn ($q) => $q->where('container_type_id', $type->id))->get();
+        if ($matches->count() > 1) {
+            $this->report->issue($draft->location, 'physicalObjectName', $named['name'], $matches->count().' containers have this name; not linked', 'ambiguous');
+
+            return $this->resolved[$cacheKey] = null;
+        }
+        if ($matches->count() === 1) {
+            return $this->resolved[$cacheKey] = $matches->first();
+        }
+        if (! $this->user->may('create', 'storage')) {
+            $this->report->issue($draft->location, 'physicalObjectName', $named['name'], 'no container has this name, and you may not make one; not linked', 'left-out');
+
+            return $this->resolved[$cacheKey] = null;
+        }
+        $container = $storage->create($this->institution, $named['name'], $language, $type?->id, null, $this->user);
+        if ($named['location'] !== null) {
+            $storage->describe($container, ['container-location-as-written' => $named['location']], $language, $this->user);
+        }
+        $this->report->counts['containers']++;
+        $this->report->issue($draft->location, 'physicalObjectName', $named['name'], 'a new container'.($named['location'] !== null ? ', its location kept as written: '.$named['location'] : ''), 'created');
+
+        return $this->resolved[$cacheKey] = $container;
     }
 
     private function place(UnitDraft|EntityDraft $draft, string $name, ?string $iri, string $language): ?Place

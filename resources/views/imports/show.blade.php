@@ -17,7 +17,7 @@
         {{ $actions['unchanged'] }} unchanged, {{ $actions['rejected'] }} not imported.
         @if($report['counts'] ?? null){{ $report['counts']['values'] }} values; {{ $report['counts']['relations'] }} relations {{ $verb }}proposed for review;
             {{ $report['counts']['agents'] }} authority records, {{ $report['counts']['places'] }} places and {{ $report['counts']['concepts'] }} concepts {{ $verb }}created, linked from the entries;
-            {{ $report['counts']['files'] ?? 0 }} files kept.@endif</p>
+            {{ $report['counts']['containers'] ?? 0 }} containers {{ $verb }}made; {{ $report['counts']['files'] ?? 0 }} files kept.@endif</p>
     <p><small>Imported values are drafts until published, and the relations an import makes are proposed until someone accepts them. An empty field never removes a value already there.</small></p>
     @if($mayCommit && ($report['units'] ?? []) !== [])
         <form method="post" action="{{ route('imports.commit', $import) }}">@csrf<button type="submit">Import now</button></form>

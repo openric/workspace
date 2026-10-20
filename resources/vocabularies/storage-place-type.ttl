@@ -1,0 +1,72 @@
+# OpenRiC Workspace - OpenRiC Workspace Storage Place Types.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Kinds of place in which containers are kept: the levels of a storage location tree, as Heratio and AtoM have them. Exported as rico:PlaceType; an institution adds its own in a storage-place-type vocabulary.
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/storage-place-type/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Storage Place Types"@en ;
+    dcterms:description "Kinds of storage place."@en ;
+    dcterms:issued "2026-10-20"^^xsd:date ;
+    skos:hasTopConcept v:building, v:floor, v:room, v:strongroom, v:aisle, v:bay, v:rack, v:shelf .
+
+v:building a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Building"@en ;
+    skos:scopeNote "Exported as a rico:PlaceType (rico:hasOrHadPlaceType); RiC-CM counts man-made structures as places."@en ;
+    skos:definition "A building in which records are kept."@en .
+
+v:floor a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Floor"@en ;
+    skos:scopeNote "Exported as a rico:PlaceType."@en ;
+    skos:definition "A floor or level of a building."@en .
+
+v:room a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Room"@en ;
+    skos:scopeNote "Exported as a rico:PlaceType."@en ;
+    skos:definition "A room of a building."@en .
+
+v:strongroom a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Strongroom"@en ;
+    skos:scopeNote "Exported as a rico:PlaceType."@en ;
+    skos:definition "A room built and controlled for keeping records: fire, water, climate and access."@en .
+
+v:aisle a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Aisle"@en ;
+    skos:scopeNote "Exported as a rico:PlaceType."@en ;
+    skos:definition "An aisle or row of shelving in a room."@en .
+
+v:bay a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Bay"@en ;
+    skos:scopeNote "Exported as a rico:PlaceType."@en ;
+    skos:definition "A bay or section of shelving in an aisle."@en .
+
+v:rack a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Rack"@en ;
+    skos:scopeNote "Exported as a rico:PlaceType."@en ;
+    skos:definition "A rack, cabinet or plan chest."@en .
+
+v:shelf a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Shelf"@en ;
+    skos:scopeNote "Exported as a rico:PlaceType."@en ;
+    skos:definition "A shelf, the place a container stands."@en .

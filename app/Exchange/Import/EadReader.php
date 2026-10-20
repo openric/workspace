@@ -115,6 +115,7 @@ class EadReader
 
     private function did(UnitDraft $draft, DOMElement $did): void
     {
+        $physloc = null;
         foreach ($this->elements($did) as $element) {
             $text = $this->text($element);
             switch ($element->localName) {
@@ -157,6 +158,14 @@ class EadReader
                             'relation' => str_contains($role, 'accumulat') || str_contains($role, 'collector') ? 'accumulation' : 'creation', 'history' => null];
                     }
                     break;
+                case 'container':
+                    if ($text !== null) {
+                        $draft->containers[] = ['name' => $text, 'type' => ($element->getAttribute('type') ?: $element->getAttribute('localtype')) ?: null, 'location' => null];
+                    }
+                    break;
+                case 'physloc':
+                    $physloc = $text;
+                    break;
                 case 'note':
                 case 'didnote':
                     $draft->value($this->lang($element, $draft), 'note', $text);
@@ -164,6 +173,16 @@ class EadReader
                 default:
                     $this->report->issue($draft->location ?: 'did', $element->localName, $text, $this->why($element->localName), 'left-out');
             }
+        }
+        // Where the containers are, as the finding aid writes it, is kept with each as written.
+        if ($physloc !== null) {
+            if ($draft->containers === []) {
+                $this->report->issue($draft->location ?: 'did', 'physloc', $physloc, 'a location with no container to keep it with; not read', 'left-out');
+            }
+            foreach ($draft->containers as &$container) {
+                $container['location'] ??= $physloc;
+            }
+            unset($container);
         }
     }
 
@@ -347,7 +366,6 @@ class EadReader
     {
         return match ($element) {
             'dao', 'daogrp', 'daoset' => 'digital objects are not kept yet; not read',
-            'container', 'physloc' => 'physical storage is not kept yet; not read',
             'function', 'occupation', 'title' => 'only subjects, places, names and documentary form types are read as access points; not read',
             default => 'no ISAD(G) element the Workspace keeps; not read',
         };

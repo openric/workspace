@@ -1,0 +1,58 @@
+# OpenRiC Workspace - OpenRiC Workspace Container Types.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Kinds of container in which records are kept for storage (openricx:ContainerType, extension ontology 1.6.0). An institution adds its own in a container-type vocabulary.
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/container-type/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Container Types"@en ;
+    dcterms:description "Kinds of storage container."@en ;
+    dcterms:issued "2026-10-20"^^xsd:date ;
+    skos:hasTopConcept v:box, v:folder, v:binder, v:map-drawer, v:crate, v:canister .
+
+v:box a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Box"@en ;
+    skos:scopeNote "Exported as an openricx:ContainerType (openricx:hasContainerType). AtoM physical object type Box."@en ;
+    skos:definition "A box, such as an archival box, holding files or items."@en .
+
+v:folder a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Folder"@en ;
+    skos:scopeNote "Exported as an openricx:ContainerType. AtoM physical object type Folder."@en ;
+    skos:definition "A folder or pocket holding loose papers, usually kept in a box."@en .
+
+v:binder a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Binder"@en ;
+    skos:scopeNote "Exported as an openricx:ContainerType."@en ;
+    skos:definition "A binder or guard book in which papers are held."@en .
+
+v:map-drawer a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Map drawer"@en ;
+    skos:scopeNote "Exported as an openricx:ContainerType."@en ;
+    skos:definition "A drawer of a plan chest, holding maps, plans or drawings flat."@en .
+
+v:crate a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Crate"@en ;
+    skos:scopeNote "Exported as an openricx:ContainerType."@en ;
+    skos:definition "A crate or carton for bulk or unprocessed records."@en .
+
+v:canister a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Canister"@en ;
+    skos:scopeNote "Exported as an openricx:ContainerType."@en ;
+    skos:definition "A can or canister for film or tape."@en .

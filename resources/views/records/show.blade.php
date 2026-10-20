@@ -36,6 +36,10 @@
         'heading' => 'Place access points', 'types' => ['place'], 'section' => 'pl', 'add' => 'place|target', 'addLabel' => 'Add a place'])
     @include('description._relations', ['subject' => $record, 'kind' => 'records', 'relations' => $relations, 'canUpdate' => $canUpdate,
         'heading' => 'Documentary form types (genre access points)', 'types' => ['documentary-form'], 'section' => 'df', 'add' => 'documentary-form|source', 'addLabel' => 'Add a documentary form type'])
+    @if(auth()->user()->mayAnywhere('read', 'storage'))
+        @include('description._relations', ['subject' => $record, 'kind' => 'records', 'relations' => $relations->filter(fn ($r) => auth()->user()->may('read', 'storage', $r->other)), 'canUpdate' => $canUpdate,
+            'heading' => 'Physical storage', 'types' => ['storage'], 'section' => 'ps', 'add' => 'storage|source', 'addLabel' => 'Add a container it is kept in'])
+    @endif
     @include('description._dates', ['subject' => $record, 'kind' => 'records', 'heading' => 'Dates (3.1.3)', 'canUpdate' => $canUpdate, 'choices' => $dateChoices])
 
     <h2>Units inside</h2>

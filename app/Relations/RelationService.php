@@ -15,6 +15,7 @@ namespace App\Relations;
 use App\Audit\AuditLog;
 use App\Description\Bcp47;
 use App\Description\DateService;
+use App\Description\StorageService;
 use App\Models\Concept;
 use App\Models\Institution;
 use App\Models\Name;
@@ -50,6 +51,16 @@ class RelationService
     {
         $definition = $this->definition($type);
         $this->allowedPair($definition, $type, $source, $target);
+        if ($type === 'location') {
+            $storage = app(StorageService::class);
+            if (! $storage->isStoragePlace($target)) {
+                throw new InvalidArgumentException('a container is kept in a storage place: a place of a storage place type');
+            }
+            // Only one place keeps a container at a time; a move ends where it was first (StorageService::move).
+            if (trim((string) ($fields['to'] ?? '')) === '' && $storage->currentLocation($source) !== null) {
+                throw new InvalidArgumentException('the container is kept somewhere already: move it, which ends where it was kept');
+            }
+        }
         foreach ([$source, $target] as $end) {
             if ($end instanceof Concept && ! in_array($end->vocabulary?->kind?->notation, $definition['schemes'] ?? [], true)) {
                 throw new InvalidArgumentException("a $type relation does not connect a concept of that vocabulary");
@@ -88,6 +99,12 @@ class RelationService
             $relation->update($values);
             $this->setDates($relation, $fields);
         }));
+    }
+
+    /** End the relation on a day (EDTF), keeping everything else said about it, as a move ends where a container was kept. */
+    public function end(Relation $relation, string $day, ?User $actor = null): void
+    {
+        DB::transaction(fn () => AuditLog::actingAs($actor, fn () => $this->setDates($relation, ['to' => $day])));
     }
 
     /** Remove a relation made in error, with its dates, evidence and assertions; the audit log keeps every row. */
@@ -208,7 +225,8 @@ class RelationService
      *
      * @return Collection<int, Model>
      */
-    public function candidates(User $user, array $kinds, string $query, ?Model $except = null, array $schemes = []): Collection
+    /** The entities of these kinds a relation may reach; a storage location reaches only storage places, any other relation only the other places. */
+    public function candidates(User $user, array $kinds, string $query, ?Model $except = null, array $schemes = [], ?string $type = null): Collection
     {
         $query = trim($query);
         $like = '%'.addcslashes($query, '%_\\').'%';
@@ -220,6 +238,9 @@ class RelationService
             $search = EntityKinds::existing($spec, $user->institution_id)
                 ->when($except, fn ($q) => $q->whereKeyNot($except->getKey()))
                 ->with($definition['with'])->limit(25);
+            if ($kind === 'place') {
+                app(StorageService::class)->scopeStorage($search, $user->institution_id, $type === 'location');
+            }
             if ($kind === 'concept') {
                 $search->whereHas('vocabulary.kind', fn ($q) => $q->whereIn('notation', $schemes))
                     ->when($query !== '', fn ($q) => $q->where(fn ($q) => $q

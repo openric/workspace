@@ -5,6 +5,6 @@ The local names of every class and property of the two ontologies whose terms th
 | File | Ontology | Source |
 | --- | --- | --- |
 | rico-1.1.terms | RiC-O 1.1: owl:Class, owl:ObjectProperty and owl:DatatypeProperty | https://www.ica.org/standards/RiC/ontology (RiC-O_1-1.rdf) |
-| openricx-ext.terms | OpenRiC extension ontology 1.4.0 | https://openric.org/ns/ext/v1 |
+| openricx-ext.terms | OpenRiC extension ontology 1.6.0 | https://openric.org/ns/ext/v1 |
 
 Both were extracted on 20 October 2026. Regenerate them when the Workspace moves to a new release of either ontology.

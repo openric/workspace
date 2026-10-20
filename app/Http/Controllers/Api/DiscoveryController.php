@@ -1,6 +1,6 @@
 <?php
 
-// OpenRiC Workspace - the OpenRiC read API, Core Discovery profile 0.7.0 (spec 0.54.0).
+// OpenRiC Workspace - the OpenRiC read API, Core Discovery profile 0.7.0 (spec 0.55.0).
 // Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
 // SPDX-License-Identifier: AGPL-3.0-or-later
 //

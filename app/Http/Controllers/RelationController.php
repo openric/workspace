@@ -47,7 +47,7 @@ class RelationController extends Controller
         $query = (string) $request->query('q', '');
 
         return view('relations.create', ['subject' => $subject, 'kind' => $kind, 'options' => $options, 'chosen' => $chosen, 'query' => $query,
-            'candidates' => $chosen ? $this->relations->candidates($request->user(), $chosen['kinds'], $query, $subject, $chosen['schemes']) : collect(),
+            'candidates' => $chosen ? $this->relations->candidates($request->user(), $chosen['kinds'], $query, $subject, $chosen['schemes'], $chosen['type'] ?? null) : collect(),
             'choices' => $this->choices(), 'newKinds' => $chosen ? $this->newKinds($request, $chosen) : []]);
     }
 

@@ -40,7 +40,7 @@ class DescriptionCsv
         'descriptionIdentifier' => ':description-identifier', 'institutionIdentifier' => ':institution-identifier', 'rules' => 'rules-or-conventions',
         'descriptionStatus' => ':description-status', 'levelOfDetail' => ':level-of-detail', 'revisionHistory' => 'dates-of-descriptions',
         'languageOfDescription' => ':culture', 'scriptOfDescription' => null, 'sources' => null, 'archivistNote' => 'archivists-note',
-        'publicationStatus' => ':publication-status', 'physicalObjectName' => null, 'physicalObjectLocation' => null, 'physicalObjectType' => null,
+        'publicationStatus' => ':publication-status', 'physicalObjectName' => ':physical-names', 'physicalObjectLocation' => ':physical-locations', 'physicalObjectType' => ':physical-types',
         'alternativeIdentifiers' => ':alternative-identifiers', 'alternativeIdentifierLabels' => ':alternative-identifier-labels',
         'eventDates' => ':event-dates', 'eventTypes' => ':event-types', 'eventStartDates' => ':event-start-dates', 'eventEndDates' => ':event-end-dates',
         'eventActors' => ':event-actors', 'eventActorHistories' => ':event-actor-histories', 'culture' => ':culture',
@@ -95,6 +95,7 @@ class DescriptionCsv
         $labels = fn (Collection $relations) => $relations->map(fn (Relation $r) => $view->label($r->other, $language))->filter()->join('|');
         $others = $unit->identifiers->reject(fn ($i) => $i->identifierType->notation === 'local')->values();
         $events = $this->events($unit, $view, $language);
+        $storage = $view->storage($unit);
         $title = $unit->namesOfType('authorised')->first();
 
         return [
@@ -112,6 +113,9 @@ class DescriptionCsv
             'event-start-dates' => implode('|', array_column($events, 'start')), 'event-end-dates' => implode('|', array_column($events, 'end')),
             'event-actors' => implode('|', array_column($events, 'actor')), 'event-actor-histories' => implode('|', array_column($events, 'history')),
             'iri' => $unit->iri, 'parent-iri' => $unit->parent?->iri,
+            'physical-names' => implode('|', array_column($storage, 'name')),
+            'physical-locations' => $storage === [] ? '' : implode('|', array_map(fn ($c) => $c['location'] ?? 'NULL', $storage)),
+            'physical-types' => $storage === [] ? '' : implode('|', array_map(fn ($c) => $c['type'] ?? 'NULL', $storage)),
         ];
     }
 
