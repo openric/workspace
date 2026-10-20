@@ -1,0 +1,44 @@
+# OpenRiC Workspace - OpenRiC Workspace Concept Scheme Kinds.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What the concepts of an institution's own vocabulary are (ADR 0006): each kind names the RiC-O 1.1 class its concepts are exported as and the property that links them.
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/concept-scheme-kind/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Concept Scheme Kinds"@en ;
+    dcterms:description "The kinds of vocabulary an institution keeps for its access points and types."@en ;
+    dcterms:issued "2026-10-20"^^xsd:date ;
+    skos:hasTopConcept v:subject, v:occupation-type, v:place-type, v:documentary-form-type .
+
+v:subject a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Subjects"@en ;
+    skos:scopeNote "Concepts exported as rico:Concept (and skos:Concept); a unit of description is linked to one by rico:hasOrHadSubject."@en ;
+    skos:definition "Topics that units of description are about."@en .
+
+v:occupation-type a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Occupation types"@en ;
+    skos:scopeNote "Concepts exported as rico:OccupationType; a person is linked to one by rico:hasOrHadOccupationOfType."@en ;
+    skos:definition "Professions, trades and crafts pursued by persons."@en .
+
+v:place-type a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Place types"@en ;
+    skos:scopeNote "Concepts exported as rico:PlaceType; a place is linked to one by rico:hasOrHadPlaceType."@en ;
+    skos:definition "Kinds of place, such as country, province, town or farm."@en .
+
+v:documentary-form-type a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Documentary form types"@en ;
+    skos:scopeNote "Concepts exported as rico:DocumentaryFormType; a record or record part is linked to one by rico:hasDocumentaryFormType. AtoM and Heratio call these genres."@en ;
+    skos:definition "Kinds of document, such as letters, minutes, maps or photographs."@en .

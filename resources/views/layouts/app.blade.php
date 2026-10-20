@@ -41,6 +41,8 @@
         'home' => ['Home', true],
         'repositories.index' => ['Repositories', auth()->user()->mayAnywhere('read', 'repository')],
         'records.index' => ['Archival descriptions', auth()->user()->mayAnywhere('read', 'description')],
+        'places.index' => ['Places', true],
+        'vocabularies.index' => ['Vocabularies', true],
         'accounts.index' => ['Accounts', auth()->user()->can(\App\Support\Vocab::permission('manage-accounts'))],
         'roles.index' => ['Roles', auth()->user()->can(\App\Support\Vocab::permission('manage-roles'))],
         'audit' => ['Audit log', auth()->user()->can(\App\Support\Vocab::permission('view-audit-log'))],

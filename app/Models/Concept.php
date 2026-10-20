@@ -6,21 +6,35 @@
 //
 // A concept is never deleted and its IRI never changes; the database enforces
 // both (migration 2026_10_19_000100). Code that depends on a value compares
-// the concept's IRI, never a label.
+// the concept's IRI, never a label. A concept of an institution's own
+// vocabulary (institution_id set) is an entity of that institution: its
+// changes are audited, and relations may point at it (ADR 0006).
 
 namespace App\Models;
 
+use App\Audit\Audited;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class Concept extends Model
 {
-    use HasUuids;
+    use Audited, HasUuids;
 
-    protected $fillable = ['vocabulary_id', 'iri', 'notation', 'broader_id', 'deprecated_at', 'replaced_by_id'];
+    /** The URL path segment of a local concept's persistent IRI: {base IRI}/concept/{UUID}. */
+    public const IRI_SEGMENT = 'concept';
+
+    protected $fillable = ['vocabulary_id', 'institution_id', 'iri', 'notation', 'broader_id', 'deprecated_at', 'replaced_by_id'];
+
+    /** Only an institution's own concepts; bundled vocabularies are loaded by the importer. */
+    public function isAudited(): bool
+    {
+        return $this->institution_id !== null;
+    }
 
     protected function casts(): array
     {
@@ -47,6 +61,41 @@ class Concept extends Model
         return $this->hasMany(ConceptLabel::class);
     }
 
+    public function narrower(): HasMany
+    {
+        return $this->hasMany(self::class, 'broader_id');
+    }
+
+    public function altLabels(): HasMany
+    {
+        return $this->hasMany(ConceptAltLabel::class)->orderBy('language')->orderBy('label');
+    }
+
+    public function matches(): HasMany
+    {
+        return $this->hasMany(ConceptMatch::class)->orderBy('target_iri');
+    }
+
+    /** @return Collection<int, self> the related concepts (skos:related), kept once for each pair */
+    public function related(): Collection
+    {
+        $ids = DB::table('concept_related')->where('concept_id', $this->id)->pluck('related_id')
+            ->merge(DB::table('concept_related')->where('related_id', $this->id)->pluck('concept_id'));
+
+        return self::whereKey($ids)->with('labels', 'vocabulary')->get();
+    }
+
+    /** @return list<self> the broader concepts, the broadest first */
+    public function ancestors(): array
+    {
+        $chain = [];
+        for ($concept = $this->broader; $concept !== null; $concept = $concept->broader) {
+            array_unshift($chain, $concept);
+        }
+
+        return $chain;
+    }
+
     /** Concepts that may be chosen for new data. */
     public function scopeCurrent(Builder $query): Builder
     {
@@ -70,5 +119,11 @@ class Concept extends Model
         }
 
         return null;
+    }
+
+    /** The label in the first of the given languages that has one, else any label, else the notation. */
+    public function anyLabel(array $languages): string
+    {
+        return $this->label($languages) ?? $this->labels->first()?->pref_label ?? (string) $this->notation;
     }
 }

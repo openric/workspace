@@ -5,7 +5,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 //
 // Each element is a concept whose broader concept is its standard (isdiah,
-// isad-g); the grouping is data, never a list in code.
+// isad-g) or its kind of entity (place); the grouping is data, never a list
+// in code.
 
 namespace App\Description;
 
@@ -18,6 +19,9 @@ final class Elements
     public const ISDIAH = 'isdiah';
 
     public const ISAD_G = 'isad-g';
+
+    /** A place: no ICA standard covers it, so its elements have no numbers and one heading. */
+    public const PLACE = 'place';
 
     /** @var array<string, Collection<int, Concept>> */
     private static array $cache = [];
@@ -74,7 +78,7 @@ final class Elements
         foreach (self::of($standard) as $element) {
             $number = self::number($element);
             $area = $number ? implode('.', array_slice(explode('.', $number), 0, 2)) : null;
-            $heading = $area ? ($area.' '.(self::AREAS[$area] ?? '')) : 'Other';
+            $heading = $area ? ($area.' '.(self::AREAS[$area] ?? '')) : 'Description';
             $areas[$heading] ??= new Collection;
             $areas[$heading]->push($element);
         }

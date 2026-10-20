@@ -20,19 +20,28 @@
 
     @if($chosen)
         <h2>Results</h2>
-        @if($candidates->isEmpty())
+        @if($candidates->isEmpty() && $newKinds === [])
             <p>Nothing found. Try part of a name or an identifier.</p>
         @else
         <form method="post" action="{{ route('relations.store', [$kind, $subject->getKey()]) }}">
             @csrf
             <input type="hidden" name="relate" value="{{ $chosen['type'].'|'.$chosen['side'] }}">
             <fieldset style="border: 0; padding: 0"><legend>{{ $name }} {{ $chosen['phrase'] }}</legend>
+                @if($candidates->isEmpty())<p>Nothing found by that name.</p>@endif
                 @foreach($candidates as $candidate)
-                    @php($candidateKind = \App\Relations\EntityKinds::of($candidate))
-                    <label><input type="radio" name="other" value="{{ $candidateKind.':'.$candidate->getKey() }}" required @checked($loop->first)>
-                        {{ \App\Relations\EntityKinds::label($candidate) }}@if($candidate->identifier) ({{ $candidate->identifier }})@endif, {{ $candidateKind === 'record' ? 'unit of description' : $candidateKind }}</label>
+                    <label><input type="radio" name="other" value="{{ \App\Relations\EntityKinds::of($candidate).':'.$candidate->getKey() }}" required @checked($loop->first)>
+                        {{ \App\Relations\EntityKinds::label($candidate) }}@if($candidate->identifier) ({{ $candidate->identifier }})@endif, {{ \App\Relations\EntityKinds::noun($candidate) }}</label>
+                @endforeach
+                @foreach($newKinds as $new)
+                    <label><input type="radio" name="other" value="{{ $new['value'] }}" required @checked($candidates->isEmpty() && $loop->first)> Make {{ $new['label'] }}, named below</label>
                 @endforeach
             </fieldset>
+            @if($newKinds !== [])
+                <label for="new_name">Name of the new place or concept</label>
+                <input id="new_name" name="new_name" value="{{ old('new_name', $query) }}" maxlength="1024">
+                <label for="new_language">Language of the name (BCP 47)</label>
+                <input id="new_language" name="new_language" value="{{ old('new_language', 'en') }}" maxlength="35">
+            @endif
             @include('description._relation-fields', ['prefix' => 'new', 'relation' => null, 'withRole' => (bool) (config('workspace.relation_types.'.$chosen['type'])['role'] ?? false)])
             <label for="basis">On what basis do you assert it (optional)</label>
             <textarea id="basis" name="basis" rows="2" style="width: 100%; font: inherit; box-sizing: border-box">{{ old('basis') }}</textarea>

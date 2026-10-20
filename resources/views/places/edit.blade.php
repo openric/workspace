@@ -1,0 +1,31 @@
+{{-- OpenRiC Workspace - describe a place. Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems. SPDX-License-Identifier: AGPL-3.0-or-later --}}
+@extends('layouts.app')
+@section('title', 'Describe place')
+@section('content')
+    <p><a href="{{ route('places.show', $place) }}">Back to the place</a></p>
+    <h1>Describe {{ $place->described('place-name', [$language, 'en']) }}</h1>
+    <p>Values in <strong>{{ $language }}</strong>. Fill in what you know; empty fields are left out. A value you change goes back to draft.</p>
+    <form method="post" action="{{ route('places.update', $place) }}">
+        @csrf
+        @if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif
+        <label for="language">Language of these values (BCP 47)</label>
+        <input id="language" name="language" required value="{{ old('language', $language) }}">
+        @include('description._fields', ['subject' => $place, 'standard' => \App\Description\Elements::PLACE, 'language' => $language])
+        <fieldset style="margin-top: 1.5rem; border: 1px solid var(--line); padding: 0 1rem 1rem">
+            <legend><strong>Type and location</strong></legend>
+            <label for="place_type">Place type (rico:hasOrHadPlaceType)</label>
+            <select id="place_type" name="place_type" style="font: inherit; padding: .5rem">
+                <option value="">Not set</option>
+                @foreach($types as $type)<option value="{{ $type->id }}" @selected(old('place_type', $place->place_type_id) === $type->id)>{{ $type->anyLabel(['en']) }} ({{ $type->vocabulary->title }})</option>@endforeach
+            </select>
+            @if($types->isEmpty())<small>The institution has no place types yet; add them under <a href="{{ route('vocabularies.index') }}">Vocabularies</a>.</small>@endif
+            <label for="latitude">Latitude (decimal degrees, WGS 84, -90 to 90)</label>
+            <input id="latitude" name="latitude" inputmode="decimal" value="{{ old('latitude', $place->latitude) }}">
+            <label for="longitude">Longitude (decimal degrees, -180 to 180)</label>
+            <input id="longitude" name="longitude" inputmode="decimal" value="{{ old('longitude', $place->longitude) }}">
+            <label for="altitude">Altitude (metres above sea level, optional)</label>
+            <input id="altitude" name="altitude" inputmode="decimal" value="{{ old('altitude', $place->altitude) }}">
+        </fieldset>
+        <button type="submit">Save</button>
+    </form>
+@endsection

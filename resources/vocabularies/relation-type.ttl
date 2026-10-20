@@ -13,7 +13,7 @@ v: a skos:ConceptScheme ;
     dcterms:title "OpenRiC Workspace Relation Types"@en ;
     dcterms:description "What kind of relation connects two entities."@en ;
     dcterms:issued "2026-10-20"^^xsd:date ;
-    skos:hasTopConcept v:associated-record, v:genetic, v:sequential, v:holding, v:creation, v:accumulation, v:management, v:ownership, v:agent-hierarchical, v:agent-temporal, v:agent-control, v:agent-associated .
+    skos:hasTopConcept v:associated-record, v:genetic, v:sequential, v:holding, v:creation, v:accumulation, v:management, v:ownership, v:agent-hierarchical, v:agent-temporal, v:agent-control, v:agent-associated, v:subject, v:place, v:place-containment .
 
 v:associated-record a skos:Concept ;
     skos:inScheme v: ;
@@ -98,3 +98,24 @@ v:agent-associated a skos:Concept ;
     skos:prefLabel "Associated agents"@en ;
     skos:scopeNote "Exported as a rico:AgentToAgentRelation, linked by rico:agentToAgentRelation_role; shortcut rico:isAgentAssociatedWithAgent (symmetric). ISAAR(CPF) 5.3.2."@en ;
     skos:definition "Two agents that are or were associated."@en .
+
+v:subject a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Subject"@en ;
+    skos:scopeNote "Shortcut rico:hasOrHadSubject, inverse rico:isOrWasSubjectOf. RiC-O 1.1 has no Relation subclass for it; with its assertions, dates or evidence it is exported as a rico:Relation (rico:relation_role). Subject access points of ISAD(G) 3.1 and AtoM."@en ;
+    skos:definition "A record resource is or was about a thing: a subject concept, a place or an agent."@en .
+
+v:place a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Place"@en ;
+    skos:scopeNote "Exported as a rico:PlaceRelation, linked by rico:placeRelation_role; shortcut rico:isPlaceAssociatedWith, inverse rico:isAssociatedWithPlace. Place access points of AtoM."@en ;
+    skos:definition "A place is associated with the existence and lifecycle of a thing, such as a unit of description or an agent."@en .
+
+v:place-containment a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Place containment"@en ;
+    skos:scopeNote "Shortcut rico:containsOrContained, inverse rico:isOrWasContainedBy. RiC-O 1.1 has no Relation subclass for it; with its dates and assertions it is exported as a rico:Relation (rico:relation_role). The place a place lies in now is kept on the place itself; this records containment with its dates, such as a former one."@en ;
+    skos:definition "A place contains or contained another, such as a district a farm lay in before a boundary changed."@en .

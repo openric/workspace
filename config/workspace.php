@@ -15,7 +15,7 @@ return [
     'audit_signing_key' => env('WORKSPACE_AUDIT_SIGNING_KEY', storage_path('keys/audit-signing.sk')),
 
     // The Workspace's own vocabularies, bundled with the code (resources/vocabularies).
-    'bundled_vocabularies' => ['account-role.ttl', 'permission.ttl', 'audit-action.ttl', 'description-element.ttl', 'language-value-state.ttl', 'description-status.ttl', 'description-detail.ttl', 'level-of-description.ttl', 'record-kind.ttl', 'date-property.ttl', 'date-qualifier.ttl', 'name-type.ttl', 'identifier-type.ttl', 'relation-type.ttl', 'relation-state.ttl', 'relation-certainty.ttl', 'assertion-origin.ttl', 'assertion-status.ttl'],
+    'bundled_vocabularies' => ['account-role.ttl', 'permission.ttl', 'audit-action.ttl', 'description-element.ttl', 'language-value-state.ttl', 'description-status.ttl', 'description-detail.ttl', 'level-of-description.ttl', 'record-kind.ttl', 'date-property.ttl', 'date-qualifier.ttl', 'name-type.ttl', 'identifier-type.ttl', 'relation-type.ttl', 'relation-state.ttl', 'relation-certainty.ttl', 'assertion-origin.ttl', 'assertion-status.ttl', 'concept-scheme-kind.ttl', 'concept-match-type.ttl'],
 
     // The shape of the permission matrix: for each kind of record (record-kind
     // vocabulary), the actions that apply to it (permission vocabulary), as
@@ -27,14 +27,15 @@ return [
         'vocabulary' => ['create', 'update', 'delete'],
     ],
 
-    // Which date properties (date-property vocabulary) each kind of entity offers on
-    // screen, in this order (ADR 0006). The store accepts any of them.
+    // Which date properties (date-property vocabulary) each kind of entity (App\Relations\EntityKinds,
+    // and names and relations) offers on screen, in this order (ADR 0006). The store accepts any of them.
     'date_properties' => [
-        'description' => ['creation', 'accumulation', 'associated'],
+        'record' => ['creation', 'accumulation', 'associated'],
         'agent' => ['existence', 'birth', 'death', 'associated'],
         'repository' => ['existence', 'associated'],
         'name' => ['used-from', 'used-to'],
         'relation' => ['beginning', 'end', 'relation'],
+        'place' => ['existence', 'associated'],
     ],
 
     // Which kinds of entity each relation type (relation-type vocabulary) connects,
@@ -42,7 +43,9 @@ return [
     // (relation_kind_groups). symmetric: the order of the two carries no meaning.
     // role: the relation may carry an agent role (OpenRiC role-type vocabulary).
     // forward and inverse: how the relation reads from its source and from its
-    // target, on screen.
+    // target, on screen. schemes: a concept at either end must be in a vocabulary
+    // of one of these kinds (concept-scheme-kind vocabulary). access_point: the
+    // relation is shown with the access points of a page, not with its relations.
     'relation_kind_groups' => [
         'agent' => ['repository'],
     ],
@@ -59,6 +62,18 @@ return [
         'agent-temporal' => ['pairs' => [['agent', 'agent']], 'forward' => 'was succeeded by', 'inverse' => 'succeeded'],
         'agent-control' => ['pairs' => [['agent', 'agent']], 'forward' => 'controls or controlled', 'inverse' => 'is or was controlled by'],
         'agent-associated' => ['pairs' => [['agent', 'agent']], 'symmetric' => true, 'forward' => 'is or was associated with', 'inverse' => 'is or was associated with'],
+        'subject' => ['pairs' => [['record', 'concept'], ['record', 'place'], ['record', 'agent']], 'schemes' => ['subject'], 'access_point' => true, 'forward' => 'is or was about', 'inverse' => 'is or was the subject of'],
+        'place' => ['pairs' => [['place', 'record'], ['place', 'agent']], 'access_point' => true, 'forward' => 'is associated with', 'inverse' => 'is associated with the place'],
+        'place-containment' => ['pairs' => [['place', 'place']], 'forward' => 'contains or contained', 'inverse' => 'lies or lay in'],
+    ],
+
+    // The RiC-O 1.1 class the concepts of each kind of local vocabulary (concept-scheme-kind
+    // vocabulary) are exported as, beside skos:Concept.
+    'scheme_kinds' => [
+        'subject' => 'https://www.ica.org/standards/RiC/ontology#Concept',
+        'occupation-type' => 'https://www.ica.org/standards/RiC/ontology#OccupationType',
+        'place-type' => 'https://www.ica.org/standards/RiC/ontology#PlaceType',
+        'documentary-form-type' => 'https://www.ica.org/standards/RiC/ontology#DocumentaryFormType',
     ],
 
     // Description elements that are names (ADR 0006): what the description form
@@ -70,6 +85,9 @@ return [
         'authorised-name' => 'authorised',
         'parallel-name' => 'parallel',
         'other-name' => 'other',
+        'place-name' => 'authorised',
+        'place-parallel-name' => 'parallel',
+        'place-other-name' => 'other',
     ],
 
     // The roles a new institution starts with, by account-role template, with

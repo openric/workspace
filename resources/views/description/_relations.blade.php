@@ -1,9 +1,17 @@
 {{-- OpenRiC Workspace - the relations of a described entity, with their assertions and evidence (ADR 0006, WS-006). Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems. SPDX-License-Identifier: AGPL-3.0-or-later --}}
 {{-- Needs: $subject, $kind (URL segment), $relations (RelationService::of), $canUpdate. Without update, only accepted and disputed relations show. --}}
+{{-- Optional: $heading; $types, the relation types to show (default: all but access points, config workspace.relation_types); $section, a prefix that keeps
+     element ids apart when the partial is included more than once; $add, the relate value (type|side) the add link starts from; $addLabel. --}}
 @php($choices = \App\Http\Controllers\RelationController::choices())
 @php($standingLabels = ['accepted' => 'accepted', 'disputed' => 'disputed', 'proposed' => 'proposed, awaiting review', 'rejected' => 'rejected'])
-<h2>Relations</h2>
-@php($shown = $relations->filter(fn ($r) => $canUpdate || in_array($r->standing(), ['accepted', 'disputed'], true)))
+@php($heading ??= 'Relations')
+@php($types ??= null)
+@php($section ??= 'rel')
+@php($add ??= null)
+@php($addLabel ??= 'Add a relation')
+<h2>{{ $heading }}</h2>
+@php($shown = $relations->filter(fn ($r) => $types === null ? ! (config('workspace.relation_types.'.$r->relationType->notation)['access_point'] ?? false) : in_array($r->relationType->notation, $types, true))
+    ->filter(fn ($r) => $canUpdate || in_array($r->standing(), ['accepted', 'disputed'], true)))
 @forelse($shown as $relation)
     @php($from = $relation->datedAs('beginning')?->normalized_value)
     @php($to = $relation->datedAs('end')?->normalized_value)
@@ -53,12 +61,12 @@
                         <label><input type="radio" name="holds" value="yes" checked> Yes, I assert it</label>
                         <label><input type="radio" name="holds" value="no"> No, I dispute it</label>
                     </fieldset>
-                    <label for="a{{ $loop->index }}-basis">On what basis (optional)</label>
-                    <textarea id="a{{ $loop->index }}-basis" name="basis" rows="2" style="width: 100%; font: inherit; box-sizing: border-box"></textarea>
-                    <label for="a{{ $loop->index }}-language">Language of the basis (BCP 47)</label>
-                    <input id="a{{ $loop->index }}-language" name="basis_language" maxlength="35" placeholder="en">
-                    <label for="a{{ $loop->index }}-supersedes">Supersedes (optional)</label>
-                    <select id="a{{ $loop->index }}-supersedes" name="supersedes" style="font: inherit; padding: .5rem">
+                    <label for="{{ $section }}a{{ $loop->index }}-basis">On what basis (optional)</label>
+                    <textarea id="{{ $section }}a{{ $loop->index }}-basis" name="basis" rows="2" style="width: 100%; font: inherit; box-sizing: border-box"></textarea>
+                    <label for="{{ $section }}a{{ $loop->index }}-language">Language of the basis (BCP 47)</label>
+                    <input id="{{ $section }}a{{ $loop->index }}-language" name="basis_language" maxlength="35" placeholder="en">
+                    <label for="{{ $section }}a{{ $loop->index }}-supersedes">Supersedes (optional)</label>
+                    <select id="{{ $section }}a{{ $loop->index }}-supersedes" name="supersedes" style="font: inherit; padding: .5rem">
                         <option value="">Nothing; it stands beside the others</option>
                         @foreach($relation->currentAssertions() as $assertion)<option value="{{ $assertion->id }}">{{ $assertion->asserter() }}, {{ $assertion->asserted_at->format('Y-m-d H:i') }}</option>@endforeach
                     </select>
@@ -69,7 +77,7 @@
                 <summary>Edit what is said about it</summary>
                 <form method="post" action="{{ route('relations.update', [$kind, $subject->getKey(), $relation]) }}">
                     @csrf
-                    @include('description._relation-fields', ['prefix' => 'r'.$loop->index, 'relation' => $relation,
+                    @include('description._relation-fields', ['prefix' => $section.'r'.$loop->index, 'relation' => $relation,
                         'withRole' => (bool) (config('workspace.relation_types.'.$relation->relationType->notation)['role'] ?? false)])
                     <button type="submit">Save relation</button>
                 </form>
@@ -83,4 +91,4 @@
 @empty
     <p>None yet.</p>
 @endforelse
-@if($canUpdate)<p><a href="{{ route('relations.create', [$kind, $subject->getKey()]) }}">Add a relation</a></p>@endif
+@if($canUpdate)<p><a href="{{ route('relations.create', [$kind, $subject->getKey(), ...($add ? ['relate' => $add] : [])]) }}">{{ $addLabel }}</a></p>@endif

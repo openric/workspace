@@ -34,6 +34,10 @@ final class Vocab
 
     public const IDENTIFIER_TYPES = self::BASE.'identifier-type/';
 
+    public const SCHEME_KINDS = self::BASE.'concept-scheme-kind/';
+
+    public const MATCH_TYPES = self::BASE.'concept-match-type/';
+
     public static function role(string $notation): string
     {
         return self::ACCOUNT_ROLES.$notation;

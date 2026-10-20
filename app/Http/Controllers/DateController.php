@@ -13,6 +13,7 @@ namespace App\Http\Controllers;
 use App\Description\DateService;
 use App\Http\Controllers\Concerns\ResolvesDescribedEntity;
 use App\Models\RicDate;
+use App\Relations\EntityKinds;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use InvalidArgumentException;
@@ -59,7 +60,7 @@ class DateController extends Controller
 
     private function fields(Request $request, string $kind): array
     {
-        $properties = config('workspace.date_properties.'.$this->recordKind($kind));
+        $properties = config('workspace.date_properties.'.EntityKinds::bySegment($kind), []);
 
         return $request->validate([
             'property' => ['required', 'string', 'in:'.implode(',', $properties)],

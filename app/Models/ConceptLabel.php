@@ -15,7 +15,7 @@ class ConceptLabel extends Model
 
     public $incrementing = false;
 
-    protected $fillable = ['concept_id', 'language', 'pref_label', 'definition', 'scope_note'];
+    protected $fillable = ['concept_id', 'language', 'pref_label', 'definition', 'scope_note', 'history_note', 'source_note', 'display_note'];
 
     public function concept(): BelongsTo
     {

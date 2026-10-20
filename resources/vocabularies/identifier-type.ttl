@@ -13,7 +13,7 @@ v: a skos:ConceptScheme ;
     dcterms:title "OpenRiC Workspace Identifier Types"@en ;
     dcterms:description "What kind of identifier an identifier is."@en ;
     dcterms:issued "2026-10-20"^^xsd:date ;
-    skos:hasTopConcept v:local, v:isil, v:previous, v:other .
+    skos:hasTopConcept v:local, v:isil, v:previous, v:gazetteer, v:other .
 
 v:local a skos:Concept ;
     skos:inScheme v: ;
@@ -42,3 +42,10 @@ v:other a skos:Concept ;
     skos:prefLabel "Other identifier"@en ;
     skos:scopeNote "Exported as a rico:Identifier with rico:hasIdentifierType."@en ;
     skos:definition "Any other identifier, such as one given by another system."@en .
+
+v:gazetteer a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Gazetteer identifier"@en ;
+    skos:scopeNote "Exported as a rico:Identifier with rico:hasIdentifierType."@en ;
+    skos:definition "The identifier of a place in a gazetteer, such as GeoNames, the Getty Thesaurus of Geographic Names or Wikidata."@en .

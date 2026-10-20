@@ -16,6 +16,10 @@
     @include('description._names', ['subject' => $repository, 'kind' => 'repositories', 'canUpdate' => $canUpdate])
     @include('description._identifiers', ['subject' => $repository, 'kind' => 'repositories', 'canUpdate' => $canUpdate])
     @include('description._relations', ['subject' => $repository, 'kind' => 'repositories', 'relations' => $relations, 'canUpdate' => $canUpdate])
+    @include('description._relations', ['subject' => $repository, 'kind' => 'repositories', 'relations' => $relations, 'canUpdate' => $canUpdate,
+        'heading' => 'Place access points', 'types' => ['place'], 'section' => 'pl', 'add' => 'place|target', 'addLabel' => 'Add a place'])
+    @include('description._relations', ['subject' => $repository, 'kind' => 'repositories', 'relations' => $relations, 'canUpdate' => $canUpdate,
+        'heading' => 'Units of description about it', 'types' => ['subject'], 'section' => 'su', 'add' => 'subject|target', 'addLabel' => 'Add a unit of description about it'])
     @include('description._dates', ['subject' => $repository, 'kind' => 'repositories', 'heading' => 'Dates', 'canUpdate' => $canUpdate, 'choices' => $dateChoices])
 
     <h2>Contact points</h2>

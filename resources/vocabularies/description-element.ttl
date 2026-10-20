@@ -13,7 +13,7 @@ v: a skos:ConceptScheme ;
     dcterms:title "OpenRiC Workspace Description Elements"@en ;
     dcterms:description "Elements of archival description, grouped under the ICA standard they come from. Only the elements, not the groups, are values of a description."@en ;
     dcterms:issued "2026-10-19"^^xsd:date ;
-    skos:hasTopConcept v:isdiah, v:isad-g .
+    skos:hasTopConcept v:isdiah, v:isad-g, v:place .
 
 v:authorised-name a skos:Concept ;
     skos:inScheme v: ;
@@ -327,3 +327,45 @@ v:dates-of-descriptions a skos:Concept ;
     skos:prefLabel "Dates of descriptions"@en ;
     skos:scopeNote "ISAD(G) 3.7.3."@en ;
     skos:definition "When the description was prepared or revised."@en .
+
+v:place a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Place"@en ;
+    skos:scopeNote "The elements of a place (rico:Place, RiC-CM 1.0). No ICA description standard covers places."@en ;
+    skos:definition "The elements a place is described with."@en .
+
+v:place-name a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:place ;
+    skos:prefLabel "Authorised name"@en ;
+    skos:scopeNote "Kept as a rico:PlaceName entity of name type authorised, one in each language (rico:hasOrHadPlaceName)."@en ;
+    skos:definition "The name by which the place is known in this institution's descriptions."@en .
+
+v:place-parallel-name a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:place ;
+    skos:prefLabel "Parallel name"@en ;
+    skos:scopeNote "Kept as rico:PlaceName entities of name type parallel."@en ;
+    skos:definition "The authorised name in another language or script, one per line."@en .
+
+v:place-other-name a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:place ;
+    skos:prefLabel "Other name"@en ;
+    skos:scopeNote "Kept as rico:PlaceName entities of name type other; the dates each was used are kept with the name."@en ;
+    skos:definition "Any other name the place has or had, such as an earlier name, one per line."@en .
+
+v:place-description a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:place ;
+    skos:prefLabel "Description"@en ;
+    skos:scopeNote "Exported as rico:generalDescription."@en ;
+    skos:definition "General information about the place."@en .
+
+v:place-history a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:place ;
+    skos:prefLabel "History"@en ;
+    skos:scopeNote "Exported as rico:history."@en ;
+    skos:definition "How the place developed over time, such as changes of boundary or jurisdiction."@en .

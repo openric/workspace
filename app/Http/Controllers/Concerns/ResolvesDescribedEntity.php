@@ -20,22 +20,17 @@ trait ResolvesDescribedEntity
      */
     private function subject(Request $request, string $segment, string $id): array
     {
-        [$class, , $permissionKind, $route] = EntityKinds::get(EntityKinds::bySegment($segment) ?? '') ?? abort(404);
-        $subject = $class::find($id);
-        abort_unless($subject && $subject->institution_id === $request->user()->institution_id && $subject->deleted_at === null, 404);
-        abort_unless($request->user()->may('update', $permissionKind, $subject), 403);
+        $kind = EntityKinds::bySegment($segment) ?? abort(404);
+        $definition = EntityKinds::get($kind);
+        $subject = EntityKinds::existing($kind, $request->user()->institution_id)->find($id) ?? abort(404);
+        abort_unless($request->user()->may('update', $definition['permission'], $subject), 403);
 
-        return [$subject, $route];
+        return [$subject, $definition['route']];
     }
 
     /** A part reached through the wrong entity does not exist (404). */
     private function belongs(Model $subject, Model $part): void
     {
         abort_unless($part->getAttribute('subject_table') === $subject->getTable() && $part->getAttribute('subject_id') === $subject->getKey(), 404);
-    }
-
-    private function recordKind(string $segment): string
-    {
-        return EntityKinds::get(EntityKinds::bySegment($segment))[2];
     }
 }

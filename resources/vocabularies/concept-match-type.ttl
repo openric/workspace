@@ -1,0 +1,51 @@
+# OpenRiC Workspace - OpenRiC Workspace Concept Match Types.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# How a concept of an institution's vocabulary corresponds to a concept in another vocabulary, such as LCSH, AAT or Wikidata (SKOS mapping properties).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/concept-match-type/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Concept Match Types"@en ;
+    dcterms:description "The SKOS mapping property between a concept and one in another vocabulary."@en ;
+    dcterms:issued "2026-10-20"^^xsd:date ;
+    skos:hasTopConcept v:exact, v:close, v:broad, v:narrow, v:related .
+
+v:exact a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Exact match"@en ;
+    skos:scopeNote "Exported as skos:exactMatch."@en ;
+    skos:definition "The two concepts can be used interchangeably."@en .
+
+v:close a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Close match"@en ;
+    skos:scopeNote "Exported as skos:closeMatch."@en ;
+    skos:definition "The two concepts are similar enough to be used interchangeably in some applications."@en .
+
+v:broad a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Broader match"@en ;
+    skos:scopeNote "Exported as skos:broadMatch."@en ;
+    skos:definition "The other concept is broader than this one."@en .
+
+v:narrow a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Narrower match"@en ;
+    skos:scopeNote "Exported as skos:narrowMatch."@en ;
+    skos:definition "The other concept is narrower than this one."@en .
+
+v:related a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Related match"@en ;
+    skos:scopeNote "Exported as skos:relatedMatch."@en ;
+    skos:definition "The two concepts are associated."@en .

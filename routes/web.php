@@ -10,10 +10,13 @@
 
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\AuditLogController;
+use App\Http\Controllers\ConceptController;
 use App\Http\Controllers\DateController;
 use App\Http\Controllers\IdentifierController;
+use App\Http\Controllers\LocalVocabularyController;
 use App\Http\Controllers\NameController;
 use App\Http\Controllers\PasswordController;
+use App\Http\Controllers\PlaceController;
 use App\Http\Controllers\RecordController;
 use App\Http\Controllers\RelationController;
 use App\Http\Controllers\RepositoryController;
@@ -21,6 +24,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\VocabularyController;
+use App\Relations\EntityKinds;
 use App\Support\Vocab;
 use Illuminate\Support\Facades\Route;
 
@@ -34,6 +38,9 @@ Route::pattern('record', '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-
 Route::pattern('date', '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}');
 Route::pattern('contact', '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}');
 Route::pattern('repository', '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}');
+foreach (['place', 'vocabulary', 'concept', 'other', 'match'] as $parameter) {
+    Route::pattern($parameter, '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}');
+}
 
 Route::get('/vocab/{scheme}.ttl', [VocabularyController::class, 'turtleFile'])->where('scheme', '[a-z-]+');
 Route::get('/vocab/{scheme}', [VocabularyController::class, 'scheme'])->where('scheme', '[a-z-]+');
@@ -82,14 +89,55 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::post('/{record}/reorder', [RecordController::class, 'reorder'])->name('reorder');
     });
 
+    // Places and the institution's own vocabularies (ADR 0006): any account of the institution reads them;
+    // each controller checks the vocabulary permissions for changes.
+    Route::prefix('places')->name('places.')->group(function () {
+        Route::get('/', [PlaceController::class, 'index'])->name('index');
+        Route::get('/new', [PlaceController::class, 'create'])->name('create');
+        Route::post('/', [PlaceController::class, 'store'])->name('store');
+        Route::get('/{place}', [PlaceController::class, 'show'])->name('show');
+        Route::get('/{place}/edit', [PlaceController::class, 'edit'])->name('edit');
+        Route::post('/{place}', [PlaceController::class, 'update'])->name('update');
+        Route::get('/{place}/move', [PlaceController::class, 'moveForm'])->name('move-form');
+        Route::post('/{place}/move', [PlaceController::class, 'move'])->name('move');
+        Route::post('/{place}/remove', [PlaceController::class, 'destroy'])->name('destroy');
+    });
+    Route::prefix('vocabularies')->name('vocabularies.')->group(function () {
+        Route::get('/', [LocalVocabularyController::class, 'index'])->name('index');
+        Route::get('/new', [LocalVocabularyController::class, 'create'])->name('create');
+        Route::post('/', [LocalVocabularyController::class, 'store'])->name('store');
+        Route::get('/{vocabulary}', [LocalVocabularyController::class, 'show'])->name('show');
+        Route::get('/{vocabulary}/edit', [LocalVocabularyController::class, 'edit'])->name('edit');
+        Route::post('/{vocabulary}', [LocalVocabularyController::class, 'update'])->name('update');
+        Route::get('/{vocabulary}/export/{format}', [LocalVocabularyController::class, 'export'])->where('format', 'turtle|rdfxml|ntriples|jsonld')->name('export');
+        Route::get('/{vocabulary}/import', [LocalVocabularyController::class, 'importForm'])->name('import-form');
+        Route::post('/{vocabulary}/import', [LocalVocabularyController::class, 'import'])->name('import');
+        Route::get('/{vocabulary}/concepts/new', [LocalVocabularyController::class, 'createConcept'])->name('concepts.create');
+        Route::post('/{vocabulary}/concepts', [LocalVocabularyController::class, 'storeConcept'])->name('concepts.store');
+    });
+    Route::prefix('concepts')->name('concepts.')->group(function () {
+        Route::get('/{concept}', [ConceptController::class, 'show'])->name('show');
+        Route::get('/{concept}/edit', [ConceptController::class, 'edit'])->name('edit');
+        Route::post('/{concept}', [ConceptController::class, 'update'])->name('update');
+        Route::post('/{concept}/related', [ConceptController::class, 'relate'])->name('related.store');
+        Route::post('/{concept}/related/{other}/remove', [ConceptController::class, 'unrelate'])->name('related.destroy');
+        Route::post('/{concept}/matches', [ConceptController::class, 'addMatch'])->name('matches.store');
+        Route::post('/{concept}/matches/{match}/remove', [ConceptController::class, 'removeMatch'])->name('matches.destroy');
+        Route::post('/{concept}/move', [ConceptController::class, 'move'])->name('move');
+        Route::post('/{concept}/merge', [ConceptController::class, 'merge'])->name('merge');
+        Route::post('/{concept}/deprecate', [ConceptController::class, 'deprecate'])->name('deprecate');
+        Route::post('/{concept}/restore', [ConceptController::class, 'restore'])->name('restore');
+    });
+
     Route::middleware('can:'.Vocab::permission('manage-institution'))->group(function () {
         Route::get('/settings', [SettingsController::class, 'edit'])->name('settings.edit');
         Route::post('/settings', [SettingsController::class, 'update'])->name('settings.update');
     });
 
     // Dates, names and identifiers of any described entity (ADR 0006); each controller checks update on the entity.
+    // A concept has labels instead (ConceptController).
     foreach (['dates' => [DateController::class, 'date'], 'names' => [NameController::class, 'name'], 'identifiers' => [IdentifierController::class, 'identifier']] as $part => [$controller, $parameter]) {
-        Route::prefix("{kind}/{id}/$part")->where(['kind' => 'records|repositories', 'id' => '[0-9a-f-]{36}', $parameter => '[0-9a-f-]{36}'])->name("$part.")
+        Route::prefix("{kind}/{id}/$part")->where(['kind' => 'records|repositories|places', 'id' => '[0-9a-f-]{36}', $parameter => '[0-9a-f-]{36}'])->name("$part.")
             ->group(function () use ($controller, $parameter) {
                 Route::post('/', [$controller, 'store'])->name('store');
                 Route::post("/{{$parameter}}", [$controller, 'update'])->name('update');
@@ -98,7 +146,7 @@ Route::middleware(['auth', 'active'])->group(function () {
     }
 
     // Relations of any described entity, their assertions and evidence (ADR 0006, WS-006).
-    Route::prefix('{kind}/{id}/relations')->where(['kind' => 'records|repositories', 'id' => '[0-9a-f-]{36}', 'relation' => '[0-9a-f-]{36}',
+    Route::prefix('{kind}/{id}/relations')->where(['kind' => EntityKinds::segments(), 'id' => '[0-9a-f-]{36}', 'relation' => '[0-9a-f-]{36}',
         'assertion' => '[0-9a-f-]{36}', 'evidence' => '[0-9a-f-]{36}'])->name('relations.')->group(function () {
             Route::get('/new', [RelationController::class, 'create'])->name('create');
             Route::post('/', [RelationController::class, 'store'])->name('store');

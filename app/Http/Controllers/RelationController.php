@@ -9,17 +9,22 @@
 
 namespace App\Http\Controllers;
 
+use App\Description\PlaceService;
 use App\Http\Controllers\Concerns\ResolvesDescribedEntity;
 use App\Models\Concept;
 use App\Models\Relation;
 use App\Models\RelationAssertion;
 use App\Models\RelationEvidence;
+use App\Models\Vocabulary;
 use App\Relations\EntityKinds;
 use App\Relations\RelationService;
+use App\Support\Vocab;
+use App\Vocabulary\ConceptService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use InvalidArgumentException;
@@ -39,8 +44,8 @@ class RelationController extends Controller
         $query = (string) $request->query('q', '');
 
         return view('relations.create', ['subject' => $subject, 'kind' => $kind, 'options' => $options, 'chosen' => $chosen, 'query' => $query,
-            'candidates' => $chosen ? $this->relations->candidates($request->user(), $chosen['kinds'], $query, $subject) : collect(),
-            'choices' => $this->choices()]);
+            'candidates' => $chosen ? $this->relations->candidates($request->user(), $chosen['kinds'], $query, $subject, $chosen['schemes']) : collect(),
+            'choices' => $this->choices(), 'newKinds' => $chosen ? $this->newKinds($request, $chosen) : []]);
     }
 
     public function store(Request $request, string $kind, string $id): RedirectResponse
@@ -48,19 +53,27 @@ class RelationController extends Controller
         [$subject, $route] = $this->subject($request, $kind, $id);
         $data = $request->validate([
             'relate' => ['required', 'string', 'max:100'],
-            // kind:id, such as repository:01a1...
-            'other' => ['required', 'string', 'regex:/^[a-z-]+:[0-9a-f-]{36}$/'],
+            // kind:id, such as repository:01a1...; or, to make it with the name given, new:place,
+            // new:{vocabulary id}, or new:{vocabulary kind} for the institution's first vocabulary of that kind
+            'other' => ['required', 'string', 'regex:/^([a-z-]+:[0-9a-f-]{36}|new:[a-z-]+|new:[0-9a-f-]{36})$/'],
+            'new_name' => ['nullable', 'string', 'max:1024'],
+            'new_language' => ['nullable', 'string', 'max:35'],
             'basis' => ['nullable', 'string', 'max:5000'],
             'basis_language' => ['nullable', 'string', 'max:35'],
         ] + $this->rules());
         $option = collect($this->relations->options($subject))->first(fn ($o) => $data['relate'] === $o['type'].'|'.$o['side']) ?? abort(422);
         [$otherKind, $otherId] = explode(':', $data['other'], 2);
-        abort_unless(in_array($otherKind, $option['kinds'], true), 422);
-        $other = $this->readable($request, $otherKind, $otherId);
-        [$source, $target] = $option['side'] === 'source' ? [$subject, $other] : [$other, $subject];
         try {
-            $this->relations->create($source, $option['type'], $target, $data, $request->user(),
-                ['basis' => $data['basis'] ?? null, 'basis_language' => $data['basis_language'] ?? null]);
+            DB::transaction(function () use ($request, $subject, $option, $otherKind, $otherId, $data) {
+                $other = $otherKind === 'new' ? $this->makeOther($request, $option, $otherId, $data) : null;
+                if ($other === null) {
+                    abort_unless(in_array($otherKind, $option['kinds'], true), 422);
+                    $other = $this->readable($request, $otherKind, $otherId);
+                }
+                [$source, $target] = $option['side'] === 'source' ? [$subject, $other] : [$other, $subject];
+                $this->relations->create($source, $option['type'], $target, $data, $request->user(),
+                    ['basis' => $data['basis'] ?? null, 'basis_language' => $data['basis_language'] ?? null]);
+            });
         } catch (InvalidArgumentException $e) {
             return back()->withInput()->withErrors(['relations' => $e->getMessage()]);
         }
@@ -166,12 +179,63 @@ class RelationController extends Controller
     /** An entity of this institution the account may read, or 404. */
     private function readable(Request $request, string $kind, string $id): Model
     {
-        [$class, , $permission] = EntityKinds::get($kind) ?? abort(404);
-        $entity = $class::find($id);
-        abort_unless($entity && $entity->institution_id === $request->user()->institution_id && $entity->deleted_at === null
-            && $request->user()->may('read', $permission, $entity), 404);
+        EntityKinds::get($kind) ?? abort(404);
+        $entity = EntityKinds::existing($kind, $request->user()->institution_id)->find($id);
+        abort_unless($entity && EntityKinds::readable($request->user(), $entity), 404);
 
         return $entity;
+    }
+
+    /**
+     * What the account may make on the spot, when the entity it looks for does not exist yet:
+     * a place, or a concept in one of the institution's vocabularies of the kinds the relation takes.
+     *
+     * @return list<array{value: string, label: string}>
+     */
+    private function newKinds(Request $request, array $option): array
+    {
+        $user = $request->user();
+        if (! $user->may('create', 'vocabulary')) {
+            return [];
+        }
+        $made = [];
+        if (in_array('place', $option['kinds'], true)) {
+            $made[] = ['value' => 'new:place', 'label' => 'a new place'];
+        }
+        if (in_array('concept', $option['kinds'], true)) {
+            foreach ($option['schemes'] as $scheme) {
+                $vocabularies = Vocabulary::where('institution_id', $user->institution_id)->whereHas('kind', fn ($q) => $q->where('notation', $scheme))->orderBy('title')->get();
+                if ($vocabularies->isEmpty()) {
+                    // The institution's first vocabulary of the kind is made with the concept, titled after the kind.
+                    $kind = Concept::where('iri', Vocab::SCHEME_KINDS.$scheme)->with('labels')->first();
+                    $made[] = ['value' => 'new:'.$scheme, 'label' => 'a new concept in '.($kind?->label(['en']) ?? $scheme)];
+                }
+                foreach ($vocabularies as $vocabulary) {
+                    $made[] = ['value' => 'new:'.$vocabulary->id, 'label' => 'a new concept in '.$vocabulary->title];
+                }
+            }
+        }
+
+        return $made;
+    }
+
+    /** Make the place or concept named in the form, for the relation about to be made. */
+    private function makeOther(Request $request, array $option, string $what, array $data): Model
+    {
+        abort_unless($request->user()->may('create', 'vocabulary'), 403);
+        $name = trim((string) ($data['new_name'] ?? ''));
+        $language = trim((string) ($data['new_language'] ?? ''));
+        if ($what === 'place') {
+            abort_unless(in_array('place', $option['kinds'], true), 422);
+
+            return app(PlaceService::class)->create($request->user()->institution, $name, $language, null, $request->user());
+        }
+        $vocabulary = preg_match('/^[0-9a-f-]{36}$/', $what)
+            ? (Vocabulary::where(['id' => $what, 'institution_id' => $request->user()->institution_id])->first() ?? abort(404))
+            : (in_array($what, $option['schemes'], true) ? app(ConceptService::class)->schemeOfKind($request->user()->institution, $what, $request->user()) : abort(422));
+        abort_unless(in_array('concept', $option['kinds'], true) && in_array($vocabulary->kind?->notation, $option['schemes'], true), 422);
+
+        return app(ConceptService::class)->create($vocabulary, ['label' => $name, 'language' => $language], $request->user());
     }
 
     private function rules(): array

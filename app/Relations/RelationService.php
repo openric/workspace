@@ -50,6 +50,14 @@ class RelationService
     {
         $definition = $this->definition($type);
         $this->allowedPair($definition, $type, EntityKinds::of($source), EntityKinds::of($target));
+        foreach ([$source, $target] as $end) {
+            if ($end instanceof Concept && ! in_array($end->vocabulary?->kind?->notation, $definition['schemes'] ?? [], true)) {
+                throw new InvalidArgumentException("a $type relation does not connect a concept of that vocabulary");
+            }
+            if ($end instanceof Concept && $end->deprecated_at !== null) {
+                throw new InvalidArgumentException('a deprecated concept is not used for new relations');
+            }
+        }
         if ($source->getAttribute('institution_id') !== $target->getAttribute('institution_id')) {
             throw new InvalidArgumentException('a relation connects entities of one institution');
         }
@@ -152,8 +160,8 @@ class RelationService
         }
         $loaded = [];
         foreach ($ends as $table => $ids) {
-            [$class] = EntityKinds::get(EntityKinds::byTable($table));
-            $loaded[$table] = $class::whereKey(array_unique($ids))->with('names.nameType', 'descriptionValues.element')->get()->keyBy('id');
+            $definition = EntityKinds::get(EntityKinds::byTable($table));
+            $loaded[$table] = $definition['class']::whereKey(array_unique($ids))->with($definition['with'])->get()->keyBy('id');
         }
         foreach ($relations as $relation) {
             $relation->other = $relation->fromSource ? $loaded[$relation->target_table][$relation->target_id] : $loaded[$relation->source_table][$relation->source_id];
@@ -166,7 +174,7 @@ class RelationService
      * The relations the entity can take part in: for each type, the side the entity is on
      * and the kinds at the other end.
      *
-     * @return list<array{type: string, side: string, kinds: list<string>, phrase: string}>
+     * @return list<array{type: string, side: string, kinds: list<string>, schemes: list<string>, phrase: string}>
      */
     public function options(Model $entity): array
     {
@@ -185,7 +193,7 @@ class RelationService
                     }
                 }
                 if ($kinds !== []) {
-                    $options[] = ['type' => $type, 'side' => $side, 'kinds' => array_values(array_unique($kinds)),
+                    $options[] = ['type' => $type, 'side' => $side, 'kinds' => array_values(array_unique($kinds)), 'schemes' => $definition['schemes'] ?? [],
                         'phrase' => $side === 'source' ? $definition['forward'] : $definition['inverse']];
                 }
             }
@@ -195,26 +203,35 @@ class RelationService
     }
 
     /**
-     * Entities of the given kinds whose names or local identifier contain $query, that
-     * the account may read, other than $except; at most 25.
+     * Entities of the given kinds whose names, labels or local identifier contain $query,
+     * that the account may read, other than $except; a concept only from a vocabulary of
+     * one of the $schemes kinds; at most 25.
      *
      * @return Collection<int, Model>
      */
-    public function candidates(User $user, array $kinds, string $query, ?Model $except = null): Collection
+    public function candidates(User $user, array $kinds, string $query, ?Model $except = null, array $schemes = []): Collection
     {
         $query = trim($query);
+        $like = '%'.addcslashes($query, '%_\\').'%';
         $found = collect();
         foreach ($kinds as $kind) {
-            [$class, , $permission] = EntityKinds::get($kind);
-            $table = (new $class)->getTable();
-            $like = '%'.addcslashes($query, '%_\\').'%';
-            $found = $found->merge($class::where('institution_id', $user->institution_id)->whereNull('deleted_at')
+            $definition = EntityKinds::get($kind);
+            $table = (new $definition['class'])->getTable();
+            $search = EntityKinds::existing($kind, $user->institution_id)
                 ->when($except, fn ($q) => $q->whereKeyNot($except->getKey()))
-                ->when($query !== '', fn ($q) => $q->where(fn ($q) => $q
+                ->with($definition['with'])->limit(25);
+            if ($kind === 'concept') {
+                $search->whereHas('vocabulary.kind', fn ($q) => $q->whereIn('notation', $schemes))
+                    ->when($query !== '', fn ($q) => $q->where(fn ($q) => $q
+                        ->whereIn('id', DB::table('concept_labels')->where('pref_label', 'ilike', $like)->select('concept_id'))
+                        ->orWhereIn('id', DB::table('concept_alt_labels')->where('label', 'ilike', $like)->select('concept_id'))
+                        ->orWhere('notation', 'ilike', $like)));
+            } else {
+                $search->when($query !== '', fn ($q) => $q->where(fn ($q) => $q
                     ->whereIn('id', Name::where('subject_table', $table)->where('value', 'ilike', $like)->select('subject_id'))
-                    ->orWhereIn('id', DB::table('identifiers')->where('subject_table', $table)->where('value', 'ilike', $like)->select('subject_id'))))
-                ->with('names.nameType', 'descriptionValues.element', 'identifiers.identifierType')->limit(25)->get()
-                ->filter(fn (Model $m) => $user->may('read', $permission, $m)));
+                    ->orWhereIn('id', DB::table('identifiers')->where('subject_table', $table)->where('value', 'ilike', $like)->select('subject_id'))));
+            }
+            $found = $found->merge($search->get()->filter(fn (Model $m) => EntityKinds::readable($user, $m)));
         }
 
         return $found->take(25)->values();

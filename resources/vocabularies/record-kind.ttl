@@ -38,6 +38,6 @@ v:description a skos:Concept ;
 v:vocabulary a skos:Concept ;
     skos:inScheme v: ;
     skos:topConceptOf v: ;
-    skos:prefLabel "Vocabulary term"@en ;
-    skos:definition "Terms of the institution's vocabularies."@en .
+    skos:prefLabel "Vocabularies and places"@en ;
+    skos:definition "The institution's own vocabularies (subjects, occupation types, place types, documentary form types) and its places, as Heratio governs terms and places with one set of permissions."@en .
 

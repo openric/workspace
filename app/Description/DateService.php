@@ -60,9 +60,9 @@ class DateService
      *
      * @return array{properties: Collection, qualifiers: Collection, types: Collection}
      */
-    public function choices(string $recordKind): array
+    public function choices(string $kind): array
     {
-        $allowed = config('workspace.date_properties.'.$recordKind, []);
+        $allowed = config('workspace.date_properties.'.$kind, []);
         $concepts = fn (string $vocabulary) => Concept::choices($vocabulary)->get();
 
         return [
