@@ -5,7 +5,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 //
 // Each element is a concept whose broader concept is its standard (isdiah,
-// isad-g, isaar-cpf) or its kind of entity (place); the grouping is data, never a list
+// isad-g, isaar-cpf) or its kind of entity (place, activity); the grouping is data, never a list
 // in code.
 
 namespace App\Description;
@@ -24,6 +24,9 @@ final class Elements
 
     /** A place: no ICA standard covers it, so its elements have no numbers and one heading. */
     public const PLACE = 'place';
+
+    /** An activity: numbered after ISDF where ISDF has the element. */
+    public const ACTIVITY = 'activity';
 
     /** @var array<string, Collection<int, Concept>> */
     private static array $cache = [];
@@ -59,6 +62,7 @@ final class Elements
         self::ISAD_G => ['3.1' => 'Identity', '3.2' => 'Context', '3.3' => 'Content and structure',
             '3.4' => 'Conditions of access and use', '3.5' => 'Allied materials', '3.6' => 'Notes', '3.7' => 'Description control'],
         self::ISAAR_CPF => ['5.1' => 'Identity', '5.2' => 'Description', '5.3' => 'Relationships', '5.4' => 'Control'],
+        self::ACTIVITY => ['5.1' => 'Identity', '5.2' => 'Context'],
     ];
 
     /** The element's number in its standard, such as 5.3.1 or 3.1.2, from its scope note. */
@@ -66,7 +70,7 @@ final class Elements
     {
         $note = (string) $element->labels->firstWhere('language', 'en')?->scope_note;
 
-        return preg_match('/(?:ISDIAH|ISAD\(G\)|ISAAR\(CPF\)) (\d+\.\d+\.\d+)/', $note, $m) ? $m[1] : null;
+        return preg_match('/(?:ISDIAH|ISAD\(G\)|ISAAR\(CPF\)|ISDF) (\d+\.\d+\.\d+)/', $note, $m) ? $m[1] : null;
     }
 
     /**

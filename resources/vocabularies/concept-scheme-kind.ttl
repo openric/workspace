@@ -13,7 +13,7 @@ v: a skos:ConceptScheme ;
     dcterms:title "OpenRiC Workspace Concept Scheme Kinds"@en ;
     dcterms:description "The kinds of vocabulary an institution keeps for its access points and types."@en ;
     dcterms:issued "2026-10-20"^^xsd:date ;
-    skos:hasTopConcept v:subject, v:occupation-type, v:place-type, v:documentary-form-type, v:legal-status .
+    skos:hasTopConcept v:subject, v:occupation-type, v:place-type, v:documentary-form-type, v:legal-status, v:activity-type .
 
 v:subject a skos:Concept ;
     skos:inScheme v: ;
@@ -49,3 +49,10 @@ v:legal-status a skos:Concept ;
     skos:prefLabel "Legal statuses"@en ;
     skos:scopeNote "Concepts exported as rico:LegalStatus; an agent is linked to one by rico:hasOrHadLegalStatus. ISAAR(CPF) 5.2.4."@en ;
     skos:definition "Legal statuses of agents, such as a company, a trust or a statutory body."@en .
+
+v:activity-type a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Activity types"@en ;
+    skos:scopeNote "Concepts exported as rico:ActivityType; an activity is linked to one by rico:hasActivityType. The institution's own kinds of activity, such as marriage, beside the OpenRiC activity-type vocabulary (mapping section 6.5)."@en ;
+    skos:definition "Kinds of activity, such as marriage or appointment."@en .

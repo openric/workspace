@@ -9,6 +9,7 @@
 // and each action that needs more names its permission IRI.
 
 use App\Http\Controllers\AccountController;
+use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\AgentController;
 use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\ConceptController;
@@ -103,6 +104,16 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/{record}/export/{format}', [ExportController::class, 'download'])->where('format', 'ead|ead3|csv|dc|mods')->name('export.download');
     });
 
+    // Activities (rico:Activity); the controller checks the authority permissions.
+    Route::middleware('access:read,authority')->prefix('activities')->name('activities.')->group(function () {
+        Route::get('/', [ActivityController::class, 'index'])->name('index');
+        Route::get('/new', [ActivityController::class, 'create'])->name('create');
+        Route::post('/', [ActivityController::class, 'store'])->name('store');
+        Route::get('/{activity}', [ActivityController::class, 'show'])->name('show');
+        Route::get('/{activity}/edit', [ActivityController::class, 'edit'])->name('edit');
+        Route::post('/{activity}', [ActivityController::class, 'update'])->name('update');
+    });
+
     // Imports of archival description: a dry run, its report, then the import (WS-015).
     Route::prefix('imports')->name('imports.')->group(function () {
         Route::get('/', [ImportController::class, 'index'])->name('index');
@@ -182,7 +193,7 @@ Route::middleware(['auth', 'active'])->group(function () {
     // Dates, names and identifiers of any described entity (ADR 0006); each controller checks update on the entity.
     // A concept has labels instead (ConceptController).
     foreach (['dates' => [DateController::class, 'date'], 'names' => [NameController::class, 'name'], 'identifiers' => [IdentifierController::class, 'identifier']] as $part => [$controller, $parameter]) {
-        Route::prefix("{kind}/{id}/$part")->where(['kind' => 'records|repositories|places|agents', 'id' => '[0-9a-f-]{36}', $parameter => '[0-9a-f-]{36}'])->name("$part.")
+        Route::prefix("{kind}/{id}/$part")->where(['kind' => 'records|repositories|places|agents|activities', 'id' => '[0-9a-f-]{36}', $parameter => '[0-9a-f-]{36}'])->name("$part.")
             ->group(function () use ($controller, $parameter) {
                 Route::post('/', [$controller, 'store'])->name('store');
                 Route::post("/{{$parameter}}", [$controller, 'update'])->name('update');
@@ -191,15 +202,15 @@ Route::middleware(['auth', 'active'])->group(function () {
     }
 
     // Delete a unit of description, a repository or a place, after confirming (EntityDeletion).
-    Route::get('{kind}/{id}/delete', [DeletionController::class, 'confirm'])->where(['kind' => 'records|repositories|places|agents', 'id' => '[0-9a-f-]{36}'])->name('deletion.confirm');
-    Route::post('{kind}/{id}/delete', [DeletionController::class, 'destroy'])->where(['kind' => 'records|repositories|places|agents', 'id' => '[0-9a-f-]{36}'])->name('deletion.destroy');
+    Route::get('{kind}/{id}/delete', [DeletionController::class, 'confirm'])->where(['kind' => 'records|repositories|places|agents|activities', 'id' => '[0-9a-f-]{36}'])->name('deletion.confirm');
+    Route::post('{kind}/{id}/delete', [DeletionController::class, 'destroy'])->where(['kind' => 'records|repositories|places|agents|activities', 'id' => '[0-9a-f-]{36}'])->name('deletion.destroy');
 
     // The modification history of an entity and its parts, from the audit log.
-    Route::get('{kind}/{id}/history', [HistoryController::class, 'show'])->where(['kind' => 'records|repositories|places|agents|concepts', 'id' => '[0-9a-f-]{36}'])->name('history');
+    Route::get('{kind}/{id}/history', [HistoryController::class, 'show'])->where(['kind' => 'records|repositories|places|agents|activities|concepts', 'id' => '[0-9a-f-]{36}'])->name('history');
 
     // Review, publish and withdraw an entity's description (PublicationService).
-    Route::get('{kind}/{id}/publication', [PublicationController::class, 'edit'])->where(['kind' => 'records|repositories|places|agents', 'id' => '[0-9a-f-]{36}'])->name('publication.edit');
-    Route::post('{kind}/{id}/publication', [PublicationController::class, 'update'])->where(['kind' => 'records|repositories|places|agents', 'id' => '[0-9a-f-]{36}'])->name('publication.update');
+    Route::get('{kind}/{id}/publication', [PublicationController::class, 'edit'])->where(['kind' => 'records|repositories|places|agents|activities', 'id' => '[0-9a-f-]{36}'])->name('publication.edit');
+    Route::post('{kind}/{id}/publication', [PublicationController::class, 'update'])->where(['kind' => 'records|repositories|places|agents|activities', 'id' => '[0-9a-f-]{36}'])->name('publication.update');
 
     // Relations of any described entity, their assertions and evidence (ADR 0006, WS-006).
     Route::prefix('{kind}/{id}/relations')->where(['kind' => EntityKinds::segments(), 'id' => '[0-9a-f-]{36}', 'relation' => '[0-9a-f-]{36}',

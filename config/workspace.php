@@ -38,6 +38,7 @@ return [
         'name' => ['used-from', 'used-to'],
         'relation' => ['beginning', 'end', 'relation'],
         'place' => ['existence', 'associated'],
+        'activity' => ['associated', 'beginning', 'end'],
     ],
 
     // Which kinds of entity each relation type (relation-type vocabulary) connects,
@@ -69,8 +70,8 @@ return [
         'agent-temporal' => ['pairs' => [['agent', 'agent']], 'forward' => 'was succeeded by', 'inverse' => 'succeeded'],
         'agent-control' => ['pairs' => [['agent', 'agent']], 'forward' => 'controls or controlled', 'inverse' => 'is or was controlled by'],
         'agent-associated' => ['pairs' => [['agent', 'agent']], 'symmetric' => true, 'forward' => 'is or was associated with', 'inverse' => 'is or was associated with'],
-        'subject' => ['pairs' => [['record', 'concept'], ['record', 'place'], ['record', 'agent']], 'schemes' => ['subject'], 'access_point' => true, 'forward' => 'is or was about', 'inverse' => 'is or was the subject of'],
-        'place' => ['pairs' => [['place', 'record'], ['place', 'agent']], 'access_point' => true, 'forward' => 'is associated with', 'inverse' => 'is associated with the place'],
+        'subject' => ['pairs' => [['record', 'concept'], ['record', 'place'], ['record', 'agent'], ['record', 'activity']], 'schemes' => ['subject'], 'access_point' => true, 'forward' => 'is or was about', 'inverse' => 'is or was the subject of'],
+        'place' => ['pairs' => [['place', 'record'], ['place', 'agent'], ['place', 'activity']], 'access_point' => true, 'forward' => 'is associated with', 'inverse' => 'is associated with the place'],
         'place-containment' => ['pairs' => [['place', 'place']], 'forward' => 'contains or contained', 'inverse' => 'lies or lay in'],
         'family' => ['pairs' => [['person', 'person']], 'symmetric' => true, 'forward' => 'belongs to the same family as', 'inverse' => 'belongs to the same family as'],
         'child' => ['pairs' => [['person', 'person']], 'forward' => 'is the parent of', 'inverse' => 'is the child of'],
@@ -93,6 +94,12 @@ return [
         'work' => ['pairs' => [['agent', 'agent']], 'symmetric' => true, 'forward' => 'works or worked with', 'inverse' => 'works or worked with'],
         'occupation' => ['pairs' => [['person', 'concept']], 'schemes' => ['occupation-type'], 'access_point' => true, 'forward' => 'pursues or pursued the occupation', 'inverse' => 'is or was the occupation of'],
         'legal-status' => ['pairs' => [['agent', 'concept']], 'schemes' => ['legal-status'], 'access_point' => true, 'forward' => 'has or had the legal status', 'inverse' => 'is or was the legal status of'],
+        // Activities (rico:Activity): who performed them, who took part and in what role, what they resulted in, what documents them, and the activities they are part of.
+        'performance' => ['pairs' => [['activity', 'agent']], 'role' => true, 'forward' => 'is or was performed by', 'inverse' => 'performs or performed'],
+        'participation' => ['pairs' => [['activity', 'agent'], ['activity', 'place'], ['activity', 'record']], 'role' => true, 'forward' => 'has or had as a participant', 'inverse' => 'takes or took part in'],
+        'result' => ['pairs' => [['activity', 'record']], 'forward' => 'results or resulted in', 'inverse' => 'results or resulted from'],
+        'documentation' => ['pairs' => [['record', 'activity']], 'forward' => 'documents', 'inverse' => 'is documented by'],
+        'subevent' => ['pairs' => [['activity', 'activity']], 'forward' => 'has or had as a part', 'inverse' => 'is or was part of'],
     ],
 
     // The RiC-O 1.1 class the concepts of each kind of local vocabulary (concept-scheme-kind
@@ -103,6 +110,7 @@ return [
         'place-type' => 'https://www.ica.org/standards/RiC/ontology#PlaceType',
         'documentary-form-type' => 'https://www.ica.org/standards/RiC/ontology#DocumentaryFormType',
         'legal-status' => 'https://www.ica.org/standards/RiC/ontology#LegalStatus',
+        'activity-type' => 'https://www.ica.org/standards/RiC/ontology#ActivityType',
     ],
 
     // Description elements that are names (ADR 0006): what the description form
@@ -121,6 +129,9 @@ return [
         'agent-parallel-name' => 'parallel',
         'agent-standardised-name' => 'standardised',
         'agent-other-name' => 'other',
+        'activity-name' => 'authorised',
+        'activity-parallel-name' => 'parallel',
+        'activity-other-name' => 'other',
     ],
 
     // The roles a new institution starts with, by account-role template, with

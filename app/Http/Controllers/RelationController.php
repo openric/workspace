@@ -9,6 +9,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Description\ActivityService;
 use App\Description\AgentService;
 use App\Description\PlaceService;
 use App\Http\Controllers\Concerns\ResolvesDescribedEntity;
@@ -201,6 +202,9 @@ class RelationController extends Controller
         if (in_array('place', $option['kinds'], true) && $user->may('create', 'vocabulary')) {
             $made[] = ['value' => 'new:place', 'label' => 'a new place'];
         }
+        if (in_array('activity', $option['kinds'], true) && $user->may('create', 'authority')) {
+            $made[] = ['value' => 'new:activity', 'label' => 'a new activity'];
+        }
         if ($user->may('create', 'authority')) {
             foreach ($this->agentTypes($option) as $type) {
                 $made[] = ['value' => 'new:agent-'.$type->notation, 'label' => 'a new '.mb_strtolower($type->label(['en', 'und'])).' (authority record)'];
@@ -241,11 +245,16 @@ class RelationController extends Controller
         return array_values($types);
     }
 
-    /** Make the place, concept or agent named in the form, for the relation about to be made. */
+    /** Make the place, concept, agent or activity named in the form, for the relation about to be made. */
     private function makeOther(Request $request, array $option, string $what, array $data): Model
     {
         $name = trim((string) ($data['new_name'] ?? ''));
         $language = trim((string) ($data['new_language'] ?? ''));
+        if ($what === 'activity') {
+            abort_unless($request->user()->may('create', 'authority') && in_array('activity', $option['kinds'], true), 403);
+
+            return app(ActivityService::class)->create($request->user()->institution, $name, $language, null, $request->user());
+        }
         if (str_starts_with($what, 'agent-')) {
             abort_unless($request->user()->may('create', 'authority'), 403);
             $type = substr($what, 6);

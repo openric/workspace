@@ -44,6 +44,7 @@
         'repositories.index' => ['Repositories', auth()->user()->mayAnywhere('read', 'repository')],
         'records.index' => ['Archival descriptions', auth()->user()->mayAnywhere('read', 'description')],
         'agents.index' => ['Authority records', auth()->user()->mayAnywhere('read', 'authority')],
+        'activities.index' => ['Activities', auth()->user()->mayAnywhere('read', 'authority')],
         'places.index' => ['Places', true],
         'vocabularies.index' => ['Vocabularies', true],
         'accounts.index' => ['Accounts', auth()->user()->can(\App\Support\Vocab::permission('manage-accounts'))],

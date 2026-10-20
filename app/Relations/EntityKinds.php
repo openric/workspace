@@ -11,6 +11,7 @@
 
 namespace App\Relations;
 
+use App\Models\Activity;
 use App\Models\Agent;
 use App\Models\Concept;
 use App\Models\Place;
@@ -38,6 +39,8 @@ final class EntityKinds
             'route' => 'agents.show', 'index' => 'agents.index', 'label' => 'agent-authorised-name', 'with' => ['names.nameType', 'descriptionValues.element', 'identifiers.identifierType', 'agentType.labels'], 'noun' => 'agent', 'ric_class' => null, 'ric_name' => 'rico:AgentName'],
         'place' => ['class' => Place::class, 'segment' => 'places', 'permission' => 'vocabulary', 'readable' => false,
             'route' => 'places.show', 'index' => 'places.index', 'label' => 'place-name', 'with' => ['names.nameType', 'descriptionValues.element', 'identifiers.identifierType', 'parent.names.nameType'], 'noun' => 'place', 'ric_class' => 'rico:Place', 'ric_name' => 'rico:PlaceName'],
+        'activity' => ['class' => Activity::class, 'segment' => 'activities', 'permission' => 'authority', 'readable' => true,
+            'route' => 'activities.show', 'index' => 'activities.index', 'label' => 'activity-name', 'with' => ['names.nameType', 'descriptionValues.element', 'identifiers.identifierType', 'activityType.labels'], 'noun' => 'activity', 'ric_class' => 'rico:Activity', 'ric_name' => 'rico:Name'],
         'concept' => ['class' => Concept::class, 'segment' => 'concepts', 'permission' => 'vocabulary', 'readable' => false,
             'route' => 'concepts.show', 'index' => null, 'label' => null, 'with' => ['labels', 'vocabulary'], 'noun' => 'concept', 'ric_class' => null, 'ric_name' => null],
     ];

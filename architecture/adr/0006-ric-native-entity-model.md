@@ -72,4 +72,17 @@ The ISAD(G), ISAAR(CPF) and ISDIAH screens stay organised by their standards, bu
   - **Links.** Creators, subjects, places and names are linked to the entity the file names by IRI, or to the one entity of that name. Two of that name is ambiguous and not linked. None is created where the account may and asked to be, or else left out and listed. The relations an import makes are proposed until a person accepts them; imported values are drafts until published.
   - **One rule set.** Everything is written through the services the screens use, so permissions, database checks and the audit log apply. A unit that fails is not imported, with the units inside it; the rest go on.
   - **Vocabulary.** Collection, the level AtoM and EAD use beside the ISAD(G) levels, is added (rico:RecordSet).
+- **v0.0.22, activities (WS-003; the V0.1 demonstration steps 5 to 7).**
+  - **The entity.** An activity is a rico:Activity with its own persistent IRI ({base}/activity/{uuid}), names, values, dates, identifiers and relations, marked deleted and never removed, and keeping an authorised name.
+  - **Types.** RiC-O 1.1 has one class, so the kind is an activity type (rico:hasActivityType). It comes from the OpenRiC activity-type vocabulary (production, accumulation, custody, transfer, publication, reproduction) or from one of the institution's own activity-type vocabularies, such as one holding Marriage (mapping section 6.5). The database refuses any other concept.
+  - **Elements.** Numbered after ISDF where ISDF has the element: names (5.1.2 to 5.1.4), description, history and legislation (5.2.2 to 5.2.4).
+  - **Relations.**
+    - Performance (rico:PerformanceRelation), with the agent's role.
+    - Participation (rico:hasOrHadParticipant), with a role such as spouse or witness from the OpenRiC role-type vocabulary.
+    - Result (rico:resultsOrResultedIn): a production activity names what it resulted in.
+    - Documentation (rico:ActivityDocumentationRelation).
+    - Part of an activity (rico:hasOrHadSubevent).
+    - Places and subjects also take activities.
+  - **Assertions and evidence.** Every relation of an activity carries assertions and evidence like any other, so a corrected witness is a new assertion that supersedes the old one, which is kept.
+  - **Permissions.** Activities are context entities like agents, so the authority permissions govern them. An activity is made on the spot from the relation screen.
 - **Still to come for archival description:** physical storage, the DACS, RAD, DC and MODS templates, bulk edit, and links to digital objects and rights. Each comes with its work package in the estimate of 20 October.

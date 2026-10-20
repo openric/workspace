@@ -1,0 +1,58 @@
+# OpenRiC Activity-Type Vocabulary
+# ================================
+# SKOS ConceptScheme of activity-type concepts referenced from
+# rico:hasActivityType in OpenRiC-conformant graphs.
+#
+# See spec/mapping.html §6.5 and spec/profiles/provenance-event.html for usage.
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix rico:    <https://www.ica.org/standards/RiC/ontology#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix at:      <https://openric.org/vocab/activity-type/> .
+
+at: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Activity-Type Vocabulary"@en ;
+    dcterms:description "SKOS ConceptScheme of activity-type concepts referenced from rico:hasActivityType. Each concept is also a rico:ActivityType per RiC-O 1.1 (which defines ActivityType as a class for categorising activities)."@en ;
+    dcterms:issued "2026-04-25"^^xsd:date ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
+    skos:hasTopConcept at:production, at:accumulation, at:custody,
+                       at:transfer,   at:publication,  at:reproduction .
+
+at:production a skos:Concept, rico:ActivityType ;
+    skos:inScheme at: ;
+    skos:topConceptOf at: ;
+    skos:prefLabel "Production"@en, "Production"@fr, "Producción"@es ;
+    skos:definition "An activity that produces a record — creation, contribution, drafting, authoring."@en ;
+    skos:scopeNote "Use for AtoM event-type values 'creation' and 'contribution'."@en .
+
+at:accumulation a skos:Concept, rico:ActivityType ;
+    skos:inScheme at: ;
+    skos:topConceptOf at: ;
+    skos:prefLabel "Accumulation"@en, "Accumulation"@fr, "Acumulación"@es ;
+    skos:definition "An activity that aggregates or accumulates records — building a collection, gathering files, inheriting custody."@en ;
+    skos:scopeNote "Use for AtoM event-type values 'accumulation' and 'collection'."@en .
+
+at:custody a skos:Concept, rico:ActivityType ;
+    skos:inScheme at: ;
+    skos:topConceptOf at: ;
+    skos:prefLabel "Custody"@en, "Garde"@fr, "Custodia"@es ;
+    skos:definition "A custody event — taking, holding, or transferring physical or intellectual control of records."@en .
+
+at:transfer a skos:Concept, rico:ActivityType ;
+    skos:inScheme at: ;
+    skos:topConceptOf at: ;
+    skos:prefLabel "Transfer"@en, "Transfert"@fr, "Transferencia"@es ;
+    skos:definition "A transfer event — records moving between custodians, repositories, or jurisdictions."@en .
+
+at:publication a skos:Concept, rico:ActivityType ;
+    skos:inScheme at: ;
+    skos:topConceptOf at: ;
+    skos:prefLabel "Publication"@en, "Publication"@fr, "Publicación"@es ;
+    skos:definition "A publication event — issuing or releasing records to a wider audience."@en .
+
+at:reproduction a skos:Concept, rico:ActivityType ;
+    skos:inScheme at: ;
+    skos:topConceptOf at: ;
+    skos:prefLabel "Reproduction"@en, "Reproduction"@fr, "Reproducción"@es ;
+    skos:definition "A reproduction event — copying, digitising, or duplicating records."@en .
