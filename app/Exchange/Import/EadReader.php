@@ -236,6 +236,7 @@ class EadReader
                 $name === 'controlaccess' => $this->accessPoints($draft, $element),
                 $name === 'subject' => $draft->subjects[] = ['name' => $label, 'iri' => $iri],
                 $name === 'geogname' => $draft->places[] = ['name' => $label, 'iri' => $iri],
+                $name === 'genreform' => $draft->genres[] = ['name' => $label, 'iri' => $iri],
                 array_key_exists($name, self::NAMES) => $draft->names[] = ['name' => $label, 'type' => self::NAMES[$name], 'iri' => $iri],
                 default => $this->report->issue($draft->location, "controlaccess/$name", $label, $this->why($name), 'left-out'),
             };
@@ -347,8 +348,7 @@ class EadReader
         return match ($element) {
             'dao', 'daogrp', 'daoset' => 'digital objects are not kept yet; not read',
             'container', 'physloc' => 'physical storage is not kept yet; not read',
-            'genreform' => 'documentary form types are not linked to units yet; not read',
-            'function', 'occupation', 'title' => 'only subjects, places and names are read as access points; not read',
+            'function', 'occupation', 'title' => 'only subjects, places, names and documentary form types are read as access points; not read',
             default => 'no ISAD(G) element the Workspace keeps; not read',
         };
     }

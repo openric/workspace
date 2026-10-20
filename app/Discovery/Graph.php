@@ -77,7 +77,7 @@ class Graph
                 continue;
             }
             $type = config('workspace.relation_types.'.$relation->relationType->notation);
-            $found[] = [$relation->other, $type['forward'] ?? $relation->relationType->label(['en']), $relation->relationType->ricTerm(), $relation->fromSource];
+            $found[] = [$relation->other, $type['forward'] ?? $relation->relationType->label(['en']), $relation->ricTerm(), $relation->fromSource];
         }
         if ($entity instanceof RecordResource) {
             if ($entity->parent && $this->view->readable($entity->parent)) {

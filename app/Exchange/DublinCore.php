@@ -63,6 +63,9 @@ class DublinCore
             $element('date', ExportView::isoInterval($date) ?? $date->display());
         }
         $element('type', $unit->level->label(['en', 'und']));
+        foreach ($points['genres'] as $relation) {
+            $element('type', $view->label($relation->other));
+        }
         $text('format', 'extent');
         $element('identifier', $unit->referenceCode());
         $element('identifier', $unit->iri);

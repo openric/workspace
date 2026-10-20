@@ -139,6 +139,7 @@ class ExportView
             'subjects' => $subjects->filter(fn (Relation $r) => $r->other instanceof Concept)->values(),
             'places' => $subjects->filter(fn (Relation $r) => $r->other instanceof Place)->merge($this->relations($unit, 'place'))->values(),
             'names' => $subjects->filter(fn (Relation $r) => $r->other instanceof Agent || EntityKinds::of($r->other) === 'repository')->values(),
+            'genres' => $this->relations($unit, 'documentary-form'),
         ];
     }
 

@@ -144,6 +144,9 @@ class CsvReader
             foreach ($this->split($cells['placeAccessPoints'] ?? '') as $name) {
                 $draft->places[] = ['name' => $name, 'iri' => null];
             }
+            foreach ($this->split($cells['genreAccessPoints'] ?? '') as $name) {
+                $draft->genres[] = ['name' => $name, 'iri' => null];
+            }
             foreach ($this->split($cells['nameAccessPoints'] ?? '') as $name) {
                 $draft->names[] = ['name' => $name, 'type' => null, 'iri' => null];
             }
@@ -251,7 +254,6 @@ class CsvReader
             'digitalObjectPath' => 'a path on the AtoM server is not fetched; export with digitalObjectURI to bring the file',
             'physicalObjectName', 'physicalObjectLocation', 'physicalObjectType' => 'physical storage is not kept yet; not read',
             'language', 'script', 'scriptOfDescription' => 'language and script codes are not kept yet; the narrative languageNote is read',
-            'genreAccessPoints' => 'documentary form types are not linked to units yet; not read',
             default => 'not read',
         };
     }

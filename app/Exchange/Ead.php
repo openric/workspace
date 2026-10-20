@@ -351,7 +351,7 @@ class Ead
         }
 
         $points = $this->view->accessPoints($unit);
-        if ($points['subjects']->isNotEmpty() || $points['places']->isNotEmpty() || $points['names']->isNotEmpty()) {
+        if ($points['subjects']->isNotEmpty() || $points['places']->isNotEmpty() || $points['names']->isNotEmpty() || $points['genres']->isNotEmpty()) {
             $x->startElement('controlaccess');
             foreach ($points['subjects'] as $relation) {
                 $this->name($x, 'subject', $this->view->label($relation->other), $relation->other->iri);
@@ -361,6 +361,9 @@ class Ead
             }
             foreach ($points['names'] as $relation) {
                 $this->name($x, $this->nameElement($relation->other), $this->view->label($relation->other), $relation->other->iri);
+            }
+            foreach ($points['genres'] as $relation) {
+                $this->name($x, 'genreform', $this->view->label($relation->other), $relation->other->iri);
             }
             $x->endElement();
         }

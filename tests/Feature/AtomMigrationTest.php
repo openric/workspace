@@ -17,9 +17,13 @@ use App\Accounts\AccountService;
 use App\Description\InstantiationService;
 use App\Description\RecordService;
 use App\Description\RepositoryService;
+use App\Exchange\DescriptionCsv;
+use App\Exchange\DublinCore;
 use App\Exchange\Ead;
 use App\Exchange\ExportView;
+use App\Exchange\Mods;
 use App\Models\Agent;
+use App\Models\Concept;
 use App\Models\ContactPoint;
 use App\Models\Import;
 use App\Models\Institution;
@@ -29,6 +33,7 @@ use App\Models\RecordResource;
 use App\Models\Relation;
 use App\Models\Repository;
 use App\Models\User;
+use App\Relations\RelationService;
 use App\Support\Vocab;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -216,6 +221,45 @@ class AtomMigrationTest extends TestCase
             'csv', ['repository' => $holder->id]);
         $this->assertEquals(['created' => 1, 'updated' => 0, 'unchanged' => 0, 'rejected' => 1], $import->report['actions']);
         $this->assertStringContainsString('choose a level for units with none', collect($import->report['units'])->firstWhere('key', '2')['message']);
+    }
+
+    public function test_genre_access_points_become_documentary_form_types_with_the_rico_term_of_the_unit_class_and_go_out_again(): void
+    {
+        $holder = Repository::firstOrFail();
+        $import = $this->import($this->csv([['legacyId', 'parentId', 'title', 'levelOfDescription', 'genreAccessPoints', 'culture'],
+            ['1', '', 'Riverside photographs', 'Fonds', 'Albums|Photographs', 'en'], ['2', '1', 'Wedding of 1902', 'Item', 'Photographs', 'en']]), 'csv', ['repository' => $holder->id]);
+        $this->assertNotContains('genreAccessPoints', array_column($import->report['issues'], 'field'));
+        $this->assertSame(2, $import->report['counts']['concepts']);
+        [$fonds, $item] = [RecordResource::whereNull('parent_id')->firstOrFail(), RecordResource::whereNotNull('parent_id')->firstOrFail()];
+        $forms = Relation::whereHas('relationType', fn ($q) => $q->where('notation', 'documentary-form'))->get();
+        $this->assertCount(3, $forms);
+        $this->assertTrue($forms->every(fn (Relation $r) => $r->standing() === 'proposed'));
+        $this->assertSame(['documentary-form-type'], $forms->map(fn (Relation $r) => Concept::find($r->target_id)->vocabulary->kind->notation)->unique()->values()->all());
+
+        // RiC-O 1.1 types a record by its documentary form, and a record set only through its members.
+        $terms = array_flip(file(resource_path('ontologies/rico-1.1.terms'), FILE_IGNORE_NEW_LINES));
+        $this->assertSame(['rico:hasOrHadSomeMembersWithDocumentaryFormType'], $forms->where('source_id', $fonds->id)->map->ricTerm()->unique()->values()->all());
+        $this->assertSame(['rico:hasDocumentaryFormType'], $forms->where('source_id', $item->id)->map->ricTerm()->values()->all());
+        $this->assertArrayHasKey('hasOrHadSomeMembersWithDocumentaryFormType', $terms);
+        $this->assertArrayHasKey('hasDocumentaryFormType', $terms);
+        $this->get(route('records.show', $fonds))->assertOk()->assertSee('Documentary form types (genre access points)')->assertSee('Albums')
+            ->assertSee('rico:hasOrHadSomeMembersWithDocumentaryFormType');
+        $this->get(route('records.show', $item))->assertOk()->assertSee('rico:hasDocumentaryFormType');
+
+        // Once accepted, they leave in every format that has a place for them, and come back in.
+        foreach ($forms as $relation) {
+            app(RelationService::class)->review($relation->currentAssertions()->firstOrFail(), true, $this->editor);
+        }
+        $view = new ExportView($this->editor, true);
+        $fonds = $fonds->fresh();
+        $ead = app(Ead::class)->export($fonds, $view);
+        $this->assertMatchesRegularExpression('#<genreform authfilenumber="[^"]+">Albums</genreform>#', $ead);
+        $this->assertStringContainsString('Albums|Photographs', app(DescriptionCsv::class)->export([$fonds], $view));
+        $this->assertMatchesRegularExpression('#<genre authority="local" type="documentary form" valueURI="[^"]+">Photographs</genre>#', app(Mods::class)->export($fonds, $view));
+        $this->assertStringContainsString('<dc:type>Albums</dc:type>', app(DublinCore::class)->export($fonds, $view));
+        $again = $this->import($ead, 'ead', ['repository' => $holder->id, 'source' => 'Workspace EAD']);
+        $this->assertSame(0, $again->report['counts']['concepts'], 'the documentary form types are found by their IRI');
+        $this->assertNotContains('controlaccess/genreform', array_column($again->report['issues'], 'field'));
     }
 
     public function test_a_file_image_magick_cannot_read_is_kept_without_copies(): void

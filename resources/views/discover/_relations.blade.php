@@ -13,7 +13,7 @@
                 @if($relation->role) <span class="meta">as {{ $relation->role->label(['en', 'und']) }}</span>@endif
                 @if($from || $to) <span class="meta">({{ $from ?? '?' }} to {{ $to ?? '?' }})</span>@endif
                 @if($relation->standing() === 'disputed') <span class="meta">(disputed)</span>@endif
-                @include('description._ric', ['term' => $relation->relationType])</li>
+                @include('description._ric', ['term' => $relation->ricTerm()])</li>
         @endforeach
     </ul>
 @endif

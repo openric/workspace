@@ -682,6 +682,12 @@ class ImportService
                 $this->relate($draft, $found, 'place', $unit);
             }
         }
+        foreach ($draft->genres as $genre) {
+            $concept = $genre['iri'] !== null ? Concept::where(['iri' => $genre['iri'], 'institution_id' => $this->institution->id])->whereNull('deprecated_at')->first() : null;
+            if ($concept ??= $this->term($draft, 'documentary-form-type', 'genre', $genre['name'], $language)) {
+                $this->relate($draft, $unit, 'documentary-form', $concept);
+            }
+        }
         foreach ($draft->associated as $iri) {
             $other = $this->existing(RecordResource::where('iri', $iri)) ?? collect($this->byKey)->first(fn ($u) => $u->iri === $iri);
             if ($other === null) {
@@ -769,7 +775,7 @@ class ImportService
         if (array_key_exists($cacheKey, $this->resolved)) {
             return $this->resolved[$cacheKey];
         }
-        $what = str_replace('-type', '', $kind);
+        $what = ['occupation-type' => 'occupation', 'documentary-form-type' => 'documentary form type'][$kind] ?? $kind;
         $matches = Concept::where('institution_id', $this->institution->id)->whereNull('deprecated_at')
             ->whereHas('vocabulary.kind', fn ($q) => $q->where('iri', Vocab::BASE.'concept-scheme-kind/'.$kind))
             ->whereHas('labels', fn ($q) => $q->whereRaw('lower(pref_label) = ?', [mb_strtolower($label)]))->get();

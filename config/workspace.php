@@ -95,6 +95,9 @@ return [
         'work' => ['pairs' => [['agent', 'agent']], 'symmetric' => true, 'forward' => 'works or worked with', 'inverse' => 'works or worked with'],
         'occupation' => ['pairs' => [['person', 'concept']], 'schemes' => ['occupation-type'], 'access_point' => true, 'forward' => 'pursues or pursued the occupation', 'inverse' => 'is or was the occupation of'],
         'legal-status' => ['pairs' => [['agent', 'concept']], 'schemes' => ['legal-status'], 'access_point' => true, 'forward' => 'has or had the legal status', 'inverse' => 'is or was the legal status of'],
+        // RiC-O 1.1 gives a record set a documentary form type only through its members, hence its own term.
+        'documentary-form' => ['pairs' => [['record', 'concept']], 'schemes' => ['documentary-form-type'], 'access_point' => true, 'forward' => 'has the documentary form type',
+            'inverse' => 'is the documentary form type of', 'record_set_term' => 'rico:hasOrHadSomeMembersWithDocumentaryFormType'],
         // Activities (rico:Activity): who performed them, who took part and in what role, what they resulted in, what documents them, and the activities they are part of.
         'performance' => ['pairs' => [['activity', 'agent']], 'role' => true, 'forward' => 'is or was performed by', 'inverse' => 'performs or performed'],
         'participation' => ['pairs' => [['activity', 'agent'], ['activity', 'place'], ['activity', 'record']], 'role' => true, 'forward' => 'has or had as a participant', 'inverse' => 'takes or took part in'],

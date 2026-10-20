@@ -36,7 +36,7 @@ class DescriptionCsv
         'physicalCharacteristics' => 'physical-characteristics', 'findingAids' => 'finding-aids-note', 'locationOfOriginals' => 'location-of-originals',
         'locationOfCopies' => 'location-of-copies', 'relatedUnitsOfDescription' => 'related-units', 'publicationNote' => 'publication-note',
         'digitalObjectPath' => null, 'digitalObjectURI' => null, 'generalNote' => 'note',
-        'subjectAccessPoints' => ':subjects', 'placeAccessPoints' => ':places', 'nameAccessPoints' => ':names', 'genreAccessPoints' => null,
+        'subjectAccessPoints' => ':subjects', 'placeAccessPoints' => ':places', 'nameAccessPoints' => ':names', 'genreAccessPoints' => ':genres',
         'descriptionIdentifier' => ':description-identifier', 'institutionIdentifier' => ':institution-identifier', 'rules' => 'rules-or-conventions',
         'descriptionStatus' => ':description-status', 'levelOfDetail' => ':level-of-detail', 'revisionHistory' => 'dates-of-descriptions',
         'languageOfDescription' => ':culture', 'scriptOfDescription' => null, 'sources' => null, 'archivistNote' => 'archivists-note',
@@ -100,7 +100,7 @@ class DescriptionCsv
         return [
             'id' => $unit->id, 'parent' => $parentInFile ? $unit->parent_id : '', 'identifier' => $unit->identifier,
             'level' => $unit->level->label(['en', 'und']), 'repository' => $unit->repository ? $view->label($unit->repository, $language) : '',
-            'subjects' => $labels($points['subjects']), 'places' => $labels($points['places']), 'names' => $labels($points['names']),
+            'subjects' => $labels($points['subjects']), 'places' => $labels($points['places']), 'names' => $labels($points['names']), 'genres' => $labels($points['genres']),
             'description-identifier' => $unit->description_identifier,
             'institution-identifier' => $unit->repository?->identifiers->first(fn ($i) => $i->identifierType->notation === 'isil')?->value ?? $unit->repository?->identifier,
             'description-status' => $unit->descriptionStatus?->label(['en', 'und']), 'level-of-detail' => $unit->descriptionDetail?->label(['en', 'und']),

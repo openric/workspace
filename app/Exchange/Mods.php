@@ -160,6 +160,16 @@ class Mods
             $this->name($relation->other, null);
             $x->endElement();
         }
+        foreach ($points['genres'] as $relation) {
+            if (($label = $view->label($relation->other)) !== null) {
+                $x->startElement('genre');
+                $x->writeAttribute('authority', 'local');
+                $x->writeAttribute('type', 'documentary form');
+                $x->writeAttribute('valueURI', $relation->other->iri);
+                $x->text($label);
+                $x->endElement();
+            }
+        }
         if ($unit->parent && $view->may('read', 'description', $unit->parent)) {
             $unit->parent->loadMissing('names.nameType', 'names.state');
             $this->related('host', $unit->parent);

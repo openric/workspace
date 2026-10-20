@@ -15,7 +15,7 @@
     @php($creators = $view->creators($unit))
     @if($creators->isNotEmpty())
         <h2>Created by</h2>
-        <ul>@foreach($creators as $relation)<li>@php($url = \App\Discovery\Links::page($relation->other))@if($url)<a href="{{ $url }}">{{ $view->label($relation->other) }}</a>@else{{ $view->label($relation->other) }}@endif @include('description._ric', ['term' => $relation->relationType])</li>@endforeach</ul>
+        <ul>@foreach($creators as $relation)<li>@php($url = \App\Discovery\Links::page($relation->other))@if($url)<a href="{{ $url }}">{{ $view->label($relation->other) }}</a>@else{{ $view->label($relation->other) }}@endif @include('description._ric', ['term' => $relation->ricTerm()])</li>@endforeach</ul>
     @endif
 
     @if($instantiations->isNotEmpty())
@@ -36,7 +36,8 @@
 
     @include('discover._values', ['subject' => $unit, 'standard' => \App\Description\Elements::ISAD_G, 'view' => $view])
     @include('discover._relations', ['relations' => $relations, 'view' => $view, 'heading' => 'Subjects and places', 'types' => ['subject', 'place']])
-    @include('discover._relations', ['relations' => $relations, 'view' => $view, 'heading' => 'Related', 'except' => ['subject', 'place', 'creation', 'accumulation']])
+    @include('discover._relations', ['relations' => $relations, 'view' => $view, 'heading' => 'Documentary form types', 'types' => ['documentary-form']])
+    @include('discover._relations', ['relations' => $relations, 'view' => $view, 'heading' => 'Related', 'except' => ['subject', 'place', 'documentary-form', 'creation', 'accumulation']])
 
     @if($children->isNotEmpty())
         <h2>Inside it ({{ $children->count() }})</h2>

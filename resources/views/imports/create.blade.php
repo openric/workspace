@@ -42,7 +42,7 @@
             @foreach($agentTypes as $type)<option value="{{ $type->notation }}" @selected(old('agent_type') === $type->notation)>Create them as a {{ mb_strtolower($type->label(['en'])) }}</option>@endforeach
         </select>
         <small id="agent-help">For creators and names with no authority record yet, and for authority records with no type of entity. EAD says whether a name is a person, family or corporate body; AtoM's description CSV does not, and AtoM lets an authority record have no type.</small>
-        <p><label><input type="checkbox" name="create_terms" value="1" @checked(old('create_terms', true))> Create subjects, places and occupations not yet in the vocabularies</label></p>
+        <p><label><input type="checkbox" name="create_terms" value="1" @checked(old('create_terms', true))> Create subjects, places, occupations and documentary form types not yet in the vocabularies</label></p>
         <p><label><input type="checkbox" name="match_identifier" value="1" @checked(old('match_identifier'))> Also match what is already here: units by their identifier under the same parent, authority records and repositories by their one authorised name</label></p>
         <button type="submit">Upload and make a dry run</button>
     </form>

@@ -45,6 +45,9 @@ final class UnitDraft
     /** @var list<array{name: string, iri: ?string}> */
     public array $places = [];
 
+    /** @var list<array{name: string, iri: ?string}> documentary form types (genre access points) */
+    public array $genres = [];
+
     /** @var list<array{name: string, type: ?string, iri: ?string}> agents as subjects */
     public array $names = [];
 

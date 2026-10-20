@@ -8,6 +8,7 @@ namespace App\Models;
 
 use App\Audit\Audited;
 use App\Description\HasDates;
+use App\Relations\EntityKinds;
 use App\Support\Vocab;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -93,6 +94,21 @@ class Relation extends Model
         $type = config('workspace.relation_types.'.$this->relationType->notation);
 
         return $type ? ($this->fromSource ? $type['forward'] : $type['inverse']) : $this->relationType->label(['en', 'und']);
+    }
+
+    /**
+     * The RiC-O term the relation is. For a type whose term depends on the class of the unit it comes from
+     * (config relation_types.*.record_set_term), a record set's relation takes that term.
+     */
+    public function ricTerm(): ?string
+    {
+        $recordSetTerm = config('workspace.relation_types.'.$this->relationType->notation.'.record_set_term');
+        if ($recordSetTerm !== null && $this->source_table === 'record_resources'
+            && ($unit = RecordResource::with('level.labels')->find($this->source_id)) && EntityKinds::ricClass($unit) === 'rico:RecordSet') {
+            return $recordSetTerm;
+        }
+
+        return $this->relationType->ricTerm();
     }
 
     public function datedAs(string $property): ?RicDate
