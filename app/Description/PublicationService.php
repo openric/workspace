@@ -16,6 +16,7 @@ namespace App\Description;
 use App\Audit\AuditLog;
 use App\Models\Concept;
 use App\Models\DescriptionValue;
+use App\Models\Instantiation;
 use App\Models\Name;
 use App\Models\RecordResource;
 use App\Models\User;
@@ -47,14 +48,22 @@ class PublicationService
             $ids = [...$ids, ...RecordResource::whereKey($entity->descendantIds())->whereNull('deleted_at')->pluck('id')->all()];
         }
 
-        return DB::transaction(fn () => AuditLog::actingAs($actor, function () use ($entity, $ids, $fromIds, $toId, $language) {
+        // A unit's instantiations are part of its description: they are published, and withdrawn, with it.
+        $subjects = [$entity->getTable() => $ids];
+        if ($entity instanceof RecordResource) {
+            $subjects['instantiations'] = Instantiation::whereIn('record_resource_id', $ids)->whereNull('deleted_at')->pluck('id')->all();
+        }
+
+        return DB::transaction(fn () => AuditLog::actingAs($actor, function () use ($subjects, $fromIds, $toId, $language) {
             $changed = 0;
-            foreach ([DescriptionValue::class, Name::class] as $class) {
-                $rows = $class::where('subject_table', $entity->getTable())->whereIn('subject_id', $ids)->whereIn('state_id', $fromIds)
-                    ->when($language, fn ($q) => $q->where('language', $language))->get();
-                // One by one, so each change is audited.
-                $rows->each(fn (Model $row) => $row->update(['state_id' => $toId]));
-                $changed += $rows->count();
+            foreach ($subjects as $table => $subjectIds) {
+                foreach ([DescriptionValue::class, Name::class] as $class) {
+                    $rows = $class::where('subject_table', $table)->whereIn('subject_id', $subjectIds)->whereIn('state_id', $fromIds)
+                        ->when($language, fn ($q) => $q->where('language', $language))->get();
+                    // One by one, so each change is audited.
+                    $rows->each(fn (Model $row) => $row->update(['state_id' => $toId]));
+                    $changed += $rows->count();
+                }
             }
 
             return $changed;

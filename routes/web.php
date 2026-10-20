@@ -15,6 +15,7 @@ use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\ConceptController;
 use App\Http\Controllers\DateController;
 use App\Http\Controllers\DeletionController;
+use App\Http\Controllers\DiscoverController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\IdentifierController;
@@ -33,6 +34,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\VocabularyController;
+use App\Http\Middleware\ServeDiscovery;
 use App\Relations\EntityKinds;
 use App\Support\Vocab;
 use Illuminate\Support\Facades\Route;
@@ -61,6 +63,21 @@ Route::get('/branding/logo', [SettingsController::class, 'logo'])->name('brandin
 // Persistent IRIs resolve, for anyone: the controller sends a page only to those signed in.
 Route::get('/{segment}/{id}', [IriController::class, 'resolve'])->where(['segment' => 'record|agent|repository|activity|place|concept|instantiation', 'id' => '[0-9a-f-]{36}'])->name('iri');
 
+// The front page: the workspace for someone signed in, the public catalogue for everyone else.
+Route::get('/', fn () => auth()->check() ? view('home') : redirect()->route('discover.home'))->middleware(['web', 'active'])->name('home');
+
+// The public catalogue (WS-009): no sign-in; DiscoverController shows only what the Public role may read and is published.
+Route::middleware(ServeDiscovery::class)->prefix('discover')->name('discover.')->group(function () {
+    Route::get('/', [DiscoverController::class, 'home'])->name('home');
+    Route::get('/records/{id}', [DiscoverController::class, 'record'])->name('record');
+    Route::get('/agents/{id}', [DiscoverController::class, 'agent'])->name('agent');
+    Route::get('/repositories/{id}', [DiscoverController::class, 'repository'])->name('repository');
+    Route::get('/places/{id}', [DiscoverController::class, 'place'])->name('place');
+    Route::get('/activities/{id}', [DiscoverController::class, 'activity'])->name('activity');
+    Route::get('/graph/{kind}/{id}', [DiscoverController::class, 'graph'])->where('kind', 'records|agents|repositories|places|activities')->name('graph');
+    Route::get('/files/{file}', [DiscoverController::class, 'file'])->name('file');
+});
+
 Route::middleware('guest')->group(function () {
     Route::get('/sign-in', [SessionController::class, 'create'])->name('sign-in');
     Route::post('/sign-in', [SessionController::class, 'store'])->middleware('throttle:sign-in');
@@ -69,7 +86,6 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::middleware(['auth', 'active'])->group(function () {
-    Route::view('/', 'home')->name('home');
     Route::get('/account/password', [PasswordController::class, 'edit'])->name('password.edit');
     Route::post('/account/password', [PasswordController::class, 'update'])->name('password.update');
     Route::post('/sign-out', [SessionController::class, 'destroy'])->name('sign-out');

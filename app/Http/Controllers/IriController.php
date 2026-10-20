@@ -5,12 +5,13 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 //
 // A unit of description, agent or repository answers with a 303 to its
-// OpenRiC JSON-LD in the read API, or, for a browser of someone signed in,
-// to its page. Activities, places and concepts are not yet in a profile the
+// OpenRiC JSON-LD in the read API, or, for a browser, to its public page,
+// or its Workspace page for someone signed in. Activities, places and concepts are not yet in a profile the
 // API declares, so their IRIs go to the page, behind sign-in; so do instantiations.
 
 namespace App\Http\Controllers;
 
+use App\Discovery\Links;
 use App\Models\Activity;
 use App\Models\Agent;
 use App\Models\Concept;
@@ -40,7 +41,12 @@ class IriController extends Controller
         $entity = $class::where('iri', $request->url())->first() ?? $class::find($id) ?? abort(404);
         abort_unless($entity->getAttribute('iri') !== null && str_ends_with($entity->getAttribute('iri'), "/$segment/$id"), 404);
         $browser = in_array($request->getPreferredFormat(), ['html', null], true) && ! str_contains((string) $request->header('Accept'), 'json');
-        $target = ($api === null || ($browser && $request->user())) ? route($page, $entity) : route($api, $entity->getKey());
+        // A browser: the page for someone signed in, else the public page; a client asking for data: the JSON-LD.
+        $target = match (true) {
+            $browser && $request->user() !== null, $api === null && ! $browser => route($page, $entity),
+            $browser => Links::page($entity) ?? route($page, $entity),
+            default => route($api, $entity->getKey()),
+        };
 
         return redirect($target, 303)->header('Vary', 'Accept');
     }

@@ -13,7 +13,7 @@
 namespace App\Http\Middleware;
 
 use App\Api\Problem;
-use App\Models\Institution;
+use App\Support\HostInstitution;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -22,11 +22,9 @@ class ServeRicApi
 {
     public function handle(Request $request, Closure $next): Response
     {
-        $host = $request->getHost();
-        $institution = Institution::all()->first(fn (Institution $i) => parse_url($i->base_iri, PHP_URL_HOST) === $host)
-            ?? (Institution::count() === 1 ? Institution::first() : null);
+        $institution = HostInstitution::for($request);
         if ($institution === null) {
-            return Problem::response($request, 404, "No institution is published at $host.");
+            return Problem::response($request, 404, 'No institution is published at '.$request->getHost().'.');
         }
         $request->attributes->set('institution', $institution);
         $response = $next($request);

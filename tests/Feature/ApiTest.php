@@ -195,7 +195,7 @@ class ApiTest extends TestCase
 
         // The persistent IRI answers with a 303 to the API, or to the page for someone signed in.
         $this->get($this->fonds->iri, ['Accept' => 'application/ld+json'])->assertStatus(303)->assertRedirect(route('api.record', $this->fonds->id));
-        $this->get($this->fonds->iri)->assertStatus(303)->assertRedirect(route('api.record', $this->fonds->id));
+        $this->get($this->fonds->iri)->assertStatus(303)->assertRedirect(route('discover.record', $this->fonds->id));
         $this->actingAs($this->editor)->get($this->fonds->iri, ['Accept' => 'text/html'])->assertStatus(303)->assertRedirect(route('records.show', $this->fonds));
         $this->get($this->council->iri, ['Accept' => 'application/json'])->assertRedirect(route('api.agent', $this->council->id));
     }

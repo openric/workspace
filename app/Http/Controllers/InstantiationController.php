@@ -15,6 +15,7 @@ use App\Description\Bcp47;
 use App\Description\DateService;
 use App\Description\Elements;
 use App\Description\InstantiationService;
+use App\Files\FileResponse;
 use App\Models\Concept;
 use App\Models\DigitalFile;
 use App\Models\Instantiation;
@@ -27,13 +28,9 @@ use Illuminate\View\View;
 use InvalidArgumentException;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
-use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 
 class InstantiationController extends Controller
 {
-    /** Types a browser shows itself; any other file is sent as a download. */
-    private const INLINE = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'application/pdf', 'text/plain', 'audio/mpeg', 'audio/wav', 'video/mp4'];
-
     public function __construct(private InstantiationService $instantiations) {}
 
     /** Upload a file as a digital instantiation, or add a carrier with no file, such as the paper original. */
@@ -117,16 +114,8 @@ class InstantiationController extends Controller
         abort_unless($this->instantiations->deliverable($request->user(), $file), 404);
         $path = $this->instantiations->path($file);
         abort_unless(is_file($path), 404);
-        $disposition = in_array($file->mime_type, self::INLINE, true) && ! $request->boolean('download') ? ResponseHeaderBag::DISPOSITION_INLINE : ResponseHeaderBag::DISPOSITION_ATTACHMENT;
-        $fallback = preg_replace('/[^A-Za-z0-9._-]+/', '_', $file->original_name) ?: 'file';
 
-        return response()->file($path, [
-            'Content-Type' => $file->mime_type,
-            'X-Content-Type-Options' => 'nosniff',
-            'Content-Security-Policy' => "sandbox; default-src 'none'; img-src 'self'; media-src 'self'; style-src 'unsafe-inline'",
-            'Cache-Control' => 'private, no-store',
-            'Digest' => 'sha-256='.base64_encode(hex2bin($file->sha256)),
-        ])->setPrivate()->setContentDisposition($disposition, $file->original_name, $fallback);
+        return FileResponse::make($file, $path, $request->boolean('download'));
     }
 
     /** Check now that the kept file is still what was received. */

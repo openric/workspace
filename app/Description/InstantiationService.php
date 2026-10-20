@@ -14,11 +14,13 @@
 
 namespace App\Description;
 
+use App\Access\AccessControl;
 use App\Audit\AuditLog;
 use App\Files\FileStore;
 use App\Models\Concept;
 use App\Models\DigitalFile;
 use App\Models\Instantiation;
+use App\Models\Institution;
 use App\Models\RecordResource;
 use App\Models\User;
 use App\Support\Vocab;
@@ -104,21 +106,29 @@ class InstantiationService
         return $intact;
     }
 
-    /** May the account receive the file? The one rule for delivery (WS-007). */
-    public function deliverable(User $user, DigitalFile $file): bool
+    /**
+     * May the account, or with none the public of the file's institution, receive the file? The one rule for delivery (WS-007).
+     * The public receives a file only when its instantiation's title is published too.
+     */
+    public function deliverable(?User $user, DigitalFile $file): bool
     {
         $instantiation = $file->instantiation;
         $unit = $instantiation->record;
-        if ($instantiation->deleted_at !== null || $unit->deleted_at !== null || $unit->institution_id !== $user->institution_id) {
+        if ($instantiation->deleted_at !== null || $unit->deleted_at !== null || ($user !== null && $unit->institution_id !== $user->institution_id)) {
             return false;
         }
-        if (! $user->may('read-'.$file->use->notation, 'description', $unit)) {
+        $may = fn (string $action) => app(AccessControl::class)->allows($user, $action, 'description', $unit, $user ? null : Institution::find($unit->institution_id));
+        if (! $may('read-'.$file->use->notation) || ! $may('read')) {
+            return false;
+        }
+        if ($user === null && ! $instantiation->names()->whereHas('nameType', fn ($q) => $q->where('iri', Vocab::NAME_TYPES.'authorised'))
+            ->whereHas('state', fn ($q) => $q->where('iri', Vocab::valueState('published')))->exists()) {
             return false;
         }
 
         return match ($instantiation->availability->notation) {
             'online' => true,
-            'on-request' => $user->may('update', 'description', $unit),
+            'on-request' => $user !== null && $may('update'),
             default => false,
         };
     }

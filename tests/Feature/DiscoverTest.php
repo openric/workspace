@@ -1,0 +1,172 @@
+<?php
+
+// OpenRiC Workspace - the public catalogue and its graph (WS-009; the V0.1 demonstration steps 9 and 10).
+// Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
+namespace Tests\Feature;
+
+use App\Access\RoleService;
+use App\Accounts\AccountService;
+use App\Description\ActivityService;
+use App\Description\AgentService;
+use App\Description\InstantiationService;
+use App\Description\PlaceService;
+use App\Description\PublicationService;
+use App\Description\RecordService;
+use App\Description\RepositoryService;
+use App\Models\Activity;
+use App\Models\Agent;
+use App\Models\Concept;
+use App\Models\Instantiation;
+use App\Models\Institution;
+use App\Models\RecordResource;
+use App\Models\User;
+use App\Relations\RelationService;
+use App\Vocabulary\ConceptService;
+use App\Vocabulary\SkosImporter;
+use DOMDocument;
+use DOMXPath;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Imagick;
+use ImagickPixel;
+use Tests\TestCase;
+
+class DiscoverTest extends TestCase
+{
+    use RefreshDatabase;
+
+    private const LEVEL = 'https://workspace.openric.org/vocab/level-of-description/';
+
+    private string $store;
+
+    private RecordResource $fonds;
+
+    private RecordResource $item;
+
+    private RecordResource $closed;
+
+    private Agent $clerk;
+
+    private Activity $wedding;
+
+    private Instantiation $scan;
+
+    private User $editor;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->store = sys_get_temp_dir().'/workspace-objects-'.bin2hex(random_bytes(6));
+        config(['workspace.object_store' => $this->store]);
+        $this->loadBundledVocabularies();
+        foreach (['role-type', 'activity-type'] as $fixture) {
+            app(SkosImporter::class)->import(file_get_contents(base_path("tests/Fixtures/$fixture.ttl")));
+        }
+        $institution = Institution::create(['name' => 'Riverside Archives', 'base_iri' => 'https://archives.example.org']);
+        app(RoleService::class)->seedDefaults($institution);
+        $this->editor = app(AccountService::class)->create($institution, 'Editor', 'editor@example.org', 'correct horse battery staple');
+        app(AccountService::class)->grantTemplateRole($this->editor, 'editor');
+        $records = app(RecordService::class);
+        $relations = app(RelationService::class);
+        $holder = app(RepositoryService::class)->create($institution, 'Riverside Archives', 'en', 'RA');
+        $this->fonds = $records->create($institution, self::LEVEL.'fonds', 'Riverside Parish Council records', 'en', null, $holder, 'RPC');
+        $this->item = $records->create($institution, self::LEVEL.'item', 'Letter of 3 May 1902', 'en', $this->fonds, null, '1');
+        $records->describe($this->item, ['scope-and-content' => 'Names the witness at the marriage.'], 'en');
+        $this->closed = $records->create($institution, self::LEVEL.'item', 'Closed personnel file', 'en', $this->fonds, null, '2');
+        $this->clerk = app(AgentService::class)->create($institution, 'person', 'Botha, Jan (parish clerk)', 'en');
+        $this->wedding = app(ActivityService::class)->create($institution, 'Marriage of Johanna Engelbrecht and Pieter de Wet', 'en',
+            Concept::where('iri', Activity::TYPES.'production')->value('id'));
+        $relations->create($this->wedding, 'participation', $this->clerk, ['role' => 'witness'], $this->editor);
+        $relations->create($this->item, 'documentation', $this->wedding, [], $this->editor);
+        $relations->create($this->item, 'creation', $this->clerk, [], $this->editor);
+        $place = app(PlaceService::class)->create($institution, 'Riverside', 'en');
+        $relations->create($place, 'place', $this->wedding, [], $this->editor);
+        $concepts = app(ConceptService::class);
+        $relations->create($this->item, 'subject', $concepts->create($concepts->schemeOfKind($institution, 'subject'), ['label' => 'Marriages', 'language' => 'en']), [], $this->editor);
+        $image = new Imagick;
+        $image->newImage(800, 600, new ImagickPixel('#d8c9a3'));
+        $image->setImageFormat('png');
+        $path = tempnam(sys_get_temp_dir(), 'scan');
+        file_put_contents($path, $image->getImageBlob());
+        $this->scan = app(InstantiationService::class)->upload($this->item, $path, 'letter.png', 'en', 'Scan of the letter');
+
+        $publication = app(PublicationService::class);
+        foreach ([$holder, $this->fonds, $this->item, $this->clerk, $this->wedding, $place] as $entity) {
+            $publication->apply($entity, 'publish', null, false, $this->editor);
+        }
+        // Published, then changed: the change is a draft.
+        $records->describe($this->item, ['archivists-note' => 'Draft note, not yet reviewed.'], 'en');
+    }
+
+    protected function tearDown(): void
+    {
+        if (is_dir($this->store)) {
+            exec('rm -rf '.escapeshellarg($this->store));
+        }
+        parent::tearDown();
+    }
+
+    public function test_step_9_only_what_is_published_appears_and_drafts_never(): void
+    {
+        $this->get('/')->assertRedirect(route('discover.home'));
+        $this->get('/discover')->assertOk()->assertSee('Riverside Parish Council records')->assertSee('2 archival descriptions')->assertDontSee('Closed personnel file');
+        $this->get('/discover?q=letter')->assertOk()->assertSee('Letter of 3 May 1902')->assertDontSee('Closed personnel');
+        $this->get('/discover?q=closed')->assertSee('Nothing found.');
+        $this->get('/discover?q=botha&kind=agents')->assertSee('Botha, Jan (parish clerk)');
+        $this->get("/discover/records/{$this->closed->id}")->assertNotFound();
+        $this->get("/discover/graph/records/{$this->closed->id}")->assertNotFound();
+
+        $page = $this->get("/discover/records/{$this->item->id}")->assertOk();
+        $page->assertSee('Names the witness at the marriage.')->assertDontSee('Draft note, not yet reviewed.')->assertSee('Botha, Jan (parish clerk)')
+            ->assertSee('Marriages')->assertSee('Documents')->assertSee('rico:scopeAndContent')->assertSee('Scan of the letter');
+        $this->assertStringNotContainsString('Closed personnel file', $this->get("/discover/records/{$this->fonds->id}")->getContent());
+
+        // The reference copy reaches the public; the master does not (the Public role has no read-master).
+        $this->get(route('discover.file', $this->scan->file('reference')))->assertOk()->assertHeader('Content-Type', 'image/jpeg')->assertHeader('X-Content-Type-Options', 'nosniff');
+        $this->get(route('discover.file', $this->scan->file('master')))->assertNotFound();
+        app(InstantiationService::class)->updateFacts($this->scan, 'digital-file', 'withdrawn');
+        $this->get(route('discover.file', $this->scan->file('reference')))->assertNotFound();
+    }
+
+    public function test_step_10_the_graph_reaches_the_clerk_and_the_marriage_and_every_node_opens_its_page(): void
+    {
+        $response = $this->get("/discover/graph/records/{$this->item->id}?depth=2")->assertOk();
+        $html = $response->getContent();
+        foreach (['Botha, Jan (parish clerk)', 'Marriage of Johanna Engelbrecht and Pieter de Wet', 'Riverside Parish Council records', 'Riverside'] as $name) {
+            $this->assertTrue(str_contains($html, $name), "$name is in the graph");
+        }
+        $this->assertStringNotContainsString('Closed personnel file', $html);
+        $response->assertSee('documents')->assertSee('has or had as a participant');
+
+        $document = new DOMDocument;
+        @$document->loadHTML($html);
+        $xpath = new DOMXPath($document);
+        $this->assertSame(1, $xpath->query('//svg[@role="group"][@aria-labelledby="graph-title graph-desc"]')->length);
+        // Invariant 5: every node is a RiC-O 1.1 or OpenRiC extension class.
+        $classes = ['rico' => array_flip(file(resource_path('ontologies/rico-1.1.terms'), FILE_IGNORE_NEW_LINES)), 'openricx' => array_flip(file(resource_path('ontologies/openricx-ext.terms'), FILE_IGNORE_NEW_LINES))];
+        $nodes = $xpath->query('//h3[.="Entities"]/following-sibling::ul[1]/li');
+        $this->assertGreaterThanOrEqual(6, $nodes->length);
+        foreach ($nodes as $li) {
+            preg_match('/\b(rico|openricx):(\w+)/', $li->textContent, $m);
+            $this->assertArrayHasKey($m[2] ?? '', $classes[$m[1] ?? 'rico'] ?? [], 'a node class from RiC-O or the extension: '.$li->textContent);
+        }
+        // Invariant 7, for people: every node with a page opens its own description.
+        $links = collect(iterator_to_array($xpath->query('//svg//a/@href')))->map->value->unique();
+        $this->assertGreaterThanOrEqual(5, $links->count());
+        foreach ($links as $url) {
+            $this->get($url)->assertOk();
+        }
+        $this->get("/discover/activities/{$this->wedding->id}")->assertOk()->assertSee('Botha, Jan (parish clerk)')->assertSee('as Witness');
+        $this->get("/discover/agents/{$this->clerk->id}")->assertOk()->assertSee('Takes or took part in');
+    }
+
+    public function test_persistent_iris_open_the_public_page_in_a_browser_and_the_json_ld_for_data(): void
+    {
+        $this->get($this->item->iri, ['Accept' => 'text/html'])->assertStatus(303)->assertRedirect(route('discover.record', $this->item->id));
+        $this->get($this->wedding->iri, ['Accept' => 'text/html'])->assertRedirect(route('discover.activity', $this->wedding->id));
+        $this->get($this->item->iri, ['Accept' => 'application/ld+json'])->assertRedirect(route('api.record', $this->item->id));
+        $this->actingAs($this->editor)->get($this->item->iri, ['Accept' => 'text/html'])->assertRedirect(route('records.show', $this->item));
+        $this->actingAs($this->editor)->get('/')->assertOk();
+    }
+}

@@ -116,4 +116,11 @@ The ISAD(G), ISAAR(CPF) and ISDIAH screens stay organised by their standards, bu
   - **Fixity.** `workspace:fixity` rehashes every file, records and audits a failure, and exits with failure. A passing check is recorded but not audited.
   - **Deletion.** A unit with instantiations cannot be deleted until they are.
   - **Specification 0.54.0.** The Workspace is repinned to it and declares core-discovery 0.7.0 and export-only 0.10.0. Digital Object Linkage is not declared until its endpoints are served.
+- **v0.0.26, public discovery (WS-009; the V0.1 demonstration steps 9 and 10).**
+  - **The catalogue.** `/discover` needs no account and is the front page for anyone not signed in. It holds a search across archival descriptions, people, families and organisations, activities, places and repositories, and a page for each.
+  - **The rules.** Everything reads through `App\Api\PublicCatalogue`, as the read API and OAI-PMH do. An entity appears once its name or title is published and the institution's Public role may read it. Only published values and relations that stand are shown, and anything else is a 404.
+  - **Files.** A unit's digital copies reach the public through the same delivery rule as for an account, read as the Public role, so by default reference copies and thumbnails but not masters, and only once the instantiation's title is published. Publishing a unit now publishes its instantiations with it.
+  - **The graph.** Each page opens a relationship graph, one or two steps out: relations that stand, the unit above and the units inside, and the holder. It is drawn on the server as SVG with no JavaScript, every node typed by its RiC-O class and linked to its own page, and given again as a list of statements for anyone who does not read the drawing.
+  - **Checks.** The public pages pass axe at WCAG 2 AA in light and dark mode.
+  - **Persistent IRIs.** A browser not signed in is sent to the public page, a client asking for data to the JSON-LD, and someone signed in to the Workspace page.
 - **Still to come for archival description:** physical storage, the DACS, RAD, DC and MODS templates, bulk edit, and links to digital objects and rights. Each comes with its work package in the estimate of 20 October.

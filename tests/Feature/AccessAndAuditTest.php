@@ -56,9 +56,10 @@ class AccessAndAuditTest extends TestCase
             ->orderBy('a.occurred_at')->pluck('c.notation')->all();
     }
 
-    public function test_every_page_but_sign_in_needs_an_account(): void
+    public function test_every_workspace_page_but_sign_in_needs_an_account(): void
     {
-        $this->get('/')->assertRedirect(route('sign-in'));
+        // The front page sends everyone not signed in to the public catalogue (WS-009), which needs no account.
+        $this->get('/')->assertRedirect(route('discover.home'));
         $this->get('/audit')->assertRedirect(route('sign-in'));
         $this->get('/sign-in')->assertOk()->assertSee('Sign in');
     }
