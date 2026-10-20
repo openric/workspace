@@ -9,7 +9,7 @@
         @continue
     @endunless
     <details>
-        <summary>{{ $summary }}</summary>
+        <summary>{{ $summary }} <small lang="en">- edit or remove</small></summary>
         <form method="post" action="{{ route('identifiers.update', [$kind, $subject->getKey(), $identifier]) }}">
             @csrf
             @include('description._identifier-fields', ['identifier' => $identifier, 'prefix' => 'i'.$loop->index])

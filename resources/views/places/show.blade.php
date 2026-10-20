@@ -37,12 +37,4 @@
         'heading' => 'Containment over time', 'types' => ['place-containment'], 'section' => 'co', 'add' => null, 'addLabel' => 'Add a containment, with its dates'])
     @include('description._dates', ['subject' => $place, 'kind' => 'places', 'heading' => 'Dates', 'canUpdate' => $canUpdate, 'choices' => $dateChoices])
 
-    @if(auth()->user()->may('delete', 'vocabulary', $place))
-        <h2>Delete</h2>
-        <p>Its persistent IRI stays, marked deleted. A place that contains places or takes part in relations is kept until they are moved or removed.</p>
-        <form method="post" action="{{ route('places.destroy', $place) }}">
-            @csrf
-            <button type="submit">Delete place</button>
-        </form>
-    @endif
 @endsection

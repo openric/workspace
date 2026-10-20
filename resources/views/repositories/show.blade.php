@@ -29,7 +29,7 @@
             @continue
         @endunless
         <details>
-            <summary>{{ $contact->label ?: 'Contact' }}@if($contact->is_primary) (primary)@endif: {{ collect([$contact->street_address, $contact->city, $contact->country_code, $contact->telephone, $contact->email])->filter()->join(', ') }}</summary>
+            <summary>{{ $contact->label ?: 'Contact' }}@if($contact->is_primary) (primary)@endif: {{ collect([$contact->street_address, $contact->city, $contact->country_code, $contact->telephone, $contact->email])->filter()->join(', ') }} <small lang="en">- edit or remove</small></summary>
             <form method="post" action="{{ route('repositories.contacts.update', [$repository, $contact]) }}">
                 @csrf
                 @include('repositories._contact-fields', ['contact' => $contact, 'prefix' => 'c'.$loop->index])

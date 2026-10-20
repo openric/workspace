@@ -156,18 +156,6 @@ class PlaceController extends Controller
         return redirect()->route('places.show', $place)->with('status', 'Place moved.');
     }
 
-    public function destroy(Request $request, Place $place): RedirectResponse
-    {
-        $this->own($request, $place, 'delete');
-        try {
-            $this->places->delete($place, $request->user());
-        } catch (InvalidArgumentException $e) {
-            return redirect()->route('places.show', $place)->withErrors(['place' => $e->getMessage()]);
-        }
-
-        return redirect()->route('places.index')->with('status', 'Place deleted.');
-    }
-
     private function existing(string $institutionId): Builder
     {
         return Place::where('institution_id', $institutionId)->whereNull('deleted_at');

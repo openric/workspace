@@ -15,7 +15,8 @@
         <br><strong>Kind:</strong> {{ $vocabulary->kind->label(['en', 'und']) }}@if($concept->notation !== null)<br><strong>Code:</strong> {{ $concept->notation }}@endif</p>
     @php($canUpdate = auth()->user()->may('update', 'vocabulary', $concept))
     @php($canDelete = auth()->user()->may('delete', 'vocabulary', $concept))
-    @if($canUpdate)<p><a href="{{ route('concepts.edit', $concept) }}">Edit labels and notes</a></p>@endif
+    @if($canUpdate)<p><a href="{{ route('concepts.edit', $concept) }}" style="display: inline-block; padding: .5rem 1rem; background: var(--accent); color: var(--bg); text-decoration: none">Edit</a>
+        @if($canDelete && ! $concept->deprecated_at) <a href="#delete" style="display: inline-block; padding: .5rem 1rem; border: 1px solid var(--error); color: var(--error); text-decoration: none">Delete</a>@endif</p>@endif
 
     @foreach($concept->labels->sortBy('language') as $label)
         <section lang="{{ $label->language }}">
@@ -108,7 +109,8 @@
     @endif
 
     @if($canDelete)
-        <h2>Merge or deprecate</h2>
+        <h2 id="delete">Delete</h2>
+        <p>A concept is never removed, so its IRI always resolves and what cites it stays readable: deleting deprecates it, and merging deprecates a duplicate in favour of another concept.</p>
         @if($concept->deprecated_at)
             <form method="post" action="{{ route('concepts.restore', $concept) }}">@csrf<button type="submit">Restore: offer it again</button></form>
         @else
@@ -125,8 +127,7 @@
             @endif
             <form method="post" action="{{ route('concepts.deprecate', $concept) }}">
                 @csrf
-                <p>Deprecating keeps the concept and everything that cites it, but no longer offers it. A concept is never deleted, so its IRI always resolves.</p>
-                <button type="submit">Deprecate</button>
+                <button type="submit">Delete (deprecate)</button>
             </form>
         @endif
     @endif

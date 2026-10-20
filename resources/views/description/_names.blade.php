@@ -14,7 +14,7 @@
         @continue
     @endunless
     <details>
-        <summary lang="{{ $name->language }}">{{ $summary }}</summary>
+        <summary><span lang="{{ $name->language }}">{{ $summary }}</span> <small lang="en">- edit or remove</small></summary>
         <form method="post" action="{{ route('names.update', [$kind, $subject->getKey(), $name]) }}">
             @csrf
             @include('description._name-fields', ['name' => $name, 'prefix' => 'n'.$loop->index, 'from' => $from, 'to' => $to])

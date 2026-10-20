@@ -36,7 +36,8 @@
             <button type="submit" style="margin-top: 0">Search</button>
         </form>
         @forelse($places as $place)
-            <p><a href="{{ route('places.show', $place) }}">{{ $place->described('place-name', [app()->getLocale(), 'en']) }}</a>{{ collect([$place->placeType?->anyLabel(['en']), $place->parent ? 'in '.$place->parent->described('place-name', [app()->getLocale(), 'en']) : null, $place->identifier])->filter()->map(fn ($s) => ', '.$s)->join('') }}</p>
+            <p><a href="{{ route('places.show', $place) }}">{{ $place->described('place-name', [app()->getLocale(), 'en']) }}</a>{{ collect([$place->placeType?->anyLabel(['en']), $place->parent ? 'in '.$place->parent->described('place-name', [app()->getLocale(), 'en']) : null, $place->identifier])->filter()->map(fn ($s) => ', '.$s)->join('') }}
+                @include('description._row-actions', ['entity' => $place])</p>
         @empty
             <p>{{ $query !== '' || $type !== '' ? 'No place matches.' : 'No places yet.' }}</p>
         @endforelse

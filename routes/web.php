@@ -12,6 +12,7 @@ use App\Http\Controllers\AccountController;
 use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\ConceptController;
 use App\Http\Controllers\DateController;
+use App\Http\Controllers\DeletionController;
 use App\Http\Controllers\IdentifierController;
 use App\Http\Controllers\LocalVocabularyController;
 use App\Http\Controllers\NameController;
@@ -100,7 +101,6 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::post('/{place}', [PlaceController::class, 'update'])->name('update');
         Route::get('/{place}/move', [PlaceController::class, 'moveForm'])->name('move-form');
         Route::post('/{place}/move', [PlaceController::class, 'move'])->name('move');
-        Route::post('/{place}/remove', [PlaceController::class, 'destroy'])->name('destroy');
     });
     Route::prefix('vocabularies')->name('vocabularies.')->group(function () {
         Route::get('/', [LocalVocabularyController::class, 'index'])->name('index');
@@ -109,6 +109,7 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/{vocabulary}', [LocalVocabularyController::class, 'show'])->name('show');
         Route::get('/{vocabulary}/edit', [LocalVocabularyController::class, 'edit'])->name('edit');
         Route::post('/{vocabulary}', [LocalVocabularyController::class, 'update'])->name('update');
+        Route::post('/{vocabulary}/remove', [LocalVocabularyController::class, 'destroy'])->name('destroy');
         Route::get('/{vocabulary}/export/{format}', [LocalVocabularyController::class, 'export'])->where('format', 'turtle|rdfxml|ntriples|jsonld')->name('export');
         Route::get('/{vocabulary}/import', [LocalVocabularyController::class, 'importForm'])->name('import-form');
         Route::post('/{vocabulary}/import', [LocalVocabularyController::class, 'import'])->name('import');
@@ -144,6 +145,10 @@ Route::middleware(['auth', 'active'])->group(function () {
                 Route::post("/{{$parameter}}/remove", [$controller, 'destroy'])->name('destroy');
             });
     }
+
+    // Delete a unit of description, a repository or a place, after confirming (EntityDeletion).
+    Route::get('{kind}/{id}/delete', [DeletionController::class, 'confirm'])->where(['kind' => 'records|repositories|places', 'id' => '[0-9a-f-]{36}'])->name('deletion.confirm');
+    Route::post('{kind}/{id}/delete', [DeletionController::class, 'destroy'])->where(['kind' => 'records|repositories|places', 'id' => '[0-9a-f-]{36}'])->name('deletion.destroy');
 
     // Relations of any described entity, their assertions and evidence (ADR 0006, WS-006).
     Route::prefix('{kind}/{id}/relations')->where(['kind' => EntityKinds::segments(), 'id' => '[0-9a-f-]{36}', 'relation' => '[0-9a-f-]{36}',

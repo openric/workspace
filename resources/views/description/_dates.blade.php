@@ -8,7 +8,7 @@
         @continue
     @endunless
     <details>
-        <summary>{{ $summary }}</summary>
+        <summary>{{ $summary }} <small lang="en">- edit or remove</small></summary>
         <form method="post" action="{{ route('dates.update', [$kind, $subject->getKey(), $date]) }}">
             @csrf
             @include('description._date-fields', ['date' => $date, 'prefix' => 'd'.$loop->index])

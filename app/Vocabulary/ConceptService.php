@@ -64,6 +64,16 @@ class ConceptService
         ])));
     }
 
+    /** Delete a vocabulary that has no concepts; one with concepts keeps them, and their IRIs, for good. */
+    public function deleteScheme(Vocabulary $vocabulary, ?User $actor = null): void
+    {
+        $this->local($vocabulary);
+        if ($vocabulary->concepts()->exists()) {
+            throw new InvalidArgumentException('the vocabulary has concepts; it is kept, so their IRIs keep resolving. Deprecate or move its concepts instead.');
+        }
+        DB::transaction(fn () => AuditLog::actingAs($actor, fn () => $vocabulary->delete()));
+    }
+
     /** The institution's first vocabulary of a kind, made (titled after the kind) when it has none. */
     public function schemeOfKind(Institution $institution, string $kind, ?User $actor = null): Vocabulary
     {

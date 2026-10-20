@@ -1,14 +1,13 @@
 <?php
 
-// OpenRiC Workspace - create, describe, arrange and delete places (rico:Place; ADR 0006).
+// OpenRiC Workspace - create, describe and arrange places (rico:Place; ADR 0006).
 // Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
 // SPDX-License-Identifier: AGPL-3.0-or-later
 //
 // Heratio keeps places as terms of a Places taxonomy; here a place is an
 // entity with rico:PlaceName names, a place type, coordinates, the place
-// that contains it, dates, identifiers and relations. Deleting marks it
-// deleted, so its IRI stays; a place that still contains places or takes
-// part in relations is not deleted until they are moved or removed.
+// that contains it, dates, identifiers and relations. Deleting is
+// EntityDeletion's, as for every entity.
 
 namespace App\Description;
 
@@ -16,7 +15,6 @@ use App\Audit\AuditLog;
 use App\Models\Concept;
 use App\Models\Institution;
 use App\Models\Place;
-use App\Models\Relation;
 use App\Models\User;
 use App\Support\Vocab;
 use Illuminate\Support\Facades\DB;
@@ -94,18 +92,5 @@ class PlaceService
             }
         }
         DB::transaction(fn () => AuditLog::actingAs($actor, fn () => $place->update(['parent_id' => $parent?->id])));
-    }
-
-    public function delete(Place $place, ?User $actor = null): void
-    {
-        if ($place->children()->exists()) {
-            throw new InvalidArgumentException('the place contains other places; move or delete them first');
-        }
-        $related = Relation::where(fn ($q) => $q->where(['source_table' => 'places', 'source_id' => $place->id])
-            ->orWhere(fn ($q) => $q->where(['target_table' => 'places', 'target_id' => $place->id])))->count();
-        if ($related > 0) {
-            throw new InvalidArgumentException("the place takes part in $related ".($related === 1 ? 'relation' : 'relations').'; remove them first');
-        }
-        DB::transaction(fn () => AuditLog::actingAs($actor, fn () => $place->update(['deleted_at' => now()])));
     }
 }

@@ -22,21 +22,21 @@ final class EntityKinds
     /**
      * kind => class (its model), segment (of its URL), permission (record kind, ADR 0005),
      * readable (reading needs the read permission; otherwise any account of the institution
-     * reads it), route (of its page), label (the name element that names it, null for a concept),
+     * reads it), route (of its page), index (the route of its list), label (the name element that names it, null for a concept),
      * with (what its label needs loaded), noun (for people).
      */
     private const KINDS = [
         'record' => ['class' => RecordResource::class, 'segment' => 'records', 'permission' => 'description', 'readable' => true,
-            'route' => 'records.show', 'label' => 'title', 'with' => ['names.nameType', 'descriptionValues.element', 'identifiers.identifierType'], 'noun' => 'unit of description'],
+            'route' => 'records.show', 'index' => 'records.index', 'label' => 'title', 'with' => ['names.nameType', 'descriptionValues.element', 'identifiers.identifierType'], 'noun' => 'unit of description'],
         'repository' => ['class' => Repository::class, 'segment' => 'repositories', 'permission' => 'repository', 'readable' => true,
-            'route' => 'repositories.show', 'label' => 'authorised-name', 'with' => ['names.nameType', 'descriptionValues.element', 'identifiers.identifierType'], 'noun' => 'repository'],
+            'route' => 'repositories.show', 'index' => 'repositories.index', 'label' => 'authorised-name', 'with' => ['names.nameType', 'descriptionValues.element', 'identifiers.identifierType'], 'noun' => 'repository'],
         'place' => ['class' => Place::class, 'segment' => 'places', 'permission' => 'vocabulary', 'readable' => false,
-            'route' => 'places.show', 'label' => 'place-name', 'with' => ['names.nameType', 'descriptionValues.element', 'identifiers.identifierType', 'parent.names.nameType'], 'noun' => 'place'],
+            'route' => 'places.show', 'index' => 'places.index', 'label' => 'place-name', 'with' => ['names.nameType', 'descriptionValues.element', 'identifiers.identifierType', 'parent.names.nameType'], 'noun' => 'place'],
         'concept' => ['class' => Concept::class, 'segment' => 'concepts', 'permission' => 'vocabulary', 'readable' => false,
-            'route' => 'concepts.show', 'label' => null, 'with' => ['labels', 'vocabulary'], 'noun' => 'concept'],
+            'route' => 'concepts.show', 'index' => null, 'label' => null, 'with' => ['labels', 'vocabulary'], 'noun' => 'concept'],
     ];
 
-    /** @return array{class: class-string<Model>, segment: string, permission: string, readable: bool, route: string, label: ?string, with: list<string>, noun: string}|null */
+    /** @return array{class: class-string<Model>, segment: string, permission: string, readable: bool, route: string, index: ?string, label: ?string, with: list<string>, noun: string}|null */
     public static function get(string $kind): ?array
     {
         return self::KINDS[$kind] ?? null;

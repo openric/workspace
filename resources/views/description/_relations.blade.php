@@ -20,7 +20,7 @@
         .(($from || $to) ? ', '.($from ?? '?').' to '.($to ?? '?') : '')
         .' ('.$standingLabels[$relation->standing()].')')
     <details>
-        <summary>{{ $summary }}</summary>
+        <summary>{{ $summary }}@if($canUpdate) <small lang="en">- assert, edit or remove</small>@endif</summary>
         <p><a href="{{ \App\Relations\EntityKinds::route($relation->other) }}">{{ \App\Relations\EntityKinds::label($relation->other) }}</a>.
            {{ collect([$relation->relationType->label(['en', 'und']), $relation->state?->label(['en', 'und']), $relation->certainty ? mb_strtolower($relation->certainty->label(['en', 'und'])) : null])->filter()->join(', ') }}.
            @if($relation->description)<br><span lang="{{ $relation->language }}">{{ $relation->description }}</span>@endif

@@ -322,19 +322,21 @@ class PlaceAndConceptTest extends TestCase
         $this->assertNull($town->fresh()->parent_id);
     }
 
-    public function test_a_place_in_use_is_not_deleted_and_a_deleted_one_keeps_its_iri(): void
+    public function test_a_place_containing_places_is_not_deleted_and_a_deleted_one_keeps_its_iri(): void
     {
         $province = $this->places->create($this->institution, 'Western Cape', 'en');
         $town = $this->places->create($this->institution, 'Riverside', 'en', $province);
-        $relation = app(RelationService::class)->create($town, 'place', $this->fonds, [], $this->archivist);
+        app(RelationService::class)->create($town, 'place', $this->fonds, [], $this->archivist);
 
-        $this->actingAs($this->archivist)->post("/places/{$province->id}/remove")->assertSessionHasErrors('place');
-        $this->actingAs($this->archivist)->post("/places/{$town->id}/remove")->assertSessionHasErrors('place');
-        app(RelationService::class)->remove($relation, $this->archivist);
-        $this->actingAs($this->archivist)->post("/places/{$town->id}/remove")->assertRedirect(route('places.index'));
+        $this->actingAs($this->archivist)->get("/places/{$province->id}/delete")->assertOk()->assertSee('It has 1 place inside it')->assertDontSee('Delete Western Cape</button>', false);
+        $this->actingAs($this->archivist)->post("/places/{$province->id}/delete")->assertSessionHasErrors('delete');
+        $this->actingAs($this->archivist)->get("/places/{$town->id}/delete")->assertOk()->assertSee('1 relation');
+        $this->actingAs($this->contributor)->post("/places/{$town->id}/delete")->assertForbidden();
+        $this->actingAs($this->archivist)->post("/places/{$town->id}/delete")->assertRedirect(route('places.index'));
 
         $this->assertNotNull($town->fresh()->deleted_at);
         $this->assertSame($town->iri, $town->fresh()->iri);
+        $this->assertSame(0, Relation::count(), 'its relations go with it');
         $this->actingAs($this->archivist)->get("/places/{$town->id}")->assertNotFound();
         $this->actingAs($this->archivist)->get('/places')->assertSee('Western Cape')->assertDontSee(route('places.show', $town));
         $this->assertTrue(DB::table('audit_log')->where(['subject_table' => 'places', 'subject_id' => $town->id])->whereNotNull('after->deleted_at')->exists());

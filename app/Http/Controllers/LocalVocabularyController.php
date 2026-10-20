@@ -104,6 +104,18 @@ class LocalVocabularyController extends Controller
         return redirect()->route('vocabularies.show', $vocabulary)->with('status', 'Vocabulary saved.');
     }
 
+    public function destroy(Request $request, Vocabulary $vocabulary): RedirectResponse
+    {
+        $this->own($request, $vocabulary, 'delete');
+        try {
+            $this->concepts->deleteScheme($vocabulary, $request->user());
+        } catch (InvalidArgumentException $e) {
+            return redirect()->route('vocabularies.show', $vocabulary)->withErrors(['vocabulary' => $e->getMessage()]);
+        }
+
+        return redirect()->route('vocabularies.index')->with('status', 'Vocabulary deleted.');
+    }
+
     public function export(Request $request, Vocabulary $vocabulary, string $format): Response
     {
         $this->own($request, $vocabulary);
