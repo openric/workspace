@@ -20,6 +20,10 @@ final class Vocab
 
     public const AUDIT_ACTIONS = self::BASE.'audit-action/';
 
+    public const DESCRIPTION_ELEMENTS = self::BASE.'description-element/';
+
+    public const VALUE_STATES = self::BASE.'language-value-state/';
+
     public static function role(string $notation): string
     {
         return self::ACCOUNT_ROLES.$notation;
@@ -33,5 +37,15 @@ final class Vocab
     public static function action(string $notation): string
     {
         return self::AUDIT_ACTIONS.$notation;
+    }
+
+    public static function element(string $notation): string
+    {
+        return self::DESCRIPTION_ELEMENTS.$notation;
+    }
+
+    public static function valueState(string $notation): string
+    {
+        return self::VALUE_STATES.$notation;
     }
 }

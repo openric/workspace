@@ -1,0 +1,40 @@
+# OpenRiC Workspace - OpenRiC Workspace Language Value States.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# The states a language value passes through. Only a published value reaches a public channel (WS-008).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/language-value-state/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Language Value States"@en ;
+    dcterms:description "States of one language value of a description."@en ;
+    dcterms:issued "2026-10-19"^^xsd:date ;
+    skos:hasTopConcept v:draft, v:reviewed, v:published, v:withdrawn .
+
+v:draft a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Draft"@en ;
+    skos:definition "Entered and not yet reviewed. Never shown publicly."@en .
+
+v:reviewed a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Reviewed"@en ;
+    skos:definition "Approved by a reviewer and not yet published. Never shown publicly."@en .
+
+v:published a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Published"@en ;
+    skos:definition "Shown in public discovery, the API and exports."@en .
+
+v:withdrawn a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Withdrawn"@en ;
+    skos:definition "Taken out of public view after being published. Kept, never deleted."@en .

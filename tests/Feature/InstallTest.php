@@ -7,6 +7,7 @@
 namespace Tests\Feature;
 
 use App\Models\Institution;
+use App\Models\Repository;
 use App\Models\User;
 use App\Support\Vocab;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -30,6 +31,9 @@ class InstallTest extends TestCase
 
         $admin = User::where('email', 'admin@example.org')->firstOrFail();
         $this->assertSame('https://archives.example.org', $admin->institution->base_iri);
+        $repository = Repository::firstOrFail();
+        $this->assertStringStartsWith('https://archives.example.org/repository/', $repository->iri);
+        $this->assertSame('Riverside Parish Council Archives', $repository->described('authorised-name', ['en']));
         $this->assertTrue($admin->hasPermission(Vocab::permission('manage-accounts')));
         $this->assertFalse($admin->hasPermission(Vocab::permission('publish')));
         $this->assertTrue(DB::table('audit_log as a')->join('concepts as c', 'c.id', '=', 'a.action_id')->where('c.notation', 'install')->exists());

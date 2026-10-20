@@ -1,7 +1,7 @@
 <?php
 
 // OpenRiC Workspace - first installation: vocabularies, the institution, its
-// role grants and the first administrator (WS-001).
+// role grants, its first repository and the first administrator (WS-001).
 // Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
@@ -9,6 +9,8 @@ namespace App\Console\Commands;
 
 use App\Accounts\AccountService;
 use App\Audit\AuditLog;
+use App\Description\Bcp47;
+use App\Description\RepositoryService;
 use App\Models\Institution;
 use App\Support\Vocab;
 use App\Vocabulary\SkosImporter;
@@ -25,11 +27,13 @@ class Install extends Command
         {--base-iri= : Base of the IRIs the institution mints, e.g. https://archives.example.org}
         {--admin-name= : Name of the first administrator}
         {--admin-email= : Email the first administrator signs in with}
+        {--repository= : Name of the first repository (default: the institution name)}
+        {--language=en : BCP 47 tag of the language the names are written in}
         {--skip-openric-vocabularies : Do not fetch the OpenRiC vocabularies from openric.org (offline installs)}';
 
     protected $description = 'Install the Workspace: vocabularies, the institution and its first administrator';
 
-    public function handle(SkosImporter $importer, AccountService $accounts): int
+    public function handle(SkosImporter $importer, AccountService $accounts, RepositoryService $repositories): int
     {
         if (Institution::exists()) {
             $this->error('The Workspace is already installed: an institution exists.');
@@ -49,6 +53,12 @@ class Install extends Command
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255'],
         ]);
+        $language = (string) $this->option('language');
+        if (! Bcp47::valid($language)) {
+            $this->error("$language is not a BCP 47 language tag, e.g. en or af.");
+
+            return self::INVALID;
+        }
         if ($validator->fails()) {
             foreach ($validator->errors()->all() as $message) {
                 $this->error($message);
@@ -79,8 +89,9 @@ class Install extends Command
         // Every audit row is signed (ADR 0004), so the key comes before the first one.
         $this->call('workspace:audit:create-key', ['--if-missing' => true]);
 
-        $admin = DB::transaction(function () use ($input, $password, $accounts) {
+        $admin = DB::transaction(function () use ($input, $password, $accounts, $repositories, $language) {
             $institution = Institution::create(['name' => $input['institution'], 'base_iri' => $input['base_iri']]);
+            $repositories->create($institution, (string) ($this->option('repository') ?: $input['institution']), $language);
             $accounts->seedDefaultGrants($institution);
             $admin = $accounts->create($institution, $input['name'], $input['email'], $password);
             $accounts->grantRole($admin, Vocab::role('administrator'));
