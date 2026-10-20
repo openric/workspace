@@ -53,6 +53,17 @@ class VocabularyImportTest extends TestCase
         $this->assertSame($ids, Concept::pluck('id', 'iri')->all());
     }
 
+    public function test_a_new_broader_concept_counts_as_an_update(): void
+    {
+        $importer = app(SkosImporter::class);
+        $importer->import($this->fixture());
+
+        $result = $importer->import($this->fixture()."\nrt:witness <http://www.w3.org/2004/02/skos/core#broader> rt:spouse .\n");
+
+        $this->assertSame(1, $result->updated);
+        $this->assertSame(10, $result->unchanged);
+    }
+
     public function test_a_concept_dropped_from_the_source_is_kept_and_reported(): void
     {
         $importer = app(SkosImporter::class);

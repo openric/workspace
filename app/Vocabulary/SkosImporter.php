@@ -51,6 +51,7 @@ class SkosImporter
 
             $result = new ImportResult($vocabulary);
             $byIri = [];
+            $outcome = [];
             foreach ($concepts as $resource) {
                 $concept = Concept::firstOrNew(['iri' => $resource->getUri()]);
                 if ($concept->exists && $concept->vocabulary_id !== $vocabulary->id) {
@@ -59,7 +60,7 @@ class SkosImporter
                 $concept->vocabulary_id = $vocabulary->id;
                 $concept->notation = $this->notation($resource, $scheme->getUri());
                 $concept->deprecated_at = $this->isDeprecated($resource) ? ($concept->deprecated_at ?? now()) : null;
-                $result->count($concept->exists ? ($concept->isDirty() ? 'updated' : 'unchanged') : 'created');
+                $outcome[$resource->getUri()] = $concept->exists ? ($concept->isDirty() ? 'updated' : 'unchanged') : 'created';
                 $concept->save();
                 $byIri[$concept->iri] = $concept;
             }
@@ -69,10 +70,17 @@ class SkosImporter
                 $concept = $byIri[$resource->getUri()];
                 $concept->broader_id = $this->linked($resource, 'skos:broader', $byIri);
                 $concept->replaced_by_id = $this->linked($resource, 'dcterms:isReplacedBy', $byIri);
+                // A change made only in this pass (a new broader concept, say) still counts as an update.
+                if ($concept->isDirty() && $outcome[$concept->iri] === 'unchanged') {
+                    $outcome[$concept->iri] = 'updated';
+                }
                 $concept->save();
                 $this->labels($concept, $resource);
             }
 
+            foreach ($outcome as $kind) {
+                $result->count($kind);
+            }
             $result->missing = Concept::where('vocabulary_id', $vocabulary->id)
                 ->whereNotIn('iri', array_keys($byIri))->pluck('iri')->all();
 
