@@ -4,6 +4,7 @@
 @section('content')
     <p><a href="{{ route('places.index') }}">All places</a>@foreach($place->ancestors() as $above) › <a href="{{ route('places.show', $above) }}">{{ $above->described('place-name', [app()->getLocale(), 'en']) }}</a>@endforeach</p>
     <h1>{{ $place->described('place-name', [app()->getLocale(), 'en']) }}</h1>
+    <p>Place @include('description._ric', ['term' => 'rico:Place'])</p>
     @if(session('status'))<p role="status">{{ session('status') }}</p>@endif
     @if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif
     <p><strong>Persistent IRI:</strong> <code>{{ $place->iri }}</code>

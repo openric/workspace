@@ -8,9 +8,9 @@
         @csrf
         @if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif
         @if($parent)<input type="hidden" name="parent" value="{{ $parent->id }}">@endif
-        <label for="name">Authorised name</label>
+        <label for="name">Authorised name</label> @include('description._ric', ['term' => 'rico:PlaceName'])
         <input id="name" name="name" required maxlength="1024" value="{{ old('name') }}">
-        <label for="language">Language of the name (BCP 47, e.g. en, af)</label>
+        <label for="language">Language of the name (BCP 47, e.g. en, af)</label> @include('description._ric', ['term' => 'xml:lang'])
         <input id="language" name="language" required value="{{ old('language', 'en') }}">
         <button type="submit">Create place</button>
     </form>

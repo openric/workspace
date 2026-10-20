@@ -8,18 +8,18 @@
         @csrf
         @if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif
         @if($parent)<input type="hidden" name="parent" value="{{ $parent->id }}">@endif
-        <label for="title">Title (ISAD(G) 3.1.2)</label>
+        <label for="title">Title (ISAD(G) 3.1.2)</label> @include('description._ric', ['term' => 'rico:Title'])
         <input id="title" name="title" required value="{{ old('title') }}">
-        <label for="language">Language of the title (BCP 47, e.g. en, af)</label>
+        <label for="language">Language of the title (BCP 47, e.g. en, af)</label> @include('description._ric', ['term' => 'xml:lang'])
         <input id="language" name="language" required value="{{ old('language', 'en') }}">
-        <label for="level">Level of description (3.1.4)</label>
+        <label for="level">Level of description (3.1.4)</label> <small>(each choice names its RiC-O class)</small>
         <select id="level" name="level" required style="font: inherit; padding: .5rem">
-            @foreach($levels as $level)<option value="{{ $level->iri }}" @selected(old('level') === $level->iri)>{{ $level->label(['en', 'und']) }}</option>@endforeach
+            @foreach($levels as $level)<option value="{{ $level->iri }}" @selected(old('level') === $level->iri)>{{ $level->label(['en', 'und']) }} ({{ $level->ricTerm() }})</option>@endforeach
         </select>
-        <label for="identifier">Reference code (3.1.1, optional)</label>
+        <label for="identifier">Reference code (3.1.1, optional)</label> @include('description._ric', ['term' => 'rico:Identifier'])
         <input id="identifier" name="identifier" value="{{ old('identifier') }}">
         @unless($parent)
-            <label for="repository">Held by</label>
+            <label for="repository">Held by</label> @include('description._ric', ['term' => 'rico:hasOrHadHolder'])
             <select id="repository" name="repository" required style="font: inherit; padding: .5rem">
                 @foreach($repositories as $repository)<option value="{{ $repository->id }}">{{ $repository->described('authorised-name', ['en']) }}</option>@endforeach
             </select>

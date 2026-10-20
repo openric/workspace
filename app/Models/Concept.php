@@ -121,6 +121,19 @@ class Concept extends Model
         return null;
     }
 
+    /**
+     * The RiC-O (or OpenRiC extension) term what this concept stands for is kept or exported as,
+     * such as rico:scopeAndContent, from the scope note of a Workspace vocabulary: the term after
+     * "exported as" or "kept as", else the first term named. Null when the note names none.
+     */
+    public function ricTerm(): ?string
+    {
+        $note = (string) $this->labels->firstWhere('language', 'en')?->scope_note;
+
+        return preg_match('/(?:exported|kept) as (?:an? |the )?((?:rico|openricx):\w+)/i', $note, $m)
+            || preg_match('/((?:rico|openricx):\w+)/', $note, $m) ? $m[1] : null;
+    }
+
     /** The label in the first of the given languages that has one, else any label, else the notation. */
     public function anyLabel(array $languages): string
     {

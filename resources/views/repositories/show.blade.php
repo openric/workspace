@@ -4,6 +4,7 @@
 @section('content')
     <p><a href="{{ route('repositories.index') }}">All repositories</a></p>
     <h1>{{ $repository->described('authorised-name', [app()->getLocale(), 'en']) }}</h1>
+    <p>Repository @include('description._ric', ['term' => 'rico:CorporateBody'])</p>
     @if(session('status'))<p role="status">{{ session('status') }}</p>@endif
     @if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif
     <p><strong>Persistent IRI:</strong> <code>{{ $repository->iri }}</code>@if($repository->identifier)<br><strong>Identifier:</strong> {{ $repository->identifier }}@endif</p>

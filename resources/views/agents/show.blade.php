@@ -7,7 +7,7 @@
     <h1>{{ $name }}</h1>
     @if(session('status'))<p role="status">{{ session('status') }}</p>@endif
     @if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif
-    <p><strong>Type of entity:</strong> {{ $agent->agentType->label(['en', 'und']) }}
+    <p><strong>Type of entity:</strong> {{ $agent->agentType->label(['en', 'und']) }} @include('description._ric', ['term' => \App\Relations\EntityKinds::ricClass($agent)])
         @if($agent->identifier)<br><strong>Identifier:</strong> {{ $agent->identifier }}@endif
         <br><strong>Persistent IRI:</strong> <code>{{ $agent->iri }}</code>
         @if($agent->isEmbargoed())<br><strong>Embargoed until {{ $agent->embargo_until->format('Y-m-d') }}:</strong> only those who may update authority records see it.@endif

@@ -4,7 +4,7 @@
 @php($nameTypes = \App\Models\Concept::choices(\App\Support\Vocab::NAME_TYPES)->get())
 @php($names = $subject->names->filter(fn ($n) => $drafts || $n->state->iri === \App\Support\Vocab::valueState('published'))
     ->sortBy(fn ($n) => [$nameTypes->search(fn ($t) => $t->id === $n->name_type_id), ! $n->is_original, $n->language]))
-<h2>Names</h2>
+<h2>Names @include('description._ric', ['term' => \App\Relations\EntityKinds::ricName($subject)])</h2>
 @forelse($names as $name)
     @php($from = $name->usedDate('used-from')?->normalized_value)
     @php($to = $name->usedDate('used-to')?->normalized_value)

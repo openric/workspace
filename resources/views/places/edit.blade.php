@@ -8,22 +8,22 @@
     <form method="post" action="{{ route('places.update', $place) }}">
         @csrf
         @if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif
-        <label for="language">Language of these values (BCP 47)</label>
+        <label for="language">Language of these values (BCP 47)</label> @include('description._ric', ['term' => 'xml:lang'])
         <input id="language" name="language" required value="{{ old('language', $language) }}">
         @include('description._fields', ['subject' => $place, 'standard' => \App\Description\Elements::PLACE, 'language' => $language])
         <fieldset style="margin-top: 1.5rem; border: 1px solid var(--line); padding: 0 1rem 1rem">
             <legend><strong>Type and location</strong></legend>
-            <label for="place_type">Place type (rico:hasOrHadPlaceType)</label>
+            <label for="place_type">Place type</label> @include('description._ric', ['term' => 'rico:hasOrHadPlaceType'])
             <select id="place_type" name="place_type" style="font: inherit; padding: .5rem">
                 <option value="">Not set</option>
                 @foreach($types as $type)<option value="{{ $type->id }}" @selected(old('place_type', $place->place_type_id) === $type->id)>{{ $type->anyLabel(['en']) }} ({{ $type->vocabulary->title }})</option>@endforeach
             </select>
             @if($types->isEmpty())<small>The institution has no place types yet; add them under <a href="{{ route('vocabularies.index') }}">Vocabularies</a>.</small>@endif
-            <label for="latitude">Latitude (decimal degrees, WGS 84, -90 to 90)</label>
+            <label for="latitude">Latitude (decimal degrees, WGS 84, -90 to 90)</label> @include('description._ric', ['term' => 'rico:latitude'])
             <input id="latitude" name="latitude" inputmode="decimal" value="{{ old('latitude', $place->latitude) }}">
-            <label for="longitude">Longitude (decimal degrees, -180 to 180)</label>
+            <label for="longitude">Longitude (decimal degrees, -180 to 180)</label> @include('description._ric', ['term' => 'rico:longitude'])
             <input id="longitude" name="longitude" inputmode="decimal" value="{{ old('longitude', $place->longitude) }}">
-            <label for="altitude">Altitude (metres above sea level, optional)</label>
+            <label for="altitude">Altitude (metres above sea level, optional)</label> @include('description._ric', ['term' => 'rico:altitude'])
             <input id="altitude" name="altitude" inputmode="decimal" value="{{ old('altitude', $place->altitude) }}">
         </fieldset>
         <button type="submit">Save</button>

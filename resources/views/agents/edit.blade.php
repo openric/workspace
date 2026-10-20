@@ -8,35 +8,35 @@
     <form method="post" action="{{ route('agents.update', $agent) }}">
         @csrf
         @if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif
-        <label for="language">Language of these values (BCP 47)</label>
+        <label for="language">Language of these values (BCP 47)</label> @include('description._ric', ['term' => 'xml:lang'])
         <input id="language" name="language" required value="{{ old('language', $language) }}">
-        <label for="type">Type of entity (5.1.1)</label>
+        <label for="type">Type of entity (5.1.1)</label> <small>(each choice names its RiC-O class)</small>
         <select id="type" name="type" required style="font: inherit; padding: .5rem">
-            @foreach($types as $t)<option value="{{ $t->notation }}" @selected(old('type', $agent->typeNotation()) === $t->notation)>{{ $t->label(['en', 'und']) }}</option>@endforeach
+            @foreach($types as $t)<option value="{{ $t->notation }}" @selected(old('type', $agent->typeNotation()) === $t->notation)>{{ $t->label(['en', 'und']) }} ({{ $t->ricTerm() }})</option>@endforeach
         </select>
-        <label for="identifier">Identifier (5.1.6)</label>
+        <label for="identifier">Identifier (5.1.6)</label> @include('description._ric', ['term' => 'rico:Identifier'])
         <input id="identifier" name="identifier" maxlength="255" value="{{ old('identifier', $agent->identifier) }}">
         @include('description._fields', ['subject' => $agent, 'standard' => \App\Description\Elements::ISAAR_CPF, 'language' => $language])
         <fieldset style="margin-top: 1.5rem; border: 1px solid var(--line); padding: 0 1rem 1rem">
             <legend><strong>Description control and publication</strong></legend>
-            <label for="description_identifier">Description identifier (5.4.1)</label>
+            <label for="description_identifier">Description identifier (5.4.1)</label> @include('description._ric', ['term' => null])
             <input id="description_identifier" name="description_identifier" maxlength="255" value="{{ old('description_identifier', $agent->description_identifier) }}">
-            <label for="maintainer">Maintained by</label>
+            <label for="maintainer">Maintained by</label> @include('description._ric', ['term' => null])
             <select id="maintainer" name="maintainer" style="font: inherit; padding: .5rem">
                 <option value="">Not set</option>
                 @foreach($repositories as $repository)<option value="{{ $repository->id }}" @selected(old('maintainer', $agent->maintainer_id) === $repository->id)>{{ $repository->described('authorised-name', ['en']) }}</option>@endforeach
             </select>
-            <label for="status">Status (5.4.4)</label>
+            <label for="status">Status (5.4.4)</label> @include('description._ric', ['term' => null])
             <select id="status" name="status" style="font: inherit; padding: .5rem">
                 <option value="">Not set</option>
                 @foreach($statuses as $status)<option value="{{ $status->iri }}" @selected(old('status', $agent->descriptionStatus?->iri) === $status->iri)>{{ $status->label(['en', 'und']) }}</option>@endforeach
             </select>
-            <label for="detail">Level of detail (5.4.5)</label>
+            <label for="detail">Level of detail (5.4.5)</label> @include('description._ric', ['term' => null])
             <select id="detail" name="detail" style="font: inherit; padding: .5rem">
                 <option value="">Not set</option>
                 @foreach($details as $detail)<option value="{{ $detail->iri }}" @selected(old('detail', $agent->descriptionDetail?->iri) === $detail->iri)>{{ $detail->label(['en', 'und']) }}</option>@endforeach
             </select>
-            <label for="embargo_until">Embargoed until (for a living person, under POPIA or GDPR: until then only those who may update it see it)</label>
+            <label for="embargo_until">Embargoed until (for a living person, under POPIA or GDPR: until then only those who may update it see it)</label> @include('description._ric', ['term' => null])
             <input id="embargo_until" name="embargo_until" type="date" value="{{ old('embargo_until', $agent->embargo_until?->format('Y-m-d')) }}">
         </fieldset>
         <button type="submit">Save</button>

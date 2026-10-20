@@ -1,14 +1,14 @@
 {{-- OpenRiC Workspace - the dates of a described entity, as rico:Date entities (ADR 0006). Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems. SPDX-License-Identifier: AGPL-3.0-or-later --}}
 {{-- Needs: $subject (HasDates), $kind (URL segment), $heading, $canUpdate, $choices (DateService::choices). --}}
-<h2>{{ $heading }}</h2>
+<h2>{{ $heading }} @include('description._ric', ['term' => 'rico:Date'])</h2>
 @forelse($subject->dates as $date)
     @php($summary = $date->property->label(['en', 'und']).': '.$date->display().($date->expressed && $date->normalized_value ? ' ('.$date->normalized_value.')' : '').($date->dateType ? ', '.$date->dateType->label(['en', 'und']) : ''))
     @unless($canUpdate)
-        <p>{{ $summary }}</p>
+        <p>{{ $summary }} @include('description._ric', ['term' => $date->property])</p>
         @continue
     @endunless
     <details>
-        <summary>{{ $summary }} <small lang="en">- edit or remove</small></summary>
+        <summary>{{ $summary }} @include('description._ric', ['term' => $date->property]) <small lang="en">- edit or remove</small></summary>
         <form method="post" action="{{ route('dates.update', [$kind, $subject->getKey(), $date]) }}">
             @csrf
             @include('description._date-fields', ['date' => $date, 'prefix' => 'd'.$loop->index])

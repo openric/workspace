@@ -9,26 +9,26 @@
     <form method="post" action="{{ route('records.update', $record) }}">
         @csrf
         @if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif
-        <label for="language">Language of these values (BCP 47)</label>
+        <label for="language">Language of these values (BCP 47)</label> @include('description._ric', ['term' => 'xml:lang'])
         <input id="language" name="language" required value="{{ old('language', $language) }}">
-        <label for="identifier">Reference code (3.1.1)</label>
+        <label for="identifier">Reference code (3.1.1)</label> @include('description._ric', ['term' => 'rico:Identifier'])
         <input id="identifier" name="identifier" value="{{ old('identifier', $record->identifier) }}">
-        <label for="level">Level of description (3.1.4)</label>
+        <label for="level">Level of description (3.1.4)</label> <small>(each choice names its RiC-O class)</small>
         <select id="level" name="level" style="font: inherit; padding: .5rem">
-            @foreach($levels as $level)<option value="{{ $level->iri }}" @selected(old('level', $record->level->iri) === $level->iri)>{{ $level->label(['en', 'und']) }}</option>@endforeach
+            @foreach($levels as $level)<option value="{{ $level->iri }}" @selected(old('level', $record->level->iri) === $level->iri)>{{ $level->label(['en', 'und']) }} ({{ $level->ricTerm() }})</option>@endforeach
         </select>
         @include('description._fields', ['subject' => $record, 'standard' => \App\Description\Elements::ISAD_G, 'language' => $language])
         @if($mayUpdate)
         <fieldset style="margin-top: 1.5rem; border: 1px solid var(--line); padding: 0 1rem 1rem">
             <legend><strong>Description control</strong></legend>
-            <label for="description_identifier">Description identifier</label>
+            <label for="description_identifier">Description identifier</label> @include('description._ric', ['term' => null])
             <input id="description_identifier" name="description_identifier" maxlength="255" value="{{ old('description_identifier', $record->description_identifier) }}">
-            <label for="description_status">Status</label>
+            <label for="description_status">Status</label> @include('description._ric', ['term' => null])
             <select id="description_status" name="description_status" style="font: inherit; padding: .5rem">
                 <option value="">Not set</option>
                 @foreach($statuses as $status)<option value="{{ $status->iri }}" @selected(old('description_status', $record->descriptionStatus?->iri) === $status->iri)>{{ $status->label(['en', 'und']) }}</option>@endforeach
             </select>
-            <label for="description_detail">Level of detail</label>
+            <label for="description_detail">Level of detail</label> @include('description._ric', ['term' => null])
             <select id="description_detail" name="description_detail" style="font: inherit; padding: .5rem">
                 <option value="">Not set</option>
                 @foreach($details as $detail)<option value="{{ $detail->iri }}" @selected(old('description_detail', $record->descriptionDetail?->iri) === $detail->iri)>{{ $detail->label(['en', 'und']) }}</option>@endforeach

@@ -26,19 +26,20 @@ final class EntityKinds
      * kind => class (its model), segment (of its URL), permission (record kind, ADR 0005),
      * readable (reading needs the read permission; otherwise any account of the institution
      * reads it), route (of its page), index (the route of its list), label (the name element that names it, null for a concept),
-     * with (what its label needs loaded), noun (for people).
+     * with (what its label needs loaded), noun (for people), ric_class (the RiC-O class it is, null when its level
+     * or agent type decides), ric_name (the RiC-O class of its names).
      */
     private const KINDS = [
         'record' => ['class' => RecordResource::class, 'segment' => 'records', 'permission' => 'description', 'readable' => true,
-            'route' => 'records.show', 'index' => 'records.index', 'label' => 'title', 'with' => ['names.nameType', 'descriptionValues.element', 'identifiers.identifierType'], 'noun' => 'unit of description'],
+            'route' => 'records.show', 'index' => 'records.index', 'label' => 'title', 'with' => ['names.nameType', 'descriptionValues.element', 'identifiers.identifierType'], 'noun' => 'unit of description', 'ric_class' => null, 'ric_name' => 'rico:Title'],
         'repository' => ['class' => Repository::class, 'segment' => 'repositories', 'permission' => 'repository', 'readable' => true,
-            'route' => 'repositories.show', 'index' => 'repositories.index', 'label' => 'authorised-name', 'with' => ['names.nameType', 'descriptionValues.element', 'identifiers.identifierType'], 'noun' => 'repository'],
+            'route' => 'repositories.show', 'index' => 'repositories.index', 'label' => 'authorised-name', 'with' => ['names.nameType', 'descriptionValues.element', 'identifiers.identifierType'], 'noun' => 'repository', 'ric_class' => 'rico:CorporateBody', 'ric_name' => 'rico:AgentName'],
         'agent' => ['class' => Agent::class, 'segment' => 'agents', 'permission' => 'authority', 'readable' => true,
-            'route' => 'agents.show', 'index' => 'agents.index', 'label' => 'agent-authorised-name', 'with' => ['names.nameType', 'descriptionValues.element', 'identifiers.identifierType', 'agentType.labels'], 'noun' => 'agent'],
+            'route' => 'agents.show', 'index' => 'agents.index', 'label' => 'agent-authorised-name', 'with' => ['names.nameType', 'descriptionValues.element', 'identifiers.identifierType', 'agentType.labels'], 'noun' => 'agent', 'ric_class' => null, 'ric_name' => 'rico:AgentName'],
         'place' => ['class' => Place::class, 'segment' => 'places', 'permission' => 'vocabulary', 'readable' => false,
-            'route' => 'places.show', 'index' => 'places.index', 'label' => 'place-name', 'with' => ['names.nameType', 'descriptionValues.element', 'identifiers.identifierType', 'parent.names.nameType'], 'noun' => 'place'],
+            'route' => 'places.show', 'index' => 'places.index', 'label' => 'place-name', 'with' => ['names.nameType', 'descriptionValues.element', 'identifiers.identifierType', 'parent.names.nameType'], 'noun' => 'place', 'ric_class' => 'rico:Place', 'ric_name' => 'rico:PlaceName'],
         'concept' => ['class' => Concept::class, 'segment' => 'concepts', 'permission' => 'vocabulary', 'readable' => false,
-            'route' => 'concepts.show', 'index' => null, 'label' => null, 'with' => ['labels', 'vocabulary'], 'noun' => 'concept'],
+            'route' => 'concepts.show', 'index' => null, 'label' => null, 'with' => ['labels', 'vocabulary'], 'noun' => 'concept', 'ric_class' => null, 'ric_name' => null],
     ];
 
     /** @return array{class: class-string<Model>, segment: string, permission: string, readable: bool, route: string, index: ?string, label: ?string, with: list<string>, noun: string}|null */
@@ -160,6 +161,22 @@ final class EntityKinds
             $entity instanceof Agent => mb_strtolower((string) $entity->agentType?->label(['en', 'und'])),
             default => self::KINDS[self::of($entity)]['noun'],
         };
+    }
+
+    /** The RiC-O class the entity is: a unit's level and an agent's type say which. */
+    public static function ricClass(Model $entity): ?string
+    {
+        return match (true) {
+            $entity instanceof RecordResource => $entity->level?->ricTerm(),
+            $entity instanceof Agent => $entity->agentType?->ricTerm(),
+            default => self::KINDS[self::of($entity)]['ric_class'],
+        };
+    }
+
+    /** The RiC-O class of the entity's names: rico:Title, rico:AgentName or rico:PlaceName. */
+    public static function ricName(Model $entity): ?string
+    {
+        return self::KINDS[self::of($entity)]['ric_name'];
     }
 
     public static function permission(Model $entity): string

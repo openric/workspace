@@ -7,7 +7,7 @@
             @php($nameType = \App\Description\Elements::nameType($element->notation))
             @php($current = $subject->valuesOf($element)->where('language', $language)->pluck('value')->join("\n"))
             @php($single = $nameType === 'authorised' || in_array($element->notation, ['dates-expressed', 'extent'], true))
-            <label for="v-{{ $element->notation }}">{{ \App\Description\Elements::number($element) }} {{ $element->label(['en', 'und']) }}</label>
+            <label for="v-{{ $element->notation }}">{{ \App\Description\Elements::number($element) }} {{ $element->label(['en', 'und']) }}</label> @include('description._ric', ['term' => $element])
             <small id="h-{{ $element->notation }}">{{ $element->labels->firstWhere('language', 'en')?->definition }}</small>
             <textarea id="v-{{ $element->notation }}" name="values[{{ $element->notation }}]" aria-describedby="h-{{ $element->notation }}" rows="{{ $single ? 1 : ($nameType ? 3 : 4) }}" style="width: 100%; font: inherit; box-sizing: border-box">{{ old('values.'.$element->notation, $current) }}</textarea>
         @endforeach

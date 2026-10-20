@@ -8,7 +8,7 @@
             @php($values = $subject->valuesOf($element)
                 ->filter(fn ($v) => $drafts || $v->state->iri === \App\Support\Vocab::valueState('published'))
                 ->sortBy(fn ($v) => [! $v->is_original, $v->language]))
-            <h3 style="margin-bottom: .2rem">{{ \App\Description\Elements::number($element) }} {{ $element->label(['en', 'und']) }}</h3>
+            <h3 style="margin-bottom: .2rem">{{ \App\Description\Elements::number($element) }} {{ $element->label(['en', 'und']) }} @include('description._ric', ['term' => $element])</h3>
             @forelse($values as $value)
                 <p lang="{{ $value->language }}" style="margin: .2rem 0">{!! nl2br(e($value->value)) !!}</p>
                 <p style="margin: 0 0 .6rem"><small>{{ $value->language }}, {{ $value->is_original ? 'original' : 'translation' }}, {{ $value->state->label(['en', 'und']) }}</small></p>

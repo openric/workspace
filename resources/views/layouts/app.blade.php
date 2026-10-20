@@ -20,6 +20,7 @@
         table { border-collapse: collapse; width: 100%; }
         th, td { text-align: left; padding: .4rem; border-bottom: 1px solid var(--line); }
         :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+        .ric { font-weight: normal; font-size: .8rem; color: var(--muted); margin-left: .35rem; } .ric a { color: var(--muted); }
     </style>
 </head>
 <body>

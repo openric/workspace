@@ -20,7 +20,7 @@
         .(($from || $to) ? ', '.($from ?? '?').' to '.($to ?? '?') : '')
         .' ('.$standingLabels[$relation->standing()].')')
     <details>
-        <summary>{{ $summary }}@if($canUpdate) <small lang="en">- assert, edit or remove</small>@endif</summary>
+        <summary>{{ $summary }} @include('description._ric', ['term' => $relation->relationType])@if($canUpdate) <small lang="en">- assert, edit or remove</small>@endif</summary>
         <p><a href="{{ \App\Relations\EntityKinds::route($relation->other) }}">{{ \App\Relations\EntityKinds::label($relation->other) }}</a>.
            {{ collect([$relation->relationType->label(['en', 'und']), $relation->state?->label(['en', 'und']), $relation->certainty ? mb_strtolower($relation->certainty->label(['en', 'und'])) : null])->filter()->join(', ') }}.
            @if($relation->description)<br><span lang="{{ $relation->language }}">{{ $relation->description }}</span>@endif
@@ -77,7 +77,7 @@
                 <summary>Edit what is said about it</summary>
                 <form method="post" action="{{ route('relations.update', [$kind, $subject->getKey(), $relation]) }}">
                     @csrf
-                    @include('description._relation-fields', ['prefix' => $section.'r'.$loop->index, 'relation' => $relation,
+                    @include('description._relation-fields', ['prefix' => $section.'r'.$loop->index, 'relation' => $relation, 'type' => $relation->relationType->notation,
                         'withRole' => (bool) (config('workspace.relation_types.'.$relation->relationType->notation)['role'] ?? false)])
                     <button type="submit">Save relation</button>
                 </form>

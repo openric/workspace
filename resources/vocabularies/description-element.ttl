@@ -19,21 +19,21 @@ v:authorised-name a skos:Concept ;
     skos:inScheme v: ;
     skos:broader v:isdiah ;
     skos:prefLabel "Authorised form of name"@en ;
-    skos:scopeNote "ISDIAH 5.1.2; kept as a rico:Name entity of name type authorised, one in each language."@en ;
+    skos:scopeNote "ISDIAH 5.1.2; kept as a rico:AgentName entity of name type authorised, one in each language: a repository is a rico:CorporateBody."@en ;
     skos:definition "The standardised name of the institution."@en .
 
 v:parallel-name a skos:Concept ;
     skos:inScheme v: ;
     skos:broader v:isdiah ;
     skos:prefLabel "Parallel form of name"@en ;
-    skos:scopeNote "ISDIAH 5.1.3; kept as rico:Name entities of name type parallel."@en ;
+    skos:scopeNote "ISDIAH 5.1.3; kept as rico:AgentName entities of name type parallel."@en ;
     skos:definition "The authorised form of name in another language or script, one per line."@en .
 
 v:other-name a skos:Concept ;
     skos:inScheme v: ;
     skos:broader v:isdiah ;
     skos:prefLabel "Other form of name"@en ;
-    skos:scopeNote "ISDIAH 5.1.4; kept as rico:Name entities of name type other."@en ;
+    skos:scopeNote "ISDIAH 5.1.4; kept as rico:AgentName entities of name type other."@en ;
     skos:definition "Any other name by which the institution is or was known, such as an abbreviation or an earlier name, one per line."@en .
 
 v:history a skos:Concept ;
@@ -54,7 +54,7 @@ v:mandates a skos:Concept ;
     skos:inScheme v: ;
     skos:broader v:isdiah ;
     skos:prefLabel "Mandates or sources of authority"@en ;
-    skos:scopeNote "ISDIAH 5.3.3."@en ;
+    skos:scopeNote "ISDIAH 5.3.3; exported as rico:authorizingMandate."@en ;
     skos:definition "The legal or other sources of the institution's authority."@en .
 
 v:administrative-structure a skos:Concept ;
@@ -75,21 +75,21 @@ v:buildings a skos:Concept ;
     skos:inScheme v: ;
     skos:broader v:isdiah ;
     skos:prefLabel "Buildings"@en ;
-    skos:scopeNote "ISDIAH 5.3.6."@en ;
+    skos:scopeNote "ISDIAH 5.3.6; exported as rico:note, until the buildings are rico:Place entities linked by rico:hasOrHadLocation."@en ;
     skos:definition "The buildings of the institution and their facilities."@en .
 
 v:holdings a skos:Concept ;
     skos:inScheme v: ;
     skos:broader v:isdiah ;
     skos:prefLabel "Archival and other holdings"@en ;
-    skos:scopeNote "ISDIAH 5.3.7."@en ;
+    skos:scopeNote "ISDIAH 5.3.7; the narrative, exported as rico:note; each unit held is linked by rico:isOrWasHolderOf."@en ;
     skos:definition "A summary of the institution's holdings."@en .
 
 v:finding-aids a skos:Concept ;
     skos:inScheme v: ;
     skos:broader v:isdiah ;
     skos:prefLabel "Finding aids, guides and publications"@en ;
-    skos:scopeNote "ISDIAH 5.3.8."@en ;
+    skos:scopeNote "ISDIAH 5.3.8; the narrative, exported as rico:note; a finding aid described as a unit is linked by rico:isOrWasDescribedBy."@en ;
     skos:definition "The finding aids, guides and publications of the institution."@en .
 
 v:opening-times a skos:Concept ;
@@ -117,21 +117,21 @@ v:research-services a skos:Concept ;
     skos:inScheme v: ;
     skos:broader v:isdiah ;
     skos:prefLabel "Research services"@en ;
-    skos:scopeNote "ISDIAH 5.5.1."@en ;
+    skos:scopeNote "ISDIAH 5.5.1; exported as rico:note; RiC-O 1.1 has no property for services."@en ;
     skos:definition "The research services the institution offers."@en .
 
 v:reproduction-services a skos:Concept ;
     skos:inScheme v: ;
     skos:broader v:isdiah ;
     skos:prefLabel "Reproduction services"@en ;
-    skos:scopeNote "ISDIAH 5.5.2."@en ;
+    skos:scopeNote "ISDIAH 5.5.2; exported as rico:note; RiC-O 1.1 has no property for services."@en ;
     skos:definition "The reproduction services the institution offers."@en .
 
 v:public-areas a skos:Concept ;
     skos:inScheme v: ;
     skos:broader v:isdiah ;
     skos:prefLabel "Public areas"@en ;
-    skos:scopeNote "ISDIAH 5.5.3."@en ;
+    skos:scopeNote "ISDIAH 5.5.3; exported as rico:note; RiC-O 1.1 has no property for services."@en ;
     skos:definition "The areas of the institution open to the public."@en .
 
 v:rules-conventions a skos:Concept ;
@@ -145,7 +145,7 @@ v:description-dates a skos:Concept ;
     skos:inScheme v: ;
     skos:broader v:isdiah ;
     skos:prefLabel "Dates of creation, revision or deletion"@en ;
-    skos:scopeNote "ISDIAH 5.6.6."@en ;
+    skos:scopeNote "ISDIAH 5.6.6; the dates as written, exported as rico:expressedDate of the rico:Date linked by rico:hasModificationDate."@en ;
     skos:definition "When the description was created, revised or deleted."@en .
 
 v:description-sources a skos:Concept ;
@@ -185,21 +185,21 @@ v:dates-expressed a skos:Concept ;
     skos:inScheme v: ;
     skos:broader v:isad-g ;
     skos:prefLabel "Dates as written"@en ;
-    skos:scopeNote "ISAD(G) 3.1.3, the written form; the structured dates are kept separately."@en ;
+    skos:scopeNote "ISAD(G) 3.1.3, the written form, exported as rico:expressedDate; the structured dates are kept separately as rico:Date entities."@en ;
     skos:definition "The dates of the unit as the archivist writes them, such as circa 1902-1950."@en .
 
 v:extent a skos:Concept ;
     skos:inScheme v: ;
     skos:broader v:isad-g ;
     skos:prefLabel "Extent and medium"@en ;
-    skos:scopeNote "ISAD(G) 3.1.5."@en ;
+    skos:scopeNote "ISAD(G) 3.1.5; exported as rico:recordResourceExtent."@en ;
     skos:definition "The extent and medium of the unit."@en .
 
 v:creator-history a skos:Concept ;
     skos:inScheme v: ;
     skos:broader v:isad-g ;
     skos:prefLabel "Administrative or biographical history"@en ;
-    skos:scopeNote "ISAD(G) 3.2.2."@en ;
+    skos:scopeNote "ISAD(G) 3.2.2; exported as rico:history of the creator (rico:hasCreator); the authority record of the creator holds it too."@en ;
     skos:definition "The history of the creator, where it is described with the unit."@en .
 
 v:archival-history a skos:Concept ;
@@ -213,7 +213,7 @@ v:acquisition a skos:Concept ;
     skos:inScheme v: ;
     skos:broader v:isad-g ;
     skos:prefLabel "Immediate source of acquisition or transfer"@en ;
-    skos:scopeNote "ISAD(G) 3.2.4."@en ;
+    skos:scopeNote "ISAD(G) 3.2.4; exported as rico:history, after the archival history; the source becomes a relation once accessions are kept."@en ;
     skos:definition "Where and how the unit came to the repository."@en .
 
 v:scope-and-content a skos:Concept ;
@@ -276,35 +276,35 @@ v:finding-aids-note a skos:Concept ;
     skos:inScheme v: ;
     skos:broader v:isad-g ;
     skos:prefLabel "Finding aids"@en ;
-    skos:scopeNote "ISAD(G) 3.4.5."@en ;
+    skos:scopeNote "ISAD(G) 3.4.5; the narrative, exported as rico:note; a finding aid described as a unit is linked by rico:isOrWasDescribedBy."@en ;
     skos:definition "The finding aids that describe the unit."@en .
 
 v:location-of-originals a skos:Concept ;
     skos:inScheme v: ;
     skos:broader v:isad-g ;
     skos:prefLabel "Existence and location of originals"@en ;
-    skos:scopeNote "ISAD(G) 3.5.1."@en ;
+    skos:scopeNote "ISAD(G) 3.5.1; the narrative, exported as rico:note; an original described as a unit is linked by rico:hasOriginal."@en ;
     skos:definition "Where the originals are, when the unit is a copy."@en .
 
 v:location-of-copies a skos:Concept ;
     skos:inScheme v: ;
     skos:broader v:isad-g ;
     skos:prefLabel "Existence and location of copies"@en ;
-    skos:scopeNote "ISAD(G) 3.5.2."@en ;
+    skos:scopeNote "ISAD(G) 3.5.2; the narrative, exported as rico:note; a copy described as a unit is linked by rico:hasCopy."@en ;
     skos:definition "Where copies of the unit are."@en .
 
 v:related-units a skos:Concept ;
     skos:inScheme v: ;
     skos:broader v:isad-g ;
     skos:prefLabel "Related units of description"@en ;
-    skos:scopeNote "ISAD(G) 3.5.3."@en ;
+    skos:scopeNote "ISAD(G) 3.5.3; the narrative, exported as rico:note; each related unit is linked by rico:isRecordResourceAssociatedWithRecordResource."@en ;
     skos:definition "Related material held elsewhere or in the same repository."@en .
 
 v:publication-note a skos:Concept ;
     skos:inScheme v: ;
     skos:broader v:isad-g ;
     skos:prefLabel "Publication note"@en ;
-    skos:scopeNote "ISAD(G) 3.5.4."@en ;
+    skos:scopeNote "ISAD(G) 3.5.4; exported as rico:note."@en ;
     skos:definition "Publications about or based on the unit."@en .
 
 v:note a skos:Concept ;
@@ -318,21 +318,21 @@ v:archivists-note a skos:Concept ;
     skos:inScheme v: ;
     skos:broader v:isad-g ;
     skos:prefLabel "Archivist's note"@en ;
-    skos:scopeNote "ISAD(G) 3.7.1."@en ;
+    skos:scopeNote "ISAD(G) 3.7.1; exported as rico:note."@en ;
     skos:definition "How the description was prepared and by whom."@en .
 
 v:rules-or-conventions a skos:Concept ;
     skos:inScheme v: ;
     skos:broader v:isad-g ;
     skos:prefLabel "Rules or conventions"@en ;
-    skos:scopeNote "ISAD(G) 3.7.2."@en ;
+    skos:scopeNote "ISAD(G) 3.7.2; exported as rico:isOrWasRegulatedBy a rico:Rule."@en ;
     skos:definition "The rules the description follows."@en .
 
 v:dates-of-descriptions a skos:Concept ;
     skos:inScheme v: ;
     skos:broader v:isad-g ;
     skos:prefLabel "Dates of descriptions"@en ;
-    skos:scopeNote "ISAD(G) 3.7.3."@en ;
+    skos:scopeNote "ISAD(G) 3.7.3; the dates as written, exported as rico:expressedDate of the rico:Date linked by rico:hasModificationDate."@en ;
     skos:definition "When the description was prepared or revised."@en .
 
 v:place a skos:Concept ;
@@ -416,7 +416,7 @@ v:agent-dates-of-existence a skos:Concept ;
     skos:inScheme v: ;
     skos:broader v:isaar-cpf ;
     skos:prefLabel "Dates of existence"@en ;
-    skos:scopeNote "ISAAR(CPF) 5.2.1; the dates as written; the normalised existence, birth and death dates are rico:Date entities of the agent."@en ;
+    skos:scopeNote "ISAAR(CPF) 5.2.1; the dates as written, exported as rico:expressedDate; the normalised existence, birth and death dates are rico:Date entities of the agent."@en ;
     skos:definition "When the entity existed: birth and death, or establishment and dissolution."@en .
 
 v:agent-history a skos:Concept ;
@@ -472,40 +472,40 @@ v:agent-institution-identifiers a skos:Concept ;
     skos:inScheme v: ;
     skos:broader v:isaar-cpf ;
     skos:prefLabel "Institution identifiers"@en ;
-    skos:scopeNote "ISAAR(CPF) 5.4.2; description control."@en ;
+    skos:scopeNote "ISAAR(CPF) 5.4.2; description control, exported as rico:note; the maintaining repository is kept as a link."@en ;
     skos:definition "The agency or agencies responsible for the authority record."@en .
 
 v:agent-rules-conventions a skos:Concept ;
     skos:inScheme v: ;
     skos:broader v:isaar-cpf ;
     skos:prefLabel "Rules or conventions"@en ;
-    skos:scopeNote "ISAAR(CPF) 5.4.3; description control."@en ;
+    skos:scopeNote "ISAAR(CPF) 5.4.3; description control, exported as rico:isOrWasRegulatedBy a rico:Rule."@en ;
     skos:definition "The national or international conventions or rules the authority record follows."@en .
 
 v:agent-description-dates a skos:Concept ;
     skos:inScheme v: ;
     skos:broader v:isaar-cpf ;
     skos:prefLabel "Dates of creation, revision or deletion"@en ;
-    skos:scopeNote "ISAAR(CPF) 5.4.6; description control."@en ;
+    skos:scopeNote "ISAAR(CPF) 5.4.6; description control, the dates as written, exported as rico:expressedDate of the rico:Date linked by rico:hasModificationDate."@en ;
     skos:definition "When the authority record was prepared, revised or deleted."@en .
 
 v:agent-languages-scripts a skos:Concept ;
     skos:inScheme v: ;
     skos:broader v:isaar-cpf ;
     skos:prefLabel "Languages and scripts"@en ;
-    skos:scopeNote "ISAAR(CPF) 5.4.7; description control."@en ;
+    skos:scopeNote "ISAAR(CPF) 5.4.7; description control, exported as rico:note until the languages are linked as rico:Language entities (rico:hasOrHadLanguage)."@en ;
     skos:definition "The languages and scripts the authority record is written in."@en .
 
 v:agent-sources a skos:Concept ;
     skos:inScheme v: ;
     skos:broader v:isaar-cpf ;
     skos:prefLabel "Sources"@en ;
-    skos:scopeNote "ISAAR(CPF) 5.4.8; description control."@en ;
+    skos:scopeNote "ISAAR(CPF) 5.4.8; description control, exported as rico:note."@en ;
     skos:definition "The sources consulted in writing the authority record."@en .
 
 v:agent-maintenance-notes a skos:Concept ;
     skos:inScheme v: ;
     skos:broader v:isaar-cpf ;
     skos:prefLabel "Maintenance notes"@en ;
-    skos:scopeNote "ISAAR(CPF) 5.4.9; description control."@en ;
+    skos:scopeNote "ISAAR(CPF) 5.4.9; description control, exported as rico:note."@en ;
     skos:definition "Notes on how the authority record was made and changed."@en .
