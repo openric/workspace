@@ -1,0 +1,86 @@
+# OpenRiC Workspace - OpenRiC Workspace Date Properties.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# How a rico:Date relates to the entity it dates (ADR 0006). Each concept names the RiC-O 1.1 property, or the OpenRiC extension property, that exports the link.
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/date-property/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Date Properties"@en ;
+    dcterms:description "The meaning of a date for the entity it belongs to."@en ;
+    dcterms:issued "2026-10-20"^^xsd:date ;
+    skos:hasTopConcept v:creation, v:accumulation, v:existence, v:birth, v:death, v:beginning, v:end, v:modification, v:relation, v:associated .
+
+v:creation a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Date of creation"@en ;
+    skos:scopeNote "Exported as rico:hasCreationDate. ISAD(G) 3.1.3."@en ;
+    skos:definition "When the records were created."@en .
+
+v:accumulation a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Date of accumulation"@en ;
+    skos:scopeNote "Exported as rico:hasAccumulationDate. ISAD(G) 3.1.3."@en ;
+    skos:definition "When the records were accumulated."@en .
+
+v:existence a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Dates of existence"@en ;
+    skos:scopeNote "Exported as openricx:hasDateOfExistence. ISAAR(CPF) 5.2.1, ISDF 5.2.1."@en ;
+    skos:definition "When an agent existed, or a function was carried out."@en .
+
+v:birth a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Date of birth"@en ;
+    skos:scopeNote "Exported as rico:hasBirthDate. ISAAR(CPF) 5.2.1."@en ;
+    skos:definition "When a person was born."@en .
+
+v:death a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Date of death"@en ;
+    skos:scopeNote "Exported as rico:hasDeathDate. ISAAR(CPF) 5.2.1."@en ;
+    skos:definition "When a person died."@en .
+
+v:beginning a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Beginning"@en ;
+    skos:scopeNote "Exported as rico:hasBeginningDate."@en ;
+    skos:definition "When something began."@en .
+
+v:end a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "End"@en ;
+    skos:scopeNote "Exported as rico:hasEndDate."@en ;
+    skos:definition "When something ended."@en .
+
+v:modification a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Date of modification"@en ;
+    skos:scopeNote "Exported as rico:hasModificationDate. ISAD(G) 3.7.3, ISAAR(CPF) 5.4.6, ISDIAH 5.6.6."@en ;
+    skos:definition "When the entity, or its description, was changed."@en .
+
+v:relation a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Date of a relation"@en ;
+    skos:scopeNote "Exported as rico:relationHasDate. ISAAR(CPF) 5.3.4."@en ;
+    skos:definition "When a relation held."@en .
+
+v:associated a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Associated date"@en ;
+    skos:scopeNote "Exported as rico:isAssociatedWithDate."@en ;
+    skos:definition "Any other date associated with the entity."@en .

@@ -1,6 +1,6 @@
 <?php
 
-// OpenRiC Workspace - units of description: hierarchy, description and dates (WS-002, WS-004).
+// OpenRiC Workspace - units of description: hierarchy and description (WS-002, WS-004); dates are in DateTest.
 // Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
 // SPDX-License-Identifier: AGPL-3.0-or-later
 //
@@ -13,17 +13,13 @@ use App\Access\RoleService;
 use App\Accounts\AccountService;
 use App\Description\RecordService;
 use App\Description\RepositoryService;
-use App\Models\Concept;
 use App\Models\Institution;
 use App\Models\RecordResource;
 use App\Models\Repository;
 use App\Models\User;
-use App\Support\Vocab;
 use App\Vocabulary\SkosImporter;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use InvalidArgumentException;
 use Tests\TestCase;
 
@@ -135,33 +131,6 @@ class RecordTest extends TestCase
         $this->actingAs($this->archivist)->post("/records/{$fonds->id}", ['language' => 'en', 'level' => self::LEVEL.'fonds', 'values' => ['title' => '']])
             ->assertSessionHasErrors('values');
         $this->assertSame('Riverside Parish Council', $fonds->fresh()->described('title', ['en']));
-    }
-
-    public function test_structured_dates(): void
-    {
-        $fonds = $this->fonds();
-        $this->actingAs($this->archivist)->post("/records/{$fonds->id}/dates", ['date_type' => self::DATE.'creation', 'begin_date' => '1902-01-01', 'end_date' => '1950-12-31'])
-            ->assertRedirect(route('records.show', $fonds));
-        $date = $fonds->fresh()->dates->first();
-        $this->assertSame('1902-01-01', $date->begin_date->format('Y-m-d'));
-        $this->assertSame(self::DATE.'creation', $date->dateType->iri);
-
-        $this->actingAs($this->archivist)->post("/records/{$fonds->id}/dates", ['date_type' => self::DATE.'creation', 'begin_date' => '1950-01-01', 'end_date' => '1902-01-01'])
-            ->assertSessionHasErrors('end_date');
-        $this->actingAs($this->archivist)->post("/records/{$fonds->id}/dates", ['date_type' => Vocab::role('archivist'), 'begin_date' => '1902-01-01'])
-            ->assertSessionHasErrors('date_type');
-
-        $this->actingAs($this->archivist)->post("/records/{$fonds->id}/dates/{$date->id}/remove")->assertRedirect(route('records.show', $fonds));
-        $this->assertCount(0, $fonds->fresh()->dates);
-    }
-
-    public function test_the_database_refuses_dates_out_of_order(): void
-    {
-        $fonds = $this->fonds();
-        $this->expectException(QueryException::class);
-        $this->expectExceptionMessage('record_dates_order');
-        DB::table('record_dates')->insert(['id' => (string) Str::uuid7(), 'institution_id' => $this->institution->id, 'record_resource_id' => $fonds->id,
-            'date_type_id' => Concept::where('iri', self::DATE.'creation')->value('id'), 'begin_date' => '1950-01-01', 'end_date' => '1902-01-01']);
     }
 
     public function test_another_institutions_units_do_not_exist_here(): void

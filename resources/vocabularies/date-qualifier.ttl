@@ -1,0 +1,44 @@
+# OpenRiC Workspace - OpenRiC Workspace Date Qualifiers.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Qualifiers of a rico:Date (rico:dateQualifier). The normalised value can also carry EDTF qualifiers; these name the qualifier for people.
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/date-qualifier/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Date Qualifiers"@en ;
+    dcterms:description "How certain or approximate a date is."@en ;
+    dcterms:issued "2026-10-20"^^xsd:date ;
+    skos:hasTopConcept v:circa, v:probably, v:before, v:after .
+
+v:circa a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Circa"@en ;
+    skos:scopeNote "Exported as rico:dateQualifier; EDTF ~."@en ;
+    skos:definition "About this date."@en .
+
+v:probably a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Probably"@en ;
+    skos:scopeNote "Exported as rico:dateQualifier; EDTF ?."@en ;
+    skos:definition "Probably this date, not certain."@en .
+
+v:before a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Before"@en ;
+    skos:scopeNote "Exported as rico:dateQualifier; EDTF open start (../date)."@en ;
+    skos:definition "On or before this date."@en .
+
+v:after a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "After"@en ;
+    skos:scopeNote "Exported as rico:dateQualifier; EDTF open end (date/..)."@en ;
+    skos:definition "On or after this date."@en .

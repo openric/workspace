@@ -5,6 +5,7 @@
     <p><a href="{{ route('repositories.index') }}">All repositories</a></p>
     <h1>{{ $repository->described('authorised-name', [app()->getLocale(), 'en']) }}</h1>
     @if(session('status'))<p role="status">{{ session('status') }}</p>@endif
+    @if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif
     <p><strong>Persistent IRI:</strong> <code>{{ $repository->iri }}</code>@if($repository->identifier)<br><strong>Identifier:</strong> {{ $repository->identifier }}@endif</p>
     @php($canUpdate = auth()->user()->may('update', 'repository', $repository))
     @if($canUpdate)
@@ -12,8 +13,9 @@
     @endif
     @include('description._view', ['subject' => $repository, 'standard' => \App\Description\Elements::ISDIAH, 'drafts' => $canUpdate])
 
+    @include('description._dates', ['subject' => $repository, 'kind' => 'repositories', 'heading' => 'Dates', 'canUpdate' => $canUpdate, 'choices' => $dateChoices])
+
     <h2>Contact points</h2>
-    @if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif
     @foreach($repository->contactPoints as $contact)
         @unless($canUpdate)
             <p>{{ $contact->label ?: 'Contact' }}@if($contact->is_primary) (primary)@endif: {{ collect([$contact->contact_person, $contact->street_address, $contact->city, $contact->region, $contact->postal_code, $contact->country_code, $contact->telephone, $contact->fax, $contact->email, $contact->website])->filter()->join(', ') }}</p>

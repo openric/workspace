@@ -15,7 +15,7 @@ return [
     'audit_signing_key' => env('WORKSPACE_AUDIT_SIGNING_KEY', storage_path('keys/audit-signing.sk')),
 
     // The Workspace's own vocabularies, bundled with the code (resources/vocabularies).
-    'bundled_vocabularies' => ['account-role.ttl', 'permission.ttl', 'audit-action.ttl', 'description-element.ttl', 'language-value-state.ttl', 'description-status.ttl', 'description-detail.ttl', 'level-of-description.ttl', 'record-kind.ttl'],
+    'bundled_vocabularies' => ['account-role.ttl', 'permission.ttl', 'audit-action.ttl', 'description-element.ttl', 'language-value-state.ttl', 'description-status.ttl', 'description-detail.ttl', 'level-of-description.ttl', 'record-kind.ttl', 'date-property.ttl', 'date-qualifier.ttl'],
 
     // The shape of the permission matrix: for each kind of record (record-kind
     // vocabulary), the actions that apply to it (permission vocabulary), as
@@ -25,6 +25,14 @@ return [
         'repository' => ['read', 'create', 'update', 'delete'],
         'description' => ['read', 'create', 'update', 'delete', 'view-draft', 'publish', 'read-master', 'read-reference', 'read-thumbnail', 'translate'],
         'vocabulary' => ['create', 'update', 'delete'],
+    ],
+
+    // Which date properties (date-property vocabulary) each kind of entity offers on
+    // screen, in this order (ADR 0006). The store accepts any of them.
+    'date_properties' => [
+        'description' => ['creation', 'accumulation', 'associated'],
+        'agent' => ['existence', 'birth', 'death', 'associated'],
+        'repository' => ['existence', 'associated'],
     ],
 
     // The roles a new institution starts with, by account-role template, with

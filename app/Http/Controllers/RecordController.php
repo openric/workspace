@@ -11,10 +11,10 @@ namespace App\Http\Controllers;
 
 use App\Access\AccessControl;
 use App\Description\Bcp47;
+use App\Description\DateService;
 use App\Description\Elements;
 use App\Description\RecordService;
 use App\Models\Concept;
-use App\Models\RecordDate;
 use App\Models\RecordResource;
 use App\Models\Repository;
 use Illuminate\Database\QueryException;
@@ -28,8 +28,6 @@ use InvalidArgumentException;
 class RecordController extends Controller
 {
     private const LEVELS = 'https://workspace.openric.org/vocab/level-of-description/';
-
-    private const DATE_TYPES = 'https://openric.org/vocab/date-type/';
 
     public function __construct(private RecordService $records) {}
 
@@ -78,11 +76,11 @@ class RecordController extends Controller
         $this->own($request, $record);
         $user = $request->user();
         $record->load('descriptionValues.element.labels', 'descriptionValues.state.labels', 'level.labels', 'repository.descriptionValues.element',
-            'children.descriptionValues.element', 'children.level.labels', 'dates.dateType.labels');
+            'children.descriptionValues.element', 'children.level.labels', 'dates.property.labels', 'dates.dateType.labels', 'dates.qualifier.labels');
 
         $record->setRelation('children', $record->children->filter(fn ($child) => $user->may('read', 'description', $child))->values());
 
-        return view('records.show', ['record' => $record, 'elements' => Elements::of(Elements::ISAD_G), 'dateTypes' => $this->concepts(self::DATE_TYPES),
+        return view('records.show', ['record' => $record, 'elements' => Elements::of(Elements::ISAD_G), 'dateChoices' => app(DateService::class)->choices('description'),
             'drafts' => $user->may('view-draft', 'description', $record), 'canUpdate' => $user->may('update', 'description', $record),
             'canCreateInside' => $user->may('create', 'description', $record)]);
     }
@@ -162,28 +160,6 @@ class RecordController extends Controller
         $this->records->reorder($record, $data['direction'] === 'up' ? -1 : 1, $request->user());
 
         return $record->parent_id ? redirect()->route('records.show', $record->parent_id) : redirect()->route('records.index');
-    }
-
-    public function storeDate(Request $request, RecordResource $record): RedirectResponse
-    {
-        $this->own($request, $record, 'update');
-        $data = $request->validate([
-            'date_type' => ['required', Rule::in($this->concepts(self::DATE_TYPES)->pluck('iri'))],
-            'begin_date' => ['nullable', 'date_format:Y-m-d', 'required_without:end_date'],
-            'end_date' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:begin_date'],
-        ]);
-        $this->records->addDate($record, $data['date_type'], $data['begin_date'] ?? null, $data['end_date'] ?? null, $request->user());
-
-        return redirect()->route('records.show', $record)->with('status', 'Date added.');
-    }
-
-    public function destroyDate(Request $request, RecordResource $record, RecordDate $date): RedirectResponse
-    {
-        $this->own($request, $record, 'update');
-        abort_unless($date->record_resource_id === $record->id, 404);
-        $this->records->removeDate($date, $request->user());
-
-        return redirect()->route('records.show', $record)->with('status', 'Date removed.');
     }
 
     private function find(Request $request, string $id): RecordResource

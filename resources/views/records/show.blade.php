@@ -17,31 +17,7 @@
     @endif
     @include('description._view', ['subject' => $record, 'standard' => \App\Description\Elements::ISAD_G, 'drafts' => $drafts])
 
-    <h2>Structured dates (3.1.3)</h2>
-    @foreach($record->dates as $date)
-        <form method="post" action="{{ route('records.dates.destroy', [$record, $date]) }}">
-            @csrf
-            {{ $date->dateType->label(['en', 'und']) }}: {{ $date->begin_date?->format('Y-m-d') ?? '?' }} to {{ $date->end_date?->format('Y-m-d') ?? '?' }}
-            @if($canUpdate)<button type="submit">Remove</button>@endif
-        </form>
-    @endforeach
-    @if($canUpdate)
-    <details>
-        <summary>Add a date</summary>
-        <form method="post" action="{{ route('records.dates.store', $record) }}">
-            @csrf
-            <label for="date_type">Type</label>
-            <select id="date_type" name="date_type" style="font: inherit; padding: .5rem">
-                @foreach($dateTypes as $type)<option value="{{ $type->iri }}">{{ $type->label(['en', 'und']) }}</option>@endforeach
-            </select>
-            <label for="begin_date">From (YYYY-MM-DD)</label>
-            <input id="begin_date" name="begin_date" type="date">
-            <label for="end_date">To (YYYY-MM-DD)</label>
-            <input id="end_date" name="end_date" type="date">
-            <button type="submit">Add date</button>
-        </form>
-    </details>
-    @endif
+    @include('description._dates', ['subject' => $record, 'kind' => 'records', 'heading' => 'Dates (3.1.3)', 'canUpdate' => $canUpdate, 'choices' => $dateChoices])
 
     <h2>Units inside</h2>
     @forelse($record->children as $child)

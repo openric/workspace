@@ -11,7 +11,6 @@ namespace App\Description;
 
 use App\Audit\AuditLog;
 use App\Models\Institution;
-use App\Models\RecordDate;
 use App\Models\RecordResource;
 use App\Models\Repository;
 use App\Models\User;
@@ -95,26 +94,6 @@ class RecordService
                 }
             }
         }));
-    }
-
-    public function addDate(RecordResource $record, string $dateTypeIri, ?string $begin, ?string $end, ?User $actor = null): RecordDate
-    {
-        if (($begin ?? '') === '' && ($end ?? '') === '') {
-            throw new InvalidArgumentException('a date needs a beginning or an end');
-        }
-
-        return DB::transaction(fn () => AuditLog::actingAs($actor, fn () => RecordDate::create([
-            'institution_id' => $record->institution_id,
-            'record_resource_id' => $record->id,
-            'date_type_id' => $this->descriptions->concept($dateTypeIri)->id,
-            'begin_date' => $begin ?: null,
-            'end_date' => $end ?: null,
-        ])));
-    }
-
-    public function removeDate(RecordDate $date, ?User $actor = null): void
-    {
-        DB::transaction(fn () => AuditLog::actingAs($actor, fn () => $date->delete()));
     }
 
     private function nextPosition(string $institutionId, ?string $parentId): int

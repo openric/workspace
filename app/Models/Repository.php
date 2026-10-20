@@ -8,6 +8,7 @@ namespace App\Models;
 
 use App\Audit\Audited;
 use App\Description\Describable;
+use App\Description\HasDates;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
@@ -17,7 +18,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 #[Fillable(['institution_id', 'iri', 'identifier', 'description_identifier', 'description_status_id', 'description_detail_id'])]
 class Repository extends Model
 {
-    use Audited, Describable, HasUuids;
+    use Audited, Describable, HasDates, HasUuids;
 
     /** The URL path segment of its persistent IRI: {base IRI}/repository/{UUID}. */
     public const IRI_SEGMENT = 'repository';

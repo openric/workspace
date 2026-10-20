@@ -10,6 +10,7 @@
 
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\AuditLogController;
+use App\Http\Controllers\DateController;
 use App\Http\Controllers\PasswordController;
 use App\Http\Controllers\RecordController;
 use App\Http\Controllers\RepositoryController;
@@ -76,13 +77,18 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/{record}/move', [RecordController::class, 'moveForm'])->name('move-form');
         Route::post('/{record}/move', [RecordController::class, 'move'])->name('move');
         Route::post('/{record}/reorder', [RecordController::class, 'reorder'])->name('reorder');
-        Route::post('/{record}/dates', [RecordController::class, 'storeDate'])->name('dates.store');
-        Route::post('/{record}/dates/{date}/remove', [RecordController::class, 'destroyDate'])->name('dates.destroy');
     });
 
     Route::middleware('can:'.Vocab::permission('manage-institution'))->group(function () {
         Route::get('/settings', [SettingsController::class, 'edit'])->name('settings.edit');
         Route::post('/settings', [SettingsController::class, 'update'])->name('settings.update');
+    });
+
+    // Dates of any described entity (ADR 0006); DateController checks update on the entity.
+    Route::prefix('{kind}/{id}/dates')->where(['kind' => 'records|repositories', 'id' => '[0-9a-f-]{36}'])->name('dates.')->group(function () {
+        Route::post('/', [DateController::class, 'store'])->name('store');
+        Route::post('/{date}', [DateController::class, 'update'])->name('update');
+        Route::post('/{date}/remove', [DateController::class, 'destroy'])->name('destroy');
     });
 
     Route::middleware('can:'.Vocab::permission('manage-roles'))->group(function () {

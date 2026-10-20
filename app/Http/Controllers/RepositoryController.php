@@ -12,6 +12,7 @@ namespace App\Http\Controllers;
 
 use App\Description\Bcp47;
 use App\Description\ContactPointService;
+use App\Description\DateService;
 use App\Description\Elements;
 use App\Description\RepositoryService;
 use App\Models\Concept;
@@ -63,9 +64,10 @@ class RepositoryController extends Controller
     public function show(Request $request, Repository $repository): View
     {
         $this->own($request, $repository);
-        $repository->load('descriptionValues.element.labels', 'descriptionValues.state.labels', 'contactPoints', 'descriptionStatus.labels', 'descriptionDetail.labels');
+        $repository->load('descriptionValues.element.labels', 'descriptionValues.state.labels', 'contactPoints', 'descriptionStatus.labels', 'descriptionDetail.labels',
+            'dates.property.labels', 'dates.dateType.labels', 'dates.qualifier.labels');
 
-        return view('repositories.show', ['repository' => $repository, 'elements' => $this->elements()]);
+        return view('repositories.show', ['repository' => $repository, 'elements' => $this->elements(), 'dateChoices' => app(DateService::class)->choices('repository')]);
     }
 
     public function edit(Request $request, Repository $repository): View
