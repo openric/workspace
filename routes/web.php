@@ -14,6 +14,7 @@ use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\ConceptController;
 use App\Http\Controllers\DateController;
 use App\Http\Controllers\DeletionController;
+use App\Http\Controllers\ExportController;
 use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\IdentifierController;
 use App\Http\Controllers\LocalVocabularyController;
@@ -84,6 +85,7 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::middleware('access:read,description')->prefix('records')->name('records.')->group(function () {
         Route::get('/', [RecordController::class, 'index'])->name('index');
         Route::get('/new', [RecordController::class, 'create'])->name('create');
+        Route::get('/export', [ExportController::class, 'everything'])->name('export-all');
         Route::post('/', [RecordController::class, 'store'])->name('store');
         Route::get('/{record}', [RecordController::class, 'show'])->name('show');
         Route::get('/{record}/edit', [RecordController::class, 'edit'])->name('edit');
@@ -96,6 +98,8 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/{record}/finding-aid', [RecordController::class, 'findingAid'])->name('finding-aid');
         Route::get('/{record}/print', [RecordController::class, 'findingAid'])->name('print');
         Route::post('/{record}/calculate-dates', [RecordController::class, 'calculateDates'])->name('calculate-dates');
+        Route::get('/{record}/export', [ExportController::class, 'form'])->name('export');
+        Route::get('/{record}/export/{format}', [ExportController::class, 'download'])->where('format', 'ead|ead3|csv|dc|mods')->name('export.download');
     });
 
     // Authority records (ISAAR(CPF)); the controller checks the authority permissions and embargoes.

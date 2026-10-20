@@ -23,7 +23,6 @@ use App\Support\Vocab;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
@@ -79,7 +78,7 @@ class RecordController extends Controller
         $this->own($request, $record);
         $top = $record->ancestors()[0] ?? $record;
 
-        return view('records.tree', ['record' => $record, 'top' => $top, 'byParent' => $this->hierarchy($request, $top)]);
+        return view('records.tree', ['record' => $record, 'top' => $top, 'byParent' => $this->records->hierarchy($top, $request->user())]);
     }
 
     /** Every unit inside this one, in order, with its reference code, level, dates and extent. */
@@ -87,7 +86,7 @@ class RecordController extends Controller
     {
         $this->own($request, $record);
 
-        return view('records.inventory', ['record' => $record, 'rows' => $this->flatten($this->hierarchy($request, $record), $record->id, 1),
+        return view('records.inventory', ['record' => $record, 'rows' => RecordService::flatten($this->records->hierarchy($record, $request->user()), $record->id),
             'drafts' => $request->user()->may('view-draft', 'description', $record)]);
     }
 
@@ -96,7 +95,7 @@ class RecordController extends Controller
     {
         $this->own($request, $record);
         $withInside = ! $request->routeIs('records.print');
-        $units = [[$record, 0], ...($withInside ? $this->flatten($this->hierarchy($request, $record), $record->id, 1) : [])];
+        $units = [[$record, 0], ...($withInside ? RecordService::flatten($this->records->hierarchy($record, $request->user()), $record->id) : [])];
 
         return view('records.finding-aid', ['record' => $record, 'units' => $units, 'withInside' => $withInside,
             'drafts' => $request->user()->may('view-draft', 'description', $record) && $request->boolean('drafts')]);
@@ -242,35 +241,6 @@ class RecordController extends Controller
         $this->records->reorder($record, $data['direction'] === 'up' ? -1 : 1, $request->user());
 
         return $record->parent_id ? redirect()->route('records.show', $record->parent_id) : redirect()->route('records.index');
-    }
-
-    /**
-     * Every readable unit below $top, by parent id, in order, with what the pages show loaded.
-     * ponytail: the whole hierarchy in memory; a fonds past some tens of thousands of units wants loading by level.
-     *
-     * @return Collection<string, Collection<int, RecordResource>>
-     */
-    private function hierarchy(Request $request, RecordResource $top)
-    {
-        $ids = [$top->id, ...$top->descendantIds()];
-
-        return RecordResource::whereKey($ids)->whereNull('deleted_at')->whereKeyNot($top->id)
-            ->with('descriptionValues.element', 'descriptionValues.state', 'names.nameType', 'names.state', 'identifiers.identifierType', 'level.labels', 'dates.property', 'dates.qualifier.labels')
-            ->orderBy('position')->orderBy('id')->get()
-            ->filter(fn (RecordResource $r) => $request->user()->may('read', 'description', $r))
-            ->groupBy('parent_id');
-    }
-
-    /** @return list<array{0: RecordResource, 1: int}> the units below $parentId depth first, with their depth */
-    private function flatten($byParent, string $parentId, int $depth): array
-    {
-        $rows = [];
-        foreach ($byParent[$parentId] ?? [] as $unit) {
-            $rows[] = [$unit, $depth];
-            $rows = [...$rows, ...$this->flatten($byParent, $unit->id, $depth + 1)];
-        }
-
-        return $rows;
     }
 
     private function find(Request $request, string $id): RecordResource

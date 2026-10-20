@@ -9,7 +9,7 @@
     @if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif
     <p>{{ $record->level->label(['en', 'und']) }}@if($record->referenceCode()), {{ $record->referenceCode() }}@endif. Held by <a href="{{ route('repositories.show', $record->repository) }}">{{ $record->repository->described('authorised-name', ['en']) }}</a>.<br>
        <strong>Persistent IRI:</strong> <code>{{ $record->iri }}</code></p>
-    <p><a href="{{ route('records.tree', $record) }}">Hierarchy</a> · <a href="{{ route('records.inventory', $record) }}">Inventory</a> · <a href="{{ route('records.finding-aid', $record) }}">Finding aid</a> · <a href="{{ route('records.print', $record) }}">Print view</a>
+    <p><a href="{{ route('records.tree', $record) }}">Hierarchy</a> · <a href="{{ route('records.inventory', $record) }}">Inventory</a> · <a href="{{ route('records.finding-aid', $record) }}">Finding aid</a> · <a href="{{ route('records.print', $record) }}">Print view</a> · <a href="{{ route('records.export', $record) }}">Export</a>
        @if($canUpdate) · <a href="{{ route('history', ['records', $record->id]) }}">History</a>
            · <form method="post" action="{{ route('records.calculate-dates', $record) }}" style="display: inline">@csrf<button type="submit" style="margin-top: 0; padding: .1rem .5rem">Calculate dates from the units inside</button></form>@endif</p>
     <p>@if($canUpdate)<a href="{{ route('records.move-form', $record) }}">Move</a>@endif

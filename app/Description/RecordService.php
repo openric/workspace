@@ -14,6 +14,7 @@ use App\Models\Institution;
 use App\Models\RecordResource;
 use App\Models\Repository;
 use App\Models\User;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
@@ -135,6 +136,37 @@ class RecordService
                 }
             }
         }));
+    }
+
+    /**
+     * Every unit below $top the account may read, by parent id, in order, with what the
+     * finding aid, inventory and exports read loaded.
+     * ponytail: the whole hierarchy in memory; a fonds past some tens of thousands of units wants loading by level.
+     *
+     * @return Collection<string, Collection<int, RecordResource>>
+     */
+    public function hierarchy(RecordResource $top, User $user)
+    {
+        return RecordResource::whereKey($top->descendantIds())->whereNull('deleted_at')
+            ->with(self::DESCRIBED)->orderBy('position')->orderBy('id')->get()
+            ->filter(fn (RecordResource $r) => $user->may('read', 'description', $r))
+            ->groupBy('parent_id');
+    }
+
+    /** What reading a unit's description needs loaded. */
+    public const DESCRIBED = ['descriptionValues.element', 'descriptionValues.state', 'names.nameType', 'names.state', 'identifiers.identifierType.labels',
+        'level.labels', 'dates.property.labels', 'dates.qualifier.labels', 'descriptionStatus.labels', 'descriptionDetail.labels'];
+
+    /** @return list<array{0: RecordResource, 1: int}> the units below $parentId depth first, with their depth */
+    public static function flatten($byParent, string $parentId, int $depth = 1): array
+    {
+        $rows = [];
+        foreach ($byParent[$parentId] ?? [] as $unit) {
+            $rows[] = [$unit, $depth];
+            $rows = [...$rows, ...self::flatten($byParent, $unit->id, $depth + 1)];
+        }
+
+        return $rows;
     }
 
     private function nextPosition(string $institutionId, ?string $parentId): int
