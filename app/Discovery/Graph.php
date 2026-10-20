@@ -118,6 +118,23 @@ class Graph
     }
 
     /**
+     * The graph as an openric:Subgraph (OpenRiC Viewing API), the shape @openric/viewer draws in 2D and 3D: each node
+     * its IRI, published name, RiC-O class and page (atomUrl, the field the viewer opens on a click); each edge its
+     * phrase and RiC-O term.
+     */
+    public function subgraph(): array
+    {
+        $nodes = [];
+        foreach (array_keys($this->nodes) as $iri) {
+            $d = $this->describe($iri);
+            $nodes[] = ['id' => $iri, 'label' => $d['label'], 'type' => $d['class'], 'atomUrl' => $d['url']];
+        }
+
+        return ['@type' => 'openric:Subgraph', 'openric:nodes' => $nodes, 'openric:edges' => array_map(fn ($e) => ['source' => $e['from'], 'target' => $e['to'],
+            'label' => $e['phrase'], 'predicate' => $e['term']], $this->edges)];
+    }
+
+    /**
      * Where each node is drawn: the entity in the middle, the first step on a ring around it, the second
      * step on an outer ring beside the node it was reached from.
      *

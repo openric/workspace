@@ -164,6 +164,18 @@ class DiscoverTest extends TestCase
         }
         $this->get("/discover/activities/{$this->wedding->id}")->assertOk()->assertSee('Botha, Jan (parish clerk)')->assertSee('as Witness');
         $this->get("/discover/agents/{$this->clerk->id}")->assertOk()->assertSee('Takes or took part in');
+
+        // The same graph as an openric:Subgraph for the 2D and 3D viewer, served from the Workspace itself.
+        $data = json_decode($xpath->query('//script[@id="graph-data"]')->item(0)->textContent, true);
+        $this->assertSame('openric:Subgraph', $data['@type']);
+        $this->assertCount(count($data['openric:nodes']), collect($data['openric:nodes'])->pluck('id')->unique());
+        $this->assertContains($this->item->iri, collect($data['openric:nodes'])->pluck('id'));
+        $this->assertSame([], collect($data['openric:nodes'])->filter(fn ($n) => $n['type'] === '')->pluck('label')->all());
+        $this->assertTrue(collect($data['openric:edges'])->every(fn ($e) => in_array($e['source'], collect($data['openric:nodes'])->pluck('id')->all(), true)));
+        $this->assertStringContainsString(asset('vendor/graph/openric-viewer.umd.js'), $html);
+        foreach (['cytoscape.min.js', 'openric-viewer.umd.js', 'three.min.js', 'three-spritetext.min.js', '3d-force-graph.min.js'] as $file) {
+            $this->assertFileExists(public_path('vendor/graph/'.$file));
+        }
     }
 
     public function test_persistent_iris_open_the_public_page_in_a_browser_and_the_json_ld_for_data(): void

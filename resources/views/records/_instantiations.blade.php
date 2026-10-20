@@ -9,7 +9,7 @@
         @if($thumbnail && $service->deliverable(auth()->user(), $thumbnail))
             <img src="{{ route('files.show', $thumbnail) }}" alt="" width="{{ $thumbnail->width }}" height="{{ $thumbnail->height }}" style="max-width: 120px; height: auto; border: 1px solid var(--line)">
         @endif
-        <p style="margin: 0"><a href="{{ route('instantiations.show', $instantiation) }}">{{ $instantiation->described('instantiation-title', [app()->getLocale(), 'en']) }}</a>
+        <p style="margin: 0; min-width: 0; overflow-wrap: anywhere"><a href="{{ route('instantiations.show', $instantiation) }}">{{ $instantiation->described('instantiation-title', [app()->getLocale(), 'en']) }}</a>
             <br><small>{{ collect([$instantiation->carrierType?->label(['en']), $master ? $master->mime_type.', '.\Illuminate\Support\Number::fileSize($master->size_bytes) : null,
                 $instantiation->availability->label(['en'])])->filter()->join(' · ') }}
             @if($master?->fixity_failed_at)<strong role="alert"> · fixity failed</strong>@endif</small></p>
