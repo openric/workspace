@@ -13,7 +13,7 @@ v: a skos:ConceptScheme ;
     dcterms:title "OpenRiC Workspace Relation Types"@en ;
     dcterms:description "What kind of relation connects two entities."@en ;
     dcterms:issued "2026-10-20"^^xsd:date ;
-    skos:hasTopConcept v:associated-record, v:genetic, v:sequential, v:holding, v:creation, v:accumulation, v:management, v:ownership, v:agent-hierarchical, v:agent-temporal, v:agent-control, v:agent-associated, v:subject, v:place, v:place-containment .
+    skos:hasTopConcept v:associated-record, v:genetic, v:sequential, v:holding, v:creation, v:accumulation, v:management, v:ownership, v:agent-hierarchical, v:agent-temporal, v:agent-control, v:agent-associated, v:subject, v:place, v:place-containment, v:family, v:child, v:descendance, v:sibling, v:spouse, v:guardianship, v:adoption, v:fostering, v:membership, v:leadership, v:position-holding, v:position-in-group, v:group-subdivision, v:knowing, v:knowing-of, v:correspondence, v:teaching, v:study-at, v:work, v:occupation, v:legal-status .
 
 v:associated-record a skos:Concept ;
     skos:inScheme v: ;
@@ -119,3 +119,150 @@ v:place-containment a skos:Concept ;
     skos:prefLabel "Place containment"@en ;
     skos:scopeNote "Shortcut rico:containsOrContained, inverse rico:isOrWasContainedBy. RiC-O 1.1 has no Relation subclass for it; with its dates and assertions it is exported as a rico:Relation (rico:relation_role). The place a place lies in now is kept on the place itself; this records containment with its dates, such as a former one."@en ;
     skos:definition "A place contains or contained another, such as a district a farm lay in before a boundary changed."@en .
+
+v:family a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Family association"@en ;
+    skos:scopeNote "Exported as a rico:FamilyRelation, linked by rico:familyRelation_role; shortcut rico:hasFamilyAssociationWith (symmetric)."@en ;
+    skos:definition "Two persons who belong to the same family."@en .
+
+v:child a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Child"@en ;
+    skos:scopeNote "Exported as a rico:ChildRelation, linked by rico:childRelation_role; shortcut rico:hasChild, inverse rico:isChildOf."@en ;
+    skos:definition "A person is the parent of another."@en .
+
+v:descendance a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Descendance"@en ;
+    skos:scopeNote "Exported as a rico:DescendanceRelation, linked by rico:descendanceRelation_role; shortcut rico:hasDescendant, inverse rico:hasAncestor."@en ;
+    skos:definition "A person is an ancestor of another, further back than a parent."@en .
+
+v:sibling a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Siblings"@en ;
+    skos:scopeNote "Exported as a rico:SiblingRelation, linked by rico:siblingRelation_role; shortcut rico:hasSibling (symmetric)."@en ;
+    skos:definition "Two persons are siblings."@en .
+
+v:spouse a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Spouses"@en ;
+    skos:scopeNote "Exported as a rico:SpouseRelation, linked by rico:spouseRelation_role; shortcut rico:hasOrHadSpouse (symmetric)."@en ;
+    skos:definition "Two persons are or were married."@en .
+
+v:guardianship a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Guardianship"@en ;
+    skos:scopeNote "Exported as a rico:FamilyRelation, linked by rico:familyRelation_role; shortcut openricx:isOrWasGuardianOf, inverse openricx:isOrWasUnderGuardianshipOf (extension ontology 1.4.0, a subproperty of rico:hasFamilyAssociationWith)."@en ;
+    skos:definition "An agent is or was the legal guardian of a person."@en .
+
+v:adoption a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Adoption"@en ;
+    skos:scopeNote "Exported as a rico:ChildRelation, linked by rico:childRelation_role; shortcut openricx:hasAdoptedChild, inverse openricx:isOrWasAdoptedChildOf (extension ontology 1.4.0, a subproperty of rico:hasChild)."@en ;
+    skos:definition "A person adopted another as their child."@en .
+
+v:fostering a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Fostering"@en ;
+    skos:scopeNote "Exported as a rico:FamilyRelation, linked by rico:familyRelation_role; shortcut openricx:hasFosterChild, inverse openricx:isOrWasFosterChildOf (extension ontology 1.4.0, a subproperty of rico:hasFamilyAssociationWith)."@en ;
+    skos:definition "An agent fostered a person, in care without legal adoption."@en .
+
+v:membership a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Membership"@en ;
+    skos:scopeNote "Exported as a rico:MembershipRelation, linked by rico:membershipRelation_role; shortcut rico:hasOrHadMember, inverse rico:isOrWasMemberOf."@en ;
+    skos:definition "A person is or was a member of a family or corporate body."@en .
+
+v:leadership a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Leadership"@en ;
+    skos:scopeNote "Exported as a rico:LeadershipRelation, linked by rico:leadershipRelation_role; shortcut rico:isOrWasLeaderOf, inverse rico:hasOrHadLeader."@en ;
+    skos:definition "A person leads or led a family or corporate body."@en .
+
+v:position-holding a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Position holding"@en ;
+    skos:scopeNote "Exported as a rico:PositionHoldingRelation, linked by rico:positionHoldingRelation_role; shortcut rico:occupiesOrOccupied, inverse rico:isOrWasOccupiedBy."@en ;
+    skos:definition "A person occupies or occupied a position."@en .
+
+v:position-in-group a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Position in a group"@en ;
+    skos:scopeNote "Exported as a rico:PositionToGroupRelation, linked by rico:positionToGroupRelation_role; shortcut rico:existsOrExistedIn, inverse rico:hasOrHadPosition."@en ;
+    skos:definition "A position exists or existed in a corporate body or family."@en .
+
+v:group-subdivision a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Subdivision"@en ;
+    skos:scopeNote "Exported as a rico:GroupSubdivisionRelation, linked by rico:groupSubdivisionRelation_role; shortcut rico:hasOrHadSubdivision, inverse rico:isOrWasSubdivisionOf."@en ;
+    skos:definition "A corporate body or family is or was a subdivision of another, such as a department of a ministry."@en .
+
+v:knowing a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Acquaintance"@en ;
+    skos:scopeNote "Exported as a rico:KnowingRelation, linked by rico:knowingRelation_role; shortcut rico:knows (symmetric)."@en ;
+    skos:definition "Two persons knew each other directly."@en .
+
+v:knowing-of a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Knowing of"@en ;
+    skos:scopeNote "Exported as a rico:KnowingOfRelation, linked by rico:knowingOfRelation_role; shortcut rico:knowsOf, inverse rico:knownBy."@en ;
+    skos:definition "A person knew of another without knowing them directly."@en .
+
+v:correspondence a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Correspondence"@en ;
+    skos:scopeNote "Exported as a rico:CorrespondenceRelation, linked by rico:correspondenceRelation_role; shortcut rico:hasOrHadCorrespondent (symmetric)."@en ;
+    skos:definition "Two persons corresponded with each other."@en .
+
+v:teaching a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Teaching"@en ;
+    skos:scopeNote "Exported as a rico:TeachingRelation, linked by rico:teachingRelation_role; shortcut rico:hasOrHadStudent, inverse rico:hasOrHadTeacher."@en ;
+    skos:definition "A person taught another."@en .
+
+v:study-at a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Study"@en ;
+    skos:scopeNote "Exported as a rico:StudyAtRelation, linked by rico:studyAtRelation_role; shortcut rico:isOrWasAttendedByStudent, inverse rico:studiesOrStudiedAt."@en ;
+    skos:definition "A person studied at a corporate body, such as a school or university."@en .
+
+v:work a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Work relation"@en ;
+    skos:scopeNote "Exported as a rico:WorkRelation, linked by rico:workRelation_role; shortcut rico:hasOrHadWorkRelationWith (symmetric)."@en ;
+    skos:definition "Two agents work or worked together in the course of their activities."@en .
+
+v:occupation a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Occupation"@en ;
+    skos:scopeNote "Shortcut rico:hasOrHadOccupationOfType from a rico:Person to a rico:OccupationType; with its dates it is exported as an openricx:Occupation (extension ontology 1.4.0), which RiC-O 1.1 lacks. ISAAR(CPF) 5.2.5."@en ;
+    skos:definition "A person pursues or pursued an occupation of a kind, such as attorney or carpenter."@en .
+
+v:legal-status a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Legal status"@en ;
+    skos:scopeNote "Shortcut rico:hasOrHadLegalStatus from a rico:Agent to a rico:LegalStatus; RiC-O 1.1 has no Relation subclass for it, so with its dates it is exported as a rico:Relation. ISAAR(CPF) 5.2.4."@en ;
+    skos:definition "An agent has or had a legal status, such as a company or a trust."@en .

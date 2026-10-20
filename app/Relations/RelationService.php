@@ -49,7 +49,7 @@ class RelationService
     public function create(Model $source, string $type, Model $target, array $fields, ?User $actor = null, array $assertion = []): Relation
     {
         $definition = $this->definition($type);
-        $this->allowedPair($definition, $type, EntityKinds::of($source), EntityKinds::of($target));
+        $this->allowedPair($definition, $type, $source, $target);
         foreach ([$source, $target] as $end) {
             if ($end instanceof Concept && ! in_array($end->vocabulary?->kind?->notation, $definition['schemes'] ?? [], true)) {
                 throw new InvalidArgumentException("a $type relation does not connect a concept of that vocabulary");
@@ -178,7 +178,6 @@ class RelationService
      */
     public function options(Model $entity): array
     {
-        $kind = EntityKinds::of($entity);
         $options = [];
         foreach (config('workspace.relation_types') as $type => $definition) {
             foreach (['source', 'target'] as $side) {
@@ -188,7 +187,7 @@ class RelationService
                 $kinds = [];
                 foreach ($definition['pairs'] as [$sourceKind, $targetKind]) {
                     [$mine, $theirs] = $side === 'source' ? [$sourceKind, $targetKind] : [$targetKind, $sourceKind];
-                    if (in_array($kind, EntityKinds::expand($mine), true)) {
+                    if (EntityKinds::matchesAny($entity, EntityKinds::expand($mine))) {
                         $kinds = [...$kinds, ...EntityKinds::expand($theirs)];
                     }
                 }
@@ -203,7 +202,7 @@ class RelationService
     }
 
     /**
-     * Entities of the given kinds whose names, labels or local identifier contain $query,
+     * Entities of the given kinds (or kind:types) whose names, labels or local identifier contain $query,
      * that the account may read, other than $except; a concept only from a vocabulary of
      * one of the $schemes kinds; at most 25.
      *
@@ -214,10 +213,11 @@ class RelationService
         $query = trim($query);
         $like = '%'.addcslashes($query, '%_\\').'%';
         $found = collect();
-        foreach ($kinds as $kind) {
+        foreach ($kinds as $spec) {
+            $kind = strtok($spec, ':');
             $definition = EntityKinds::get($kind);
             $table = (new $definition['class'])->getTable();
-            $search = EntityKinds::existing($kind, $user->institution_id)
+            $search = EntityKinds::existing($spec, $user->institution_id)
                 ->when($except, fn ($q) => $q->whereKeyNot($except->getKey()))
                 ->with($definition['with'])->limit(25);
             if ($kind === 'concept') {
@@ -265,14 +265,14 @@ class RelationService
         return config('workspace.relation_types.'.$type) ?? throw new InvalidArgumentException("$type is not a relation type");
     }
 
-    private function allowedPair(array $definition, string $type, string $sourceKind, string $targetKind): void
+    private function allowedPair(array $definition, string $type, Model $source, Model $target): void
     {
         foreach ($definition['pairs'] as [$s, $t]) {
-            if (in_array($sourceKind, EntityKinds::expand($s), true) && in_array($targetKind, EntityKinds::expand($t), true)) {
+            if (EntityKinds::matchesAny($source, EntityKinds::expand($s)) && EntityKinds::matchesAny($target, EntityKinds::expand($t))) {
                 return;
             }
         }
-        throw new InvalidArgumentException("a $type relation does not connect a $sourceKind to a $targetKind");
+        throw new InvalidArgumentException("a $type relation does not connect a ".EntityKinds::noun($source).' to a '.EntityKinds::noun($target));
     }
 
     private function values(array $definition, array $fields): array

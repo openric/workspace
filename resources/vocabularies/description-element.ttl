@@ -13,7 +13,7 @@ v: a skos:ConceptScheme ;
     dcterms:title "OpenRiC Workspace Description Elements"@en ;
     dcterms:description "Elements of archival description, grouped under the ICA standard they come from. Only the elements, not the groups, are values of a description."@en ;
     dcterms:issued "2026-10-19"^^xsd:date ;
-    skos:hasTopConcept v:isdiah, v:isad-g, v:place .
+    skos:hasTopConcept v:isdiah, v:isad-g, v:place, v:isaar-cpf .
 
 v:authorised-name a skos:Concept ;
     skos:inScheme v: ;
@@ -369,3 +369,136 @@ v:place-history a skos:Concept ;
     skos:prefLabel "History"@en ;
     skos:scopeNote "Exported as rico:history."@en ;
     skos:definition "How the place developed over time, such as changes of boundary or jurisdiction."@en .
+
+v:isaar-cpf a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "ISAAR(CPF)"@en ;
+    skos:scopeNote "International Standard Archival Authority Record for Corporate Bodies, Persons and Families, 2nd edition (ICA, 2004)."@en ;
+    skos:definition "The elements of an authority record."@en .
+
+v:agent-authorised-name a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:isaar-cpf ;
+    skos:prefLabel "Authorised form(s) of name"@en ;
+    skos:scopeNote "ISAAR(CPF) 5.1.2; kept as a rico:AgentName entity of name type authorised, one in each language."@en ;
+    skos:definition "The standardised name of the entity, with qualifiers such as dates, place or occupation to tell it from others of the same name."@en .
+
+v:agent-parallel-name a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:isaar-cpf ;
+    skos:prefLabel "Parallel forms of name"@en ;
+    skos:scopeNote "ISAAR(CPF) 5.1.3; kept as rico:AgentName entities of name type parallel."@en ;
+    skos:definition "The authorised form of name in another language or script, one per line."@en .
+
+v:agent-standardised-name a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:isaar-cpf ;
+    skos:prefLabel "Standardised forms of name according to other rules"@en ;
+    skos:scopeNote "ISAAR(CPF) 5.1.4; kept as rico:AgentName entities of name type standardised."@en ;
+    skos:definition "The name as other rules give it, such as those of another agency, one per line."@en .
+
+v:agent-other-name a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:isaar-cpf ;
+    skos:prefLabel "Other forms of name"@en ;
+    skos:scopeNote "ISAAR(CPF) 5.1.5; kept as rico:AgentName entities of name type other; the dates each was used are kept with the name."@en ;
+    skos:definition "Any other name the entity is or was known by, such as a maiden name, a pseudonym or an earlier name of a corporate body, one per line."@en .
+
+v:agent-dates-of-existence a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:isaar-cpf ;
+    skos:prefLabel "Dates of existence"@en ;
+    skos:scopeNote "ISAAR(CPF) 5.2.1; the dates as written; the normalised existence, birth and death dates are rico:Date entities of the agent."@en ;
+    skos:definition "When the entity existed: birth and death, or establishment and dissolution."@en .
+
+v:agent-history a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:isaar-cpf ;
+    skos:prefLabel "History"@en ;
+    skos:scopeNote "ISAAR(CPF) 5.2.2; exported as rico:history."@en ;
+    skos:definition "The main events, activities, achievements and roles of the entity in its life or existence."@en .
+
+v:agent-places a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:isaar-cpf ;
+    skos:prefLabel "Places"@en ;
+    skos:scopeNote "ISAAR(CPF) 5.2.3; the narrative; each place is a rico:PlaceRelation to a rico:Place. Exported as rico:note."@en ;
+    skos:definition "The places and jurisdictions the entity was based in, lived in or connected with, and when."@en .
+
+v:agent-legal-status a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:isaar-cpf ;
+    skos:prefLabel "Legal status"@en ;
+    skos:scopeNote "ISAAR(CPF) 5.2.4; the narrative; each legal status is a relation to a legal-status concept (rico:hasOrHadLegalStatus). Exported as rico:note."@en ;
+    skos:definition "The legal status of a corporate body, with the dates it held."@en .
+
+v:agent-functions a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:isaar-cpf ;
+    skos:prefLabel "Functions, occupations and activities"@en ;
+    skos:scopeNote "ISAAR(CPF) 5.2.5; the narrative; a person's occupations are relations to occupation types (rico:hasOrHadOccupationOfType, openricx:Occupation). Exported as rico:note."@en ;
+    skos:definition "What the entity did: its functions, occupations and activities, with their dates."@en .
+
+v:agent-mandates a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:isaar-cpf ;
+    skos:prefLabel "Mandates or sources of authority"@en ;
+    skos:scopeNote "ISAAR(CPF) 5.2.6; exported as rico:authorizingMandate."@en ;
+    skos:definition "The documents, laws or other sources of the entity's power, functions and responsibilities."@en .
+
+v:agent-internal-structure a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:isaar-cpf ;
+    skos:prefLabel "Internal structures or genealogy"@en ;
+    skos:scopeNote "ISAAR(CPF) 5.2.7; exported as openricx:hasInternalStructure."@en ;
+    skos:definition "The internal structure of a corporate body, or the genealogy of a family."@en .
+
+v:agent-general-context a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:isaar-cpf ;
+    skos:prefLabel "General context"@en ;
+    skos:scopeNote "ISAAR(CPF) 5.2.8; exported as openricx:generalContext."@en ;
+    skos:definition "The social, cultural, economic, political or historical context the entity lived or worked in."@en .
+
+v:agent-institution-identifiers a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:isaar-cpf ;
+    skos:prefLabel "Institution identifiers"@en ;
+    skos:scopeNote "ISAAR(CPF) 5.4.2; description control."@en ;
+    skos:definition "The agency or agencies responsible for the authority record."@en .
+
+v:agent-rules-conventions a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:isaar-cpf ;
+    skos:prefLabel "Rules or conventions"@en ;
+    skos:scopeNote "ISAAR(CPF) 5.4.3; description control."@en ;
+    skos:definition "The national or international conventions or rules the authority record follows."@en .
+
+v:agent-description-dates a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:isaar-cpf ;
+    skos:prefLabel "Dates of creation, revision or deletion"@en ;
+    skos:scopeNote "ISAAR(CPF) 5.4.6; description control."@en ;
+    skos:definition "When the authority record was prepared, revised or deleted."@en .
+
+v:agent-languages-scripts a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:isaar-cpf ;
+    skos:prefLabel "Languages and scripts"@en ;
+    skos:scopeNote "ISAAR(CPF) 5.4.7; description control."@en ;
+    skos:definition "The languages and scripts the authority record is written in."@en .
+
+v:agent-sources a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:isaar-cpf ;
+    skos:prefLabel "Sources"@en ;
+    skos:scopeNote "ISAAR(CPF) 5.4.8; description control."@en ;
+    skos:definition "The sources consulted in writing the authority record."@en .
+
+v:agent-maintenance-notes a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:isaar-cpf ;
+    skos:prefLabel "Maintenance notes"@en ;
+    skos:scopeNote "ISAAR(CPF) 5.4.9; description control."@en ;
+    skos:definition "Notes on how the authority record was made and changed."@en .

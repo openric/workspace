@@ -9,8 +9,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Description\AgentService;
 use App\Description\PlaceService;
 use App\Http\Controllers\Concerns\ResolvesDescribedEntity;
+use App\Models\Agent;
 use App\Models\Concept;
 use App\Models\Relation;
 use App\Models\RelationAssertion;
@@ -67,8 +69,8 @@ class RelationController extends Controller
             DB::transaction(function () use ($request, $subject, $option, $otherKind, $otherId, $data) {
                 $other = $otherKind === 'new' ? $this->makeOther($request, $option, $otherId, $data) : null;
                 if ($other === null) {
-                    abort_unless(in_array($otherKind, $option['kinds'], true), 422);
                     $other = $this->readable($request, $otherKind, $otherId);
+                    abort_unless(EntityKinds::matchesAny($other, $option['kinds']), 422);
                 }
                 [$source, $target] = $option['side'] === 'source' ? [$subject, $other] : [$other, $subject];
                 $this->relations->create($source, $option['type'], $target, $data, $request->user(),
@@ -195,14 +197,16 @@ class RelationController extends Controller
     private function newKinds(Request $request, array $option): array
     {
         $user = $request->user();
-        if (! $user->may('create', 'vocabulary')) {
-            return [];
-        }
         $made = [];
-        if (in_array('place', $option['kinds'], true)) {
+        if (in_array('place', $option['kinds'], true) && $user->may('create', 'vocabulary')) {
             $made[] = ['value' => 'new:place', 'label' => 'a new place'];
         }
-        if (in_array('concept', $option['kinds'], true)) {
+        if ($user->may('create', 'authority')) {
+            foreach ($this->agentTypes($option) as $type) {
+                $made[] = ['value' => 'new:agent-'.$type->notation, 'label' => 'a new '.mb_strtolower($type->label(['en', 'und'])).' (authority record)'];
+            }
+        }
+        if (in_array('concept', $option['kinds'], true) && $user->may('create', 'vocabulary')) {
             foreach ($option['schemes'] as $scheme) {
                 $vocabularies = Vocabulary::where('institution_id', $user->institution_id)->whereHas('kind', fn ($q) => $q->where('notation', $scheme))->orderBy('title')->get();
                 if ($vocabularies->isEmpty()) {
@@ -219,12 +223,37 @@ class RelationController extends Controller
         return $made;
     }
 
-    /** Make the place or concept named in the form, for the relation about to be made. */
+    /** The agent types the relation takes at the other end: every type for agent, the named ones for agent:person|family. */
+    private function agentTypes(array $option)
+    {
+        $types = [];
+        foreach ($option['kinds'] as $spec) {
+            if (strtok($spec, ':') === 'agent') {
+                $named = str_contains($spec, ':') ? explode('|', substr($spec, strpos($spec, ':') + 1)) : null;
+                foreach (Concept::choices(Agent::TYPES)->get() as $type) {
+                    if ($named === null || in_array($type->notation, $named, true)) {
+                        $types[$type->notation] = $type;
+                    }
+                }
+            }
+        }
+
+        return array_values($types);
+    }
+
+    /** Make the place, concept or agent named in the form, for the relation about to be made. */
     private function makeOther(Request $request, array $option, string $what, array $data): Model
     {
-        abort_unless($request->user()->may('create', 'vocabulary'), 403);
         $name = trim((string) ($data['new_name'] ?? ''));
         $language = trim((string) ($data['new_language'] ?? ''));
+        if (str_starts_with($what, 'agent-')) {
+            abort_unless($request->user()->may('create', 'authority'), 403);
+            $type = substr($what, 6);
+            abort_unless(in_array($type, array_map(fn ($t) => $t->notation, $this->agentTypes($option)), true), 422);
+
+            return app(AgentService::class)->create($request->user()->institution, $type, $name, $language, null, $request->user());
+        }
+        abort_unless($request->user()->may('create', 'vocabulary'), 403);
         if ($what === 'place') {
             abort_unless(in_array('place', $option['kinds'], true), 422);
 

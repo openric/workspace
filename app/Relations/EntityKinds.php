@@ -4,11 +4,14 @@
 // Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
 // SPDX-License-Identifier: AGPL-3.0-or-later
 //
-// Code, not data: each kind is a model class. Agents join here as they are
-// built, together with their table in a relations migration.
+// Code, not data: each kind is a model class, and joins here together with
+// its table in a relations migration. Where relations take only some agents,
+// config workspace.relation_types names a kind with types after a colon, such
+// as agent:person or agent:family|corporate-body (agent-type vocabulary).
 
 namespace App\Relations;
 
+use App\Models\Agent;
 use App\Models\Concept;
 use App\Models\Place;
 use App\Models\RecordResource;
@@ -30,6 +33,8 @@ final class EntityKinds
             'route' => 'records.show', 'index' => 'records.index', 'label' => 'title', 'with' => ['names.nameType', 'descriptionValues.element', 'identifiers.identifierType'], 'noun' => 'unit of description'],
         'repository' => ['class' => Repository::class, 'segment' => 'repositories', 'permission' => 'repository', 'readable' => true,
             'route' => 'repositories.show', 'index' => 'repositories.index', 'label' => 'authorised-name', 'with' => ['names.nameType', 'descriptionValues.element', 'identifiers.identifierType'], 'noun' => 'repository'],
+        'agent' => ['class' => Agent::class, 'segment' => 'agents', 'permission' => 'authority', 'readable' => true,
+            'route' => 'agents.show', 'index' => 'agents.index', 'label' => 'agent-authorised-name', 'with' => ['names.nameType', 'descriptionValues.element', 'identifiers.identifierType', 'agentType.labels'], 'noun' => 'agent'],
         'place' => ['class' => Place::class, 'segment' => 'places', 'permission' => 'vocabulary', 'readable' => false,
             'route' => 'places.show', 'index' => 'places.index', 'label' => 'place-name', 'with' => ['names.nameType', 'descriptionValues.element', 'identifiers.identifierType', 'parent.names.nameType'], 'noun' => 'place'],
         'concept' => ['class' => Concept::class, 'segment' => 'concepts', 'permission' => 'vocabulary', 'readable' => false,
@@ -80,17 +85,44 @@ final class EntityKinds
         return null;
     }
 
-    /** The kinds a name in config workspace.relation_types stands for: a kind, or a group such as agent. */
+    /** The kinds a name in config workspace.relation_types stands for: a kind, a kind with types (agent:person), or a group such as agent. */
     public static function expand(string $kindOrGroup): array
     {
-        return config('workspace.relation_kind_groups.'.$kindOrGroup) ?? (isset(self::KINDS[$kindOrGroup]) ? [$kindOrGroup] : []);
+        return config('workspace.relation_kind_groups.'.$kindOrGroup) ?? (isset(self::KINDS[strtok($kindOrGroup, ':')]) ? [$kindOrGroup] : []);
     }
 
-    /** The entities of a kind that exist in the account's institution: not deleted, and for a concept, local and current. */
-    public static function existing(string $kind, string $institutionId): Builder
+    /** Is the entity of this kind, such as agent or agent:person|family? */
+    public static function matches(Model $entity, string $spec): bool
     {
+        [$kind, $types] = array_pad(explode(':', $spec, 2), 2, null);
+        if (self::of($entity) !== $kind) {
+            return false;
+        }
+
+        return $types === null || ($entity instanceof Agent && in_array($entity->typeNotation(), explode('|', $types), true));
+    }
+
+    /** @param  list<string>  $specs */
+    public static function matchesAny(Model $entity, array $specs): bool
+    {
+        foreach ($specs as $spec) {
+            if (self::matches($entity, $spec)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /** The entities of a kind (or kind:types) that exist in the account's institution: not deleted, and for a concept, local and current. */
+    public static function existing(string $spec, string $institutionId): Builder
+    {
+        [$kind, $types] = array_pad(explode(':', $spec, 2), 2, null);
         $class = self::KINDS[$kind]['class'];
         $query = $class::where('institution_id', $institutionId);
+        if ($types !== null) {
+            $query->whereHas('agentType', fn ($q) => $q->whereIn('iri', array_map(fn ($t) => Agent::TYPES.$t, explode('|', $types))));
+        }
 
         return $kind === 'concept' ? $query->whereNull('deprecated_at') : $query->whereNull('deleted_at');
     }
@@ -100,6 +132,10 @@ final class EntityKinds
     {
         $definition = self::KINDS[self::of($entity)];
         if ($entity->getAttribute('institution_id') !== $user->institution_id) {
+            return false;
+        }
+
+        if ($entity instanceof Agent && $entity->isEmbargoed() && ! $user->may('update', 'authority', $entity)) {
             return false;
         }
 
@@ -119,7 +155,11 @@ final class EntityKinds
     /** What kind of thing it is, for people: a concept says its vocabulary. */
     public static function noun(Model $entity): string
     {
-        return $entity instanceof Concept ? 'concept in '.$entity->vocabulary->title : self::KINDS[self::of($entity)]['noun'];
+        return match (true) {
+            $entity instanceof Concept => 'concept in '.$entity->vocabulary->title,
+            $entity instanceof Agent => mb_strtolower((string) $entity->agentType?->label(['en', 'und'])),
+            default => self::KINDS[self::of($entity)]['noun'],
+        };
     }
 
     public static function permission(Model $entity): string

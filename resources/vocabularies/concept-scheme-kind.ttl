@@ -13,7 +13,7 @@ v: a skos:ConceptScheme ;
     dcterms:title "OpenRiC Workspace Concept Scheme Kinds"@en ;
     dcterms:description "The kinds of vocabulary an institution keeps for its access points and types."@en ;
     dcterms:issued "2026-10-20"^^xsd:date ;
-    skos:hasTopConcept v:subject, v:occupation-type, v:place-type, v:documentary-form-type .
+    skos:hasTopConcept v:subject, v:occupation-type, v:place-type, v:documentary-form-type, v:legal-status .
 
 v:subject a skos:Concept ;
     skos:inScheme v: ;
@@ -42,3 +42,10 @@ v:documentary-form-type a skos:Concept ;
     skos:prefLabel "Documentary form types"@en ;
     skos:scopeNote "Concepts exported as rico:DocumentaryFormType; a record or record part is linked to one by rico:hasDocumentaryFormType. AtoM and Heratio call these genres."@en ;
     skos:definition "Kinds of document, such as letters, minutes, maps or photographs."@en .
+
+v:legal-status a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Legal statuses"@en ;
+    skos:scopeNote "Concepts exported as rico:LegalStatus; an agent is linked to one by rico:hasOrHadLegalStatus. ISAAR(CPF) 5.2.4."@en ;
+    skos:definition "Legal statuses of agents, such as a company, a trust or a statutory body."@en .

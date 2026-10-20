@@ -5,7 +5,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 //
 // Each element is a concept whose broader concept is its standard (isdiah,
-// isad-g) or its kind of entity (place); the grouping is data, never a list
+// isad-g, isaar-cpf) or its kind of entity (place); the grouping is data, never a list
 // in code.
 
 namespace App\Description;
@@ -19,6 +19,8 @@ final class Elements
     public const ISDIAH = 'isdiah';
 
     public const ISAD_G = 'isad-g';
+
+    public const ISAAR_CPF = 'isaar-cpf';
 
     /** A place: no ICA standard covers it, so its elements have no numbers and one heading. */
     public const PLACE = 'place';
@@ -53,10 +55,10 @@ final class Elements
      * area an element belongs to comes from the number in its scope note.
      */
     private const AREAS = [
-        '5.1' => 'Identity', '5.2' => 'Contact', '5.3' => 'Description', '5.4' => 'Access',
-        '5.5' => 'Services', '5.6' => 'Control',
-        '3.1' => 'Identity', '3.2' => 'Context', '3.3' => 'Content and structure',
-        '3.4' => 'Conditions of access and use', '3.5' => 'Allied materials', '3.6' => 'Notes', '3.7' => 'Description control',
+        self::ISDIAH => ['5.1' => 'Identity', '5.2' => 'Contact', '5.3' => 'Description', '5.4' => 'Access', '5.5' => 'Services', '5.6' => 'Control'],
+        self::ISAD_G => ['3.1' => 'Identity', '3.2' => 'Context', '3.3' => 'Content and structure',
+            '3.4' => 'Conditions of access and use', '3.5' => 'Allied materials', '3.6' => 'Notes', '3.7' => 'Description control'],
+        self::ISAAR_CPF => ['5.1' => 'Identity', '5.2' => 'Description', '5.3' => 'Relationships', '5.4' => 'Control'],
     ];
 
     /** The element's number in its standard, such as 5.3.1 or 3.1.2, from its scope note. */
@@ -64,7 +66,7 @@ final class Elements
     {
         $note = (string) $element->labels->firstWhere('language', 'en')?->scope_note;
 
-        return preg_match('/(?:ISDIAH|ISAD\(G\)) (\d+\.\d+\.\d+)/', $note, $m) ? $m[1] : null;
+        return preg_match('/(?:ISDIAH|ISAD\(G\)|ISAAR\(CPF\)) (\d+\.\d+\.\d+)/', $note, $m) ? $m[1] : null;
     }
 
     /**
@@ -78,7 +80,7 @@ final class Elements
         foreach (self::of($standard) as $element) {
             $number = self::number($element);
             $area = $number ? implode('.', array_slice(explode('.', $number), 0, 2)) : null;
-            $heading = $area ? ($area.' '.(self::AREAS[$area] ?? '')) : 'Description';
+            $heading = $area ? ($area.' '.(self::AREAS[$standard][$area] ?? '')) : 'Description';
             $areas[$heading] ??= new Collection;
             $areas[$heading]->push($element);
         }

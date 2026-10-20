@@ -37,7 +37,7 @@
                 @endforeach
             </fieldset>
             @if($newKinds !== [])
-                <label for="new_name">Name of the new place or concept</label>
+                <label for="new_name">Name of the new one (its authorised name)</label>
                 <input id="new_name" name="new_name" value="{{ old('new_name', $query) }}" maxlength="1024">
                 <label for="new_language">Language of the name (BCP 47)</label>
                 <input id="new_language" name="new_language" value="{{ old('new_language', 'en') }}" maxlength="35">

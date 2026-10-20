@@ -172,6 +172,36 @@ class RoleService
         return $roles;
     }
 
+    /**
+     * Give an institution's default roles what config workspace.default_roles grants on a
+     * kind of record added after the institution was installed. A grant the role already
+     * has, or a role that no longer exists, is left alone; anything an institution changed
+     * since is kept. Audited on the institution.
+     */
+    public function grantKind(Institution $institution, string $kind): void
+    {
+        $kindId = $this->concept(Vocab::kind($kind))->id;
+        $granted = [];
+        foreach (config('workspace.default_roles') as $notation => $definition) {
+            $role = $this->byTemplate($institution, $notation);
+            $actions = $definition['grants'] === '*' ? config('workspace.permission_matrix.'.$kind, []) : ($definition['grants'][$kind] ?? []);
+            if ($role === null || $actions === []) {
+                continue;
+            }
+            foreach ($actions as $action) {
+                $actionId = $this->concept(Vocab::permission($action))->id;
+                $where = ['institution_id' => $institution->id, 'role_id' => $role->id, 'kind_id' => $kindId, 'action_id' => $actionId, 'repository_id' => null, 'subject_id' => null];
+                if (! Permission::where($where)->exists()) {
+                    Permission::create([...$where, 'is_grant' => true]);
+                    $granted[$notation][] = $action;
+                }
+            }
+        }
+        if ($granted !== []) {
+            AuditLog::record(Vocab::action('update'), $institution, null, ['permissions' => [$kind => $granted]], null, $institution->id);
+        }
+    }
+
     public function byTemplate(Institution $institution, string $notation): ?Role
     {
         return Role::where('institution_id', $institution->id)

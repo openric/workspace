@@ -12,8 +12,10 @@ namespace App\Http\Controllers;
 
 use App\Description\DateService;
 use App\Http\Controllers\Concerns\ResolvesDescribedEntity;
+use App\Models\Agent;
 use App\Models\RicDate;
 use App\Relations\EntityKinds;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use InvalidArgumentException;
@@ -28,7 +30,7 @@ class DateController extends Controller
     {
         [$subject, $route] = $this->subject($request, $kind, $id);
         try {
-            $this->dates->add($subject, $this->fields($request, $kind), $request->user());
+            $this->dates->add($subject, $this->fields($request, $kind, $subject), $request->user());
         } catch (InvalidArgumentException $e) {
             return redirect()->route($route, $subject)->withInput()->withErrors(['dates' => $e->getMessage()]);
         }
@@ -41,7 +43,7 @@ class DateController extends Controller
         [$subject, $route] = $this->subject($request, $kind, $id);
         $this->belongs($subject, $date);
         try {
-            $this->dates->update($date, $this->fields($request, $kind), $request->user());
+            $this->dates->update($date, $this->fields($request, $kind, $subject), $request->user());
         } catch (InvalidArgumentException $e) {
             return redirect()->route($route, $subject)->withErrors(['dates' => $e->getMessage()]);
         }
@@ -58,9 +60,11 @@ class DateController extends Controller
         return redirect()->route($route, $subject)->with('status', 'Date removed.');
     }
 
-    private function fields(Request $request, string $kind): array
+    private function fields(Request $request, string $kind, ?Model $subject = null): array
     {
-        $properties = config('workspace.date_properties.'.EntityKinds::bySegment($kind), []);
+        // A person has birth and death dates; other agents have dates of existence.
+        $key = EntityKinds::bySegment($kind).($subject instanceof Agent && $subject->typeNotation() === 'person' ? ':person' : '');
+        $properties = config('workspace.date_properties.'.$key, []);
 
         return $request->validate([
             'property' => ['required', 'string', 'in:'.implode(',', $properties)],

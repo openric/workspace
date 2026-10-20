@@ -15,7 +15,7 @@ return [
     'audit_signing_key' => env('WORKSPACE_AUDIT_SIGNING_KEY', storage_path('keys/audit-signing.sk')),
 
     // The Workspace's own vocabularies, bundled with the code (resources/vocabularies).
-    'bundled_vocabularies' => ['account-role.ttl', 'permission.ttl', 'audit-action.ttl', 'description-element.ttl', 'language-value-state.ttl', 'description-status.ttl', 'description-detail.ttl', 'level-of-description.ttl', 'record-kind.ttl', 'date-property.ttl', 'date-qualifier.ttl', 'name-type.ttl', 'identifier-type.ttl', 'relation-type.ttl', 'relation-state.ttl', 'relation-certainty.ttl', 'assertion-origin.ttl', 'assertion-status.ttl', 'concept-scheme-kind.ttl', 'concept-match-type.ttl'],
+    'bundled_vocabularies' => ['account-role.ttl', 'permission.ttl', 'audit-action.ttl', 'description-element.ttl', 'language-value-state.ttl', 'description-status.ttl', 'description-detail.ttl', 'level-of-description.ttl', 'record-kind.ttl', 'date-property.ttl', 'date-qualifier.ttl', 'name-type.ttl', 'identifier-type.ttl', 'relation-type.ttl', 'relation-state.ttl', 'relation-certainty.ttl', 'assertion-origin.ttl', 'assertion-status.ttl', 'concept-scheme-kind.ttl', 'concept-match-type.ttl', 'agent-type.ttl'],
 
     // The shape of the permission matrix: for each kind of record (record-kind
     // vocabulary), the actions that apply to it (permission vocabulary), as
@@ -25,13 +25,15 @@ return [
         'repository' => ['read', 'create', 'update', 'delete'],
         'description' => ['read', 'create', 'update', 'delete', 'view-draft', 'publish', 'read-master', 'read-reference', 'read-thumbnail', 'translate'],
         'vocabulary' => ['create', 'update', 'delete'],
+        'authority' => ['read', 'create', 'update', 'delete'],
     ],
 
     // Which date properties (date-property vocabulary) each kind of entity (App\Relations\EntityKinds,
     // and names and relations) offers on screen, in this order (ADR 0006). The store accepts any of them.
     'date_properties' => [
         'record' => ['creation', 'accumulation', 'associated'],
-        'agent' => ['existence', 'birth', 'death', 'associated'],
+        'agent' => ['existence', 'associated'],
+        'agent:person' => ['existence', 'birth', 'death', 'associated'],
         'repository' => ['existence', 'associated'],
         'name' => ['used-from', 'used-to'],
         'relation' => ['beginning', 'end', 'relation'],
@@ -40,14 +42,19 @@ return [
 
     // Which kinds of entity each relation type (relation-type vocabulary) connects,
     // as [source kind, target kind] pairs; "agent" stands for every kind of agent
-    // (relation_kind_groups). symmetric: the order of the two carries no meaning.
+    // (relation_kind_groups), person a person, group a family or corporate body (rico:Group);
+    // a kind may name types after a colon, such as agent:family|corporate-body (agent-type
+    // vocabulary). symmetric: the order of the two carries no meaning.
     // role: the relation may carry an agent role (OpenRiC role-type vocabulary).
     // forward and inverse: how the relation reads from its source and from its
     // target, on screen. schemes: a concept at either end must be in a vocabulary
     // of one of these kinds (concept-scheme-kind vocabulary). access_point: the
     // relation is shown with the access points of a page, not with its relations.
     'relation_kind_groups' => [
-        'agent' => ['repository'],
+        'agent' => ['repository', 'agent'],
+        'person' => ['agent:person'],
+        'group' => ['repository', 'agent:family|corporate-body'],
+        'position' => ['agent:position'],
     ],
     'relation_types' => [
         'associated-record' => ['pairs' => [['record', 'record']], 'symmetric' => true, 'forward' => 'is associated with', 'inverse' => 'is associated with'],
@@ -65,6 +72,27 @@ return [
         'subject' => ['pairs' => [['record', 'concept'], ['record', 'place'], ['record', 'agent']], 'schemes' => ['subject'], 'access_point' => true, 'forward' => 'is or was about', 'inverse' => 'is or was the subject of'],
         'place' => ['pairs' => [['place', 'record'], ['place', 'agent']], 'access_point' => true, 'forward' => 'is associated with', 'inverse' => 'is associated with the place'],
         'place-containment' => ['pairs' => [['place', 'place']], 'forward' => 'contains or contained', 'inverse' => 'lies or lay in'],
+        'family' => ['pairs' => [['person', 'person']], 'symmetric' => true, 'forward' => 'belongs to the same family as', 'inverse' => 'belongs to the same family as'],
+        'child' => ['pairs' => [['person', 'person']], 'forward' => 'is the parent of', 'inverse' => 'is the child of'],
+        'descendance' => ['pairs' => [['person', 'person']], 'forward' => 'is an ancestor of', 'inverse' => 'is a descendant of'],
+        'sibling' => ['pairs' => [['person', 'person']], 'symmetric' => true, 'forward' => 'is a sibling of', 'inverse' => 'is a sibling of'],
+        'spouse' => ['pairs' => [['person', 'person']], 'symmetric' => true, 'forward' => 'is or was married to', 'inverse' => 'is or was married to'],
+        'guardianship' => ['pairs' => [['agent', 'person']], 'forward' => 'is or was the guardian of', 'inverse' => 'is or was under the guardianship of'],
+        'adoption' => ['pairs' => [['person', 'person']], 'forward' => 'adopted', 'inverse' => 'is the adopted child of'],
+        'fostering' => ['pairs' => [['agent', 'person']], 'forward' => 'fostered', 'inverse' => 'was fostered by'],
+        'membership' => ['pairs' => [['group', 'person']], 'role' => true, 'forward' => 'has or had as a member', 'inverse' => 'is or was a member of'],
+        'leadership' => ['pairs' => [['person', 'group']], 'forward' => 'leads or led', 'inverse' => 'is or was led by'],
+        'position-holding' => ['pairs' => [['person', 'position']], 'forward' => 'occupies or occupied', 'inverse' => 'is or was occupied by'],
+        'position-in-group' => ['pairs' => [['position', 'group']], 'forward' => 'exists or existed in', 'inverse' => 'has or had the position'],
+        'group-subdivision' => ['pairs' => [['group', 'group']], 'forward' => 'has or had as a subdivision', 'inverse' => 'is or was a subdivision of'],
+        'knowing' => ['pairs' => [['person', 'person']], 'symmetric' => true, 'forward' => 'knew', 'inverse' => 'knew'],
+        'knowing-of' => ['pairs' => [['person', 'person']], 'forward' => 'knew of', 'inverse' => 'was known of by'],
+        'correspondence' => ['pairs' => [['person', 'person']], 'symmetric' => true, 'forward' => 'corresponded with', 'inverse' => 'corresponded with'],
+        'teaching' => ['pairs' => [['person', 'person']], 'forward' => 'taught', 'inverse' => 'was taught by'],
+        'study-at' => ['pairs' => [['group', 'person']], 'forward' => 'was attended by the student', 'inverse' => 'studied at'],
+        'work' => ['pairs' => [['agent', 'agent']], 'symmetric' => true, 'forward' => 'works or worked with', 'inverse' => 'works or worked with'],
+        'occupation' => ['pairs' => [['person', 'concept']], 'schemes' => ['occupation-type'], 'access_point' => true, 'forward' => 'pursues or pursued the occupation', 'inverse' => 'is or was the occupation of'],
+        'legal-status' => ['pairs' => [['agent', 'concept']], 'schemes' => ['legal-status'], 'access_point' => true, 'forward' => 'has or had the legal status', 'inverse' => 'is or was the legal status of'],
     ],
 
     // The RiC-O 1.1 class the concepts of each kind of local vocabulary (concept-scheme-kind
@@ -74,6 +102,7 @@ return [
         'occupation-type' => 'https://www.ica.org/standards/RiC/ontology#OccupationType',
         'place-type' => 'https://www.ica.org/standards/RiC/ontology#PlaceType',
         'documentary-form-type' => 'https://www.ica.org/standards/RiC/ontology#DocumentaryFormType',
+        'legal-status' => 'https://www.ica.org/standards/RiC/ontology#LegalStatus',
     ],
 
     // Description elements that are names (ADR 0006): what the description form
@@ -88,6 +117,10 @@ return [
         'place-name' => 'authorised',
         'place-parallel-name' => 'parallel',
         'place-other-name' => 'other',
+        'agent-authorised-name' => 'authorised',
+        'agent-parallel-name' => 'parallel',
+        'agent-standardised-name' => 'standardised',
+        'agent-other-name' => 'other',
     ],
 
     // The roles a new institution starts with, by account-role template, with
@@ -95,19 +128,21 @@ return [
     // every kind), after Heratio's and AtoM's standard groups. Read only when
     // an institution is installed; afterwards roles and permissions are data.
     'default_roles' => [
-        'public' => ['parent' => null, 'grants' => ['repository' => ['read'], 'description' => ['read', 'read-reference', 'read-thumbnail']]],
+        'public' => ['parent' => null, 'grants' => ['repository' => ['read'], 'description' => ['read', 'read-reference', 'read-thumbnail'], 'authority' => ['read']]],
         'signed-in' => ['parent' => 'public', 'grants' => []],
         'administrator' => ['parent' => 'signed-in', 'grants' => '*'],
         'editor' => ['parent' => 'signed-in', 'grants' => [
             'repository' => ['read', 'create', 'update'],
             'description' => ['read', 'create', 'update', 'delete', 'view-draft', 'publish', 'read-master', 'read-reference', 'read-thumbnail'],
             'vocabulary' => ['create', 'update'],
+            'authority' => ['read', 'create', 'update'],
         ]],
         'contributor' => ['parent' => 'signed-in', 'grants' => [
             'repository' => ['read'],
             'description' => ['read', 'create', 'update', 'view-draft', 'read-reference', 'read-thumbnail'],
+            'authority' => ['read', 'create', 'update'],
         ]],
-        'translator' => ['parent' => 'signed-in', 'grants' => ['description' => ['read', 'view-draft', 'translate']]],
+        'translator' => ['parent' => 'signed-in', 'grants' => ['description' => ['read', 'view-draft', 'translate'], 'authority' => ['read']]],
     ],
 
     // Vocabularies every installation loads (`php artisan workspace:vocabulary:import --configured`).

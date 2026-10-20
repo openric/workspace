@@ -9,6 +9,7 @@
 // and each action that needs more names its permission IRI.
 
 use App\Http\Controllers\AccountController;
+use App\Http\Controllers\AgentController;
 use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\ConceptController;
 use App\Http\Controllers\DateController;
@@ -39,7 +40,7 @@ Route::pattern('record', '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-
 Route::pattern('date', '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}');
 Route::pattern('contact', '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}');
 Route::pattern('repository', '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}');
-foreach (['place', 'vocabulary', 'concept', 'other', 'match'] as $parameter) {
+foreach (['place', 'vocabulary', 'concept', 'other', 'match', 'agent'] as $parameter) {
     Route::pattern($parameter, '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}');
 }
 
@@ -90,6 +91,28 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::post('/{record}/reorder', [RecordController::class, 'reorder'])->name('reorder');
     });
 
+    // Authority records (ISAAR(CPF)); the controller checks the authority permissions and embargoes.
+    Route::middleware('access:read,authority')->prefix('agents')->name('agents.')->group(function () {
+        Route::get('/', [AgentController::class, 'index'])->name('index');
+        Route::get('/new', [AgentController::class, 'create'])->name('create');
+        Route::post('/', [AgentController::class, 'store'])->name('store');
+        Route::get('/dashboard', [AgentController::class, 'dashboard'])->name('dashboard');
+        Route::get('/duplicates', [AgentController::class, 'duplicates'])->name('duplicates');
+        Route::get('/{agent}', [AgentController::class, 'show'])->name('show');
+        Route::get('/{agent}/print', [AgentController::class, 'print'])->name('print');
+        Route::get('/{agent}/eac-cpf', [AgentController::class, 'eac'])->name('eac');
+        Route::get('/{agent}/edit', [AgentController::class, 'edit'])->name('edit');
+        Route::post('/{agent}', [AgentController::class, 'update'])->name('update');
+        Route::post('/{agent}/contacts', [AgentController::class, 'storeContact'])->name('contacts.store');
+        Route::post('/{agent}/contacts/{contact}', [AgentController::class, 'updateContact'])->name('contacts.update');
+        Route::post('/{agent}/contacts/{contact}/remove', [AgentController::class, 'destroyContact'])->name('contacts.destroy');
+        Route::get('/{agent}/merge', [AgentController::class, 'mergeForm'])->name('merge-form');
+        Route::post('/{agent}/merge', [AgentController::class, 'merge'])->name('merge');
+        Route::get('/{agent}/split', [AgentController::class, 'splitForm'])->name('split-form');
+        Route::post('/{agent}/split', [AgentController::class, 'split'])->name('split');
+        Route::post('/{agent}/not-a-duplicate', [AgentController::class, 'dismiss'])->name('dismiss');
+    });
+
     // Places and the institution's own vocabularies (ADR 0006): any account of the institution reads them;
     // each controller checks the vocabulary permissions for changes.
     Route::prefix('places')->name('places.')->group(function () {
@@ -138,7 +161,7 @@ Route::middleware(['auth', 'active'])->group(function () {
     // Dates, names and identifiers of any described entity (ADR 0006); each controller checks update on the entity.
     // A concept has labels instead (ConceptController).
     foreach (['dates' => [DateController::class, 'date'], 'names' => [NameController::class, 'name'], 'identifiers' => [IdentifierController::class, 'identifier']] as $part => [$controller, $parameter]) {
-        Route::prefix("{kind}/{id}/$part")->where(['kind' => 'records|repositories|places', 'id' => '[0-9a-f-]{36}', $parameter => '[0-9a-f-]{36}'])->name("$part.")
+        Route::prefix("{kind}/{id}/$part")->where(['kind' => 'records|repositories|places|agents', 'id' => '[0-9a-f-]{36}', $parameter => '[0-9a-f-]{36}'])->name("$part.")
             ->group(function () use ($controller, $parameter) {
                 Route::post('/', [$controller, 'store'])->name('store');
                 Route::post("/{{$parameter}}", [$controller, 'update'])->name('update');
@@ -147,8 +170,8 @@ Route::middleware(['auth', 'active'])->group(function () {
     }
 
     // Delete a unit of description, a repository or a place, after confirming (EntityDeletion).
-    Route::get('{kind}/{id}/delete', [DeletionController::class, 'confirm'])->where(['kind' => 'records|repositories|places', 'id' => '[0-9a-f-]{36}'])->name('deletion.confirm');
-    Route::post('{kind}/{id}/delete', [DeletionController::class, 'destroy'])->where(['kind' => 'records|repositories|places', 'id' => '[0-9a-f-]{36}'])->name('deletion.destroy');
+    Route::get('{kind}/{id}/delete', [DeletionController::class, 'confirm'])->where(['kind' => 'records|repositories|places|agents', 'id' => '[0-9a-f-]{36}'])->name('deletion.confirm');
+    Route::post('{kind}/{id}/delete', [DeletionController::class, 'destroy'])->where(['kind' => 'records|repositories|places|agents', 'id' => '[0-9a-f-]{36}'])->name('deletion.destroy');
 
     // Relations of any described entity, their assertions and evidence (ADR 0006, WS-006).
     Route::prefix('{kind}/{id}/relations')->where(['kind' => EntityKinds::segments(), 'id' => '[0-9a-f-]{36}', 'relation' => '[0-9a-f-]{36}',

@@ -1,0 +1,51 @@
+# OpenRiC Workspace - OpenRiC Workspace Agent Types.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# The kind of agent an authority record describes (ISAAR(CPF) 5.1.1, type of entity; ADR 0006): each concept names the RiC-O 1.1 class it is exported as.
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/agent-type/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Agent Types"@en ;
+    dcterms:description "Whether an agent is a person, a family, a corporate body, a position or a mechanism."@en ;
+    dcterms:issued "2026-10-20"^^xsd:date ;
+    skos:hasTopConcept v:person, v:family, v:corporate-body, v:position, v:mechanism .
+
+v:person a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Person"@en ;
+    skos:scopeNote "Exported as rico:Person. ISAAR(CPF) 5.1.1."@en ;
+    skos:definition "An individual human being."@en .
+
+v:family a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Family"@en ;
+    skos:scopeNote "Exported as rico:Family (a rico:Group). ISAAR(CPF) 5.1.1."@en ;
+    skos:definition "Two or more people related by marriage, birth, adoption or another legal or social arrangement, who present themselves as a family."@en .
+
+v:corporate-body a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Corporate body"@en ;
+    skos:scopeNote "Exported as rico:CorporateBody (a rico:Group). ISAAR(CPF) 5.1.1."@en ;
+    skos:definition "An organisation or group of people identified by a name that acts, or may act, as an entity."@en .
+
+v:position a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Position"@en ;
+    skos:scopeNote "Exported as rico:Position. RiC-CM 1.0; not in ISAAR(CPF)."@en ;
+    skos:definition "A functional role in a group, such as a town clerk, that persons occupy over time."@en .
+
+v:mechanism a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Mechanism"@en ;
+    skos:scopeNote "Exported as rico:Mechanism. RiC-CM 1.0; not in ISAAR(CPF)."@en ;
+    skos:definition "A process or system that performs activities, such as software that creates records."@en .

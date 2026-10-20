@@ -10,6 +10,7 @@ use App\Audit\AuditLog;
 use App\Models\ContactPoint;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class ContactPointService
@@ -39,5 +40,27 @@ class ContactPointService
     {
         // The Audited trait records the removal with everything the contact point held.
         DB::transaction(fn () => AuditLog::actingAs($actor, fn () => $contact->delete()));
+    }
+
+    /** The whole contact point: a field the form did not send is cleared, not kept. */
+    public function fieldsFrom(Request $request): array
+    {
+        $sent = $request->validate([
+            'is_primary' => ['nullable', 'boolean'],
+            'label' => ['nullable', 'string', 'max:255'],
+            'contact_person' => ['nullable', 'string', 'max:255'],
+            'street_address' => ['nullable', 'string', 'max:2000'],
+            'city' => ['nullable', 'string', 'max:255'],
+            'region' => ['nullable', 'string', 'max:255'],
+            'postal_code' => ['nullable', 'string', 'max:64'],
+            'country_code' => ['nullable', 'string', 'regex:/^[A-Za-z]{2}$/'],
+            'telephone' => ['nullable', 'string', 'max:64'],
+            'fax' => ['nullable', 'string', 'max:64'],
+            'email' => ['nullable', 'email', 'max:255'],
+            'website' => ['nullable', 'url:http,https', 'max:1024'],
+        ]);
+
+        // + keeps the left-hand keys, so what was sent wins over the empty defaults.
+        return $sent + array_fill_keys(ContactPoint::FIELDS, null);
     }
 }
