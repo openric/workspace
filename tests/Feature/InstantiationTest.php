@@ -156,6 +156,45 @@ class InstantiationTest extends TestCase
         }
     }
 
+    public function test_each_kind_of_file_opens_in_heratios_viewer_for_it(): void
+    {
+        $page = fn () => $this->actingAs($this->editor)->get("/records/{$this->item->id}")->assertOk()->getContent();
+
+        // An image: OpenSeadragon deep zoom, Mirador or the plain image, through Heratio's viewer script.
+        $this->upload($this->scan(400, 300))->assertRedirect();
+        $html = $page();
+        $this->assertStringContainsString('vendor/openseadragon/6.0.2/openseadragon.min.js', $html);
+        $this->assertStringContainsString('vendor/ahg-theme-b5/js/ahg-iiif-viewer.js', $html);
+        $this->assertMatchesRegularExpression('~id="btn-osd-v-[0-9a-f-]+" class="active" aria-pressed="true"~', $html);
+        $this->assertStringContainsString('initIiifViewer(', $html);
+
+        // A PDF: drawn with pdf.js for one who may read the master; the public, who may not, gets its first page as a picture.
+        $pdf = "%PDF-1.4\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj\n3 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 595 842]>>endobj\ntrailer<</Root 1 0 R>>\n%%EOF\n";
+        $this->upload(UploadedFile::fake()->createWithContent('minutes.pdf', $pdf))->assertRedirect();
+        $html = $page();
+        $this->assertStringContainsString('class="file-viewer pdf-viewer"', $html);
+        $this->assertStringContainsString('vendor/pdfjs/3.11.174/pdf.min.js', $html);
+
+        // Audio: Plyr with a wavesurfer waveform; an OBJ model: Heratio's three.js viewer.
+        $this->upload(UploadedFile::fake()->createWithContent('interview.mp3', "ID3\x03\x00\x00\x00\x00\x00\x00".str_repeat("\xff\xfb\x90\x00".str_repeat("\x00", 413), 4)))->assertRedirect();
+        $this->upload(UploadedFile::fake()->createWithContent('vase.obj', "v 0 0 0\nv 1 0 0\nv 0 1 0\nf 1 2 3\n"))->assertRedirect();
+        $html = $page();
+        $mp3 = Instantiation::with('files.use')->get()->first(fn ($i) => $i->file('master')?->original_name === 'interview.mp3')->file('master');
+        $this->assertStringStartsWith('audio/', $mp3->mime_type);
+        $this->assertStringContainsString('vendor/plyr/plyr.min.js', $html);
+        $this->assertStringContainsString('class="waveform"', $html);
+        $this->assertStringContainsString('three/addons/loaders/OBJLoader.js', $html);
+        $this->assertSame(1, substr_count($html, 'pdf.min.js"'), 'each viewer\'s scripts load once');
+
+        // Heratio's Mirador asks for saved workspaces; none are kept on the server, and it is told so, not 404.
+        $this->get('/api/iiif/workspace')->assertOk()->assertExactJson(['data' => []]);
+
+        foreach (['openseadragon/6.0.2/openseadragon.min.js', 'openseadragon/6.0.2/images', 'ahg-theme-b5/js/ahg-iiif-viewer.js', 'ahg-theme-b5/js/vendor/mirador/mirador.min.js',
+            'pdfjs/3.11.174/pdf.worker.min.js', 'plyr/plyr.svg', 'wavesurfer/wavesurfer.min.js', 'three/0.160.0/three.module.js', 'three/0.160.0/addons/loaders/STLLoader.js', 'viewers/README.md'] as $vendored) {
+            $this->assertFileExists(public_path("vendor/$vendored"));
+        }
+    }
+
     public function test_the_copies_command_makes_copies_a_master_kept_without_them_has_and_only_once(): void
     {
         $this->upload($this->model())->assertRedirect();

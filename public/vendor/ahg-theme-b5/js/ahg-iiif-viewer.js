@@ -1,0 +1,613 @@
+/**
+ * AHG IIIF Viewer - OpenSeadragon + Mirador + Carousel toggle for images
+ *
+ * Runtime config is read from window.AHG_IIIF (injected by master.blade.php
+ * from /admin/ahgSettings/iiif via App\Support\IiifSettings::payload).
+ * Closes audit issue #81. The 9 keys honoured here:
+ *   - enabled              gate the entire viewer (no-op + warning when off)
+ *   - viewer               default initialMode override
+ *   - server_url           IIIF tile-source origin (empty -> local Cantaloupe)
+ *   - default_zoom         OSD initial zoom level
+ *   - max_zoom             OSD maxZoomPixelRatio cap
+ *   - show_navigator       OSD navigator overlay
+ *   - show_fullscreen      toolbar fullscreen button visibility
+ *   - show_rotation        toolbar rotation button visibility (future)
+ *   - enable_annotations   Mirador annotation panel visibility
+ */
+function initIiifViewer(viewerId, imageUrl, title, initialMode, viewerObjects) {
+    var cfg = (window.AHG_IIIF && typeof window.AHG_IIIF === 'object') ? window.AHG_IIIF : {};
+    // Master kill-switch. When the operator disables IIIF, fall back to a
+    // plain <img> render so callers don't get an inert page.
+    if (cfg.enabled === false) {
+        var fallback = document.getElementById('img-' + viewerId);
+        if (fallback) fallback.style.display = 'block';
+        return;
+    }
+
+    var vid = viewerId;
+    var osdEl = document.getElementById('osd-' + vid);
+    var mirEl = document.getElementById('mirador-' + vid);
+    var imgEl = document.getElementById('img-' + vid);
+    var carEl = document.getElementById('carousel-' + vid);
+    var osdViewer = null;
+    var miradorLoaded = false;
+
+    // Build IIIF tile source so OSD gets true deep-zoom (tiled pyramid) rather
+    // than a flat single-resolution <img>. Cantaloupe handles the common raster
+    // formats - TIFF, JP2/JPX, JPEG and PNG - so all of them route through it.
+    // webp/gif/svg/avif are deliberately excluded (Cantaloupe 501s on webp) and
+    // keep the plain-image path. If the tile source fails for any image, OSD
+    // falls back to the plain image (open-failed handler below) - no regression.
+    // server_url override (cfg.server_url) lets ops front the viewer with a
+    // remote IIIF image server instead of the local Cantaloupe proxy. Empty
+    // string keeps the legacy behaviour (current origin + /iiif/3/).
+    var iiifOrigin = (cfg.server_url && cfg.server_url.length) ? cfg.server_url : window.location.origin;
+    var needsIiif = /\.(tiff?|jp2|jpx|jpe?g|png)$/i.test(imageUrl);
+    var iiifTileSource = null;
+    if (needsIiif) {
+        // Convert URL path to Cantaloupe identifier: strip origin, replace / with _SL_
+        var urlObj = new URL(imageUrl, window.location.origin);
+        var relPath = urlObj.pathname.replace(/^\//, '');
+        var iiifId = relPath.replace(/\//g, '_SL_');
+        iiifTileSource = iiifOrigin + '/iiif/3/' + iiifId + '/info.json';
+    }
+
+    // Cantaloupe image-service base id for any raster URL Cantaloupe can serve
+    // (TIFF/JP2/JPEG/PNG), else null (webp/gif/svg/etc. stay plain). Used to
+    // give each multi-object Mirador canvas true deep-zoom (#1475 follow-up).
+    function cantaloupeServiceId(u) {
+        if (!/\.(tiff?|jp2|jpx|jpe?g|png)$/i.test(u)) { return null; }
+        try {
+            var p = new URL(u, window.location.origin).pathname.replace(/^\//, '').replace(/\//g, '_SL_');
+            return iiifOrigin + '/iiif/3/' + p;
+        } catch (e) { return null; }
+    }
+
+    function hideAllPanels() {
+        osdEl.style.display = 'none';
+        mirEl.style.display = 'none';
+        imgEl.style.display = 'none';
+        if (carEl) carEl.style.display = 'none';
+    }
+
+    function showOSD() {
+        hideAllPanels();
+        osdEl.style.display = 'block';
+        document.getElementById('btn-osd-' + vid).classList.add('active');
+        document.getElementById('btn-mirador-' + vid).classList.remove('active');
+        document.getElementById('btn-img-' + vid).classList.remove('active');
+
+        if (!osdViewer && typeof OpenSeadragon !== 'undefined') {
+            // OSD options sourced from window.AHG_IIIF where the operator's
+            // /admin/ahgSettings/iiif choices apply. Defaults match the
+            // pre-wiring hardcoded values so this is a behavioural no-op
+            // until the operator changes a setting.
+            osdViewer = OpenSeadragon({
+                id: 'osd-' + vid,
+                tileSources: iiifTileSource || {
+                    type: 'image',
+                    url: imageUrl,
+                    buildPyramid: false
+                },
+                showNavigator: cfg.show_navigator !== false,
+                navigatorPosition: 'BOTTOM_RIGHT',
+                showFullPageControl: cfg.show_fullscreen === true,
+                showRotationControl: cfg.show_rotation !== false,
+                prefixUrl: '/vendor/openseadragon/6.0.2/images/',
+                // openseadragon-filtering rewrites pixels on the 2D canvas via
+                // tile-loaded; the WebGL drawer (OSD 6 default) never reads
+                // those pixels, so filters silently no-op. Force canvas.
+                // The Heratio magnifier loupe also needs the canvas
+                // drawer (reads source-canvas pixels via 2d context).
+                drawer: 'canvas',
+                gestureSettingsMouse: { clickToZoom: true, dblClickToZoom: true },
+                gestureSettingsTouch: { pinchToZoom: true },
+                animationTime: 0.5,
+                zoomPerClick: 1.5,
+                defaultZoomLevel: (typeof cfg.default_zoom === 'number' && cfg.default_zoom > 0) ? cfg.default_zoom : 0,
+                maxZoomPixelRatio: (typeof cfg.max_zoom === 'number' && cfg.max_zoom > 0) ? cfg.max_zoom : 4,
+                // How far the image may zoom OUT. OSD's default (0.8) clamps
+                // zoom-out to ~0.8x the viewport, which for non-square images
+                // stops the whole image ever fitting at "home" - the raw image
+                // then shows more than the deep-zoom view. A low ratio lets the
+                // full image fit with margin and lets the user keep zooming out.
+                minZoomImageRatio: (typeof cfg.min_zoom_ratio === 'number' && cfg.min_zoom_ratio >= 0) ? cfg.min_zoom_ratio : 0.3,
+                homeFillsViewer: false,
+                visibilityRatio: 0.5,
+                constrainDuringPan: true,
+                immediateRender: true,
+                crossOriginPolicy: 'Anonymous'
+            });
+            // Safety net: if the Cantaloupe/IIIF tile source can't be opened
+            // (image server down, unsupported/corrupt source, path miss), fall
+            // back once to the plain single-resolution image so the viewer
+            // never ends up blank. Only triggers when an IIIF source was used.
+            if (iiifTileSource) {
+                var iiifFallbackUsed = false;
+                osdViewer.addHandler('open-failed', function () {
+                    if (iiifFallbackUsed) { return; }
+                    iiifFallbackUsed = true;
+                    try {
+                        osdViewer.open({ type: 'image', url: imageUrl, buildPyramid: false });
+                    } catch (e) { /* leave the OSD error message in place */ }
+                });
+            }
+            buildFilterToolbar();
+            // Issue #698 - scalebar + magnifier toolbar wiring.
+            wireHeratioScalebar();
+            wireHeratioMagnifier();
+        }
+    }
+
+    // Lazy-load the Heratio OSD plugin scripts the first time we wire
+    // a scalebar / magnifier. The blades that already host the OSD
+    // bundle (object/library/redaction show pages) are locked, so we
+    // can't add a fresh <script> tag in their markup - we inject it
+    // here once per page instead.
+    var heratioOsdPluginPromise = null;
+    function ensureHeratioOsdPlugins() {
+        if (heratioOsdPluginPromise) return heratioOsdPluginPromise;
+        heratioOsdPluginPromise = new Promise(function (resolve) {
+            if (typeof OpenSeadragon === 'undefined') { resolve(false); return; }
+            // If already loaded (e.g. by a future blade update) skip
+            // both injections.
+            var hasScalebar = typeof OpenSeadragon.Viewer.prototype.addHeratioScalebar === 'function';
+            var hasMagnifier = typeof OpenSeadragon.Viewer.prototype.addHeratioMagnifier === 'function';
+            var toLoad = [];
+            if (!hasScalebar) toLoad.push('/vendor/openseadragon/6.0.2/openseadragon-heratio-scalebar.js');
+            if (!hasMagnifier) toLoad.push('/vendor/openseadragon/6.0.2/openseadragon-heratio-magnifier.js');
+            if (!toLoad.length) { resolve(true); return; }
+            var remaining = toLoad.length;
+            toLoad.forEach(function (src) {
+                var s = document.createElement('script');
+                s.src = src;
+                s.onload = function () { remaining--; if (!remaining) resolve(true); };
+                s.onerror = function () { remaining--; if (!remaining) resolve(false); };
+                document.head.appendChild(s);
+            });
+        });
+        return heratioOsdPluginPromise;
+    }
+
+    // Hook the OSD scalebar plugin onto the viewer. The OSD plugin
+    // reads info.json's service block automatically; for cases where
+    // physdim arrives via the Heratio manifest endpoint (not in the
+    // image-server info.json) callers can override
+    // window.AHG_IIIF.physdim = { physicalScale, physicalUnits } and
+    // we pass it in explicitly.
+    function wireHeratioScalebar() {
+        if (!osdViewer) return;
+        ensureHeratioOsdPlugins().then(function () {
+            if (typeof osdViewer.addHeratioScalebar !== 'function') return;
+            if (osdViewer.__heratioScalebar) return;
+            var explicit = (cfg.physdim && typeof cfg.physdim === 'object') ? cfg.physdim : null;
+            osdViewer.__heratioScalebar = osdViewer.addHeratioScalebar({
+                position: 'BOTTOM_LEFT',
+                service: explicit
+            });
+        });
+    }
+
+    function wireHeratioMagnifier() {
+        if (!osdViewer) return;
+        ensureHeratioOsdPlugins().then(function () {
+            if (typeof osdViewer.addHeratioMagnifier !== 'function') return;
+            if (osdViewer.__heratioMagnifier) return;
+            osdViewer.__heratioMagnifier = osdViewer.addHeratioMagnifier({
+                radius: 90,
+                zoom: 3
+            });
+            addMagnifierToggleButton();
+        });
+    }
+
+    function addMagnifierToggleButton() {
+        if (document.getElementById('btn-loupe-' + vid)) return;
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.id = 'btn-loupe-' + vid;
+        btn.title = 'Toggle magnifier';
+        btn.setAttribute('aria-label', 'Toggle magnifier');
+        btn.className = 'osd-loupe-toggle';
+        btn.innerHTML = '<i class="bi bi-search"></i>';
+        // Style the button to match the existing filter toggle (top-right
+        // dark pill). Anchored just left of the filter toggle so the
+        // two never overlap.
+        var s = document.createElement('style');
+        if (!document.getElementById('osd-loupe-toggle-styles')) {
+            s.id = 'osd-loupe-toggle-styles';
+            s.textContent =
+                '.osd-loupe-toggle{position:absolute;top:8px;right:50px;z-index:1000;width:34px;height:34px;border:0;border-radius:4px;background:rgba(0,0,0,.65);color:#fff;cursor:pointer;}' +
+                '.osd-loupe-toggle:hover{background:rgba(0,0,0,.85);}' +
+                '.osd-loupe-toggle.active{background:#2c3e50;}';
+            document.head.appendChild(s);
+        }
+        btn.addEventListener('click', function () {
+            if (!osdViewer.__heratioMagnifier) return;
+            var on = osdViewer.__heratioMagnifier.toggle();
+            btn.classList.toggle('active', on);
+        });
+        osdEl.appendChild(btn);
+    }
+
+    // Filter toolbar: brightness / contrast / greyscale / invert / threshold.
+    // Requires openseadragon-filtering.js to be loaded — feature-detected so
+    // missing plugin just skips the toolbar instead of throwing.
+    function buildFilterToolbar() {
+        if (!osdViewer || !osdViewer.setFilterOptions || !window.OpenSeadragon || !OpenSeadragon.Filters) return;
+        if (document.getElementById('osd-filters-' + vid)) return;
+        injectFilterStyles();
+
+        var bar = document.createElement('div');
+        bar.id = 'osd-filters-' + vid;
+        bar.className = 'osd-filter-toolbar';
+        bar.innerHTML =
+            '<button type="button" class="osd-filter-toggle" title="Image filters" aria-label="Image filters">' +
+                '<i class="fas fa-sliders-h"></i>' +
+            '</button>' +
+            '<div class="osd-filter-panel" hidden>' +
+                '<label>Brightness <span class="osd-filter-val" data-for="brightness">0</span>' +
+                    '<input type="range" data-filter="brightness" min="-100" max="100" value="0" step="1">' +
+                '</label>' +
+                '<label>Contrast <span class="osd-filter-val" data-for="contrast">0</span>' +
+                    '<input type="range" data-filter="contrast" min="-50" max="50" value="0" step="1">' +
+                '</label>' +
+                '<label class="osd-filter-check">' +
+                    '<input type="checkbox" data-filter="greyscale"> Greyscale' +
+                '</label>' +
+                '<label class="osd-filter-check">' +
+                    '<input type="checkbox" data-filter="invert"> Invert' +
+                '</label>' +
+                '<label>Threshold <span class="osd-filter-val" data-for="threshold">off</span>' +
+                    '<input type="range" data-filter="threshold" min="0" max="255" value="0" step="1">' +
+                '</label>' +
+                '<button type="button" class="osd-filter-reset">Reset</button>' +
+            '</div>';
+        osdEl.appendChild(bar);
+
+        bar.querySelector('.osd-filter-toggle').addEventListener('click', function () {
+            var p = bar.querySelector('.osd-filter-panel');
+            p.hidden = !p.hidden;
+        });
+
+        bar.querySelectorAll('input').forEach(function (inp) {
+            inp.addEventListener('input', applyFilters);
+            inp.addEventListener('change', applyFilters);
+        });
+
+        bar.querySelector('.osd-filter-reset').addEventListener('click', function () {
+            bar.querySelectorAll('input[type=range]').forEach(function (r) { r.value = 0; });
+            bar.querySelectorAll('input[type=checkbox]').forEach(function (c) { c.checked = false; });
+            applyFilters();
+        });
+
+        function applyFilters() {
+            var brightness = parseFloat(bar.querySelector('[data-filter=brightness]').value);
+            var contrastRaw = parseFloat(bar.querySelector('[data-filter=contrast]').value);
+            var greyscale = bar.querySelector('[data-filter=greyscale]').checked;
+            var invert = bar.querySelector('[data-filter=invert]').checked;
+            var threshold = parseInt(bar.querySelector('[data-filter=threshold]').value, 10);
+
+            bar.querySelector('[data-for=brightness]').textContent = brightness;
+            bar.querySelector('[data-for=contrast]').textContent = contrastRaw;
+            bar.querySelector('[data-for=threshold]').textContent = threshold > 0 ? threshold : 'off';
+
+            var processors = [];
+            if (greyscale) processors.push(OpenSeadragon.Filters.GREYSCALE());
+            if (brightness) processors.push(OpenSeadragon.Filters.BRIGHTNESS(brightness));
+            if (contrastRaw) processors.push(OpenSeadragon.Filters.CONTRAST(1 + contrastRaw / 50));
+            if (invert) processors.push(OpenSeadragon.Filters.INVERT());
+            if (threshold > 0) processors.push(OpenSeadragon.Filters.THRESHOLDING(threshold));
+
+            osdViewer.setFilterOptions({ filters: processors.length ? { processors: processors } : [] });
+        }
+    }
+
+    function injectFilterStyles() {
+        if (document.getElementById('osd-filter-styles')) return;
+        var s = document.createElement('style');
+        s.id = 'osd-filter-styles';
+        s.textContent =
+            '.osd-filter-toolbar{position:absolute;top:8px;right:8px;z-index:1000;font-size:12px;color:#fff;}' +
+            '.osd-filter-toggle{width:34px;height:34px;border:0;border-radius:4px;background:rgba(0,0,0,.65);color:#fff;cursor:pointer;}' +
+            '.osd-filter-toggle:hover{background:rgba(0,0,0,.85);}' +
+            '.osd-filter-panel{position:absolute;top:40px;right:0;background:rgba(0,0,0,.85);padding:10px 12px;border-radius:6px;width:200px;display:flex;flex-direction:column;gap:8px;}' +
+            '.osd-filter-panel label{display:flex;flex-direction:column;font-size:11px;line-height:1.3;gap:2px;}' +
+            '.osd-filter-panel label.osd-filter-check{flex-direction:row;align-items:center;gap:6px;}' +
+            '.osd-filter-panel input[type=range]{width:100%;}' +
+            '.osd-filter-val{font-weight:600;color:#9ec1ff;}' +
+            '.osd-filter-reset{background:#444;color:#fff;border:0;border-radius:3px;padding:4px 8px;cursor:pointer;font-size:11px;}' +
+            '.osd-filter-reset:hover{background:#666;}';
+        document.head.appendChild(s);
+    }
+
+    function showMirador() {
+        hideAllPanels();
+        mirEl.style.display = 'block';
+        document.getElementById('btn-mirador-' + vid).classList.add('active');
+        document.getElementById('btn-osd-' + vid).classList.remove('active');
+        document.getElementById('btn-img-' + vid).classList.remove('active');
+
+        // Always recreate Mirador to avoid stale state
+        mirEl.innerHTML = '';
+
+        // #1457: when the record has more than one digital object, show ALL of
+        // them (primary + attached recto/verso/...) in ONE Mirador window, each a
+        // deep-zoomable canvas with a thumbnail navigator. The manifest is built
+        // client-side from the objects' reference-image URLs (dimensions probed
+        // per image). #1475: each canvas now carries a Cantaloupe IIIF image
+        // service (via cantaloupeServiceId) for servable rasters, so attached
+        // objects get true tiled deep-zoom - not just the primary; webp/other
+        // non-servable formats fall back to the plain reference image.
+        if (viewerObjects && viewerObjects.length > 1) {
+            var probes = viewerObjects.map(function (o) {
+                return new Promise(function (resolve) {
+                    var im = new Image();
+                    im.onload = function () { resolve({ url: o.url, label: o.label, redacted: !!o.redacted, w: im.naturalWidth || 1200, h: im.naturalHeight || 1200 }); };
+                    im.onerror = function () { resolve(null); };
+                    im.src = o.url;
+                });
+            });
+            Promise.all(probes).then(function (items) {
+                items = items.filter(Boolean);
+                if (items.length < 2) { showImg(); return; } // not enough loaded - fall back to the single image
+                var manifestUrl = 'urn:heratio:multi:' + encodeURIComponent(vid);
+                var canvases = items.map(function (it, i) {
+                    var cid = manifestUrl + '/canvas/' + i;
+                    // #1475: when the object is a Cantaloupe-servable raster,
+                    // attach an IIIF image service so this canvas deep-zooms
+                    // (tiled pyramid) instead of loading a single flat image.
+                    // Non-servable formats (webp/gif/...) keep the plain image.
+                    // A redacted image never gets one (heratio#1503): its url is
+                    // the burnt-in derivative, and Cantaloupe tiles the ORIGINAL,
+                    // so a service would deep-zoom straight past the redaction.
+                    var svcId = it.redacted ? null : cantaloupeServiceId(it.url);
+                    var resource = svcId
+                        ? {
+                            '@id': svcId + '/full/max/0/default.jpg', '@type': 'dctypes:Image',
+                            format: 'image/jpeg', width: it.w, height: it.h,
+                            service: { '@id': svcId, '@type': 'ImageService2', profile: 'http://iiif.io/api/image/2/level2.json' }
+                          }
+                        : { '@id': it.url, '@type': 'dctypes:Image', format: 'image/jpeg', width: it.w, height: it.h };
+                    return {
+                        '@type': 'sc:Canvas', '@id': cid, label: it.label || ('Image ' + (i + 1)),
+                        width: it.w, height: it.h,
+                        images: [{
+                            '@type': 'oa:Annotation', motivation: 'sc:painting',
+                            resource: resource,
+                            on: cid
+                        }]
+                    };
+                });
+                var manifest = {
+                    '@context': 'http://iiif.io/api/presentation/2/context.json',
+                    '@type': 'sc:Manifest', '@id': manifestUrl, label: title || 'Images',
+                    sequences: [{ '@type': 'sc:Sequence', canvases: canvases }]
+                };
+                function createMulti() {
+                    if (typeof Mirador === 'undefined') { mirEl.innerHTML = '<div class="alert alert-warning m-3">Mirador viewer not available.</div>'; return; }
+                    var mir = Mirador.viewer({
+                        id: 'mirador-' + vid, windows: [],
+                        window: { allowClose: false, allowMaximize: false, allowFullscreen: cfg.show_fullscreen !== false, allowTopMenuButton: false, allowWindowSideBar: true },
+                        workspaceControlPanel: { enabled: false }, workspace: { type: 'mosaic', allowNewWindows: false }
+                    });
+                    mir.store.dispatch(Mirador.actions.receiveManifest(manifestUrl, manifest));
+                    mir.store.dispatch(Mirador.actions.addWindow({ manifestId: manifestUrl }));
+                    setTimeout(function () {
+                        var style = document.createElement('style');
+                        style.textContent = '#mirador-' + vid + ' button[aria-label="Close"], #mirador-' + vid + ' button[aria-label="Minimize window"], #mirador-' + vid + ' button[aria-label="Maximize window"] { display:none !important; }';
+                        document.head.appendChild(style);
+                    }, 500);
+                }
+                if (!miradorLoaded) {
+                    var sr = document.createElement('script');
+                    sr.src = '/vendor/ahg-theme-b5/js/vendor/mirador/mirador.min.js';
+                    sr.onload = function () { miradorLoaded = true; createMulti(); };
+                    sr.onerror = function () { mirEl.innerHTML = '<div class="alert alert-warning m-3">Could not load the Mirador viewer.</div>'; };
+                    document.head.appendChild(sr);
+                } else { createMulti(); }
+            });
+            return;
+        }
+
+        // For IIIF-served images (TIFF etc.), use the IIIF image service in the manifest
+        var miradorImageUrl = imageUrl;
+        var miradorService = null;
+        if (iiifTileSource) {
+            var serviceId = iiifTileSource.replace('/info.json', '');
+            miradorImageUrl = serviceId + '/full/max/0/default.jpg';
+            miradorService = {
+                '@id': serviceId,
+                '@type': 'ImageService2',
+                profile: 'http://iiif.io/api/image/2/level2.json'
+            };
+        }
+
+        // A record with redactions is served the burnt-in derivative instead.
+        // The image service MUST be dropped with it: Cantaloupe tiles the
+        // ORIGINAL file, so leaving the service in the manifest would let
+        // Mirador deep-zoom straight past the redaction. The page sets this
+        // only for a non-admin viewer of a single-object record; see
+        // _digital-object-viewer.blade.php.
+        var redactedAssetUrl = (window.AHG_REDACTED_ASSET || {})[vid];
+        if (redactedAssetUrl) {
+            miradorImageUrl = redactedAssetUrl;
+            miradorService = null;
+        }
+
+        // Probe the real image dimensions before building the manifest. Mirador
+        // sizes its canvas from manifest width/height, so a wrong value parks
+        // the image in a corner of an oversized empty canvas.
+        function buildAndShow(realW, realH) {
+            // Stable internal identifier for the inline IIIF manifest. This is
+            // NOT an HTTP address and must never be fetched - Mirador is handed
+            // the manifest object directly via receiveManifest below. Declared
+            // before the manifest so it can also be the manifest's own @id.
+            // (Replaces a blob: URL, which is fragile under strict CSP.)
+            var manifestUrl = 'urn:heratio:inline-manifest:' + encodeURIComponent(imageUrl);
+            var manifest = {
+                '@context': 'http://iiif.io/api/presentation/2/context.json',
+                '@type': 'sc:Manifest',
+                '@id': manifestUrl,
+                label: title || 'Image',
+                sequences: [{
+                    '@type': 'sc:Sequence',
+                    canvases: [{
+                        '@type': 'sc:Canvas',
+                        '@id': imageUrl + '/canvas/1',
+                        label: title || 'Image',
+                        width: realW,
+                        height: realH,
+                        images: [{
+                            '@type': 'oa:Annotation',
+                            motivation: 'sc:painting',
+                            resource: Object.assign({
+                                '@id': miradorImageUrl,
+                                '@type': 'dctypes:Image',
+                                format: 'image/jpeg',
+                                width: realW,
+                                height: realH
+                            }, miradorService ? { service: miradorService } : {}),
+                            on: imageUrl + '/canvas/1'
+                        }]
+                    }]
+                }]
+            };
+
+            function createMirador() {
+                if (typeof Mirador === 'undefined') {
+                    mirEl.innerHTML = '<div class="alert alert-warning m-3">Mirador viewer not available.</div>';
+                    return;
+                }
+                // Mirador honours iiif_show_fullscreen + iiif_enable_annotations.
+                // Annotations on -> sidebar opens to the annotation panel and
+                // mirador-annotation-editor is wired with the Heratio storage
+                // adapter (writes to /api/annotations, reads via the same
+                // search endpoint). Closes #100. Adapter is exposed as
+                // window.HeratioAnnotationAdapter by the bundle entrypoint
+                // (see tools/mirador-build/src/index.js).
+                var miradorConfig = {
+                    id: 'mirador-' + vid,
+                    // Windows are opened imperatively (addWindow) after the
+                    // inline manifest is injected into the store, so Mirador
+                    // never tries to fetch the urn: manifestId.
+                    windows: [],
+                    window: {
+                        allowClose: false,
+                        allowMaximize: false,
+                        allowFullscreen: cfg.show_fullscreen !== false,
+                        allowTopMenuButton: false,
+                        allowWindowSideBar: true,
+                        sideBarOpenByDefault: cfg.enable_annotations === true,
+                        sideBarOpen: cfg.enable_annotations === true,
+                        highlightAllAnnotations: cfg.enable_annotations === true
+                    },
+                    workspaceControlPanel: { enabled: false },
+                    workspace: { type: 'mosaic', allowNewWindows: false }
+                };
+                if (cfg.enable_annotations === true && typeof window.HeratioAnnotationAdapter === 'function') {
+                    miradorConfig.annotation = {
+                        adapter: function (canvasId) { return new window.HeratioAnnotationAdapter(canvasId); },
+                        // Editor stays editable; the storage backend gates
+                        // writes via session auth (anon POST -> 302 to
+                        // /login). Toggling readonly per-user from JS would
+                        // need to round-trip the auth state into a global,
+                        // which we don't currently expose.
+                        exportLocalStorageAnnotations: false
+                    };
+                }
+                var mir = Mirador.viewer(miradorConfig);
+                // Hand Mirador the manifest object directly (the manifestUrl is a
+                // urn:, not fetchable), then open a window on it. This keeps the
+                // annotation/highlight options that used to live in windows:[{...}].
+                mir.store.dispatch(Mirador.actions.receiveManifest(manifestUrl, manifest));
+                mir.store.dispatch(Mirador.actions.addWindow({
+                    manifestId: manifestUrl,
+                    sideBarPanel: cfg.enable_annotations === true ? 'annotations' : 'info',
+                    highlightAllAnnotations: cfg.enable_annotations === true
+                }));
+
+                // Hide Mirador's own close/minimize/maximize buttons via CSS
+                setTimeout(function() {
+                    var style = document.createElement('style');
+                    style.textContent = '#mirador-' + vid + ' button[aria-label="Close"], ' +
+                        '#mirador-' + vid + ' button[aria-label="Minimize window"], ' +
+                        '#mirador-' + vid + ' button[aria-label="Maximize window"], ' +
+                        '#mirador-' + vid + ' .mirador-window-top-bar-buttons button:first-child { display: none !important; }';
+                    document.head.appendChild(style);
+                }, 500);
+            }
+
+            if (!miradorLoaded) {
+                var s = document.createElement('script');
+                s.src = '/vendor/ahg-theme-b5/js/vendor/mirador/mirador.min.js';
+                s.onload = function () {
+                    miradorLoaded = true;
+                    createMirador();
+                };
+                s.onerror = function () {
+                    mirEl.innerHTML = '<div class="alert alert-warning m-3">Could not load Mirador.</div>';
+                };
+                document.head.appendChild(s);
+            } else {
+                createMirador();
+            }
+        }
+
+        var probe = new Image();
+        probe.onload = function () {
+            buildAndShow(probe.naturalWidth || 4000, probe.naturalHeight || 3000);
+        };
+        probe.onerror = function () {
+            // Fall back to a sane default if probing fails — better to render
+            // an oversized canvas than to show nothing.
+            buildAndShow(4000, 3000);
+        };
+        probe.src = miradorImageUrl;
+    }
+
+    function showImg() {
+        hideAllPanels();
+        if (carEl) {
+            carEl.style.display = 'block';
+        } else {
+            imgEl.style.display = 'block';
+        }
+        document.getElementById('btn-img-' + vid).classList.add('active');
+        document.getElementById('btn-osd-' + vid).classList.remove('active');
+        document.getElementById('btn-mirador-' + vid).classList.remove('active');
+    }
+
+    document.getElementById('btn-osd-' + vid).addEventListener('click', showOSD);
+    document.getElementById('btn-mirador-' + vid).addEventListener('click', showMirador);
+    document.getElementById('btn-img-' + vid).addEventListener('click', showImg);
+
+    // iiif_show_fullscreen gates the toolbar fullscreen button. When the
+    // operator hides it the wrapping <button id="btn-fs-..."> still exists
+    // (the rendering blade is locked) — we hide it from JS instead so the
+    // button stops responding without a layout shift on the surrounding
+    // toolbar. Skip the listener attach when there's no element at all.
+    var fsBtn = document.getElementById('btn-fs-' + vid);
+    if (fsBtn) {
+        if (cfg.show_fullscreen === false) {
+            fsBtn.style.display = 'none';
+        } else {
+            fsBtn.addEventListener('click', function () {
+                var el = osdEl.style.display !== 'none' ? osdEl :
+                         (mirEl.style.display !== 'none' ? mirEl :
+                         (carEl && carEl.style.display !== 'none' ? carEl : imgEl));
+                if (el.requestFullscreen) el.requestFullscreen();
+                else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+            });
+        }
+    }
+
+    // Initial mode resolution. Caller's initialMode arg wins (page-specific
+    // pick); falling back to the operator's iiif_viewer setting; falling
+    // back to OSD. Closes the wiring loop on cfg.viewer.
+    var mode = (initialMode || cfg.viewer || 'openseadragon').toLowerCase();
+    if (mode === 'mirador')              showMirador();
+    else if (mode === 'single' ||
+             mode === 'carousel')         showImg();
+    else                                  showOSD();
+}

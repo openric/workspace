@@ -92,6 +92,8 @@ class SettingsAndScreensTest extends TestCase
 
     public function test_every_page_has_the_main_navigation(): void
     {
+        // The logo opens the public catalogue, as on every OpenRiC surface.
+        $this->actingAs($this->admin)->get('/repositories')->assertSee('<a href="'.route('discover.home').'" style="color: inherit', false);
         $this->actingAs($this->admin)->get('/repositories')->assertSee('aria-label="Main"', false)
             ->assertSee('</svg>Home<', false)->assertSee('>Settings<', false)->assertSee('aria-current="page"', false)
             // Grouped in submenus, and the group holding the page is marked.

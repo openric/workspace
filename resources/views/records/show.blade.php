@@ -5,18 +5,15 @@
     <nav aria-label="Hierarchy"><a href="{{ route('records.index') }}">Archival descriptions</a>
         @foreach($record->ancestors() as $ancestor) / <a href="{{ route('records.show', $ancestor) }}">{{ $ancestor->described('title', ['en']) }}</a>@endforeach</nav>
     @php
-        $preview = $record->instantiations->map(fn ($i) => [$i, $i->file('reference') ?? $i->file('thumbnail')])
-            ->filter(fn ($p) => $p[1] && app(\App\Description\InstantiationService::class)->deliverable(auth()->user(), $p[1]));
+        // Each instantiation's files this account may receive, by use, for its viewer.
+        $preview = $record->instantiations->map(fn ($i) => [$i, $i->files->filter(fn ($f) => app(\App\Description\InstantiationService::class)->deliverable(auth()->user(), $f->setRelation('instantiation', $i)))
+            ->keyBy(fn ($f) => $f->use->notation)])->filter(fn ($p) => $p[1]->isNotEmpty());
     @endphp
     @if($preview->isNotEmpty())
         {{-- The images first, as AtoM shows the digital object above the description; the instantiations are managed below. --}}
         <section aria-label="Digital copies" style="display: flex; gap: 1rem; flex-wrap: wrap; margin: 1rem 0">
-            @foreach($preview as [$instantiation, $file])
-                @if($file->mime_type === \App\Files\FileStore::MODEL)
-                    <div style="flex: 1 1 100%; min-width: 0">@include('description._model', ['src' => route('files.show', $file), 'alt' => $instantiation->described('instantiation-title', [app()->getLocale(), 'en'])])</div>
-                    @continue
-                @endif
-                <a href="{{ route('instantiations.show', $instantiation) }}" style="min-width: 0; max-width: 100%"><img src="{{ route('files.show', $file) }}" alt="{{ $instantiation->described('instantiation-title', [app()->getLocale(), 'en']) }}" width="{{ $file->width }}" height="{{ $file->height }}" style="max-width: 100%; max-height: 28rem; width: auto; height: auto; border: 1px solid var(--line)"></a>
+            @foreach($preview as [$instantiation, $files])
+                <div style="flex: 1 1 100%; min-width: 0">@include('description._viewer', ['instantiation' => $instantiation, 'files' => $files, 'title' => $instantiation->described('instantiation-title', [app()->getLocale(), 'en']), 'fileRoute' => 'files.show'])</div>
             @endforeach
         </section>
     @endif

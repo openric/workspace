@@ -9,13 +9,7 @@
         <section aria-label="Digital copies and carriers">
         @foreach($instantiations as ['instantiation' => $instantiation, 'files' => $files])
             <figure style="margin: 1rem 0">
-                @if($files->has('reference') && $files['reference']->mime_type === \App\Files\FileStore::MODEL)
-                    @include('description._model', ['src' => route('discover.file', $files['reference']), 'alt' => $view->label($instantiation)])
-                @elseif($files->has('reference'))
-                    <a href="{{ route('discover.file', $files['reference']) }}"><img src="{{ route('discover.file', $files['reference']) }}" alt="{{ $view->label($instantiation) }}" width="{{ $files['reference']->width }}" height="{{ $files['reference']->height }}" style="max-width: 100%; height: auto; border: 1px solid var(--line)"></a>
-                @elseif($files->has('thumbnail'))
-                    <img src="{{ route('discover.file', $files['thumbnail']) }}" alt="{{ $view->label($instantiation) }}" style="border: 1px solid var(--line)">
-                @endif
+                @include('description._viewer', ['instantiation' => $instantiation, 'files' => $files, 'title' => $view->label($instantiation), 'fileRoute' => 'discover.file'])
                 <figcaption>{{ $view->label($instantiation) }} @include('description._ric', ['term' => 'rico:Instantiation'])
                     <span class="meta">{{ collect([$instantiation->carrierType?->label(['en'])])->filter()->join('') }}</span>
                     @if($files->has('master')) · <a href="{{ route('discover.file', [$files['master'], 'download' => 1]) }}">Download the master ({{ $files['master']->mime_type }}, {{ \Illuminate\Support\Number::fileSize($files['master']->size_bytes, 1) }}, SHA-256 {{ substr($files['master']->sha256, 0, 12) }}...)</a>@endif</figcaption>

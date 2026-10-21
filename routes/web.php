@@ -61,6 +61,10 @@ Route::get('/vocab/{scheme}/{notation}', [VocabularyController::class, 'concept'
 // Public: the logo appears on the sign-in page too.
 Route::get('/branding/logo', [SettingsController::class, 'logo'])->name('branding.logo');
 
+// Heratio's Mirador bundle asks here for the reader's saved Mirador workspaces and falls back to the browser's own storage;
+// the Workspace keeps none on the server yet, so it says so instead of answering 404.
+Route::get('/api/iiif/workspace', fn () => response()->json(['data' => []]))->name('iiif.workspaces');
+
 // Persistent IRIs resolve, for anyone: the controller sends a page only to those signed in.
 Route::get('/{segment}/{id}', [IriController::class, 'resolve'])->where(['segment' => 'record|agent|repository|activity|place|concept|instantiation', 'id' => '[0-9a-f-]{36}'])->name('iri');
 
