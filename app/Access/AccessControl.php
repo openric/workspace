@@ -140,11 +140,12 @@ final class AccessControl
         return in_array($language, $this->translationLanguages($account), true);
     }
 
-    /** @return list<string> the languages any of the account's roles may translate into */
+    /** @return list<string> the languages the account may translate into: those of any of its roles, and its own */
     public function translationLanguages(User $account): array
     {
-        return DB::table('role_translation_languages')->whereIn('role_id', $this->roleIds($account, $account->institution_id))
-            ->distinct()->orderBy('language')->pluck('language')->all();
+        return DB::table('role_translation_languages')->whereIn('role_id', $this->roleIds($account, $account->institution_id))->select('language')
+            ->union(DB::table('account_translation_languages')->where('user_id', $account->id)->select('language'))
+            ->orderBy('language')->pluck('language')->unique()->values()->all();
     }
 
     /** Forget the roles cached for an account, after its membership changed. */

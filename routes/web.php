@@ -91,6 +91,11 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::middleware(['auth', 'active'])->group(function () {
+    // Heratio's profile: an account sees and edits its own name, email and contact details.
+    Route::get('/account', [AccountController::class, 'profile'])->name('account.profile');
+    Route::get('/account/edit', [AccountController::class, 'editProfile'])->name('account.edit');
+    Route::post('/account', [AccountController::class, 'updateProfile'])->name('account.update');
+    Route::post('/account/contact', [AccountController::class, 'updateProfileContact'])->name('account.contact');
     Route::get('/account/password', [PasswordController::class, 'edit'])->name('password.edit');
     Route::post('/account/password', [PasswordController::class, 'update'])->name('password.update');
     Route::post('/sign-out', [SessionController::class, 'destroy'])->name('sign-out');
@@ -302,6 +307,9 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/new', [AccountController::class, 'create'])->name('create');
         Route::post('/', [AccountController::class, 'store'])->name('store');
         Route::get('/{account}', [AccountController::class, 'show'])->name('show');
+        Route::get('/{account}/edit', [AccountController::class, 'edit'])->name('edit');
+        Route::post('/{account}', [AccountController::class, 'update'])->name('update');
+        Route::post('/{account}/contact', [AccountController::class, 'updateContact'])->name('contact');
         Route::post('/{account}/roles', [AccountController::class, 'updateRoles'])->name('roles');
         Route::post('/{account}/disable', [AccountController::class, 'disable'])->name('disable');
         Route::post('/{account}/enable', [AccountController::class, 'enable'])->name('enable');

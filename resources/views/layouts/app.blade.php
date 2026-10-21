@@ -18,7 +18,7 @@
     @auth
         <form method="post" action="{{ route('sign-out') }}">
             @csrf
-            <span>{{ auth()->user()->name }}</span>
+            <a href="{{ route('account.profile') }}">{{ auth()->user()->name }}</a>
             <button type="submit">Sign out</button>
         </form>
     @endauth

@@ -6,8 +6,10 @@
 
 namespace Tests\Feature;
 
+use App\Access\AccessControl;
 use App\Access\RoleService;
 use App\Accounts\AccountService;
+use App\Models\ContactPoint;
 use App\Models\Institution;
 use App\Models\User;
 use App\Support\Vocab;
@@ -160,5 +162,50 @@ class AccountManagementTest extends TestCase
         $this->app['auth']->forgetGuards();
         $this->get('/')->assertRedirect(route('sign-in'));
         $this->assertGuest();
+    }
+
+    public function test_an_administrator_edits_an_account_its_contact_details_and_translation_languages(): void
+    {
+        $archivist = $this->account('An Archivist', 'archivist@example.org', 'editor');
+        $this->actingAs($this->admin)->get("/accounts/{$archivist->id}")->assertSee(route('accounts.edit', $archivist), false);
+        $this->actingAs($this->admin)->get("/accounts/{$archivist->id}/edit")->assertOk()->assertSee('Contact details')->assertSee('besides those of its roles');
+
+        $this->actingAs($this->admin)->post("/accounts/{$archivist->id}", ['name' => 'Anna Archivist', 'email' => ' Anna@Example.org ', 'translation_languages' => 'af, fr af'])
+            ->assertRedirect(route('accounts.edit', $archivist))->assertSessionHas('status');
+        $archivist->refresh();
+        $this->assertSame(['Anna Archivist', 'anna@example.org'], [$archivist->name, $archivist->email]);
+        $this->assertSame(['af', 'fr'], $this->accounts->translationLanguages($archivist));
+        $this->assertContains('fr', app(AccessControl::class)->translationLanguages($archivist), 'its own languages count with its roles\'');
+
+        // Heratio's rules: a name, and an email no other account signs in with; a language must be a BCP 47 tag.
+        $this->actingAs($this->admin)->post("/accounts/{$archivist->id}", ['name' => '', 'email' => 'admin@example.org'])->assertSessionHasErrors(['name', 'email']);
+        $this->actingAs($this->admin)->post("/accounts/{$archivist->id}", ['name' => 'Anna', 'email' => 'anna@example.org', 'translation_languages' => 'not a tag!'])->assertSessionHasErrors('account');
+
+        $this->actingAs($this->admin)->post("/accounts/{$archivist->id}/contact", ['city' => 'Pretoria', 'country_code' => 'za', 'telephone' => '012 345 6789'])->assertRedirect();
+        $contact = ContactPoint::where(['subject_table' => 'users', 'subject_id' => $archivist->id])->sole();
+        $this->assertSame(['Pretoria', 'ZA', true], [$contact->city, $contact->country_code, $contact->is_primary]);
+        $this->assertContains('update', $this->actions(), 'the changes are audited');
+
+        // Only within the institution.
+        $other = $this->account('Elsewhere', 'elsewhere@example.org', null, Institution::create(['name' => 'Elsewhere', 'base_iri' => 'https://elsewhere.example.org']));
+        $this->actingAs($this->admin)->get("/accounts/{$other->id}/edit")->assertNotFound();
+    }
+
+    public function test_an_account_edits_its_own_profile_but_not_its_permissions(): void
+    {
+        $archivist = $this->account('An Archivist', 'archivist@example.org', 'editor');
+        $this->actingAs($archivist)->get('/')->assertSee(route('account.profile'), false);
+        $this->actingAs($archivist)->get('/account')->assertOk()->assertSee('An Archivist')->assertSee('Edit your profile');
+        $this->actingAs($archivist)->get('/account/edit')->assertOk()->assertDontSee('besides those of its roles');
+
+        $this->actingAs($archivist)->post('/account', ['name' => 'Anna', 'email' => 'anna@example.org', 'translation_languages' => 'fr'])->assertRedirect(route('account.edit'));
+        $this->assertSame(['Anna', 'anna@example.org'], [$archivist->fresh()->name, $archivist->fresh()->email]);
+        $this->assertSame([], $this->accounts->translationLanguages($archivist), 'an owner cannot give themselves languages');
+        $this->actingAs($archivist->fresh())->post('/account/contact', ['city' => 'Potchefstroom'])->assertRedirect(route('account.edit'));
+        $this->actingAs($archivist->fresh())->get('/account')->assertSee('Potchefstroom');
+
+        // The administrator screens stay closed to the owner.
+        $this->actingAs($archivist->fresh())->get("/accounts/{$archivist->id}/edit")->assertForbidden();
+        $this->actingAs($archivist->fresh())->post("/accounts/{$archivist->id}", ['name' => 'X', 'email' => 'x@example.org'])->assertForbidden();
     }
 }

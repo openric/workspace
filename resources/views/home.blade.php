@@ -13,6 +13,7 @@
     @endforelse
     @if(session('status'))<p role="status">{{ session('status') }}</p>@endif
     <ul>
+        <li><a href="{{ route('account.profile') }}">Your profile</a></li>
         <li><a href="{{ route('password.edit') }}">Change your password</a></li>
         @if($user->mayAnywhere('read', 'repository'))<li><a href="{{ route('repositories.index') }}">Repositories</a></li>@endif
         @if($user->mayAnywhere('read', 'description'))<li><a href="{{ route('records.index') }}">Archival descriptions</a></li>@endif

@@ -6,14 +6,20 @@
 //
 // Written for the Workspace (G1 audit: user management is "write fresh"). Which
 // fields and actions an archive needs was read from Heratio's ahg-user-manage;
-// no code was taken from it. Every route here needs manage-accounts, and an
-// administrator only ever sees accounts of their own institution.
+// editing follows its UserController::update and profile/profileEdit (one form,
+// for an administrator or for the account's owner). The administrator routes
+// need manage-accounts and see only accounts of their own institution; the
+// owner edits their own name, email and contact details, never their roles,
+// translation languages or whether the account is enabled.
 
 namespace App\Http\Controllers;
 
+use App\Access\AccessControl;
 use App\Accounts\AccountException;
 use App\Accounts\AccountService;
+use App\Description\ContactPointService;
 use App\Models\Concept;
+use App\Models\ContactPoint;
 use App\Models\Role;
 use App\Models\User;
 use App\Support\Vocab;
@@ -63,6 +69,92 @@ class AccountController extends Controller
 
         return view('accounts.show', ['account' => $account->load('roles.labels'), 'roles' => $this->roles($request),
             'kinds' => collect(array_keys(config('workspace.permission_matrix')))->map(fn ($n) => Concept::where('iri', Vocab::kind($n))->with('labels')->firstOrFail())]);
+    }
+
+    public function edit(Request $request, User $account): View
+    {
+        $this->sameInstitution($request, $account);
+
+        return $this->editForm($account, false);
+    }
+
+    public function update(Request $request, User $account): RedirectResponse
+    {
+        $this->sameInstitution($request, $account);
+
+        return $this->saveAccount($request, $account, false);
+    }
+
+    public function updateContact(Request $request, User $account): RedirectResponse
+    {
+        $this->sameInstitution($request, $account);
+
+        return $this->saveContact($request, $account, false);
+    }
+
+    /** Heratio's profile: the signed-in account, as itself. */
+    public function profile(Request $request): View
+    {
+        $account = $request->user()->load('roles.labels');
+
+        return view('accounts.profile', ['account' => $account, 'contact' => $this->contact($account),
+            'languages' => app(AccessControl::class)->translationLanguages($account)]);
+    }
+
+    public function editProfile(Request $request): View
+    {
+        return $this->editForm($request->user(), true);
+    }
+
+    public function updateProfile(Request $request): RedirectResponse
+    {
+        return $this->saveAccount($request, $request->user(), true);
+    }
+
+    public function updateProfileContact(Request $request): RedirectResponse
+    {
+        return $this->saveContact($request, $request->user(), true);
+    }
+
+    private function editForm(User $account, bool $own): View
+    {
+        return view('accounts.edit', ['account' => $account, 'own' => $own, 'contact' => $this->contact($account),
+            'languages' => $this->accounts->translationLanguages($account)]);
+    }
+
+    /** Name and sign-in email (Heratio's rules: name required, at most 1,024 characters; email unique); translation languages for an administrator. */
+    private function saveAccount(Request $request, User $account, bool $own): RedirectResponse
+    {
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:1024'],
+            'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($account->id)],
+            'translation_languages' => ['nullable', 'string', 'max:500'],
+        ]);
+        $back = $own ? redirect()->route('account.edit') : redirect()->route('accounts.edit', $account);
+        try {
+            $this->accounts->update($account, $data['name'], $data['email'], $request->user());
+            if (! $own) {
+                $this->accounts->setTranslationLanguages($account, preg_split('/[\s,]+/', (string) ($data['translation_languages'] ?? '')), $request->user());
+            }
+        } catch (\InvalidArgumentException $e) {
+            return $back->withInput()->withErrors(['account' => $e->getMessage()]);
+        }
+
+        return $back->with('status', 'Account saved.');
+    }
+
+    /** The account's contact details: one contact point, as a repository's (ISDIAH 5.2), kept with the account. */
+    private function saveContact(Request $request, User $account, bool $own): RedirectResponse
+    {
+        app(ContactPointService::class)->save($account, [...app(ContactPointService::class)->fieldsFrom($request), 'is_primary' => true],
+            $this->contact($account), $request->user());
+
+        return ($own ? redirect()->route('account.edit') : redirect()->route('accounts.edit', $account))->with('status', 'Contact details saved.');
+    }
+
+    private function contact(User $account): ?ContactPoint
+    {
+        return ContactPoint::where(['subject_table' => $account->getTable(), 'subject_id' => $account->id])->orderByDesc('is_primary')->first();
     }
 
     public function updateRoles(Request $request, User $account): RedirectResponse

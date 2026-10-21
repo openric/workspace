@@ -12,6 +12,7 @@ namespace App\Accounts;
 
 use App\Access\RoleService;
 use App\Audit\AuditLog;
+use App\Description\Bcp47;
 use App\Models\Institution;
 use App\Models\Role;
 use App\Models\User;
@@ -32,6 +33,45 @@ class AccountService
             'email' => mb_strtolower(trim($email)),
             'password' => $password,
         ])));
+    }
+
+    /** Change the account's name and sign-in email (Heratio's user update, without its username and typed passwords). */
+    public function update(User $account, string $name, string $email, ?User $actor = null): void
+    {
+        $email = mb_strtolower(trim($email));
+        if (User::where('email', $email)->whereKeyNot($account->id)->exists()) {
+            throw new InvalidArgumentException('another account signs in with that email');
+        }
+        DB::transaction(fn () => AuditLog::actingAs($actor, fn () => $account->update(['name' => trim($name), 'email' => $email])));
+    }
+
+    /** @return list<string> the languages this account may translate into by itself, besides its roles' */
+    public function translationLanguages(User $account): array
+    {
+        return DB::table('account_translation_languages')->where('user_id', $account->id)->orderBy('language')->pluck('language')->all();
+    }
+
+    /** The languages this account may translate into by itself (BCP 47 tags), as Heratio's per-user translate languages. */
+    public function setTranslationLanguages(User $account, array $languages, ?User $actor = null): void
+    {
+        $languages = array_values(array_unique(array_filter(array_map('trim', $languages))));
+        sort($languages);
+        foreach ($languages as $language) {
+            if (! Bcp47::valid($language)) {
+                throw new InvalidArgumentException("$language is not a BCP 47 language tag");
+            }
+        }
+        DB::transaction(function () use ($account, $languages, $actor) {
+            $before = $this->translationLanguages($account);
+            if ($before === $languages) {
+                return;
+            }
+            DB::table('account_translation_languages')->where('user_id', $account->id)->delete();
+            foreach ($languages as $language) {
+                DB::table('account_translation_languages')->insert(['user_id' => $account->id, 'language' => $language]);
+            }
+            AuditLog::record(Vocab::action('update'), $account, ['translation_languages' => $before], ['translation_languages' => $languages], $actor);
+        });
     }
 
     /** Make the account a member of exactly these roles of its institution. */
