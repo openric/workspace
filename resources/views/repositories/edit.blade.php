@@ -13,6 +13,7 @@
         <input id="language" name="language" required value="{{ old('language', $language) }}">
         <label for="identifier">Identifier (ISDIAH 5.1.1)</label> @include('description._ric', ['term' => 'rico:Identifier'])
         <input id="identifier" name="identifier" value="{{ old('identifier', $repository->identifier) }}">
+        <label style="font-weight: normal"><input type="hidden" name="complete_reference_codes" value="0"><input type="checkbox" name="complete_reference_codes" value="1" style="width: auto" @checked(old('complete_reference_codes', $repository->complete_reference_codes))> Each unit it holds carries its complete reference code, so codes are not built from the units above it</label>
         @include('description._fields', ['subject' => $repository, 'standard' => \App\Description\Elements::ISDIAH, 'language' => $language])
         <h2>Control (ISDIAH 5.6)</h2>
         <label for="description_identifier">Description identifier (5.6.1)</label> @include('description._ric', ['term' => null])

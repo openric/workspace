@@ -47,7 +47,9 @@ class RecordResource extends Model
     public function referenceCode(string $separator = '/'): ?string
     {
         $code = '';
-        foreach ([...$this->ancestors(), $this] as $unit) {
+        // A repository that gives every unit its whole code (as the Archives nationales de France do): the unit's own.
+        $units = $this->repository?->complete_reference_codes && (string) $this->identifier !== '' ? [$this] : [...$this->ancestors(), $this];
+        foreach ($units as $unit) {
             $own = (string) $unit->identifier;
             if ($own === '') {
                 continue;

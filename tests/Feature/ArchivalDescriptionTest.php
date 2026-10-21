@@ -123,6 +123,15 @@ class ArchivalDescriptionTest extends TestCase
         $this->actingAs($this->contributor)->get('/records?top=0&publication=published')->assertSee('No archival descriptions yet.');
     }
 
+    public function test_a_repository_giving_complete_codes_stops_them_being_built_from_the_units_above(): void
+    {
+        app(RepositoryService::class)->setCompleteReferenceCodes($this->fonds->repository, true);
+        $this->assertSame('ZA-RA 1', $this->series->fresh()->referenceCode(), 'the unit\'s own identifier, after the repository code');
+        $this->assertSame('ZA-RA RPC/1/3', $this->file->fresh()->referenceCode());
+        app(RepositoryService::class)->setCompleteReferenceCodes($this->fonds->repository, false);
+        $this->assertSame('ZA-RA RPC/1', $this->series->fresh()->referenceCode());
+    }
+
     public function test_reference_codes_hierarchy_inventory_and_finding_aid(): void
     {
         $this->assertSame('ZA-RA RPC', $this->fonds->referenceCode());

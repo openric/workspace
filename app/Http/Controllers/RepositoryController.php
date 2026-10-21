@@ -93,6 +93,7 @@ class RepositoryController extends Controller
         $data = $request->validate([
             'language' => ['required', 'string', fn ($a, $v, $fail) => Bcp47::valid((string) $v) || $fail('Give a BCP 47 language tag, such as en or af.')],
             'identifier' => ['nullable', 'string', 'max:255'],
+            'complete_reference_codes' => ['boolean'],
             'values' => ['array'],
             'values.*' => ['nullable', 'string', 'max:65535'],
             'description_identifier' => ['nullable', 'string', 'max:255'],
@@ -104,6 +105,7 @@ class RepositoryController extends Controller
             // One transaction: a refused description leaves the identifier unchanged too.
             DB::transaction(function () use ($repository, $data, $values, $request) {
                 $this->repositories->updateIdentity($repository, $data['identifier'] ?? null, $request->user());
+                $this->repositories->setCompleteReferenceCodes($repository, (bool) ($data['complete_reference_codes'] ?? $repository->complete_reference_codes), $request->user());
                 $this->repositories->updateControl($repository, $data['description_identifier'] ?? null, $data['description_status'] ?? null, $data['description_detail'] ?? null, $request->user());
                 $this->repositories->describe($repository, $values, $data['language'], $request->user());
             });

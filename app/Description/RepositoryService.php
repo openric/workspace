@@ -46,6 +46,12 @@ class RepositoryService
         $this->identifiers->setLocal($repository, $identifier, $actor);
     }
 
+    /** Do the repository's holdings carry complete reference codes, so that none is built from the units above it? */
+    public function setCompleteReferenceCodes(Repository $repository, bool $complete, ?User $actor = null): void
+    {
+        DB::transaction(fn () => AuditLog::actingAs($actor, fn () => $repository->update(['complete_reference_codes' => $complete])));
+    }
+
     /** ISDIAH 5.6.1, 5.6.4 and 5.6.5; status and detail are concept IRIs or null. */
     public function updateControl(Repository $repository, ?string $descriptionIdentifier, ?string $statusIri, ?string $detailIri, ?User $actor = null): void
     {
