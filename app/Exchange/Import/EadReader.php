@@ -256,6 +256,9 @@ class EadReader
                 $name === 'subject' => $draft->subjects[] = ['name' => $label, 'iri' => $iri],
                 $name === 'geogname' => $draft->places[] = ['name' => $label, 'iri' => $iri],
                 $name === 'genreform' => $draft->genres[] = ['name' => $label, 'iri' => $iri],
+                // A trade the unit is about, as the Archives nationales index them, is one of its subjects: the Workspace keeps
+                // occupation types for people (rico:hasOrHadOccupationOfType), so a unit's occupation is a subject concept.
+                $name === 'occupation' => $draft->subjects[] = ['name' => $label, 'iri' => $iri],
                 array_key_exists($name, self::NAMES) => $draft->names[] = ['name' => $label, 'type' => self::NAMES[$name], 'iri' => $iri],
                 default => $this->report->issue($draft->location, "controlaccess/$name", $label, $this->why($name), 'left-out'),
             };
@@ -284,7 +287,8 @@ class EadReader
     {
         $edtf = null;
         if ($normal !== null) {
-            $parts = array_map(fn ($part) => preg_match('/^(\d{4})(\d{2})(\d{2})?$/', $part, $m) ? $m[1].'-'.$m[2].(isset($m[3]) ? '-'.$m[3] : '') : $part, explode('/', $normal));
+            // Some finding aids write the interval with spaces around the slash (the Archives nationales: "1570-01-01 / 1947-12-31").
+            $parts = array_map(fn ($part) => preg_match('/^(\d{4})(\d{2})(\d{2})?$/', $part, $m) ? $m[1].'-'.$m[2].(isset($m[3]) ? '-'.$m[3] : '') : $part, array_map('trim', explode('/', $normal)));
             $edtf = count($parts) === 2 ? CsvReader::interval($parts[0], $parts[1]) : $parts[0];
         }
         $property = in_array(mb_strtolower($datechar), ['accumulation', 'associated'], true) ? mb_strtolower($datechar) : 'creation';
@@ -366,7 +370,7 @@ class EadReader
     {
         return match ($element) {
             'dao', 'daogrp', 'daoset' => 'digital objects are not kept yet; not read',
-            'function', 'occupation', 'title' => 'only subjects, places, names and documentary form types are read as access points; not read',
+            'function', 'title' => 'only subjects, places, names, occupations and documentary form types are read as access points; not read',
             default => 'no ISAD(G) element the Workspace keeps; not read',
         };
     }

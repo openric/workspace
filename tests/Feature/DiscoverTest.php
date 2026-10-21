@@ -10,6 +10,7 @@ use App\Access\RoleService;
 use App\Accounts\AccountService;
 use App\Description\ActivityService;
 use App\Description\AgentService;
+use App\Description\IdentifierService;
 use App\Description\InstantiationService;
 use App\Description\PlaceService;
 use App\Description\PublicationService;
@@ -177,6 +178,13 @@ class DiscoverTest extends TestCase
         // Signed in, the closed file is there.
         $this->actingAs($this->editor)->get("/records/{$this->fonds->id}")->assertSee('<nav class="tree" aria-label="Hierarchy">', false)->assertSee('Closed personnel file');
         $this->actingAs($this->editor)->get("/records/{$this->fonds->id}/tree-branch")->assertOk()->assertJsonCount(2, 'items');
+    }
+
+    public function test_identifiers_show_in_the_public_catalogue_with_web_addresses_as_links(): void
+    {
+        app(IdentifierService::class)->add($this->clerk, ['type' => 'other', 'value' => 'https://rdf.archives-nationales.culture.gouv.fr/agent/000001'], $this->editor);
+        $this->get("/discover/agents/{$this->clerk->id}")->assertOk()->assertSee('<h2 id="identifiers-heading">', false)
+            ->assertSee('<a href="https://rdf.archives-nationales.culture.gouv.fr/agent/000001" rel="noopener">', false);
     }
 
     public function test_a_unit_with_no_picture_of_its_own_shows_the_pictures_of_the_units_inside_it(): void

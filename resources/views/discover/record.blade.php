@@ -56,6 +56,7 @@
         <h2>Inside it ({{ $children->count() }})</h2>
         <ul>@foreach($children as $child)<li><a href="{{ route('discover.record', $child->id) }}">{{ $view->label($child) }}</a> <span class="meta">{{ collect([$child->level->label(['en', 'und']), $child->referenceCode(), $child->dates->first()?->display()])->filter()->join(', ') }}</span></li>@endforeach</ul>
     @endif
+    @include('discover._identifiers', ['entity' => $unit])
     <h2>Cite and reuse</h2>
     <p>{{ collect([$title, $unit->referenceCode(), $unit->repository ? $view->label($unit->repository) : null])->filter()->join(', ') }}. <code>{{ $unit->iri }}</code></p>
     <p class="meta">This description as RiC-O: <a href="{{ route('api.record', $unit->id) }}">JSON-LD</a> · <a href="{{ route('api.export', [$unit->id, 'format' => 'ttl']) }}">Turtle</a> · <a href="{{ route('api.export', [$unit->id, 'format' => 'rdf']) }}">RDF/XML</a></p>

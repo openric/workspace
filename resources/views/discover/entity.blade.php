@@ -23,5 +23,6 @@
     @endisset
     @include('discover._values', ['subject' => $entity, 'standard' => $standard, 'view' => $view])
     @include('discover._relations', ['relations' => $relations, 'view' => $view, 'heading' => 'Relations'])
+    @include('discover._identifiers', ['entity' => $entity])
     <p class="meta"><code>{{ $entity->getAttribute('iri') }}</code></p>
 @endsection

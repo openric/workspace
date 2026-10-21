@@ -211,6 +211,23 @@ class ImportTest extends TestCase
         $this->assertSame(1, Concept::whereHas('labels', fn ($q) => $q->where('pref_label', 'Parish business'))->count(), 'one subject, used by all');
     }
 
+    public function test_an_archives_nationales_finding_aid_keeps_its_reference_code_spaced_dates_and_occupations(): void
+    {
+        // As the Archives nationales write it: the code only as a typed unitid, an interval with spaces around the slash, trades indexed as occupations, which become subjects.
+        $xml = '<?xml version="1.0" encoding="UTF-8"?><ead><eadheader><eadid>FRAN_IR_X</eadid></eadheader><archdesc level="fonds"><did><unittitle>Minutes de l\'étude XII</unittitle>'
+            .'<unitid type="cote-de-consultation">MC/ET/XII</unitid><unitdate normal="1570-01-01 / 1947-12-31">1570-1947</unitdate></did>'
+            .'<controlaccess><occupation authfilenumber="d699msjnau1" source="FRAN_RI_010">serrurier</occupation></controlaccess></archdesc></ead>';
+        $import = $this->commit($this->upload($xml, 'ead', ['create_terms' => '1']));
+        $this->assertEquals(['created' => 1, 'updated' => 0, 'unchanged' => 0, 'rejected' => 0], $import->report['actions']);
+        $unit = RecordResource::sole();
+        $this->assertSame('MC/ET/XII', $unit->identifier);
+        $this->assertSame(0, $unit->identifiers()->whereHas('identifierType', fn ($q) => $q->where('notation', 'other'))->count(), 'not kept twice');
+        $this->assertSame('1570/1947', $unit->dates()->sole()->normalized_value, 'whole years, as the interval runs from 1 January to 31 December');
+        $concept = Concept::whereHas('labels', fn ($q) => $q->where('pref_label', 'serrurier'))->sole();
+        $this->assertSame('subject', $concept->vocabulary->kind->notation, 'occupation types are for people');
+        $this->assertTrue(Relation::where(['source_id' => $unit->id, 'target_id' => $concept->id])->exists(), 'the unit is about the trade');
+    }
+
     public function test_a_foreign_ead_2002_finding_aid_without_a_namespace(): void
     {
         $xml = <<<'XML'

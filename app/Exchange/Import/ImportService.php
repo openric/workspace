@@ -292,6 +292,11 @@ class ImportService
 
     private function write(UnitDraft $draft): RecordResource
     {
+        // A unit with only typed unitids takes the first as its identifier, as AtoM does: the Archives nationales give
+        // their reference code (cote de consultation) only as a typed unitid.
+        if ($draft->identifier === null && $draft->identifiers !== []) {
+            $draft->identifier = array_shift($draft->identifiers)['value'];
+        }
         $parent = $this->parent($draft);
         $unit = $this->match($draft, $parent);
         $language = $draft->language($this->import->language);
