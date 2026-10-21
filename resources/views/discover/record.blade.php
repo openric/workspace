@@ -3,8 +3,23 @@
 @section('title', $view->label($unit))
 @section('head')<link rel="alternate" type="application/ld+json" href="{{ route('api.record', $unit->id) }}">@endsection
 @section('content')
+    @php $withTree = $tree['ancestors'] !== [] || $tree['children'] !== []; @endphp
+    @if($withTree)<div class="with-tree"><aside class="tree-aside">@include('records._tree', ['tree' => $tree, 'branch' => 'discover.record.tree'])</aside><div class="with-tree-main">@endif
     @if($ancestors)<nav aria-label="Hierarchy" class="meta">@foreach($ancestors as $above)<a href="{{ route('discover.record', $above->id) }}">{{ $view->label($above) }}</a> / @endforeach</nav>@endif
     {{-- The images first, as AtoM shows the digital object above the description. --}}
+    {{-- Heratio's imageflow: the pictures of the units inside, each opening its unit. --}}
+    @if($childThumbnails->isNotEmpty())
+        <section aria-label="Pictures of the units inside" class="imageflow">
+            <ul>
+                @foreach($childThumbnails as ['unit' => $child, 'file' => $file])
+                    <li><a href="{{ route('discover.record', $child->id) }}" title="{{ $view->label($child) }}">
+                        <img src="{{ route('discover.file', $file) }}" alt="" width="{{ $file->width }}" height="{{ $file->height }}" loading="lazy">
+                        <span>{{ \Illuminate\Support\Str::limit((string) $view->label($child), 28) }}</span></a></li>
+                @endforeach
+            </ul>
+            @if($childThumbnailTotal > $childThumbnails->count())<p class="meta">Showing {{ $childThumbnails->count() }} of {{ $childThumbnailTotal }} pictures of the units inside.</p>@endif
+        </section>
+    @endif
     @if($instantiations->isNotEmpty())
         <section aria-label="Digital copies and carriers">
         @foreach($instantiations as ['instantiation' => $instantiation, 'files' => $files])
@@ -44,4 +59,5 @@
     <h2>Cite and reuse</h2>
     <p>{{ collect([$title, $unit->referenceCode(), $unit->repository ? $view->label($unit->repository) : null])->filter()->join(', ') }}. <code>{{ $unit->iri }}</code></p>
     <p class="meta">This description as RiC-O: <a href="{{ route('api.record', $unit->id) }}">JSON-LD</a> · <a href="{{ route('api.export', [$unit->id, 'format' => 'ttl']) }}">Turtle</a> · <a href="{{ route('api.export', [$unit->id, 'format' => 'rdf']) }}">RDF/XML</a></p>
+    @if($withTree)</div></div>@endif
 @endsection

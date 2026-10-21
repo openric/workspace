@@ -88,6 +88,7 @@ Route::get('/', fn () => auth()->check() ? view('home') : redirect()->route('dis
 Route::middleware(ServeDiscovery::class)->prefix('discover')->name('discover.')->group(function () {
     Route::get('/', [DiscoverController::class, 'home'])->name('home');
     Route::get('/records/{id}', [DiscoverController::class, 'record'])->name('record');
+    Route::get('/records/{id}/tree', [DiscoverController::class, 'treeChildren'])->name('record.tree');
     Route::get('/agents/{id}', [DiscoverController::class, 'agent'])->name('agent');
     Route::get('/repositories/{id}', [DiscoverController::class, 'repository'])->name('repository');
     Route::get('/places/{id}', [DiscoverController::class, 'place'])->name('place');
@@ -144,6 +145,7 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::post('/{record}/move', [RecordController::class, 'move'])->name('move');
         Route::post('/{record}/reorder', [RecordController::class, 'reorder'])->name('reorder');
         Route::get('/{record}/tree', [RecordController::class, 'tree'])->name('tree');
+        Route::get('/{record}/tree-branch', [RecordController::class, 'treeChildren'])->name('tree-branch');
         Route::get('/{record}/inventory', [RecordController::class, 'inventory'])->name('inventory');
         Route::get('/{record}/finding-aid', [RecordController::class, 'findingAid'])->name('finding-aid');
         Route::get('/{record}/print', [RecordController::class, 'findingAid'])->name('print');

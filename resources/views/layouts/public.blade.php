@@ -17,6 +17,12 @@
         .catalogue-lede { font-size: 1.1rem; color: var(--muted-2); text-align: justify; hyphens: auto; }
         .catalogue-counts { color: var(--muted); font-size: .95rem; }
         .catalogue-search div { display: flex; gap: .5rem; max-width: 34rem; } .catalogue-search input { max-width: none; flex: 1; } .catalogue-search button { margin: 0; }
+.imageflow { margin: 1rem 0; padding: .6rem; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
+        .imageflow ul { display: flex; gap: .6rem; overflow-x: auto; list-style: none; margin: 0; padding: 0 0 .3rem; scrollbar-width: thin; }
+        .imageflow li { flex: none; width: 128px; margin: 0; }
+        .imageflow a { display: block; text-decoration: none !important; color: var(--muted-2); font-size: .8rem; text-align: center; }
+        .imageflow img { width: 128px; height: 96px; object-fit: cover; border-radius: 6px; border: 1px solid var(--line); display: block; margin-bottom: .25rem; }
+        .imageflow a:hover img, .imageflow a:focus-visible img { border-color: var(--link); }
         .catalogue-credits { text-align: justify; margin-top: 3rem; padding: 1.1rem 1.3rem; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); font-size: .92rem; color: var(--muted-2); }
         .catalogue-credits h2 { margin-top: 0; font-size: 1.05rem; border: 0; padding: 0; }
         @media (max-width: 40rem) { .catalogue-hero { padding: 1.5rem 1.1rem; border-radius: var(--radius); } .catalogue-lede { text-align: left; } }

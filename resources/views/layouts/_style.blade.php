@@ -155,6 +155,10 @@
         .ric a { color: var(--muted); text-decoration: none; }
         .ric code { font-size: .95em; background: var(--surface-2); color: var(--muted-2); }
 
+        /* A record beside its hierarchy tree (Heratio's sidebar treeview); above the record on narrow screens. */
+        .with-tree { display: grid; grid-template-columns: minmax(14rem, 18rem) minmax(0, 1fr); gap: 2rem; align-items: start; }
+        .tree-aside { position: sticky; top: 4rem; max-height: calc(100vh - 5rem); overflow: auto; padding: .9rem 1rem; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
+        @media (max-width: 64rem) { .with-tree { display: block; } .tree-aside { position: static; max-height: 22rem; margin-bottom: 1.25rem; } }
         /* Phones and narrow windows: nothing wider than the screen. Long IRIs and RiC-O terms wrap, wide tables scroll inside themselves, media shrink. */
         main, .main-nav { overflow-wrap: break-word; }
         code, .ric, dd, td { overflow-wrap: anywhere; }

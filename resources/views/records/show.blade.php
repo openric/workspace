@@ -2,6 +2,8 @@
 @extends('layouts.app')
 @section('title', $record->described('title', ['en']))
 @section('content')
+    @php $withTree = $tree['ancestors'] !== [] || $tree['children'] !== []; @endphp
+    @if($withTree)<div class="with-tree"><aside class="tree-aside">@include('records._tree', ['tree' => $tree, 'branch' => 'records.tree-branch'])</aside><div class="with-tree-main">@endif
     <nav aria-label="Hierarchy"><a href="{{ route('records.index') }}">Archival descriptions</a>
         @foreach($record->ancestors() as $ancestor) / <a href="{{ route('records.show', $ancestor) }}">{{ $ancestor->described('title', ['en']) }}</a>@endforeach</nav>
     @php
@@ -9,6 +11,19 @@
         $preview = $record->instantiations->map(fn ($i) => [$i, $i->files->filter(fn ($f) => app(\App\Description\InstantiationService::class)->deliverable(auth()->user(), $f->setRelation('instantiation', $i)))
             ->keyBy(fn ($f) => $f->use->notation)])->filter(fn ($p) => $p[1]->isNotEmpty());
     @endphp
+    {{-- Heratio's imageflow: the pictures of the units inside, each opening its unit. --}}
+    @if($childThumbnails['tiles']->isNotEmpty())
+        <section aria-label="Pictures of the units inside" style="margin: 1rem 0; padding: .6rem; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius)">
+            <ul style="display: flex; gap: .6rem; overflow-x: auto; list-style: none; margin: 0; padding: 0 0 .3rem">
+                @foreach($childThumbnails['tiles'] as ['unit' => $child, 'file' => $file])
+                    <li style="flex: none; width: 128px; margin: 0"><a href="{{ route('records.show', $child) }}" title="{{ $child->described('title', ['en']) }}" style="display: block; text-decoration: none; font-size: .8rem; text-align: center; color: var(--muted-2)">
+                        <img src="{{ route('files.show', $file) }}" alt="" width="{{ $file->width }}" height="{{ $file->height }}" loading="lazy" style="width: 128px; height: 96px; object-fit: cover; border-radius: 6px; border: 1px solid var(--line); display: block; margin-bottom: .25rem">
+                        {{ \Illuminate\Support\Str::limit((string) $child->described('title', ['en']), 28) }}</a></li>
+                @endforeach
+            </ul>
+            @if($childThumbnails['total'] > $childThumbnails['tiles']->count())<p class="meta">Showing {{ $childThumbnails['tiles']->count() }} of {{ $childThumbnails['total'] }} pictures of the units inside.</p>@endif
+        </section>
+    @endif
     @if($preview->isNotEmpty())
         {{-- The images first, as AtoM shows the digital object above the description; the instantiations are managed below. --}}
         <section aria-label="Digital copies" style="display: flex; gap: 1rem; flex-wrap: wrap; margin: 1rem 0">
@@ -69,4 +84,5 @@
     @empty
         <p>None yet.</p>
     @endforelse
+    @if($withTree)</div></div>@endif
 @endsection

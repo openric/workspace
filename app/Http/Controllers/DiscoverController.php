@@ -15,6 +15,7 @@ namespace App\Http\Controllers;
 use App\Api\PublicCatalogue;
 use App\Description\Elements;
 use App\Description\InstantiationService;
+use App\Description\TreeService;
 use App\Discovery\Graph;
 use App\Discovery\Links;
 use App\Files\FileResponse;
@@ -24,6 +25,7 @@ use App\Models\Relation;
 use App\Relations\EntityKinds;
 use App\Relations\RelationService;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
@@ -109,8 +111,59 @@ class DiscoverController extends Controller
             'instantiation' => $i, 'files' => $i->files->filter(fn (DigitalFile $f) => $service->deliverable(null, $f->setRelation('instantiation', $i)))->keyBy(fn ($f) => $f->use->notation),
         ])->values();
 
+        [$childThumbnails, $childThumbnailTotal] = $this->childThumbnails($catalogue, $unit);
+
         return view('discover.record', ['unit' => $unit, 'view' => $view, 'ancestors' => $ancestors, 'children' => $children, 'instantiations' => $instantiations,
-            'relations' => $this->relations($unit, $catalogue), 'institution' => $catalogue->institution]);
+            'relations' => $this->relations($unit, $catalogue), 'institution' => $catalogue->institution,
+            'childThumbnails' => $childThumbnails, 'childThumbnailTotal' => $childThumbnailTotal,
+            'tree' => (new TreeService(null, $catalogue))->window($unit)]);
+    }
+
+    /**
+     * Heratio's imageflow strip (InformationObjectController childThumbnails): a thumbnail for each published unit inside
+     * this one that has a picture the public may see, linking to that unit; at most 24, with how many there are.
+     *
+     * @return array{0: Collection<int, array{unit: RecordResource, file: DigitalFile}>, 1: int}
+     */
+    private function childThumbnails(PublicCatalogue $catalogue, RecordResource $unit): array
+    {
+        $records = $catalogue->visible('records');
+        $parents = $records->pluck('parent_id', 'id');
+        $inside = $records->filter(function ($r) use ($parents, $unit) {
+            for ($id = $parents[$r->id] ?? null, $seen = 0; $id !== null && $seen < 100; $id = $parents[$id] ?? null, $seen++) {
+                if ($id === $unit->id) {
+                    return true;
+                }
+            }
+
+            return false;
+        })->keyBy('id');
+        if ($inside->isEmpty()) {
+            return [collect(), 0];
+        }
+        $service = app(InstantiationService::class);
+        $found = [];
+        DigitalFile::query()->whereHas('use', fn ($q) => $q->where('notation', 'thumbnail'))
+            ->whereHas('instantiation', fn ($q) => $q->whereIn('record_resource_id', $inside->keys())->whereNull('deleted_at'))
+            ->with('use', 'instantiation.record', 'instantiation.availability')->orderBy('created_at')->get()
+            ->each(function (DigitalFile $file) use (&$found, $service) {
+                $owner = $file->instantiation->record_resource_id;
+                if (! isset($found[$owner]) && $service->deliverable(null, $file)) {
+                    $found[$owner] = $file;
+                }
+            });
+        $tiles = collect($found)->map(fn ($file, $id) => ['unit' => $inside[$id], 'file' => $file])->values();
+
+        return [$tiles->take(24), $tiles->count()];
+    }
+
+    /** A branch of the hierarchy tree in the public catalogue: published units only. */
+    public function treeChildren(Request $request, string $id): JsonResponse
+    {
+        $catalogue = $this->catalogue($request);
+        $unit = $catalogue->find('records', $id) ?? abort(404);
+
+        return response()->json((new TreeService(null, $catalogue))->children($unit->id, max(0, (int) $request->query('offset', 0))));
     }
 
     public function agent(Request $request, string $id): View

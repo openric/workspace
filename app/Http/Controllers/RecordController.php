@@ -13,16 +13,22 @@ use App\Access\AccessControl;
 use App\Description\Bcp47;
 use App\Description\DateService;
 use App\Description\Elements;
+use App\Description\InstantiationService;
 use App\Description\RecordService;
+use App\Description\TreeService;
 use App\Models\Concept;
+use App\Models\DigitalFile;
 use App\Models\Name;
 use App\Models\RecordResource;
 use App\Models\Repository;
+use App\Models\User;
 use App\Relations\RelationService;
 use App\Support\Vocab;
 use Illuminate\Database\QueryException;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
@@ -70,6 +76,14 @@ class RecordController extends Controller
 
         return view('records.index', ['units' => $units, 'query' => $query, 'filters' => $filters, 'levels' => $this->levels($request),
             'repositories' => $this->repositories($request)]);
+    }
+
+    /** A branch of the hierarchy tree, the next page of it (Heratio's treeview-data). */
+    public function treeChildren(Request $request, RecordResource $record): JsonResponse
+    {
+        abort_unless($record->institution_id === $request->user()->institution_id && $record->deleted_at === null && $request->user()->may('read', 'description', $record), 404);
+
+        return response()->json((new TreeService($request->user()))->children($record->id, max(0, (int) $request->query('offset', 0))));
     }
 
     /** The whole hierarchy the unit belongs to, from its top unit down. */
@@ -154,7 +168,36 @@ class RecordController extends Controller
 
         return view('records.show', ['record' => $record, 'elements' => Elements::of(Elements::ISAD_G), 'dateChoices' => app(DateService::class)->choices('record'), 'relations' => app(RelationService::class)->of($record),
             'drafts' => $user->may('view-draft', 'description', $record), 'canUpdate' => $user->may('update', 'description', $record),
-            'canCreateInside' => $user->may('create', 'description', $record)]);
+            'canCreateInside' => $user->may('create', 'description', $record), 'childThumbnails' => $this->childThumbnails($record, $user),
+            'tree' => (new TreeService($user))->window($record)]);
+    }
+
+    /**
+     * Heratio's imageflow strip: a thumbnail for each unit inside this one, at any depth, that has one this account may
+     * receive, linking to that unit; at most 24, with how many there are.
+     *
+     * @return array{tiles: Collection<int, array{unit: RecordResource, file: DigitalFile}>, total: int}
+     */
+    private function childThumbnails(RecordResource $record, User $user): array
+    {
+        $ids = collect(DB::select('WITH RECURSIVE inside AS (SELECT id FROM record_resources WHERE parent_id = ? AND deleted_at IS NULL
+            UNION ALL SELECT r.id FROM record_resources r JOIN inside ON r.parent_id = inside.id WHERE r.deleted_at IS NULL) SELECT id FROM inside', [$record->id]))->pluck('id');
+        if ($ids->isEmpty()) {
+            return ['tiles' => collect(), 'total' => 0];
+        }
+        $service = app(InstantiationService::class);
+        $found = [];
+        DigitalFile::query()->whereHas('use', fn ($q) => $q->where('notation', 'thumbnail'))
+            ->whereHas('instantiation', fn ($q) => $q->whereIn('record_resource_id', $ids)->whereNull('deleted_at'))
+            ->with('use', 'instantiation.record.names.nameType', 'instantiation.availability')->orderBy('created_at')->get()
+            ->each(function ($file) use (&$found, $service, $user) {
+                $owner = $file->instantiation->record_resource_id;
+                if (! isset($found[$owner]) && $service->deliverable($user, $file)) {
+                    $found[$owner] = ['unit' => $file->instantiation->record, 'file' => $file];
+                }
+            });
+
+        return ['tiles' => collect(array_values($found))->take(24), 'total' => count($found)];
     }
 
     public function edit(Request $request, RecordResource $record): View

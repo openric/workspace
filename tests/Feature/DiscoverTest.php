@@ -157,6 +157,41 @@ class DiscoverTest extends TestCase
         $this->get('/discover')->assertDontSee('id="credits"', false)->assertDontSee('class="catalogue-lede"', false);
     }
 
+    public function test_the_hierarchy_tree_stands_beside_a_record_with_only_what_the_reader_may_see(): void
+    {
+        // Heratio's sidebar treeview: the units above, the current one marked, its children or its neighbours.
+        $page = $this->get("/discover/records/{$this->item->id}")->assertOk()->getContent();
+        preg_match('~<nav class="tree" aria-label="Hierarchy">.*?</nav>~s', $page, $tree);
+        $this->assertStringContainsString('href="'.route('discover.record', $this->fonds->id).'"', $tree[0]);
+        $this->assertStringContainsString('<strong aria-current="page">Letter of 3 May 1902</strong>', $tree[0]);
+        $this->assertStringNotContainsString('Closed personnel file', $tree[0], 'a draft is not in the public tree');
+
+        $fonds = $this->get("/discover/records/{$this->fonds->id}")->getContent();
+        preg_match('~<nav class="tree" aria-label="Hierarchy">.*?</nav>~s', $fonds, $tree);
+        $this->assertStringContainsString('Letter of 3 May 1902', $tree[0]);
+        $this->assertStringNotContainsString('Closed personnel file', $tree[0]);
+        $this->get("/discover/records/{$this->fonds->id}/tree")->assertOk()->assertJsonPath('items.0.title', 'Letter of 3 May 1902')->assertJsonCount(1, 'items')->assertJsonPath('more', false);
+        $this->get("/discover/records/{$this->closed->id}/tree")->assertNotFound();
+
+        // Signed in, the closed file is there.
+        $this->actingAs($this->editor)->get("/records/{$this->fonds->id}")->assertSee('<nav class="tree" aria-label="Hierarchy">', false)->assertSee('Closed personnel file');
+        $this->actingAs($this->editor)->get("/records/{$this->fonds->id}/tree-branch")->assertOk()->assertJsonCount(2, 'items');
+    }
+
+    public function test_a_unit_with_no_picture_of_its_own_shows_the_pictures_of_the_units_inside_it(): void
+    {
+        // Heratio's imageflow: the fonds has no file, the letter inside it has the scan.
+        $page = $this->get("/discover/records/{$this->fonds->id}")->assertOk()->assertSee('aria-label="Pictures of the units inside"', false)->getContent();
+        preg_match('~<section aria-label="Pictures of the units inside".*?</section>~s', $page, $strip);
+        $this->assertStringContainsString(route('discover.record', $this->item->id), $strip[0]);
+        $this->assertStringContainsString(route('discover.file', $this->scan->file('thumbnail')), $strip[0]);
+        $this->assertStringNotContainsString('Closed personnel file', $strip[0]);
+        // The letter shows its own scan, and no strip.
+        $this->get("/discover/records/{$this->item->id}")->assertDontSee('aria-label="Pictures of the units inside"', false);
+        // The same strip on the staff page.
+        $this->actingAs($this->editor)->get("/records/{$this->fonds->id}")->assertSee('aria-label="Pictures of the units inside"', false)->assertSee(route('records.show', $this->item), false);
+    }
+
     public function test_a_repository_lists_the_published_units_it_holds_at_the_top_and_no_draft(): void
     {
         $repository = $this->fonds->repository;
