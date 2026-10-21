@@ -35,6 +35,11 @@ class Place extends Model
     }
 
     /** The place it lies in now (rico:isOrWasContainedBy). */
+    public function mergedInto(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'merged_into_id');
+    }
+
     public function parent(): BelongsTo
     {
         return $this->belongsTo(self::class, 'parent_id');

@@ -13,9 +13,14 @@ namespace App\Description;
 
 use App\Audit\AuditLog;
 use App\Models\Concept;
+use App\Models\Identifier;
 use App\Models\Institution;
+use App\Models\Name;
 use App\Models\Place;
+use App\Models\Relation;
+use App\Models\RicDate;
 use App\Models\User;
+use App\Relations\RelationService;
 use App\Support\Vocab;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -93,5 +98,60 @@ class PlaceService
             }
         }
         DB::transaction(fn () => AuditLog::actingAs($actor, fn () => $place->update(['parent_id' => $parent?->id])));
+    }
+
+    /**
+     * Merge a duplicate place into the place kept, by AgentService::merge's rules: its relations move to the kept place
+     * (one the kept place has already is not made twice, and none comes to connect the place to itself); its names become
+     * other forms of name there unless the kept place has that name already; its identifiers move, a local one as a
+     * previous identifier; the places inside it move inside the kept place, and its dates with them; coordinates the kept
+     * place lacks are taken from it. It is marked deleted and names the place kept, so its persistent IRI leads there.
+     */
+    public function merge(Place $duplicate, Place $kept, ?User $actor = null): void
+    {
+        if ($duplicate->id === $kept->id || $duplicate->institution_id !== $kept->institution_id || $duplicate->deleted_at || $kept->deleted_at) {
+            throw new InvalidArgumentException('a place merges into another current place of the institution');
+        }
+        foreach ($kept->fresh()->ancestors() as $above) {
+            if ($above->id === $duplicate->id) {
+                throw new InvalidArgumentException('a place cannot be merged into a place that lies inside it');
+            }
+        }
+        $relations = app(RelationService::class);
+        DB::transaction(fn () => AuditLog::actingAs($actor, function () use ($duplicate, $kept, $actor, $relations) {
+            foreach (['source', 'target', 'context'] as $side) {
+                foreach (Relation::where([$side.'_table' => 'places', $side.'_id' => $duplicate->id])->get() as $relation) {
+                    $moved = [$side.'_id' => $kept->id];
+                    $ends = array_replace($relation->only(['relation_type_id', 'source_table', 'source_id', 'target_table', 'target_id']), $side === 'context' ? [] : $moved);
+                    $other = $side === 'source' ? 'target' : 'source';
+                    $reflexive = $side !== 'context' && $relation->{$other.'_table'} === 'places' && $relation->{$other.'_id'} === $kept->id;
+                    $twin = $side !== 'context' && Relation::where($ends)->whereKeyNot($relation->id)->exists();
+                    $twin || $reflexive ? $relations->remove($relation, $actor) : $relation->update($moved);
+                }
+            }
+            $otherName = $this->descriptions->concept(Vocab::NAME_TYPES.'other')->id;
+            $keptNames = Name::where(['subject_table' => 'places', 'subject_id' => $kept->id])->get()->map(fn ($n) => $n->language.'|'.$n->value)->all();
+            foreach (Name::where(['subject_table' => 'places', 'subject_id' => $duplicate->id])->with('nameType')->get() as $name) {
+                if (in_array($name->language.'|'.$name->value, $keptNames, true)) {
+                    $name->delete();
+
+                    continue;
+                }
+                $name->update(['subject_id' => $kept->id, 'name_type_id' => $name->nameType->notation === 'authorised' ? $otherName : $name->name_type_id, 'is_original' => false]);
+            }
+            $local = $this->descriptions->concept(Vocab::IDENTIFIER_TYPES.'local')->id;
+            $previous = $this->descriptions->concept(Vocab::IDENTIFIER_TYPES.'previous')->id;
+            foreach (Identifier::where(['subject_table' => 'places', 'subject_id' => $duplicate->id])->get() as $identifier) {
+                $type = $identifier->identifier_type_id === $local ? $previous : $identifier->identifier_type_id;
+                Identifier::where(['subject_table' => 'places', 'subject_id' => $kept->id, 'identifier_type_id' => $type, 'value' => $identifier->value])->exists()
+                    ? $identifier->delete() : $identifier->update(['subject_id' => $kept->id, 'identifier_type_id' => $type]);
+            }
+            RicDate::where(['subject_table' => 'places', 'subject_id' => $duplicate->id])->get()->each(fn ($d) => $d->update(['subject_id' => $kept->id]));
+            Place::where('parent_id', $duplicate->id)->get()->each(fn (Place $child) => $child->update(['parent_id' => $kept->id]));
+            if ($kept->latitude === null && $duplicate->latitude !== null) {
+                $kept->update($duplicate->only(['latitude', 'longitude', 'altitude']));
+            }
+            $duplicate->forceFill(['deleted_at' => now(), 'merged_into_id' => $kept->id])->save();
+        }));
     }
 }

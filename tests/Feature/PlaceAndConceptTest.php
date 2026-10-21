@@ -356,4 +356,32 @@ class PlaceAndConceptTest extends TestCase
         $this->actingAs($this->contributor)->get("/places/{$farm->id}")->assertSee('Containment over time')->assertSee('Lies or lay in Cape Colony, 1806 to 1910 (accepted)');
         $this->actingAs($this->contributor)->get("/places/{$cape->id}")->assertSee('Contains or contained Rietvlei, 1806 to 1910');
     }
+
+    public function test_a_duplicate_place_merges_into_the_place_kept_with_its_relations_names_and_places_inside(): void
+    {
+        $places = app(PlaceService::class);
+        $relations = app(RelationService::class);
+        $kept = $places->create($this->institution, 'rue Ganneron (Paris, France)', 'fr');
+        $duplicate = $places->create($this->institution, 'Ganneron (rue)', 'fr');
+        $inside = $places->create($this->institution, 'Ganneron, number 12', 'fr', $duplicate);
+        $other = app(RecordService::class)->create($this->institution, self::FONDS, 'Notary deeds', 'en', null, $this->holder, 'ND');
+        $relations->create($duplicate, 'place', $this->fonds, [], $this->archivist);
+        $relations->create($kept, 'place', $this->fonds, [], $this->archivist);
+        $relations->create($duplicate, 'place', $other, [], $this->archivist);
+
+        $places->merge($duplicate, $kept, $this->archivist);
+
+        $this->assertSame(1, Relation::where(['source_table' => 'places', 'source_id' => $kept->id, 'target_id' => $this->fonds->id])->count(), 'not made twice');
+        $this->assertTrue(Relation::where(['source_id' => $kept->id, 'target_id' => $other->id])->exists(), 'moved');
+        $this->assertFalse(Relation::where('source_id', $duplicate->id)->orWhere('target_id', $duplicate->id)->exists());
+        $this->assertSame($kept->id, $inside->fresh()->parent_id);
+        $this->assertSame(['Ganneron (rue)'], $kept->names()->whereHas('nameType', fn ($q) => $q->where('notation', 'other'))->pluck('value')->all());
+        $this->assertSame($kept->id, $duplicate->fresh()->merged_into_id);
+        $this->assertNotNull($duplicate->fresh()->deleted_at);
+        $this->actingAs($this->archivist)->get("/places/{$duplicate->id}")->assertRedirect(route('places.show', $kept));
+
+        // Not into itself, a deleted place, or a place inside it.
+        $this->expectException(InvalidArgumentException::class);
+        $places->merge($kept, $inside, $this->archivist);
+    }
 }

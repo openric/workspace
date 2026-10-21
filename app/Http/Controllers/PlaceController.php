@@ -85,8 +85,11 @@ class PlaceController extends Controller
         return redirect()->route('places.edit', [$place, 'language' => $data['language']])->with('status', 'Place created. Describe it now, or later.');
     }
 
-    public function show(Request $request, Place $place): View
+    public function show(Request $request, Place $place): View|RedirectResponse
     {
+        if ($place->merged_into_id && $place->institution_id === $request->user()->institution_id) {
+            return redirect()->route('places.show', $place->merged_into_id)->with('status', 'That place was merged into this one.');
+        }
         $this->own($request, $place);
         $place->load('descriptionValues.element.labels', 'descriptionValues.state.labels', 'names.nameType.labels', 'names.state.labels', 'names.dates.property',
             'identifiers.identifierType.labels', 'placeType.labels', 'children.names.nameType', 'children.placeType.labels',

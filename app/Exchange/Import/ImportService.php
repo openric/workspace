@@ -977,8 +977,12 @@ class ImportService
 
     private function place(UnitDraft|EntityDraft $draft, string $name, ?string $iri, string $language): ?Place
     {
-        if ($iri !== null && ($found = Place::where(['iri' => $iri, 'institution_id' => $this->institution->id])->whereNull('deleted_at')->first())) {
-            return $found;
+        if ($iri !== null && ($found = Place::where(['iri' => $iri, 'institution_id' => $this->institution->id])->first())) {
+            // A merged place's IRI leads to the place it was merged into, as an agent's does.
+            $found = $found->merged_into_id ? $found->mergedInto : $found;
+            if ($found && $found->deleted_at === null) {
+                return $found;
+            }
         }
         $cacheKey = 'place:'.mb_strtolower($name);
         if (array_key_exists($cacheKey, $this->resolved)) {
