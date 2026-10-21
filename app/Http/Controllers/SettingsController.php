@@ -35,6 +35,7 @@ class SettingsController extends Controller
             'header_title' => ['nullable', 'string', 'max:255'],
             'catalogue_introduction' => ['nullable', 'string', 'max:5000'],
             'catalogue_credits' => ['nullable', 'string', 'max:5000'],
+            'registration_open' => ['nullable', 'boolean'],
             'logo' => ['nullable', 'file', 'mimes:png,jpg,jpeg,webp', 'mimetypes:image/png,image/jpeg,image/webp', 'max:1024', 'dimensions:max_width=4000,max_height=4000'],
             'remove_logo' => ['nullable', 'boolean'],
         ]);
@@ -43,7 +44,8 @@ class SettingsController extends Controller
         $old = $institution->logo_path;
         $blank = fn (string $key) => trim((string) ($data[$key] ?? '')) === '' ? null : trim((string) $data[$key]);
         $changes = ['name' => $data['name'], 'header_title' => $blank('header_title'),
-            'catalogue_introduction' => $blank('catalogue_introduction'), 'catalogue_credits' => $blank('catalogue_credits')];
+            'catalogue_introduction' => $blank('catalogue_introduction'), 'catalogue_credits' => $blank('catalogue_credits'),
+            'registration_open' => $request->boolean('registration_open')];
         if ($request->hasFile('logo')) {
             $file = $request->file('logo');
             // A new name each time, so no cache shows the old logo.

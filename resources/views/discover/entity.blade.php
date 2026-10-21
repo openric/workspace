@@ -5,6 +5,7 @@
     @php($nameElement = \App\Relations\EntityKinds::get($kind)['label'])
     @php([$name, $nameLanguage] = $view->valueWithLanguage($entity, $nameElement) ?? ['', 'en'])
     <h1 lang="{{ $nameLanguage }}">{{ $name }}</h1>
+    @if(in_array($kind, ['agent', 'repository'], true))@include('clipboard._button', ['type' => $kind === 'agent' ? 'agents' : 'repositories', 'id' => $entity->getKey()])@endif
     <p class="meta">{{ ucfirst(\App\Relations\EntityKinds::noun($entity)) }} @include('description._ric', ['term' => \App\Relations\EntityKinds::ricClass($entity)])
         @if($entity instanceof \App\Models\Activity && $entity->activityType) · {{ $entity->activityType->anyLabel(['en']) }} @include('description._ric', ['term' => 'rico:hasActivityType'])@endif
         @if($entity instanceof \App\Models\Place && $entity->placeType) · {{ $entity->placeType->anyLabel(['en']) }}@endif

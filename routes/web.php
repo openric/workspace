@@ -12,6 +12,7 @@ use App\Http\Controllers\AccountController;
 use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\AgentController;
 use App\Http\Controllers\AuditLogController;
+use App\Http\Controllers\ClipboardController;
 use App\Http\Controllers\ConceptController;
 use App\Http\Controllers\DateController;
 use App\Http\Controllers\DeletionController;
@@ -28,6 +29,7 @@ use App\Http\Controllers\PasswordController;
 use App\Http\Controllers\PlaceController;
 use App\Http\Controllers\PublicationController;
 use App\Http\Controllers\RecordController;
+use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\RelationController;
 use App\Http\Controllers\RepositoryController;
 use App\Http\Controllers\RoleController;
@@ -68,6 +70,17 @@ Route::get('/api/iiif/workspace', fn () => response()->json(['data' => []]))->na
 // Persistent IRIs resolve, for anyone: the controller sends a page only to those signed in.
 Route::get('/{segment}/{id}', [IriController::class, 'resolve'])->where(['segment' => 'record|agent|repository|activity|place|concept|instantiation', 'id' => '[0-9a-f-]{36}'])->name('iri');
 
+// The clipboard (Heratio's): for anyone; it holds only what the reader may see.
+Route::prefix('clipboard')->name('clipboard.')->middleware('throttle:120,1')->group(function () {
+    Route::get('/', [ClipboardController::class, 'index'])->name('index');
+    Route::post('/add', [ClipboardController::class, 'add'])->name('add');
+    Route::post('/remove', [ClipboardController::class, 'remove'])->name('remove');
+    Route::post('/clear', [ClipboardController::class, 'clear'])->name('clear');
+    Route::post('/save', [ClipboardController::class, 'save'])->name('save');
+    Route::post('/load', [ClipboardController::class, 'load'])->name('load');
+    Route::get('/export', [ClipboardController::class, 'export'])->name('export');
+});
+
 // The front page: the workspace for someone signed in, the public catalogue for everyone else.
 Route::get('/', fn () => auth()->check() ? view('home') : redirect()->route('discover.home'))->middleware(['web', 'active'])->name('home');
 
@@ -85,6 +98,9 @@ Route::middleware(ServeDiscovery::class)->prefix('discover')->name('discover.')-
 
 Route::middleware('guest')->group(function () {
     Route::get('/sign-in', [SessionController::class, 'create'])->name('sign-in');
+    // Heratio's registration: a visitor asks for an account, where the institution takes requests.
+    Route::get('/register', [RegistrationController::class, 'create'])->name('register');
+    Route::post('/register', [RegistrationController::class, 'store'])->middleware('throttle:sign-in');
     Route::post('/sign-in', [SessionController::class, 'store'])->middleware('throttle:sign-in');
     Route::get('/set-password/{token}', [PasswordController::class, 'createFromLink'])->name('password.set');
     Route::post('/set-password', [PasswordController::class, 'storeFromLink'])->middleware('throttle:sign-in')->name('password.store');
@@ -94,6 +110,7 @@ Route::middleware(['auth', 'active'])->group(function () {
     // Heratio's profile: an account sees and edits its own name, email and contact details.
     Route::get('/account', [AccountController::class, 'profile'])->name('account.profile');
     Route::get('/account/edit', [AccountController::class, 'editProfile'])->name('account.edit');
+    Route::get('/account/access', [AccountController::class, 'profileAccess'])->name('account.access');
     Route::post('/account', [AccountController::class, 'updateProfile'])->name('account.update');
     Route::post('/account/contact', [AccountController::class, 'updateProfileContact'])->name('account.contact');
     Route::get('/account/password', [PasswordController::class, 'edit'])->name('password.edit');
@@ -302,6 +319,12 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::post('/accounts/{account}/permissions/{kind}', [RoleController::class, 'updateAccountPermissions'])->name('accounts.permissions.update');
     });
 
+    Route::middleware('can:'.Vocab::permission('manage-accounts'))->group(function () {
+        Route::get('/registrations', [RegistrationController::class, 'index'])->name('registrations.index');
+        Route::post('/registrations/{registration}/approve', [RegistrationController::class, 'approve'])->name('registrations.approve');
+        Route::post('/registrations/{registration}/reject', [RegistrationController::class, 'reject'])->name('registrations.reject');
+    });
+
     Route::middleware('can:'.Vocab::permission('manage-accounts'))->prefix('accounts')->name('accounts.')->group(function () {
         Route::get('/', [AccountController::class, 'index'])->name('index');
         Route::get('/new', [AccountController::class, 'create'])->name('create');
@@ -310,6 +333,9 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/{account}/edit', [AccountController::class, 'edit'])->name('edit');
         Route::post('/{account}', [AccountController::class, 'update'])->name('update');
         Route::post('/{account}/contact', [AccountController::class, 'updateContact'])->name('contact');
+        Route::get('/{account}/access', [AccountController::class, 'access'])->name('access');
+        Route::get('/{account}/delete', [AccountController::class, 'confirmDelete'])->name('delete');
+        Route::post('/{account}/delete', [AccountController::class, 'destroy'])->name('destroy');
         Route::post('/{account}/roles', [AccountController::class, 'updateRoles'])->name('roles');
         Route::post('/{account}/disable', [AccountController::class, 'disable'])->name('disable');
         Route::post('/{account}/enable', [AccountController::class, 'enable'])->name('enable');

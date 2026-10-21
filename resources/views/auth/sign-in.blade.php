@@ -14,4 +14,5 @@
         <input id="password" name="password" type="password" autocomplete="current-password" required>
         <button type="submit">Sign in</button>
     </form>
+    @if(\App\Support\HostInstitution::for(request())?->registration_open)<p>No account yet? <a href="{{ route('register') }}">Ask for one</a>.</p>@endif
 @endsection

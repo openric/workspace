@@ -18,6 +18,7 @@
         </section>
     @endif
     <h1>{{ $record->described('title', ['en']) }}</h1>
+    @include('clipboard._button', ['type' => 'records', 'id' => $record->id])
     @if(session('status'))<p role="status">{{ session('status') }}</p>@endif
     @if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif
     <p>{{ $record->level->label(['en', 'und']) }} @include('description._ric', ['term' => \App\Relations\EntityKinds::ricClass($record)])@if($record->referenceCode()), {{ $record->referenceCode() }}@endif. Held by <a href="{{ route('repositories.show', $record->repository) }}">{{ $record->repository->described('authorised-name', ['en']) }}</a>.<br>

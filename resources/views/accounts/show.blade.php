@@ -5,7 +5,7 @@
     <p><a href="{{ route('accounts.index') }}">All accounts</a></p>
     <h1>{{ $account->name }}</h1>
     <p>{{ $account->email }}. {{ $account->isDisabled() ? 'Disabled.' : 'Active.' }}</p>
-    <p><a href="{{ route('accounts.edit', $account) }}">Edit account and contact details</a></p>
+    <p><a href="{{ route('accounts.edit', $account) }}">Edit account and contact details</a> · <a href="{{ route('accounts.access', $account) }}">What it may do</a>@unless($account->is(auth()->user())) · <a href="{{ route('accounts.delete', $account) }}">Delete account</a>@endunless</p>
     @if(session('status'))<p role="status">{{ session('status') }}</p>@endif
     @if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif
     @if(session('password_link'))

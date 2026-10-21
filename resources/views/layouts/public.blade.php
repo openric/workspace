@@ -34,6 +34,7 @@
         <label for="site-q" style="margin: 0; position: absolute; left: -999px">Search the catalogue</label>
         <input id="site-q" name="q" value="{{ request('q') }}" placeholder="Search the catalogue" style="max-width: 16rem">
         <button type="submit" style="margin: 0">Search</button>
+        <a href="{{ route('clipboard.index') }}">Clipboard ({{ app(\App\Clipboard\ClipboardService::class)->count() }})</a>
         @auth<a href="{{ route('home') }}">Workspace</a>@else<a href="{{ route('sign-in') }}">Sign in</a>@endauth
     </form>
 </header>

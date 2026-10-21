@@ -19,6 +19,7 @@
     @endif
     @php([$title, $titleLanguage] = $view->valueWithLanguage($unit, 'title') ?? ['', 'en'])
     <h1 lang="{{ $titleLanguage }}">{{ $title }}</h1>
+    @include('clipboard._button', ['type' => 'records', 'id' => $unit->id])
     <p class="meta">{{ $unit->level->label(['en', 'und']) }} @include('description._ric', ['term' => \App\Relations\EntityKinds::ricClass($unit)])
         @if($unit->referenceCode()) · {{ $unit->referenceCode() }}@endif
         @if($unit->repository && $view->readable($unit->repository)) · Held by <a href="{{ route('discover.repository', $unit->repository->id) }}">{{ $view->label($unit->repository) }}</a>@endif</p>

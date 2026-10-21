@@ -18,13 +18,19 @@ use App\Access\AccessControl;
 use App\Accounts\AccountException;
 use App\Accounts\AccountService;
 use App\Description\ContactPointService;
+use App\Models\Agent;
 use App\Models\Concept;
 use App\Models\ContactPoint;
+use App\Models\Container;
+use App\Models\RecordResource;
+use App\Models\Repository;
 use App\Models\Role;
 use App\Models\User;
+use App\Relations\EntityKinds;
 use App\Support\Vocab;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
@@ -155,6 +161,64 @@ class AccountController extends Controller
     private function contact(User $account): ?ContactPoint
     {
         return ContactPoint::where(['subject_table' => $account->getTable(), 'subject_id' => $account->id])->orderByDesc('is_primary')->first();
+    }
+
+    /** What an account may do, kind by kind: anywhere or not, and every rule from its roles or itself that grants or refuses it (Heratio's ACL index pages, read-only). */
+    public function access(Request $request, User $account): View
+    {
+        $this->sameInstitution($request, $account);
+
+        return $this->accessView($account, false);
+    }
+
+    public function profileAccess(Request $request): View
+    {
+        return $this->accessView($request->user(), true);
+    }
+
+    private function accessView(User $account, bool $own): View
+    {
+        $control = app(AccessControl::class);
+        $roleIds = $control->effectiveRoleIds($account);
+        $roles = Role::whereIn('id', $roleIds)->get()->keyBy('id');
+        $concept = fn (string $iri) => Concept::where('iri', $iri)->value('id');
+        $tables = ['description' => RecordResource::class, 'authority' => Agent::class, 'repository' => Repository::class, 'storage' => Container::class];
+        $kinds = [];
+        foreach (config('workspace.permission_matrix') as $kind => $actions) {
+            foreach ($actions as $action) {
+                $rules = DB::table('permissions')->where('institution_id', $account->institution_id)
+                    ->where('kind_id', $concept(Vocab::kind($kind)))->where('action_id', $concept(Vocab::permission($action)))
+                    ->where(fn ($q) => $q->whereIn('role_id', $roleIds)->orWhere('user_id', $account->id))->get()
+                    ->map(fn ($r) => ['grant' => (bool) $r->is_grant, 'from' => $r->user_id ? 'this account' : ($roles[$r->role_id]?->name() ?? 'a role'),
+                        'scope' => match (true) {
+                            $r->subject_id !== null => EntityKinds::label(($tables[$kind] ?? RecordResource::class)::find($r->subject_id)) ?? 'one entry',
+                            $r->repository_id !== null => 'in '.(EntityKinds::label(Repository::find($r->repository_id)) ?? 'one repository'),
+                            default => 'everywhere',
+                        }]);
+                $kinds[$kind][$action] = ['anywhere' => $control->allowsAnywhere($account, $action, $kind), 'rules' => $rules];
+            }
+        }
+
+        return view('accounts.access', ['account' => $account, 'own' => $own, 'kinds' => $kinds, 'roles' => $roles]);
+    }
+
+    public function confirmDelete(Request $request, User $account): View
+    {
+        $this->sameInstitution($request, $account);
+
+        return view('accounts.delete', ['account' => $account]);
+    }
+
+    public function destroy(Request $request, User $account): RedirectResponse
+    {
+        $this->sameInstitution($request, $account);
+        try {
+            $this->accounts->delete($account, $request->user());
+        } catch (AccountException $e) {
+            return redirect()->route('accounts.show', $account)->withErrors(['account' => $e->getMessage()]);
+        }
+
+        return redirect()->route('accounts.index')->with('status', 'Account deleted.');
     }
 
     public function updateRoles(Request $request, User $account): RedirectResponse

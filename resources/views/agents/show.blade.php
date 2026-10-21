@@ -5,6 +5,7 @@
 @section('content')
     @unless($print)<p><a href="{{ route('agents.index') }}">Authority records</a></p>@endunless
     <h1>{{ $name }}</h1>
+    @include('clipboard._button', ['type' => 'agents', 'id' => $agent->id])
     @if(session('status'))<p role="status">{{ session('status') }}</p>@endif
     @if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif
     <p><strong>Type of entity:</strong> {{ $agent->agentType->label(['en', 'und']) }} @include('description._ric', ['term' => \App\Relations\EntityKinds::ricClass($agent)])

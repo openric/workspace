@@ -12,9 +12,14 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['name', 'base_iri', 'header_title', 'logo_path', 'logo_mime', 'catalogue_introduction', 'catalogue_credits'])]
+#[Fillable(['name', 'base_iri', 'header_title', 'logo_path', 'logo_mime', 'catalogue_introduction', 'catalogue_credits', 'registration_open'])]
 class Institution extends Model
 {
+    protected function casts(): array
+    {
+        return ['registration_open' => 'boolean'];
+    }
+
     use Audited, HasUuids;
 
     /** The institution whose branding a page shows: the signed-in account's, or the installation's only one. */

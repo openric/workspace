@@ -9,6 +9,7 @@ namespace Tests\Feature;
 use App\Access\AccessControl;
 use App\Access\RoleService;
 use App\Accounts\AccountService;
+use App\Description\ContactPointService;
 use App\Models\ContactPoint;
 use App\Models\Institution;
 use App\Models\User;
@@ -207,5 +208,43 @@ class AccountManagementTest extends TestCase
         // The administrator screens stay closed to the owner.
         $this->actingAs($archivist->fresh())->get("/accounts/{$archivist->id}/edit")->assertForbidden();
         $this->actingAs($archivist->fresh())->post("/accounts/{$archivist->id}", ['name' => 'X', 'email' => 'x@example.org'])->assertForbidden();
+    }
+
+    public function test_only_an_account_that_never_acted_can_be_deleted(): void
+    {
+        $unused = $this->account('Created By Mistake', 'mistake@example.org', 'editor');
+        app(ContactPointService::class)->save($unused, ['city' => 'Pretoria']);
+        $this->actingAs($this->admin)->get("/accounts/{$unused->id}")->assertSee(route('accounts.delete', $unused), false);
+        $this->actingAs($this->admin)->get("/accounts/{$unused->id}/delete")->assertOk()->assertSee('cannot be undone');
+        $this->actingAs($this->admin)->post("/accounts/{$unused->id}/delete")->assertRedirect(route('accounts.index'));
+        $this->assertNull(User::find($unused->id));
+        $this->assertSame(0, DB::table('contact_points')->where('subject_id', $unused->id)->count());
+        $this->assertContains('delete', $this->actions(), 'the deletion is audited');
+
+        // One that has acted is named in the audit log, and is kept.
+        $worker = $this->account('Has Worked', 'worker@example.org', 'editor');
+        $this->actingAs($worker)->post('/account', ['name' => 'Has Worked Here', 'email' => 'worker@example.org', 'translation_languages' => '']);
+        $this->assertTrue(DB::table('audit_log')->where('actor_id', $worker->id)->exists());
+        $this->actingAs($this->admin)->post("/accounts/{$worker->id}/delete")->assertRedirect(route('accounts.show', $worker))->assertSessionHasErrors('account');
+        $this->assertNotNull(User::find($worker->id));
+        $this->assertTrue(DB::table('role_members')->where('user_id', $worker->id)->exists(), 'nothing of it was removed');
+
+        // Not oneself, and not the last administrator.
+        $this->actingAs($this->admin)->post("/accounts/{$this->admin->id}/delete")->assertSessionHasErrors('account');
+        $this->assertNotNull($this->admin->fresh());
+    }
+
+    public function test_what_an_account_may_do_is_shown_kind_by_kind_with_the_rules_behind_it(): void
+    {
+        $archivist = $this->account('An Archivist', 'archivist@example.org', 'editor');
+        $page = $this->actingAs($this->admin)->get("/accounts/{$archivist->id}/access")->assertOk()
+            ->assertSee('What An Archivist may do')->assertSee('<h2>Description</h2>', false)->assertSee('by Editor');
+        $this->assertMatchesRegularExpression('~<td>manage accounts</td><td>No</td>~', $page->getContent(), 'an editor manages no accounts');
+        $this->assertMatchesRegularExpression('~<td>update</td><td>Yes</td>~', $page->getContent());
+        $this->actingAs($this->admin)->get("/accounts/{$archivist->id}")->assertSee(route('accounts.access', $archivist), false);
+
+        // The owner sees their own, and no one else's.
+        $this->actingAs($archivist)->get('/account/access')->assertOk()->assertSee('What you may do');
+        $this->actingAs($archivist)->get("/accounts/{$this->admin->id}/access")->assertForbidden();
     }
 }

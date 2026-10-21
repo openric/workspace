@@ -148,6 +148,12 @@ final class AccessControl
             ->orderBy('language')->pluck('language')->unique()->values()->all();
     }
 
+    /** @return list<string> the roles whose permissions apply to the account: its own, those above them, Signed in and Public */
+    public function effectiveRoleIds(User $account): array
+    {
+        return $this->roleIds($account, $account->institution_id);
+    }
+
     /** Forget the roles cached for an account, after its membership changed. */
     public function forget(User $account): void
     {

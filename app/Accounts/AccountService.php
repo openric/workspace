@@ -17,6 +17,7 @@ use App\Models\Institution;
 use App\Models\Role;
 use App\Models\User;
 use App\Support\Vocab;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Password;
 use InvalidArgumentException;
@@ -169,6 +170,36 @@ class AccountService
      * ponytail: two administrators disabling each other at the same instant could
      * both pass; a per-institution advisory lock closes that if it ever matters.
      */
+    /**
+     * Delete an account that has never acted in the Workspace (Heratio's user delete). The audit log, imports and assertions
+     * name the account that did each thing, and the database keeps those rows from losing their account, so an account
+     * that has signed in, imported or asserted anything cannot be deleted: disable it instead, and the record of who did
+     * what stays whole. Its role memberships, own permissions, translation languages and contact details go with it.
+     */
+    public function delete(User $account, ?User $actor = null): void
+    {
+        if ($actor !== null && $actor->id === $account->id) {
+            throw new AccountException('You cannot delete your own account.');
+        }
+        try {
+            DB::transaction(function () use ($account, $actor) {
+                $this->keepAnAdministrator($account);
+                DB::table('role_members')->where('user_id', $account->id)->delete();
+                DB::table('permissions')->where('user_id', $account->id)->delete();
+                DB::table('account_translation_languages')->where('user_id', $account->id)->delete();
+                DB::table('contact_points')->where(['subject_table' => 'users', 'subject_id' => $account->id])->delete();
+                DB::table('password_reset_tokens')->where('email', $account->email)->delete();
+                DB::table('sessions')->where('user_id', $account->id)->delete();
+                AuditLog::actingAs($actor, fn () => $account->delete());
+            });
+        } catch (QueryException $e) {
+            if ($e->getCode() !== '23503') {
+                throw $e;
+            }
+            throw new AccountException('This account has done work in the Workspace (it has signed in, imported or made assertions), so it is kept: disable it instead.');
+        }
+    }
+
     private function keepAnAdministrator(User $account): void
     {
         $admin = $this->roles->byTemplate($account->institution, 'administrator');

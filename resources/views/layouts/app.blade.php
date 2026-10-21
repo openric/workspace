@@ -18,6 +18,7 @@
     @auth
         <form method="post" action="{{ route('sign-out') }}">
             @csrf
+            <a href="{{ route('clipboard.index') }}">Clipboard ({{ app(\App\Clipboard\ClipboardService::class)->count() }})</a>
             <a href="{{ route('account.profile') }}">{{ auth()->user()->name }}</a>
             <button type="submit">Sign out</button>
         </form>
