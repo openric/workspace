@@ -1,6 +1,6 @@
 <?php
 
-// OpenRiC Workspace - institution settings: its name, the header text and the logo.
+// OpenRiC Workspace - institution settings: its name, the header text, the logo, and the public catalogue's introduction and credits.
 // Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
 // SPDX-License-Identifier: AGPL-3.0-or-later
 //
@@ -33,13 +33,17 @@ class SettingsController extends Controller
         $data = $request->validate([
             'name' => ['required', 'string', 'max:500'],
             'header_title' => ['nullable', 'string', 'max:255'],
+            'catalogue_introduction' => ['nullable', 'string', 'max:5000'],
+            'catalogue_credits' => ['nullable', 'string', 'max:5000'],
             'logo' => ['nullable', 'file', 'mimes:png,jpg,jpeg,webp', 'mimetypes:image/png,image/jpeg,image/webp', 'max:1024', 'dimensions:max_width=4000,max_height=4000'],
             'remove_logo' => ['nullable', 'boolean'],
         ]);
         $institution = $request->user()->institution;
         $disk = Storage::disk('local');
         $old = $institution->logo_path;
-        $changes = ['name' => $data['name'], 'header_title' => ($data['header_title'] ?? '') === '' ? null : $data['header_title']];
+        $blank = fn (string $key) => trim((string) ($data[$key] ?? '')) === '' ? null : trim((string) $data[$key]);
+        $changes = ['name' => $data['name'], 'header_title' => $blank('header_title'),
+            'catalogue_introduction' => $blank('catalogue_introduction'), 'catalogue_credits' => $blank('catalogue_credits')];
         if ($request->hasFile('logo')) {
             $file = $request->file('logo');
             // A new name each time, so no cache shows the old logo.

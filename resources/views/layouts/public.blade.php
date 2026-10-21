@@ -10,6 +10,16 @@
         .skip { position: absolute; left: -999px; } .skip:focus { left: 1rem; top: .5rem; background: var(--bg); padding: .5rem; }
         .meta { color: var(--muted); font-size: .9rem; }
         dl.values dt { font-weight: 600; margin-top: .8rem; } dl.values dd { margin: .2rem 0 0; }
+        /* The catalogue's home page: openric.org's hero and plain-language lede. */
+        .catalogue-hero { margin: -2rem -1.4rem 1.5rem; padding: 3rem 1.4rem 2.5rem; border-bottom: 1px solid var(--line);
+            background: radial-gradient(ellipse 60% 80% at 15% 0%, rgba(31, 95, 168, .08), transparent 60%), radial-gradient(ellipse 50% 60% at 85% 100%, rgba(16, 185, 129, .07), transparent 60%), linear-gradient(to bottom, var(--surface) 0%, var(--bg) 100%); }
+        .catalogue-hero h1 { font-size: clamp(2rem, 4vw, 2.9rem); letter-spacing: -.028em; }
+        .catalogue-lede { font-size: 1.1rem; color: var(--muted-2); max-width: 46rem; }
+        .catalogue-counts { color: var(--muted); font-size: .95rem; }
+        .catalogue-search div { display: flex; gap: .5rem; max-width: 34rem; } .catalogue-search input { max-width: none; flex: 1; } .catalogue-search button { margin: 0; }
+        .catalogue-credits { margin-top: 3rem; padding: 1.1rem 1.3rem; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); font-size: .92rem; color: var(--muted-2); }
+        .catalogue-credits h2 { margin-top: 0; font-size: 1.05rem; border: 0; padding: 0; }
+        @media (max-width: 40rem) { .catalogue-hero { margin: -1.25rem -.9rem 1.25rem; padding: 2rem .9rem 1.75rem; } }
     </style>
     @hasSection('head')@yield('head')@endif
 </head>

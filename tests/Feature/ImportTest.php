@@ -13,6 +13,7 @@ use App\Description\DateService;
 use App\Description\RecordService;
 use App\Description\RepositoryService;
 use App\Models\Agent;
+use App\Models\Concept;
 use App\Models\Import;
 use App\Models\Institution;
 use App\Models\Place;
@@ -168,6 +169,35 @@ class ImportTest extends TestCase
         $xml = str_replace('<p>Two.</p>', '<p>Two, changed.</p>', $this->actingAs($this->editor)->get("/records/{$fonds->id}/export/ead?drafts=1")->getContent());
         $this->assertEquals(['created' => 0, 'updated' => 1, 'unchanged' => 2, 'rejected' => 0], $this->commit($this->upload($xml, 'ead'))->report['actions']);
         $this->assertSame("One.\n\nTwo, changed.", $fonds->fresh()->described('scope-and-content', ['en']));
+    }
+
+    public function test_a_finding_aid_larger_than_a_part_is_checked_and_imported_whole_with_every_unit_in_its_parent(): void
+    {
+        // 1 + 3 series + 3 x 40 files = 124 units: seven parts of 20, files whose series is in an earlier part, a new
+        // subject used in every part. The dry run checks each part inside its real parents and writes nothing.
+        $series = '';
+        foreach (range(1, 3) as $s) {
+            $files = '';
+            foreach (range(1, 40) as $f) {
+                $files .= "<c02 level=\"file\" id=\"f$s-$f\"><did><unittitle>File $s.$f</unittitle><unitid>$s.$f</unitid></did><controlaccess><subject>Parish business</subject></controlaccess></c02>";
+            }
+            $series .= "<c01 level=\"series\" id=\"s$s\"><did><unittitle>Series $s</unittitle><unitid>$s</unitid></did>$files</c01>";
+        }
+        $xml = '<?xml version="1.0" encoding="UTF-8"?><ead><eadheader><eadid>BIG</eadid></eadheader><archdesc level="fonds"><did><unittitle>Big fonds</unittitle><unitid>BIG</unitid></did><dsc>'.$series.'</dsc></archdesc></ead>';
+
+        $import = $this->upload($xml, 'ead', ['create_terms' => '1']);
+        $this->assertEquals(['created' => 124, 'updated' => 0, 'unchanged' => 0, 'rejected' => 0], $import->report['actions']);
+        $this->assertSame(0, RecordResource::count(), 'a dry run writes nothing');
+        $this->assertCount(1, collect($import->report['issues'])->where('kind', 'created')->where('value', 'Parish business'), 'the new subject is reported once');
+
+        $import = $this->commit($import);
+        $this->assertEquals(['created' => 124, 'updated' => 0, 'unchanged' => 0, 'rejected' => 0], $import->report['actions']);
+        $top = RecordResource::whereNull('parent_id')->sole();
+        $this->assertSame(3, $top->children()->count());
+        foreach ($top->children as $child) {
+            $this->assertSame(40, $child->children()->count(), 'every file is in its series');
+        }
+        $this->assertSame(1, Concept::whereHas('labels', fn ($q) => $q->where('pref_label', 'Parish business'))->count(), 'one subject, used by all');
     }
 
     public function test_a_foreign_ead_2002_finding_aid_without_a_namespace(): void

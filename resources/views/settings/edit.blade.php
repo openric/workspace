@@ -18,6 +18,13 @@
         @if($institution->logo_path)
             <label style="font-weight: normal"><input type="checkbox" name="remove_logo" value="1" style="width: auto"> Remove the logo</label>
         @endif
+        <h2>Public catalogue</h2>
+        <label for="catalogue_introduction">Introduction on the catalogue's home page</label>
+        <small id="intro-help">What the catalogue and the institution offer, shown first on the home page. Plain text: an empty line starts a new paragraph, and a web address becomes a link.</small>
+        <textarea id="catalogue_introduction" name="catalogue_introduction" rows="8" aria-describedby="intro-help">{{ old('catalogue_introduction', $institution->catalogue_introduction) }}</textarea>
+        <label for="catalogue_credits">Credits for data reused from others</label>
+        <small id="credits-help">Shown on the catalogue's home page. Many open-data licences require a credit with each reuse: give the author, the dataset, its version and date, and a link.</small>
+        <textarea id="catalogue_credits" name="catalogue_credits" rows="6" aria-describedby="credits-help">{{ old('catalogue_credits', $institution->catalogue_credits) }}</textarea>
         <p><small>The persistent IRIs of records are built from {{ $institution->base_iri }}, which is set at installation and does not change.</small></p>
         <button type="submit">Save settings</button>
     </form>

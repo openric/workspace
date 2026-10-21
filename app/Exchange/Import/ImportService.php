@@ -94,6 +94,9 @@ class ImportService
     /** @var array<string, int> keys of the units the file puts other units inside */
     private array $parents = [];
 
+    /** Entries imported in one transaction; see run(). */
+    private const PART = 20;
+
     public function __construct(private RecordService $records, private IdentifierService $identifiers, private DateService $dates,
         private RelationService $relations, private AgentService $agents, private PlaceService $places, private ConceptService $concepts,
         private RepositoryService $repositories, private ContactPointService $contacts, private InstantiationService $instantiations,
@@ -129,23 +132,50 @@ class ImportService
         }
 
         $this->parents = array_flip(array_filter(array_map(fn ($d) => $d->parentKey, $drafts), fn ($k) => $k !== null));
-        try {
-            DB::transaction(function () use ($drafts, $commit) {
-                AuditLog::actingAs($this->user, function () use ($drafts) {
-                    foreach ($drafts as $draft) {
-                        $this->unit($draft);
+        // In parts of PART entries, each its own transaction. PostgreSQL holds a lock for every savepoint that writes until
+        // its transaction ends, in a table every database on the server shares; one transaction for a finding aid of a few
+        // hundred units held thousands and stalled the server. Committed, a part stays when a later one fails, and the
+        // report names what was refused. A dry run rolls each part back, after first making again, unreported, the
+        // units above it that an earlier part made, so a unit is checked inside its real parent.
+        $byKey = [];
+        foreach ($drafts as $draft) {
+            $byKey[$draft->key] = $draft;
+        }
+        foreach (array_chunk($drafts, self::PART) as $part) {
+            try {
+                DB::transaction(function () use ($part, $byKey, $commit) {
+                    AuditLog::actingAs($this->user, function () use ($part, $byKey, $commit) {
+                        if (! $commit) {
+                            $this->remakeAncestors($part, $byKey);
+                        }
+                        foreach ($part as $draft) {
+                            $this->unit($draft);
+                        }
+                    });
+                    // The database's deferred checks run now, so a dry run meets them too; then they are deferred
+                    // again, as every deferrable constraint of the schema is by default, for whatever the
+                    // surrounding transaction does next.
+                    DB::statement('SET CONSTRAINTS ALL IMMEDIATE');
+                    DB::statement('SET CONSTRAINTS ALL DEFERRED');
+                    if (! $commit) {
+                        throw new DryRun;
                     }
                 });
-                // The database's deferred checks run now, so a dry run meets them too; then they are deferred
-                // again, as every deferrable constraint of the schema is by default, for whatever the
-                // surrounding transaction does next.
-                DB::statement('SET CONSTRAINTS ALL IMMEDIATE');
-                DB::statement('SET CONSTRAINTS ALL DEFERRED');
-                if (! $commit) {
-                    throw new DryRun;
+            } catch (DryRun) {
+                // Rolled back: what this part made does not exist, so nothing found or made in it is kept for the next.
+                $this->resolved = [];
+            } catch (QueryException $e) {
+                // A deferred check refused the part: none of it was kept.
+                $keys = array_flip(array_map(fn ($d) => $d->key, $part));
+                $this->report->units = array_values(array_filter($this->report->units, fn ($u) => ! isset($keys[$u['key']])));
+                foreach ($part as $draft) {
+                    $this->failed[$draft->key] = true;
+                    $this->report->unit($draft, 'rejected', null, 'the database refused the part of the file it was in: '.$this->reason($e));
                 }
-            });
-        } catch (DryRun) {
+                $this->resolved = [];
+            }
+        }
+        if (! $commit) {
             // Rolled back: units created in a dry run do not exist.
             foreach ($this->report->units as &$unit) {
                 if ($unit['action'] === 'created') {
@@ -153,6 +183,9 @@ class ImportService
                 }
             }
             unset($unit);
+            // A term made again in each part of a dry run is reported once.
+            $this->report->issues = array_values(array_intersect_key($this->report->issues,
+                array_unique(array_map(fn ($i) => $i['kind'] === 'created' ? $i['kind'].'|'.$i['field'].'|'.$i['value'] : serialize($i), $this->report->issues))));
         }
 
         $report = $this->report->toArray();
@@ -162,6 +195,36 @@ class ImportService
         $import->update(['report' => $report, 'committed_at' => $commit ? now() : null]);
 
         return $this->report;
+    }
+
+    /**
+     * In a dry run, make again the units above this part's units that an earlier, rolled-back part made, top down,
+     * leaving the report as it was: they were reported in their own part.
+     *
+     * @param  list<UnitDraft|EntityDraft>  $part
+     * @param  array<string, UnitDraft|EntityDraft>  $byKey
+     */
+    private function remakeAncestors(array $part, array $byKey): void
+    {
+        $inPart = array_flip(array_map(fn ($d) => $d->key, $part));
+        $needed = [];
+        foreach ($part as $draft) {
+            $chain = [];
+            for ($key = $draft->parentKey; $key !== null && isset($byKey[$key]) && ! isset($inPart[$key]) && ! isset($needed[$key]); $key = $byKey[$key]->parentKey) {
+                $chain[] = $key;
+            }
+            foreach (array_reverse($chain) as $key) {
+                $needed[$key] = true;
+            }
+        }
+        $this->byKey = array_diff_key($this->byKey, $needed);
+        $saved = [$this->report->units, $this->report->counts, $this->report->issues, $this->failed];
+        foreach (array_keys($needed) as $key) {
+            if (! isset($this->failed[$key])) {
+                $this->unit($byKey[$key]);
+            }
+        }
+        [$this->report->units, $this->report->counts, $this->report->issues, $this->failed] = $saved;
     }
 
     private function unit(UnitDraft|EntityDraft $draft): void

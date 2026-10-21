@@ -134,6 +134,29 @@ class DiscoverTest extends TestCase
         $this->get(route('discover.file', $this->scan->file('reference')))->assertNotFound();
     }
 
+    public function test_the_home_page_shows_the_introduction_the_collections_carousel_and_the_credits(): void
+    {
+        $institution = Institution::find($this->fonds->institution_id);
+        $institution->update(['catalogue_introduction' => "Records of the parish council.\n\nSee https://example.org/about for more. <script>alert(1)</script>",
+            'catalogue_credits' => 'Place names: Example Gazetteer, version 2 (2026), https://example.org/gazetteer']);
+        app(RecordService::class)->create($institution, self::LEVEL.'fonds', 'Unpublished vestry minutes', 'en', null, $this->fonds->repository, 'VM');
+
+        $page = $this->get('/discover')->assertOk()
+            ->assertSee('Records of the parish council.')->assertSee('<a href="https://example.org/about">https://example.org/about</a>', false)
+            ->assertDontSee('<script>alert(1)</script>', false)->assertSee('&lt;script&gt;', false)
+            ->assertSee('<h2 id="credits">Credits</h2>', false)->assertSee('<a href="https://example.org/gazetteer">', false)
+            ->assertSee('aria-roledescription="carousel"', false)->assertSee('class="carousel-pause" aria-pressed="false"', false);
+        // The fonds is shown with the picture of the letter inside it, and how much it holds; a draft never is.
+        preg_match('~<section class="collections-carousel".*?</section>~s', $page->getContent(), $carousel);
+        $this->assertStringContainsString('Riverside Parish Council records', $carousel[0]);
+        $this->assertStringContainsString(route('discover.file', $this->scan->file('thumbnail')), $carousel[0]);
+        $this->assertStringContainsString('1 unit inside', $carousel[0]);
+        $this->assertStringNotContainsString('Unpublished vestry minutes', $page->getContent());
+
+        $institution->update(['catalogue_introduction' => null, 'catalogue_credits' => null]);
+        $this->get('/discover')->assertDontSee('id="credits"', false)->assertDontSee('class="catalogue-lede"', false);
+    }
+
     public function test_a_repository_lists_the_published_units_it_holds_at_the_top_and_no_draft(): void
     {
         $repository = $this->fonds->repository;

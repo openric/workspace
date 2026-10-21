@@ -38,6 +38,18 @@ class SettingsAndScreensTest extends TestCase
         $accounts->grantTemplateRole($this->admin, 'editor');
     }
 
+    public function test_an_administrator_sets_the_catalogue_introduction_and_credits_and_clears_them(): void
+    {
+        $this->actingAs($this->admin)->get('/settings')->assertOk()->assertSee('Introduction on the catalogue')->assertSee('Credits for data reused from others');
+        $this->actingAs($this->admin)->post('/settings', ['name' => 'Riverside Archives', 'catalogue_introduction' => "  Welcome.  \n", 'catalogue_credits' => 'Data: Example (2026)'])
+            ->assertRedirect(route('settings.edit'));
+        $this->assertSame(['Welcome.', 'Data: Example (2026)'], [$this->institution->fresh()->catalogue_introduction, $this->institution->fresh()->catalogue_credits]);
+        $this->actingAs($this->admin)->post('/settings', ['name' => 'Riverside Archives', 'catalogue_introduction' => ' ', 'catalogue_credits' => '']);
+        $this->assertNull($this->institution->fresh()->catalogue_introduction);
+        $this->assertNull($this->institution->fresh()->catalogue_credits);
+        $this->actingAs($this->admin)->post('/settings', ['name' => 'Riverside Archives', 'catalogue_credits' => str_repeat('x', 5001)])->assertSessionHasErrors('catalogue_credits');
+    }
+
     public function test_an_administrator_changes_the_name_header_and_logo(): void
     {
         $this->actingAs($this->admin)->post('/settings', [

@@ -197,6 +197,25 @@ class NameAndIdentifierTest extends TestCase
         $this->assertSame(2, $this->fonds->names()->count());
     }
 
+    public function test_one_transaction_names_hundreds_of_subjects_without_filling_the_lock_table(): void
+    {
+        // An import is one transaction. The one-per-subject check once took an advisory lock per subject, held to the end,
+        // and a finding aid of about 450 units from the Archives nationales filled PostgreSQL's lock table. It locks the
+        // subject's row now, which takes no slot in that table.
+        $records = app(RecordService::class);
+        DB::transaction(function () use ($records) {
+            foreach (range(1, 300) as $n) {
+                $records->create($this->institution, 'https://workspace.openric.org/vocab/level-of-description/item', "Minute $n", 'en', $this->fonds, null, "M$n");
+            }
+            $held = DB::selectOne("SELECT count(*) AS n FROM pg_locks WHERE pid = pg_backend_pid() AND locktype = 'advisory'")->n;
+            $this->assertLessThanOrEqual(1, $held, 'only the audit chain\'s single advisory lock');
+        });
+        $this->assertSame(300, $this->fonds->children()->count());
+        // The check still holds: a second authorised name in one language is refused.
+        $title = $this->fonds->names()->sole();
+        $this->assertRefused(fn () => DB::table('names')->insert([...$this->row($title), 'value' => 'Second title']), 'only one names');
+    }
+
     public function test_the_services_refuse_bad_values(): void
     {
         $this->expectException(InvalidArgumentException::class);
