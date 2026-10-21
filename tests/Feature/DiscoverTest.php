@@ -165,6 +165,7 @@ class DiscoverTest extends TestCase
         $this->assertStringContainsString('href="'.route('discover.record', $this->fonds->id).'"', $tree[0]);
         $this->assertStringContainsString('<strong aria-current="page">Letter of 3 May 1902</strong>', $tree[0]);
         $this->assertStringNotContainsString('Closed personnel file', $tree[0], 'a draft is not in the public tree');
+        $this->assertStringContainsString('<details class="tree-panel" open>', $tree[0], 'the panel opens and closes, open to start');
 
         $fonds = $this->get("/discover/records/{$this->fonds->id}")->getContent();
         preg_match('~<nav class="tree" aria-label="Hierarchy">.*?</nav>~s', $fonds, $tree);

@@ -22,15 +22,26 @@
     }
 @endphp
 <nav class="tree" aria-label="Hierarchy">
-    <h2>Hierarchy</h2>
-    <ul class="tree-root">{!! $level !!}</ul>
+    <details class="tree-panel" open>
+        <summary><h2>Hierarchy</h2></summary>
+        <ul class="tree-root">{!! $level !!}</ul>
+    </details>
 </nav>
 @once
     <style>
-        .tree h2 { font-size: 1rem; margin: 0 0 .5rem; border: 0; padding: 0; }
+        .tree h2 { font-size: 1rem; margin: 0; border: 0; padding: 0; display: inline; }
+        .tree-panel > summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: .5rem; }
+        .tree-panel > summary::-webkit-details-marker { display: none; }
+        .tree-panel > summary::before { content: ""; width: .45rem; height: .45rem; border-right: 2px solid var(--link); border-bottom: 2px solid var(--link); transform: rotate(-45deg); transition: transform .15s; flex: none; }
+        .tree-panel[open] > summary::before { transform: rotate(45deg); }
+        .tree-panel[open] > summary { margin-bottom: .5rem; }
+        /* Collapsed: the tree folds to its heading and the record takes the width. */
+        .with-tree:has(.tree-panel:not([open])) { grid-template-columns: max-content minmax(0, 1fr); }
+        .with-tree:has(.tree-panel:not([open])) .tree-aside { max-height: none; }
         .tree ul { list-style: none; margin: 0; padding-left: 1.1rem; font-size: .9rem; line-height: 1.45; }
         .tree .tree-root { padding-left: 0; }
-        .tree li { margin: .25rem 0; position: relative; }
+        .tree li { margin: .25rem 0; position: relative; padding-left: 1.3rem; }
+        .tree li > .tree-toggle, .tree li > .tree-leaf { position: absolute; left: 0; top: .15rem; }
         .tree small { color: var(--muted); font-size: .78rem; }
         .tree a { text-decoration: none !important; }
         .tree a:hover { text-decoration: underline !important; }
@@ -42,6 +53,11 @@
         .tree-more button { margin: 0; padding: .1rem .6rem; font-size: .8rem; background: var(--bg); color: var(--link); border: 1px solid var(--line); box-shadow: none; }
     </style>
     <script>
+        // The panel stays as the reader left it, where the browser keeps such a choice.
+        document.querySelectorAll('.tree-panel').forEach(panel => {
+            try { if (localStorage.getItem('workspace.tree') === 'closed') panel.open = false; } catch (e) {}
+            panel.addEventListener('toggle', () => { try { localStorage.setItem('workspace.tree', panel.open ? 'open' : 'closed'); } catch (e) {} });
+        });
         // Heratio's lazy treeview: a branch's units load when it is first opened, "More" brings the next page.
         (function () {
             const esc = s => String(s).replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
