@@ -12,6 +12,10 @@
         {{-- The images first, as AtoM shows the digital object above the description; the instantiations are managed below. --}}
         <section aria-label="Digital copies" style="display: flex; gap: 1rem; flex-wrap: wrap; margin: 1rem 0">
             @foreach($preview as [$instantiation, $file])
+                @if($file->mime_type === \App\Files\FileStore::MODEL)
+                    <div style="flex: 1 1 100%; min-width: 0">@include('description._model', ['src' => route('files.show', $file), 'alt' => $instantiation->described('instantiation-title', [app()->getLocale(), 'en'])])</div>
+                    @continue
+                @endif
                 <a href="{{ route('instantiations.show', $instantiation) }}" style="min-width: 0; max-width: 100%"><img src="{{ route('files.show', $file) }}" alt="{{ $instantiation->described('instantiation-title', [app()->getLocale(), 'en']) }}" width="{{ $file->width }}" height="{{ $file->height }}" style="max-width: 100%; max-height: 28rem; width: auto; height: auto; border: 1px solid var(--line)"></a>
             @endforeach
         </section>

@@ -53,6 +53,15 @@
                 'settings.edit' => ['Settings', $may('manage-institution'), 'settings.*'],
             ],
         ]));
+        // An icon beside each main item, drawn here (24 by 24, stroked); the word stays, so the icon is hidden from screen readers.
+        $icons = [
+            'Home' => '<path d="M3 11l9-8 9 8"/><path d="M5 9.5V21h5v-6h4v6h5V9.5"/>',
+            'Describe' => '<path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5"/><path d="M9 13h7M9 17h5"/>',
+            'Manage' => '<path d="M3 4h18v5H3z"/><path d="M5 9v11h14V9"/><path d="M10 13h4"/>',
+            'Admin' => '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/>',
+            'Public catalogue' => '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3.5 3.5 3.5 14.5 0 18M12 3c-3.5 3.5-3.5 14.5 0 18"/>',
+        ];
+        $icon = fn (string $item) => new \Illuminate\Support\HtmlString('<svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">'.$icons[$item].'</svg>');
         $current = function (array $item): bool {
             $patterns = collect(explode('|', $item[2]));
             $not = $patterns->filter(fn ($p) => str_starts_with($p, '!'))->map(fn ($p) => substr($p, 1));
@@ -63,11 +72,11 @@
     @endphp
     <nav aria-label="Main" class="main-nav">
         <ul>
-            <li><a href="{{ route('home') }}" @if(request()->routeIs('home')) aria-current="page" @endif>Home</a></li>
+            <li><a href="{{ route('home') }}" @if(request()->routeIs('home')) aria-current="page" @endif>{{ $icon('Home') }}Home</a></li>
             @foreach($nav as $group => $items)
                 @php($open = collect($items)->contains($current))
                 <li><details name="main-nav">
-                    <summary @class(['here' => $open])>{{ $group }}</summary>
+                    <summary @class(['here' => $open])>{{ $icon($group) }}{{ $group }}</summary>
                     <ul>
                         @foreach($items as $name => $item)
                             <li><a href="{{ route($name) }}" @if($current($item)) aria-current="page" @endif>{{ $item[0] }}</a></li>
@@ -75,7 +84,7 @@
                     </ul>
                 </details></li>
             @endforeach
-            <li><a href="{{ route('discover.home') }}">Public catalogue</a></li>
+            <li><a href="{{ route('discover.home') }}">{{ $icon('Public catalogue') }}Public catalogue</a></li>
         </ul>
     </nav>
     <script>

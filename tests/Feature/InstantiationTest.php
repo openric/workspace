@@ -126,6 +126,50 @@ class InstantiationTest extends TestCase
         $this->assertSame(['master'], Instantiation::latest('position')->first()->files->map->use->pluck('notation')->all());
     }
 
+    /** The smallest glTF binary: the 12-byte header and a JSON chunk naming the glTF version. */
+    private function model(): UploadedFile
+    {
+        $json = str_pad('{"asset":{"version":"2.0"}}', 28);
+
+        return UploadedFile::fake()->createWithContent('helmet.glb', 'glTF'.pack('VV', 2, 12 + 8 + strlen($json)).pack('V', strlen($json)).'JSON'.$json);
+    }
+
+    public function test_a_glb_model_is_its_own_reference_copy_and_is_shown_in_the_3d_viewer(): void
+    {
+        $this->upload($this->model())->assertRedirect();
+        $instantiation = Instantiation::with('files.use')->sole();
+        [$master, $reference] = [$instantiation->file('master'), $instantiation->file('reference')];
+        $this->assertSame('model/gltf-binary', $master->mime_type);
+        $this->assertSame([$master->sha256, $master->storage_path, 'model/gltf-binary', 'helmet-reference.glb'],
+            [$reference->sha256, $reference->storage_path, $reference->mime_type, $reference->original_name], 'the same bytes, kept once');
+        $this->assertNull($instantiation->file('thumbnail'), 'a model is not drawn on the server');
+
+        // Seen by one who may read reference copies but not masters, through the viewer the Workspace serves itself.
+        $this->actingAs($this->contributor)->get(route('files.show', $reference))->assertOk()->assertHeader('Content-Type', 'model/gltf-binary');
+        $page = $this->actingAs($this->contributor)->get("/records/{$this->item->id}")->assertOk()
+            ->assertSee('<model-viewer src="'.route('files.show', $reference).'"', false)->assertSee('vendor/model-viewer/model-viewer.min.js')
+            ->assertSee('dracoDecoderLocation')->assertDontSee('gstatic.com');
+        $this->assertSame(1, substr_count($page->getContent(), 'model-viewer.min.js'), 'the viewer loads once');
+        $this->actingAs($this->contributor)->get("/instantiations/{$instantiation->id}")->assertOk()->assertSee('<model-viewer', false);
+        foreach (['model-viewer.min.js', 'draco/draco_decoder.wasm', 'draco/draco_wasm_wrapper.js', 'basis/basis_transcoder.wasm', 'README.md'] as $vendored) {
+            $this->assertFileExists(public_path("vendor/model-viewer/$vendored"));
+        }
+    }
+
+    public function test_the_copies_command_makes_copies_a_master_kept_without_them_has_and_only_once(): void
+    {
+        $this->upload($this->model())->assertRedirect();
+        $instantiation = Instantiation::with('files.use')->sole();
+        // As a model was kept before 0.0.34: its master only.
+        DB::table('digital_files')->where('id', $instantiation->file('reference')->id)->delete();
+        $this->upload($this->scan(400, 300))->assertRedirect();
+
+        $this->artisan('workspace:copies')->expectsOutputToContain('1 copy made of helmet.glb')->expectsOutputToContain('2 instantiations with files looked at, 1 copies made.')->assertSuccessful();
+        $this->assertSame('model/gltf-binary', $instantiation->fresh()->load('files.use')->file('reference')?->mime_type);
+        $this->artisan('workspace:copies')->expectsOutputToContain('0 copies made.')->assertSuccessful();
+        $this->assertSame(1, DigitalFile::where('instantiation_id', $instantiation->id)->where('mime_type', 'model/gltf-binary')->where('original_name', 'helmet-reference.glb')->count());
+    }
+
     public function test_delivery_needs_the_read_permission_of_the_use_and_follows_availability(): void
     {
         $this->upload($this->scan(400, 300))->assertRedirect();

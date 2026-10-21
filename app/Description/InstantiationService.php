@@ -74,12 +74,34 @@ class InstantiationService
         return DB::transaction(fn () => AuditLog::actingAs($actor, function () use ($unit, $originalName, $language, $title, $availability, $master, $copies) {
             $instantiation = $this->create($unit, trim((string) $title) !== '' ? (string) $title : $originalName, $language, 'digital-file', $availability);
             $this->addFile($instantiation, 'master', $originalName, $master);
-            foreach ($copies as $use => $copy) {
-                $this->addFile($instantiation, $use, pathinfo($originalName, PATHINFO_FILENAME).'-'.$use.'.jpg', $copy);
-            }
+            $this->addCopies($instantiation, $originalName, $copies);
 
             return $instantiation->load('files.use');
         }));
+    }
+
+    /**
+     * Make the copies for viewing of a master that has none, as an upload would now: for a file kept before a kind of copy
+     * was made, or whose copies could not be made then. The number of copies added.
+     */
+    public function makeCopies(Instantiation $instantiation, ?User $actor = null): int
+    {
+        $master = $instantiation->file('master');
+        if ($master === null || $instantiation->files()->where('id', '!=', $master->id)->exists()) {
+            return 0;
+        }
+        $copies = $this->store->copies($instantiation->institution_id, $this->store->path($master->storage_path), $master->mime_type);
+        DB::transaction(fn () => AuditLog::actingAs($actor, fn () => $this->addCopies($instantiation, $master->original_name, $copies)));
+
+        return count($copies);
+    }
+
+    private function addCopies(Instantiation $instantiation, string $originalName, array $copies): void
+    {
+        foreach ($copies as $use => $copy) {
+            $extension = $copy['mime_type'] === FileStore::MODEL ? 'glb' : 'jpg';
+            $this->addFile($instantiation, $use, pathinfo($originalName, PATHINFO_FILENAME).'-'.$use.'.'.$extension, $copy);
+        }
     }
 
     /** @param  array<string, ?string>  $values  element notation => text */

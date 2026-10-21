@@ -43,5 +43,16 @@
             .main-nav details a { display: block; padding: .5rem .9rem; }
             button, input, select { min-height: 2.75rem; }
         }
+        .main-nav .icon { width: 1.1em; height: 1.1em; vertical-align: -.18em; margin-right: .35rem; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+        /* Description areas as an accordion: each a bar that opens and closes; all open to start, and in print. */
+        details.area { border: 1px solid var(--line); margin: 1rem 0; }
+        details.area > summary { list-style: none; cursor: pointer; display: flex; align-items: baseline; gap: .75rem; flex-wrap: wrap; padding: .5rem .75rem; background: color-mix(in srgb, var(--accent) 8%, var(--bg)); }
+        details.area > summary::-webkit-details-marker { display: none; }
+        details.area > summary::before { content: ""; width: .5rem; height: .5rem; border-right: 2px solid var(--accent); border-bottom: 2px solid var(--accent); transform: rotate(-45deg); transition: transform .15s; align-self: center; flex: none; }
+        details.area[open] > summary::before { transform: rotate(45deg); }
+        details.area > summary h2 { margin: 0; font-size: 1.2rem; }
+        details.area > :not(summary) { margin-left: .75rem; margin-right: .75rem; }
+        details.area[open] { padding-bottom: .5rem; }
+        @media print { details.area > summary::before { display: none; } }
         .ric { font-weight: normal; font-size: .8rem; color: var(--muted); margin-left: .35rem; } .ric a { color: var(--muted); }
     </style>

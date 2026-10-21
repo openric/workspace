@@ -74,7 +74,8 @@ class RicTermsTest extends TestCase
             ->assertSee('<a href="https://www.ica.org/standards/RiC/ontology#scopeAndContent"', false)
             ->assertSee('openricx:hasAppraisalInformation')->assertSee('rico:hasExtent')->assertSee('Fonds (rico:RecordSet)');
         $this->actingAs($editor)->get("/records/{$fonds->id}")->assertOk()
-            ->assertSee('rico:RecordSet')->assertSee('rico:Title')->assertSee('rico:Identifier')->assertSee('rico:Date')->assertSee('rico:scopeAndContent');
+            ->assertSee('rico:RecordSet')->assertSee('rico:Title')->assertSee('rico:Identifier')->assertSee('rico:Date')
+            ->assertDontSee('rico:scopeAndContent'); // not described, so not shown; the edit page shows its term
         $this->actingAs($editor)->get("/repositories/{$repository->id}")->assertOk()->assertSee('rico:CorporateBody')->assertSee('rico:AgentName');
         $this->actingAs($editor)->get("/repositories/{$repository->id}/edit")->assertOk()->assertSee('not in RiC-O');
     }

@@ -81,10 +81,10 @@ class SettingsAndScreensTest extends TestCase
     public function test_every_page_has_the_main_navigation(): void
     {
         $this->actingAs($this->admin)->get('/repositories')->assertSee('aria-label="Main"', false)
-            ->assertSee('>Home<', false)->assertSee('>Settings<', false)->assertSee('aria-current="page"', false)
+            ->assertSee('</svg>Home<', false)->assertSee('>Settings<', false)->assertSee('aria-current="page"', false)
             // Grouped in submenus, and the group holding the page is marked.
-            ->assertSeeInOrder(['<summary class="here">Describe</summary>', '>Repositories<', '>Manage</summary>', '>Vocabularies<', '>Containers<', '>Imports<',
-                '>Duplicate authority records<', '>Admin</summary>', '>Accounts<', '>Audit log<', '>Settings<'], false);
+            ->assertSeeInOrder(['<summary class="here">', '</svg>Describe</summary>', '>Repositories<', '</svg>Manage</summary>', '>Vocabularies<', '>Containers<', '>Imports<',
+                '>Duplicate authority records<', '</svg>Admin</summary>', '>Accounts<', '>Audit log<', '>Settings<'], false);
     }
 
     public function test_a_new_repository_opens_its_full_description_form(): void
@@ -96,11 +96,20 @@ class SettingsAndScreensTest extends TestCase
             ->assertSee('5.3 Description')->assertSee('5.3.1 History')->assertSee('5.4.1 Opening times');
     }
 
-    public function test_the_view_page_shows_every_element_and_what_is_missing(): void
+    public function test_the_view_page_shows_the_described_elements_by_area_and_leaves_out_the_rest(): void
     {
         $repository = app(RepositoryService::class)->create($this->institution, 'Riverside Parish Council Archives', 'en');
         $this->actingAs($this->admin)->get("/repositories/{$repository->id}")
-            ->assertSee('5.1.2 Authorised form of name')->assertSee('5.3.1 History')->assertSee('Not yet described')
+            ->assertSee('<details class="area" open>', false)->assertSee('5.1.2 Authorised form of name')->assertSee('1 of ')
+            ->assertDontSee('5.3.1 History')->assertDontSee('Not yet described')->assertDontSee('<h2>5.3 Description</h2>', false)
             ->assertSee('Edit description')->assertSee('Add a translation');
+    }
+
+    public function test_the_main_menu_items_carry_an_icon_hidden_from_screen_readers(): void
+    {
+        $page = $this->actingAs($this->admin)->get('/')->assertOk()->getContent();
+        preg_match('~<nav aria-label="Main".*?</nav>~s', $page, $nav);
+        $this->assertSame(5, substr_count($nav[0], '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">'), 'Home, Describe, Manage, Admin and the public catalogue');
+        $this->assertStringContainsString('</svg>Describe</summary>', $nav[0]);
     }
 }

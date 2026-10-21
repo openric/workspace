@@ -87,7 +87,7 @@ class AgentTest extends TestCase
         $this->assertSame('ZA-RA-AR-001', $agent->description_identifier);
 
         $this->actingAs($this->contributor)->get("/agents/{$agent->id}")->assertOk()
-            ->assertSeeInOrder(['5.1 Identity', '5.2 Description', '5.2.2 History', 'Farmer and diarist of Rietvlei.', '5.4 Control'])
+            ->assertSeeInOrder(['5.1 Identity', '5.2 Description', '5.2.2 History', 'Farmer and diarist of Rietvlei.'])->assertDontSee('Internal structures or genealogy')
             ->assertSee('Occupations (5.2.5)')->assertSee('Export as EAC-CPF');
         $this->actingAs($this->contributor)->get('/agents?q=du+toit')->assertOk()->assertSee('Engelbrecht, Johanna (1871-1949)');
         $this->actingAs($this->contributor)->get('/agents?type=family')->assertDontSee('Engelbrecht, Johanna (1871-1949)');

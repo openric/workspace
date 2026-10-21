@@ -18,7 +18,9 @@
     @forelse($instantiation->files->sortBy(fn ($f) => array_search($f->use->notation, ['master', 'reference', 'thumbnail'])) as $file)
         <section style="border-top: 1px solid var(--line); padding: .5rem 0">
             <h3 style="margin: .2rem 0">{{ $file->use->label(['en']) }}</h3>
-            @if($file->use->notation === 'reference' && $deliverable[$file->id])
+            @if($file->use->notation === 'reference' && $deliverable[$file->id] && $file->mime_type === \App\Files\FileStore::MODEL)
+                @include('description._model', ['src' => route('files.show', $file), 'alt' => $instantiation->described('instantiation-title', ['en'])])
+            @elseif($file->use->notation === 'reference' && $deliverable[$file->id])
                 <p><img src="{{ route('files.show', $file) }}" alt="{{ $instantiation->described('instantiation-title', ['en']) }}" width="{{ $file->width }}" height="{{ $file->height }}" style="max-width: 100%; height: auto; border: 1px solid var(--line)"></p>
             @endif
             <p>{{ $file->original_name }}<br>

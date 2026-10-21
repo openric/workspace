@@ -9,7 +9,9 @@
         <section aria-label="Digital copies and carriers">
         @foreach($instantiations as ['instantiation' => $instantiation, 'files' => $files])
             <figure style="margin: 1rem 0">
-                @if($files->has('reference'))
+                @if($files->has('reference') && $files['reference']->mime_type === \App\Files\FileStore::MODEL)
+                    @include('description._model', ['src' => route('discover.file', $files['reference']), 'alt' => $view->label($instantiation)])
+                @elseif($files->has('reference'))
                     <a href="{{ route('discover.file', $files['reference']) }}"><img src="{{ route('discover.file', $files['reference']) }}" alt="{{ $view->label($instantiation) }}" width="{{ $files['reference']->width }}" height="{{ $files['reference']->height }}" style="max-width: 100%; height: auto; border: 1px solid var(--line)"></a>
                 @elseif($files->has('thumbnail'))
                     <img src="{{ route('discover.file', $files['thumbnail']) }}" alt="{{ $view->label($instantiation) }}" style="border: 1px solid var(--line)">

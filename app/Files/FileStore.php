@@ -10,7 +10,8 @@
 // configured; and it is kept by its checksum under the institution, outside
 // the web root, so the only way to it is through the Workspace. Copies for
 // viewing (a reference image and a thumbnail) are made from images and from
-// the first page of a PDF, without the master's embedded metadata.
+// the first page of a PDF, without the master's embedded metadata. A glTF
+// binary (GLB) 3D model is its own reference copy, shown in a 3D viewer.
 
 namespace App\Files;
 
@@ -25,6 +26,12 @@ class FileStore
 {
     /** Longest side, in pixels, of each copy made from a master. */
     public const COPIES = ['reference' => 1600, 'thumbnail' => 300];
+
+    /** A 3D model in glTF binary form, the one 3D format the Workspace shows. */
+    public const MODEL = 'model/gltf-binary';
+
+    /** Largest GLB, in MB, given a reference copy for viewing in the page. */
+    public const MODEL_REFERENCE_MEGABYTES = 25;
 
     public function root(): string
     {
@@ -64,6 +71,19 @@ class FileStore
      */
     public function copies(string $institutionId, string $masterPath, string $mime): array
     {
+        if ($mime === self::MODEL) {
+            // ponytail: a browser needs the whole model to show it, so the reference copy of a GLB is the master itself,
+            // kept once under the same checksum; a reduced copy needs a mesh simplifier (gltf-transform) on the server.
+            // A model larger than this limit gets no copy: it stays a download for those who may read masters.
+            $size = (int) filesize($masterPath);
+            if ($size > self::MODEL_REFERENCE_MEGABYTES * 1024 * 1024) {
+                return [];
+            }
+            $sha = hash_file('sha256', $masterPath);
+
+            return ['reference' => [...$this->keep($institutionId, $masterPath, $sha), 'sha256' => $sha, 'size_bytes' => $size, 'mime_type' => $mime,
+                'width' => null, 'height' => null, 'scanned_with' => null, 'scanned_at' => null]];
+        }
         if (! str_starts_with($mime, 'image/') && $mime !== 'application/pdf') {
             return [];
         }
