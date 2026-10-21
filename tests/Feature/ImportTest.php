@@ -185,9 +185,20 @@ class ImportTest extends TestCase
         }
         $xml = '<?xml version="1.0" encoding="UTF-8"?><ead><eadheader><eadid>BIG</eadid></eadheader><archdesc level="fonds"><did><unittitle>Big fonds</unittitle><unitid>BIG</unitid></did><dsc>'.$series.'</dsc></archdesc></ead>';
 
+        // Savepoint locks held by this connection, sampled as the import runs: about one per unit, not one per write.
+        $most = 0;
+        $sampling = false;
+        DB::listen(function () use (&$most, &$sampling) {
+            if (! $sampling) {
+                $sampling = true;
+                $most = max($most, (int) DB::selectOne("SELECT count(*) AS n FROM pg_locks WHERE pid = pg_backend_pid() AND locktype = 'transactionid'")->n);
+                $sampling = false;
+            }
+        });
         $import = $this->upload($xml, 'ead', ['create_terms' => '1']);
         $this->assertEquals(['created' => 124, 'updated' => 0, 'unchanged' => 0, 'rejected' => 0], $import->report['actions']);
         $this->assertSame(0, RecordResource::count(), 'a dry run writes nothing');
+        $this->assertLessThan(300, $most, 'a lock per unit, not per write (each unit once took about 75)');
         $this->assertCount(1, collect($import->report['issues'])->where('kind', 'created')->where('value', 'Parish business'), 'the new subject is reported once');
 
         $import = $this->commit($import);

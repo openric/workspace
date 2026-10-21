@@ -53,6 +53,7 @@ use App\Relations\RelationService;
 use App\Support\Vocab;
 use App\Vocabulary\ConceptService;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Query\Grammars\PostgresGrammar;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -238,11 +239,11 @@ class ImportService
         $before = $this->seq();
         [$resolved, $counts, $issues] = [$this->resolved, $this->report->counts, count($this->report->issues)];
         try {
-            $unit = DB::transaction(fn () => match (true) {
+            $unit = DB::transaction(fn () => $this->withoutInnerSavepoints(fn () => match (true) {
                 $draft instanceof UnitDraft => $this->write($draft),
                 $this->import->format === 'authority-csv' => $this->authority($draft),
                 default => $this->repository($draft),
-            });
+            }));
         } catch (InvalidArgumentException|QueryException|RuntimeException $e) {
             // Rolled back to before this unit: what it created does not exist, so forget it.
             $this->resolved = $resolved;
@@ -258,6 +259,35 @@ class ImportService
             $this->byKey[$draft->key] = $unit;
         }
         $this->report->unit($draft, $unit->wasRecentlyCreated ? 'created' : ($this->seq() !== $before ? 'updated' : 'unchanged'), $unit->id);
+    }
+
+    /**
+     * Run a unit's work inside its one savepoint, with the services it calls opening none of their own. PostgreSQL keeps
+     * a lock for every savepoint that writes until the transaction ends, in a table every database on the server shares;
+     * an entry with many names and access points opened some 75. An error inside rises to the unit's savepoint, which
+     * the caller rolls back with the real grammar restored, so the unit is refused whole and nothing of it is kept.
+     *
+     * @template T
+     *
+     * @param  callable(): T  $work
+     * @return T
+     */
+    private function withoutInnerSavepoints(callable $work): mixed
+    {
+        $connection = DB::connection();
+        $grammar = $connection->getQueryGrammar();
+        $connection->setQueryGrammar(new class($connection) extends PostgresGrammar
+        {
+            public function supportsSavepoints(): bool
+            {
+                return false;
+            }
+        });
+        try {
+            return $work();
+        } finally {
+            $connection->setQueryGrammar($grammar);
+        }
     }
 
     private function write(UnitDraft $draft): RecordResource

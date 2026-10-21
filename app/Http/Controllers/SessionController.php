@@ -50,6 +50,7 @@ class SessionController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('sign-in');
+        // Back to the public catalogue, where a signed-out reader is.
+        return redirect()->route('discover.home');
     }
 }
