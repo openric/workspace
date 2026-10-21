@@ -14,6 +14,12 @@
     @foreach($entity->dates as $date)<p><strong>{{ $date->property->label(['en', 'und']) }}:</strong> {{ $date->display() }} @include('description._ric', ['term' => $date->property])</p>@endforeach
     @if($entity instanceof \App\Models\Place && $entity->latitude !== null)<p><strong>Coordinates:</strong> {{ $entity->latitude }}, {{ $entity->longitude }} (WGS 84)</p>@endif
     <p><a href="{{ route('discover.graph', [\App\Discovery\Links::CATALOGUE[$kind], $entity->getKey()]) }}">See it in the relationship graph</a></p>
+    @isset($holdings)
+        <h2>Holdings ({{ $holdings->count() }}) @include('description._ric', ['term' => 'rico:isOrWasHolderOf'])</h2>
+        @if($holdings->isEmpty())<p>No published descriptions yet.</p>@else
+        <ul>@foreach($holdings as $unit)<li><a href="{{ route('discover.record', $unit->id) }}">{{ $view->label($unit) }}</a> <span class="meta">{{ collect([$unit->level?->label(['en', 'und']), $unit->referenceCode()])->filter()->join(', ') }}</span></li>@endforeach</ul>
+        @endif
+    @endisset
     @include('discover._values', ['subject' => $entity, 'standard' => $standard, 'view' => $view])
     @include('discover._relations', ['relations' => $relations, 'view' => $view, 'heading' => 'Relations'])
     <p class="meta"><code>{{ $entity->getAttribute('iri') }}</code></p>

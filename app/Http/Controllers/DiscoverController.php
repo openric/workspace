@@ -80,7 +80,11 @@ class DiscoverController extends Controller
 
     public function repository(Request $request, string $id): View
     {
-        return $this->entity($request, 'repository', $id, ['contactPoints']);
+        // Its holdings, as AtoM lists them: the published units at the top that it holds, with what each holds inside.
+        $holdings = $this->catalogue($request)->visible('records', '', false, ['level.labels'])
+            ->where('repository_id', $id)->whereNull('parent_id')->sortBy(fn ($unit) => mb_strtolower((string) $this->catalogue($request)->view->label($unit)))->values();
+
+        return $this->entity($request, 'repository', $id, ['contactPoints'], ['holdings' => $holdings]);
     }
 
     public function place(Request $request, string $id): View
@@ -117,13 +121,13 @@ class DiscoverController extends Controller
         return FileResponse::make($file, $path, $request->boolean('download'));
     }
 
-    private function entity(Request $request, string $kind, string $id, array $with): View
+    private function entity(Request $request, string $kind, string $id, array $with, array $more = []): View
     {
         $catalogue = $this->catalogue($request);
         $entity = $catalogue->find(Links::CATALOGUE[$kind], $id, $with) ?? abort(404);
 
         return view('discover.entity', ['entity' => $entity, 'kind' => $kind, 'standard' => self::STANDARDS[$kind], 'view' => $catalogue->view,
-            'relations' => $this->relations($entity, $catalogue), 'institution' => $catalogue->institution]);
+            'relations' => $this->relations($entity, $catalogue), 'institution' => $catalogue->institution, ...$more]);
     }
 
     /** @return Collection<int, Relation> the relations that stand, whose other end the public may read */

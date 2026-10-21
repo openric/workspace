@@ -13,6 +13,7 @@
     <a href="{{ auth()->check() ? route('home') : route('sign-in') }}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: .75rem">
         @if($brand?->logo_path)<img src="{{ route('branding.logo') }}?v={{ md5($brand->logo_path) }}" alt="" style="max-height: 48px; max-width: 160px">@endif
         <strong>{{ $brand?->headerTitle() ?? config('app.name') }}</strong>
+        @unless(str_contains($brand?->headerTitle() ?? config('app.name'), 'Workspace'))<span class="product">Workspace</span>@endunless
     </a>
     @auth
         <form method="post" action="{{ route('sign-out') }}">

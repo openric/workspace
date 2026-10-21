@@ -134,6 +134,17 @@ class DiscoverTest extends TestCase
         $this->get(route('discover.file', $this->scan->file('reference')))->assertNotFound();
     }
 
+    public function test_a_repository_lists_the_published_units_it_holds_at_the_top_and_no_draft(): void
+    {
+        $repository = $this->fonds->repository;
+        app(RecordService::class)->create($repository->institution, self::LEVEL.'fonds', 'Unpublished vestry minutes', 'en', null, $repository, 'VM');
+
+        $this->get("/discover/repositories/{$repository->id}")->assertOk()
+            ->assertSee('Holdings (1)')->assertSee('rico:isOrWasHolderOf')
+            ->assertSee('href="'.route('discover.record', $this->fonds->id).'"', false)->assertSee('Riverside Parish Council records')
+            ->assertDontSee('Unpublished vestry minutes')->assertDontSee('Closed personnel file')->assertDontSee('Letter of 3 May 1902');
+    }
+
     public function test_step_10_the_graph_reaches_the_clerk_and_the_marriage_and_every_node_opens_its_page(): void
     {
         $response = $this->get("/discover/graph/records/{$this->item->id}?depth=2")->assertOk();

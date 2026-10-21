@@ -1,0 +1,204 @@
+/*
+ * Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+ * Email: johan@plainsailingisystems.co.za
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ *
+ * OpenRiC shared shell, v1.
+ * Canonical source: https://openric.org/assets/shell/v1.css
+ *
+ * WHY THIS EXISTS
+ * OpenRiC is four independently deployed surfaces - openric.org, the reference
+ * API at ric.theahg.co.za, viewer.openric.org and capture.openric.org. That
+ * modularity is one of the project's strongest technical claims and is not
+ * being given up. But a visitor should not have to reason about it, and until
+ * now each surface had its own header, its own type stack and its own idea of
+ * what colour a Place is.
+ *
+ * This file is the one place those decisions live. It is loaded cross-origin
+ * by the other surfaces, so treat every change as a change to four live sites.
+ *
+ * DEGRADATION
+ * Consuming pages keep their own base styling. If this file fails to load, a
+ * page loses the shared chrome and falls back to its own look - it does not
+ * break. Nothing here is required for a page to function.
+ *
+ * ENTITY COLOURS
+ * The canonical set is the viewer's src/colours.js, which is the most
+ * considered of the three that existed. Before v1 the Browse demo carried a
+ * different palette under a comment claiming it matched the viewer; it did
+ * not - Record was #3b82f6 against the viewer's #45b7d1, Activity #ef4444
+ * against #6f42c1. Anything colouring a RiC entity should now read these
+ * variables rather than restate the hex.
+ */
+
+:root {
+  /* Brand */
+  --oric-fg:        #0f172a;
+  --oric-muted:     #64748b;
+  --oric-muted-2:   #475569;
+  --oric-accent:    #0f3e75;
+  --oric-accent-2:  #1f5fa8;
+  --oric-accent-h:  #072545;
+  --oric-border:    #e2e8f0;
+  --oric-bg:        #ffffff;
+  --oric-surface:   #f8fafc;
+  --oric-surface-2: #f1f5f9;
+
+  /* Status */
+  --oric-live:      #10b981;
+  --oric-pending:   #f59e0b;
+  --oric-draft:     #94a3b8;
+  --oric-danger:    #dc2626;
+
+  --oric-radius:    8px;
+  --oric-font:      "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --oric-mono:      "JetBrains Mono", "SF Mono", Menlo, Consolas, monospace;
+
+  /* RiC entity colours - canonical. See the note above. */
+  --ric-record-set:     #4ecdc4;
+  --ric-record:         #45b7d1;
+  --ric-record-part:    #96ceb4;
+  --ric-person:         #dc3545;
+  --ric-corporate-body: #ffc107;
+  --ric-family:         #e83e8c;
+  --ric-mechanism:      #e74c3c;
+  --ric-activity:       #6f42c1;
+  --ric-place:          #fd7e14;
+  --ric-thing:          #20c997;
+  --ric-language:       #0d6efd;
+  --ric-instantiation:  #17a2b8;
+  --ric-function:       #6c757d;
+  --ric-rule:           #8e44ad;
+  --ric-repository:     #db2777;
+  --ric-default:        #6c757d;
+}
+
+/* ---------- Shared header ---------- */
+
+/* Deliberately NOT sticky. Three of the four surfaces are app-like and already
+   have their own sticky element - Browse sticks its type tabs at top:0, and a
+   sticky shell above them would either overlap or need every consumer to know
+   the shell's height. A static strip works in every layout without the
+   consumer knowing anything about it. */
+.oric-shell {
+  font-family: var(--oric-font);
+  background: var(--oric-bg);
+  border-bottom: 1px solid var(--oric-border);
+  padding: 0.55rem 1.2rem;
+}
+.oric-shell * { box-sizing: border-box; }
+.oric-shell-inner {
+  max-width: 1180px; margin: 0 auto;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem;
+}
+.oric-shell-brand {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  font-weight: 700; font-size: 1.02rem; letter-spacing: -0.01em;
+  color: var(--oric-fg); text-decoration: none;
+}
+.oric-shell-brand:hover { text-decoration: none; color: var(--oric-accent); }
+.oric-shell-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--oric-accent-2), var(--oric-live));
+  display: inline-block; flex: none;
+}
+/* The product label is what tells a visitor which of the four they are on. */
+.oric-shell-product {
+  font-weight: 500; font-size: 0.8rem; color: var(--oric-muted-2);
+  padding: 0.15rem 0.5rem; background: var(--oric-surface-2);
+  border-radius: 10px; white-space: nowrap;
+}
+.oric-shell-links {
+  margin-left: auto;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 0.1rem 0.8rem;
+  font-size: 0.87rem;
+}
+.oric-shell-links a { color: var(--oric-muted-2); text-decoration: none; padding: 0.3rem 0.45rem; border-radius: 5px; }
+.oric-shell-links a:hover { color: var(--oric-accent); background: var(--oric-surface-2); text-decoration: none; }
+.oric-shell-links a.oric-back { font-weight: 600; color: var(--oric-accent-2); }
+
+/* Dark variant. The viewer and editor are dark-themed app surfaces, and a
+   white strip above them reads as a rendering fault rather than as chrome.
+   Opt in with data-theme="dark" on the script tag. */
+.oric-shell[data-theme="dark"],
+.oric-shell-footer[data-theme="dark"] {
+  background: #0f172a;
+  border-color: #1f2937;
+  color: #9ca3af;
+}
+.oric-shell[data-theme="dark"] .oric-shell-brand { color: #e5e7eb; }
+.oric-shell[data-theme="dark"] .oric-shell-brand:hover { color: #fff; }
+.oric-shell[data-theme="dark"] .oric-shell-product { background: #1f2937; color: #cbd5e1; }
+.oric-shell[data-theme="dark"] .oric-shell-links a { color: #9ca3af; }
+.oric-shell[data-theme="dark"] .oric-shell-links a:hover { color: #fff; background: #1f2937; }
+.oric-shell[data-theme="dark"] .oric-shell-links a.oric-back { color: #60a5fa; }
+.oric-shell-footer[data-theme="dark"] a { color: #9ca3af; }
+.oric-shell-footer[data-theme="dark"] a:hover { color: #fff; }
+
+/* ---------- Status badges ---------- */
+
+.oric-badge {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+  padding: 0.12rem 0.5rem; border-radius: 999px; color: #fff; white-space: nowrap;
+}
+.oric-badge.live         { background: var(--oric-live); }
+.oric-badge.draft        { background: var(--oric-draft); }
+.oric-badge.normative    { background: var(--oric-accent-2); }
+.oric-badge.experimental { background: var(--oric-pending); }
+.oric-badge.write        { background: var(--oric-danger); }
+
+/* ---------- Floating WhatsApp contact ----------
+   On every page, every surface. The visitor initiates, which opens their own
+   24-hour window - so this needs no template, no consent record and no send
+   path. Bottom-right deliberately: Browse pins a delete bar and the wizard a
+   flash message to bottom-centre, and colliding with either would be worse
+   than not being there. */
+
+.oric-wa {
+  position: fixed; right: 1.1rem; bottom: 1.1rem; z-index: 9500;
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  padding: 0.6rem 1rem 0.6rem 0.85rem;
+  background: #0f7a5a; color: #fff !important;
+  border-radius: 999px; text-decoration: none !important;
+  font-family: var(--oric-font); font-size: 0.88rem; font-weight: 600;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.18), 0 10px 24px -8px rgba(15, 23, 42, 0.3);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.oric-wa:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 3px 8px rgba(15, 23, 42, 0.22), 0 14px 30px -8px rgba(15, 23, 42, 0.35);
+  color: #fff !important; text-decoration: none !important;
+}
+.oric-wa:focus-visible { outline: 3px solid var(--oric-accent-2); outline-offset: 2px; }
+.oric-wa svg { width: 18px; height: 18px; flex: none; fill: currentColor; }
+
+/* On a narrow screen the label costs more than it gives - keep the target,
+   drop the word, and leave the accessible name on the element. */
+@media (max-width: 560px) {
+  .oric-wa { padding: 0.7rem; gap: 0; }
+  .oric-wa .oric-wa-label { display: none; }
+}
+
+@media print { .oric-wa { display: none; } }
+
+/* ---------- Shared footer ---------- */
+
+.oric-shell-footer {
+  font-family: var(--oric-font);
+  border-top: 1px solid var(--oric-border);
+  background: var(--oric-surface);
+  color: var(--oric-muted);
+  font-size: 0.84rem;
+  padding: 1.5rem 1.2rem;
+  text-align: center;
+  margin-top: 3rem;
+}
+.oric-shell-footer a { color: var(--oric-muted-2); text-decoration: underline; text-underline-offset: 2px; }
+.oric-shell-footer a:hover { color: var(--oric-accent); }
+.oric-shell-footer-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.4rem 1rem; margin-bottom: 0.6rem; }
+
+@media (max-width: 640px) {
+  .oric-shell-links { margin-left: 0; flex-basis: 100%; gap: 0.1rem 0.5rem; font-size: 0.82rem; }
+  .oric-shell-product { font-size: 0.74rem; }
+}
