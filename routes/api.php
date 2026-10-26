@@ -20,6 +20,7 @@ Route::middleware([ServeRicApi::class, 'throttle:600,1', AuthenticateApiKey::cla
     Route::get('/records', [DiscoveryController::class, 'records'])->name('api.records');
     Route::get('/records/{key}', [DiscoveryController::class, 'record'])->name('api.record');
     Route::get('/records/{key}/export', [DiscoveryController::class, 'export'])->name('api.export');
+    Route::get('/records/{key}/files', [DiscoveryController::class, 'files'])->name('api.files');
     Route::match(['get', 'post'], '/oai', [OaiController::class, 'handle'])->name('api.oai');
     Route::get('/agents', [DiscoveryController::class, 'agents'])->name('api.agents');
     Route::get('/agents/{key}', [DiscoveryController::class, 'agent'])->name('api.agent');

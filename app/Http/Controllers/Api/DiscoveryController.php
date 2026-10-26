@@ -16,8 +16,11 @@ use App\Api\JsonLd;
 use App\Api\Problem;
 use App\Api\PublicCatalogue;
 use App\Api\Rdf;
+use App\Description\InstantiationService;
 use App\Exchange\ExportView;
 use App\Http\Controllers\Controller;
+use App\Models\DigitalFile;
+use App\Models\Instantiation;
 use App\Models\Institution;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -94,6 +97,47 @@ class DiscoveryController extends Controller
         $unit = $this->catalogue($request)->find('records', $key, self::RECORD_WITH);
 
         return $unit ? $this->json($this->jsonLd($request)->record($unit)) : $this->missing($request, 'Record', $key);
+    }
+
+    /**
+     * A record's files and their text, as a visitor may have them (ADR 0007): its instantiations the public
+     * catalogue shows, each with its published title and transcript and the copies a visitor may open
+     * (reference and thumbnail; never a master), at their addresses in the public catalogue. Plain JSON, not
+     * JSON-LD: the Core Discovery profile does not describe instantiations.
+     */
+    public function files(Request $request, string $key): JsonResponse
+    {
+        $unit = $this->catalogue($request)->find('records', $key);
+        if ($unit === null) {
+            return $this->missing($request, 'Record', $key);
+        }
+        $view = $this->view($request);
+        $service = app(InstantiationService::class);
+        $instantiations = Instantiation::where('record_resource_id', $unit->id)->whereNull('deleted_at')
+            ->with([...PublicCatalogue::WITH, 'availability', 'files.use', 'files.instantiation.record', 'files.instantiation.availability'])
+            ->orderBy('position')->orderBy('id')->get();
+        $items = [];
+        foreach ($instantiations as $instantiation) {
+            // Shown as the public catalogue shows it: with a published title. Its text is the file's content, so only of a file a visitor may open.
+            $title = $view->label($instantiation);
+            if ($title === null) {
+                continue;
+            }
+            $files = $instantiation->files->filter(fn (DigitalFile $file) => $service->deliverable(null, $file))->sortBy(fn ($file) => $file->use->notation);
+            $text = $instantiation->availability->notation !== 'online' ? [] : $view->values($instantiation, 'instantiation-transcript')->map(fn ($v) => ['language' => $v->language, 'value' => $v->value])->values()->all();
+            if ($files->isEmpty() && $text === []) {
+                continue; // nothing a visitor may have of it
+            }
+            $items[] = [
+                'id' => $instantiation->id, 'title' => $title,
+                'files' => $files->map(fn (DigitalFile $file) => ['id' => $file->id, 'use' => $file->use->notation, 'mime_type' => $file->mime_type,
+                    'width' => $file->width, 'height' => $file->height, 'size_bytes' => $file->size_bytes,
+                    'path' => parse_url(route('discover.file', $file), PHP_URL_PATH), 'url' => route('discover.file', $file)])->values()->all(),
+                'text' => $text,
+            ];
+        }
+
+        return $this->json(['record' => $unit->id, 'title' => $view->label($unit), 'instantiations' => $items]);
     }
 
     public function agent(Request $request, string $key): JsonResponse
