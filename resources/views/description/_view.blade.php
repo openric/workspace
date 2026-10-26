@@ -22,5 +22,5 @@
         @endforeach
     </details>
 @empty
-    <p class="meta">Nothing is described yet; the edit page has every element.</p>
+    <p class="meta">{{ __('Nothing is described yet; the edit page has every element.') }}</p>
 @endforelse

@@ -4,7 +4,7 @@
 @section('content')
     <p><a href="{{ route('records.show', $record) }}">Back to {{ $record->described('title', ['en']) }}</a></p>
     <h1>Hierarchy of {{ $top->described('title', ['en']) }}</h1>
-    <p>The arrangement (rico:hasOrHadPart), in order. Move units, or change their order, from each unit's page.</p>
+    <p>{{ __('The arrangement (rico:hasOrHadPart), in order. Move units, or change their order, from each unit\'s page.') }}</p>
     @php
         $line = fn ($u) => (($u->id === $record->id) ? '<strong aria-current="page">' : '').'<a href="'.e(route('records.show', $u)).'">'.e($u->described('title', [app()->getLocale(), 'en'])).'</a>'.(($u->id === $record->id) ? '</strong>' : '')
             .' <small>'.e(collect([$u->level->label(\App\Support\Vocab::languages()), $u->identifier])->filter()->join(', ')).'</small>';

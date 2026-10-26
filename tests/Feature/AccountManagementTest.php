@@ -196,7 +196,7 @@ class AccountManagementTest extends TestCase
     {
         $archivist = $this->account('An Archivist', 'archivist@example.org', 'editor');
         $this->actingAs($archivist)->get('/')->assertSee(route('account.profile'), false);
-        $this->actingAs($archivist)->get('/account')->assertOk()->assertSee('An Archivist')->assertSee('Edit your profile');
+        $this->actingAs($archivist)->get('/account')->assertOk()->assertSee('An Archivist')->assertSee('Edit profile');
         $this->actingAs($archivist)->get('/account/edit')->assertOk()->assertDontSee('besides those of its roles');
 
         $this->actingAs($archivist)->post('/account', ['name' => 'Anna', 'email' => 'anna@example.org', 'translation_languages' => 'fr'])->assertRedirect(route('account.edit'));

@@ -2,15 +2,15 @@
 @extends('layouts.app')
 @section('title', 'Box list: '.$container->described('container-name', ['en']))
 @section('content')
-    <p class="no-print"><a href="{{ route('containers.show', $container) }}">Back to the container</a> · <a href="#" onclick="window.print(); return false">Print</a></p>
+    <p class="no-print"><a href="{{ route('containers.show', $container) }}">{{ __('Back to the container') }}</a> · <a href="#" onclick="window.print(); return false">{{ __('Print') }}</a></p>
     <style>@media print { .no-print, nav, header, footer { display: none !important } }</style>
     <h1>{{ $container->described('container-name', ['en']) }}</h1>
     <p>{{ collect([$container->containerType?->anyLabel(['en']), $container->identifier, $path])->filter()->join(', ') }}. {{ $units->count() }} {{ $units->count() === 1 ? 'unit' : 'units' }} of description, listed {{ now()->format('j F Y') }}.</p>
     @if($units->isEmpty())
-        <p>It holds no unit of description.</p>
+        <p>{{ __('It holds no unit of description.') }}</p>
     @else
         <table>
-            <thead><tr><th>Reference code</th><th>Title</th><th>Dates</th><th>Conditions of access</th><th>Part of</th></tr></thead>
+            <thead><tr><th>{{ __('Reference code') }}</th><th>{{ __('Title') }}</th><th>{{ __('Dates') }}</th><th>{{ __('Conditions of access') }}</th><th>{{ __('Part of') }}</th></tr></thead>
             <tbody>
             @foreach($units as $unit)
                 <tr><td>{{ $unit->referenceCode() }}</td>

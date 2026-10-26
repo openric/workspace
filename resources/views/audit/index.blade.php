@@ -1,11 +1,11 @@
 {{-- OpenRiC Workspace - audit log. Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems. SPDX-License-Identifier: AGPL-3.0-or-later --}}
 @extends('layouts.app')
-@section('title', 'Audit log')
+@section('title', __('Audit log'))
 @section('content')
-    <h1>Audit log</h1>
-    <p>Every change and sign-in in this institution, newest first. The log cannot be edited or deleted.</p>
+    <h1>{{ __('Audit log') }}</h1>
+    <p>{{ __('Every change and sign-in in this institution, newest first. The log cannot be edited or deleted.') }}</p>
     <table>
-        <thead><tr><th scope="col">When (UTC)</th><th scope="col">Action</th><th scope="col">By</th><th scope="col">Record</th><th scope="col">Address</th></tr></thead>
+        <thead><tr><th scope="col">{{ __('When (UTC)') }}</th><th scope="col">{{ __('Action') }}</th><th scope="col">{{ __('By') }}</th><th scope="col">{{ __('Record') }}</th><th scope="col">{{ __('Address') }}</th></tr></thead>
         <tbody>
         @foreach($rows as $row)
             <tr>

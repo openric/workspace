@@ -21,9 +21,9 @@
         $level = $nodeHtml($ancestor, false, $level, true);
     }
 @endphp
-<nav class="tree" aria-label="Hierarchy">
+<nav class="tree" aria-label="{{ __('Hierarchy') }}">
     <details class="tree-panel" open>
-        <summary><h2>Hierarchy</h2></summary>
+        <summary><h2>{{ __('Hierarchy') }}</h2></summary>
         <ul class="tree-root">{!! $level !!}</ul>
     </details>
 </nav>

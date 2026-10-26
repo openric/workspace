@@ -4,7 +4,7 @@ The interface's text in each language other than English (WS-005; roadmap phase 
 
 ## Wording
 
-The English follows PSIS, the AHG's AtoM, which uses the established archival wording (AtoM's, after the ICA standards): for example Log in, Users, Taxonomies, Creator(s), Access points, Physical storage, and the standards' area names (Identity area, Context area). Where PSIS has no string for what a screen says, the Workspace's own wording stays. One exception: Activities stays. PSIS's nearest term, Functions, names a narrower thing than a RiC activity.
+The English follows PSIS in its words and South African English in its spelling (Authorised, not PSIS's Authorized), the AHG's AtoM, which uses the established archival wording (AtoM's, after the ICA standards): for example Log in, Users, Taxonomies, Creator(s), Access points, Physical storage, and the standards' area names (Identity area, Context area). Where PSIS has no string for what a screen says, the Workspace's own wording stays. One exception: Activities stays. PSIS's nearest term, Functions, names a narrower thing than a RiC activity.
 
 The Afrikaans takes PSIS's translation where it is correct archival Afrikaans, and keeps the correct term where it is not. Examples:
 - "Teken uit", not PSIS's "Teken af";
@@ -14,8 +14,8 @@ The Afrikaans takes PSIS's translation where it is correct archival Afrikaans, a
 
 ## af.json (Afrikaans)
 
-- 8 are PSIS's (AtoM's) Afrikaans for PSIS's English: Log in, Profile, No results found., Creator(s), Access points, Physical storage, Import, Confirm password (its capital W corrected). They are AtoM translators' work under the same notice as below.
-- 163 were written for the Workspace, in its own wording where PSIS has none, for review by Dr Johan Pieterse.
+- 62 are PSIS's (AtoM's) Afrikaans for PSIS's English, taken where it is correct archival Afrikaans; four were corrected (Address: Adres, not "Addres"; All: Alle, not "Almal"; Description identifier: Beskrywingsidentifiseerder; Clipboard ID: Knipbord-ID), as was the capital W of Bevestig wagwoord. They are AtoM translators' work under the same notice as below.
+- 691 were written for the Workspace, in its own wording where PSIS has none, for review by Dr Johan Pieterse.
 - 27 come from Heratio's `lang/af.json` (heratio-dev `4131171e4`, AGPL-3.0-or-later, Johan Pieterse, Plain Sailing Information Systems), where the Workspace's English matches Heratio's. Heratio has "Bestuur" for both Admin and Manage; Admin is "Administrasie" here.
 - 16 of those 27 are Access to Memory's Afrikaans translation, which Heratio took from AtoM's XLIFF files:
 

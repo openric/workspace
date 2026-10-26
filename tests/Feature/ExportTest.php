@@ -232,6 +232,6 @@ class ExportTest extends TestCase
         $csv = $this->actingAs($this->editor)->get("/records/export?download=1&drafts=1&repository={$other->id}")->getContent();
         $this->assertStringContainsString('Town Hall records', $csv);
         $this->assertStringNotContainsString('Riverside Parish Council records', $csv);
-        $this->actingAs($this->editor)->get("/records/{$this->fonds->id}/export")->assertOk()->assertSee('Download EAD3')->assertSee('Include drafts');
+        $this->actingAs($this->editor)->get("/records/{$this->fonds->id}/export")->assertOk()->assertSee('Download EAD3')->assertSee('Include draft records');
     }
 }

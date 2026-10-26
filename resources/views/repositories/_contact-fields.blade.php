@@ -8,4 +8,4 @@
         <input id="{{ $prefix }}-{{ $field }}" name="{{ $field }}" value="{{ $contact?->$field }}" @if($field === 'email') type="email" @elseif($field === 'website') type="url" @endif>
     @endif
 @endforeach
-<label style="font-weight: normal"><input type="hidden" name="is_primary" value="0"><input type="checkbox" name="is_primary" value="1" style="width: auto" @checked($contact?->is_primary)> Primary contact</label>
+<label style="font-weight: normal"><input type="hidden" name="is_primary" value="0"><input type="checkbox" name="is_primary" value="1" style="width: auto" @checked($contact?->is_primary)> {{ __('Primary contact') }}</label>

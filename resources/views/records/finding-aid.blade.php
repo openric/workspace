@@ -4,7 +4,7 @@
 @section('content')
     <p class="no-print"><a href="{{ route('records.show', $record) }}">Back to {{ $record->described('title', ['en']) }}</a>
         @if(auth()->user()->may('view-draft', 'description', $record))
-            · @if($drafts)<a href="{{ url()->current() }}">Published values only</a>@else<a href="{{ url()->current() }}?drafts=1">Include drafts</a>@endif
+            · @if($drafts)<a href="{{ url()->current() }}">{{ __('Published values only') }}</a>@else<a href="{{ url()->current() }}?drafts=1">{{ __('Include draft records') }}</a>@endif
         @endif</p>
     <p class="no-print"><small>{{ $drafts ? 'Drafts are included.' : 'Published values only.' }} Use your browser's print command; the menu is left out of the printout.</small></p>
     @php($published = \App\Support\Vocab::valueState('published'))

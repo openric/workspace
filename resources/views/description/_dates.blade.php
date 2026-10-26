@@ -8,28 +8,28 @@
         @continue
     @endunless
     <details>
-        <summary>{{ $summary }} @include('description._ric', ['term' => $date->property]) <small lang="en">- edit or remove</small></summary>
+        <summary>{{ $summary }} @include('description._ric', ['term' => $date->property]) <small lang="en">{{ __('- edit or remove') }}</small></summary>
         <form method="post" action="{{ route('dates.update', [$kind, $subject->getKey(), $date]) }}">
             @csrf
             @include('description._date-fields', ['date' => $date, 'prefix' => 'd'.$loop->index])
-            <button type="submit">Save date</button>
+            <button type="submit">{{ __('Save date') }}</button>
         </form>
         <form method="post" action="{{ route('dates.destroy', [$kind, $subject->getKey(), $date]) }}">
             @csrf
-            <button type="submit">Remove date</button>
+            <button type="submit">{{ __('Remove date') }}</button>
         </form>
-        <p><strong>Persistent IRI:</strong> <code>{{ $date->iri }}</code></p>
+        <p><strong>{{ __('Persistent IRI') }}:</strong> <code>{{ $date->iri }}</code></p>
     </details>
 @empty
-    <p>None yet.</p>
+    <p>{{ __('None yet.') }}</p>
 @endforelse
 @if($canUpdate)
 <details>
-    <summary>Add a date</summary>
+    <summary>{{ __('Add date') }}</summary>
     <form method="post" action="{{ route('dates.store', [$kind, $subject->getKey()]) }}">
         @csrf
         @include('description._date-fields', ['date' => null, 'prefix' => 'new'])
-        <button type="submit">Add date</button>
+        <button type="submit">{{ __('Add date') }}</button>
     </form>
 </details>
 @endif

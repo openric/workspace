@@ -1,15 +1,15 @@
 {{-- OpenRiC Workspace - imports of archival description, authority records and repositories. Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems. SPDX-License-Identifier: AGPL-3.0-or-later --}}
 @extends('layouts.app')
-@section('title', 'Imports')
+@section('title', __('Import'))
 @section('content')
-    <p><a href="{{ route('records.index') }}">Archival descriptions</a></p>
-    <h1>Imports</h1>
-    <p><a href="{{ route('imports.create') }}">Import a file</a></p>
+    <p><a href="{{ route('records.index') }}">{{ __('Archival descriptions') }}</a></p>
+    <h1>{{ __('Import') }}</h1>
+    <p><a href="{{ route('imports.create') }}">{{ __('Import a file') }}</a></p>
     @if($imports->isEmpty())
-        <p>No imports yet.</p>
+        <p>{{ __('No imports yet.') }}</p>
     @else
         <table>
-            <thead><tr><th>When</th><th>File</th><th>Source</th><th>By</th><th>What</th><th>State</th><th>Entries</th></tr></thead>
+            <thead><tr><th>{{ __('When') }}</th><th>{{ __('File') }}</th><th>{{ __('Source') }}</th><th>{{ __('By') }}</th><th>{{ __('What') }}</th><th>{{ __('State') }}</th><th>{{ __('Entries') }}</th></tr></thead>
             <tbody>
             @foreach($imports as $import)
                 @php($actions = $import->report['actions'] ?? null)

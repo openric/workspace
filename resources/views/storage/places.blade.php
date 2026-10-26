@@ -1,6 +1,6 @@
 {{-- OpenRiC Workspace - the storage places, as a tree. Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems. SPDX-License-Identifier: AGPL-3.0-or-later --}}
 @extends('layouts.app')
-@section('title', 'Storage places')
+@section('title', __('Physical storage'))
 @section('content')
     @include('storage._nav')
     <h1>Storage places @include('description._ric', ['term' => 'rico:Place'])</h1>
@@ -21,27 +21,27 @@
         return $html.'</ul>';
     };
     @endphp
-    @if($byParent->isEmpty())<p>No storage places yet.</p>@else{!! $tree('top') !!}@endif
+    @if($byParent->isEmpty())<p>{{ __('No storage places yet.') }}</p>@else{!! $tree('top') !!}@endif
 
     @if($mayCreate)
-        <h2>New storage place</h2>
+        <h2>{{ __('New storage place') }}</h2>
         <form method="post" action="{{ route('storage.places.store') }}">
             @csrf
-            <label for="name">Name</label> @include('description._ric', ['term' => 'rico:PlaceName'])
+            <label for="name">{{ __('Name') }}</label> @include('description._ric', ['term' => 'rico:PlaceName'])
             <input id="name" name="name" required maxlength="1024" value="{{ old('name') }}" aria-describedby="name-help">
-            <small id="name-help">Such as "Strongroom 2" or "Shelf 4".</small>
-            <label for="language">Language of the name (BCP 47)</label> @include('description._ric', ['term' => 'xml:lang'])
+            <small id="name-help">{{ __('Such as "Strongroom 2" or "Shelf 4".') }}</small>
+            <label for="language">{{ __('Language of the name (BCP 47)') }}</label> @include('description._ric', ['term' => 'xml:lang'])
             <input id="language" name="language" required value="{{ old('language', 'en') }}">
-            <label for="type">Storage place type</label> @include('description._ric', ['term' => 'rico:hasOrHadPlaceType'])
+            <label for="type">{{ __('Storage place type') }}</label> @include('description._ric', ['term' => 'rico:hasOrHadPlaceType'])
             <select id="type" name="type" required style="font: inherit; padding: .5rem">
                 @foreach($types as $t)<option value="{{ $t->id }}" @selected(old('type') === $t->id)>{{ $t->anyLabel(['en']) }}</option>@endforeach
             </select>
-            <label for="parent">In</label> @include('description._ric', ['term' => 'rico:hasOrHadLocation'])
+            <label for="parent">{{ __('In') }}</label> @include('description._ric', ['term' => 'rico:hasOrHadLocation'])
             <select id="parent" name="parent" style="font: inherit; padding: .5rem">
-                <option value="">Nothing: it is at the top</option>
+                <option value="">{{ __('Nothing: it is at the top') }}</option>
                 @foreach($byParent->flatten() as $p)<option value="{{ $p->id }}" @selected(old('parent') === $p->id)>{{ $p->path }}</option>@endforeach
             </select>
-            <button type="submit">Create storage place</button>
+            <button type="submit">{{ __('Create storage place') }}</button>
         </form>
     @endif
 @endsection

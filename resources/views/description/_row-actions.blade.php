@@ -5,6 +5,6 @@
 @php($mayEdit = auth()->user()->may('update', $kindDefinition['permission'], $entity))
 @php($mayDelete = auth()->user()->may('delete', $kindDefinition['permission'], $entity))
 @if($mayEdit || $mayDelete)
-    <small>@if($mayEdit) · <a href="{{ route($editRoute, [$entity, 'language' => $entity->originalLanguage($kindDefinition['label'])]) }}">Edit</a>@endif
-        @if($mayDelete) · <a href="{{ route('deletion.confirm', [$kindDefinition['segment'], $entity->getKey()]) }}">Delete</a>@endif</small>
+    <small>@if($mayEdit) · <a href="{{ route($editRoute, [$entity, 'language' => $entity->originalLanguage($kindDefinition['label'])]) }}">{{ __('Edit') }}</a>@endif
+        @if($mayDelete) · <a href="{{ route('deletion.confirm', [$kindDefinition['segment'], $entity->getKey()]) }}">{{ __('Delete') }}</a>@endif</small>
 @endif

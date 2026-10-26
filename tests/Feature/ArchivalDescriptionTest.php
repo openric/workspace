@@ -178,7 +178,7 @@ class ArchivalDescriptionTest extends TestCase
 
         $this->actingAs($this->contributor)->get("/records/{$this->fonds->id}")->assertOk()
             ->assertSee('3.4.3 Language/scripts of material')->assertSee('English and Dutch.')
-            ->assertSee('Creators (3.2.1)')->assertSee('Established in 1902 to govern the parish.')
+            ->assertSee('Creator(s) (3.2.1)')->assertSee('Established in 1902 to govern the parish.')
             ->assertSeeInOrder(['Custody and provenance', '1902 to 1950: Was created by Riverside Parish Council', '1950 to 1975: Is or was held by Riverside Town Hall', 'Now held by Riverside Archives'])
             ->assertSee('Riverside Parish Council records, ZA-RA RPC, Riverside Archives. '.$this->fonds->iri);
 

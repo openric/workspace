@@ -6,7 +6,7 @@
     <p><a href="{{ \App\Relations\EntityKinds::route($entity) }}">Back to {{ $name }}</a></p>
     <h1>Delete {{ $name }}?</h1>
     @if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif
-    <p>This {{ \App\Relations\EntityKinds::noun($entity) }} is marked deleted: it leaves every list and page, and its persistent IRI (<code>{{ $entity->iri }}</code>) is kept, so nothing that cites it breaks. The audit log keeps everything it held.</p>
+    <p>This {{ \App\Relations\EntityKinds::noun($entity) }} is marked deleted: it leaves every list and page, and its persistent IRI (<code>{{ $entity->iri }}</code>{{ __(') is kept, so nothing that cites it breaks. The audit log keeps everything it held.') }}</p>
     @if($blockers)
         <div class="error" role="alert">@foreach($blockers as $blocker)<p>{{ $blocker }}</p>@endforeach</div>
     @else

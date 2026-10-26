@@ -2,25 +2,25 @@
 @extends('layouts.app')
 @section('title', $vocabulary->title)
 @section('content')
-    <p><a href="{{ route('vocabularies.index') }}">Vocabularies</a></p>
+    <p><a href="{{ route('vocabularies.index') }}">{{ __('Taxonomies') }}</a></p>
     <h1>{{ $vocabulary->title }}</h1>
     @if(session('status'))<p role="status">{{ session('status') }}</p>@endif
     @if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif
     @if($vocabulary->description)<p lang="{{ $vocabulary->language }}">{{ $vocabulary->description }}</p>@endif
-    <p><strong>Kind:</strong> {{ $vocabulary->kind->label(\App\Support\Vocab::languages()) }}<br><strong>Persistent IRI:</strong> <code>{{ $vocabulary->iri }}</code></p>
+    <p><strong>{{ __('Kind') }}:</strong> {{ $vocabulary->kind->label(\App\Support\Vocab::languages()) }}<br><strong>{{ __('Persistent IRI') }}:</strong> <code>{{ $vocabulary->iri }}</code></p>
     <p>
-        @if(auth()->user()->may('create', 'vocabulary'))<a href="{{ route('vocabularies.concepts.create', $vocabulary) }}">Add a concept</a> · <a href="{{ route('vocabularies.import-form', $vocabulary) }}">Import SKOS</a> · @endif
-        @if(auth()->user()->may('update', 'vocabulary'))<a href="{{ route('vocabularies.edit', $vocabulary) }}">Edit title</a> · @endif
+        @if(auth()->user()->may('create', 'vocabulary'))<a href="{{ route('vocabularies.concepts.create', $vocabulary) }}">{{ __('Add a concept') }}</a> · <a href="{{ route('vocabularies.import-form', $vocabulary) }}">{{ __('Import SKOS') }}</a> · @endif
+        @if(auth()->user()->may('update', 'vocabulary'))<a href="{{ route('vocabularies.edit', $vocabulary) }}">{{ __('Edit title') }}</a> · @endif
         @if(auth()->user()->may('delete', 'vocabulary') && $concepts->isEmpty() && $query === '' && ! $vocabulary->concepts()->exists())
-            <form method="post" action="{{ route('vocabularies.destroy', $vocabulary) }}" style="display: inline">@csrf<button type="submit" style="margin-top: 0">Delete this empty vocabulary</button></form> ·
+            <form method="post" action="{{ route('vocabularies.destroy', $vocabulary) }}" style="display: inline">@csrf<button type="submit" style="margin-top: 0">{{ __('Delete this empty vocabulary') }}</button></form> ·
         @endif
-        Export SKOS: <a href="{{ route('vocabularies.export', [$vocabulary, 'turtle']) }}">Turtle</a>, <a href="{{ route('vocabularies.export', [$vocabulary, 'rdfxml']) }}">RDF/XML</a>, <a href="{{ route('vocabularies.export', [$vocabulary, 'ntriples']) }}">N-Triples</a>, <a href="{{ route('vocabularies.export', [$vocabulary, 'jsonld']) }}">JSON-LD</a>
+        Export SKOS: <a href="{{ route('vocabularies.export', [$vocabulary, 'turtle']) }}">{{ __('Turtle') }}</a>, <a href="{{ route('vocabularies.export', [$vocabulary, 'rdfxml']) }}">RDF/XML</a>, <a href="{{ route('vocabularies.export', [$vocabulary, 'ntriples']) }}">{{ __('N-Triples') }}</a>, <a href="{{ route('vocabularies.export', [$vocabulary, 'jsonld']) }}">JSON-LD</a>
     </p>
     <form method="get" action="{{ route('vocabularies.show', $vocabulary) }}" style="display: flex; gap: .75rem; flex-wrap: wrap; align-items: end">
-        <div><label for="q" style="margin-top: 0">Label, alternative label or code</label><input id="q" name="q" value="{{ $query }}" maxlength="200"></div>
-        <label style="margin-top: 0"><input type="checkbox" name="deprecated" value="1" @checked($deprecated)> Include deprecated</label>
-        <label style="margin-top: 0"><input type="checkbox" name="view" value="tree" @checked($tree !== null)> As a hierarchy</label>
-        <button type="submit" style="margin-top: 0">Show</button>
+        <div><label for="q" style="margin-top: 0">{{ __('Label, alternative label or code') }}</label><input id="q" name="q" value="{{ $query }}" maxlength="200"></div>
+        <label style="margin-top: 0"><input type="checkbox" name="deprecated" value="1" @checked($deprecated)> {{ __('Include deprecated') }}</label>
+        <label style="margin-top: 0"><input type="checkbox" name="view" value="tree" @checked($tree !== null)> {{ __('As a hierarchy') }}</label>
+        <button type="submit" style="margin-top: 0">{{ __('Show') }}</button>
     </form>
     @php
         $canEdit = auth()->user()->may('update', 'vocabulary');

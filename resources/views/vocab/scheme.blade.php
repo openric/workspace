@@ -3,10 +3,10 @@
 @section('title', $vocabulary->title)
 @section('content')
     <h1>{{ $vocabulary->title }}</h1>
-    <p><strong>Scheme IRI:</strong> <code>{{ $vocabulary->iri }}</code><br>
-       <strong>Machine-readable:</strong> <a href="{{ rtrim($vocabulary->iri, '/') }}.ttl">Turtle</a>, or this IRI with <code>Accept: text/turtle</code></p>
+    <p><strong>{{ __('Scheme IRI') }}:</strong> <code>{{ $vocabulary->iri }}</code><br>
+       <strong>{{ __('Machine-readable') }}:</strong> <a href="{{ rtrim($vocabulary->iri, '/') }}.ttl">{{ __('Turtle') }}</a>{{ __(', or this IRI with') }} <code>{{ __('Accept: text/turtle') }}</code></p>
     <table>
-        <thead><tr><th scope="col">Concept</th><th scope="col">Label</th><th scope="col">Definition</th></tr></thead>
+        <thead><tr><th scope="col">{{ __('Concept') }}</th><th scope="col">{{ __('Label') }}</th><th scope="col">{{ __('Definition') }}</th></tr></thead>
         <tbody>
         @foreach($concepts as $concept)
             <tr>

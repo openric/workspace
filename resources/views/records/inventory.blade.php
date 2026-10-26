@@ -5,7 +5,7 @@
     <p><a href="{{ route('records.show', $record) }}">Back to {{ $record->described('title', ['en']) }}</a></p>
     <h1>Inventory of {{ $record->described('title', ['en']) }}</h1>
     @if($rows === [])
-        <p>No units inside it.</p>
+        <p>{{ __('No units inside it.') }}</p>
     @else
         <table style="border-collapse: collapse; width: 100%">
             <thead><tr>@foreach(['Reference code', 'Title', 'Level', 'Dates', 'Extent'] as $h)<th style="text-align: left; border-bottom: 1px solid var(--line); padding: .3rem .5rem">{{ $h }}</th>@endforeach</tr></thead>

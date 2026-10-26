@@ -3,4 +3,4 @@
 @php($term = $term instanceof \App\Models\Concept ? $term->ricTerm() : $term)
 @php([$prefix, $local] = $term ? explode(':', $term, 2) : [null, null])
 @php($namespace = ['rico' => 'https://www.ica.org/standards/RiC/ontology#', 'openricx' => 'https://openric.org/ns/ext/v1#'][$prefix] ?? null)
-<small class="ric">@if($namespace)<a href="{{ $namespace.$local }}" title="The RiC term this is kept or exported as"><code>{{ $term }}</code></a>@elseif($term)<code title="Kept as the language tag of the RDF value">{{ $term }}</code>@else<span title="RiC-O 1.1 has no term for this; kept by the Workspace">not in RiC-O</span>@endif</small>
+<small class="ric">@if($namespace)<a href="{{ $namespace.$local }}" title="{{ __('The RiC term this is kept or exported as') }}"><code>{{ $term }}</code></a>@elseif($term)<code title="{{ __('Kept as the language tag of the RDF value') }}">{{ $term }}</code>@else<span title="{{ __('RiC-O 1.1 has no term for this; kept by the Workspace') }}">{{ __('not in RiC-O') }}</span>@endif</small>

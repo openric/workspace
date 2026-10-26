@@ -2,18 +2,18 @@
 {{-- Needs $keys, $scopes (the api-scope concepts this account may give), $newKey (?string, once), $storeUrl and $revokeUrl (fn (ApiKey) => string). --}}
 @if($newKey)
     <div role="status">
-        <p><strong>The new key</strong>. Copy it now: it is shown only this once, and the Workspace keeps only a fingerprint of it.</p>
+        <p><strong>{{ __('The new key') }}</strong>{{ __('. Copy it now: it is shown only this once, and the Workspace keeps only a fingerprint of it.') }}</p>
         <p><code style="word-break: break-all">{{ $newKey }}</code></p>
     </div>
 @endif
-<p>A key reads what the public may see, whatever its scopes. Send it in the <code>X-API-Key</code> header, or as <code>Authorization: Bearer</code>, to {{ url('/api/ric/v1') }}.</p>
+<p>{{ __('A key reads what the public may see, whatever its scopes. Send it in the') }} <code>{{ __('X-API-Key') }}</code> {{ __('header, or as') }} <code>{{ __('Authorization: Bearer') }}</code>, to {{ url('/api/ric/v1') }}.</p>
 
 @if($keys->isEmpty())
-    <p>No keys yet.</p>
+    <p>{{ __('No keys yet.') }}</p>
 @else
     <table>
-        <caption>API keys</caption>
-        <thead><tr><th scope="col">Name</th><th scope="col">Begins</th><th scope="col">Scopes</th><th scope="col">Limits</th><th scope="col">Ends</th><th scope="col">Last used</th><th scope="col">State</th><th scope="col">Action</th></tr></thead>
+        <caption>{{ __('API keys') }}</caption>
+        <thead><tr><th scope="col">{{ __('Name') }}</th><th scope="col">{{ __('Begins') }}</th><th scope="col">{{ __('Scopes') }}</th><th scope="col">{{ __('Limits') }}</th><th scope="col">{{ __('Ends') }}</th><th scope="col">{{ __('Last used') }}</th><th scope="col">{{ __('State') }}</th><th scope="col">{{ __('Action') }}</th></tr></thead>
         <tbody>
         @foreach($keys as $key)
             <tr>
@@ -26,7 +26,7 @@
                 <td>{{ $key->isRevoked() ? 'Revoked '.$key->revoked_at->toDateString() : ($key->isExpired() ? 'Expired' : 'Active') }}</td>
                 <td>
                     @unless($key->isRevoked())
-                        <form method="post" action="{{ $revokeUrl($key) }}">@csrf<button type="submit">Revoke</button></form>
+                        <form method="post" action="{{ $revokeUrl($key) }}">@csrf<button type="submit">{{ __('Revoke') }}</button></form>
                     @endunless
                 </td>
             </tr>
@@ -35,19 +35,19 @@
     </table>
 @endif
 
-<h3>New key</h3>
+<h3>{{ __('New key') }}</h3>
 <form method="post" action="{{ $storeUrl }}">
     @csrf
-    <p><label for="key-name">Name</label><br><input id="key-name" name="name" required maxlength="100" value="{{ old('name') }}"></p>
+    <p><label for="key-name">{{ __('Name') }}</label><br><input id="key-name" name="name" required maxlength="100" value="{{ old('name') }}"></p>
     <fieldset>
-        <legend>Scopes</legend>
+        <legend>{{ __('Scopes') }}</legend>
         @foreach($scopes as $scope)
             <p style="margin: .2rem 0"><label><input type="checkbox" name="scopes[]" value="{{ $scope->notation }}" @checked(in_array($scope->notation, old('scopes', ['read']), true))>
                 {{ $scope->anyLabel(['en']) }}</label>: {{ $scope->labels->firstWhere('language', 'en')?->definition }}</p>
         @endforeach
-        @if($scopes->count() < 2)<p>This account may give its keys the read scope only.</p>@endif
+        @if($scopes->count() < 2)<p>{{ __('This account may give its keys the read scope only.') }}</p>@endif
     </fieldset>
-    <p><label for="key-ends">Ends on (optional)</label><br><input id="key-ends" type="date" name="expires_at" value="{{ old('expires_at') }}"></p>
-    <p><label for="key-daily">Requests a day (optional)</label><br><input id="key-daily" type="number" name="daily_limit" min="1" max="1000000" value="{{ old('daily_limit') }}"></p>
-    <button type="submit">Make key</button>
+    <p><label for="key-ends">{{ __('Ends on (optional)') }}</label><br><input id="key-ends" type="date" name="expires_at" value="{{ old('expires_at') }}"></p>
+    <p><label for="key-daily">{{ __('Requests a day (optional)') }}</label><br><input id="key-daily" type="number" name="daily_limit" min="1" max="1000000" value="{{ old('daily_limit') }}"></p>
+    <button type="submit">{{ __('Make key') }}</button>
 </form>

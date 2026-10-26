@@ -34,11 +34,11 @@
     @endphp
     <div class="file-viewer">
         <div class="viewer-modes" role="group" aria-label="{{ __('How to view the image') }}">
-            <button type="button" id="btn-osd-{{ $viewerId }}" @class(['active' => $mode === 'openseadragon']) aria-pressed="{{ $mode === 'openseadragon' ? 'true' : 'false' }}">Deep zoom</button>
-            <button type="button" id="btn-mirador-{{ $viewerId }}" @class(['active' => $mode === 'mirador']) aria-pressed="{{ $mode === 'mirador' ? 'true' : 'false' }}">Mirador</button>
-            <button type="button" id="btn-img-{{ $viewerId }}" @class(['active' => $mode === 'single']) aria-pressed="{{ $mode === 'single' ? 'true' : 'false' }}">Image</button>
-            <button type="button" id="btn-fs-{{ $viewerId }}" aria-pressed="false">Full screen</button>
-            <a href="{{ $url($image) }}" target="_blank" rel="noopener">Open the image</a>
+            <button type="button" id="btn-osd-{{ $viewerId }}" @class(['active' => $mode === 'openseadragon']) aria-pressed="{{ $mode === 'openseadragon' ? 'true' : 'false' }}">{{ __('Deep zoom') }}</button>
+            <button type="button" id="btn-mirador-{{ $viewerId }}" @class(['active' => $mode === 'mirador']) aria-pressed="{{ $mode === 'mirador' ? 'true' : 'false' }}">{{ __('Mirador') }}</button>
+            <button type="button" id="btn-img-{{ $viewerId }}" @class(['active' => $mode === 'single']) aria-pressed="{{ $mode === 'single' ? 'true' : 'false' }}">{{ __('Image') }}</button>
+            <button type="button" id="btn-fs-{{ $viewerId }}" aria-pressed="false">{{ __('Fullscreen') }}</button>
+            <a href="{{ $url($image) }}" target="_blank" rel="noopener">{{ __('Open the image') }}</a>
         </div>
         <div id="osd-{{ $viewerId }}" class="viewer-stage" @if($mode !== 'openseadragon') style="display: none" @endif></div>
         <div id="mirador-{{ $viewerId }}" class="viewer-stage" @if($mode !== 'mirador') style="display: none" @endif></div>
@@ -60,12 +60,12 @@
 @elseif($kind === 'pdf')
     <div class="file-viewer pdf-viewer" id="{{ $viewerId }}" data-src="{{ $url($master) }}">
         <div class="viewer-modes" role="group" aria-label="{{ __('Pages') }}">
-            <button type="button" data-pdf="prev" aria-pressed="false">Previous page</button>
-            <span class="pdf-page" aria-live="polite">Loading...</span>
-            <button type="button" data-pdf="next" aria-pressed="false">Next page</button>
-            <button type="button" data-pdf="out" aria-pressed="false" aria-label="Zoom out">-</button>
-            <button type="button" data-pdf="in" aria-pressed="false" aria-label="Zoom in">+</button>
-            <a href="{{ route($fileRoute, [$master, 'download' => 1]) }}">Download the PDF</a>
+            <button type="button" data-pdf="prev" aria-pressed="false">{{ __('Previous page') }}</button>
+            <span class="pdf-page" aria-live="polite">{{ __('Loading...') }}</span>
+            <button type="button" data-pdf="next" aria-pressed="false">{{ __('Next page') }}</button>
+            <button type="button" data-pdf="out" aria-pressed="false" aria-label="{{ __('Zoom out') }}">-</button>
+            <button type="button" data-pdf="in" aria-pressed="false" aria-label="{{ __('Zoom in') }}">+</button>
+            <a href="{{ route($fileRoute, [$master, 'download' => 1]) }}">{{ __('Download the PDF') }}</a>
         </div>
         <div class="viewer-stage pdf-stage"><canvas aria-label="{{ $title }}" role="img"></canvas></div>
     </div>
@@ -132,9 +132,9 @@
     <div class="file-viewer">
         <div id="{{ $viewerId }}-container" class="viewer-stage mesh-stage">
             <canvas id="{{ $viewerId }}-canvas" style="width: 100%; height: 100%" aria-label="{{ $title }}" role="img"></canvas>
-            <p id="{{ $viewerId }}-loading" class="mesh-loading">Loading the 3D model...</p>
+            <p id="{{ $viewerId }}-loading" class="mesh-loading">{{ __('Loading the 3D model...') }}</p>
         </div>
-        <p class="meta">Drag to turn the model, scroll to zoom.</p>
+        <p class="meta">{{ __('Drag to turn the model, scroll to zoom.') }}</p>
     </div>
     @once
         <script type="importmap">{"imports": {"three": @json(asset('vendor/three/0.160.0/three.module.js')), "three/addons/": @json(asset('vendor/three/0.160.0/addons').'/')}}</script>

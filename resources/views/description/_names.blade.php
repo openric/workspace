@@ -14,28 +14,28 @@
         @continue
     @endunless
     <details>
-        <summary><span lang="{{ $name->language }}">{{ $summary }}</span> <small lang="en">- edit or remove</small></summary>
+        <summary><span lang="{{ $name->language }}">{{ $summary }}</span> <small lang="en">{{ __('- edit or remove') }}</small></summary>
         <form method="post" action="{{ route('names.update', [$kind, $subject->getKey(), $name]) }}">
             @csrf
             @include('description._name-fields', ['name' => $name, 'prefix' => 'n'.$loop->index, 'from' => $from, 'to' => $to])
-            <button type="submit">Save name</button>
+            <button type="submit">{{ __('Save name') }}</button>
         </form>
         <form method="post" action="{{ route('names.destroy', [$kind, $subject->getKey(), $name]) }}">
             @csrf
-            <button type="submit">Remove name</button>
+            <button type="submit">{{ __('Remove name') }}</button>
         </form>
-        <p><strong>Persistent IRI:</strong> <code>{{ $name->iri }}</code></p>
+        <p><strong>{{ __('Persistent IRI') }}:</strong> <code>{{ $name->iri }}</code></p>
     </details>
 @empty
-    <p>None yet.</p>
+    <p>{{ __('None yet.') }}</p>
 @endforelse
 @if($canUpdate)
 <details>
-    <summary>Add a name</summary>
+    <summary>{{ __('Add name') }}</summary>
     <form method="post" action="{{ route('names.store', [$kind, $subject->getKey()]) }}">
         @csrf
         @include('description._name-fields', ['name' => null, 'prefix' => 'new-name', 'from' => null, 'to' => null])
-        <button type="submit">Add name</button>
+        <button type="submit">{{ __('Add name') }}</button>
     </form>
 </details>
 @endif

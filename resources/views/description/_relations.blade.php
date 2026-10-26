@@ -20,14 +20,14 @@
         .(($from || $to) ? ', '.($from ?? '?').' to '.($to ?? '?') : '')
         .' ('.$standingLabels[$relation->standing()].')')
     <details>
-        <summary>{{ $summary }} @include('description._ric', ['term' => $relation->ricTerm()])@if($canUpdate) <small lang="en">- assert, edit or remove</small>@endif</summary>
+        <summary>{{ $summary }} @include('description._ric', ['term' => $relation->ricTerm()])@if($canUpdate) <small lang="en">{{ __('- assert, edit or remove') }}</small>@endif</summary>
         <p><a href="{{ \App\Relations\EntityKinds::route($relation->other) }}">{{ \App\Relations\EntityKinds::label($relation->other) }}</a>.
            {{ collect([$relation->relationType->label(\App\Support\Vocab::languages()), $relation->state?->label(\App\Support\Vocab::languages()), $relation->certainty ? mb_strtolower($relation->certainty->label(\App\Support\Vocab::languages())) : null])->filter()->join(', ') }}.
            @if($relation->description)<br><span lang="{{ $relation->language }}">{{ $relation->description }}</span>@endif
-           @if($relation->source_of_information)<br>Source: <span lang="{{ $relation->language }}">{{ $relation->source_of_information }}</span>@endif
-           <br><strong>Persistent IRI:</strong> <code>{{ $relation->iri }}</code></p>
+           @if($relation->source_of_information)<br>{{ __('Source') }}: <span lang="{{ $relation->language }}">{{ $relation->source_of_information }}</span>@endif
+           <br><strong>{{ __('Persistent IRI') }}:</strong> <code>{{ $relation->iri }}</code></p>
 
-        <h3>Assertions</h3>
+        <h3>{{ __('Assertions') }}</h3>
         @php($current = $relation->currentAssertions()->pluck('id')->all())
         <ul>
         @foreach($relation->assertions as $assertion)
@@ -36,59 +36,59 @@
                 @if($assertion->reviewer); reviewed by {{ $assertion->reviewer->name }}, {{ $assertion->reviewed_at->format('Y-m-d') }}@endif
                 @unless(in_array($assertion->id, $current, true)); superseded @endunless
                 @if($canUpdate && $assertion->status->notation === 'proposed')
-                    <form method="post" action="{{ route('relations.review', [$kind, $subject->getKey(), $relation, $assertion]) }}" style="display: inline">@csrf<input type="hidden" name="decision" value="accept"><button type="submit">Accept</button></form>
-                    <form method="post" action="{{ route('relations.review', [$kind, $subject->getKey(), $relation, $assertion]) }}" style="display: inline">@csrf<input type="hidden" name="decision" value="reject"><button type="submit">Reject</button></form>
+                    <form method="post" action="{{ route('relations.review', [$kind, $subject->getKey(), $relation, $assertion]) }}" style="display: inline">@csrf<input type="hidden" name="decision" value="accept"><button type="submit">{{ __('Accept') }}</button></form>
+                    <form method="post" action="{{ route('relations.review', [$kind, $subject->getKey(), $relation, $assertion]) }}" style="display: inline">@csrf<input type="hidden" name="decision" value="reject"><button type="submit">{{ __('Reject') }}</button></form>
                 @endif
             </li>
         @endforeach
         </ul>
 
-        <h3>Evidence</h3>
+        <h3>{{ __('Evidence') }}</h3>
         @forelse($relation->evidence as $evidence)
             <p><a href="{{ route('records.show', $evidence->record) }}">{{ $evidence->record->described('title', ['en']) }}</a>
-                @if($canUpdate)<form method="post" action="{{ route('relations.evidence.destroy', [$kind, $subject->getKey(), $relation, $evidence]) }}" style="display: inline">@csrf<button type="submit">Remove evidence</button></form>@endif</p>
+                @if($canUpdate)<form method="post" action="{{ route('relations.evidence.destroy', [$kind, $subject->getKey(), $relation, $evidence]) }}" style="display: inline">@csrf<button type="submit">{{ __('Remove evidence') }}</button></form>@endif</p>
         @empty
-            <p>No unit of description is linked as evidence.</p>
+            <p>{{ __('No unit of description is linked as evidence.') }}</p>
         @endforelse
 
         @if($canUpdate)
-            <p><a href="{{ route('relations.evidence', [$kind, $subject->getKey(), $relation]) }}">Add evidence</a></p>
+            <p><a href="{{ route('relations.evidence', [$kind, $subject->getKey(), $relation]) }}">{{ __('Add evidence') }}</a></p>
             <details>
-                <summary>Assert or dispute this relation</summary>
+                <summary>{{ __('Assert or dispute this relation') }}</summary>
                 <form method="post" action="{{ route('relations.assert', [$kind, $subject->getKey(), $relation]) }}">
                     @csrf
-                    <fieldset style="border: 0; padding: 0"><legend>Does the relation hold?</legend>
-                        <label><input type="radio" name="holds" value="yes" checked> Yes, I assert it</label>
-                        <label><input type="radio" name="holds" value="no"> No, I dispute it</label>
+                    <fieldset style="border: 0; padding: 0"><legend>{{ __('Does the relation hold?') }}</legend>
+                        <label><input type="radio" name="holds" value="yes" checked> {{ __('Yes, I assert it') }}</label>
+                        <label><input type="radio" name="holds" value="no"> {{ __('No, I dispute it') }}</label>
                     </fieldset>
-                    <label for="{{ $section }}a{{ $loop->index }}-basis">On what basis (optional)</label>
+                    <label for="{{ $section }}a{{ $loop->index }}-basis">{{ __('On what basis (optional)') }}</label>
                     <textarea id="{{ $section }}a{{ $loop->index }}-basis" name="basis" rows="2" style="width: 100%; font: inherit; box-sizing: border-box"></textarea>
-                    <label for="{{ $section }}a{{ $loop->index }}-language">Language of the basis (BCP 47)</label>
+                    <label for="{{ $section }}a{{ $loop->index }}-language">{{ __('Language of the basis (BCP 47)') }}</label>
                     <input id="{{ $section }}a{{ $loop->index }}-language" name="basis_language" maxlength="35" placeholder="en">
-                    <label for="{{ $section }}a{{ $loop->index }}-supersedes">Supersedes (optional)</label>
+                    <label for="{{ $section }}a{{ $loop->index }}-supersedes">{{ __('Supersedes (optional)') }}</label>
                     <select id="{{ $section }}a{{ $loop->index }}-supersedes" name="supersedes" style="font: inherit; padding: .5rem">
-                        <option value="">Nothing; it stands beside the others</option>
+                        <option value="">{{ __('Nothing; it stands beside the others') }}</option>
                         @foreach($relation->currentAssertions() as $assertion)<option value="{{ $assertion->id }}">{{ $assertion->asserter() }}, {{ $assertion->asserted_at->format('Y-m-d H:i') }}</option>@endforeach
                     </select>
-                    <button type="submit">Record assertion</button>
+                    <button type="submit">{{ __('Record assertion') }}</button>
                 </form>
             </details>
             <details>
-                <summary>Edit what is said about it</summary>
+                <summary>{{ __('Edit what is said about it') }}</summary>
                 <form method="post" action="{{ route('relations.update', [$kind, $subject->getKey(), $relation]) }}">
                     @csrf
                     @include('description._relation-fields', ['prefix' => $section.'r'.$loop->index, 'relation' => $relation, 'type' => $relation->relationType->notation,
                         'withRole' => (bool) (config('workspace.relation_types.'.$relation->relationType->notation)['role'] ?? false)])
-                    <button type="submit">Save relation</button>
+                    <button type="submit">{{ __('Save relation') }}</button>
                 </form>
             </details>
             <form method="post" action="{{ route('relations.destroy', [$kind, $subject->getKey(), $relation]) }}">
                 @csrf
-                <button type="submit">Remove relation (made in error)</button>
+                <button type="submit">{{ __('Remove relation (made in error)') }}</button>
             </form>
         @endif
     </details>
 @empty
-    <p>None yet.</p>
+    <p>{{ __('None yet.') }}</p>
 @endforelse
 @if($canUpdate)<p><a href="{{ route('relations.create', [$kind, $subject->getKey(), ...($add ? ['relate' => $add] : [])]) }}">{{ $addLabel }}</a></p>@endif

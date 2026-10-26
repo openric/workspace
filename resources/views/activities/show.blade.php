@@ -2,13 +2,13 @@
 @extends('layouts.app')
 @section('title', $activity->described('activity-name', [app()->getLocale(), 'en']))
 @section('content')
-    <p><a href="{{ route('activities.index') }}">Activities</a></p>
+    <p><a href="{{ route('activities.index') }}">{{ __('Activities') }}</a></p>
     <h1>{{ $activity->described('activity-name', [app()->getLocale(), 'en']) }}</h1>
     <p>Activity @include('description._ric', ['term' => 'rico:Activity'])</p>
     @if(session('status'))<p role="status">{{ session('status') }}</p>@endif
     @if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif
-    <p><strong>Persistent IRI:</strong> <code>{{ $activity->iri }}</code>
-        <br><strong>Activity type:</strong> {{ $activity->activityType ? $activity->activityType->anyLabel(['en']).' ('.$activity->activityType->vocabulary->title.')' : 'not set' }} @include('description._ric', ['term' => 'rico:hasActivityType'])</p>
+    <p><strong>{{ __('Persistent IRI') }}:</strong> <code>{{ $activity->iri }}</code>
+        <br><strong>{{ __('Activity type') }}:</strong> {{ $activity->activityType ? $activity->activityType->anyLabel(['en']).' ('.$activity->activityType->vocabulary->title.')' : 'not set' }} @include('description._ric', ['term' => 'rico:hasActivityType'])</p>
     @if($canUpdate)
         @include('description._actions', ['subject' => $activity, 'editRoute' => 'activities.edit', 'required' => 'activity-name'])
     @endif

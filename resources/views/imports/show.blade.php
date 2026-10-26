@@ -2,7 +2,7 @@
 @extends('layouts.app')
 @section('title', 'Import of '.$import->file_name)
 @section('content')
-    <p><a href="{{ route('imports.index') }}">Imports</a> · <a href="{{ route('imports.create') }}">Import another file</a></p>
+    <p><a href="{{ route('imports.index') }}">{{ __('Import') }}</a> · <a href="{{ route('imports.create') }}">{{ __('Import another file') }}</a></p>
     <h1>Import of {{ $import->file_name }}</h1>
     @if(session('status'))<p role="status">{{ session('status') }}</p>@endif
     @if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif
@@ -18,12 +18,12 @@
         @if($report['counts'] ?? null){{ $report['counts']['values'] }} values; {{ $report['counts']['relations'] }} relations {{ $verb }}proposed for review;
             {{ $report['counts']['agents'] }} authority records, {{ $report['counts']['places'] }} places and {{ $report['counts']['concepts'] }} concepts {{ $verb }}created, linked from the entries;
             {{ $report['counts']['containers'] ?? 0 }} containers {{ $verb }}made; {{ $report['counts']['files'] ?? 0 }} files kept.@endif</p>
-    <p><small>Imported values are drafts until published, and the relations an import makes are proposed until someone accepts them. An empty field never removes a value already there.</small></p>
+    <p><small>{{ __('Imported values are drafts until published, and the relations an import makes are proposed until someone accepts them. An empty field never removes a value already there.') }}</small></p>
     @if($mayCommit && ($report['units'] ?? []) !== [])
-        <form method="post" action="{{ route('imports.commit', $import) }}">@csrf<button type="submit">Import now</button></form>
+        <form method="post" action="{{ route('imports.commit', $import) }}">@csrf<button type="submit">{{ __('Import now') }}</button></form>
     @endif
     @if($rec = $report['reconciliation'] ?? null)
-        <h2>Reconciliation</h2>
+        <h2>{{ __('Reconciliation') }}</h2>
         <p>{{ $rec['holds'] ? 'Reconciled.' : 'Does not reconcile; look at the units below.' }}
             Of {{ $rec['in_file'] }} entries in the file, {{ $rec['imported_or_matched'] }} were imported or matched and {{ $rec['not_imported'] }} were not.
             {{ $rec['present_with_title'] }} are in the Workspace with an authorised name or title, and {{ $rec['keyed_to_source'] }} are keyed to the source, so importing it again updates them.</p>
@@ -31,10 +31,10 @@
 
     <h2>Fields not taken as given ({{ count($report['issues'] ?? []) }})</h2>
     @if(($report['issues'] ?? []) === [])
-        <p>None: every field was read.</p>
+        <p>{{ __('None: every field was read.') }}</p>
     @else
         <table>
-            <thead><tr><th>Where</th><th>Field</th><th>Value</th><th>What happened</th></tr></thead>
+            <thead><tr><th>{{ __('Where') }}</th><th>{{ __('Field') }}</th><th>{{ __('Value') }}</th><th>{{ __('What happened') }}</th></tr></thead>
             <tbody>
             @foreach($report['issues'] as $issue)
                 <tr><td>{{ $issue['location'] }}</td><td>{{ $issue['field'] }}</td><td>{{ $issue['value'] }}</td>
@@ -45,9 +45,9 @@
     @endif
 
     @php($route = ['agents' => 'agents.show', 'repositories' => 'repositories.show'][\App\Exchange\Import\ImportService::TABLES[$import->format] ?? ''] ?? 'records.show')
-    <h2>Entries</h2>
+    <h2>{{ __('Entries') }}</h2>
     <table>
-        <thead><tr><th>Where</th><th>Title</th><th>Becomes</th></tr></thead>
+        <thead><tr><th>{{ __('Where') }}</th><th>{{ __('Title') }}</th><th>{{ __('Becomes') }}</th></tr></thead>
         <tbody>
         @foreach($report['units'] ?? [] as $unit)
             <tr><td>{{ $unit['location'] }}</td>
