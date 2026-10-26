@@ -41,7 +41,7 @@
         <input id="site-q" name="q" value="{{ request('q') }}" placeholder="{{ __('Search the catalogue') }}" style="max-width: 16rem">
         <button type="submit" style="margin: 0">{{ __('Search') }}</button>
         <a href="{{ route('clipboard.index') }}" style="white-space: nowrap">{{ __('Clipboard') }} ({{ app(\App\Clipboard\ClipboardService::class)->count() }})</a>
-        @auth<a href="{{ route('home') }}">Workspace</a>@else<a href="{{ route('sign-in') }}" style="white-space: nowrap">{{ __('Sign in') }}</a>@endauth
+        @auth<a href="{{ route('home') }}">Workspace</a>@else<a href="{{ route('sign-in') }}" style="white-space: nowrap">{{ __('Log in') }}</a>@endauth
     </form>
     @include('layouts._language')
 </header>

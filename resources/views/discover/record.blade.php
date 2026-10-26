@@ -43,12 +43,12 @@
 
     @php($creators = $view->creators($unit))
     @if($creators->isNotEmpty())
-        <h2>{{ __('Created by') }}</h2>
+        <h2>{{ __('Creator(s)') }}</h2>
         <ul>@foreach($creators as $relation)<li>@php($url = \App\Discovery\Links::page($relation->other))@if($url)<a href="{{ $url }}">{{ $view->label($relation->other) }}</a>@else{{ $view->label($relation->other) }}@endif @include('description._ric', ['term' => $relation->ricTerm()])</li>@endforeach</ul>
     @endif
 
     @include('discover._values', ['subject' => $unit, 'standard' => \App\Description\Elements::ISAD_G, 'view' => $view])
-    @include('discover._relations', ['relations' => $relations, 'view' => $view, 'heading' => __('Subjects and places'), 'types' => ['subject', 'place']])
+    @include('discover._relations', ['relations' => $relations, 'view' => $view, 'heading' => __('Access points'), 'types' => ['subject', 'place']])
     @include('discover._relations', ['relations' => $relations, 'view' => $view, 'heading' => __('Documentary form types'), 'types' => ['documentary-form']])
     @include('discover._relations', ['relations' => $relations, 'view' => $view, 'heading' => __('Related'), 'except' => ['subject', 'place', 'documentary-form', 'creation', 'accumulation']])
 

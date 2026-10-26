@@ -11,7 +11,7 @@
         <p>{{ __('For :email. At least 12 characters.', ['email' => $email]) }}</p>
         <label for="password">{{ __('New password') }}</label>
         <input id="password" name="password" type="password" autocomplete="new-password" required>
-        <label for="password_confirmation">{{ __('New password again') }}</label>
+        <label for="password_confirmation">{{ __('Confirm password') }}</label>
         <input id="password_confirmation" name="password_confirmation" type="password" autocomplete="new-password" required>
         <button type="submit">{{ __('Set password') }}</button>
     </form>

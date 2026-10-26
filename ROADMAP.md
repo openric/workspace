@@ -115,7 +115,7 @@ Standing rules for every phase: vocabularies, never enums; every field names its
 
 ### Phase details
 
-**1. Interface in more than one language (WS-005).** The interface is English only; WS-005 asks for interface localisation beside the multilingual values the Workspace already keeps. Every screen's text moves to Laravel language files, with a language switch for each account and for the public catalogue. English and Afrikaans first. Heratio's `lang/*.json` holds translations for many languages; each file's origin is checked first, because strings taken from AtoM's XLIFF files carry Artefactual's copyright and must keep its notice. Done when a reviewer completes the V0.1 scenario in Afrikaans. Progress:
+**1. Interface in more than one language (WS-005).** The interface was English only; WS-005 asks for interface localisation beside the multilingual values the Workspace already keeps. Every screen's text moves to Laravel language files, with a language switch for each account and for the public catalogue. English and Afrikaans first. Heratio's `lang/*.json` holds translations for many languages; each file's origin is checked first, because strings taken from AtoM's XLIFF files carry Artefactual's copyright and must keep its notice. Done when a reviewer completes the V0.1 scenario in Afrikaans. Progress:
 - **v0.0.50**: the language machinery and the public side.
   - Copied from Heratio: the language choice, in order the URL, session, cookie, the account's choice, then the browser; the switch at `/language`; Content-Language on every page.
   - In both languages: the layouts, the menus, the public catalogue, sign-in, registration and the home page.

@@ -13,7 +13,7 @@
     @php($others = $entity->names->filter(fn ($n) => $view->visible($n) && $n->nameType->notation !== 'authorised'))
     @if($others->isNotEmpty())<p>{{ __('Also known as:') }} @foreach($others as $other)<span lang="{{ $other->language }}">{{ $other->value }}</span>@if(! $loop->last); @endif @endforeach</p>@endif
     @foreach($entity->dates as $date)<p><strong>{{ $date->property->label(\App\Support\Vocab::languages()) }}:</strong> {{ $date->display() }} @include('description._ric', ['term' => $date->property])</p>@endforeach
-    @if($entity instanceof \App\Models\Place && $entity->latitude !== null)<p><strong>{{ __('Coordinates:') }}</strong> {{ $entity->latitude }}, {{ $entity->longitude }} (WGS 84)</p>@endif
+    @if($entity instanceof \App\Models\Place && $entity->latitude !== null)<p><strong>{{ __('Coordinates') }}:</strong> {{ $entity->latitude }}, {{ $entity->longitude }} (WGS 84)</p>@endif
     <p><a href="{{ route('discover.graph', [\App\Discovery\Links::CATALOGUE[$kind], $entity->getKey()]) }}">{{ __('See it in the relationship graph') }}</a></p>
     @isset($holdings)
         <h2>{{ __('Holdings (:count)', ['count' => $holdings->count()]) }} @include('description._ric', ['term' => 'rico:isOrWasHolderOf'])</h2>

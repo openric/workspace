@@ -13,12 +13,12 @@
         <input id="email" name="email" type="email" required maxlength="255" autocomplete="email" value="{{ old('email') }}">
         <label for="password">{{ __('Password (at least 12 characters)') }}</label>
         <input id="password" name="password" type="password" required minlength="12" autocomplete="new-password">
-        <label for="password_confirmation">{{ __('The password again') }}</label>
+        <label for="password_confirmation">{{ __('Confirm password') }}</label>
         <input id="password_confirmation" name="password_confirmation" type="password" required minlength="12" autocomplete="new-password">
         <label for="reason">{{ __('Why you would like an account (optional)') }}</label>
         <textarea id="reason" name="reason" rows="4" maxlength="2000">{{ old('reason') }}</textarea>
         <div style="position: absolute; left: -9999px" aria-hidden="true"><label for="website">{{ __('Leave this empty') }}</label><input id="website" name="website" tabindex="-1" autocomplete="off"></div>
         <button type="submit">{{ __('Send the request') }}</button>
     </form>
-    <p><a href="{{ route('sign-in') }}">{{ __('Sign in') }}</a></p>
+    <p><a href="{{ route('sign-in') }}">{{ __('Log in') }}</a></p>
 @endsection

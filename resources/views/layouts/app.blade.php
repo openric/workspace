@@ -20,7 +20,7 @@
             @csrf
             <a href="{{ route('clipboard.index') }}">{{ __('Clipboard') }} ({{ app(\App\Clipboard\ClipboardService::class)->count() }})</a>
             <a href="{{ route('account.profile') }}">{{ auth()->user()->name }}</a>
-            <button type="submit">{{ __('Sign out') }}</button>
+            <button type="submit">{{ __('Log out') }}</button>
         </form>
     @endauth
     @include('layouts._language')
@@ -42,16 +42,16 @@
                 'repositories.index' => [__('Repositories'), $user->mayAnywhere('read', 'repository'), 'repositories.*'],
             ],
             'Manage' => [
-                'vocabularies.index' => [__('Vocabularies'), true, 'vocabularies.*'],
+                'vocabularies.index' => [__('Taxonomies'), true, 'vocabularies.*'],
                 'containers.index' => [__('Containers'), $user->mayAnywhere('read', 'storage'), 'containers.*'],
-                'storage.places' => [__('Storage places'), $user->mayAnywhere('read', 'storage'), 'storage.*'],
-                'imports.index' => [__('Imports'), $mayImport, 'imports.*'],
+                'storage.places' => [__('Physical storage'), $user->mayAnywhere('read', 'storage'), 'storage.*'],
+                'imports.index' => [__('Import'), $mayImport, 'imports.*'],
                 'proposals.index' => [__('Proposals to review'), $user->mayAnywhere('review-proposals', 'description'), 'proposals.*'],
                 'records.export-all' => [__('Export descriptions'), $user->mayAnywhere('read', 'description'), 'records.export-all'],
                 'agents.duplicates' => [__('Duplicate authority records'), $user->may('update', 'authority'), 'agents.duplicates'],
             ],
             'Admin' => [
-                'accounts.index' => [__('Accounts'), $may('manage-accounts'), 'accounts.*'],
+                'accounts.index' => [__('Users'), $may('manage-accounts'), 'accounts.*'],
                 'roles.index' => [__('Roles'), $may('manage-roles'), 'roles.*'],
                 'audit' => [__('Audit log'), $may('view-audit-log'), 'audit'],
                 'settings.edit' => [__('Settings'), $may('manage-institution'), 'settings.*'],

@@ -61,7 +61,7 @@ class AccessAndAuditTest extends TestCase
         // The front page sends everyone not signed in to the public catalogue (WS-009), which needs no account.
         $this->get('/')->assertRedirect(route('discover.home'));
         $this->get('/audit')->assertRedirect(route('sign-in'));
-        $this->get('/sign-in')->assertOk()->assertSee('Sign in');
+        $this->get('/sign-in')->assertOk()->assertSee('Log in');
     }
 
     public function test_signing_in_and_out_is_audited(): void

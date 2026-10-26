@@ -87,7 +87,7 @@ class SettingsAndScreensTest extends TestCase
         $this->actingAs($archivist)->get('/settings')->assertForbidden();
         // An archivist has the working tools under Manage and no Admin menu.
         $this->actingAs($archivist)->get('/')->assertDontSee('Settings')->assertSee('Home')
-            ->assertSee('>Manage</summary>', false)->assertSee('>Vocabularies<', false)->assertDontSee('>Admin</summary>', false);
+            ->assertSee('>Manage</summary>', false)->assertSee('>Taxonomies<', false)->assertDontSee('>Admin</summary>', false);
     }
 
     public function test_every_page_has_the_main_navigation(): void
@@ -97,8 +97,8 @@ class SettingsAndScreensTest extends TestCase
         $this->actingAs($this->admin)->get('/repositories')->assertSee('aria-label="Main"', false)
             ->assertSee('</svg>Home<', false)->assertSee('>Settings<', false)->assertSee('aria-current="page"', false)
             // Grouped in submenus, and the group holding the page is marked.
-            ->assertSeeInOrder(['<summary class="here">', '</svg>Describe</summary>', '>Repositories<', '</svg>Manage</summary>', '>Vocabularies<', '>Containers<', '>Imports<',
-                '>Duplicate authority records<', '</svg>Admin</summary>', '>Accounts<', '>Audit log<', '>Settings<'], false);
+            ->assertSeeInOrder(['<summary class="here">', '</svg>Describe</summary>', '>Repositories<', '</svg>Manage</summary>', '>Taxonomies<', '>Containers<', '>Import<',
+                '>Duplicate authority records<', '</svg>Admin</summary>', '>Users<', '>Audit log<', '>Settings<'], false);
     }
 
     public function test_a_new_repository_opens_its_full_description_form(): void
@@ -115,7 +115,7 @@ class SettingsAndScreensTest extends TestCase
         $repository = app(RepositoryService::class)->create($this->institution, 'Riverside Parish Council Archives', 'en');
         $this->actingAs($this->admin)->get("/repositories/{$repository->id}")
             ->assertSee('<details class="area" open>', false)->assertSee('5.1.2 Authorised form of name')->assertSee('1 of ')
-            ->assertDontSee('5.3.1 History')->assertDontSee('Not yet described')->assertDontSee('<h2>5.3 Description</h2>', false)
+            ->assertDontSee('5.3.1 History')->assertDontSee('Not yet described')->assertDontSee('<h2>5.3 Description area</h2>', false)
             ->assertSee('Edit description')->assertSee('Add a translation');
     }
 

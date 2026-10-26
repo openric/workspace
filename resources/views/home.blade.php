@@ -13,12 +13,12 @@
     @endforelse
     @if(session('status'))<p role="status">{{ session('status') }}</p>@endif
     <ul>
-        <li><a href="{{ route('account.profile') }}">{{ __('Your profile') }}</a></li>
-        <li><a href="{{ route('password.edit') }}">{{ __('Change your password') }}</a></li>
+        <li><a href="{{ route('account.profile') }}">{{ __('Profile') }}</a></li>
+        <li><a href="{{ route('password.edit') }}">{{ __('Change password') }}</a></li>
         @if($user->mayAnywhere('read', 'repository'))<li><a href="{{ route('repositories.index') }}">{{ __('Repositories') }}</a></li>@endif
         @if($user->mayAnywhere('read', 'description'))<li><a href="{{ route('records.index') }}">{{ __('Archival descriptions') }}</a></li>@endif
         @can(\App\Support\Vocab::permission('manage-accounts'))
-            <li><a href="{{ route('accounts.index') }}">{{ __('Accounts') }}</a></li>
+            <li><a href="{{ route('accounts.index') }}">{{ __('Users') }}</a></li>
         @endcan
         @can(\App\Support\Vocab::permission('manage-roles'))
             <li><a href="{{ route('roles.index') }}">{{ __('Roles and permissions') }}</a></li>

@@ -37,7 +37,7 @@
         <p>@foreach($kinds as $key => $name)@if($kind === $key)<strong>{{ __($name) }}</strong>@else<a href="{{ route('discover.home', ['q' => $query, 'kind' => $key]) }}">{{ __($name) }}</a>@endif · @endforeach
             @if($kind)<a href="{{ route('discover.home', ['q' => $query]) }}">{{ __('Everything') }}</a>@else<strong>{{ __('Everything') }}</strong>@endif</p>
         @php($found = collect($results)->sum(fn ($c) => $c->count()))
-        <p role="status">{{ $found === 0 ? __('Nothing found.') : __(':count found.', ['count' => $found]) }}</p>
+        <p role="status">{{ $found === 0 ? __('No results found.') : __(':count found.', ['count' => $found]) }}</p>
         @foreach($results as $key => $entities)
             @continue($entities->isEmpty())
             <h2>{{ __($kinds[$key]) }} ({{ $entities->count() }})</h2>

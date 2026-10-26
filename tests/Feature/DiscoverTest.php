@@ -113,7 +113,7 @@ class DiscoverTest extends TestCase
         $this->get('/')->assertRedirect(route('discover.home'));
         $this->get('/discover')->assertOk()->assertSee('Riverside Parish Council records')->assertSee('2 archival descriptions')->assertDontSee('Closed personnel file');
         $this->get('/discover?q=letter')->assertOk()->assertSee('Letter of 3 May 1902')->assertDontSee('Closed personnel');
-        $this->get('/discover?q=closed')->assertSee('Nothing found.');
+        $this->get('/discover?q=closed')->assertSee('No results found.');
         $this->get('/discover?q=botha&kind=agents')->assertSee('Botha, Jan (parish clerk)');
         $this->get("/discover/records/{$this->closed->id}")->assertNotFound();
         $this->get("/discover/graph/records/{$this->closed->id}")->assertNotFound();

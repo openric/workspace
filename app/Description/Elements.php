@@ -64,11 +64,11 @@ final class Elements
      * area an element belongs to comes from the number in its scope note.
      */
     private const AREAS = [
-        self::ISDIAH => ['5.1' => 'Identity', '5.2' => 'Contact', '5.3' => 'Description', '5.4' => 'Access', '5.5' => 'Services', '5.6' => 'Control'],
-        self::ISAD_G => ['3.1' => 'Identity', '3.2' => 'Context', '3.3' => 'Content and structure',
-            '3.4' => 'Conditions of access and use', '3.5' => 'Allied materials', '3.6' => 'Notes', '3.7' => 'Description control'],
-        self::ISAAR_CPF => ['5.1' => 'Identity', '5.2' => 'Description', '5.3' => 'Relationships', '5.4' => 'Control'],
-        self::ACTIVITY => ['5.1' => 'Identity', '5.2' => 'Context'],
+        self::ISDIAH => ['5.1' => 'Identity area', '5.2' => 'Contact area', '5.3' => 'Description area', '5.4' => 'Access area', '5.5' => 'Services area', '5.6' => 'Control area'],
+        self::ISAD_G => ['3.1' => 'Identity area', '3.2' => 'Context area', '3.3' => 'Content and structure area',
+            '3.4' => 'Conditions of access and use area', '3.5' => 'Allied materials area', '3.6' => 'Notes area', '3.7' => 'Description control area'],
+        self::ISAAR_CPF => ['5.1' => 'Identity area', '5.2' => 'Description area', '5.3' => 'Relationships area', '5.4' => 'Control area'],
+        self::ACTIVITY => ['5.1' => 'Identity area', '5.2' => 'Context area'],
     ];
 
     /** The element's number in its standard, such as 5.3.1 or 3.1.2, from its scope note. */
