@@ -48,7 +48,7 @@ jobs:
           coverage: none
       # convert (ImageMagick) makes the viewing copies, and pdftoppm a PDF's first page (App\Files\FileStore).
       - name: Image and PDF tools
-        run: sudo apt-get install -y --no-install-recommends imagemagick poppler-utils
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends imagemagick poppler-utils
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist --no-progress
       - name: Application key
