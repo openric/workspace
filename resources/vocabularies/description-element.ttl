@@ -615,6 +615,13 @@ v:instantiation-rights a skos:Concept ;
     skos:scopeNote "Exported as rico:conditionsOfUse."@en ;
     skos:definition "The rights in this carrier and the terms of its use, such as a licence."@en .
 
+v:instantiation-transcript a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:instantiation ;
+    skos:prefLabel "Transcript"@en ;
+    skos:scopeNote "Kept as openricx:transcript, proposed in openric/spec#65: RiC-O 1.1 has no property for the text of an instantiation, so it is not exported until the extension ontology defines one. The text read from the carrier, such as an OCR or a transcription accepted from a proposal (ADR 0007); Heratio's transcript property of a digital object."@en ;
+    skos:definition "The text of this carrier, as read from it."@en .
+
 v:container a skos:Concept ;
     skos:inScheme v: ;
     skos:topConceptOf v: ;

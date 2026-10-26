@@ -22,6 +22,9 @@ class RicTermsTest extends TestCase
     private const VOCAB = 'https://workspace.openric.org/vocab/';
 
     /** The vocabularies whose concepts stand for fields or the values of fields. */
+    /** Terms proposed for the extension ontology and not yet in it: openric/spec#64 and #65. */
+    private const PROPOSED = ['openricx:hasNameType', 'openricx:transcript'];
+
     private const MAPPED = ['description-element', 'date-property', 'level-of-description', 'agent-type', 'identifier-type',
         'relation-type', 'relation-state', 'relation-certainty', 'date-qualifier'];
 
@@ -47,11 +50,13 @@ class RicTermsTest extends TestCase
                 $term = $concept->ricTerm();
                 $this->assertNotNull($term, "$concept->iri names no RiC term in its scope note");
                 [$prefix, $local] = explode(':', $term);
-                $this->assertArrayHasKey($local, $defined[$prefix], "$concept->iri names $term, which the ontology does not define");
+                if (! in_array($term, self::PROPOSED, true)) {
+                    $this->assertArrayHasKey($local, $defined[$prefix], "$concept->iri names $term, which the ontology does not define");
+                }
                 // Every other term the note names exists too.
                 preg_match_all('/\b(rico|openricx):(\w+)/', (string) $concept->labels->firstWhere('language', 'en')?->scope_note, $all, PREG_SET_ORDER);
                 foreach ($all as [$named, $p, $l]) {
-                    if ($named !== 'openricx:hasNameType') { // proposed in openric/spec#64, not yet in the extension ontology
+                    if (! in_array($named, self::PROPOSED, true)) {
                         $this->assertArrayHasKey($l, $defined[$p], "$concept->iri names $named, which the ontology does not define");
                     }
                 }

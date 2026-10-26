@@ -42,6 +42,8 @@ Accounts make their own keys under Your profile, API keys; an administrator make
 
 Proposals sent with a write key wait in `proposals` (relationships as proposed relation assertions) and change nothing on a record until reviewed. Release v0.0.47 gives the Administrator and Editor roles of every institution the new `review-proposals` permission on descriptions; it gives back nothing an institution took away.
 
+Reviewers find them under Manage, Proposals to review (v0.0.48). Accepting writes the value as a draft, so it reaches the public catalogue only when the record is published again.
+
 ## Moving from AtoM
 
 AtoM's CLI exports what the import reads: `csv:repository-export`, `csv:authority-export` and `csv:export --single-slug=<fonds>`. Import them in that order with one source, so descriptions find their holders and creators. For the files, copy AtoM's `uploads` folder (the one holding `r/`) to the Workspace host, readable by `www-data`, and set `WORKSPACE_IMPORT_FILES` to it: an import of descriptions takes the file each `digitalObjectURI` names from there and keeps it only when its SHA-256 matches the one AtoM recorded. A file is not fetched over the network; AtoM serves masters only to those who may read them.

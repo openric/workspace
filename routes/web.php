@@ -28,6 +28,7 @@ use App\Http\Controllers\LocalVocabularyController;
 use App\Http\Controllers\NameController;
 use App\Http\Controllers\PasswordController;
 use App\Http\Controllers\PlaceController;
+use App\Http\Controllers\ProposalReviewController;
 use App\Http\Controllers\PublicationController;
 use App\Http\Controllers\RecordController;
 use App\Http\Controllers\RegistrationController;
@@ -53,7 +54,7 @@ Route::pattern('record', '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-
 Route::pattern('date', '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}');
 Route::pattern('contact', '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}');
 Route::pattern('repository', '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}');
-foreach (['place', 'vocabulary', 'concept', 'other', 'match', 'agent', 'apiKey'] as $parameter) {
+foreach (['place', 'vocabulary', 'concept', 'other', 'match', 'agent', 'apiKey', 'proposal', 'assertion'] as $parameter) {
     Route::pattern($parameter, '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}');
 }
 
@@ -199,6 +200,14 @@ Route::middleware(['auth', 'active'])->group(function () {
     });
 
     // Imports of archival description: a dry run, its report, then the import (WS-015).
+    // The review queue of proposals sent through the API (ADR 0007); each proposal is checked against its record.
+    Route::middleware('access:review-proposals,description')->prefix('proposals')->name('proposals.')->group(function () {
+        Route::get('/', [ProposalReviewController::class, 'index'])->name('index');
+        Route::post('/{proposal}/accept', [ProposalReviewController::class, 'accept'])->name('accept');
+        Route::post('/{proposal}/reject', [ProposalReviewController::class, 'reject'])->name('reject');
+        Route::post('/relations/{assertion}', [ProposalReviewController::class, 'reviewRelation'])->name('relation');
+    });
+
     Route::prefix('imports')->name('imports.')->group(function () {
         Route::get('/', [ImportController::class, 'index'])->name('index');
         Route::get('/new', [ImportController::class, 'create'])->name('create');
