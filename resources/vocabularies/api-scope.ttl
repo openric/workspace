@@ -1,0 +1,32 @@
+# OpenRiC Workspace - OpenRiC Workspace API Scopes.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What an API key may be used for (ADR 0007). A key carries only scopes its
+# account holds (config workspace.api_scope_requires), and reads only what the
+# institution's Public role may read, whatever its scopes.
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/api-scope/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace API Scopes"@en ;
+    dcterms:description "What an API key may be used for."@en ;
+    dcterms:issued "2026-10-26"^^xsd:date ;
+    skos:hasTopConcept v:read, v:write .
+
+v:read a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Read"@en ;
+    skos:scopeNote "Heratio API scope read."@en ;
+    skos:definition "Read the published catalogue, as the public may."@en .
+
+v:write a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Propose changes"@en ;
+    skos:scopeNote "Heratio API scope write."@en ;
+    skos:definition "Propose names, places, dates, relations, values and transcriptions for an archivist to review. Nothing is written to a record without that review."@en .

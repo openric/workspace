@@ -73,7 +73,7 @@ class AccountController extends Controller
     {
         $this->sameInstitution($request, $account);
 
-        return view('accounts.show', ['account' => $account->load('roles.labels'), 'roles' => $this->roles($request),
+        return view('accounts.show', [...app(ApiKeyController::class)->managerData($account), 'account' => $account->load('roles.labels'), 'roles' => $this->roles($request),
             'kinds' => collect(array_keys(config('workspace.permission_matrix')))->map(fn ($n) => Concept::where('iri', Vocab::kind($n))->with('labels')->firstOrFail())]);
     }
 

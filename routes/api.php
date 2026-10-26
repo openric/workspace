@@ -6,10 +6,13 @@
 
 use App\Http\Controllers\Api\DiscoveryController;
 use App\Http\Controllers\Api\OaiController;
+use App\Http\Middleware\AuthenticateApiKey;
 use App\Http\Middleware\ServeRicApi;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware([ServeRicApi::class, 'throttle:600,1'])->group(function () {
+// Reads are open to anyone (Core Discovery 2.1); a key, when sent, must be valid and counts against its limits,
+// and reads still see only what the Public role sees (ADR 0007).
+Route::middleware([ServeRicApi::class, 'throttle:600,1', AuthenticateApiKey::class])->group(function () {
     Route::get('/', [DiscoveryController::class, 'service'])->name('api.service');
     Route::get('/health', [DiscoveryController::class, 'health'])->name('api.health');
     Route::get('/vocabulary', [DiscoveryController::class, 'vocabulary'])->name('api.vocabulary');

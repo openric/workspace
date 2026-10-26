@@ -48,6 +48,19 @@ Issues #8, #12 and #13 stay with the service and the specification: they wait on
 
 The V0.1 demonstration scenario should carry #11 and #17 together: a participant whose role is recorded with its evidence, and later corrected on new evidence, with both assertions kept.
 
+## Work brought forward
+
+On 26 October 2026 Dr Johan Pieterse brought part of WS-018 (integration protocols) and WS-019 (AI assistance with human review) forward from V2.0, so that the AHG Archives MCP can serve the Workspace in full ([ADR 0007](architecture/adr/0007-api-keys-and-proposals.md)). It is built in four steps, each finished before the next:
+
+| Step | What | Release |
+|---|---|---|
+| 1 | API keys: scopes no wider than the account's, end date, hourly and daily limits, last use, revocation, key pages | v0.0.46 |
+| 2 | Proposals through the API, and a caller's list of them | |
+| 3 | The review queue: approve, edit or reject each proposal | |
+| 4 | File text and images through the API | |
+
+: API keys and proposals, brought forward
+
 ## Next actions
 
 1. Name the product, archival domain, standards, technical, legal and provenance, and security leads; recruit one pilot institution (G0).

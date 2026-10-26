@@ -11,6 +11,7 @@
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\AgentController;
+use App\Http\Controllers\ApiKeyController;
 use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\ClipboardController;
 use App\Http\Controllers\ConceptController;
@@ -52,7 +53,7 @@ Route::pattern('record', '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-
 Route::pattern('date', '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}');
 Route::pattern('contact', '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}');
 Route::pattern('repository', '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}');
-foreach (['place', 'vocabulary', 'concept', 'other', 'match', 'agent'] as $parameter) {
+foreach (['place', 'vocabulary', 'concept', 'other', 'match', 'agent', 'apiKey'] as $parameter) {
     Route::pattern($parameter, '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}');
 }
 
@@ -114,6 +115,10 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::get('/account/access', [AccountController::class, 'profileAccess'])->name('account.access');
     Route::post('/account', [AccountController::class, 'updateProfile'])->name('account.update');
     Route::post('/account/contact', [AccountController::class, 'updateProfileContact'])->name('account.contact');
+    // Heratio's /api/keys: an account's own API keys (ADR 0007).
+    Route::get('/account/api-keys', [ApiKeyController::class, 'index'])->name('account.api-keys');
+    Route::post('/account/api-keys', [ApiKeyController::class, 'store'])->name('account.api-keys.store');
+    Route::post('/account/api-keys/{apiKey}/revoke', [ApiKeyController::class, 'revoke'])->name('account.api-keys.revoke');
     Route::get('/account/password', [PasswordController::class, 'edit'])->name('password.edit');
     Route::post('/account/password', [PasswordController::class, 'update'])->name('password.update');
     Route::post('/sign-out', [SessionController::class, 'destroy'])->name('sign-out');
@@ -342,5 +347,7 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::post('/{account}/disable', [AccountController::class, 'disable'])->name('disable');
         Route::post('/{account}/enable', [AccountController::class, 'enable'])->name('enable');
         Route::post('/{account}/password-link', [AccountController::class, 'passwordLink'])->name('password-link');
+        Route::post('/{account}/api-keys', [ApiKeyController::class, 'storeFor'])->name('api-keys.store');
+        Route::post('/{account}/api-keys/{apiKey}/revoke', [ApiKeyController::class, 'revokeFor'])->name('api-keys.revoke');
     });
 });

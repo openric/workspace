@@ -15,7 +15,19 @@ return [
     'audit_signing_key' => env('WORKSPACE_AUDIT_SIGNING_KEY', storage_path('keys/audit-signing.sk')),
 
     // The Workspace's own vocabularies, bundled with the code (resources/vocabularies).
-    'bundled_vocabularies' => ['account-role.ttl', 'permission.ttl', 'audit-action.ttl', 'description-element.ttl', 'language-value-state.ttl', 'description-status.ttl', 'description-detail.ttl', 'level-of-description.ttl', 'record-kind.ttl', 'date-property.ttl', 'date-qualifier.ttl', 'name-type.ttl', 'identifier-type.ttl', 'relation-type.ttl', 'relation-state.ttl', 'relation-certainty.ttl', 'assertion-origin.ttl', 'assertion-status.ttl', 'concept-scheme-kind.ttl', 'concept-match-type.ttl', 'agent-type.ttl', 'carrier-type.ttl', 'file-use.ttl', 'file-availability.ttl', 'container-type.ttl', 'storage-place-type.ttl', 'container-status.ttl', 'capacity-unit.ttl', 'storage-security-level.ttl'],
+    'bundled_vocabularies' => ['account-role.ttl', 'permission.ttl', 'audit-action.ttl', 'description-element.ttl', 'language-value-state.ttl', 'description-status.ttl', 'description-detail.ttl', 'level-of-description.ttl', 'record-kind.ttl', 'date-property.ttl', 'date-qualifier.ttl', 'name-type.ttl', 'identifier-type.ttl', 'relation-type.ttl', 'relation-state.ttl', 'relation-certainty.ttl', 'assertion-origin.ttl', 'assertion-status.ttl', 'concept-scheme-kind.ttl', 'concept-match-type.ttl', 'agent-type.ttl', 'carrier-type.ttl', 'file-use.ttl', 'file-availability.ttl', 'container-type.ttl', 'storage-place-type.ttl', 'container-status.ttl', 'capacity-unit.ttl', 'storage-security-level.ttl', 'api-scope.ttl'],
+
+    // API keys (ADR 0007, Heratio's ApiKeyService): what an account must hold, anywhere, for a key it
+    // owns to carry each scope (api-scope vocabulary), as [action, kind] pairs of which any one will do.
+    // read needs nothing: an API read sees what the Public role sees. A key loses a scope at once when
+    // its account no longer qualifies.
+    'api_scope_requires' => [
+        'read' => [],
+        'write' => [['create', 'description'], ['update', 'description'], ['create', 'authority'], ['update', 'authority']],
+    ],
+
+    // Requests a key may make per hour unless it says otherwise (Heratio's default rate limit).
+    'api_key_hourly_limit' => (int) env('WORKSPACE_API_KEY_HOURLY_LIMIT', 1000),
 
     // The shape of the permission matrix: for each kind of record (record-kind
     // vocabulary), the actions that apply to it (permission vocabulary), as

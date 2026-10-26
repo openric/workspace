@@ -38,9 +38,16 @@ final class Vocab
 
     public const MATCH_TYPES = self::BASE.'concept-match-type/';
 
+    public const API_SCOPES = self::BASE.'api-scope/';
+
     public static function role(string $notation): string
     {
         return self::ACCOUNT_ROLES.$notation;
+    }
+
+    public static function apiScope(string $notation): string
+    {
+        return self::API_SCOPES.$notation;
     }
 
     public static function permission(string $notation): string

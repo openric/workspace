@@ -21,7 +21,7 @@ use RuntimeException;
 class AuditLog
 {
     /** Fields whose values are never written to the log; the log records only that they changed. */
-    private const REDACTED = ['password', 'remember_token'];
+    private const REDACTED = ['password', 'remember_token', 'key_hash'];
 
     /** @var array<string, string> action IRI => concept id */
     private static array $actions = [];

@@ -30,6 +30,9 @@
         </ul>
     @endcan
 
+    <h2 id="api-keys">API keys</h2>
+    @include('accounts._api-keys', ['storeUrl' => route('accounts.api-keys.store', $account), 'revokeUrl' => fn ($key) => route('accounts.api-keys.revoke', [$account, $key])])
+
     <h2>Access</h2>
     <form method="post" action="{{ route('accounts.password-link', $account) }}">
         @csrf
