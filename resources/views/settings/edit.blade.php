@@ -30,10 +30,15 @@
         <h2>{{ __('Interface languages') }}</h2>
         <p><small>{{ __('The languages people may choose for the screens of the Workspace and the public catalogue. English is always offered; a string with no translation in a language is shown in English.') }}</small></p>
         @php($chosen = old('interface_languages', $institution->interface_languages ?? ['en']))
+        @php($available = \App\Support\InterfaceLanguages::available())
         <input type="hidden" name="interface_languages[]" value="en">
-        @foreach(\App\Support\InterfaceLanguages::available() as $tag)
-            <label style="font-weight: normal; display: inline-block; margin-right: 1rem" lang="{{ $tag }}"><input type="checkbox" name="interface_languages[]" value="{{ $tag }}" style="width: auto" @checked($tag === 'en' || in_array($tag, $chosen, true)) @disabled($tag === 'en')> {{ \App\Support\InterfaceLanguages::name($tag) }}</label>
-        @endforeach
+        <label for="interface_languages">{{ __('Interface languages') }}</label>
+        <select id="interface_languages" name="interface_languages[]" multiple size="{{ min(count($available), 10) }}" aria-describedby="languages-help">
+            @foreach($available as $tag)
+                <option value="{{ $tag }}" lang="{{ $tag }}" @selected($tag === 'en' || in_array($tag, $chosen, true)) @disabled($tag === 'en')>{{ \App\Support\InterfaceLanguages::name($tag) }}</option>
+            @endforeach
+        </select>
+        <small id="languages-help">{{ __('Hold Ctrl (Cmd on a Mac) to choose more than one.') }}</small>
         <p><small>{{ __('The persistent IRIs of records are built from :iri, which is set at installation and does not change.', ['iri' => $institution->base_iri]) }}</small></p>
         <button type="submit">{{ __('Save settings') }}</button>
     </form>
