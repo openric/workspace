@@ -30,7 +30,7 @@
         <label for="default_level">{{ __('Units with no level of description (archival descriptions only)') }}</label>
         <select id="default_level" name="default_level" aria-describedby="level-help">
             <option value="">{{ __('Do not import them, and list them') }}</option>
-            @foreach($levels as $level)<option value="{{ $level->notation }}" @selected(old('default_level') === $level->notation)>Import them as {{ mb_strtolower($level->label(['en'])) }}</option>@endforeach
+            @foreach($levels as $level)<option value="{{ $level->notation }}" @selected(old('default_level') === $level->notation)>{{ __('Import them as :level', ['level' => mb_strtolower($level->label(\App\Support\Vocab::languages()))]) }}</option>@endforeach
         </select>
         <small id="level-help">{{ __('AtoM lets a unit have no level; the Workspace needs one, because the level decides whether a unit is a record set, a record or a record part.') }}</small>
         <label for="language">{{ __('Language of the file (BCP 47)') }}</label>
@@ -39,7 +39,7 @@
         <label for="agent_type">{{ __('Agents whose kind the file does not give') }}</label>
         <select id="agent_type" name="agent_type" aria-describedby="agent-help">
             <option value="">{{ __('Leave them out and list them') }}</option>
-            @foreach($agentTypes as $type)<option value="{{ $type->notation }}" @selected(old('agent_type') === $type->notation)>Create them as a {{ mb_strtolower($type->label(['en'])) }}</option>@endforeach
+            @foreach($agentTypes as $type)<option value="{{ $type->notation }}" @selected(old('agent_type') === $type->notation)>{{ __('Create them as a :type', ['type' => mb_strtolower($type->label(\App\Support\Vocab::languages()))]) }}</option>@endforeach
         </select>
         <small id="agent-help">{{ __('For creators and names with no authority record yet, and for authority records with no type of entity. EAD says whether a name is a person, family or corporate body; AtoM\'s description CSV does not, and AtoM lets an authority record have no type.') }}</small>
         <p><label><input type="checkbox" name="create_terms" value="1" @checked(old('create_terms', true))> {{ __('Create subjects, places, occupations and documentary form types not yet in the vocabularies') }}</label></p>

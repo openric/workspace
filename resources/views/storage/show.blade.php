@@ -4,14 +4,14 @@
 @section('content')
     @include('storage._nav')
     <h1>{{ $container->described('container-name', [app()->getLocale(), 'en']) }}</h1>
-    <p>Container @include('description._ric', ['term' => 'openricx:Container'])</p>
+    <p>{{ __('Container') }} @include('description._ric', ['term' => 'openricx:Container'])</p>
     @if(session('status'))<p role="status">{{ session('status') }}</p>@endif
     @if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif
     @php($barcode = $container->identifiers->first(fn ($i) => $i->identifierType->notation === 'barcode')?->value)
     <p><strong>{{ __('Persistent IRI') }}:</strong> <code>{{ $container->iri }}</code>
         <br><strong>{{ __('Container type') }}:</strong> {{ $container->containerType ? $container->containerType->anyLabel(['en']).' ('.$container->containerType->vocabulary->title.')' : 'not set' }} @include('description._ric', ['term' => 'openricx:hasContainerType'])
         @if($barcode)<br><strong>{{ __('Barcode') }}:</strong> {{ $barcode }} @include('description._ric', ['term' => 'rico:Identifier'])@endif
-        <br><strong>{{ __('Kept in') }}:</strong> {{ $path ?? 'nowhere yet' }} @include('description._ric', ['term' => 'rico:hasOrHadLocation'])
+        <br><strong>{{ __('Kept in') }}:</strong> {{ $path ?? __('nowhere yet') }} @include('description._ric', ['term' => 'rico:hasOrHadLocation'])
         <br><a href="{{ route('containers.box-list', $container) }}">{{ __('Box list to print') }}</a></p>
     @if($canUpdate)
         @include('description._actions', ['subject' => $container, 'editRoute' => 'containers.edit', 'required' => 'container-name'])
@@ -30,22 +30,22 @@
         @if($places->isEmpty())<p><small>{{ __('There are no storage places yet: make them under') }} <a href="{{ route('storage.places') }}">{{ __('Physical storage') }}</a>.</small></p>@endif
     @endif
 
-    <h2>Where it was kept @include('description._ric', ['term' => 'rico:hasOrHadLocation'])</h2>
+    <h2>{{ __('Where it was kept') }} @include('description._ric', ['term' => 'rico:hasOrHadLocation'])</h2>
     @forelse($locations->reverse() as [$relation, $at])
         @php($from = $relation->datedAs('beginning')?->normalized_value)
         @php($to = $relation->datedAs('end')?->normalized_value)
-        <p>{{ $at ? $storage->path($at) : 'a place since deleted' }}: from {{ $from ?? '?' }} {{ $to ? 'to '.$to : 'until now' }}@if($relation->description). {{ $relation->description }}@endif</p>
+        <p>{{ $at ? $storage->path($at) : __('a place since deleted') }}: {{ $to ? __('from :from to :to', ['from' => $from ?? '?', 'to' => $to]) : __('from :from until now', ['from' => $from ?? '?']) }}@if($relation->description). {{ $relation->description }}@endif</p>
     @empty
         <p>{{ __('Not kept anywhere yet.') }}</p>
     @endforelse
 
     <h2>{{ __('Facts') }}</h2>
     <dl>
-        <dt>{{ __('Status') }}</dt><dd>{{ $container->status?->label(['en']) ?? 'not set' }} @include('description._ric', ['term' => null])</dd>
-        <dt>{{ __('Security') }}</dt><dd>{{ $container->securityLevel?->label(['en']) ?? 'not set' }} @include('description._ric', ['term' => null])</dd>
+        <dt>{{ __('Status') }}</dt><dd>{{ $container->status?->label(['en']) ?? __('not set') }} @include('description._ric', ['term' => null])</dd>
+        <dt>{{ __('Security') }}</dt><dd>{{ $container->securityLevel?->label(['en']) ?? __('not set') }} @include('description._ric', ['term' => null])</dd>
         <dt>{{ __('Size (width, height, depth)') }}</dt><dd>{{ collect([$container->width_cm, $container->height_cm, $container->depth_cm])->map(fn ($v) => $v === null ? '?' : rtrim(rtrim((string) $v, '0'), '.'))->join(' x ') }} cm @include('description._ric', ['term' => null])</dd>
-        <dt>{{ __('Capacity') }}</dt><dd>@if($container->capacity !== null){{ rtrim(rtrim((string) $container->capacity_used, '0'), '.') ?: 0 }} of {{ rtrim(rtrim((string) $container->capacity, '0'), '.') }} {{ mb_strtolower((string) $container->capacityUnit?->label(['en'])) }} used @else not set @endif @include('description._ric', ['term' => null])</dd>
-        <dt>{{ __('Environment') }}</dt><dd>{{ $container->climate_controlled === null ? 'climate control not recorded' : ($container->climate_controlled ? 'climate controlled' : 'not climate controlled') }}@if($container->temperature_min !== null || $container->temperature_max !== null), {{ $container->temperature_min ?? '?' }} to {{ $container->temperature_max ?? '?' }} °C @endif @if($container->humidity_min !== null || $container->humidity_max !== null), {{ $container->humidity_min ?? '?' }} to {{ $container->humidity_max ?? '?' }}% relative humidity @endif @include('description._ric', ['term' => null])</dd>
+        <dt>{{ __('Capacity') }}</dt><dd>@if($container->capacity !== null){{ __(':used of :capacity :unit used', ['used' => rtrim(rtrim((string) $container->capacity_used, '0'), '.') ?: 0, 'capacity' => rtrim(rtrim((string) $container->capacity, '0'), '.'), 'unit' => mb_strtolower((string) $container->capacityUnit?->label(\App\Support\Vocab::languages()))]) }} @else {{ __('not set') }} @endif @include('description._ric', ['term' => null])</dd>
+        <dt>{{ __('Environment') }}</dt><dd>{{ __($container->climate_controlled === null ? 'climate control not recorded' : ($container->climate_controlled ? 'climate controlled' : 'not climate controlled')) }}@if($container->temperature_min !== null || $container->temperature_max !== null), {{ __(':from to :to', ['from' => $container->temperature_min ?? '?', 'to' => $container->temperature_max ?? '?']) }} °C @endif @if($container->humidity_min !== null || $container->humidity_max !== null), {{ __(':from to :to% relative humidity', ['from' => $container->humidity_min ?? '?', 'to' => $container->humidity_max ?? '?']) }} @endif @include('description._ric', ['term' => null])</dd>
     </dl>
 
     @include('description._view', ['subject' => $container, 'standard' => \App\Description\Elements::CONTAINER, 'drafts' => $canUpdate])

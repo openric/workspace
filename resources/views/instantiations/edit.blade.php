@@ -3,7 +3,7 @@
 @section('title', __('Describe instantiation'))
 @section('content')
     <p><a href="{{ route('instantiations.show', $instantiation) }}">{{ __('Back to the instantiation') }}</a></p>
-    <h1>Describe {{ $instantiation->described('instantiation-title', [$language, 'en']) }}</h1>
+    <h1>{{ __('Describe :name', ['name' => $instantiation->described('instantiation-title', [$language, 'en'])]) }}</h1>
     <p>{{ __('Values in') }} <strong>{{ $language }}</strong>{{ __('. Fill in what you know; empty fields are left out. A value you change goes back to draft. The files themselves never change: another version is another instantiation.') }}</p>
     <form method="post" action="{{ route('instantiations.update', $instantiation) }}">
         @csrf

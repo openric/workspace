@@ -32,9 +32,9 @@
         <ul>
         @foreach($relation->assertions as $assertion)
             <li>{{ $assertion->status->label(\App\Support\Vocab::languages()) }}: {{ $assertion->asserter() }} ({{ mb_strtolower($assertion->origin->label(\App\Support\Vocab::languages())) }}), {{ $assertion->asserted_at->format('Y-m-d H:i') }}
-                @if($assertion->basis), on the basis: <span lang="{{ $assertion->basis_language }}">{{ $assertion->basis }}</span>@endif
-                @if($assertion->reviewer); reviewed by {{ $assertion->reviewer->name }}, {{ $assertion->reviewed_at->format('Y-m-d') }}@endif
-                @unless(in_array($assertion->id, $current, true)); superseded @endunless
+                @if($assertion->basis), {{ __('on the basis:') }} <span lang="{{ $assertion->basis_language }}">{{ $assertion->basis }}</span>@endif
+                @if($assertion->reviewer); {{ __('reviewed by :name, :date', ['name' => $assertion->reviewer->name, 'date' => $assertion->reviewed_at->format('Y-m-d')]) }}@endif
+                @unless(in_array($assertion->id, $current, true)); {{ __('superseded') }} @endunless
                 @if($canUpdate && $assertion->status->notation === 'proposed')
                     <form method="post" action="{{ route('relations.review', [$kind, $subject->getKey(), $relation, $assertion]) }}" style="display: inline">@csrf<input type="hidden" name="decision" value="accept"><button type="submit">{{ __('Accept') }}</button></form>
                     <form method="post" action="{{ route('relations.review', [$kind, $subject->getKey(), $relation, $assertion]) }}" style="display: inline">@csrf<input type="hidden" name="decision" value="reject"><button type="submit">{{ __('Reject') }}</button></form>

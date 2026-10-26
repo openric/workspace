@@ -1,10 +1,10 @@
 {{-- OpenRiC Workspace - review, publish or withdraw an entity's description. Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems. SPDX-License-Identifier: AGPL-3.0-or-later --}}
 @extends('layouts.app')
 @php($name = \App\Relations\EntityKinds::label($entity))
-@section('title', 'Publication of '.$name)
+@section('title', __('Publication of :name', ['name' => $name]))
 @section('content')
-    <p><a href="{{ \App\Relations\EntityKinds::route($entity) }}">Back to {{ $name }}</a></p>
-    <h1>Publication of {{ $name }}</h1>
+    <p><a href="{{ \App\Relations\EntityKinds::route($entity) }}">{{ __('Back to :name', ['name' => $name]) }}</a></p>
+    <h1>{{ __('Publication of :name', ['name' => $name]) }}</h1>
     <p>{{ __('Each value and name has its own state. Only published ones reach public discovery, the API and exports. A value someone changes goes back to draft, so it is published again only when someone publishes it.') }}</p>
     <table style="border-collapse: collapse">
         <tr><th style="text-align: left; padding: .25rem .75rem .25rem 0">{{ __('Language') }}</th>@foreach($states as $state)<th style="text-align: left; padding: .25rem .75rem">{{ $state->label(\App\Support\Vocab::languages()) }}</th>@endforeach</tr>
@@ -26,7 +26,7 @@
         <label for="language">{{ __('In one language only (BCP 47), or leave empty for every language') }}</label>
         <input id="language" name="language" maxlength="35" style="max-width: 8rem">
         @if($inside > 0)
-            <label><input type="checkbox" name="inside" value="1"> And the {{ $inside }} {{ $inside === 1 ? 'unit' : 'units' }} of description inside it</label>
+            <label><input type="checkbox" name="inside" value="1"> {{ __($inside === 1 ? 'And the :count unit of description inside it' : 'And the :count units of description inside it', ['count' => $inside]) }}</label>
         @endif
         <button type="submit">{{ __('Apply') }}</button>
     </form>

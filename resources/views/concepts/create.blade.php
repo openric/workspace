@@ -3,7 +3,7 @@
 @section('title', __('New concept'))
 @section('content')
     <p><a href="{{ route('vocabularies.show', $vocabulary) }}">{{ $vocabulary->title }}</a></p>
-    <h1>New concept in {{ $vocabulary->title }}</h1>
+    <h1>{{ __('New concept in :name', ['name' => $vocabulary->title]) }}</h1>
     <form method="post" action="{{ route('vocabularies.concepts.store', $vocabulary) }}">
         @csrf
         @if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif

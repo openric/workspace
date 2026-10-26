@@ -1,35 +1,33 @@
 {{-- OpenRiC Workspace - an import's report: the dry run, or what was imported and its reconciliation. Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems. SPDX-License-Identifier: AGPL-3.0-or-later --}}
 @extends('layouts.app')
-@section('title', 'Import of '.$import->file_name)
+@section('title', __('Import of :name', ['name' => $import->file_name]))
 @section('content')
     <p><a href="{{ route('imports.index') }}">{{ __('Import') }}</a> · <a href="{{ route('imports.create') }}">{{ __('Import another file') }}</a></p>
-    <h1>Import of {{ $import->file_name }}</h1>
+    <h1>{{ __('Import of :name', ['name' => $import->file_name]) }}</h1>
     @if(session('status'))<p role="status">{{ session('status') }}</p>@endif
     @if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif
     @php($report = $import->report ?? ['units' => [], 'issues' => [], 'counts' => [], 'actions' => []])
     @php($actions = $report['actions'] ?? ['created' => 0, 'updated' => 0, 'unchanged' => 0, 'rejected' => 0])
     @php($verb = $import->committed_at ? '' : 'would be ')
-    <p>{{ \App\Exchange\Import\ImportService::FORMATS[$import->format] ?? $import->format }}, source "{{ $import->source }}", language {{ $import->language }},
-        @if($import->repository)into {{ $import->repository->described('authorised-name', ['en']) }}@endif @if($import->parent), inside <a href="{{ route('records.show', $import->parent) }}">{{ $import->parent->described('title', ['en']) }}</a>@endif.
-        Uploaded by {{ $import->user->name }} on {{ $import->created_at->format('Y-m-d H:i') }}. SHA-256 <code>{{ $import->file_sha256 }}</code>.</p>
-    <p><strong>{{ $import->committed_at ? 'Imported on '.$import->committed_at->format('Y-m-d H:i').'.' : 'Dry run: nothing has been written.' }}</strong>
-        {{ count($report['units'] ?? []) }} entries in the file: {{ $actions['created'] }} {{ $verb }}created, {{ $actions['updated'] }} {{ $verb }}updated,
-        {{ $actions['unchanged'] }} unchanged, {{ $actions['rejected'] }} not imported.
-        @if($report['counts'] ?? null){{ $report['counts']['values'] }} values; {{ $report['counts']['relations'] }} relations {{ $verb }}proposed for review;
-            {{ $report['counts']['agents'] }} authority records, {{ $report['counts']['places'] }} places and {{ $report['counts']['concepts'] }} concepts {{ $verb }}created, linked from the entries;
-            {{ $report['counts']['containers'] ?? 0 }} containers {{ $verb }}made; {{ $report['counts']['files'] ?? 0 }} files kept.@endif</p>
+    <p>{{ \App\Exchange\Import\ImportService::FORMATS[$import->format] ?? $import->format }}, {{ __('source ":source", language :language', ['source' => $import->source, 'language' => $import->language]) }},
+        @if($import->repository){{ __('into :repository', ['repository' => $import->repository->described('authorised-name', ['en'])]) }}@endif @if($import->parent), {{ __('inside') }} <a href="{{ route('records.show', $import->parent) }}">{{ $import->parent->described('title', ['en']) }}</a>@endif.
+        {{ __('Uploaded by :name on :date.', ['name' => $import->user->name, 'date' => $import->created_at->format('Y-m-d H:i')]) }} SHA-256 <code>{{ $import->file_sha256 }}</code>.</p>
+    @php($done = (bool) $import->committed_at)
+    <p><strong>{{ $done ? __('Imported on :date.', ['date' => $import->committed_at->format('Y-m-d H:i')]) : __('Dry run: nothing has been written.') }}</strong>
+        {{ __($done ? ':entries entries in the file: :created created, :updated updated, :unchanged unchanged, :rejected not imported.' : ':entries entries in the file: :created would be created, :updated would be updated, :unchanged unchanged, :rejected not imported.', ['entries' => count($report['units'] ?? [])] + $actions) }}
+        @if($report['counts'] ?? null){{ __($done ? ':values values; :relations relations proposed for review; :agents authority records, :places places and :concepts concepts created, linked from the entries; :containers containers made; :files files kept.' : ':values values; :relations relations would be proposed for review; :agents authority records, :places places and :concepts concepts would be created, linked from the entries; :containers containers would be made; :files files kept.', ['containers' => 0, 'files' => 0] + $report['counts']) }}@endif</p>
     <p><small>{{ __('Imported values are drafts until published, and the relations an import makes are proposed until someone accepts them. An empty field never removes a value already there.') }}</small></p>
     @if($mayCommit && ($report['units'] ?? []) !== [])
         <form method="post" action="{{ route('imports.commit', $import) }}">@csrf<button type="submit">{{ __('Import now') }}</button></form>
     @endif
     @if($rec = $report['reconciliation'] ?? null)
         <h2>{{ __('Reconciliation') }}</h2>
-        <p>{{ $rec['holds'] ? 'Reconciled.' : 'Does not reconcile; look at the units below.' }}
-            Of {{ $rec['in_file'] }} entries in the file, {{ $rec['imported_or_matched'] }} were imported or matched and {{ $rec['not_imported'] }} were not.
-            {{ $rec['present_with_title'] }} are in the Workspace with an authorised name or title, and {{ $rec['keyed_to_source'] }} are keyed to the source, so importing it again updates them.</p>
+        <p>{{ $rec['holds'] ? __('Reconciled.') : __('Does not reconcile; look at the units below.') }}
+            {{ __('Of :in_file entries in the file, :imported_or_matched were imported or matched and :not_imported were not.', $rec) }}
+            {{ __(':present_with_title are in the Workspace with an authorised name or title, and :keyed_to_source are keyed to the source, so importing it again updates them.', $rec) }}</p>
     @endif
 
-    <h2>Fields not taken as given ({{ count($report['issues'] ?? []) }})</h2>
+    <h2>{{ __('Fields not taken as given (:count)', ['count' => count($report['issues'] ?? [])]) }}</h2>
     @if(($report['issues'] ?? []) === [])
         <p>{{ __('None: every field was read.') }}</p>
     @else
@@ -52,7 +50,7 @@
         @foreach($report['units'] ?? [] as $unit)
             <tr><td>{{ $unit['location'] }}</td>
                 <td>@if($unit['unit_id'] && $import->committed_at || $unit['unit_id'] && $unit['action'] !== 'created')<a href="{{ route($route, $unit['unit_id']) }}">{{ $unit['title'] ?? '[no title]' }}</a>@else{{ $unit['title'] ?? '[no title]' }}@endif</td>
-                <td>{{ ['created' => $verb.'created', 'updated' => $verb.'updated', 'unchanged' => 'unchanged', 'rejected' => 'not imported'][$unit['action']] }}@if($unit['message']): {{ $unit['message'] }}@endif</td></tr>
+                <td>{{ __(['created' => $import->committed_at ? 'created' : 'would be created', 'updated' => $import->committed_at ? 'updated' : 'would be updated', 'unchanged' => 'unchanged', 'rejected' => 'not imported'][$unit['action']]) }}@if($unit['message']): {{ $unit['message'] }}@endif</td></tr>
         @endforeach
         </tbody>
     </table>

@@ -3,7 +3,7 @@
 @section('title', __('Edit vocabulary'))
 @section('content')
     <p><a href="{{ route('vocabularies.show', $vocabulary) }}">{{ __('Back to the vocabulary') }}</a></p>
-    <h1>Edit {{ $vocabulary->title }}</h1>
+    <h1>{{ __('Edit :name', ['name' => $vocabulary->title]) }}</h1>
     <form method="post" action="{{ route('vocabularies.update', $vocabulary) }}">
         @csrf
         @if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif

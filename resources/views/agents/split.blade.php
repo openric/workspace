@@ -1,11 +1,11 @@
 {{-- OpenRiC Workspace - split an authority record that describes two agents. Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems. SPDX-License-Identifier: AGPL-3.0-or-later --}}
 @extends('layouts.app')
 @php($name = $agent->described('agent-authorised-name', ['en']))
-@section('title', 'Split '.$name)
+@section('title', __('Split :name', ['name' => $name]))
 @section('content')
-    <p><a href="{{ route('agents.show', $agent) }}">Back to {{ $name }}</a></p>
-    <h1>Split {{ $name }}</h1>
-    <p>For a record that describes two agents. A new authority record takes the names and relations you choose; the first name chosen becomes its authorised name if none of them is one. {{ $name }} keeps the rest, and at least one authorised name.</p>
+    <p><a href="{{ route('agents.show', $agent) }}">{{ __('Back to :name', ['name' => $name]) }}</a></p>
+    <h1>{{ __('Split :name', ['name' => $name]) }}</h1>
+    <p>{{ __('For a record that describes two agents. A new authority record takes the names and relations you choose; the first name chosen becomes its authorised name if none of them is one. :name keeps the rest, and at least one authorised name.', ['name' => $name]) }}</p>
     @if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif
     <form method="post" action="{{ route('agents.split', $agent) }}">
         @csrf

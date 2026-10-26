@@ -4,13 +4,13 @@
 @section('content')
     <p><a href="{{ route('accounts.index') }}">{{ __('All users') }}</a></p>
     <h1>{{ $account->name }}</h1>
-    <p>{{ $account->email }}. {{ $account->isDisabled() ? 'Disabled.' : 'Active.' }}</p>
+    <p>{{ $account->email }}. {{ __($account->isDisabled() ? 'Disabled.' : 'Active.') }}</p>
     <p><a href="{{ route('accounts.edit', $account) }}">{{ __('Edit user and contact details') }}</a> · <a href="{{ route('accounts.access', $account) }}">{{ __('What it may do') }}</a>@unless($account->is(auth()->user())) · <a href="{{ route('accounts.delete', $account) }}">{{ __('Delete user') }}</a>@endunless</p>
     @if(session('status'))<p role="status">{{ session('status') }}</p>@endif
     @if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif
     @if(session('password_link'))
         <div role="status">
-            <p><strong>{{ __('One-time link to set the password') }}</strong>, valid for {{ intdiv(config('auth.passwords.users.expire'), 60) }} hours. Send it to {{ $account->email }} yourself; it is shown only now.</p>
+            <p><strong>{{ __('One-time link to set the password') }}</strong>, {{ __('valid for :hours hours. Send it to :email yourself; it is shown only now.', ['hours' => intdiv(config('auth.passwords.users.expire'), 60), 'email' => $account->email]) }}</p>
             <p><code style="word-break: break-all">{{ session('password_link') }}</code></p>
         </div>
     @endif

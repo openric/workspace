@@ -123,12 +123,10 @@ Standing rules for every phase: vocabularies, never enums; every field names its
   - `lang/af.json` has 199 strings, 32 of them from Heratio; attribution is in `lang/README.md`.
 - **v0.0.51**: PSIS's archival English, in South African spelling, and correct Afrikaans, where PSIS's is correct and the right term where it is not.
 - **v0.0.52**: the staff screens' plain text, 946 strings in 106 views, wrapped by a script that masks all Blade and PHP code first. `lang/af.json` now has 780 strings: 62 from PSIS, 27 from Heratio, 691 written for the Workspace.
-- **Still to do**:
-  - 170 pieces of text mixed with values, in 79 views, written with placeholders by hand;
-  - the public relationship graph page and the hierarchy tree;
-  - the messages written in code;
-  - Laravel's validation messages;
-  - Afrikaans labels for the bundled vocabularies.
+- **v0.0.53**: the remaining text mixed with values, about 150 sentences with placeholders, including whole sentences for singular and plural and for a dry run and an import; English in PHP expressions; the public relationship graph and the hierarchy tree.
+  - The completeness test now also reads keys chosen at run time.
+  - `lang/af.json` has 993 strings: 62 from PSIS, 27 from Heratio, 904 written for the Workspace.
+- **Still to do**: the messages written in code (status messages and validation errors), Laravel's validation messages, and Afrikaans labels for the bundled vocabularies.
 
 Reuse was lower than hoped: only 32 of Heratio's Afrikaans strings carried over. Heratio's strings are keyed by its own English, which is mostly AtoM's, and the Workspace's screens were written in different English.
 

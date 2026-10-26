@@ -1,24 +1,24 @@
 {{-- OpenRiC Workspace - the relationship graph around an entity, drawn and as a list (WS-009). Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems. SPDX-License-Identifier: AGPL-3.0-or-later --}}
 @extends('layouts.public')
 @php($root = $graph->describe($entity->getAttribute('iri')))
-@section('title', 'Graph: '.$root['label'])
+@section('title', __('Graph: :name', ['name' => $root['label']]))
 @section('content')
-    <p><a href="{{ $root['url'] }}">Back to {{ $root['label'] }}</a></p>
-    <h1 id="graph-title">Relationships of {{ $root['label'] }}</h1>
-    <p>@if($depth === 1)One step out · <a href="{{ route('discover.graph', [$kind, $entity->getKey(), 'depth' => 2]) }}">Two steps out</a>@else<a href="{{ route('discover.graph', [$kind, $entity->getKey()]) }}">One step out</a> · Two steps out @endif
-        · <a href="#as-a-list">The graph as a list</a></p>
-    <p id="graph-desc" class="meta">{{ count($graph->nodes) }} entities and {{ count($graph->edges) }} relationships, each typed by its RiC-O class. Every entity opens its own description.
-        @if($graph->truncated) Not every relationship is drawn: the list below says which entities are shown.@endif</p>
+    <p><a href="{{ $root['url'] }}">{{ __('Back to :name', ['name' => $root['label']]) }}</a></p>
+    <h1 id="graph-title">{{ __('Relationships of :name', ['name' => $root['label']]) }}</h1>
+    <p>@if($depth === 1){{ __('One step out') }} · <a href="{{ route('discover.graph', [$kind, $entity->getKey(), 'depth' => 2]) }}">{{ __('Two steps out') }}</a>@else<a href="{{ route('discover.graph', [$kind, $entity->getKey()]) }}">{{ __('One step out') }}</a> · {{ __('Two steps out') }} @endif
+        · <a href="#as-a-list">{{ __('The graph as a list') }}</a></p>
+    <p id="graph-desc" class="meta">{{ __(':nodes entities and :edges relationships, each typed by its RiC-O class. Every entity opens its own description.', ['nodes' => count($graph->nodes), 'edges' => count($graph->edges)]) }}
+        @if($graph->truncated) {{ __('Not every relationship is drawn: the list below says which entities are shown.') }}@endif</p>
     {{-- The interactive viewer (@openric/viewer, as on openric.org): 2D, or 3D on request; the drawing below stays for a browser without JavaScript. --}}
     <div class="graph-viewer" hidden>
-        <p role="group" aria-label="View" style="margin: 0 0 .5rem">
+        <p role="group" aria-label="{{ __('View') }}" style="margin: 0 0 .5rem">
             <button type="button" data-mode="2d" aria-pressed="true">2D</button>
             <button type="button" data-mode="3d" aria-pressed="false">3D</button>
-            <button type="button" data-mode="picture" aria-pressed="false">Picture</button>
+            <button type="button" data-mode="picture" aria-pressed="false">{{ __('Picture') }}</button>
         </p>
         <div id="graph-canvas" aria-hidden="true" style="height: min(70vh, 40rem); background: #0f2328; border: 1px solid var(--line)"></div>
         <p class="meta" id="graph-key"></p>
-        <p class="meta">Drag to move, scroll or pinch to zoom; select an entity to open it. The list below gives the same relationships for a screen reader or keyboard.</p>
+        <p class="meta">{{ __('Drag to move, scroll or pinch to zoom; select an entity to open it. The list below gives the same relationships for a screen reader or keyboard.') }}</p>
     </div>
     <script type="application/json" id="graph-data">@json($graph->subgraph())</script>
     @php($positions = $graph->layout())
@@ -42,7 +42,7 @@
             @if($d['url'])</a>@endif
         @endforeach
     </svg>
-    <p class="meta">Colours:
+    <p class="meta">{{ __('Colours:') }}
         @foreach(['record' => 'units of description', 'agent' => 'people, families and organisations', 'repository' => 'repositories', 'place' => 'places', 'activity' => 'activities', 'concept' => 'subjects'] as $key => $what)
             <span style="white-space: nowrap"><svg width="12" height="12" aria-hidden="true" focusable="false" style="vertical-align: middle"><circle cx="6" cy="6" r="5" fill="{{ $colours[$key] }}" stroke="currentColor" stroke-width=".5"></circle></svg> {{ $what }}</span>@if(! $loop->last),@endif
         @endforeach</p>
@@ -91,7 +91,7 @@
     })();
     </script>
 
-    <h2 id="as-a-list">The graph as a list</h2>
+    <h2 id="as-a-list">{{ __('The graph as a list') }}</h2>
     <ul>
         @foreach($graph->edges as $edge)
             @php([$from, $to] = [$graph->describe($edge['from']), $graph->describe($edge['to'])])
@@ -101,7 +101,7 @@
                 @if($edge['term'])@include('description._ric', ['term' => $edge['term']])@endif</li>
         @endforeach
     </ul>
-    <h3>Entities</h3>
+    <h3>{{ __('Entities') }}</h3>
     <ul>
         @foreach($graph->nodes as $iri => $node)
             @php($d = $graph->describe($iri))

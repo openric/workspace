@@ -11,11 +11,11 @@
             <h2>{{ $kind->label(\App\Support\Vocab::languages()) }}</h2>
             <p><small>{{ $kind->labels->firstWhere('language', 'en')?->definition }}</small></p>
             @forelse($vocabularies[$kind->id] ?? [] as $vocabulary)
-                <p><a href="{{ route('vocabularies.show', $vocabulary) }}">{{ $vocabulary->title }}</a> ({{ $vocabulary->current_count }} {{ $vocabulary->current_count === 1 ? 'concept' : 'concepts' }}@if($vocabulary->concepts_count > $vocabulary->current_count), {{ $vocabulary->concepts_count - $vocabulary->current_count }} deprecated @endif)</p>
+                <p><a href="{{ route('vocabularies.show', $vocabulary) }}">{{ $vocabulary->title }}</a> ({{ __($vocabulary->current_count === 1 ? ':count concept' : ':count concepts', ['count' => $vocabulary->current_count]) }}@if($vocabulary->concepts_count > $vocabulary->current_count), {{ __(':count deprecated', ['count' => $vocabulary->concepts_count - $vocabulary->current_count]) }} @endif)</p>
             @empty
                 <p>{{ __('None yet.') }}</p>
             @endforelse
-            @if($canCreate)<p><a href="{{ route('vocabularies.create', ['kind' => $kind->notation]) }}">New vocabulary of {{ mb_strtolower($kind->label(\App\Support\Vocab::languages())) }}</a></p>@endif
+            @if($canCreate)<p><a href="{{ route('vocabularies.create', ['kind' => $kind->notation]) }}">{{ __('New vocabulary of :kind', ['kind' => mb_strtolower($kind->label(\App\Support\Vocab::languages()))]) }}</a></p>@endif
         </section>
     @endforeach
 @endsection

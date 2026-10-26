@@ -12,12 +12,12 @@
 @endphp
 @forelse($areas as $area => $shown)
     <details class="area" open>
-        <summary><h2>{{ $area }}</h2> <span class="meta">{{ $shown->count() }} of {{ count($all[$area]) }} described</span></summary>
+        <summary><h2>{{ $area }}</h2> <span class="meta">{{ __(':shown of :count described', ['shown' => $shown->count(), 'count' => count($all[$area])]) }}</span></summary>
         @foreach($shown as [$element, $values])
             <h3 style="margin-bottom: .2rem">{{ \App\Description\Elements::number($element) }} {{ $element->label(\App\Support\Vocab::languages()) }} @include('description._ric', ['term' => $element])</h3>
             @foreach($values as $value)
                 <p lang="{{ $value->language }}" style="margin: .2rem 0">{!! nl2br(e($value->value)) !!}</p>
-                <p style="margin: 0 0 .6rem"><small>{{ $value->language }}, {{ $value->is_original ? 'original' : 'translation' }}, {{ $value->state->label(\App\Support\Vocab::languages()) }}</small></p>
+                <p style="margin: 0 0 .6rem"><small>{{ $value->language }}, {{ __($value->is_original ? 'original' : 'translation') }}, {{ $value->state->label(\App\Support\Vocab::languages()) }}</small></p>
             @endforeach
         @endforeach
     </details>

@@ -8,8 +8,8 @@
     @if(session('status'))<p role="status">{{ session('status') }}</p>@endif
     @if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif
     @if($concept->deprecated_at)
-        <p role="note"><strong>{{ __('Deprecated') }}</strong> on {{ $concept->deprecated_at->format('Y-m-d') }}: kept, so what cites it stays readable, but no longer offered.
-            @if($concept->replacedBy) Replaced by <a href="{{ route('concepts.show', $concept->replacedBy) }}">{{ $concept->replacedBy->anyLabel(['en']) }}</a>.@endif</p>
+        <p role="note"><strong>{{ __('Deprecated') }}</strong> {{ __('on :date: kept, so what cites it stays readable, but no longer offered.', ['date' => $concept->deprecated_at->format('Y-m-d')]) }}
+            @if($concept->replacedBy) {{ __('Replaced by') }} <a href="{{ route('concepts.show', $concept->replacedBy) }}">{{ $concept->replacedBy->anyLabel(['en']) }}</a>.@endif</p>
     @endif
     <p><strong>{{ __('Persistent IRI') }}:</strong> <code>{{ $concept->iri }}</code>
         <br><strong>{{ __('Kind') }}:</strong> {{ $vocabulary->kind->label(\App\Support\Vocab::languages()) }}@if($concept->notation !== null)<br><strong>{{ __('Code') }}:</strong> {{ $concept->notation }}@endif</p>

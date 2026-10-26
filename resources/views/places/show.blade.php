@@ -4,15 +4,15 @@
 @section('content')
     <p><a href="{{ route('places.index') }}">{{ __('All places') }}</a>@foreach($place->ancestors() as $above) › <a href="{{ route('places.show', $above) }}">{{ $above->described('place-name', [app()->getLocale(), 'en']) }}</a>@endforeach</p>
     <h1>{{ $place->described('place-name', [app()->getLocale(), 'en']) }}</h1>
-    <p>Place @include('description._ric', ['term' => 'rico:Place'])</p>
+    <p>{{ __('Place') }} @include('description._ric', ['term' => 'rico:Place'])</p>
     @if(session('status'))<p role="status">{{ session('status') }}</p>@endif
     @if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif
     <p><strong>{{ __('Persistent IRI') }}:</strong> <code>{{ $place->iri }}</code>
-        <br><strong>{{ __('Place type') }}:</strong> {{ $place->placeType?->anyLabel(['en']) ?? 'not set' }}
+        <br><strong>{{ __('Place type') }}:</strong> {{ $place->placeType?->anyLabel(['en']) ?? __('not set') }}
         <br><strong>{{ __('Coordinates') }}:</strong>
         @if($place->latitude !== null){{ $place->latitude }}, {{ $place->longitude }}@if($place->altitude !== null), {{ $place->altitude }} m @endif (WGS 84)
             · <a href="https://www.openstreetmap.org/?mlat={{ $place->latitude }}&amp;mlon={{ $place->longitude }}#map=12/{{ $place->latitude }}/{{ $place->longitude }}" rel="noopener noreferrer">{{ __('Show on OpenStreetMap') }}</a>
-        @else not set @endif</p>
+        @else {{ __('not set') }} @endif</p>
     @php($canUpdate = auth()->user()->may('update', 'vocabulary', $place))
     @if($canUpdate)
         @include('description._actions', ['subject' => $place, 'editRoute' => 'places.edit', 'required' => 'place-name'])

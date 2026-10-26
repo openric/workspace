@@ -4,19 +4,19 @@
 @section('title', $own ? 'What you may do' : 'What '.$account->name.' may do')
 @section('content')
     <p>@if($own)<a href="{{ route('account.profile') }}">{{ __('Profile') }}</a>@else<a href="{{ route('accounts.show', $account) }}">{{ $account->name }}</a>@endif</p>
-    <h1>{{ $own ? 'What you may do' : 'What '.$account->name.' may do' }}</h1>
-    <p>From {{ $roles->map->name()->join(', ', ' and ') }}{{ $own ? '' : ', and the permissions set for this account alone' }}. A rule for one repository or one entry comes before a rule for everything, and a refusal before a grant at the same level.</p>
+    <h1>{{ $own ? __('What you may do') : __('What :name may do', ['name' => $account->name]) }}</h1>
+    <p>{{ $own ? __('From :roles.', ['roles' => $roles->map->name()->join(', ', ' '.__('and').' ')]) : __('From :roles, and the permissions set for this account alone.', ['roles' => $roles->map->name()->join(', ', ' '.__('and').' ')]) }} {{ __('A rule for one repository or one entry comes before a rule for everything, and a refusal before a grant at the same level.') }}</p>
     @foreach($kinds as $kind => $actions)
         <details class="area" @if($loop->first) open @endif>
-            <summary><h2>{{ ucfirst($kind) }}</h2> <span class="meta">{{ collect($actions)->where('anywhere', true)->count() }} of {{ count($actions) }} allowed somewhere</span></summary>
+            <summary><h2>{{ ucfirst($kind) }}</h2> <span class="meta">{{ __(':allowed of :count allowed somewhere', ['allowed' => collect($actions)->where('anywhere', true)->count(), 'count' => count($actions)]) }}</span></summary>
             <table>
                 <thead><tr><th>{{ __('Action') }}</th><th>{{ __('Somewhere') }}</th><th>{{ __('Rules') }}</th></tr></thead>
                 <tbody>
                 @foreach($actions as $action => ['anywhere' => $anywhere, 'rules' => $rules])
-                    <tr><td>{{ str_replace('-', ' ', $action) }}</td><td>{{ $anywhere ? 'Yes' : 'No' }}</td>
+                    <tr><td>{{ str_replace('-', ' ', $action) }}</td><td>{{ __($anywhere ? 'Yes' : 'No') }}</td>
                         <td>
                             @forelse($rules as $rule)
-                                {{ $rule['grant'] ? 'Granted' : 'Refused' }} {{ $rule['scope'] }} by {{ $rule['from'] }}<br>
+                                {{ __($rule['grant'] ? 'Granted' : 'Refused') }} {{ $rule['scope'] }} by {{ $rule['from'] }}<br>
                             @empty
                                 <span class="meta">{{ __('None') }}</span>
                             @endforelse

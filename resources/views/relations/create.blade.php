@@ -4,7 +4,7 @@
 @section('content')
     @php($name = \App\Relations\EntityKinds::label($subject))
     <p><a href="{{ \App\Relations\EntityKinds::route($subject) }}">{{ $name }}</a></p>
-    <h1>Add a relation to {{ $name }}</h1>
+    <h1>{{ __('Add a relation to :name', ['name' => $name]) }}</h1>
     @if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif
     <form method="get" action="{{ route('relations.create', [$kind, $subject->getKey()]) }}">
         <label for="relate">{{ $name }}</label>
@@ -33,7 +33,7 @@
                         {{ \App\Relations\EntityKinds::label($candidate) }}@if($candidate->identifier) ({{ $candidate->identifier }})@endif, {{ \App\Relations\EntityKinds::noun($candidate) }}</label>
                 @endforeach
                 @foreach($newKinds as $new)
-                    <label><input type="radio" name="other" value="{{ $new['value'] }}" required @checked($candidates->isEmpty() && $loop->first)> Make {{ $new['label'] }}, named below</label>
+                    <label><input type="radio" name="other" value="{{ $new['value'] }}" required @checked($candidates->isEmpty() && $loop->first)> {{ __('Make :kind, named below', ['kind' => $new['label']]) }}</label>
                 @endforeach
             </fieldset>
             @if($newKinds !== [])

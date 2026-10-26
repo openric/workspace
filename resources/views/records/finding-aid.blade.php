@@ -2,11 +2,11 @@
 @extends('layouts.app')
 @section('title', ($withInside ? 'Finding aid: ' : '').$record->described('title', ['en']))
 @section('content')
-    <p class="no-print"><a href="{{ route('records.show', $record) }}">Back to {{ $record->described('title', ['en']) }}</a>
+    <p class="no-print"><a href="{{ route('records.show', $record) }}">{{ __('Back to :name', ['name' => $record->described('title', ['en'])]) }}</a>
         @if(auth()->user()->may('view-draft', 'description', $record))
             · @if($drafts)<a href="{{ url()->current() }}">{{ __('Published values only') }}</a>@else<a href="{{ url()->current() }}?drafts=1">{{ __('Include draft records') }}</a>@endif
         @endif</p>
-    <p class="no-print"><small>{{ $drafts ? 'Drafts are included.' : 'Published values only.' }} Use your browser's print command; the menu is left out of the printout.</small></p>
+    <p class="no-print"><small>{{ $drafts ? __('Drafts are included.') : __('Published values only.') }} {{ __('Use your browser\'s print command; the menu is left out of the printout.') }}</small></p>
     @php($published = \App\Support\Vocab::valueState('published'))
     @foreach($units as [$unit, $depth])
         <section style="margin-left: {{ min($depth, 6) }}rem; {{ $depth ? 'border-top: 1px solid var(--line); margin-top: 1rem' : '' }}">

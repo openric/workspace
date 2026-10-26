@@ -21,7 +21,7 @@
                         {{ \Illuminate\Support\Str::limit((string) $child->described('title', ['en']), 28) }}</a></li>
                 @endforeach
             </ul>
-            @if($childThumbnails['total'] > $childThumbnails['tiles']->count())<p class="meta">Showing {{ $childThumbnails['tiles']->count() }} of {{ $childThumbnails['total'] }} pictures of the units inside.</p>@endif
+            @if($childThumbnails['total'] > $childThumbnails['tiles']->count())<p class="meta">{{ __('Showing :shown of :total pictures of the units inside.', ['shown' => $childThumbnails['tiles']->count(), 'total' => $childThumbnails['total']]) }}</p>@endif
         </section>
     @endif
     @if($preview->isNotEmpty())
@@ -36,7 +36,7 @@
     @include('clipboard._button', ['type' => 'records', 'id' => $record->id])
     @if(session('status'))<p role="status">{{ session('status') }}</p>@endif
     @if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif
-    <p>{{ $record->level->label(\App\Support\Vocab::languages()) }} @include('description._ric', ['term' => \App\Relations\EntityKinds::ricClass($record)])@if($record->referenceCode()), {{ $record->referenceCode() }}@endif. Held by <a href="{{ route('repositories.show', $record->repository) }}">{{ $record->repository->described('authorised-name', ['en']) }}</a>.<br>
+    <p>{{ $record->level->label(\App\Support\Vocab::languages()) }} @include('description._ric', ['term' => \App\Relations\EntityKinds::ricClass($record)])@if($record->referenceCode()), {{ $record->referenceCode() }}@endif{{ __('. Held by') }} <a href="{{ route('repositories.show', $record->repository) }}">{{ $record->repository->described('authorised-name', ['en']) }}</a>.<br>
        <strong>{{ __('Persistent IRI') }}:</strong> <code>{{ $record->iri }}</code></p>
     <p><a href="{{ route('records.tree', $record) }}">{{ __('Hierarchy') }}</a> · <a href="{{ route('records.inventory', $record) }}">{{ __('Inventory') }}</a> · <a href="{{ route('records.finding-aid', $record) }}">{{ __('Finding aid') }}</a> · <a href="{{ route('records.print', $record) }}">{{ __('Print view') }}</a> · <a href="{{ route('records.export', $record) }}">{{ __('Export') }}</a>
        @if($canUpdate) · <a href="{{ route('history', ['records', $record->id]) }}">{{ __('History') }}</a>
@@ -52,9 +52,11 @@
     @include('records._provenance', ['record' => $record, 'relations' => $relations])
     @include('records._instantiations', ['record' => $record, 'canUpdate' => $canUpdate])
     <h2>{{ __('Description control') }}</h2>
-    <p>Description identifier: {{ $record->description_identifier ?? 'none' }}. Status: {{ $record->descriptionStatus?->label(\App\Support\Vocab::languages()) ?? 'not set' }}. Level of detail: {{ $record->descriptionDetail?->label(\App\Support\Vocab::languages()) ?? 'not set' }}.</p>
+    <p>{{ __('Description identifier') }}: {{ $record->description_identifier ?? __('none') }}.
+        {{ __('Status') }}: {{ $record->descriptionStatus?->label(\App\Support\Vocab::languages()) ?? __('not set') }}.
+        {{ __('Level of detail') }}: {{ $record->descriptionDetail?->label(\App\Support\Vocab::languages()) ?? __('not set') }}.</p>
     <h2>{{ __('Cite as') }}</h2>
-    <p>{{ collect([$record->described('title', ['en']), $record->referenceCode(), $record->repository->described('authorised-name', ['en'])])->filter()->join(', ') }}. {{ $record->iri }} (accessed {{ now()->format('j F Y') }}).</p>
+    <p>{{ collect([$record->described('title', ['en']), $record->referenceCode(), $record->repository->described('authorised-name', ['en'])])->filter()->join(', ') }}. {{ $record->iri }} ({{ __('accessed :date', ['date' => now()->translatedFormat('j F Y')]) }}).</p>
 
     @include('description._names', ['subject' => $record, 'kind' => 'records', 'canUpdate' => $canUpdate, 'drafts' => $drafts])
     @include('description._identifiers', ['subject' => $record, 'kind' => 'records', 'canUpdate' => $canUpdate])

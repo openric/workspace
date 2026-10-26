@@ -7,7 +7,7 @@
        <strong>{{ __('In scheme') }}:</strong> <a href="{{ $concept->vocabulary->iri }}">{{ $concept->vocabulary->title }}</a>
        @if($concept->broader)<br><strong>{{ __('Broader') }}:</strong> <a href="{{ $concept->broader->iri }}">{{ $concept->broader->notation }}</a>@endif</p>
     @if($concept->deprecated_at)
-        <p>Deprecated.@if($concept->replacedBy) Use <a href="{{ $concept->replacedBy->iri }}">{{ $concept->replacedBy->notation }}</a> instead.@endif</p>
+        <p>{{ __('Deprecated.') }}@if($concept->replacedBy) {{ __('Use') }} <a href="{{ $concept->replacedBy->iri }}">{{ $concept->replacedBy->notation }}</a> {{ __('instead.') }}@endif</p>
     @endif
     @foreach($concept->labels as $label)
         <p lang="{{ $label->language }}">{{ $label->definition }}</p>

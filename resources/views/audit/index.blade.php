@@ -11,7 +11,7 @@
             <tr>
                 <td>{{ \Illuminate\Support\Carbon::parse($row->occurred_at)->utc()->format('Y-m-d H:i:s') }}</td>
                 <td>{{ $row->action }}</td>
-                <td>{{ $row->actor ?? 'the system' }}</td>
+                <td>{{ $row->actor ?? __('the system') }}</td>
                 <td>{{ $row->subject_table }}</td>
                 <td>{{ $row->ip }}</td>
             </tr>

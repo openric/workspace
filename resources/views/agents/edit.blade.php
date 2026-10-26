@@ -3,7 +3,7 @@
 @section('title', __('Describe authority record'))
 @section('content')
     <p><a href="{{ route('agents.show', $agent) }}">{{ __('Back to the authority record') }}</a></p>
-    <h1>Describe {{ $agent->described('agent-authorised-name', [$language, 'en']) }}</h1>
+    <h1>{{ __('Describe :name', ['name' => $agent->described('agent-authorised-name', [$language, 'en'])]) }}</h1>
     <p>{{ __('Values in') }} <strong>{{ $language }}</strong>{{ __('. Fill in what you know; empty fields are left out. A value you change goes back to draft. Dates, places, occupations, legal statuses and relationships are kept as dates and relations on the record\'s page; the fields here are their narrative.') }}</p>
     <form method="post" action="{{ route('agents.update', $agent) }}">
         @csrf

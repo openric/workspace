@@ -1,7 +1,7 @@
 {{-- OpenRiC Workspace - the identifiers of a described entity, as rico:Identifier entities (ADR 0006). Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems. SPDX-License-Identifier: AGPL-3.0-or-later --}}
 {{-- Needs: $subject (HasIdentifiers), $kind (URL segment), $canUpdate. The local identifier is also set on the description form. --}}
 @php($identifierTypes = \App\Models\Concept::choices(\App\Support\Vocab::IDENTIFIER_TYPES)->get())
-<h2>Identifiers @include('description._ric', ['term' => 'rico:Identifier'])</h2>
+<h2>{{ __('Identifiers') }} @include('description._ric', ['term' => 'rico:Identifier'])</h2>
 @forelse($subject->identifiers as $identifier)
     @php($summary = $identifier->identifierType->label(\App\Support\Vocab::languages()).': '.$identifier->value)
     @unless($canUpdate)

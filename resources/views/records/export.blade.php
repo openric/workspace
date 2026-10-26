@@ -1,9 +1,9 @@
 {{-- OpenRiC Workspace - export a unit of description. Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems. SPDX-License-Identifier: AGPL-3.0-or-later --}}
 @extends('layouts.app')
-@section('title', 'Export '.$record->described('title', ['en']))
+@section('title', __('Export :name', ['name' => $record->described('title', ['en'])]))
 @section('content')
-    <p><a href="{{ route('records.show', $record) }}">Back to {{ $record->described('title', ['en']) }}</a></p>
-    <h1>Export {{ $record->described('title', ['en']) }}</h1>
+    <p><a href="{{ route('records.show', $record) }}">{{ __('Back to :name', ['name' => $record->described('title', ['en'])]) }}</a></p>
+    <h1>{{ __('Export :name', ['name' => $record->described('title', ['en'])]) }}</h1>
     <p>{{ __('Only the units inside it that you may read are exported. Only accepted or disputed relations are exported, and only those whose other end you may read.') }}</p>
     @foreach($formats as $format => [$name, $holds])
         <form method="get" action="{{ route('records.export.download', [$record, $format]) }}">
@@ -23,7 +23,7 @@
                 @if($mayDrafts)
                     <p><label><input type="checkbox" name="drafts" value="1"> {{ __('Include draft records') }}</label> <small>{{ __('Otherwise only published values and names are exported.') }}</small></p>
                 @endif
-                <button type="submit">Download {{ $name }}</button>
+                <button type="submit">{{ __('Download :name', ['name' => $name]) }}</button>
             </fieldset>
         </form>
     @endforeach

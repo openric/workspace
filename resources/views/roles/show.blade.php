@@ -8,7 +8,7 @@
     @if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif
 
     <h2>{{ __('Permissions') }}</h2>
-    <p>What members of this role may do, for each kind of record. Inherited from {{ $role->parent?->name() ?? 'nothing' }} as well.</p>
+    <p>{{ $role->parent ? __('What members of this role may do, for each kind of record. Inherited from :role as well.', ['role' => $role->parent->name()]) : __('What members of this role may do, for each kind of record.') }}</p>
     <ul>
         @foreach($kinds as $kind)
             <li><a href="{{ route('roles.permissions', [$role, $kind->notation]) }}">{{ $kind->label(\App\Support\Vocab::languages()) }}</a></li>
@@ -17,12 +17,12 @@
 
     <h2>{{ __('Members') }}</h2>
     @if($role->is_system)
-        <p>{{ $role->isTemplate('public') ? 'Everyone belongs to this role, signed in or not.' : 'Every signed-in account belongs to this role.' }}</p>
+        <p>{{ __($role->isTemplate('public') ? 'Everyone belongs to this role, signed in or not.' : 'Every signed-in account belongs to this role.') }}</p>
     @else
         @forelse($role->members as $member)
             <form method="post" action="{{ route('roles.members.remove', [$role, $member]) }}">
                 @csrf
-                <a href="{{ route('accounts.show', $member) }}">{{ $member->name }}</a> ({{ $member->email }})@if($member->isDisabled()) <small>disabled</small>@endif
+                <a href="{{ route('accounts.show', $member) }}">{{ $member->name }}</a> ({{ $member->email }})@if($member->isDisabled()) <small>{{ __('disabled') }}</small>@endif
                 <button type="submit">{{ __('Remove from role') }}</button>
             </form>
         @empty

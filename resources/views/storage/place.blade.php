@@ -13,7 +13,7 @@
         <ul>@foreach($children as $child)<li><a href="{{ route('storage.place', $child) }}">{{ $child->described('place-name', ['en']) }}</a> ({{ mb_strtolower((string) $child->placeType?->anyLabel(['en'])) }})</li>@endforeach</ul>
     @endif
 
-    <h2>Containers kept here ({{ $here->count() }}) @include('description._ric', ['term' => 'rico:isOrWasLocationOf'])</h2>
+    <h2>{{ __('Containers kept here (:count)', ['count' => $here->count()]) }} @include('description._ric', ['term' => 'rico:isOrWasLocationOf'])</h2>
     @if($here->isEmpty())
         <p>{{ __('None.') }}</p>
     @else
@@ -37,11 +37,11 @@
             @endif
         </form>
     @endif
-    @if($below->count() > $here->count())<p>{{ $below->count() - $here->count() }} more in the places inside it.</p>@endif
+    @if($below->count() > $here->count())<p>{{ __(':count more in the places inside it.', ['count' => $below->count() - $here->count()]) }}</p>@endif
 
     @if($capacity !== [])
         <h2>{{ __('Capacity, here and below') }}</h2>
-        <ul>@foreach($capacity as $unit => $sum)<li>{{ rtrim(rtrim(number_format($sum['used'], 2, '.', ''), '0'), '.') }} of {{ rtrim(rtrim(number_format($sum['capacity'], 2, '.', ''), '0'), '.') }} {{ mb_strtolower($unit) }} used</li>@endforeach</ul>
+        <ul>@foreach($capacity as $unit => $sum)<li>{{ __(':used of :capacity :unit used', ['used' => rtrim(rtrim(number_format($sum['used'], 2, '.', ''), '0'), '.'), 'capacity' => rtrim(rtrim(number_format($sum['capacity'], 2, '.', ''), '0'), '.'), 'unit' => mb_strtolower($unit)]) }}</li>@endforeach</ul>
     @endif
 
     @if($mayMove && $unplaced->isNotEmpty())
@@ -62,7 +62,7 @@
     @forelse($history as [$relation, $container])
         @php($from = $relation->datedAs('beginning')?->normalized_value)
         @php($to = $relation->datedAs('end')?->normalized_value)
-        <p>@if($container)<a href="{{ route('containers.show', $container) }}">{{ $container->described('container-name', ['en']) }}</a>@else A container since deleted @endif: here from {{ $from ?? '?' }} {{ $to ? 'to '.$to : 'until now' }}@if($relation->description). {{ $relation->description }}@endif</p>
+        <p>@if($container)<a href="{{ route('containers.show', $container) }}">{{ $container->described('container-name', ['en']) }}</a>@else {{ __('A container since deleted') }} @endif: {{ $to ? __('here from :from to :to', ['from' => $from ?? '?', 'to' => $to]) : __('here from :from until now', ['from' => $from ?? '?']) }}@if($relation->description). {{ $relation->description }}@endif</p>
     @empty
         <p>{{ __('No container has been kept here.') }}</p>
     @endforelse

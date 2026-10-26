@@ -2,7 +2,7 @@
 @extends('layouts.app')
 @section('title', __('Storage'))
 @section('content')
-    <h1>Containers @include('description._ric', ['term' => 'openricx:Container'])</h1>
+    <h1>{{ __('Containers') }} @include('description._ric', ['term' => 'openricx:Container'])</h1>
     @if(session('status'))<p role="status">{{ session('status') }}</p>@endif
     @if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif
     <p>{{ __('The boxes, folders and drawers records are kept in, and where each is kept. Storage is for staff: none of it is public.') }}</p>
@@ -31,12 +31,12 @@
             </tbody>
         </table>
     @else
-        <p>{{ $query !== '' || $type !== '' || $unplaced ? 'No container matches.' : 'No containers yet.' }}</p>
+        <p>{{ __($query !== '' || $type !== '' || $unplaced ? 'No container matches.' : 'No containers yet.') }}</p>
     @endif
     @if($containers->hasPages())
         <nav aria-label="{{ __('Pages') }}"><p>
             @if($containers->previousPageUrl())<a href="{{ $containers->previousPageUrl() }}" rel="prev">{{ __('Previous') }}</a>@endif
-            Page {{ $containers->currentPage() }} of {{ $containers->lastPage() }}
+            {{ __('Page :page of :pages', ['page' => $containers->currentPage(), 'pages' => $containers->lastPage()]) }}
             @if($containers->nextPageUrl())<a href="{{ $containers->nextPageUrl() }}" rel="next">{{ __('Next') }}</a>@endif
         </p></nav>
     @endif

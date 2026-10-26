@@ -1,11 +1,11 @@
 {{-- OpenRiC Workspace - a container's box list, to print and keep in it. Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems. SPDX-License-Identifier: AGPL-3.0-or-later --}}
 @extends('layouts.app')
-@section('title', 'Box list: '.$container->described('container-name', ['en']))
+@section('title', __('Box list: :name', ['name' => $container->described('container-name', ['en'])]))
 @section('content')
     <p class="no-print"><a href="{{ route('containers.show', $container) }}">{{ __('Back to the container') }}</a> · <a href="#" onclick="window.print(); return false">{{ __('Print') }}</a></p>
     <style>@media print { .no-print, nav, header, footer { display: none !important } }</style>
     <h1>{{ $container->described('container-name', ['en']) }}</h1>
-    <p>{{ collect([$container->containerType?->anyLabel(['en']), $container->identifier, $path])->filter()->join(', ') }}. {{ $units->count() }} {{ $units->count() === 1 ? 'unit' : 'units' }} of description, listed {{ now()->format('j F Y') }}.</p>
+    <p>{{ collect([$container->containerType?->anyLabel(['en']), $container->identifier, $path])->filter()->join(', ') }}. {{ __($units->count() === 1 ? ':count unit of description, listed :date.' : ':count units of description, listed :date.', ['count' => $units->count(), 'date' => now()->translatedFormat('j F Y')]) }}</p>
     @if($units->isEmpty())
         <p>{{ __('It holds no unit of description.') }}</p>
     @else

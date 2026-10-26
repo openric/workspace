@@ -1,9 +1,9 @@
 {{-- OpenRiC Workspace - the units inside a unit, as a list. Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems. SPDX-License-Identifier: AGPL-3.0-or-later --}}
 @extends('layouts.app')
-@section('title', 'Inventory of '.$record->described('title', ['en']))
+@section('title', __('Inventory of :name', ['name' => $record->described('title', ['en'])]))
 @section('content')
-    <p><a href="{{ route('records.show', $record) }}">Back to {{ $record->described('title', ['en']) }}</a></p>
-    <h1>Inventory of {{ $record->described('title', ['en']) }}</h1>
+    <p><a href="{{ route('records.show', $record) }}">{{ __('Back to :name', ['name' => $record->described('title', ['en'])]) }}</a></p>
+    <h1>{{ __('Inventory of :name', ['name' => $record->described('title', ['en'])]) }}</h1>
     @if($rows === [])
         <p>{{ __('No units inside it.') }}</p>
     @else

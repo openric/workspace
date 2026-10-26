@@ -3,7 +3,7 @@
 @section('title', __('Describe place'))
 @section('content')
     <p><a href="{{ route('places.show', $place) }}">{{ __('Back to the place') }}</a></p>
-    <h1>Describe {{ $place->described('place-name', [$language, 'en']) }}</h1>
+    <h1>{{ __('Describe :name', ['name' => $place->described('place-name', [$language, 'en'])]) }}</h1>
     <p>{{ __('Values in') }} <strong>{{ $language }}</strong>{{ __('. Fill in what you know; empty fields are left out. A value you change goes back to draft.') }}</p>
     <form method="post" action="{{ route('places.update', $place) }}">
         @csrf

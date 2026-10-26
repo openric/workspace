@@ -35,12 +35,12 @@
             ({{ collect([$unit->level->label(\App\Support\Vocab::languages()), $unit->referenceCode(), $unit->parent ? 'in '.$unit->parent->described('title', ['en']) : null, $unit->repository->described('authorised-name', ['en'])])->filter()->join(', ') }})
             @include('description._row-actions', ['entity' => $unit])</p>
     @empty
-        <p>{{ $query !== '' ? 'No unit of description matches.' : 'No archival descriptions yet.' }}</p>
+        <p>{{ __($query !== '' ? 'No unit of description matches.' : 'No archival descriptions yet.') }}</p>
     @endforelse
     @if($units->hasPages())
         <nav aria-label="{{ __('Pages') }}"><p>
             @if($units->previousPageUrl())<a href="{{ $units->previousPageUrl() }}" rel="prev">{{ __('Previous') }}</a>@endif
-            Page {{ $units->currentPage() }} of {{ $units->lastPage() }}
+            {{ __('Page :page of :pages', ['page' => $units->currentPage(), 'pages' => $units->lastPage()]) }}
             @if($units->nextPageUrl())<a href="{{ $units->nextPageUrl() }}" rel="next">{{ __('Next') }}</a>@endif
         </p></nav>
     @endif

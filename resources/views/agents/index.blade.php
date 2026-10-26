@@ -32,12 +32,12 @@
         <p><a href="{{ route('agents.show', $agent) }}">{{ $agent->described('agent-authorised-name', [app()->getLocale(), 'en']) }}</a>{{ collect([$agent->agentType->label(\App\Support\Vocab::languages()), $agent->identifier, $agent->descriptionStatus?->label(\App\Support\Vocab::languages()), $agent->isEmbargoed() ? 'embargoed until '.$agent->embargo_until->format('Y-m-d') : null])->filter()->map(fn ($s) => ', '.$s)->join('') }}
             @include('description._row-actions', ['entity' => $agent])</p>
     @empty
-        <p>{{ $query !== '' || $type !== '' || $status !== '' ? 'No authority record matches.' : 'No authority records yet.' }}</p>
+        <p>{{ __($query !== '' || $type !== '' || $status !== '' ? 'No authority record matches.' : 'No authority records yet.') }}</p>
     @endforelse
     @if($agents->hasPages())
         <nav aria-label="{{ __('Pages') }}"><p>
             @if($agents->previousPageUrl())<a href="{{ $agents->previousPageUrl() }}" rel="prev">{{ __('Previous') }}</a>@endif
-            Page {{ $agents->currentPage() }} of {{ $agents->lastPage() }}
+            {{ __('Page :page of :pages', ['page' => $agents->currentPage(), 'pages' => $agents->lastPage()]) }}
             @if($agents->nextPageUrl())<a href="{{ $agents->nextPageUrl() }}" rel="next">{{ __('Next') }}</a>@endif
         </p></nav>
     @endif

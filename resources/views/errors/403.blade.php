@@ -4,5 +4,5 @@
 @section('content')
     <h1>{{ __('Access denied') }}</h1>
     <p>{{ __('Your roles do not allow this. An administrator can give you a role that does, or set a permission for your account under Roles and permissions.') }}</p>
-    <p><a href="{{ auth()->check() ? route('home') : route('sign-in') }}">{{ auth()->check() ? 'Back to Home' : 'Sign in' }}</a></p>
+    <p><a href="{{ auth()->check() ? route('home') : route('sign-in') }}">{{ __(auth()->check() ? 'Back to :name' : 'Log in', ['name' => __('Home')]) }}</a></p>
 @endsection

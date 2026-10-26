@@ -3,7 +3,7 @@
 @section('title', __('New activity'))
 @section('content')
     <p><a href="{{ route('activities.index') }}">{{ __('Back') }}</a></p>
-    <h1>New activity @include('description._ric', ['term' => 'rico:Activity'])</h1>
+    <h1>{{ __('New activity') }} @include('description._ric', ['term' => 'rico:Activity'])</h1>
     <form method="post" action="{{ route('activities.store') }}">
         @csrf
         @if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif

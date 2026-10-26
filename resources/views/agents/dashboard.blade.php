@@ -4,7 +4,7 @@
 @section('content')
     <p><a href="{{ route('agents.index') }}">{{ __('Authority records') }}</a></p>
     <h1>{{ __('Authority records dashboard') }}</h1>
-    <p>{{ $agents->count() }} {{ $agents->count() === 1 ? 'authority record' : 'authority records' }}.</p>
+    <p>{{ $agents->count() }} {{ __($agents->count() === 1 ? 'authority record' : 'authority records') }}.</p>
     <div style="display: flex; gap: 3rem; flex-wrap: wrap">
         <section><h2>{{ __('By type of entity') }}</h2>@forelse($byType as $label => $n)<p>{{ $label }}: {{ $n }}</p>@empty<p>{{ __('None.') }}</p>@endforelse</section>
         <section><h2>{{ __('By status') }}</h2>@forelse($byStatus as $label => $n)<p>{{ $label }}: {{ $n }}</p>@empty<p>{{ __('None.') }}</p>@endforelse</section>
@@ -12,7 +12,7 @@
     <h2>{{ __('Work queue') }}</h2>
     <p>{{ __('Records that lack an ISAAR(CPF) essential element, the least complete first.') }}</p>
     @forelse($queue as $agent)
-        <p><a href="{{ route('agents.show', $agent) }}">{{ $agent->described('agent-authorised-name', ['en']) }}</a>: {{ $completeness[$agent->id]['percent'] }}% complete; missing {{ implode(', ', $completeness[$agent->id]['missing']) }}
+        <p><a href="{{ route('agents.show', $agent) }}">{{ $agent->described('agent-authorised-name', ['en']) }}</a>: {{ __(':percent% complete; missing :missing', ['percent' => $completeness[$agent->id]['percent'], 'missing' => implode(', ', $completeness[$agent->id]['missing'])]) }}
             @include('description._row-actions', ['entity' => $agent])</p>
     @empty
         <p>{{ __('Every record has its essential elements.') }}</p>

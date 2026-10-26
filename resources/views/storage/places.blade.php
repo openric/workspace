@@ -3,11 +3,11 @@
 @section('title', __('Physical storage'))
 @section('content')
     @include('storage._nav')
-    <h1>Storage places @include('description._ric', ['term' => 'rico:Place'])</h1>
+    <h1>{{ __('Physical storage') }} @include('description._ric', ['term' => 'rico:Place'])</h1>
     @if(session('status'))<p role="status">{{ session('status') }}</p>@endif
     @if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif
-    <p>Buildings, strongrooms, aisles, bays and shelves, each a place of a storage place type. They are kept apart from the places records are about, and none is public unless someone publishes it.
-        @if($unplaced > 0)<a href="{{ route('containers.index', ['unplaced' => 1]) }}">{{ $unplaced }} {{ $unplaced === 1 ? 'container is' : 'containers are' }} kept nowhere yet.</a>@endif</p>
+    <p>{{ __('Buildings, strongrooms, aisles, bays and shelves, each a place of a storage place type. They are kept apart from the places records are about, and none is public unless someone publishes it.') }}
+        @if($unplaced > 0)<a href="{{ route('containers.index', ['unplaced' => 1]) }}">{{ __($unplaced === 1 ? ':count container is kept nowhere yet.' : ':count containers are kept nowhere yet.', ['count' => $unplaced]) }}</a>@endif</p>
     @php
     $tree = function ($parent) use (&$tree, $byParent, $storage) {
         $items = $byParent[$parent] ?? collect();

@@ -4,7 +4,7 @@
 @section('title', $own ? 'Edit your profile' : 'Edit '.$account->name)
 @section('content')
     <p>@if($own)<a href="{{ route('account.profile') }}">{{ __('Profile') }}</a>@else<a href="{{ route('accounts.show', $account) }}">{{ $account->name }}</a>@endif</p>
-    <h1>{{ $own ? 'Edit your profile' : 'Edit '.$account->name }}</h1>
+    <h1>{{ $own ? __('Edit profile') : __('Edit :name', ['name' => $account->name]) }}</h1>
     @if(session('status'))<p role="status">{{ session('status') }}</p>@endif
     @if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif
 

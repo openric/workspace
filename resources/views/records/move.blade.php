@@ -3,7 +3,7 @@
 @section('title', __('Move'))
 @section('content')
     <p><a href="{{ route('records.show', $record) }}">{{ __('Back') }}</a></p>
-    <h1>Move "{{ $record->described('title', ['en']) }}"</h1>
+    <h1>{{ __('Move ":name"', ['name' => $record->described('title', ['en'])]) }}</h1>
     <p>{{ __('Its persistent IRI does not change. A unit cannot move under itself or anything inside it, so those are not offered.') }}</p>
     <form method="post" action="{{ route('records.move', $record) }}">
         @csrf

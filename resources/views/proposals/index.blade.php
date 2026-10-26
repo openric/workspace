@@ -27,13 +27,13 @@
                 <h3 style="font-size: 1.05rem">
                     @php($heading = $p->kind->label(\App\Support\Vocab::languages()).($k === 'value' ? ': '.$p->element->label(\App\Support\Vocab::languages()) : '').($k === 'agent' && $p->agentType ? ' ('.mb_strtolower($p->agentType->label(\App\Support\Vocab::languages())).')' : ''))
                     {{ $heading }}
-                    for <a href="{{ route('records.show', $p->record) }}">{{ \App\Relations\EntityKinds::label($p->record) }}</a>
+                    {{ __('for') }} <a href="{{ route('records.show', $p->record) }}">{{ \App\Relations\EntityKinds::label($p->record) }}</a>
                     <small>(<a href="{{ route('proposals.index', ['record' => $p->record_resource_id, 'status' => $status]) }}">{{ __('all for this record') }}</a>)</small>
                 </h3>
                 @php($facts = array_filter(['Proposed by '.$p->proposedBy->name.', through '.$p->origin_label.', '.$p->created_at->format('Y-m-d H:i'),
                     $p->confidence !== null ? 'confidence '.number_format($p->confidence, 2) : null, $p->language ? 'language '.$p->language : null]))
                 <p><small>{{ implode('; ', $facts) }}
-                    @if($k === 'transcript' && $p->instantiation); of <a href="{{ route('instantiations.show', $p->instantiation) }}">{{ $p->instantiation->described('instantiation-title', ['en']) ?? 'the instantiation' }}</a> @endif
+                    @if($k === 'transcript' && $p->instantiation); {{ __('of') }} <a href="{{ route('instantiations.show', $p->instantiation) }}">{{ $p->instantiation->described('instantiation-title', ['en']) ?? __('the instantiation') }}</a> @endif
                 </small></p>
                 @if($p->evidence)<p><strong>{{ __('Evidence') }}:</strong> {{ $p->evidence }}</p>@endif
                 @if($p->sources)<p><strong>{{ __('Sources') }}:</strong> @foreach($p->sources as $url) <a href="{{ $url }}" rel="noopener noreferrer nofollow">{{ $url }}</a> @endforeach</p>@endif
@@ -43,7 +43,7 @@
                 @if($p->status->notation === 'proposed')
                     <form method="post" action="{{ route('proposals.accept', $p) }}">
                         @csrf
-                        <label>Text to write
+                        <label>{{ __('Text to write') }}
                             @if(in_array($k, ['value', 'transcript'], true))
                                 <textarea name="value" rows="{{ $k === 'transcript' ? 10 : 4 }}" style="width: 100%">{{ old('value', $p->value) }}</textarea>
                             @else
@@ -61,9 +61,9 @@
                                 <legend>{{ __('Link it to') }}</legend>
                                 @if($p->linked_id)
                                     @php($proposed = ($k === 'agent' ? \App\Models\Agent::class : \App\Models\Place::class)::find($p->linked_id))
-                                    @if($proposed)<label><input type="radio" name="link" value="{{ $proposed->id }}" checked> the proposed {{ $k === 'agent' ? 'authority record' : 'place' }}: <a href="{{ route($k === 'agent' ? 'agents.show' : 'places.show', $proposed) }}">{{ \App\Relations\EntityKinds::label($proposed) }}</a></label><br>@endif
+                                    @if($proposed)<label><input type="radio" name="link" value="{{ $proposed->id }}" checked> {{ __($k === 'agent' ? 'the proposed authority record' : 'the proposed place') }}: <a href="{{ route($k === 'agent' ? 'agents.show' : 'places.show', $proposed) }}">{{ \App\Relations\EntityKinds::label($proposed) }}</a></label><br>@endif
                                 @endif
-                                <label><input type="radio" name="link" value="new" @checked(! $p->linked_id)> a new {{ $k === 'agent' ? 'authority record' : 'place' }} of this name</label>
+                                <label><input type="radio" name="link" value="new" @checked(! $p->linked_id)> {{ __($k === 'agent' ? 'a new authority record of this name' : 'a new place of this name') }}</label>
                                 @if($k === 'agent')
                                     <select name="agent_type" aria-label="{{ __('Type of the new authority record') }}">@foreach($agentTypes as $type)<option value="{{ $type->notation }}" @selected($type->id === $p->agent_type_id)>{{ $type->label(\App\Support\Vocab::languages()) }}</option>@endforeach</select>
                                 @endif
@@ -98,7 +98,7 @@
                     {{ config('workspace.relation_types.'.$a->relation->relationType->notation.'.forward') }}
                     @if($to)<a href="{{ \App\Relations\EntityKinds::route($to) }}">{{ \App\Relations\EntityKinds::label($to) }}</a>@endif
                 </h3>
-                <p><small>Proposed by {{ $a->asserter() }}, {{ $a->asserted_at->format('Y-m-d H:i') }} @if($record), from <a href="{{ route('records.show', $record) }}">{{ \App\Relations\EntityKinds::label($record) }}</a>@endif</small></p>
+                <p><small>{{ __('Proposed by :name, :date', ['name' => $a->asserter(), 'date' => $a->asserted_at->format('Y-m-d H:i')]) }} @if($record), {{ __('from') }} <a href="{{ route('records.show', $record) }}">{{ \App\Relations\EntityKinds::label($record) }}</a>@endif</small></p>
                 @if($a->basis)<p style="white-space: pre-line"><strong>{{ __('Basis') }}:</strong> {{ $a->basis }}</p>@endif
                 @if($a->status->notation === 'proposed')
                     <form method="post" action="{{ route('proposals.relation', $a) }}" style="display: flex; gap: .5rem">

@@ -15,7 +15,7 @@ The Afrikaans takes PSIS's translation where it is correct archival Afrikaans, a
 ## af.json (Afrikaans)
 
 - 62 are PSIS's (AtoM's) Afrikaans for PSIS's English, taken where it is correct archival Afrikaans; four were corrected (Address: Adres, not "Addres"; All: Alle, not "Almal"; Description identifier: Beskrywingsidentifiseerder; Clipboard ID: Knipbord-ID), as was the capital W of Bevestig wagwoord. They are AtoM translators' work under the same notice as below.
-- 691 were written for the Workspace, in its own wording where PSIS has none, for review by Dr Johan Pieterse.
+- 904 were written for the Workspace, in its own wording where PSIS has none, for review by Dr Johan Pieterse.
 - 27 come from Heratio's `lang/af.json` (heratio-dev `4131171e4`, AGPL-3.0-or-later, Johan Pieterse, Plain Sailing Information Systems), where the Workspace's English matches Heratio's. Heratio has "Bestuur" for both Admin and Manage; Admin is "Administrasie" here.
 - 16 of those 27 are Access to Memory's Afrikaans translation, which Heratio took from AtoM's XLIFF files:
 

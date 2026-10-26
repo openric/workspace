@@ -33,7 +33,7 @@
                 <div class="collection-card-body">
                     <h3 class="collection-card-title">{{ $view->label($unit) }}</h3>
                     @if($summary)<p class="collection-card-summary">{{ $summary }}</p>@endif
-                    <span class="collection-card-count">{{ $unit->level?->label(\App\Support\Vocab::languages()) }}@if($count) · {{ $count }} {{ $count === 1 ? 'unit' : 'units' }} inside @endif</span>
+                    <span class="collection-card-count">{{ $unit->level?->label(\App\Support\Vocab::languages()) }}@if($count) · {{ __($count === 1 ? ':count unit inside' : ':count units inside', ['count' => $count]) }} @endif</span>
                 </div>
             </a>
         @endforeach
@@ -41,7 +41,7 @@
     <button type="button" class="carousel-arrow right" aria-label="Next collections" data-scroll="1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button>
     <div class="carousel-controls" hidden>
         <span class="carousel-dots"></span>
-        <button type="button" class="carousel-pause" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5v14M15 5v14"/></svg><span>Pause</span></button>
+        <button type="button" class="carousel-pause" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5v14M15 5v14"/></svg><span>{{ __('Pause') }}</span></button>
     </div>
 </section>
 <script>

@@ -1,7 +1,7 @@
 {{-- OpenRiC Workspace - the instantiations of a unit: its digital files and other carriers (rico:hasOrHadInstantiation, WS-007). Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems. SPDX-License-Identifier: AGPL-3.0-or-later --}}
 {{-- Needs $record (with instantiations.files.use and instantiations.names loaded) and $canUpdate. --}}
 @php($service = app(\App\Description\InstantiationService::class))
-<h2 id="instantiations">Instantiations: digital files and other carriers @include('description._ric', ['term' => 'rico:hasOrHadInstantiation'])</h2>
+<h2 id="instantiations">{{ __('Instantiations: digital files and other carriers') }} @include('description._ric', ['term' => 'rico:hasOrHadInstantiation'])</h2>
 @forelse($record->instantiations as $instantiation)
     @php($thumbnail = $instantiation->file('thumbnail'))
     @php($master = $instantiation->file('master'))
@@ -22,7 +22,7 @@
         <summary>{{ __('Upload a file, or add another carrier') }}</summary>
         <form method="post" action="{{ route('instantiations.store', $record) }}" enctype="multipart/form-data">
             @csrf
-            <label for="i-file">File (up to {{ config('workspace.max_upload_megabytes') }} MB)</label>
+            <label for="i-file">{{ __('File (up to :size MB)', ['size' => config('workspace.max_upload_megabytes')]) }}</label>
             <input id="i-file" type="file" name="file" aria-describedby="i-file-help">
             <small id="i-file-help">{{ __('Its SHA-256 is taken as it arrives and it is scanned for viruses. Images and PDFs get a reference copy and a thumbnail; the master is kept as received. Leave this empty to record a carrier with no file, such as the paper original.') }}</small>
             <label for="i-sha">{{ __('SHA-256 you expect (optional)') }}</label> @include('description._ric', ['term' => 'openricx:checksumValue'])

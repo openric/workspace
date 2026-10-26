@@ -14,7 +14,7 @@
         @if(auth()->user()->may('delete', 'vocabulary') && $concepts->isEmpty() && $query === '' && ! $vocabulary->concepts()->exists())
             <form method="post" action="{{ route('vocabularies.destroy', $vocabulary) }}" style="display: inline">@csrf<button type="submit" style="margin-top: 0">{{ __('Delete this empty vocabulary') }}</button></form> ·
         @endif
-        Export SKOS: <a href="{{ route('vocabularies.export', [$vocabulary, 'turtle']) }}">{{ __('Turtle') }}</a>, <a href="{{ route('vocabularies.export', [$vocabulary, 'rdfxml']) }}">RDF/XML</a>, <a href="{{ route('vocabularies.export', [$vocabulary, 'ntriples']) }}">{{ __('N-Triples') }}</a>, <a href="{{ route('vocabularies.export', [$vocabulary, 'jsonld']) }}">JSON-LD</a>
+        {{ __('Export SKOS:') }} <a href="{{ route('vocabularies.export', [$vocabulary, 'turtle']) }}">{{ __('Turtle') }}</a>, <a href="{{ route('vocabularies.export', [$vocabulary, 'rdfxml']) }}">RDF/XML</a>, <a href="{{ route('vocabularies.export', [$vocabulary, 'ntriples']) }}">{{ __('N-Triples') }}</a>, <a href="{{ route('vocabularies.export', [$vocabulary, 'jsonld']) }}">JSON-LD</a>
     </p>
     <form method="get" action="{{ route('vocabularies.show', $vocabulary) }}" style="display: flex; gap: .75rem; flex-wrap: wrap; align-items: end">
         <div><label for="q" style="margin-top: 0">{{ __('Label, alternative label or code') }}</label><input id="q" name="q" value="{{ $query }}" maxlength="200"></div>
@@ -31,7 +31,7 @@
             .($canEdit ? ' <small>· <a href="'.e(route('concepts.edit', $c)).'">Edit</a></small>' : '');
     @endphp
     @if($concepts->isEmpty())
-        <p>{{ $query !== '' ? 'No concept matches.' : 'No concepts yet.' }}</p>
+        <p>{{ __($query !== '' ? 'No concept matches.' : 'No concepts yet.') }}</p>
     @elseif($tree !== null)
         @php
             // A concept whose broader concept is not shown (deprecated, or filtered out) starts its own branch.

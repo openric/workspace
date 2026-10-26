@@ -2,7 +2,7 @@
 @extends('layouts.app')
 @section('title', __('Activities'))
 @section('content')
-    <h1>Activities @include('description._ric', ['term' => 'rico:Activity'])</h1>
+    <h1>{{ __('Activities') }} @include('description._ric', ['term' => 'rico:Activity'])</h1>
     @if(session('status'))<p role="status">{{ session('status') }}</p>@endif
     <p>{{ __('What people and organisations did: the creation of a series, a marriage, an appointment, a transfer. Each is linked to who performed it or took part, and what it resulted in.') }}</p>
     @if(auth()->user()->may('create', 'authority'))<p><a href="{{ route('activities.create') }}">{{ __('New activity') }}</a></p>@endif
@@ -19,12 +19,12 @@
         <p><a href="{{ route('activities.show', $activity) }}">{{ $activity->described('activity-name', [app()->getLocale(), 'en']) }}</a>{{ collect([$activity->activityType?->anyLabel(['en']), $activity->dates->first()?->display(), $activity->identifier])->filter()->map(fn ($s) => ', '.$s)->join('') }}
             @include('description._row-actions', ['entity' => $activity])</p>
     @empty
-        <p>{{ $query !== '' || $type !== '' ? 'No activity matches.' : 'No activities yet.' }}</p>
+        <p>{{ __($query !== '' || $type !== '' ? 'No activity matches.' : 'No activities yet.') }}</p>
     @endforelse
     @if($activities->hasPages())
         <nav aria-label="{{ __('Pages') }}"><p>
             @if($activities->previousPageUrl())<a href="{{ $activities->previousPageUrl() }}" rel="prev">{{ __('Previous') }}</a>@endif
-            Page {{ $activities->currentPage() }} of {{ $activities->lastPage() }}
+            {{ __('Page :page of :pages', ['page' => $activities->currentPage(), 'pages' => $activities->lastPage()]) }}
             @if($activities->nextPageUrl())<a href="{{ $activities->nextPageUrl() }}" rel="next">{{ __('Next') }}</a>@endif
         </p></nav>
     @endif

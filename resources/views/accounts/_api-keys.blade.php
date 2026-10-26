@@ -20,10 +20,10 @@
                 <td>{{ $key->name }}</td>
                 <td><code>{{ $key->prefix }}</code></td>
                 <td>{{ $key->scopes->map(fn ($s) => $s->anyLabel(['en']))->implode(', ') }}</td>
-                <td>{{ number_format($key->hourly_limit) }} an hour{{ $key->daily_limit ? ", ".number_format($key->daily_limit)." a day" : "" }}</td>
-                <td>{{ $key->expires_at?->toDateString() ?? 'Never' }}</td>
-                <td>{{ $key->last_used_at?->toDayDateTimeString() ?? 'Never' }}</td>
-                <td>{{ $key->isRevoked() ? 'Revoked '.$key->revoked_at->toDateString() : ($key->isExpired() ? 'Expired' : 'Active') }}</td>
+                <td>{{ __(':count an hour', ['count' => number_format($key->hourly_limit)]) }}{{ $key->daily_limit ? ', '.__(':count a day', ['count' => number_format($key->daily_limit)]) : '' }}</td>
+                <td>{{ $key->expires_at?->toDateString() ?? __('Never') }}</td>
+                <td>{{ $key->last_used_at?->toDayDateTimeString() ?? __('Never') }}</td>
+                <td>{{ $key->isRevoked() ? __('Revoked :date', ['date' => $key->revoked_at->toDateString()]) : __($key->isExpired() ? 'Expired' : 'Active') }}</td>
                 <td>
                     @unless($key->isRevoked())
                         <form method="post" action="{{ $revokeUrl($key) }}">@csrf<button type="submit">{{ __('Revoke') }}</button></form>

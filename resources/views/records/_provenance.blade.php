@@ -5,7 +5,7 @@
 <section>
     <h2>{{ __('Custody and provenance') }}</h2>
     @if($custody->isEmpty())
-        <p>Only the current holder is recorded: {{ $record->repository->described('authorised-name', ['en']) }}. Former holders, owners and managers are relations with their dates.</p>
+        <p>{{ __('Only the current holder is recorded: :repository. Former holders, owners and managers are relations with their dates.', ['repository' => $record->repository->described('authorised-name', ['en'])]) }}</p>
     @else
         <ol>
             @foreach($custody as $relation)
@@ -13,7 +13,7 @@
                 @php($to = $relation->datedAs('end')?->normalized_value)
                 <li>{{ ($from || $to) ? ($from ?? '?').' to '.($to ?? '?').': ' : 'Undated: ' }}{{ ucfirst($relation->phrase()) }} {{ \App\Relations\EntityKinds::label($relation->other) }}@if($relation->state), {{ mb_strtolower($relation->state->label(\App\Support\Vocab::languages())) }}@endif</li>
             @endforeach
-            <li>Now held by {{ $record->repository->described('authorised-name', ['en']) }}.</li>
+            <li>{{ __('Now held by :repository.', ['repository' => $record->repository->described('authorised-name', ['en'])]) }}</li>
         </ol>
     @endif
 </section>

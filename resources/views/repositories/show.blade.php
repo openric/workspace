@@ -5,7 +5,7 @@
     <p><a href="{{ route('repositories.index') }}">{{ __('All repositories') }}</a></p>
     <h1>{{ $repository->described('authorised-name', [app()->getLocale(), 'en']) }}</h1>
     @include('clipboard._button', ['type' => 'repositories', 'id' => $repository->id])
-    <p>Repository @include('description._ric', ['term' => 'rico:CorporateBody'])</p>
+    <p>{{ __('Repository') }} @include('description._ric', ['term' => 'rico:CorporateBody'])</p>
     @if(session('status'))<p role="status">{{ session('status') }}</p>@endif
     @if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif
     <p><strong>{{ __('Persistent IRI') }}:</strong> <code>{{ $repository->iri }}</code>@if($repository->identifier)<br><strong>{{ __('Identifier') }}:</strong> {{ $repository->identifier }}@endif</p>
@@ -27,11 +27,11 @@
     <h2>{{ __('Contact points') }}</h2>
     @foreach($repository->contactPoints as $contact)
         @unless($canUpdate)
-            <p>{{ $contact->label ?: 'Contact' }}@if($contact->is_primary) (primary)@endif: {{ collect([$contact->contact_person, $contact->street_address, $contact->city, $contact->region, $contact->postal_code, $contact->country_code, $contact->telephone, $contact->fax, $contact->email, $contact->website])->filter()->join(', ') }}</p>
+            <p>{{ $contact->label ?: 'Contact' }}@if($contact->is_primary) {{ __('(primary)') }}@endif: {{ collect([$contact->contact_person, $contact->street_address, $contact->city, $contact->region, $contact->postal_code, $contact->country_code, $contact->telephone, $contact->fax, $contact->email, $contact->website])->filter()->join(', ') }}</p>
             @continue
         @endunless
         <details>
-            <summary>{{ $contact->label ?: 'Contact' }}@if($contact->is_primary) (primary)@endif: {{ collect([$contact->street_address, $contact->city, $contact->country_code, $contact->telephone, $contact->email])->filter()->join(', ') }} <small lang="en">{{ __('- edit or remove') }}</small></summary>
+            <summary>{{ $contact->label ?: 'Contact' }}@if($contact->is_primary) {{ __('(primary)') }}@endif: {{ collect([$contact->street_address, $contact->city, $contact->country_code, $contact->telephone, $contact->email])->filter()->join(', ') }} <small lang="en">{{ __('- edit or remove') }}</small></summary>
             <form method="post" action="{{ route('repositories.contacts.update', [$repository, $contact]) }}">
                 @csrf
                 @include('repositories._contact-fields', ['contact' => $contact, 'prefix' => 'c'.$loop->index])
@@ -55,7 +55,7 @@
     @endif
 
     <h2>{{ __('Control') }}</h2>
-    <p>Description identifier: {{ $repository->description_identifier ?? 'none' }}.
-       Status: {{ $repository->descriptionStatus?->label(\App\Support\Vocab::languages()) ?? 'not set' }}.
-       Level of detail: {{ $repository->descriptionDetail?->label(\App\Support\Vocab::languages()) ?? 'not set' }}.</p>
+    <p>{{ __('Description identifier') }}: {{ $repository->description_identifier ?? __('none') }}.
+        {{ __('Status') }}: {{ $repository->descriptionStatus?->label(\App\Support\Vocab::languages()) ?? __('not set') }}.
+        {{ __('Level of detail') }}: {{ $repository->descriptionDetail?->label(\App\Support\Vocab::languages()) ?? __('not set') }}.</p>
 @endsection

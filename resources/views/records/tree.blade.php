@@ -1,9 +1,9 @@
 {{-- OpenRiC Workspace - the hierarchy a unit belongs to. Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems. SPDX-License-Identifier: AGPL-3.0-or-later --}}
 @extends('layouts.app')
-@section('title', 'Hierarchy of '.$top->described('title', ['en']))
+@section('title', __('Hierarchy of :name', ['name' => $top->described('title', ['en'])]))
 @section('content')
-    <p><a href="{{ route('records.show', $record) }}">Back to {{ $record->described('title', ['en']) }}</a></p>
-    <h1>Hierarchy of {{ $top->described('title', ['en']) }}</h1>
+    <p><a href="{{ route('records.show', $record) }}">{{ __('Back to :name', ['name' => $record->described('title', ['en'])]) }}</a></p>
+    <h1>{{ __('Hierarchy of :name', ['name' => $top->described('title', ['en'])]) }}</h1>
     <p>{{ __('The arrangement (rico:hasOrHadPart), in order. Move units, or change their order, from each unit\'s page.') }}</p>
     @php
         $line = fn ($u) => (($u->id === $record->id) ? '<strong aria-current="page">' : '').'<a href="'.e(route('records.show', $u)).'">'.e($u->described('title', [app()->getLocale(), 'en'])).'</a>'.(($u->id === $record->id) ? '</strong>' : '')

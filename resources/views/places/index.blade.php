@@ -39,12 +39,12 @@
             <p><a href="{{ route('places.show', $place) }}">{{ $place->described('place-name', [app()->getLocale(), 'en']) }}</a>{{ collect([$place->placeType?->anyLabel(['en']), $place->parent ? 'in '.$place->parent->described('place-name', [app()->getLocale(), 'en']) : null, $place->identifier])->filter()->map(fn ($s) => ', '.$s)->join('') }}
                 @include('description._row-actions', ['entity' => $place])</p>
         @empty
-            <p>{{ $query !== '' || $type !== '' ? 'No place matches.' : 'No places yet.' }}</p>
+            <p>{{ __($query !== '' || $type !== '' ? 'No place matches.' : 'No places yet.') }}</p>
         @endforelse
         @if($places->hasPages())
             <nav aria-label="{{ __('Pages') }}"><p>
                 @if($places->previousPageUrl())<a href="{{ $places->previousPageUrl() }}" rel="prev">{{ __('Previous') }}</a>@endif
-                Page {{ $places->currentPage() }} of {{ $places->lastPage() }}
+                {{ __('Page :page of :pages', ['page' => $places->currentPage(), 'pages' => $places->lastPage()]) }}
                 @if($places->nextPageUrl())<a href="{{ $places->nextPageUrl() }}" rel="next">{{ __('Next') }}</a>@endif
             </p></nav>
         @endif

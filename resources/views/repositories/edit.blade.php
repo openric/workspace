@@ -3,7 +3,7 @@
 @section('title', __('Describe repository'))
 @section('content')
     <p><a href="{{ route('repositories.show', $repository) }}">{{ __('Back to the repository') }}</a></p>
-    <h1>Describe {{ $repository->described('authorised-name', [$language, 'en']) }}</h1>
+    <h1>{{ __('Describe :name', ['name' => $repository->described('authorised-name', [$language, 'en'])]) }}</h1>
     <p>{{ __('Values in') }} <strong>{{ $language }}</strong>{{ __('. Fill in what you know; empty fields are left out. A value you change goes back to draft.') }}</p>
     @if(session('status'))<p role="status">{{ session('status') }}</p>@endif
     <form method="post" action="{{ route('repositories.update', $repository) }}">

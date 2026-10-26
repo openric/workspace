@@ -3,7 +3,7 @@
 @section('title', __('New place'))
 @section('content')
     <p><a href="{{ $parent ? route('places.show', $parent) : route('places.index') }}">{{ __('Back') }}</a></p>
-    <h1>New place{{ $parent ? ' in '.$parent->described('place-name', ['en']) : '' }}</h1>
+    <h1>{{ $parent ? __('New place in :place', ['place' => $parent->described('place-name', ['en'])]) : __('New place') }}</h1>
     <form method="post" action="{{ route('places.store') }}">
         @csrf
         @if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif

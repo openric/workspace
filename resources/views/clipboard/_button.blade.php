@@ -4,5 +4,5 @@
 <form method="post" action="{{ $on ? route('clipboard.remove') : route('clipboard.add') }}" class="no-print" style="display: inline">
     @csrf
     <input type="hidden" name="type" value="{{ $type }}"><input type="hidden" name="id" value="{{ $id }}">
-    <button type="submit" aria-pressed="{{ $on ? 'true' : 'false' }}" style="margin: .25rem 0; padding: .3rem .8rem; font-size: .85rem">{{ $on ? 'On the clipboard: remove' : 'Add to clipboard' }}</button>
+    <button type="submit" aria-pressed="{{ $on ? 'true' : 'false' }}" style="margin: .25rem 0; padding: .3rem .8rem; font-size: .85rem">{{ __($on ? 'On the clipboard: remove' : 'Add to clipboard') }}</button>
 </form>

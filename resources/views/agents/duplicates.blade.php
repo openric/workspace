@@ -13,7 +13,7 @@
                 @foreach([[$a, $b], [$b, $a]] as [$one, $other])
                     <div style="flex: 1; min-width: 14rem">
                         <p><a href="{{ route('agents.show', $one) }}">{{ $one->described('agent-authorised-name', ['en']) }}</a>@if($one->identifier) ({{ $one->identifier }})@endif
-                            <br><small>{{ $one->names->count() }} {{ $one->names->count() === 1 ? 'name' : 'names' }}, changed {{ $one->updated_at->format('Y-m-d') }}</small>
+                            <br><small>{{ __($one->names->count() === 1 ? ':count name, changed :date' : ':count names, changed :date', ['count' => $one->names->count(), 'date' => $one->updated_at->format('Y-m-d')]) }}</small>
                             <br><small>{{ \Illuminate\Support\Str::limit((string) $one->described('agent-history', ['en']), 200) }}</small></p>
                         @if(auth()->user()->may('delete', 'authority', $other))
                             <form method="post" action="{{ route('agents.merge', $other) }}">@csrf<input type="hidden" name="into" value="{{ $one->id }}"><button type="submit">{{ __('Keep this one, merge the other into it') }}</button></form>

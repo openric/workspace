@@ -3,7 +3,7 @@
 @php($text = $concept?->labels->firstWhere('language', $language))
 @php($alts = $concept ? $concept->altLabels->where('language', $language) : collect())
 @php($area = 'width: 100%; font: inherit; box-sizing: border-box')
-<label for="label">Preferred label (skos:prefLabel){{ $concept ? '; empty removes this language' : '' }}</label>
+<label for="label">{{ __('Preferred label') }} (skos:prefLabel){{ $concept ? '; '.__('empty removes this language') : '' }}</label>
 <input id="label" name="label" maxlength="1024" @unless($concept) required @endunless value="{{ old('label', $text?->pref_label) }}">
 <label for="language">{{ __('Language (BCP 47)') }}</label>
 <input id="language" name="language" required maxlength="35" value="{{ old('language', $language ?? 'en') }}">

@@ -2,7 +2,7 @@
 @extends('layouts.app')
 @section('title', __('Permissions'))
 @section('content')
-    <p><a href="{{ $back }}">Back to {{ $holderName }}</a></p>
+    <p><a href="{{ $back }}">{{ __('Back to :name', ['name' => $holderName]) }}</a></p>
     <h1>{{ $holderName }}: {{ $kind->label(\App\Support\Vocab::languages()) }}</h1>
     @if(session('status'))<p role="status">{{ session('status') }}</p>@endif
     @if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif

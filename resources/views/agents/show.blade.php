@@ -11,9 +11,9 @@
     <p><strong>{{ __('Type of entity') }}:</strong> {{ $agent->agentType->label(\App\Support\Vocab::languages()) }} @include('description._ric', ['term' => \App\Relations\EntityKinds::ricClass($agent)])
         @if($agent->identifier)<br><strong>{{ __('Identifier') }}:</strong> {{ $agent->identifier }}@endif
         <br><strong>{{ __('Persistent IRI') }}:</strong> <code>{{ $agent->iri }}</code>
-        @if($agent->isEmbargoed())<br><strong>Embargoed until {{ $agent->embargo_until->format('Y-m-d') }}:</strong> only those who may update authority records see it.@endif
-        @unless($print)<br><strong>{{ __('Completeness') }}:</strong> {{ $completeness['percent'] }}% of the ISAAR(CPF) elements.
-            @if($completeness['missing'])Missing essential elements: {{ implode(', ', $completeness['missing']) }}.@endif @endunless</p>
+        @if($agent->isEmbargoed())<br><strong>{{ __('Embargoed until :date', ['date' => $agent->embargo_until->format('Y-m-d')]) }}:</strong> {{ __('only those who may update authority records see it.') }}@endif
+        @unless($print)<br><strong>{{ __('Completeness') }}:</strong> {{ __(':percent% of the ISAAR(CPF) elements.', ['percent' => $completeness['percent']]) }}
+            @if($completeness['missing']){{ __('Missing essential elements: :missing.', ['missing' => implode(', ', $completeness['missing'])]) }}@endif @endunless</p>
     @php($canUpdate = ! $print && auth()->user()->may('update', 'authority', $agent))
     @unless($print)
         @if($canUpdate)
@@ -45,11 +45,11 @@
     <h2>{{ __('Contact points') }}</h2>
     @forelse($agent->contactPoints as $contact)
         @unless($canUpdate)
-            <p>{{ $contact->label ?: 'Contact' }}@if($contact->is_primary) (primary)@endif: {{ collect([$contact->contact_person, $contact->street_address, $contact->city, $contact->region, $contact->postal_code, $contact->country_code, $contact->telephone, $contact->fax, $contact->email, $contact->website])->filter()->join(', ') }}</p>
+            <p>{{ $contact->label ?: 'Contact' }}@if($contact->is_primary) {{ __('(primary)') }}@endif: {{ collect([$contact->contact_person, $contact->street_address, $contact->city, $contact->region, $contact->postal_code, $contact->country_code, $contact->telephone, $contact->fax, $contact->email, $contact->website])->filter()->join(', ') }}</p>
             @continue
         @endunless
         <details>
-            <summary>{{ $contact->label ?: 'Contact' }}@if($contact->is_primary) (primary)@endif: {{ collect([$contact->street_address, $contact->city, $contact->country_code, $contact->telephone, $contact->email])->filter()->join(', ') }} <small lang="en">{{ __('- edit or remove') }}</small></summary>
+            <summary>{{ $contact->label ?: 'Contact' }}@if($contact->is_primary) {{ __('(primary)') }}@endif: {{ collect([$contact->street_address, $contact->city, $contact->country_code, $contact->telephone, $contact->email])->filter()->join(', ') }} <small lang="en">{{ __('- edit or remove') }}</small></summary>
             <form method="post" action="{{ route('agents.contacts.update', [$agent, $contact]) }}">
                 @csrf
                 @include('repositories._contact-fields', ['contact' => $contact, 'prefix' => 'c'.$loop->index])
@@ -75,8 +75,8 @@
     @endif
 
     <h2>{{ __('Control') }} (5.4)</h2>
-    <p>Description identifier: {{ $agent->description_identifier ?? 'none' }}.
-        Maintained by: {{ $agent->maintainer ? $agent->maintainer->described('authorised-name', ['en']) : 'not set' }}.
-        Status: {{ $agent->descriptionStatus?->label(\App\Support\Vocab::languages()) ?? 'not set' }}.
-        Level of detail: {{ $agent->descriptionDetail?->label(\App\Support\Vocab::languages()) ?? 'not set' }}.</p>
+    <p>{{ __('Description identifier') }}: {{ $agent->description_identifier ?? __('none') }}.
+        {{ __('Maintained by') }}: {{ $agent->maintainer ? $agent->maintainer->described('authorised-name', ['en']) : __('not set') }}.
+        {{ __('Status') }}: {{ $agent->descriptionStatus?->label(\App\Support\Vocab::languages()) ?? __('not set') }}.
+        {{ __('Level of detail') }}: {{ $agent->descriptionDetail?->label(\App\Support\Vocab::languages()) ?? __('not set') }}.</p>
 @endsection

@@ -3,7 +3,7 @@
 @section('title', __('New container'))
 @section('content')
     <p><a href="{{ route('containers.index') }}">{{ __('Back') }}</a></p>
-    <h1>New container @include('description._ric', ['term' => 'openricx:Container'])</h1>
+    <h1>{{ __('New container') }} @include('description._ric', ['term' => 'openricx:Container'])</h1>
     <form method="post" action="{{ route('containers.store') }}">
         @csrf
         @if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif

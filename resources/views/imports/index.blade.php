@@ -18,7 +18,7 @@
                     <td>{{ $import->file_name }}</td><td>{{ $import->source }}</td><td>{{ $import->user->name }}</td>
                     <td>{{ \App\Exchange\Import\ImportService::FORMATS[$import->format] ?? $import->format }}</td>
                     <td>{{ $import->committed_at ? 'Imported '.$import->committed_at->format('Y-m-d H:i') : 'Dry run' }}</td>
-                    <td>@if($actions){{ $actions['created'] }} new, {{ $actions['updated'] }} updated, {{ $actions['unchanged'] }} unchanged, {{ $actions['rejected'] }} not imported @endif</td>
+                    <td>@if($actions){{ __(':created new, :updated updated, :unchanged unchanged, :rejected not imported', $actions) }} @endif</td>
                 </tr>
             @endforeach
             </tbody>

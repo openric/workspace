@@ -74,15 +74,15 @@ class InterfaceLanguageTest extends TestCase
         foreach (['resources/views', 'app'] as $dir) {
             foreach (new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator(base_path($dir))) as $file) {
                 if ($file->isFile() && str_ends_with($file->getFilename(), '.php')) {
-                    preg_match_all("/__\\('((?:[^'\\\\]|\\\\.)+)'/", file_get_contents($file->getPathname()), $found);
-                    $keys = [...$keys, ...array_map(fn ($k) => str_replace("\\'", "'", $k), $found[1])];
+                    $keys = [...$keys, ...$this->translationKeys(file_get_contents($file->getPathname()))];
                 }
             }
         }
-        // Translated where they are shown: relation phrases.
+        // Translated where they are shown: relation phrases, and the storage environment labels (__($label)).
         foreach (config('workspace.relation_types') as $type) {
             $keys = [...$keys, $type['forward'], $type['inverse']];
         }
+        $keys = [...$keys, 'Lowest temperature (°C)', 'Highest temperature (°C)', 'Lowest relative humidity (%)', 'Highest relative humidity (%)'];
         $missing = array_values(array_diff(array_unique($keys), array_keys($af)));
         $this->assertSame([], $missing, 'strings with no Afrikaans in lang/af.json');
         // Every placeholder of a string is in its translation.
@@ -92,5 +92,57 @@ class InterfaceLanguageTest extends TestCase
                 $this->assertStringContainsString(':'.$placeholder, $afrikaans, "the Afrikaans of \"$english\" lacks :$placeholder");
             }
         }
+    }
+
+    /**
+     * The keys of a file: every quoted string in the first argument of each __() call, so a key chosen at run time
+     * (__($n === 1 ? 'one' : 'many')) counts too; strings that are array keys or indexes or compared with are not keys.
+     *
+     * @return list<string>
+     */
+    private function translationKeys(string $source): array
+    {
+        $keys = [];
+        preg_match_all('/(?<![\w>$])__\(/', $source, $calls, PREG_OFFSET_CAPTURE);
+        foreach ($calls[0] as [$call, $at]) {
+            [$i, $depth, $quote, $arg] = [$at + strlen($call), 0, null, ''];
+            for (; $i < strlen($source); $i++) {
+                $c = $source[$i];
+                if ($quote !== null) {
+                    $arg .= $c;
+                    if ($c === '\\') {
+                        $arg .= $source[++$i];
+                    } elseif ($c === $quote) {
+                        $quote = null;
+                    }
+
+                    continue;
+                }
+                if ($c === "'" || $c === '"') {
+                    $quote = $c;
+                } elseif ($c === '(' || $c === '[') {
+                    $depth++;
+                } elseif ($c === ')' || $c === ']' || $c === ',') {
+                    if ($depth === 0) {
+                        break;
+                    }
+                    if ($c !== ',') {
+                        $depth--;
+                    }
+                }
+                $arg .= $c;
+            }
+            preg_match_all("/'((?:[^'\\\\]|\\\\.)*)'/", $arg, $literals, PREG_OFFSET_CAPTURE);
+            foreach ($literals[1] as $n => [$literal, $offset]) {
+                $before = rtrim(substr($arg, 0, $literals[0][$n][1]));
+                $after = ltrim(substr($arg, $literals[0][$n][1] + strlen($literals[0][$n][0])));
+                if ($literal === '' || ($before !== '' && preg_match('/(\[|\(|===|==|!==)$/', $before)) || preg_match('/^(\]|=>|===|==|!==)/', $after)) {
+                    continue;
+                }
+                $keys[] = str_replace(["\\'", '\\\\'], ["'", '\\'], $literal);
+            }
+        }
+
+        return $keys;
     }
 }

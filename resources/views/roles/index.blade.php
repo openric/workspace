@@ -12,8 +12,8 @@
         @foreach($roles as $role)
             <tr>
                 <td><a href="{{ route('roles.show', $role) }}">{{ $role->name() }}</a>@if($role->is_system) <small>{{ __('(system)') }}</small>@endif</td>
-                <td>{{ $role->parent?->name() ?? 'nothing' }}</td>
-                <td>{{ $role->is_system ? ($role->isTemplate('public') ? 'everyone' : 'every signed-in account') : $role->members->count() }}</td>
+                <td>{{ $role->parent?->name() ?? __('nothing') }}</td>
+                <td>{{ $role->is_system ? __($role->isTemplate('public') ? 'everyone' : 'every signed-in account') : $role->members->count() }}</td>
             </tr>
         @endforeach
         </tbody>

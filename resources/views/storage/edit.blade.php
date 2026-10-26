@@ -3,7 +3,7 @@
 @section('title', __('Describe container'))
 @section('content')
     <p><a href="{{ route('containers.show', $container) }}">{{ __('Back to the container') }}</a></p>
-    <h1>Describe {{ $container->described('container-name', [$language, 'en']) }}</h1>
+    <h1>{{ __('Describe :name', ['name' => $container->described('container-name', [$language, 'en'])]) }}</h1>
     <p>{{ __('Values in') }} <strong>{{ $language }}</strong>{{ __('. Fill in what you know; empty fields are left out.') }}</p>
     <form method="post" action="{{ route('containers.update', $container) }}">
         @csrf
@@ -20,7 +20,7 @@
 
         <fieldset><legend>{{ __('Collection management (not in RiC-O)') }}</legend>
             @foreach(['status' => ['Status', $statuses], 'security_level' => ['Security', $securityLevels]] as $field => [$label, $choices])
-                <label for="{{ $field }}">{{ $label }}</label>
+                <label for="{{ $field }}">{{ __($label) }}</label>
                 <select id="{{ $field }}" name="{{ $field }}" style="font: inherit; padding: .5rem">
                     <option value="">{{ __('Not set') }}</option>
                     @php($current = ['status' => $container->status?->notation, 'security_level' => $container->securityLevel?->notation][$field])

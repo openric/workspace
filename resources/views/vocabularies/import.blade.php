@@ -3,7 +3,7 @@
 @section('title', __('Import SKOS'))
 @section('content')
     <p><a href="{{ route('vocabularies.show', $vocabulary) }}">{{ __('Back to the vocabulary') }}</a></p>
-    <h1>Import SKOS into {{ $vocabulary->title }}</h1>
+    <h1>{{ __('Import SKOS into :name', ['name' => $vocabulary->title]) }}</h1>
     <p>{{ __('Every skos:Concept in the file is added with this institution\'s IRI, its labels, alternative and hidden labels, notes, code, broader and related concepts and matches. The IRI it had becomes an exact match, so importing the same file again updates the concepts instead of adding them twice.') }}</p>
     <form method="post" action="{{ route('vocabularies.import', $vocabulary) }}" enctype="multipart/form-data">
         @csrf

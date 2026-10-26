@@ -23,5 +23,5 @@
 </div>
 @php($languages = $subject->languages())
 @if(count($languages) > 1)
-    <p>Described in: @foreach($languages as $lang)<a href="{{ route($editRoute, [$subject, 'language' => $lang]) }}">{{ $lang }}</a>@if(! $loop->last), @endif @endforeach</p>
+    <p>{{ __('Described in:') }} @foreach($languages as $lang)<a href="{{ route($editRoute, [$subject, 'language' => $lang]) }}">{{ $lang }}</a>@if(! $loop->last), @endif @endforeach</p>
 @endif

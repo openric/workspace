@@ -3,7 +3,7 @@
 @section('title', __('Describe activity'))
 @section('content')
     <p><a href="{{ route('activities.show', $activity) }}">{{ __('Back to the activity') }}</a></p>
-    <h1>Describe {{ $activity->described('activity-name', [$language, 'en']) }}</h1>
+    <h1>{{ __('Describe :name', ['name' => $activity->described('activity-name', [$language, 'en'])]) }}</h1>
     <p>{{ __('Values in') }} <strong>{{ $language }}</strong>{{ __('. Fill in what you know; empty fields are left out. A value you change goes back to draft.') }}</p>
     <form method="post" action="{{ route('activities.update', $activity) }}">
         @csrf
