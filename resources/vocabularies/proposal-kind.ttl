@@ -1,0 +1,53 @@
+# OpenRiC Workspace - OpenRiC Workspace Proposal Kinds.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What a proposal sent through the API asks to add to a record (ADR 0007). A
+# proposed relation is not one of these: it is a relation with a proposed
+# assertion (ADR 0006).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/proposal-kind/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Proposal Kinds"@en ;
+    dcterms:description "What a proposal asks to add to a record, for an archivist to review."@en ;
+    dcterms:issued "2026-10-26"^^xsd:date ;
+    skos:hasTopConcept v:agent, v:place, v:date, v:value, v:transcript .
+
+v:agent a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Person or organisation"@en ;
+    skos:scopeNote "Heratio and PSIS proposal entity types PERSON and ORG."@en ;
+    skos:definition "A person or organisation named in the record, perhaps with an existing authority record proposed for it."@en .
+
+v:place a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Place"@en ;
+    skos:scopeNote "Heratio and PSIS proposal entity type GPE."@en ;
+    skos:definition "A place named in the record, perhaps with an existing place proposed for it."@en .
+
+v:date a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Date"@en ;
+    skos:scopeNote "Heratio and PSIS proposal entity type DATE."@en ;
+    skos:definition "A date named in the record."@en .
+
+v:value a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Value of an element"@en ;
+    skos:scopeNote "Heratio and PSIS field proposals."@en ;
+    skos:definition "Text for an element of the record's description, in its original language or as a translation into another."@en .
+
+v:transcript a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Transcript"@en ;
+    skos:scopeNote "Heratio and PSIS transcript proposals."@en ;
+    skos:definition "The text of a file of the record, read from it."@en .

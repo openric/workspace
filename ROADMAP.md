@@ -55,7 +55,7 @@ On 26 October 2026 Dr Johan Pieterse brought part of WS-018 (integration protoco
 | Step | What | Release |
 |---|---|---|
 | 1 | API keys: scopes no wider than the account's, end date, hourly and daily limits, last use, revocation, key pages | v0.0.46 |
-| 2 | Proposals through the API, and a caller's list of them | |
+| 2 | Proposals through the API, and a caller's list of them | v0.0.47 |
 | 3 | The review queue: approve, edit or reject each proposal | |
 | 4 | File text and images through the API | |
 

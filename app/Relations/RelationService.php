@@ -43,9 +43,10 @@ class RelationService
     /**
      * Relate $source to $target. Fields: role, state, certainty (notations),
      * source_of_information, description, language, from, to (EDTF).
-     * The first assertion is the actor's, or the named import's or model's.
+     * The first assertion is the actor's, or the named import's or model's; a model's may
+     * also name the account it proposed for (user), as a proposal through an API key does.
      *
-     * @param  array{origin?: string, label?: ?string, basis?: ?string, basis_language?: ?string}  $assertion
+     * @param  array{origin?: string, label?: ?string, basis?: ?string, basis_language?: ?string, user?: ?User}  $assertion
      */
     public function create(Model $source, string $type, Model $target, array $fields, ?User $actor = null, array $assertion = []): Relation
     {
@@ -84,7 +85,7 @@ class RelationService
             $relation->save();
             $this->setDates($relation, $fields);
             $origin = $assertion['origin'] ?? 'account';
-            $this->addAssertion($relation, $origin, $origin === 'account' ? $actor : null, $assertion['label'] ?? null,
+            $this->addAssertion($relation, $origin, $origin === 'account' ? $actor : ($assertion['user'] ?? null), $assertion['label'] ?? null,
                 $assertion['basis'] ?? null, $assertion['basis_language'] ?? null, $origin === 'account' ? 'accepted' : 'proposed');
 
             return $relation;
@@ -271,7 +272,7 @@ class RelationService
         $id = (string) Str::uuid7();
         $assertion = new RelationAssertion(['institution_id' => $institution->id, 'iri' => $institution->base_iri.'/'.RelationAssertion::IRI_SEGMENT.'/'.$id,
             'relation_id' => $relation->id, 'origin_id' => $this->concept(Vocab::BASE.'assertion-origin/'.$origin)->id,
-            'user_id' => $user?->id, 'origin_label' => $user ? null : trim((string) $label),
+            'user_id' => $user?->id, 'origin_label' => $origin === 'account' ? null : trim((string) $label),
             'basis' => $basis === '' ? null : $basis, 'basis_language' => $basis === '' ? null : $basisLanguage,
             'asserted_at' => now(), 'status_id' => $this->concept(Vocab::BASE.'assertion-status/'.$status)->id, 'supersedes_id' => $supersedes?->id]);
         $assertion->id = $id;

@@ -176,15 +176,21 @@ class RoleService
      * Give an institution's default roles what config workspace.default_roles grants on a
      * kind of record added after the institution was installed. A grant the role already
      * has, or a role that no longer exists, is left alone; anything an institution changed
-     * since is kept. Audited on the institution.
+     * since is kept. With $only, just those actions: an action added to a kind the institution
+     * already had, without giving back a grant the institution took away. Audited on the institution.
+     *
+     * @param  list<string>|null  $only
      */
-    public function grantKind(Institution $institution, string $kind): void
+    public function grantKind(Institution $institution, string $kind, ?array $only = null): void
     {
         $kindId = $this->concept(Vocab::kind($kind))->id;
         $granted = [];
         foreach (config('workspace.default_roles') as $notation => $definition) {
             $role = $this->byTemplate($institution, $notation);
             $actions = $definition['grants'] === '*' ? config('workspace.permission_matrix.'.$kind, []) : ($definition['grants'][$kind] ?? []);
+            if ($only !== null) {
+                $actions = array_values(array_intersect($actions, $only));
+            }
             if ($role === null || $actions === []) {
                 continue;
             }

@@ -40,6 +40,10 @@ final class Vocab
 
     public const API_SCOPES = self::BASE.'api-scope/';
 
+    public const PROPOSAL_KINDS = self::BASE.'proposal-kind/';
+
+    public const ASSERTION_STATUSES = self::BASE.'assertion-status/';
+
     public static function role(string $notation): string
     {
         return self::ACCOUNT_ROLES.$notation;

@@ -6,6 +6,7 @@
 
 use App\Http\Controllers\Api\DiscoveryController;
 use App\Http\Controllers\Api\OaiController;
+use App\Http\Controllers\Api\ProposalController;
 use App\Http\Middleware\AuthenticateApiKey;
 use App\Http\Middleware\ServeRicApi;
 use Illuminate\Support\Facades\Route;
@@ -25,4 +26,10 @@ Route::middleware([ServeRicApi::class, 'throttle:600,1', AuthenticateApiKey::cla
     Route::get('/repositories', [DiscoveryController::class, 'repositories'])->name('api.repositories');
     Route::get('/repositories/{key}', [DiscoveryController::class, 'repository'])->name('api.repository');
     Route::get('/autocomplete', [DiscoveryController::class, 'autocomplete'])->name('api.autocomplete');
+});
+
+// Proposals need a key (ADR 0007): to send them, one with the write scope; to list them, any.
+Route::middleware([ServeRicApi::class, 'throttle:600,1'])->group(function () {
+    Route::post('/records/{key}/proposals', [ProposalController::class, 'store'])->middleware(AuthenticateApiKey::class.':write')->name('api.proposals.store');
+    Route::get('/proposals', [ProposalController::class, 'index'])->middleware(AuthenticateApiKey::class.':read')->name('api.proposals');
 });

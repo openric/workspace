@@ -51,9 +51,13 @@ class RelationAssertion extends Model
         return $this->belongsTo(User::class, 'reviewed_by_id');
     }
 
-    /** Who asserted it, for people. */
+    /** Who asserted it, for people: an account, an import or model, or an account through a model. */
     public function asserter(): string
     {
+        if ($this->user && $this->origin_label !== null) {
+            return $this->user->name.', through '.$this->origin_label;
+        }
+
         return $this->user?->name ?? (string) $this->origin_label;
     }
 }

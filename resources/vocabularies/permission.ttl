@@ -14,7 +14,7 @@ v: a skos:ConceptScheme ;
     dcterms:title "OpenRiC Workspace Permissions"@en ;
     dcterms:description "Actions a role or an account may be granted or denied, on a kind of record, at the scope of everything, one repository or one record. Anything not granted is denied, and a denial wins over a grant at the same scope (ADR 0005)."@en ;
     dcterms:issued "2026-10-19"^^xsd:date ;
-    skos:hasTopConcept v:manage-institution, v:manage-accounts, v:view-audit-log, v:describe, v:review, v:publish, v:manage-roles, v:read, v:create, v:update, v:delete, v:view-draft, v:read-master, v:read-reference, v:read-thumbnail, v:translate .
+    skos:hasTopConcept v:manage-institution, v:manage-accounts, v:view-audit-log, v:describe, v:review, v:publish, v:manage-roles, v:read, v:create, v:update, v:delete, v:view-draft, v:read-master, v:read-reference, v:read-thumbnail, v:translate, v:review-proposals .
 
 v:manage-institution a skos:Concept ;
     skos:inScheme v: ;
@@ -125,3 +125,10 @@ v:translate a skos:Concept ;
     skos:prefLabel "Translate"@en ;
     skos:scopeNote "Heratio ACL action translate."@en ;
     skos:definition "Add or change values in another language than the original, in the languages the role may translate into."@en .
+
+v:review-proposals a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Review proposals"@en ;
+    skos:scopeNote "Heratio's AI review screens, and the API's list of everyone's proposals (ADR 0007). Not the deprecated Review, which meant approving described material."@en ;
+    skos:definition "See everyone's proposals for a record, and accept, change or reject them."@en .
