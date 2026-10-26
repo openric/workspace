@@ -82,7 +82,7 @@ class IdentifierService
         try {
             return DB::transaction($write);
         } catch (UniqueConstraintViolationException) {
-            throw new InvalidArgumentException('that identifier is already used: a repository identifier must be unique in the institution, and an entity has one local identifier');
+            throw new InvalidArgumentException(__('that identifier is already used: a repository identifier must be unique in the institution, and an entity has one local identifier'));
         }
     }
 
@@ -96,7 +96,7 @@ class IdentifierService
     {
         $value = trim($value);
         if ($value === '' || preg_match('/\R/', $value) || mb_strlen($value) > 255) {
-            throw new InvalidArgumentException('an identifier is one line of at most 255 characters');
+            throw new InvalidArgumentException(__('an identifier is one line of at most 255 characters'));
         }
 
         return $value;

@@ -28,7 +28,7 @@ class IdentifierController extends Controller
             return redirect()->route($route, $subject)->withInput()->withErrors(['identifiers' => $e->getMessage()]);
         }
 
-        return redirect()->route($route, $subject)->with('status', 'Identifier added.');
+        return redirect()->route($route, $subject)->with('status', __('Identifier added.'));
     }
 
     public function update(Request $request, string $kind, string $id, Identifier $identifier): RedirectResponse
@@ -41,7 +41,7 @@ class IdentifierController extends Controller
             return redirect()->route($route, $subject)->withErrors(['identifiers' => $e->getMessage()]);
         }
 
-        return redirect()->route($route, $subject)->with('status', 'Identifier saved.');
+        return redirect()->route($route, $subject)->with('status', __('Identifier saved.'));
     }
 
     public function destroy(Request $request, string $kind, string $id, Identifier $identifier): RedirectResponse
@@ -50,7 +50,7 @@ class IdentifierController extends Controller
         $this->belongs($subject, $identifier);
         $this->identifiers->remove($identifier, $request->user());
 
-        return redirect()->route($route, $subject)->with('status', 'Identifier removed.');
+        return redirect()->route($route, $subject)->with('status', __('Identifier removed.'));
     }
 
     private function fields(Request $request): array

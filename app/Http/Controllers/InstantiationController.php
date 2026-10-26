@@ -41,7 +41,7 @@ class InstantiationController extends Controller
         $data = $request->validate([
             'file' => ['nullable', 'file', 'max:'.(config('workspace.max_upload_megabytes') * 1024)],
             'title' => [Rule::requiredIf(! $request->hasFile('file')), 'nullable', 'string', 'max:2000'],
-            'language' => ['required', 'string', fn ($a, $v, $fail) => Bcp47::valid((string) $v) || $fail('Give a BCP 47 language tag, such as en or af.')],
+            'language' => ['required', 'string', fn ($a, $v, $fail) => Bcp47::valid((string) $v) || $fail(__('Give a BCP 47 language tag, such as en or af.'))],
             'sha256' => ['nullable', 'string', 'max:64'],
             'carrier_type' => ['nullable', Rule::in($this->choices(InstantiationService::CARRIER_TYPES)->pluck('notation'))],
             'availability' => ['required', Rule::in($this->choices(InstantiationService::AVAILABILITY)->pluck('notation'))],
@@ -51,10 +51,10 @@ class InstantiationController extends Controller
                 $upload = $request->file('file');
                 $instantiation = $this->instantiations->upload($record, $upload->getRealPath(), $upload->getClientOriginalName(), $data['language'],
                     $data['title'] ?? null, $data['sha256'] ?? null, $data['availability'], $request->user());
-                $status = 'File kept, SHA-256 '.$instantiation->file('master')->sha256.'.';
+                $status = __('File kept, SHA-256 :sha.', ['sha' => $instantiation->file('master')->sha256]);
             } else {
                 $instantiation = $this->instantiations->create($record, $data['title'], $data['language'], $data['carrier_type'] ?? null, $data['availability'], $request->user());
-                $status = 'Instantiation added.';
+                $status = __('Instantiation added.');
             }
         } catch (InvalidArgumentException|RuntimeException $e) {
             return back()->withInput()->withErrors(['file' => ucfirst($e->getMessage()).'.']);
@@ -89,7 +89,7 @@ class InstantiationController extends Controller
     {
         $this->own($request, $instantiation, 'update');
         $data = $request->validate([
-            'language' => ['required', 'string', fn ($a, $v, $fail) => Bcp47::valid((string) $v) || $fail('Give a BCP 47 language tag, such as en or af.')],
+            'language' => ['required', 'string', fn ($a, $v, $fail) => Bcp47::valid((string) $v) || $fail(__('Give a BCP 47 language tag, such as en or af.'))],
             'values' => ['array'],
             'values.*' => ['nullable', 'string', 'max:65535'],
             'carrier_type' => ['nullable', Rule::in($this->choices(InstantiationService::CARRIER_TYPES)->pluck('notation'))],
@@ -105,7 +105,7 @@ class InstantiationController extends Controller
             return back()->withInput()->withErrors(['values' => $e->getMessage()]);
         }
 
-        return redirect()->route('instantiations.show', $instantiation)->with('status', 'Instantiation saved.');
+        return redirect()->route('instantiations.show', $instantiation)->with('status', __('Instantiation saved.'));
     }
 
     /** The file itself, to whoever may receive it; to anyone else it does not exist. */
@@ -127,8 +127,8 @@ class InstantiationController extends Controller
         $intact = $this->instantiations->checkFixity($file, $request->user());
 
         return redirect()->route('instantiations.show', $file->instantiation)->with('status', $intact
-            ? "Fixity checked: {$file->original_name} is unchanged."
-            : "Fixity check failed: {$file->original_name} is missing or no longer matches its SHA-256. Restore it from a backup.");
+            ? __('Fixity checked: :file is unchanged.', ['file' => $file->original_name])
+            : __('Fixity check failed: :file is missing or no longer matches its SHA-256. Restore it from a backup.', ['file' => $file->original_name]));
     }
 
     /** Another institution's instantiation, or one deleted with its unit, does not exist here (404); without the permission, 403. */

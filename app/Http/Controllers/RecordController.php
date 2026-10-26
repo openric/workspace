@@ -121,8 +121,8 @@ class RecordController extends Controller
         $edtf = $this->records->calculateDates($record, $request->user());
 
         return redirect()->route('records.show', $record)->with('status', $edtf
-            ? "Creation date set to $edtf, the span of the units inside it."
-            : 'No unit inside it has a creation date, so nothing was calculated.');
+            ? __('Creation date set to :date, the span of the units inside it.', ['date' => $edtf])
+            : __('No unit inside it has a creation date, so nothing was calculated.'));
     }
 
     public function create(Request $request): View
@@ -137,7 +137,7 @@ class RecordController extends Controller
     {
         $data = $request->validate([
             'title' => ['required', 'string', 'max:2000'],
-            'language' => ['required', 'string', fn ($a, $v, $fail) => Bcp47::valid((string) $v) || $fail('Give a BCP 47 language tag, such as en or af.')],
+            'language' => ['required', 'string', fn ($a, $v, $fail) => Bcp47::valid((string) $v) || $fail(__('Give a BCP 47 language tag, such as en or af.'))],
             'level' => ['required', Rule::in($this->levels($request)->pluck('iri'))],
             'identifier' => ['nullable', 'string', 'max:255'],
             'parent' => ['nullable', 'uuid'],
@@ -153,7 +153,7 @@ class RecordController extends Controller
         }
 
         // Straight to the full description, so every ISAD(G) element is in view.
-        return redirect()->route('records.edit', [$record, 'language' => $data['language']])->with('status', 'Created. Describe it now, or later.');
+        return redirect()->route('records.edit', [$record, 'language' => $data['language']])->with('status', __('Created. Describe it now, or later.'));
     }
 
     public function show(Request $request, RecordResource $record): View
@@ -217,7 +217,7 @@ class RecordController extends Controller
     {
         $this->own($request, $record);
         $data = $request->validate([
-            'language' => ['required', 'string', fn ($a, $v, $fail) => Bcp47::valid((string) $v) || $fail('Give a BCP 47 language tag, such as en or af.')],
+            'language' => ['required', 'string', fn ($a, $v, $fail) => Bcp47::valid((string) $v) || $fail(__('Give a BCP 47 language tag, such as en or af.'))],
             'identifier' => ['nullable', 'string', 'max:255'],
             'level' => ['required', Rule::in($this->levels($request)->pluck('iri'))],
             'values' => ['array'],
@@ -247,7 +247,7 @@ class RecordController extends Controller
             return back()->withInput()->withErrors(['values' => $e->getMessage()]);
         }
 
-        return redirect()->route('records.show', $record)->with('status', 'Description saved.');
+        return redirect()->route('records.show', $record)->with('status', __('Description saved.'));
     }
 
     public function moveForm(Request $request, RecordResource $record): View
@@ -275,7 +275,7 @@ class RecordController extends Controller
             return back()->withErrors(['parent' => 'It cannot move under itself or one of its own descendants.']);
         }
 
-        return redirect()->route('records.show', $record)->with('status', 'Moved; its persistent IRI is unchanged.');
+        return redirect()->route('records.show', $record)->with('status', __('Moved; its persistent IRI is unchanged.'));
     }
 
     public function reorder(Request $request, RecordResource $record): RedirectResponse

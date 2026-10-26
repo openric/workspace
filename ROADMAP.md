@@ -126,7 +126,10 @@ Standing rules for every phase: vocabularies, never enums; every field names its
 - **v0.0.53**: the remaining text mixed with values, about 150 sentences with placeholders, including whole sentences for singular and plural and for a dry run and an import; English in PHP expressions; the public relationship graph and the hierarchy tree.
   - The completeness test now also reads keys chosen at run time.
   - `lang/af.json` has 993 strings: 62 from PSIS, 27 from Heratio, 904 written for the Workspace.
-- **Still to do**: the messages written in code (status messages and validation errors), Laravel's validation messages, and Afrikaans labels for the bundled vocabularies.
+- **v0.0.54**: the messages written in code, about 70 status messages and the error messages people see, and Laravel's validation messages, with Afrikaans field names.
+  - Errors the API answers stay in English, as do internal and operator messages.
+  - `lang/af.json` has 1211 strings.
+- **Still to do**: Afrikaans labels for the bundled vocabularies (levels of description, entity types, relation types and the rest), from PSIS where its term is correct.
 
 Reuse was lower than hoped: only 32 of Heratio's Afrikaans strings carried over. Heratio's strings are keyed by its own English, which is mostly AtoM's, and the Workspace's screens were written in different English.
 

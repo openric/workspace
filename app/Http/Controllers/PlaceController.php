@@ -72,7 +72,7 @@ class PlaceController extends Controller
         abort_unless($request->user()->may('create', 'vocabulary'), 403);
         $data = $request->validate([
             'name' => ['required', 'string', 'max:1024'],
-            'language' => ['required', 'string', fn ($a, $v, $fail) => Bcp47::valid((string) $v) || $fail('Give a BCP 47 language tag, such as en or af.')],
+            'language' => ['required', 'string', fn ($a, $v, $fail) => Bcp47::valid((string) $v) || $fail(__('Give a BCP 47 language tag, such as en or af.'))],
             'parent' => ['nullable', 'uuid'],
         ]);
         $parent = ($data['parent'] ?? null) ? $this->find($request, $data['parent']) : null;
@@ -82,13 +82,13 @@ class PlaceController extends Controller
             return back()->withInput()->withErrors(['name' => $e->getMessage()]);
         }
 
-        return redirect()->route('places.edit', [$place, 'language' => $data['language']])->with('status', 'Place created. Describe it now, or later.');
+        return redirect()->route('places.edit', [$place, 'language' => $data['language']])->with('status', __('Place created. Describe it now, or later.'));
     }
 
     public function show(Request $request, Place $place): View|RedirectResponse
     {
         if ($place->merged_into_id && $place->institution_id === $request->user()->institution_id) {
-            return redirect()->route('places.show', $place->merged_into_id)->with('status', 'That place was merged into this one.');
+            return redirect()->route('places.show', $place->merged_into_id)->with('status', __('That place was merged into this one.'));
         }
         $this->own($request, $place);
         $place->load('descriptionValues.element.labels', 'descriptionValues.state.labels', 'names.nameType.labels', 'names.state.labels', 'names.dates.property',
@@ -113,7 +113,7 @@ class PlaceController extends Controller
     {
         $this->own($request, $place, 'update');
         $data = $request->validate([
-            'language' => ['required', 'string', fn ($a, $v, $fail) => Bcp47::valid((string) $v) || $fail('Give a BCP 47 language tag, such as en or af.')],
+            'language' => ['required', 'string', fn ($a, $v, $fail) => Bcp47::valid((string) $v) || $fail(__('Give a BCP 47 language tag, such as en or af.'))],
             'values' => ['array'],
             'values.*' => ['nullable', 'string', 'max:65535'],
             'place_type' => ['nullable', 'uuid'],
@@ -131,7 +131,7 @@ class PlaceController extends Controller
             return back()->withInput()->withErrors(['values' => $e->getMessage()]);
         }
 
-        return redirect()->route('places.show', $place)->with('status', 'Place saved.');
+        return redirect()->route('places.show', $place)->with('status', __('Place saved.'));
     }
 
     /** Find the place it now lies in: search, then choose, or put it at the top. */
@@ -157,7 +157,7 @@ class PlaceController extends Controller
             return back()->withErrors(['parent' => $e->getMessage()]);
         }
 
-        return redirect()->route('places.show', $place)->with('status', 'Place moved.');
+        return redirect()->route('places.show', $place)->with('status', __('Place moved.'));
     }
 
     private function existing(string $institutionId): Builder

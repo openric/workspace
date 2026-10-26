@@ -61,7 +61,7 @@ class ActivityController extends Controller
         abort_unless($request->user()->may('create', 'authority'), 403);
         $data = $request->validate([
             'name' => ['required', 'string', 'max:2000'],
-            'language' => ['required', 'string', fn ($a, $v, $fail) => Bcp47::valid((string) $v) || $fail('Give a BCP 47 language tag, such as en or af.')],
+            'language' => ['required', 'string', fn ($a, $v, $fail) => Bcp47::valid((string) $v) || $fail(__('Give a BCP 47 language tag, such as en or af.'))],
             'type' => ['nullable', 'uuid'],
         ]);
         try {
@@ -70,7 +70,7 @@ class ActivityController extends Controller
             return back()->withInput()->withErrors(['type' => $e->getMessage()]);
         }
 
-        return redirect()->route('activities.show', $activity)->with('status', 'Activity created. Add who performed it and took part, and what it resulted in.');
+        return redirect()->route('activities.show', $activity)->with('status', __('Activity created. Add who performed it and took part, and what it resulted in.'));
     }
 
     public function show(Request $request, Activity $activity): View
@@ -97,7 +97,7 @@ class ActivityController extends Controller
     {
         $this->own($request, $activity, 'update');
         $data = $request->validate([
-            'language' => ['required', 'string', fn ($a, $v, $fail) => Bcp47::valid((string) $v) || $fail('Give a BCP 47 language tag, such as en or af.')],
+            'language' => ['required', 'string', fn ($a, $v, $fail) => Bcp47::valid((string) $v) || $fail(__('Give a BCP 47 language tag, such as en or af.'))],
             'values' => ['array'],
             'values.*' => ['nullable', 'string', 'max:65535'],
             'type' => ['nullable', 'uuid'],
@@ -112,7 +112,7 @@ class ActivityController extends Controller
             return back()->withInput()->withErrors(['values' => $e->getMessage()]);
         }
 
-        return redirect()->route('activities.show', $activity)->with('status', 'Activity saved.');
+        return redirect()->route('activities.show', $activity)->with('status', __('Activity saved.'));
     }
 
     private function existing(string $institutionId): Builder

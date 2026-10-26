@@ -54,7 +54,7 @@ class RepositoryController extends Controller
         $data = $request->validate([
             'name' => ['required', 'string', 'max:1024'],
             'identifier' => ['nullable', 'string', 'max:255'],
-            'language' => ['required', 'string', fn ($a, $v, $fail) => Bcp47::valid((string) $v) || $fail('Give a BCP 47 language tag, such as en or af.')],
+            'language' => ['required', 'string', fn ($a, $v, $fail) => Bcp47::valid((string) $v) || $fail(__('Give a BCP 47 language tag, such as en or af.'))],
         ]);
         try {
             $repository = $this->repositories->create($request->user()->institution, $data['name'], $data['language'], $data['identifier'] ?? null, $request->user());
@@ -63,7 +63,7 @@ class RepositoryController extends Controller
         }
 
         // Straight to the full description, so every ISDIAH element is in view.
-        return redirect()->route('repositories.edit', [$repository, 'language' => $data['language']])->with('status', 'Repository created. Describe it now, or later.');
+        return redirect()->route('repositories.edit', [$repository, 'language' => $data['language']])->with('status', __('Repository created. Describe it now, or later.'));
     }
 
     public function show(Request $request, Repository $repository): View
@@ -91,7 +91,7 @@ class RepositoryController extends Controller
         $this->own($request, $repository, 'update');
         $notations = $this->elements()->pluck('notation')->all();
         $data = $request->validate([
-            'language' => ['required', 'string', fn ($a, $v, $fail) => Bcp47::valid((string) $v) || $fail('Give a BCP 47 language tag, such as en or af.')],
+            'language' => ['required', 'string', fn ($a, $v, $fail) => Bcp47::valid((string) $v) || $fail(__('Give a BCP 47 language tag, such as en or af.'))],
             'identifier' => ['nullable', 'string', 'max:255'],
             'complete_reference_codes' => ['boolean'],
             'values' => ['array'],
@@ -113,7 +113,7 @@ class RepositoryController extends Controller
             return back()->withInput()->withErrors(['values' => $e->getMessage()]);
         }
 
-        return redirect()->route('repositories.show', $repository)->with('status', 'Description saved.');
+        return redirect()->route('repositories.show', $repository)->with('status', __('Description saved.'));
     }
 
     public function storeContact(Request $request, Repository $repository): RedirectResponse
@@ -121,7 +121,7 @@ class RepositoryController extends Controller
         $this->own($request, $repository, 'update');
         $this->contacts->save($repository, $this->contactFields($request), null, $request->user());
 
-        return redirect()->route('repositories.show', $repository)->with('status', 'Contact point added.');
+        return redirect()->route('repositories.show', $repository)->with('status', __('Contact point added.'));
     }
 
     public function updateContact(Request $request, Repository $repository, ContactPoint $contact): RedirectResponse
@@ -129,7 +129,7 @@ class RepositoryController extends Controller
         $this->ownContact($request, $repository, $contact);
         $this->contacts->save($repository, $this->contactFields($request), $contact, $request->user());
 
-        return redirect()->route('repositories.show', $repository)->with('status', 'Contact point saved.');
+        return redirect()->route('repositories.show', $repository)->with('status', __('Contact point saved.'));
     }
 
     public function destroyContact(Request $request, Repository $repository, ContactPoint $contact): RedirectResponse
@@ -137,7 +137,7 @@ class RepositoryController extends Controller
         $this->ownContact($request, $repository, $contact);
         $this->contacts->remove($contact, $request->user());
 
-        return redirect()->route('repositories.show', $repository)->with('status', 'Contact point removed.');
+        return redirect()->route('repositories.show', $repository)->with('status', __('Contact point removed.'));
     }
 
     private function contactFields(Request $request): array

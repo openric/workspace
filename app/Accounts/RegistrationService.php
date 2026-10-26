@@ -27,10 +27,10 @@ class RegistrationService
     {
         $email = mb_strtolower(trim($email));
         if (! $institution->registration_open) {
-            throw new AccountException('This institution does not take requests for accounts.');
+            throw new AccountException(__('This institution does not take requests for accounts.'));
         }
         if (User::where('email', $email)->exists() || RegistrationRequest::whereRaw('lower(email) = ?', [$email])->whereNull('approved_at')->whereNull('rejected_at')->exists()) {
-            throw new AccountException('An account or a request for one with that email exists already.');
+            throw new AccountException(__('An account or a request for one with that email exists already.'));
         }
 
         return RegistrationRequest::create(['institution_id' => $institution->id, 'name' => trim($name), 'email' => $email, 'password' => $password,
@@ -41,7 +41,7 @@ class RegistrationService
     public function approve(RegistrationRequest $request, array $roleIds, User $actor): User
     {
         if (! $request->isPending()) {
-            throw new AccountException('This request has been decided already.');
+            throw new AccountException(__('This request has been decided already.'));
         }
 
         return DB::transaction(function () use ($request, $roleIds, $actor) {
@@ -58,7 +58,7 @@ class RegistrationService
     public function reject(RegistrationRequest $request, User $actor): void
     {
         if (! $request->isPending()) {
-            throw new AccountException('This request has been decided already.');
+            throw new AccountException(__('This request has been decided already.'));
         }
         DB::transaction(function () use ($request, $actor) {
             $request->update(['rejected_at' => now(), 'decided_by_id' => $actor->id]);

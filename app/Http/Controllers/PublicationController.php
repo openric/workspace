@@ -51,10 +51,13 @@ class PublicationController extends Controller
             }
         }
         $changed = $this->publication->apply($entity, $data['action'], ($data['language'] ?? '') ?: null, $inside, $user);
-        $done = ['review' => 'reviewed', 'publish' => 'published', 'withdraw' => 'withdrawn'][$data['action']];
+        // Each action's sentences in full, so each translates as a whole: nothing, one value, several.
+        $done = ['review' => ['Nothing to mark reviewed.', ':count value reviewed.', ':count values reviewed.'],
+            'publish' => ['Nothing to mark published.', ':count value published.', ':count values published.'],
+            'withdraw' => ['Nothing to mark withdrawn.', ':count value withdrawn.', ':count values withdrawn.']][$data['action']];
 
         return redirect()->route(EntityKinds::get(EntityKinds::of($entity))['route'], $entity)
-            ->with('status', $changed === 0 ? "Nothing to mark $done." : "$changed ".($changed === 1 ? 'value' : 'values')." $done.");
+            ->with('status', __($done[$changed === 0 ? 0 : ($changed === 1 ? 1 : 2)], ['count' => $changed]));
     }
 
     /** @return array{0: Model, 1: string} the entity and its permission kind; 404 outside the institution, 403 without update or publish */

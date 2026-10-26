@@ -33,7 +33,7 @@ class PlaceService
     public function create(Institution $institution, string $name, string $language, ?Place $parent = null, ?User $actor = null): Place
     {
         if ($parent && ($parent->institution_id !== $institution->id || $parent->deleted_at !== null)) {
-            throw new InvalidArgumentException('a place lies in a place of the institution');
+            throw new InvalidArgumentException(__('a place lies in a place of the institution'));
         }
 
         return DB::transaction(fn () => AuditLog::actingAs($actor, function () use ($institution, $name, $language, $parent) {
@@ -65,19 +65,19 @@ class PlaceService
             $type = Concept::where(['id' => $typeId, 'institution_id' => $place->institution_id])->whereNull('deprecated_at')
                 ->whereHas('vocabulary.kind', fn ($q) => $q->whereIn('iri', [Vocab::SCHEME_KINDS.'place-type', Vocab::SCHEME_KINDS.'storage-place-type']))->first()
                 ?? Concept::choices(StorageService::PLACE_TYPES)->whereKey($typeId)->first()
-                ?? throw new InvalidArgumentException('a place type is a current concept of one of the institution\'s place-type or storage-place-type vocabularies, or of the storage-place-type vocabulary');
+                ?? throw new InvalidArgumentException(__('a place type is a current concept of one of the institution\'s place-type or storage-place-type vocabularies, or of the storage-place-type vocabulary'));
         }
         [$latitude, $longitude, $altitude] = array_map(fn ($v) => ($v = trim((string) $v)) === '' ? null : $v, [$latitude, $longitude, $altitude]);
-        foreach (['latitude' => [$latitude, 90], 'longitude' => [$longitude, 180]] as $what => [$value, $limit]) {
+        foreach ([__('latitude') => [$latitude, 90], __('longitude') => [$longitude, 180]] as $what => [$value, $limit]) {
             if ($value !== null && (! is_numeric($value) || abs((float) $value) > $limit)) {
-                throw new InvalidArgumentException("give the $what in decimal degrees, from -$limit to $limit");
+                throw new InvalidArgumentException(__('give the :what in decimal degrees, from -:limit to :limit', ['what' => $what, 'limit' => $limit]));
             }
         }
         if (($latitude === null) !== ($longitude === null) || ($altitude !== null && $latitude === null)) {
-            throw new InvalidArgumentException('give both latitude and longitude, and an altitude only with them');
+            throw new InvalidArgumentException(__('give both latitude and longitude, and an altitude only with them'));
         }
         if ($altitude !== null && (! is_numeric($altitude) || abs((float) $altitude) >= 1000000)) {
-            throw new InvalidArgumentException('give the altitude in metres');
+            throw new InvalidArgumentException(__('give the altitude in metres'));
         }
         DB::transaction(fn () => AuditLog::actingAs($actor, fn () => $place->update([
             'place_type_id' => $type?->id, 'latitude' => $latitude, 'longitude' => $longitude, 'altitude' => $altitude,
@@ -89,11 +89,11 @@ class PlaceService
     {
         if ($parent) {
             if ($parent->institution_id !== $place->institution_id || $parent->deleted_at !== null) {
-                throw new InvalidArgumentException('a place lies in a place of the institution');
+                throw new InvalidArgumentException(__('a place lies in a place of the institution'));
             }
             foreach ([$parent, ...$parent->ancestors()] as $above) {
                 if ($above->id === $place->id) {
-                    throw new InvalidArgumentException('a place cannot lie in itself or in a place it contains');
+                    throw new InvalidArgumentException(__('a place cannot lie in itself or in a place it contains'));
                 }
             }
         }
@@ -110,11 +110,11 @@ class PlaceService
     public function merge(Place $duplicate, Place $kept, ?User $actor = null): void
     {
         if ($duplicate->id === $kept->id || $duplicate->institution_id !== $kept->institution_id || $duplicate->deleted_at || $kept->deleted_at) {
-            throw new InvalidArgumentException('a place merges into another current place of the institution');
+            throw new InvalidArgumentException(__('a place merges into another current place of the institution'));
         }
         foreach ($kept->fresh()->ancestors() as $above) {
             if ($above->id === $duplicate->id) {
-                throw new InvalidArgumentException('a place cannot be merged into a place that lies inside it');
+                throw new InvalidArgumentException(__('a place cannot be merged into a place that lies inside it'));
             }
         }
         $relations = app(RelationService::class);

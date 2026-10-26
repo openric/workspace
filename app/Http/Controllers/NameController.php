@@ -28,7 +28,7 @@ class NameController extends Controller
             return redirect()->route($route, $subject)->withInput()->withErrors(['names' => $e->getMessage()]);
         }
 
-        return redirect()->route($route, $subject)->with('status', 'Name added.');
+        return redirect()->route($route, $subject)->with('status', __('Name added.'));
     }
 
     public function update(Request $request, string $kind, string $id, Name $name): RedirectResponse
@@ -41,7 +41,7 @@ class NameController extends Controller
             return redirect()->route($route, $subject)->withErrors(['names' => $e->getMessage()]);
         }
 
-        return redirect()->route($route, $subject)->with('status', 'Name saved.');
+        return redirect()->route($route, $subject)->with('status', __('Name saved.'));
     }
 
     public function destroy(Request $request, string $kind, string $id, Name $name): RedirectResponse
@@ -54,7 +54,7 @@ class NameController extends Controller
             return redirect()->route($route, $subject)->withErrors(['names' => $e->getMessage()]);
         }
 
-        return redirect()->route($route, $subject)->with('status', 'Name removed.');
+        return redirect()->route($route, $subject)->with('status', __('Name removed.'));
     }
 
     private function fields(Request $request): array

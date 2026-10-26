@@ -72,11 +72,11 @@ class AgentService
         $maintainer = null;
         if (($fields['maintainer'] ?? '') !== '' && ($fields['maintainer'] ?? null) !== null) {
             $maintainer = Repository::where(['id' => $fields['maintainer'], 'institution_id' => $agent->institution_id])->whereNull('deleted_at')->first()
-                ?? throw new InvalidArgumentException('the authority record is maintained by a repository of the institution');
+                ?? throw new InvalidArgumentException(__('the authority record is maintained by a repository of the institution'));
         }
         $embargo = trim((string) ($fields['embargo_until'] ?? ''));
         if ($embargo !== '' && ! preg_match('/^\d{4}-\d{2}-\d{2}$/', $embargo)) {
-            throw new InvalidArgumentException('give the embargo date as YYYY-MM-DD');
+            throw new InvalidArgumentException(__('give the embargo date as YYYY-MM-DD'));
         }
         DB::transaction(fn () => AuditLog::actingAs($actor, function () use ($agent, $fields, $type, $maintainer, $embargo) {
             if ($type->id !== $agent->agent_type_id) {
@@ -107,7 +107,7 @@ class AgentService
     public function merge(Agent $duplicate, Agent $kept, ?User $actor = null): void
     {
         if ($duplicate->id === $kept->id || $duplicate->institution_id !== $kept->institution_id || $duplicate->deleted_at || $kept->deleted_at) {
-            throw new InvalidArgumentException('an agent merges into another current agent of the institution');
+            throw new InvalidArgumentException(__('an agent merges into another current agent of the institution'));
         }
         DB::transaction(fn () => AuditLog::actingAs($actor, function () use ($duplicate, $kept, $actor) {
             foreach (['source', 'target', 'context'] as $side) {
@@ -155,12 +155,12 @@ class AgentService
     {
         $names = Name::where(['subject_table' => 'agents', 'subject_id' => $agent->id])->whereKey($nameIds)->with('nameType')->orderBy('created_at')->get();
         if ($names->isEmpty() || $names->count() !== count(array_unique($nameIds))) {
-            throw new InvalidArgumentException('choose at least one of the agent\'s names for the new agent');
+            throw new InvalidArgumentException(__('choose at least one of the agent\'s names for the new agent'));
         }
         $authorised = $this->concept(Vocab::NAME_TYPES.'authorised')->id;
         $staying = Name::where(['subject_table' => 'agents', 'subject_id' => $agent->id, 'name_type_id' => $authorised])->whereKeyNot($names->pluck('id'))->exists();
         if (! $staying) {
-            throw new InvalidArgumentException('the agent keeps an authorised form of name; leave one of its authorised names with it');
+            throw new InvalidArgumentException(__('the agent keeps an authorised form of name; leave one of its authorised names with it'));
         }
         $typeConcept = $this->concept(Agent::TYPES.$type);
 
@@ -272,7 +272,7 @@ class AgentService
             throw new InvalidArgumentException("the type of entity cannot change while the agent takes part in $related ".($related === 1 ? 'relation' : 'relations').', which depend on it; remove them first');
         }
         if ($type->notation !== 'person' && $agent->dates()->whereHas('property', fn ($q) => $q->whereIn('notation', ['birth', 'death']))->exists()) {
-            throw new InvalidArgumentException('only a person has birth and death dates; change them to dates of existence first');
+            throw new InvalidArgumentException(__('only a person has birth and death dates; change them to dates of existence first'));
         }
     }
 

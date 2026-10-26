@@ -34,7 +34,7 @@ class SessionController extends Controller
         if (! Auth::attempt([...$credentials, 'disabled_at' => null])) {
             $known = User::where('email', $credentials['email'])->first();
             AuditLog::record(Vocab::action('sign-in-failed'), $known, null, ['email' => $credentials['email']], null, $known?->institution_id);
-            throw ValidationException::withMessages(['email' => 'The email or password is not correct, or the account is disabled.']);
+            throw ValidationException::withMessages(['email' => __('The email or password is not correct, or the account is disabled.')]);
         }
 
         $request->session()->regenerate();

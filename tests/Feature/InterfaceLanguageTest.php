@@ -67,6 +67,20 @@ class InterfaceLanguageTest extends TestCase
         $this->actingAs($this->editor->fresh())->get(self::SITE.'/')->assertSee('Teken uit')->assertSee('Bestuur')->assertSee('Beskryf');
     }
 
+    public function test_messages_and_validation_errors_come_in_the_language_of_the_interface(): void
+    {
+        $this->editor->update(['interface_language' => 'af']);
+        $editor = $this->editor->fresh();
+        // Laravel's validation messages, with the field's Afrikaans name.
+        $this->actingAs($editor)->post(self::SITE.'/account/api-keys', ['name' => ''])
+            ->assertSessionHasErrors(['name' => 'Die naam-veld is verpligtend.']);
+        // A message written in code.
+        $this->actingAs($editor)->post(self::SITE.'/account/password', ['current_password' => 'wrong', 'password' => 'a new long password', 'password_confirmation' => 'a new long password'])
+            ->assertSessionHasErrors(['current_password' => 'Dit is nie u huidige wagwoord nie.']);
+        $this->actingAs($editor)->post(self::SITE.'/account/password', ['current_password' => 'correct horse battery staple', 'password' => 'a new long password', 'password_confirmation' => 'a new long password'])
+            ->assertSessionHas('status', 'U wagwoord is verander.');
+    }
+
     public function test_every_translated_string_has_its_afrikaans(): void
     {
         $af = json_decode(file_get_contents(base_path('lang/af.json')), true);
@@ -78,11 +92,12 @@ class InterfaceLanguageTest extends TestCase
                 }
             }
         }
-        // Translated where they are shown: relation phrases, and the storage environment labels (__($label)).
+        // Translated where they are shown: relation phrases, the storage environment labels (__($label)) and the publication messages (PublicationController).
         foreach (config('workspace.relation_types') as $type) {
             $keys = [...$keys, $type['forward'], $type['inverse']];
         }
-        $keys = [...$keys, 'Lowest temperature (°C)', 'Highest temperature (°C)', 'Lowest relative humidity (%)', 'Highest relative humidity (%)'];
+        $keys = [...$keys, 'Lowest temperature (°C)', 'Highest temperature (°C)', 'Lowest relative humidity (%)', 'Highest relative humidity (%)',
+            ...array_merge(...array_map(fn ($done) => ["Nothing to mark $done.", ":count value $done.", ":count values $done."], ['reviewed', 'published', 'withdrawn']))];
         $missing = array_values(array_diff(array_unique($keys), array_keys($af)));
         $this->assertSame([], $missing, 'strings with no Afrikaans in lang/af.json');
         // Every placeholder of a string is in its translation.

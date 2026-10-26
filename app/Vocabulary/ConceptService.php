@@ -69,7 +69,7 @@ class ConceptService
     {
         $this->local($vocabulary);
         if ($vocabulary->concepts()->exists()) {
-            throw new InvalidArgumentException('the vocabulary has concepts; it is kept, so their IRIs keep resolving. Deprecate or move its concepts instead.');
+            throw new InvalidArgumentException(__('the vocabulary has concepts; it is kept, so their IRIs keep resolving. Deprecate or move its concepts instead.'));
         }
         DB::transaction(fn () => AuditLog::actingAs($actor, fn () => $vocabulary->delete()));
     }
@@ -123,7 +123,7 @@ class ConceptService
             $before = $this->snapshot($concept);
             if ($label === '') {
                 if (ConceptLabel::where('concept_id', $concept->id)->where('language', '<>', $language)->doesntExist()) {
-                    throw new InvalidArgumentException('a concept keeps a preferred label in at least one language');
+                    throw new InvalidArgumentException(__('a concept keeps a preferred label in at least one language'));
                 }
                 ConceptLabel::where(['concept_id' => $concept->id, 'language' => $language])->delete();
                 ConceptAltLabel::where(['concept_id' => $concept->id, 'language' => $language])->delete();
@@ -149,7 +149,7 @@ class ConceptService
     public function relate(Concept $concept, Concept $other, ?User $actor = null): void
     {
         if ($concept->id === $other->id || $concept->institution_id === null || $other->institution_id !== $concept->institution_id) {
-            throw new InvalidArgumentException('a concept is related to another concept of the institution');
+            throw new InvalidArgumentException(__('a concept is related to another concept of the institution'));
         }
         [$a, $b] = strcmp($concept->id, $other->id) < 0 ? [$concept->id, $other->id] : [$other->id, $concept->id];
         $this->changing($concept, $actor, fn () => DB::table('concept_related')->insertOrIgnore(['concept_id' => $a, 'related_id' => $b, 'created_at' => now(), 'updated_at' => now()]));
@@ -167,7 +167,7 @@ class ConceptService
         $this->local($concept->vocabulary);
         $iri = trim($iri);
         if (! preg_match('#^https?://\S+$#', $iri)) {
-            throw new InvalidArgumentException('a match is the http or https IRI of a concept in another vocabulary');
+            throw new InvalidArgumentException(__('a match is the http or https IRI of a concept in another vocabulary'));
         }
         $typeId = $this->concept(Vocab::MATCH_TYPES.$type)->id;
         $this->guarded(fn () => $this->changing($concept, $actor, fn () => ConceptMatch::create(['concept_id' => $concept->id, 'match_type_id' => $typeId,
@@ -186,7 +186,7 @@ class ConceptService
         $this->local($target);
         $from = $concept->vocabulary;
         if ($target->institution_id !== $from->institution_id || $target->kind_id !== $from->kind_id || $target->id === $from->id) {
-            throw new InvalidArgumentException('a concept moves to another vocabulary of the same kind in the institution');
+            throw new InvalidArgumentException(__('a concept moves to another vocabulary of the same kind in the institution'));
         }
 
         return DB::transaction(fn () => AuditLog::actingAs($actor, function () use ($concept, $target) {
@@ -214,7 +214,7 @@ class ConceptService
     public function merge(Concept $duplicate, Concept $kept, ?User $actor = null): void
     {
         if ($duplicate->id === $kept->id || $duplicate->vocabulary_id !== $kept->vocabulary_id || $kept->deprecated_at !== null) {
-            throw new InvalidArgumentException('a concept merges into another current concept of the same vocabulary');
+            throw new InvalidArgumentException(__('a concept merges into another current concept of the same vocabulary'));
         }
         $this->local($kept->vocabulary);
         DB::transaction(fn () => AuditLog::actingAs($actor, function () use ($duplicate, $kept) {
@@ -256,7 +256,7 @@ class ConceptService
     {
         $this->local($concept->vocabulary);
         if (Concept::where('broader_id', $concept->id)->whereNull('deprecated_at')->exists()) {
-            throw new InvalidArgumentException('the concept has narrower concepts; move or deprecate them first, or merge it into another concept');
+            throw new InvalidArgumentException(__('the concept has narrower concepts; move or deprecate them first, or merge it into another concept'));
         }
         DB::transaction(fn () => AuditLog::actingAs($actor, fn () => $concept->update(['deprecated_at' => now()])));
     }
@@ -371,7 +371,7 @@ class ConceptService
         }
 
         return Concept::where(['id' => $id, 'vocabulary_id' => $vocabulary->id])->value('id')
-            ?? throw new InvalidArgumentException('a broader concept is a concept of the same vocabulary');
+            ?? throw new InvalidArgumentException(__('a broader concept is a concept of the same vocabulary'));
     }
 
     private function notation(?string $notation): ?string
@@ -411,13 +411,13 @@ class ConceptService
 
     private function language(string $language): string
     {
-        return Bcp47::valid($language) ? $language : throw new InvalidArgumentException('give the language as a BCP 47 tag, such as en or af');
+        return Bcp47::valid($language) ? $language : throw new InvalidArgumentException(__('give the language as a BCP 47 tag, such as en or af'));
     }
 
     private function local(Vocabulary $vocabulary): void
     {
         if ($vocabulary->institution_id === null) {
-            throw new InvalidArgumentException('a bundled or published vocabulary is changed only by importing it');
+            throw new InvalidArgumentException(__('a bundled or published vocabulary is changed only by importing it'));
         }
     }
 

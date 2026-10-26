@@ -45,7 +45,7 @@ class DeletionController extends Controller
             ? route('records.show', $entity->parent_id)
             : route(EntityKinds::get(EntityKinds::of($entity))['index']);
 
-        return redirect($back)->with('status', "Deleted: $name.");
+        return redirect($back)->with('status', __('Deleted: :name.', ['name' => $name]));
     }
 
     /** Another institution's entity, or a deleted one, does not exist here (404); deleting needs the delete permission (403). */

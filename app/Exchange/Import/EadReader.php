@@ -63,7 +63,7 @@ class EadReader
         $ead3 = $root->namespaceURI === Ead::EAD3 || $this->child($root, 'control') !== null;
         $header = $this->child($root, $ead3 ? 'control' : 'eadheader');
         $this->eadid = $this->text($this->child($header, $ead3 ? 'recordid' : 'eadid'));
-        $archdesc = $this->child($root, 'archdesc') ?? throw new InvalidArgumentException('the finding aid has no archdesc');
+        $archdesc = $this->child($root, 'archdesc') ?? throw new InvalidArgumentException(__('the finding aid has no archdesc'));
         $top = $this->unit($archdesc, null, 'archdesc', '');
         $rules = $ead3 ? $this->text($this->child($this->child($header, 'conventiondeclaration'), 'citation'))
             : $this->text($this->child($this->child($header, 'profiledesc'), 'descrules'));

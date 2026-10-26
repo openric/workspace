@@ -56,7 +56,7 @@ class LocalVocabularyController extends Controller
             return back()->withInput()->withErrors(['title' => $e->getMessage()]);
         }
 
-        return redirect()->route('vocabularies.show', $vocabulary)->with('status', 'Vocabulary created.');
+        return redirect()->route('vocabularies.show', $vocabulary)->with('status', __('Vocabulary created.'));
     }
 
     /** Browse its concepts: search labels, alternative labels and codes; or the hierarchy (view=tree); deprecated ones on request. */
@@ -101,7 +101,7 @@ class LocalVocabularyController extends Controller
             return back()->withInput()->withErrors(['title' => $e->getMessage()]);
         }
 
-        return redirect()->route('vocabularies.show', $vocabulary)->with('status', 'Vocabulary saved.');
+        return redirect()->route('vocabularies.show', $vocabulary)->with('status', __('Vocabulary saved.'));
     }
 
     public function destroy(Request $request, Vocabulary $vocabulary): RedirectResponse
@@ -113,7 +113,7 @@ class LocalVocabularyController extends Controller
             return redirect()->route('vocabularies.show', $vocabulary)->withErrors(['vocabulary' => $e->getMessage()]);
         }
 
-        return redirect()->route('vocabularies.index')->with('status', 'Vocabulary deleted.');
+        return redirect()->route('vocabularies.index')->with('status', __('Vocabulary deleted.'));
     }
 
     public function export(Request $request, Vocabulary $vocabulary, string $format): Response
@@ -148,7 +148,7 @@ class LocalVocabularyController extends Controller
             return back()->withErrors(['file' => $e->getMessage()]);
         }
 
-        return redirect()->route('vocabularies.show', $vocabulary)->with('status', "Imported: {$count['created']} concepts added, {$count['updated']} updated.");
+        return redirect()->route('vocabularies.show', $vocabulary)->with('status', __('Imported: :created concepts added, :updated updated.', $count));
     }
 
     public function createConcept(Request $request, Vocabulary $vocabulary): View
@@ -169,7 +169,7 @@ class LocalVocabularyController extends Controller
             return back()->withInput()->withErrors(['label' => $e->getMessage()]);
         }
 
-        return redirect()->route('concepts.show', $concept)->with('status', 'Concept added.');
+        return redirect()->route('concepts.show', $concept)->with('status', __('Concept added.'));
     }
 
     /** @return Collection<int, Concept> current concepts of the vocabulary, by label, for a broader-concept list */
@@ -184,7 +184,7 @@ class LocalVocabularyController extends Controller
     {
         return $request->validate([
             'title' => ['required', 'string', 'max:1024'],
-            'language' => ['required', 'string', fn ($a, $v, $fail) => Bcp47::valid((string) $v) || $fail('Give a BCP 47 language tag, such as en or af.')],
+            'language' => ['required', 'string', fn ($a, $v, $fail) => Bcp47::valid((string) $v) || $fail(__('Give a BCP 47 language tag, such as en or af.'))],
             'description' => ['nullable', 'string', 'max:5000'],
         ] + ($withKind ? ['kind' => ['required', Rule::in($this->kinds()->pluck('notation'))]] : []));
     }

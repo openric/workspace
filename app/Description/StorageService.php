@@ -157,7 +157,7 @@ class StorageService
         $number = function (string $key, float $min, ?float $max, string $what) use ($text) {
             $value = $text($key);
             if ($value !== null && (! is_numeric($value) || (float) $value < $min || ($max !== null && (float) $value > $max))) {
-                throw new InvalidArgumentException("give the $what as a number".($max !== null ? " from $min to $max" : ($min > 0 ? ' above 0' : ' of 0 or more')));
+                throw new InvalidArgumentException($max !== null ? __('give the :what as a number from :min to :max', ['what' => $what, 'min' => $min, 'max' => $max]) : __($min > 0 ? 'give the :what as a number above 0' : 'give the :what as a number of 0 or more', ['what' => $what]));
             }
 
             return $value;
@@ -167,19 +167,19 @@ class StorageService
             'status_id' => $text('status') ? $this->concept(self::STATUSES.$text('status'))->id : null,
             'security_level_id' => $text('security_level') ? $this->concept(self::SECURITY_LEVELS.$text('security_level'))->id : null,
             'capacity_unit_id' => $text('capacity_unit') ? $this->concept(self::CAPACITY_UNITS.$text('capacity_unit'))->id : null,
-            'width_cm' => $number('width_cm', 0.1, null, 'width in centimetres'), 'height_cm' => $number('height_cm', 0.1, null, 'height in centimetres'),
-            'depth_cm' => $number('depth_cm', 0.1, null, 'depth in centimetres'),
-            'capacity' => $number('capacity', 0, null, 'capacity'), 'capacity_used' => $number('capacity_used', 0, null, 'capacity used'),
+            'width_cm' => $number('width_cm', 0.1, null, __('width in centimetres')), 'height_cm' => $number('height_cm', 0.1, null, __('height in centimetres')),
+            'depth_cm' => $number('depth_cm', 0.1, null, __('depth in centimetres')),
+            'capacity' => $number('capacity', 0, null, __('capacity')), 'capacity_used' => $number('capacity_used', 0, null, __('capacity used')),
             'climate_controlled' => array_key_exists('climate_controlled', $fields) && $fields['climate_controlled'] !== null && $fields['climate_controlled'] !== '' ? (bool) $fields['climate_controlled'] : null,
-            'temperature_min' => $number('temperature_min', -100, 100, 'lowest temperature in degrees Celsius'), 'temperature_max' => $number('temperature_max', -100, 100, 'highest temperature in degrees Celsius'),
-            'humidity_min' => $number('humidity_min', 0, 100, 'lowest relative humidity in per cent'), 'humidity_max' => $number('humidity_max', 0, 100, 'highest relative humidity in per cent'),
+            'temperature_min' => $number('temperature_min', -100, 100, __('lowest temperature in degrees Celsius')), 'temperature_max' => $number('temperature_max', -100, 100, __('highest temperature in degrees Celsius')),
+            'humidity_min' => $number('humidity_min', 0, 100, __('lowest relative humidity in per cent')), 'humidity_max' => $number('humidity_max', 0, 100, __('highest relative humidity in per cent')),
         ];
         if (($values['capacity'] !== null || $values['capacity_used'] !== null) && $values['capacity_unit_id'] === null) {
-            throw new InvalidArgumentException('give the unit the capacity is counted in');
+            throw new InvalidArgumentException(__('give the unit the capacity is counted in'));
         }
-        foreach ([['temperature_min', 'temperature_max', 'temperature'], ['humidity_min', 'humidity_max', 'humidity']] as [$low, $high, $what]) {
+        foreach ([['temperature_min', 'temperature_max', __('temperature')], ['humidity_min', 'humidity_max', __('humidity')]] as [$low, $high, $what]) {
             if ($values[$low] !== null && $values[$high] !== null && (float) $values[$low] > (float) $values[$high]) {
-                throw new InvalidArgumentException("the lowest $what is above the highest");
+                throw new InvalidArgumentException(__('the lowest :what is above the highest', ['what' => $what]));
             }
         }
         DB::transaction(fn () => AuditLog::actingAs($actor, fn () => $container->update($values)));
@@ -219,10 +219,10 @@ class StorageService
     {
         $day ??= now()->toDateString();
         if (! preg_match('/^\d{4}-\d{2}-\d{2}$/', $day)) {
-            throw new InvalidArgumentException('give the day of the move as YYYY-MM-DD');
+            throw new InvalidArgumentException(__('give the day of the move as YYYY-MM-DD'));
         }
         if ($place !== null && (! $this->isStoragePlace($place) || $place->institution_id !== $container->institution_id || $place->deleted_at !== null)) {
-            throw new InvalidArgumentException('a container is kept in a storage place of the institution: a place of a storage place type');
+            throw new InvalidArgumentException(__('a container is kept in a storage place of the institution: a place of a storage place type'));
         }
         $current = $this->currentLocation($container);
         if ($current?->target_id === $place?->id) {

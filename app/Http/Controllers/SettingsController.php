@@ -68,7 +68,7 @@ class SettingsController extends Controller
             $disk->delete($old);
         }
 
-        return redirect()->route('settings.edit')->with('status', 'Settings saved.');
+        return redirect()->route('settings.edit')->with('status', __('Settings saved.'));
     }
 
     /** Public: the sign-in page shows the logo too. */

@@ -54,11 +54,11 @@ final class ReviewService
         $record = $proposal->record;
         $value = trim((string) ($edits['value'] ?? $proposal->value));
         if ($value === '') {
-            throw new InvalidArgumentException('give the text to write, or reject the proposal');
+            throw new InvalidArgumentException(__('give the text to write, or reject the proposal'));
         }
         $language = trim((string) ($edits['language'] ?? $proposal->language ?? $record->originalLanguage('title')));
         if (! Bcp47::valid($language)) {
-            throw new InvalidArgumentException('give the language as a BCP 47 tag, such as en or af');
+            throw new InvalidArgumentException(__('give the language as a BCP 47 tag, such as en or af'));
         }
 
         return DB::transaction(fn () => AuditLog::actingAs($reviewer, function () use ($proposal, $reviewer, $edits, $record, $value, $language) {
@@ -102,7 +102,7 @@ final class ReviewService
                 ?? throw new InvalidArgumentException($isAgent ? 'that authority record does not exist' : 'that place does not exist');
         } elseif ($isAgent) {
             if (! $reviewer->may('create', 'authority')) {
-                throw new InvalidArgumentException('you may not create authority records: choose an existing one');
+                throw new InvalidArgumentException(__('you may not create authority records: choose an existing one'));
             }
             $entity = app(AgentService::class)->create($institution, (string) ($edits['agent_type'] ?? $proposal->agentType?->notation ?? 'person'), $value, $language, null, $reviewer);
             $known = array_filter(array_map(fn ($k) => $proposal->authority[$k] ?? null, array_flip(self::AUTHORITY_ELEMENTS)));
@@ -111,7 +111,7 @@ final class ReviewService
             }
         } else {
             if (! $reviewer->may('create', 'vocabulary')) {
-                throw new InvalidArgumentException('you may not create places: choose an existing one');
+                throw new InvalidArgumentException(__('you may not create places: choose an existing one'));
             }
             $entity = app(PlaceService::class)->create($institution, $value, $language, null, $reviewer);
         }
@@ -130,7 +130,7 @@ final class ReviewService
     private function waiting(Proposal $proposal): void
     {
         if ($proposal->status->iri !== Vocab::ASSERTION_STATUSES.'proposed') {
-            throw new InvalidArgumentException('this proposal was reviewed already');
+            throw new InvalidArgumentException(__('this proposal was reviewed already'));
         }
     }
 

@@ -81,7 +81,7 @@ class RelationController extends Controller
             return back()->withInput()->withErrors(['relations' => $e->getMessage()]);
         }
 
-        return redirect()->route($route, $subject)->with('status', 'Relation added.');
+        return redirect()->route($route, $subject)->with('status', __('Relation added.'));
     }
 
     public function update(Request $request, string $kind, string $id, Relation $relation): RedirectResponse
@@ -93,7 +93,7 @@ class RelationController extends Controller
             return redirect()->route($route, $subject)->withErrors(['relations' => $e->getMessage()]);
         }
 
-        return redirect()->route($route, $subject)->with('status', 'Relation saved.');
+        return redirect()->route($route, $subject)->with('status', __('Relation saved.'));
     }
 
     public function destroy(Request $request, string $kind, string $id, Relation $relation): RedirectResponse
@@ -101,7 +101,7 @@ class RelationController extends Controller
         [$subject, $route] = $this->subjectOf($request, $kind, $id, $relation);
         $this->relations->remove($relation, $request->user());
 
-        return redirect()->route($route, $subject)->with('status', 'Relation removed.');
+        return redirect()->route($route, $subject)->with('status', __('Relation removed.'));
     }
 
     public function assert(Request $request, string $kind, string $id, Relation $relation): RedirectResponse
@@ -120,7 +120,7 @@ class RelationController extends Controller
             return redirect()->route($route, $subject)->withErrors(['relations' => $e->getMessage()]);
         }
 
-        return redirect()->route($route, $subject)->with('status', 'Assertion recorded.');
+        return redirect()->route($route, $subject)->with('status', __('Assertion recorded.'));
     }
 
     public function review(Request $request, string $kind, string $id, Relation $relation, RelationAssertion $assertion): RedirectResponse
@@ -134,7 +134,7 @@ class RelationController extends Controller
             return redirect()->route($route, $subject)->withErrors(['relations' => $e->getMessage()]);
         }
 
-        return redirect()->route($route, $subject)->with('status', $data['decision'] === 'accept' ? 'Assertion accepted.' : 'Assertion rejected.');
+        return redirect()->route($route, $subject)->with('status', __($data['decision'] === 'accept' ? 'Assertion accepted.' : 'Assertion rejected.'));
     }
 
     /** Find a unit of description that proves the relation. */
@@ -157,7 +157,7 @@ class RelationController extends Controller
             return redirect()->route($route, $subject)->withErrors(['relations' => $e->getMessage()]);
         }
 
-        return redirect()->route($route, $subject)->with('status', 'Evidence added.');
+        return redirect()->route($route, $subject)->with('status', __('Evidence added.'));
     }
 
     public function removeEvidence(Request $request, string $kind, string $id, Relation $relation, RelationEvidence $evidence): RedirectResponse
@@ -166,7 +166,7 @@ class RelationController extends Controller
         abort_unless($evidence->relation_id === $relation->id, 404);
         $this->relations->removeEvidence($evidence, $request->user());
 
-        return redirect()->route($route, $subject)->with('status', 'Evidence removed.');
+        return redirect()->route($route, $subject)->with('status', __('Evidence removed.'));
     }
 
     /** The page's entity, which must be one end of the relation. */

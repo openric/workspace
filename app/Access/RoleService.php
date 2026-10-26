@@ -47,7 +47,7 @@ class RoleService
     public function update(Role $role, array $labels, ?Role $parent, ?User $actor = null): void
     {
         if ($role->is_system && $parent?->id !== $role->parent_id) {
-            throw new AccountException('The parent of a system role cannot change.');
+            throw new AccountException(__('The parent of a system role cannot change.'));
         }
         DB::transaction(fn () => AuditLog::actingAs($actor, function () use ($role, $labels, $parent) {
             if ($role->parent_id !== $parent?->id) {
@@ -61,13 +61,13 @@ class RoleService
     public function remove(Role $role, ?User $actor = null): void
     {
         if ($role->is_system) {
-            throw new AccountException('Public and Signed in are system roles and cannot be removed.');
+            throw new AccountException(__('Public and Signed in are system roles and cannot be removed.'));
         }
         if ($role->isTemplate('administrator')) {
-            throw new AccountException('The Administrator role cannot be removed.');
+            throw new AccountException(__('The Administrator role cannot be removed.'));
         }
         if (Role::where('parent_id', $role->id)->exists()) {
-            throw new AccountException('Other roles inherit from this role; give them another parent first.');
+            throw new AccountException(__('Other roles inherit from this role; give them another parent first.'));
         }
         DB::transaction(fn () => AuditLog::actingAs($actor, function () use ($role, $actor) {
             foreach ($role->members as $member) {
@@ -84,10 +84,10 @@ class RoleService
     public function addMember(Role $role, User $account, ?User $actor = null): void
     {
         if ($role->is_system) {
-            throw new AccountException('Everyone belongs to Public, and every signed-in account to Signed in; they have no members to add.');
+            throw new AccountException(__('Everyone belongs to Public, and every signed-in account to Signed in; they have no members to add.'));
         }
         if ($account->institution_id !== $role->institution_id) {
-            throw new InvalidArgumentException('a role can only hold accounts of its own institution');
+            throw new InvalidArgumentException(__('a role can only hold accounts of its own institution'));
         }
         DB::transaction(function () use ($role, $account, $actor) {
             $added = DB::table('role_members')->insertOrIgnore(['role_id' => $role->id, 'user_id' => $account->id, 'granted_by_id' => $actor?->id]);
@@ -118,7 +118,7 @@ class RoleService
         $languages = array_values(array_unique(array_filter(array_map('trim', $languages))));
         foreach ($languages as $language) {
             if (! Bcp47::valid($language)) {
-                throw new InvalidArgumentException("$language is not a BCP 47 language tag");
+                throw new InvalidArgumentException(__(':language is not a BCP 47 language tag', ['language' => $language]));
             }
         }
         DB::transaction(function () use ($role, $languages, $actor) {
@@ -224,7 +224,7 @@ class RoleService
     {
         foreach ($labels as $language => $label) {
             if (! Bcp47::valid($language)) {
-                throw new InvalidArgumentException("$language is not a BCP 47 language tag");
+                throw new InvalidArgumentException(__(':language is not a BCP 47 language tag', ['language' => $language]));
             }
             $name = trim((string) ($label['name'] ?? ''));
             $existing = RoleLabel::where(['role_id' => $role->id, 'language' => $language])->first();
@@ -237,7 +237,7 @@ class RoleService
             $existing ? $existing->fill($values)->save() : RoleLabel::create(['role_id' => $role->id, 'language' => $language, ...$values]);
         }
         if (! RoleLabel::where('role_id', $role->id)->exists()) {
-            throw new InvalidArgumentException('a role needs a name in at least one language');
+            throw new InvalidArgumentException(__('a role needs a name in at least one language'));
         }
         $role->unsetRelation('labels');
     }
@@ -248,7 +248,7 @@ class RoleService
         $others = DB::table('role_members as m')->join('users as u', 'u.id', '=', 'm.user_id')
             ->where('m.role_id', $role->id)->whereNull('u.disabled_at')->where('u.id', '<>', $leaving->id)->exists();
         if (! $others) {
-            throw new AccountException('This is the last active administrator of the institution; give another account the Administrator role first.');
+            throw new AccountException(__('This is the last active administrator of the institution; give another account the Administrator role first.'));
         }
     }
 

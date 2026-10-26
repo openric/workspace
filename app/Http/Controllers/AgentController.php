@@ -75,7 +75,7 @@ class AgentController extends Controller
         $data = $request->validate([
             'type' => ['required', Rule::in(Concept::choices(Agent::TYPES)->pluck('notation'))],
             'name' => ['required', 'string', 'max:1024'],
-            'language' => ['required', 'string', fn ($a, $v, $fail) => Bcp47::valid((string) $v) || $fail('Give a BCP 47 language tag, such as en or af.')],
+            'language' => ['required', 'string', fn ($a, $v, $fail) => Bcp47::valid((string) $v) || $fail(__('Give a BCP 47 language tag, such as en or af.'))],
             'identifier' => ['nullable', 'string', 'max:255'],
         ]);
         try {
@@ -84,7 +84,7 @@ class AgentController extends Controller
             return back()->withInput()->withErrors(['name' => $e->getMessage()]);
         }
 
-        return redirect()->route('agents.edit', [$agent, 'language' => $data['language']])->with('status', 'Authority record created. Describe it now, or later.');
+        return redirect()->route('agents.edit', [$agent, 'language' => $data['language']])->with('status', __('Authority record created. Describe it now, or later.'));
     }
 
     public function show(Request $request, Agent $agent): View|RedirectResponse
@@ -121,7 +121,7 @@ class AgentController extends Controller
     {
         $this->own($request, $agent, 'update');
         $data = $request->validate([
-            'language' => ['required', 'string', fn ($a, $v, $fail) => Bcp47::valid((string) $v) || $fail('Give a BCP 47 language tag, such as en or af.')],
+            'language' => ['required', 'string', fn ($a, $v, $fail) => Bcp47::valid((string) $v) || $fail(__('Give a BCP 47 language tag, such as en or af.'))],
             'type' => ['required', 'string', 'max:64'],
             'identifier' => ['nullable', 'string', 'max:255'],
             'values' => ['array'],
@@ -142,7 +142,7 @@ class AgentController extends Controller
             return back()->withInput()->withErrors(['values' => $e->getMessage()]);
         }
 
-        return redirect()->route('agents.show', $agent)->with('status', 'Authority record saved.');
+        return redirect()->route('agents.show', $agent)->with('status', __('Authority record saved.'));
     }
 
     public function storeContact(Request $request, Agent $agent): RedirectResponse
@@ -150,7 +150,7 @@ class AgentController extends Controller
         $this->own($request, $agent, 'update');
         $this->contacts->save($agent, $this->contactFields($request), null, $request->user());
 
-        return redirect()->route('agents.show', $agent)->with('status', 'Contact point added.');
+        return redirect()->route('agents.show', $agent)->with('status', __('Contact point added.'));
     }
 
     public function updateContact(Request $request, Agent $agent, ContactPoint $contact): RedirectResponse
@@ -158,7 +158,7 @@ class AgentController extends Controller
         $this->ownContact($request, $agent, $contact);
         $this->contacts->save($agent, $this->contactFields($request), $contact, $request->user());
 
-        return redirect()->route('agents.show', $agent)->with('status', 'Contact point saved.');
+        return redirect()->route('agents.show', $agent)->with('status', __('Contact point saved.'));
     }
 
     public function destroyContact(Request $request, Agent $agent, ContactPoint $contact): RedirectResponse
@@ -166,7 +166,7 @@ class AgentController extends Controller
         $this->ownContact($request, $agent, $contact);
         $this->contacts->remove($contact, $request->user());
 
-        return redirect()->route('agents.show', $agent)->with('status', 'Contact point removed.');
+        return redirect()->route('agents.show', $agent)->with('status', __('Contact point removed.'));
     }
 
     /** Find the agent to merge this one into. */
@@ -190,7 +190,7 @@ class AgentController extends Controller
             return back()->withErrors(['into' => $e->getMessage()]);
         }
 
-        return redirect()->route('agents.show', $kept)->with('status', 'Merged: the duplicate\'s names, identifiers, relations and contact points are here now, and its IRI leads here.');
+        return redirect()->route('agents.show', $kept)->with('status', __('Merged: the duplicate\'s names, identifiers, relations and contact points are here now, and its IRI leads here.'));
     }
 
     public function splitForm(Request $request, Agent $agent): View
@@ -219,7 +219,7 @@ class AgentController extends Controller
             return back()->withErrors(['names' => $e->getMessage()]);
         }
 
-        return redirect()->route('agents.show', $new)->with('status', 'Split: this new authority record has the names and relations chosen.');
+        return redirect()->route('agents.show', $new)->with('status', __('Split: this new authority record has the names and relations chosen.'));
     }
 
     /** Pairs that may be the same agent, to compare, merge or dismiss. */
@@ -238,7 +238,7 @@ class AgentController extends Controller
         $other = $this->find($request, (string) $request->validate(['other' => ['required', 'uuid']])['other']);
         $this->agents->dismiss($agent, $other, $request->user());
 
-        return redirect()->route('agents.duplicates')->with('status', 'Marked as not duplicates.');
+        return redirect()->route('agents.duplicates')->with('status', __('Marked as not duplicates.'));
     }
 
     /** Counts by type and status, and the records that lack an essential element, as a work queue. */
@@ -293,7 +293,7 @@ class AgentController extends Controller
     private function merged(Request $request, Agent $agent): ?RedirectResponse
     {
         if ($agent->merged_into_id && $agent->institution_id === $request->user()->institution_id) {
-            return redirect()->route('agents.show', $agent->merged_into_id)->with('status', 'That authority record was merged into this one.');
+            return redirect()->route('agents.show', $agent->merged_into_id)->with('status', __('That authority record was merged into this one.'));
         }
 
         return null;

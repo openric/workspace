@@ -31,10 +31,10 @@ class PasswordController extends Controller
             'password' => ['required', 'confirmed', PasswordRule::min(12)],
         ]);
         if (! $this->accounts->setPasswordWithToken($data['email'], $data['token'], $data['password'])) {
-            throw ValidationException::withMessages(['password' => 'This link is not valid or has expired. Ask an administrator for a new one.']);
+            throw ValidationException::withMessages(['password' => __('This link is not valid or has expired. Ask an administrator for a new one.')]);
         }
 
-        return redirect()->route('sign-in')->with('status', 'Your password is set. You can sign in now.');
+        return redirect()->route('sign-in')->with('status', __('Your password is set. You can sign in now.'));
     }
 
     public function edit(): View
@@ -49,10 +49,10 @@ class PasswordController extends Controller
             'password' => ['required', 'confirmed', PasswordRule::min(12)],
         ]);
         if (! Hash::check($data['current_password'], $request->user()->password)) {
-            throw ValidationException::withMessages(['current_password' => 'That is not your current password.']);
+            throw ValidationException::withMessages(['current_password' => __('That is not your current password.')]);
         }
         $this->accounts->changePassword($request->user(), $data['password']);
 
-        return redirect()->route('home')->with('status', 'Your password is changed.');
+        return redirect()->route('home')->with('status', __('Your password is changed.'));
     }
 }

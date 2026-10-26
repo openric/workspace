@@ -146,7 +146,7 @@ class AccountController extends Controller
             return $back->withInput()->withErrors(['account' => $e->getMessage()]);
         }
 
-        return $back->with('status', 'Account saved.');
+        return $back->with('status', __('Account saved.'));
     }
 
     /** The account's contact details: one contact point, as a repository's (ISDIAH 5.2), kept with the account. */
@@ -155,7 +155,7 @@ class AccountController extends Controller
         app(ContactPointService::class)->save($account, [...app(ContactPointService::class)->fieldsFrom($request), 'is_primary' => true],
             $this->contact($account), $request->user());
 
-        return ($own ? redirect()->route('account.edit') : redirect()->route('accounts.edit', $account))->with('status', 'Contact details saved.');
+        return ($own ? redirect()->route('account.edit') : redirect()->route('accounts.edit', $account))->with('status', __('Contact details saved.'));
     }
 
     private function contact(User $account): ?ContactPoint
@@ -218,7 +218,7 @@ class AccountController extends Controller
             return redirect()->route('accounts.show', $account)->withErrors(['account' => $e->getMessage()]);
         }
 
-        return redirect()->route('accounts.index')->with('status', 'Account deleted.');
+        return redirect()->route('accounts.index')->with('status', __('Account deleted.'));
     }
 
     public function updateRoles(Request $request, User $account): RedirectResponse
@@ -229,14 +229,14 @@ class AccountController extends Controller
             'roles.*' => ['uuid', Rule::in($this->roles($request)->pluck('id'))],
         ]);
 
-        return $this->attempt(fn () => $this->accounts->setRoles($account, $data['roles'] ?? [], $request->user()), $account, 'Roles saved.');
+        return $this->attempt(fn () => $this->accounts->setRoles($account, $data['roles'] ?? [], $request->user()), $account, __('Roles saved.'));
     }
 
     public function disable(Request $request, User $account): RedirectResponse
     {
         $this->sameInstitution($request, $account);
 
-        return $this->attempt(fn () => $this->accounts->disable($account, $request->user()), $account, 'Account disabled.');
+        return $this->attempt(fn () => $this->accounts->disable($account, $request->user()), $account, __('Account disabled.'));
     }
 
     public function enable(Request $request, User $account): RedirectResponse
@@ -244,7 +244,7 @@ class AccountController extends Controller
         $this->sameInstitution($request, $account);
         $this->accounts->enable($account, $request->user());
 
-        return redirect()->route('accounts.show', $account)->with('status', 'Account enabled.');
+        return redirect()->route('accounts.show', $account)->with('status', __('Account enabled.'));
     }
 
     public function passwordLink(Request $request, User $account): RedirectResponse

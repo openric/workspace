@@ -36,7 +36,7 @@ class ClipboardController extends Controller
         $data = $this->entry($request);
         $added = $this->clipboard->add($data['type'], $data['id'], $request->user(), $this->institution($request));
 
-        return back()->with('status', $added ? 'Added to the clipboard.' : 'That cannot go on the clipboard.');
+        return back()->with('status', __($added ? 'Added to the clipboard.' : 'That cannot go on the clipboard.'));
     }
 
     public function remove(Request $request): RedirectResponse
@@ -44,14 +44,14 @@ class ClipboardController extends Controller
         $data = $this->entry($request);
         $this->clipboard->remove($data['type'], $data['id'], $request->user());
 
-        return back()->with('status', 'Taken off the clipboard.');
+        return back()->with('status', __('Taken off the clipboard.'));
     }
 
     public function clear(Request $request): RedirectResponse
     {
         $this->clipboard->clear($request->validate(['type' => ['nullable', Rule::in(array_keys(ClipboardService::TYPES))]])['type'] ?? null);
 
-        return redirect()->route('clipboard.index')->with('status', 'The clipboard is empty.');
+        return redirect()->route('clipboard.index')->with('status', __('The clipboard is empty.'));
     }
 
     public function save(Request $request): RedirectResponse
@@ -74,7 +74,7 @@ class ClipboardController extends Controller
             return redirect()->route('clipboard.index')->withErrors(['clipboard_id' => $e->getMessage()]);
         }
 
-        return redirect()->route('clipboard.index')->with('status', "Clipboard {$data['clipboard_id']} loaded: $count ".($count === 1 ? 'entry' : 'entries').'.');
+        return redirect()->route('clipboard.index')->with('status', __($count === 1 ? 'Clipboard :id loaded: :count entry.' : 'Clipboard :id loaded: :count entries.', ['id' => $data['clipboard_id'], 'count' => $count]));
     }
 
     public function export(Request $request): Response

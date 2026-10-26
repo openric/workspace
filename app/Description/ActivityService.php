@@ -79,6 +79,6 @@ class ActivityService
         }
 
         return $this->types($institutionId)->firstWhere('id', $typeId)
-            ?? throw new InvalidArgumentException('an activity type is a concept of the OpenRiC activity-type vocabulary or of one of the institution\'s activity-type vocabularies');
+            ?? throw new InvalidArgumentException(__('an activity type is a concept of the OpenRiC activity-type vocabulary or of one of the institution\'s activity-type vocabularies'));
     }
 }

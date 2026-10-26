@@ -125,7 +125,7 @@ class LocalSkos
     public function import(Vocabulary $vocabulary, string $content, string $format, ?User $actor = null): array
     {
         if (! in_array($format, self::IMPORT_FORMATS, true)) {
-            throw new InvalidArgumentException('import a SKOS file in Turtle, RDF/XML or N-Triples');
+            throw new InvalidArgumentException(__('import a SKOS file in Turtle, RDF/XML or N-Triples'));
         }
         $graph = new Graph;
         try {
@@ -135,7 +135,7 @@ class LocalSkos
         }
         $resources = $graph->allOfType('skos:Concept');
         if ($resources === []) {
-            throw new InvalidArgumentException('the file has no skos:Concept');
+            throw new InvalidArgumentException(__('the file has no skos:Concept'));
         }
 
         return DB::transaction(function () use ($vocabulary, $resources, $actor) {

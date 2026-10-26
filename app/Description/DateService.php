@@ -85,14 +85,14 @@ class DateService
         $expressed = trim((string) ($fields['expressed'] ?? ''));
         $language = trim((string) ($fields['language'] ?? ''));
         if ($normalized === '' && $expressed === '') {
-            throw new InvalidArgumentException('a date needs a normalised value (EDTF) or a written form');
+            throw new InvalidArgumentException(__('a date needs a normalised value (EDTF) or a written form'));
         }
         $bounds = [null, null];
         if ($normalized !== '') {
-            $bounds = Edtf::bounds($normalized) ?? throw new InvalidArgumentException("$normalized is not an EDTF date, such as 1902, 1902-03-15, 1902~ or 1902/1950");
+            $bounds = Edtf::bounds($normalized) ?? throw new InvalidArgumentException(__(':date is not an EDTF date, such as 1902, 1902-03-15, 1902~ or 1902/1950', ['date' => $normalized]));
         }
         if ($expressed !== '' && ! Bcp47::valid($language)) {
-            throw new InvalidArgumentException('give the language of the written form, as a BCP 47 tag such as en or af');
+            throw new InvalidArgumentException(__('give the language of the written form, as a BCP 47 tag such as en or af'));
         }
 
         return [

@@ -55,7 +55,7 @@ class RoleController extends Controller
             return back()->withInput()->withErrors(['name' => $e->getMessage()]);
         }
 
-        return redirect()->route('roles.show', $role)->with('status', 'Role created. Set its permissions below.');
+        return redirect()->route('roles.show', $role)->with('status', __('Role created. Set its permissions below.'));
     }
 
     public function show(Request $request, Role $role): View
@@ -85,7 +85,7 @@ class RoleController extends Controller
             return back()->withInput()->withErrors(['parent' => 'A role cannot inherit from itself or from a role that inherits from it.']);
         }
 
-        return redirect()->route('roles.show', $role)->with('status', 'Role saved.');
+        return redirect()->route('roles.show', $role)->with('status', __('Role saved.'));
     }
 
     public function destroy(Request $request, Role $role): RedirectResponse
@@ -97,7 +97,7 @@ class RoleController extends Controller
             return redirect()->route('roles.show', $role)->withErrors(['role' => $e->getMessage()]);
         }
 
-        return redirect()->route('roles.index')->with('status', 'Role removed.');
+        return redirect()->route('roles.index')->with('status', __('Role removed.'));
     }
 
     public function addMember(Request $request, Role $role): RedirectResponse
@@ -111,7 +111,7 @@ class RoleController extends Controller
             return redirect()->route('roles.show', $role)->withErrors(['members' => $e->getMessage()]);
         }
 
-        return redirect()->route('roles.show', $role)->with('status', "{$account->name} added.");
+        return redirect()->route('roles.show', $role)->with('status', __(':name added.', ['name' => $account->name]));
     }
 
     public function removeMember(Request $request, Role $role, User $account): RedirectResponse
@@ -124,7 +124,7 @@ class RoleController extends Controller
             return redirect()->route('roles.show', $role)->withErrors(['members' => $e->getMessage()]);
         }
 
-        return redirect()->route('roles.show', $role)->with('status', "{$account->name} removed.");
+        return redirect()->route('roles.show', $role)->with('status', __(':name removed.', ['name' => $account->name]));
     }
 
     public function languages(Request $request, Role $role): RedirectResponse
@@ -137,7 +137,7 @@ class RoleController extends Controller
             return back()->withInput()->withErrors(['languages' => $e->getMessage()]);
         }
 
-        return redirect()->route('roles.show', $role)->with('status', 'Translation languages saved.');
+        return redirect()->route('roles.show', $role)->with('status', __('Translation languages saved.'));
     }
 
     /** The matrix of one kind for a role (Heratio's editInformationObjectAcl and its siblings). */
@@ -204,7 +204,7 @@ class RoleController extends Controller
             return redirect($back)->withErrors(['cell' => $e->getMessage()]);
         }
 
-        return redirect($back)->with('status', 'Permissions saved.');
+        return redirect($back)->with('status', __('Permissions saved.'));
     }
 
     private function validateProfile(Request $request): array
@@ -212,7 +212,7 @@ class RoleController extends Controller
         return $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:2000'],
-            'language' => ['required', 'string', fn ($a, $v, $fail) => Bcp47::valid((string) $v) || $fail('Give a BCP 47 language tag, such as en or af.')],
+            'language' => ['required', 'string', fn ($a, $v, $fail) => Bcp47::valid((string) $v) || $fail(__('Give a BCP 47 language tag, such as en or af.'))],
             'parent' => ['nullable', 'uuid'],
         ]);
     }

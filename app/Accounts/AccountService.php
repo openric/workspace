@@ -41,7 +41,7 @@ class AccountService
     {
         $email = mb_strtolower(trim($email));
         if (User::where('email', $email)->whereKeyNot($account->id)->exists()) {
-            throw new InvalidArgumentException('another account signs in with that email');
+            throw new InvalidArgumentException(__('another account signs in with that email'));
         }
         DB::transaction(fn () => AuditLog::actingAs($actor, fn () => $account->update(['name' => trim($name), 'email' => $email])));
     }
@@ -59,7 +59,7 @@ class AccountService
         sort($languages);
         foreach ($languages as $language) {
             if (! Bcp47::valid($language)) {
-                throw new InvalidArgumentException("$language is not a BCP 47 language tag");
+                throw new InvalidArgumentException(__(':language is not a BCP 47 language tag', ['language' => $language]));
             }
         }
         DB::transaction(function () use ($account, $languages, $actor) {
@@ -80,7 +80,7 @@ class AccountService
     {
         $wanted = Role::where('institution_id', $account->institution_id)->where('is_system', false)->whereIn('id', $roleIds)->get();
         if ($wanted->count() !== count(array_unique($roleIds))) {
-            throw new InvalidArgumentException('every role must be one of the institution\'s own roles');
+            throw new InvalidArgumentException(__('every role must be one of the institution\'s own roles'));
         }
         DB::transaction(function () use ($account, $wanted, $actor) {
             $current = $account->roles()->get();
@@ -179,7 +179,7 @@ class AccountService
     public function delete(User $account, ?User $actor = null): void
     {
         if ($actor !== null && $actor->id === $account->id) {
-            throw new AccountException('You cannot delete your own account.');
+            throw new AccountException(__('You cannot delete your own account.'));
         }
         try {
             DB::transaction(function () use ($account, $actor) {
@@ -196,7 +196,7 @@ class AccountService
             if ($e->getCode() !== '23503') {
                 throw $e;
             }
-            throw new AccountException('This account has done work in the Workspace (it has signed in, imported or made assertions), so it is kept: disable it instead.');
+            throw new AccountException(__('This account has done work in the Workspace (it has signed in, imported or made assertions), so it is kept: disable it instead.'));
         }
     }
 
@@ -210,7 +210,7 @@ class AccountService
         $others = DB::table('role_members as m')->join('users as u', 'u.id', '=', 'm.user_id')
             ->where('m.role_id', $admin->id)->whereNull('u.disabled_at')->where('u.id', '<>', $account->id)->exists();
         if (! $others) {
-            throw new AccountException('This is the last active administrator of the institution; give another account the Administrator role first.');
+            throw new AccountException(__('This is the last active administrator of the institution; give another account the Administrator role first.'));
         }
     }
 }

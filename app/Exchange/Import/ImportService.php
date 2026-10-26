@@ -442,10 +442,10 @@ class ImportService
         $language = $draft->language($this->import->language);
         if ($agent === null) {
             if (! $this->user->may('create', 'authority')) {
-                throw new InvalidArgumentException('you may not create authority records');
+                throw new InvalidArgumentException(__('you may not create authority records'));
             }
-            $type ?? throw new InvalidArgumentException('it has no type of entity: choose a kind for authority records with none, or give typeOfEntity');
-            $name = $draft->title() ?? throw new InvalidArgumentException('it has no authorised form of name, and a new authority record needs one');
+            $type ?? throw new InvalidArgumentException(__('it has no type of entity: choose a kind for authority records with none, or give typeOfEntity'));
+            $name = $draft->title() ?? throw new InvalidArgumentException(__('it has no authorised form of name, and a new authority record needs one'));
             $agent = $this->agents->create($this->institution, $type, $name, $language, $draft->identifier, $this->user);
             $agent->wasRecentlyCreated = true;
         } else {
@@ -491,9 +491,9 @@ class ImportService
         $language = $draft->language($this->import->language);
         if ($repository === null) {
             if (! $this->user->may('create', 'repository')) {
-                throw new InvalidArgumentException('you may not create repositories');
+                throw new InvalidArgumentException(__('you may not create repositories'));
             }
-            $name = $draft->title() ?? throw new InvalidArgumentException('it has no authorised form of name, and a new repository needs one');
+            $name = $draft->title() ?? throw new InvalidArgumentException(__('it has no authorised form of name, and a new repository needs one'));
             $repository = $this->repositories->create($this->institution, $name, $language, $draft->identifier, $this->user);
             $repository->wasRecentlyCreated = true;
         } else {
@@ -673,7 +673,7 @@ class ImportService
             $default = ($this->import->options['default_level'] ?? '') ?: null;
             $level = $default ? Concept::choices(self::LEVELS)->get()->first(fn (Concept $c) => $c->notation === $default) : null;
             if ($level === null) {
-                throw new InvalidArgumentException('it has no level of description, and a new unit needs one: choose a level for units with none, or give one in the file');
+                throw new InvalidArgumentException(__('it has no level of description, and a new unit needs one: choose a level for units with none, or give one in the file'));
             }
             $this->report->issue($draft->location, 'level', null, 'no level of description in the file; '.$level->label(['en']).', as chosen for the import', 'note');
 

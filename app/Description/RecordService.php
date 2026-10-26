@@ -27,7 +27,7 @@ class RecordService
     {
         $repository ??= $parent?->repository;
         if ($repository === null || $repository->institution_id !== $institution->id) {
-            throw new InvalidArgumentException('a unit of description needs a repository of the same institution that holds it');
+            throw new InvalidArgumentException(__('a unit of description needs a repository of the same institution that holds it'));
         }
 
         return DB::transaction(fn () => AuditLog::actingAs($actor, function () use ($institution, $levelIri, $title, $language, $parent, $repository, $identifier) {
@@ -109,7 +109,7 @@ class RecordService
     public function move(RecordResource $record, ?RecordResource $parent, ?User $actor = null): void
     {
         if ($parent !== null && $parent->institution_id !== $record->institution_id) {
-            throw new InvalidArgumentException('a unit can only move within its institution');
+            throw new InvalidArgumentException(__('a unit can only move within its institution'));
         }
         DB::transaction(fn () => AuditLog::actingAs($actor, fn () => $record->update([
             'parent_id' => $parent?->id,

@@ -35,7 +35,7 @@ class DateController extends Controller
             return redirect()->route($route, $subject)->withInput()->withErrors(['dates' => $e->getMessage()]);
         }
 
-        return redirect()->route($route, $subject)->with('status', 'Date added.');
+        return redirect()->route($route, $subject)->with('status', __('Date added.'));
     }
 
     public function update(Request $request, string $kind, string $id, RicDate $date): RedirectResponse
@@ -48,7 +48,7 @@ class DateController extends Controller
             return redirect()->route($route, $subject)->withErrors(['dates' => $e->getMessage()]);
         }
 
-        return redirect()->route($route, $subject)->with('status', 'Date saved.');
+        return redirect()->route($route, $subject)->with('status', __('Date saved.'));
     }
 
     public function destroy(Request $request, string $kind, string $id, RicDate $date): RedirectResponse
@@ -57,7 +57,7 @@ class DateController extends Controller
         $this->belongs($subject, $date);
         $this->dates->remove($date, $request->user());
 
-        return redirect()->route($route, $subject)->with('status', 'Date removed.');
+        return redirect()->route($route, $subject)->with('status', __('Date removed.'));
     }
 
     private function fields(Request $request, string $kind, ?Model $subject = null): array

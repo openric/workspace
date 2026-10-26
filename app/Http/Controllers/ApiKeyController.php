@@ -55,7 +55,7 @@ class ApiKeyController extends Controller
         abort_unless($apiKey->user_id === $request->user()->id, 404);
         $this->keys->revoke($apiKey, $request->user());
 
-        return redirect()->route('account.api-keys')->with('status', 'The key is revoked. Anything using it is refused from now on.');
+        return redirect()->route('account.api-keys')->with('status', __('The key is revoked. Anything using it is refused from now on.'));
     }
 
     /** An administrator issues a key for another account of the institution. */
@@ -71,7 +71,7 @@ class ApiKeyController extends Controller
         abort_unless($account->institution_id === $request->user()->institution_id && $apiKey->user_id === $account->id, 404);
         $this->keys->revoke($apiKey, $request->user());
 
-        return redirect(route('accounts.show', $account).'#api-keys')->with('status', 'The key is revoked. Anything using it is refused from now on.');
+        return redirect(route('accounts.show', $account).'#api-keys')->with('status', __('The key is revoked. Anything using it is refused from now on.'));
     }
 
     /** What the key manager needs for one account. */

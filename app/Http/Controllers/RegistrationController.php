@@ -32,7 +32,7 @@ class RegistrationController extends Controller
         $institution = $this->institution($request);
         // A field people never see: a form that fills it was not filled by a person.
         if (filled($request->input('website'))) {
-            return redirect()->route('sign-in')->with('status', 'Thank you: an administrator will look at your request.');
+            return redirect()->route('sign-in')->with('status', __('Thank you: an administrator will look at your request.'));
         }
         $data = $request->validate([
             'name' => ['required', 'string', 'max:1024'],
@@ -46,7 +46,7 @@ class RegistrationController extends Controller
             return back()->withInput($request->except('password', 'password_confirmation'))->withErrors(['email' => $e->getMessage()]);
         }
 
-        return redirect()->route('sign-in')->with('status', 'Thank you: an administrator will look at your request. You can sign in once it is approved.');
+        return redirect()->route('sign-in')->with('status', __('Thank you: an administrator will look at your request. You can sign in once it is approved.'));
     }
 
     public function index(Request $request): View
@@ -67,7 +67,7 @@ class RegistrationController extends Controller
             return redirect()->route('registrations.index')->withErrors(['registration' => $e->getMessage()]);
         }
 
-        return redirect()->route('accounts.show', $account)->with('status', 'Request approved: '.$account->name.' can sign in with the password they chose.');
+        return redirect()->route('accounts.show', $account)->with('status', __('Request approved: :name can sign in with the password they chose.', ['name' => $account->name]));
     }
 
     public function reject(Request $request, RegistrationRequest $registration): RedirectResponse
@@ -79,7 +79,7 @@ class RegistrationController extends Controller
             return redirect()->route('registrations.index')->withErrors(['registration' => $e->getMessage()]);
         }
 
-        return redirect()->route('registrations.index')->with('status', 'Request rejected.');
+        return redirect()->route('registrations.index')->with('status', __('Request rejected.'));
     }
 
     private function institution(Request $request): Institution

@@ -85,7 +85,7 @@ class StorageController extends Controller
         abort_unless($user->may('create', 'storage'), 403);
         $data = $request->validate([
             'name' => ['required', 'string', 'max:1024'],
-            'language' => ['required', 'string', fn ($a, $v, $fail) => Bcp47::valid((string) $v) || $fail('Give a BCP 47 language tag, such as en or af.')],
+            'language' => ['required', 'string', fn ($a, $v, $fail) => Bcp47::valid((string) $v) || $fail(__('Give a BCP 47 language tag, such as en or af.'))],
             'type' => ['nullable', 'uuid'],
             'identifier' => ['nullable', 'string', 'max:255'],
             'barcode' => ['nullable', 'string', 'max:255'],
@@ -105,7 +105,7 @@ class StorageController extends Controller
         // A container that cannot be placed is still kept, and the reason shown.
         $placed = $this->placeFromForm($request, $container, $data);
 
-        $redirect = redirect()->route('containers.show', $container)->with('status', 'Container created'.$placed.'. Add what it holds from each unit of description, or here.');
+        $redirect = redirect()->route('containers.show', $container)->with('status', __($placed === '' ? 'Container created. Add what it holds from each unit of description, or here.' : 'Container created, and kept in :place. Add what it holds from each unit of description, or here.', ['place' => $placed]));
 
         return $this->placementError ? $redirect->withErrors(['placement' => $this->placementError]) : $redirect;
     }
@@ -143,7 +143,7 @@ class StorageController extends Controller
         $this->own($request, $container, 'update');
         $notations = fn (string $vocabulary) => Concept::choices($vocabulary)->pluck('notation')->all();
         $data = $request->validate([
-            'language' => ['required', 'string', fn ($a, $v, $fail) => Bcp47::valid((string) $v) || $fail('Give a BCP 47 language tag, such as en or af.')],
+            'language' => ['required', 'string', fn ($a, $v, $fail) => Bcp47::valid((string) $v) || $fail(__('Give a BCP 47 language tag, such as en or af.'))],
             'values' => ['array'],
             'values.*' => ['nullable', 'string', 'max:65535'],
             'type' => ['nullable', 'uuid'],
@@ -169,7 +169,7 @@ class StorageController extends Controller
         }
         $placed = $this->placeFromForm($request, $container, $data);
 
-        $redirect = redirect()->route('containers.show', $container)->with('status', 'Container saved'.$placed.'.');
+        $redirect = redirect()->route('containers.show', $container)->with('status', __($placed === '' ? 'Container saved.' : 'Container saved, and kept in :place.', ['place' => $placed]));
 
         return $this->placementError ? $redirect->withErrors(['placement' => $this->placementError.' The rest was saved.']) : $redirect;
     }
@@ -186,7 +186,7 @@ class StorageController extends Controller
             return back()->withErrors(['move' => $e->getMessage()]);
         }
 
-        return redirect()->route('containers.show', $container)->with('status', $place ? 'Moved to '.$this->storage->path($place).'.' : 'Taken out of storage.');
+        return redirect()->route('containers.show', $container)->with('status', $place ? __('Moved to :place.', ['place' => $this->storage->path($place)]) : __('Taken out of storage.'));
     }
 
     /** What a container holds, to print and put in it, as Heratio's box list. */
@@ -240,7 +240,7 @@ class StorageController extends Controller
         abort_unless($user->may('create', 'vocabulary'), 403);
         $data = $request->validate([
             'name' => ['required', 'string', 'max:1024'],
-            'language' => ['required', 'string', fn ($a, $v, $fail) => Bcp47::valid((string) $v) || $fail('Give a BCP 47 language tag, such as en or af.')],
+            'language' => ['required', 'string', fn ($a, $v, $fail) => Bcp47::valid((string) $v) || $fail(__('Give a BCP 47 language tag, such as en or af.'))],
             'type' => ['required', 'uuid', Rule::in($this->storage->placeTypes($user->institution_id)->pluck('id')->all())],
             'parent' => ['nullable', 'uuid'],
         ]);
@@ -257,7 +257,7 @@ class StorageController extends Controller
             return back()->withInput()->withErrors(['place' => $e->getMessage()]);
         }
 
-        return redirect()->route('storage.place', $place)->with('status', 'Storage place created.');
+        return redirect()->route('storage.place', $place)->with('status', __('Storage place created.'));
     }
 
     /** A storage place: its path, the places inside it, the containers it keeps and keeps below it, their capacity, and what came and went. */
@@ -292,7 +292,7 @@ class StorageController extends Controller
             return back()->withErrors(['move' => $e->getMessage()]);
         }
 
-        return redirect()->route('storage.place', $here)->with('status', "$moved ".($moved === 1 ? 'container' : 'containers').' moved'.($destination ? ' to '.$this->storage->path($destination) : ' out of storage').'.');
+        return redirect()->route('storage.place', $here)->with('status', $destination ? __($moved === 1 ? ':count container moved to :place.' : ':count containers moved to :place.', ['count' => $moved, 'place' => $this->storage->path($destination)]) : __($moved === 1 ? ':count container moved out of storage.' : ':count containers moved out of storage.', ['count' => $moved]));
     }
 
     private ?string $placementError = null;
@@ -313,9 +313,9 @@ class StorageController extends Controller
             }
             $this->storage->move($container, $place, 'Placed with the storage form.', 'en', $request->user());
 
-            return ', and kept in '.$this->storage->path($place);
+            return $this->storage->path($place);
         } catch (InvalidArgumentException $e) {
-            $this->placementError = 'It was not placed: '.$e->getMessage().'.';
+            $this->placementError = __('It was not placed: :reason.', ['reason' => $e->getMessage()]);
 
             return '';
         }

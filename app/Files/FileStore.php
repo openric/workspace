@@ -53,10 +53,10 @@ class FileStore
         $sha = hash_file('sha256', $path);
         $expected = $expectedSha256 === null ? '' : strtolower(trim($expectedSha256));
         if ($expected !== '' && ! preg_match('/^[0-9a-f]{64}$/', $expected)) {
-            throw new InvalidArgumentException('a SHA-256 checksum is 64 hexadecimal digits');
+            throw new InvalidArgumentException(__('a SHA-256 checksum is 64 hexadecimal digits'));
         }
         if ($expected !== '' && $expected !== $sha) {
-            throw new InvalidArgumentException("the file's SHA-256 is $sha, not the $expected you gave: it was changed or damaged on the way, so it was not kept");
+            throw new InvalidArgumentException(__('the file\'s SHA-256 is :sha, not the :expected you gave: it was changed or damaged on the way, so it was not kept', ['sha' => $sha, 'expected' => $expected]));
         }
         $scanner = $this->scan($path);
 

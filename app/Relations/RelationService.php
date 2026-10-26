@@ -55,23 +55,23 @@ class RelationService
         if ($type === 'location') {
             $storage = app(StorageService::class);
             if (! $storage->isStoragePlace($target)) {
-                throw new InvalidArgumentException('a container is kept in a storage place: a place of a storage place type');
+                throw new InvalidArgumentException(__('a container is kept in a storage place: a place of a storage place type'));
             }
             // Only one place keeps a container at a time; a move ends where it was first (StorageService::move).
             if (trim((string) ($fields['to'] ?? '')) === '' && $storage->currentLocation($source) !== null) {
-                throw new InvalidArgumentException('the container is kept somewhere already: move it, which ends where it was kept');
+                throw new InvalidArgumentException(__('the container is kept somewhere already: move it, which ends where it was kept'));
             }
         }
         foreach ([$source, $target] as $end) {
             if ($end instanceof Concept && ! in_array($end->vocabulary?->kind?->notation, $definition['schemes'] ?? [], true)) {
-                throw new InvalidArgumentException("a $type relation does not connect a concept of that vocabulary");
+                throw new InvalidArgumentException(__('a :type relation does not connect a concept of that vocabulary', ['type' => $type]));
             }
             if ($end instanceof Concept && $end->deprecated_at !== null) {
-                throw new InvalidArgumentException('a deprecated concept is not used for new relations');
+                throw new InvalidArgumentException(__('a deprecated concept is not used for new relations'));
             }
         }
         if ($source->getAttribute('institution_id') !== $target->getAttribute('institution_id')) {
-            throw new InvalidArgumentException('a relation connects entities of one institution');
+            throw new InvalidArgumentException(__('a relation connects entities of one institution'));
         }
         $values = $this->values($definition, $fields);
 
@@ -127,7 +127,7 @@ class RelationService
     public function assert(Relation $relation, User $actor, bool $holds, ?string $basis, ?string $basisLanguage, ?RelationAssertion $supersedes = null): RelationAssertion
     {
         if ($supersedes && $supersedes->relation_id !== $relation->id) {
-            throw new InvalidArgumentException('an assertion can only supersede one about the same relation');
+            throw new InvalidArgumentException(__('an assertion can only supersede one about the same relation'));
         }
 
         return $this->guarded(fn () => AuditLog::actingAs($actor, fn () => $this->addAssertion($relation, 'account', $actor, null, $basis, $basisLanguage, $holds ? 'accepted' : 'rejected', $supersedes)));
@@ -137,7 +137,7 @@ class RelationService
     public function review(RelationAssertion $assertion, bool $accept, User $actor): void
     {
         if ($assertion->status->iri !== Vocab::BASE.'assertion-status/proposed') {
-            throw new InvalidArgumentException('only a proposed assertion is reviewed; assert again to change your mind');
+            throw new InvalidArgumentException(__('only a proposed assertion is reviewed; assert again to change your mind'));
         }
         DB::transaction(fn () => AuditLog::actingAs($actor, fn () => $assertion->update([
             'status_id' => $this->concept(Vocab::BASE.'assertion-status/'.($accept ? 'accepted' : 'rejected'))->id,
@@ -263,10 +263,10 @@ class RelationService
     {
         $basis = trim((string) $basis);
         if ($basis !== '' && ! Bcp47::valid((string) $basisLanguage)) {
-            throw new InvalidArgumentException('give the language of the basis as a BCP 47 tag, such as en or af');
+            throw new InvalidArgumentException(__('give the language of the basis as a BCP 47 tag, such as en or af'));
         }
         if ($user === null && trim((string) $label) === '') {
-            throw new InvalidArgumentException('an assertion by an import or a model names it');
+            throw new InvalidArgumentException(__('an assertion by an import or a model names it'));
         }
         $institution = Institution::findOrFail($relation->institution_id);
         $id = (string) Str::uuid7();
@@ -294,7 +294,7 @@ class RelationService
                 return;
             }
         }
-        throw new InvalidArgumentException("a $type relation does not connect a ".EntityKinds::noun($source).' to a '.EntityKinds::noun($target));
+        throw new InvalidArgumentException(__('a :type relation does not connect a :source to a :target', ['type' => $type, 'source' => __(EntityKinds::noun($source)), 'target' => __(EntityKinds::noun($target))]));
     }
 
     private function values(array $definition, array $fields): array
@@ -304,11 +304,11 @@ class RelationService
         $description = $text('description');
         $language = $text('language');
         if (($source !== null || $description !== null) && ! Bcp47::valid((string) $language)) {
-            throw new InvalidArgumentException('give the language of the source and description as a BCP 47 tag, such as en or af');
+            throw new InvalidArgumentException(__('give the language of the source and description as a BCP 47 tag, such as en or af'));
         }
         $role = $text('role');
         if ($role !== null && ! ($definition['role'] ?? false)) {
-            throw new InvalidArgumentException('this kind of relation has no agent role');
+            throw new InvalidArgumentException(__('this kind of relation has no agent role'));
         }
         $concept = fn (?string $notation, string $vocabulary) => $notation === null ? null : $this->concept($vocabulary.$notation)->id;
 

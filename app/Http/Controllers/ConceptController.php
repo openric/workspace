@@ -88,7 +88,7 @@ class ConceptController extends Controller
             return back()->withInput()->withErrors(['label' => $e->getMessage()]);
         }
 
-        return redirect()->route('concepts.show', $concept)->with('status', 'Concept saved.');
+        return redirect()->route('concepts.show', $concept)->with('status', __('Concept saved.'));
     }
 
     public function relate(Request $request, Concept $concept): RedirectResponse
@@ -96,14 +96,14 @@ class ConceptController extends Controller
         $this->own($request, $concept, 'update');
         $other = $this->find($request, (string) $request->validate(['related' => ['required', 'uuid']])['related']);
 
-        return $this->attempt($concept, fn () => $this->concepts->relate($concept, $other, $request->user()), 'Related concept added.');
+        return $this->attempt($concept, fn () => $this->concepts->relate($concept, $other, $request->user()), __('Related concept added.'));
     }
 
     public function unrelate(Request $request, Concept $concept, Concept $other): RedirectResponse
     {
         $this->own($request, $concept, 'update');
 
-        return $this->attempt($concept, fn () => $this->concepts->unrelate($concept, $other, $request->user()), 'Related concept removed.');
+        return $this->attempt($concept, fn () => $this->concepts->unrelate($concept, $other, $request->user()), __('Related concept removed.'));
     }
 
     public function addMatch(Request $request, Concept $concept): RedirectResponse
@@ -116,7 +116,7 @@ class ConceptController extends Controller
             'target_scheme' => ['nullable', 'string', 'max:255'],
         ]);
 
-        return $this->attempt($concept, fn () => $this->concepts->addMatch($concept, $data['type'], $data['iri'], $data['target_label'] ?? null, $data['target_scheme'] ?? null, $request->user()), 'Match added.');
+        return $this->attempt($concept, fn () => $this->concepts->addMatch($concept, $data['type'], $data['iri'], $data['target_label'] ?? null, $data['target_scheme'] ?? null, $request->user()), __('Match added.'));
     }
 
     public function removeMatch(Request $request, Concept $concept, ConceptMatch $match): RedirectResponse
@@ -124,7 +124,7 @@ class ConceptController extends Controller
         $this->own($request, $concept, 'update');
         abort_unless($match->concept_id === $concept->id, 404);
 
-        return $this->attempt($concept, fn () => $this->concepts->removeMatch($match, $request->user()), 'Match removed.');
+        return $this->attempt($concept, fn () => $this->concepts->removeMatch($match, $request->user()), __('Match removed.'));
     }
 
     public function move(Request $request, Concept $concept): RedirectResponse
@@ -135,7 +135,7 @@ class ConceptController extends Controller
         return $this->attempt($concept, function () use ($concept, $target, $request) {
             $moved = $this->concepts->move($concept, $target, $request->user());
 
-            return $moved === 1 ? 'Concept moved to '.$target->title.'.' : "$moved concepts moved to ".$target->title.'.';
+            return __($moved === 1 ? ':count concept moved to :vocabulary.' : ':count concepts moved to :vocabulary.', ['count' => $moved, 'vocabulary' => $target->title]);
         });
     }
 
@@ -149,21 +149,21 @@ class ConceptController extends Controller
             return redirect()->route('concepts.show', $concept)->withErrors(['concept' => $e->getMessage()]);
         }
 
-        return redirect()->route('concepts.show', $kept)->with('status', 'Merged: the duplicate now points here, and its labels are alternative labels.');
+        return redirect()->route('concepts.show', $kept)->with('status', __('Merged: the duplicate now points here, and its labels are alternative labels.'));
     }
 
     public function deprecate(Request $request, Concept $concept): RedirectResponse
     {
         $this->own($request, $concept, 'delete');
 
-        return $this->attempt($concept, fn () => $this->concepts->deprecate($concept, $request->user()), 'Concept deprecated: it is kept, but no longer offered.');
+        return $this->attempt($concept, fn () => $this->concepts->deprecate($concept, $request->user()), __('Concept deprecated: it is kept, but no longer offered.'));
     }
 
     public function restore(Request $request, Concept $concept): RedirectResponse
     {
         $this->own($request, $concept, 'delete');
 
-        return $this->attempt($concept, fn () => $this->concepts->restore($concept, $request->user()), 'Concept restored.');
+        return $this->attempt($concept, fn () => $this->concepts->restore($concept, $request->user()), __('Concept restored.'));
     }
 
     /** Run a change and go back to the concept with its outcome, or what was refused. */

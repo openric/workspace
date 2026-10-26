@@ -79,7 +79,7 @@ class NameService
         $lines = array_values(array_unique(array_filter(array_map('trim', preg_split('/\R/', $text)), fn ($l) => $l !== '')));
         if ($type === 'authorised') {
             if (count($lines) > 1) {
-                throw new InvalidArgumentException('an authorised form of name or title is one line; put other names under the other forms of name');
+                throw new InvalidArgumentException(__('an authorised form of name or title is one line; put other names under the other forms of name'));
             }
             $current = $existing->first();
             if ($lines === []) {
@@ -149,7 +149,7 @@ class NameService
         $authorised = $this->type('authorised')->id;
         if ($name->getOriginal('name_type_id') === $authorised
             && ! Name::where(['subject_table' => $name->subject_table, 'subject_id' => $name->subject_id, 'name_type_id' => $authorised])->whereKeyNot($name->id)->exists()) {
-            throw new InvalidArgumentException('this is the only authorised form of name (or title); add another before removing or retyping it');
+            throw new InvalidArgumentException(__('this is the only authorised form of name (or title); add another before removing or retyping it'));
         }
     }
 
@@ -159,7 +159,7 @@ class NameService
         try {
             return DB::transaction($write);
         } catch (UniqueConstraintViolationException) {
-            throw new InvalidArgumentException('the entity already has this name, or already has an authorised form of name in that language');
+            throw new InvalidArgumentException(__('the entity already has this name, or already has an authorised form of name in that language'));
         }
     }
 
@@ -172,7 +172,7 @@ class NameService
     {
         $value = trim($value);
         if ($value === '' || preg_match('/\R/', $value) || mb_strlen($value) > 2000) {
-            throw new InvalidArgumentException('a name is one line of at most 2000 characters');
+            throw new InvalidArgumentException(__('a name is one line of at most 2000 characters'));
         }
 
         return $value;
@@ -180,7 +180,7 @@ class NameService
 
     private function language(string $language): string
     {
-        return Bcp47::valid($language) ? $language : throw new InvalidArgumentException('give the language of the name as a BCP 47 tag, such as en or af');
+        return Bcp47::valid($language) ? $language : throw new InvalidArgumentException(__('give the language of the name as a BCP 47 tag, such as en or af'));
     }
 
     private function concept(string $iri): Concept

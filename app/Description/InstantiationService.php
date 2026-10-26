@@ -41,7 +41,7 @@ class InstantiationService
     public function create(RecordResource $unit, string $title, string $language, ?string $carrierType = null, string $availability = 'online', ?User $actor = null): Instantiation
     {
         if ($unit->deleted_at !== null) {
-            throw new InvalidArgumentException('a deleted unit of description takes no new instantiations');
+            throw new InvalidArgumentException(__('a deleted unit of description takes no new instantiations'));
         }
 
         return DB::transaction(fn () => AuditLog::actingAs($actor, function () use ($unit, $title, $language, $carrierType, $availability) {

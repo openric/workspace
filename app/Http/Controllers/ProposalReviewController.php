@@ -81,7 +81,7 @@ class ProposalReviewController extends Controller
             return back()->withErrors(["proposal-{$proposal->id}" => $e->getMessage()])->withInput();
         }
 
-        return back()->with('status', 'Accepted: written to '.EntityKinds::label($proposal->record).' as a draft, for publishing.');
+        return back()->with('status', __('Accepted: written to :record as a draft, for publishing.', ['record' => EntityKinds::label($proposal->record)]));
     }
 
     public function reject(Request $request, Proposal $proposal): RedirectResponse
@@ -94,7 +94,7 @@ class ProposalReviewController extends Controller
             return back()->withErrors(["proposal-{$proposal->id}" => $e->getMessage()]);
         }
 
-        return back()->with('status', 'Rejected.');
+        return back()->with('status', __('Rejected.'));
     }
 
     /** Accept or reject a relation proposed through the API, as the relation's own page does. */
@@ -108,7 +108,7 @@ class ProposalReviewController extends Controller
             return back()->withErrors(["assertion-{$assertion->id}" => $e->getMessage()]);
         }
 
-        return back()->with('status', $decision === 'accept' ? 'Relation accepted.' : 'Relation rejected.');
+        return back()->with('status', __($decision === 'accept' ? 'Relation accepted.' : 'Relation rejected.'));
     }
 
     private function authorise(Request $request, Proposal $proposal): void
