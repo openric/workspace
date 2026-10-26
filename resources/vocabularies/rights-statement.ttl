@@ -1,0 +1,112 @@
+# OpenRiC Workspace - OpenRiC Workspace Rights Statements.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# The statements of RightsStatements.org, by their own IRIs, as Heratio's rights_statement list has them.
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/rights-statement/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Rights Statements"@en ;
+    dcterms:description "The copyright status of a record or instantiation, as RightsStatements.org states it."@en ;
+    dcterms:issued "2026-10-27"^^xsd:date ;
+    skos:hasTopConcept <http://rightsstatements.org/vocab/InC/1.0/>, <http://rightsstatements.org/vocab/InC-OW-EU/1.0/>, <http://rightsstatements.org/vocab/InC-EDU/1.0/>, <http://rightsstatements.org/vocab/InC-NC/1.0/>, <http://rightsstatements.org/vocab/InC-RUU/1.0/>, <http://rightsstatements.org/vocab/NoC-CR/1.0/>, <http://rightsstatements.org/vocab/NoC-NC/1.0/>, <http://rightsstatements.org/vocab/NoC-OKLR/1.0/>, <http://rightsstatements.org/vocab/NoC-US/1.0/>, <http://rightsstatements.org/vocab/CNE/1.0/>, <http://rightsstatements.org/vocab/UND/1.0/>, <http://rightsstatements.org/vocab/NKC/1.0/> .
+
+<http://rightsstatements.org/vocab/InC/1.0/> a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:notation "InC" ;
+    skos:prefLabel "In Copyright"@en ;
+    skos:scopeNote "Exported by its RightsStatements.org IRI, as the rico:Rule a record or instantiation is associated with (rico:isAssociatedWithRule)."@en ;
+    skos:definition "This Item is protected by copyright and/or related rights."@en .
+
+<http://rightsstatements.org/vocab/InC-OW-EU/1.0/> a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:notation "InC-OW-EU" ;
+    skos:prefLabel "In Copyright - EU Orphan Work"@en ;
+    skos:scopeNote "Exported by its RightsStatements.org IRI, as the rico:Rule a record or instantiation is associated with (rico:isAssociatedWithRule)."@en ;
+    skos:definition "This Item has been identified as an orphan work in the EU."@en .
+
+<http://rightsstatements.org/vocab/InC-EDU/1.0/> a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:notation "InC-EDU" ;
+    skos:prefLabel "In Copyright - Educational Use Permitted"@en ;
+    skos:scopeNote "Exported by its RightsStatements.org IRI, as the rico:Rule a record or instantiation is associated with (rico:isAssociatedWithRule)."@en ;
+    skos:definition "This Item is protected by copyright; educational use is permitted."@en .
+
+<http://rightsstatements.org/vocab/InC-NC/1.0/> a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:notation "InC-NC" ;
+    skos:prefLabel "In Copyright - Non-Commercial Use Permitted"@en ;
+    skos:scopeNote "Exported by its RightsStatements.org IRI, as the rico:Rule a record or instantiation is associated with (rico:isAssociatedWithRule)."@en ;
+    skos:definition "This Item is protected by copyright; non-commercial use is permitted."@en .
+
+<http://rightsstatements.org/vocab/InC-RUU/1.0/> a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:notation "InC-RUU" ;
+    skos:prefLabel "In Copyright - Rights-holder(s) Unlocatable or Unidentifiable"@en ;
+    skos:scopeNote "Exported by its RightsStatements.org IRI, as the rico:Rule a record or instantiation is associated with (rico:isAssociatedWithRule)."@en ;
+    skos:definition "This Item is protected by copyright, but its rights-holder cannot be found."@en .
+
+<http://rightsstatements.org/vocab/NoC-CR/1.0/> a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:notation "NoC-CR" ;
+    skos:prefLabel "No Copyright - Contractual Restrictions"@en ;
+    skos:scopeNote "Exported by its RightsStatements.org IRI, as the rico:Rule a record or instantiation is associated with (rico:isAssociatedWithRule)."@en ;
+    skos:definition "Use of this Item is not restricted by copyright, but contractual restrictions apply."@en .
+
+<http://rightsstatements.org/vocab/NoC-NC/1.0/> a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:notation "NoC-NC" ;
+    skos:prefLabel "No Copyright - Non-Commercial Use Only"@en ;
+    skos:scopeNote "Exported by its RightsStatements.org IRI, as the rico:Rule a record or instantiation is associated with (rico:isAssociatedWithRule)."@en ;
+    skos:definition "This Item is not protected by copyright; it may be used for non-commercial purposes only."@en .
+
+<http://rightsstatements.org/vocab/NoC-OKLR/1.0/> a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:notation "NoC-OKLR" ;
+    skos:prefLabel "No Copyright - Other Known Legal Restrictions"@en ;
+    skos:scopeNote "Exported by its RightsStatements.org IRI, as the rico:Rule a record or instantiation is associated with (rico:isAssociatedWithRule)."@en ;
+    skos:definition "Use of this Item is not restricted by copyright, but other legal restrictions apply."@en .
+
+<http://rightsstatements.org/vocab/NoC-US/1.0/> a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:notation "NoC-US" ;
+    skos:prefLabel "No Copyright - United States"@en ;
+    skos:scopeNote "Exported by its RightsStatements.org IRI, as the rico:Rule a record or instantiation is associated with (rico:isAssociatedWithRule)."@en ;
+    skos:definition "This Item is not protected by copyright in the United States."@en .
+
+<http://rightsstatements.org/vocab/CNE/1.0/> a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:notation "CNE" ;
+    skos:prefLabel "Copyright Not Evaluated"@en ;
+    skos:scopeNote "Exported by its RightsStatements.org IRI, as the rico:Rule a record or instantiation is associated with (rico:isAssociatedWithRule)."@en ;
+    skos:definition "The copyright status of this Item has not been evaluated."@en .
+
+<http://rightsstatements.org/vocab/UND/1.0/> a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:notation "UND" ;
+    skos:prefLabel "Copyright Undetermined"@en ;
+    skos:scopeNote "Exported by its RightsStatements.org IRI, as the rico:Rule a record or instantiation is associated with (rico:isAssociatedWithRule)."@en ;
+    skos:definition "The copyright status of this Item could not be determined."@en .
+
+<http://rightsstatements.org/vocab/NKC/1.0/> a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:notation "NKC" ;
+    skos:prefLabel "No Known Copyright"@en ;
+    skos:scopeNote "Exported by its RightsStatements.org IRI, as the rico:Rule a record or instantiation is associated with (rico:isAssociatedWithRule)."@en ;
+    skos:definition "No copyright or related rights are known to apply to this Item."@en .

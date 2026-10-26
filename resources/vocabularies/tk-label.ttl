@@ -1,0 +1,206 @@
+# OpenRiC Workspace - OpenRiC Workspace Traditional Knowledge and Biocultural Labels.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# The Labels of Local Contexts (localcontexts.org), by their own IRIs, as Heratio's icip_tk_label_type list has them. A community applies a Label to say how its knowledge in a record is to be used.
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/tk-label/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Traditional Knowledge and Biocultural Labels"@en ;
+    dcterms:description "The Traditional Knowledge (TK) and Biocultural (BC) Labels of Local Contexts."@en ;
+    dcterms:issued "2026-10-27"^^xsd:date ;
+    skos:hasTopConcept v:tk, v:bc .
+
+v:tk a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Traditional Knowledge Labels"@en ;
+    skos:scopeNote "A group of Local Contexts Labels."@en ;
+    skos:definition "The Labels of Local Contexts for Indigenous traditional knowledge."@en .
+
+v:bc a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Biocultural Labels"@en ;
+    skos:scopeNote "A group of Local Contexts Labels."@en ;
+    skos:definition "The Labels of Local Contexts for Indigenous biocultural rights."@en .
+
+<https://localcontexts.org/label/tk-attribution/> a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:tk ;
+    skos:notation "tk_a" ;
+    skos:prefLabel "TK Attribution"@en ;
+    skos:scopeNote "Exported by its Local Contexts IRI, as a rico:Rule the record is associated with (rico:isAssociatedWithRule), applied by a community."@en ;
+    skos:definition "Corrects historical attributions that have not properly attributed Indigenous peoples' contributions to the creation of the material."@en .
+
+<https://localcontexts.org/label/tk-clan/> a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:tk ;
+    skos:notation "tk_cl" ;
+    skos:prefLabel "TK Clan"@en ;
+    skos:scopeNote "Exported by its Local Contexts IRI, as a rico:Rule the record is associated with (rico:isAssociatedWithRule), applied by a community."@en ;
+    skos:definition "The material is traditionally and usually owned by clan members."@en .
+
+<https://localcontexts.org/label/tk-family/> a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:tk ;
+    skos:notation "tk_f" ;
+    skos:prefLabel "TK Family"@en ;
+    skos:scopeNote "Exported by its Local Contexts IRI, as a rico:Rule the record is associated with (rico:isAssociatedWithRule), applied by a community."@en ;
+    skos:definition "The material is traditionally and usually owned by family members."@en .
+
+<https://localcontexts.org/label/tk-multiple-communities/> a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:tk ;
+    skos:notation "tk_mc" ;
+    skos:prefLabel "TK Multiple Communities"@en ;
+    skos:scopeNote "Exported by its Local Contexts IRI, as a rico:Rule the record is associated with (rico:isAssociatedWithRule), applied by a community."@en ;
+    skos:definition "The material traditionally belongs to multiple communities."@en .
+
+<https://localcontexts.org/label/tk-non-commercial/> a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:tk ;
+    skos:notation "tk_nc" ;
+    skos:prefLabel "TK Non-Commercial"@en ;
+    skos:scopeNote "Exported by its Local Contexts IRI, as a rico:Rule the record is associated with (rico:isAssociatedWithRule), applied by a community."@en ;
+    skos:definition "The material has specific conditions for commercial use."@en .
+
+<https://localcontexts.org/label/tk-outreach/> a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:tk ;
+    skos:notation "tk_o" ;
+    skos:prefLabel "TK Outreach"@en ;
+    skos:scopeNote "Exported by its Local Contexts IRI, as a rico:Rule the record is associated with (rico:isAssociatedWithRule), applied by a community."@en ;
+    skos:definition "There has been community outreach, but no decision has been made."@en .
+
+<https://localcontexts.org/label/tk-secret-sacred/> a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:tk ;
+    skos:notation "tk_s" ;
+    skos:prefLabel "TK Secret/Sacred"@en ;
+    skos:scopeNote "Exported by its Local Contexts IRI, as a rico:Rule the record is associated with (rico:isAssociatedWithRule), applied by a community."@en ;
+    skos:definition "The material has specific restrictions around access."@en .
+
+<https://localcontexts.org/label/tk-verified/> a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:tk ;
+    skos:notation "tk_v" ;
+    skos:prefLabel "TK Verified"@en ;
+    skos:scopeNote "Exported by its Local Contexts IRI, as a rico:Rule the record is associated with (rico:isAssociatedWithRule), applied by a community."@en ;
+    skos:definition "The community has verified information about the material."@en .
+
+<https://localcontexts.org/label/tk-culturally-sensitive/> a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:tk ;
+    skos:notation "tk_cs" ;
+    skos:prefLabel "TK Culturally Sensitive"@en ;
+    skos:scopeNote "Exported by its Local Contexts IRI, as a rico:Rule the record is associated with (rico:isAssociatedWithRule), applied by a community."@en ;
+    skos:definition "The material is culturally sensitive and should be treated accordingly."@en .
+
+<https://localcontexts.org/label/tk-community-voice/> a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:tk ;
+    skos:notation "tk_cv" ;
+    skos:prefLabel "TK Community Voice"@en ;
+    skos:scopeNote "Exported by its Local Contexts IRI, as a rico:Rule the record is associated with (rico:isAssociatedWithRule), applied by a community."@en ;
+    skos:definition "The material should be heard or spoken by community members."@en .
+
+<https://localcontexts.org/label/tk-community-use-only/> a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:tk ;
+    skos:notation "tk_co" ;
+    skos:prefLabel "TK Community Use Only"@en ;
+    skos:scopeNote "Exported by its Local Contexts IRI, as a rico:Rule the record is associated with (rico:isAssociatedWithRule), applied by a community."@en ;
+    skos:definition "The material is for community use only."@en .
+
+<https://localcontexts.org/label/tk-women-restricted/> a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:tk ;
+    skos:notation "tk_wr" ;
+    skos:prefLabel "TK Women Restricted"@en ;
+    skos:scopeNote "Exported by its Local Contexts IRI, as a rico:Rule the record is associated with (rico:isAssociatedWithRule), applied by a community."@en ;
+    skos:definition "The material has gender-based restrictions for women."@en .
+
+<https://localcontexts.org/label/tk-women-general/> a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:tk ;
+    skos:notation "tk_wg" ;
+    skos:prefLabel "TK Women General"@en ;
+    skos:scopeNote "Exported by its Local Contexts IRI, as a rico:Rule the record is associated with (rico:isAssociatedWithRule), applied by a community."@en ;
+    skos:definition "The material traditionally belongs to women."@en .
+
+<https://localcontexts.org/label/tk-men-restricted/> a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:tk ;
+    skos:notation "tk_mr" ;
+    skos:prefLabel "TK Men Restricted"@en ;
+    skos:scopeNote "Exported by its Local Contexts IRI, as a rico:Rule the record is associated with (rico:isAssociatedWithRule), applied by a community."@en ;
+    skos:definition "The material has gender-based restrictions for men."@en .
+
+<https://localcontexts.org/label/tk-men-general/> a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:tk ;
+    skos:notation "tk_mg" ;
+    skos:prefLabel "TK Men General"@en ;
+    skos:scopeNote "Exported by its Local Contexts IRI, as a rico:Rule the record is associated with (rico:isAssociatedWithRule), applied by a community."@en ;
+    skos:definition "The material traditionally belongs to men."@en .
+
+<https://localcontexts.org/label/tk-seasonal/> a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:tk ;
+    skos:notation "tk_ss" ;
+    skos:prefLabel "TK Seasonal"@en ;
+    skos:scopeNote "Exported by its Local Contexts IRI, as a rico:Rule the record is associated with (rico:isAssociatedWithRule), applied by a community."@en ;
+    skos:definition "The material has seasonal restrictions."@en .
+
+<https://localcontexts.org/label/bc-provenance/> a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:bc ;
+    skos:notation "bc_p" ;
+    skos:prefLabel "BC Provenance"@en ;
+    skos:scopeNote "Exported by its Local Contexts IRI, as a rico:Rule the record is associated with (rico:isAssociatedWithRule), applied by a community."@en ;
+    skos:definition "The origins and chain of custody of biological or genetic resources."@en .
+
+<https://localcontexts.org/label/bc-multiple-communities/> a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:bc ;
+    skos:notation "bc_mc" ;
+    skos:prefLabel "BC Multiple Communities"@en ;
+    skos:scopeNote "Exported by its Local Contexts IRI, as a rico:Rule the record is associated with (rico:isAssociatedWithRule), applied by a community."@en ;
+    skos:definition "Multiple communities have interests in this biological resource."@en .
+
+<https://localcontexts.org/label/bc-clan/> a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:bc ;
+    skos:notation "bc_cl" ;
+    skos:prefLabel "BC Clan"@en ;
+    skos:scopeNote "Exported by its Local Contexts IRI, as a rico:Rule the record is associated with (rico:isAssociatedWithRule), applied by a community."@en ;
+    skos:definition "Clan ownership of biological or genetic resources."@en .
+
+<https://localcontexts.org/label/bc-non-commercial/> a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:bc ;
+    skos:notation "bc_cnc" ;
+    skos:prefLabel "BC Commercial Non-Commercial"@en ;
+    skos:scopeNote "Exported by its Local Contexts IRI, as a rico:Rule the record is associated with (rico:isAssociatedWithRule), applied by a community."@en ;
+    skos:definition "Conditions for commercial and non-commercial use."@en .
+
+<https://localcontexts.org/label/bc-outreach/> a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:bc ;
+    skos:notation "bc_o" ;
+    skos:prefLabel "BC Outreach"@en ;
+    skos:scopeNote "Exported by its Local Contexts IRI, as a rico:Rule the record is associated with (rico:isAssociatedWithRule), applied by a community."@en ;
+    skos:definition "Community outreach regarding biological resources."@en .
+
+<https://localcontexts.org/label/bc-research-use/> a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:bc ;
+    skos:notation "bc_r" ;
+    skos:prefLabel "BC Research Use"@en ;
+    skos:scopeNote "Exported by its Local Contexts IRI, as a rico:Rule the record is associated with (rico:isAssociatedWithRule), applied by a community."@en ;
+    skos:definition "Specific conditions for research use of biological resources."@en .

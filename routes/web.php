@@ -14,6 +14,7 @@ use App\Http\Controllers\AgentController;
 use App\Http\Controllers\ApiKeyController;
 use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\ClipboardController;
+use App\Http\Controllers\CommunityLabelController;
 use App\Http\Controllers\ConceptController;
 use App\Http\Controllers\DateController;
 use App\Http\Controllers\DeletionController;
@@ -34,6 +35,7 @@ use App\Http\Controllers\RecordController;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\RelationController;
 use App\Http\Controllers\RepositoryController;
+use App\Http\Controllers\RightsController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\SettingsController;
@@ -310,6 +312,15 @@ Route::middleware(['auth', 'active'])->group(function () {
                 Route::post("/{{$parameter}}/remove", [$controller, 'destroy'])->name('destroy');
             });
     }
+
+    // Rights and Local Contexts Labels of a unit of description or an instantiation (roadmap phase 2); each controller checks update on it.
+    Route::prefix('{kind}/{id}')->where(['kind' => 'records|instantiations', 'id' => '[0-9a-f-]{36}', 'right' => '[0-9a-f-]{36}', 'label' => '[0-9a-f-]{36}'])->group(function () {
+        Route::post('/rights', [RightsController::class, 'store'])->name('rights.store');
+        Route::post('/rights/{right}', [RightsController::class, 'update'])->name('rights.update');
+        Route::post('/rights/{right}/remove', [RightsController::class, 'destroy'])->name('rights.destroy');
+        Route::post('/community-labels', [CommunityLabelController::class, 'store'])->name('community-labels.store');
+        Route::post('/community-labels/{label}/remove', [CommunityLabelController::class, 'destroy'])->name('community-labels.destroy');
+    });
 
     // Delete a unit of description, a repository or a place, after confirming (EntityDeletion).
     Route::get('{kind}/{id}/delete', [DeletionController::class, 'confirm'])->where(['kind' => 'records|repositories|places|agents|activities|instantiations|containers', 'id' => '[0-9a-f-]{36}'])->name('deletion.confirm');

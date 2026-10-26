@@ -60,6 +60,8 @@
 
     @include('description._names', ['subject' => $record, 'kind' => 'records', 'canUpdate' => $canUpdate, 'drafts' => $drafts])
     @include('description._identifiers', ['subject' => $record, 'kind' => 'records', 'canUpdate' => $canUpdate])
+    @include('description._rights', ['subject' => $record, 'kind' => 'records', 'canUpdate' => $canUpdate])
+    @include('description._community-labels', ['subject' => $record, 'kind' => 'records', 'canUpdate' => $canUpdate])
     @include('description._relations', ['subject' => $record, 'kind' => 'records', 'relations' => $relations, 'canUpdate' => $canUpdate])
     @include('description._relations', ['subject' => $record, 'kind' => 'records', 'relations' => $relations, 'canUpdate' => $canUpdate,
         'heading' => 'Subject access points', 'types' => ['subject'], 'section' => 'su', 'add' => 'subject|source', 'addLabel' => 'Add a subject: a concept, a place or an agent'])

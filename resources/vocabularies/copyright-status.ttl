@@ -1,0 +1,37 @@
+# OpenRiC Workspace - OpenRiC Workspace Copyright Statuses.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Whether material is in copyright (PREMIS copyrightStatus; Heratio's copyright_status).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/copyright-status/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Copyright Statuses"@en ;
+    dcterms:description "Whether the material is protected by copyright."@en ;
+    dcterms:issued "2026-10-27"^^xsd:date ;
+    skos:hasTopConcept v:copyrighted, v:public-domain, v:unknown .
+
+v:copyrighted a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "In copyright"@en ;
+    skos:scopeNote "Kept with a copyright right (PREMIS copyrightStatus); RiC-O 1.1 has no property for it, so it is part of the rico:Rule's description."@en ;
+    skos:definition "The material is protected by copyright."@en .
+
+v:public-domain a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Public domain"@en ;
+    skos:scopeNote "Kept with a copyright right (PREMIS copyrightStatus); RiC-O 1.1 has no property for it, so it is part of the rico:Rule's description."@en ;
+    skos:definition "The material is not, or no longer, protected by copyright."@en .
+
+v:unknown a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Unknown"@en ;
+    skos:scopeNote "Kept with a copyright right (PREMIS copyrightStatus); RiC-O 1.1 has no property for it, so it is part of the rico:Rule's description."@en ;
+    skos:definition "Whether the material is in copyright is not known."@en .

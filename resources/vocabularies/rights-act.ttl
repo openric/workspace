@@ -1,0 +1,79 @@
+# OpenRiC Workspace - OpenRiC Workspace Rights Acts.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What a right allows or restricts (the PREMIS acts; Heratio's rights_grant.act).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/rights-act/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Rights Acts"@en ;
+    dcterms:description "An action a right allows, restricts or conditions."@en ;
+    dcterms:issued "2026-10-27"^^xsd:date ;
+    skos:hasTopConcept v:render, v:disseminate, v:replicate, v:migrate, v:modify, v:delete, v:print, v:publish, v:use .
+
+v:render a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Display"@en ;
+    skos:scopeNote "PREMIS act of a rights grant; RiC-O 1.1 has no property for it, so it is part of the rico:Rule's description."@en ;
+    skos:definition "Show or play the material."@en .
+
+v:disseminate a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Disseminate"@en ;
+    skos:scopeNote "PREMIS act of a rights grant; RiC-O 1.1 has no property for it, so it is part of the rico:Rule's description."@en ;
+    skos:definition "Give copies to others, such as by download."@en .
+
+v:replicate a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Replicate"@en ;
+    skos:scopeNote "PREMIS act of a rights grant; RiC-O 1.1 has no property for it, so it is part of the rico:Rule's description."@en ;
+    skos:definition "Make exact copies, such as for preservation."@en .
+
+v:migrate a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Migrate"@en ;
+    skos:scopeNote "PREMIS act of a rights grant; RiC-O 1.1 has no property for it, so it is part of the rico:Rule's description."@en ;
+    skos:definition "Change the material to another format."@en .
+
+v:modify a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Modify"@en ;
+    skos:scopeNote "PREMIS act of a rights grant; RiC-O 1.1 has no property for it, so it is part of the rico:Rule's description."@en ;
+    skos:definition "Change the content of the material."@en .
+
+v:delete a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Delete"@en ;
+    skos:scopeNote "PREMIS act of a rights grant; RiC-O 1.1 has no property for it, so it is part of the rico:Rule's description."@en ;
+    skos:definition "Remove the material."@en .
+
+v:print a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Print"@en ;
+    skos:scopeNote "PREMIS act of a rights grant; RiC-O 1.1 has no property for it, so it is part of the rico:Rule's description."@en ;
+    skos:definition "Print the material."@en .
+
+v:publish a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Publish"@en ;
+    skos:scopeNote "PREMIS act of a rights grant; RiC-O 1.1 has no property for it, so it is part of the rico:Rule's description."@en ;
+    skos:definition "Publish the material, such as in a book or online."@en .
+
+v:use a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Use"@en ;
+    skos:scopeNote "PREMIS act of a rights grant; RiC-O 1.1 has no property for it, so it is part of the rico:Rule's description."@en ;
+    skos:definition "Any other use."@en .

@@ -141,6 +141,10 @@ Reuse was lower than hoped: only 32 of Heratio's Afrikaans strings carried over.
 
 **2. Rights statements and rights holders (WS-007).** WS-007 asks for rights on each file; today an instantiation only has free text for its rights. Copy `ahg-extended-rights`: a rights statement per instantiation from RightsStatements.org and the Creative Commons licences, as bundled vocabularies, with its basis (copyright, licence, statute, donor), its holder and its dates. The rights holder is an agent, related by a typed relation, from `ahg-rights-holder-manage`. Rights show in the public catalogue and in the files API, and go out in exports. The RiC term is checked first (`rico:Rule`, `rico:hasOrHadLegalStatus`, or a spec issue). Done when every delivered file carries its statement.
 
+Progress:
+- **v0.0.57**: rights on records and instantiations, each a rico:Rule with its basis, RightsStatements.org statement, Creative Commons licence, copyright status, jurisdiction, dates, holder and PREMIS grants. Traditional Knowledge and Biocultural Labels of Local Contexts, brought into phase 2 on 27 October 2026 (ADR 0008).
+- **Next**: rights holders' own pages, rights set through the clipboard, the rights report; then public display, the files API and the exports.
+
 **3. Backup and restore (WS-011).** `deploy/deploy.sh` already backs up the database before a release. Copy `ahg-backup`: scheduled backups of the database and the object store together, an offsite copy (its local, rsync and S3 drivers, which do not touch the AtoM schema), and a restore that checks every file's SHA-256 and the audit chain afterwards. Done when a restore drill on a fresh machine is recorded, as the G2 evidence asks.
 
 **4. Heratio migration check (WS-013, G3).** The AtoM import reads AtoM CSV exports and AtoM's uploads. Copy the mapping rules of `ahg-data-migration` to take a difficult Heratio sample (inherited access rules, translations, relations, embargoed records). A reconciliation report lists, for each source row, what was kept, changed and lost. Done when the report for the agreed sample shows nothing lost silently.

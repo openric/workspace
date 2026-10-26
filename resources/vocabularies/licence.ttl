@@ -1,0 +1,80 @@
+# OpenRiC Workspace - OpenRiC Workspace Licences.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# The Creative Commons licences and public domain tools, by their own IRIs, as Heratio's creative_commons_license list has them.
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/licence/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Licences"@en ;
+    dcterms:description "The licence under which a record or instantiation may be reused."@en ;
+    dcterms:issued "2026-10-27"^^xsd:date ;
+    skos:hasTopConcept <https://creativecommons.org/publicdomain/zero/1.0/>, <https://creativecommons.org/licenses/by/4.0/>, <https://creativecommons.org/licenses/by-sa/4.0/>, <https://creativecommons.org/licenses/by-nc/4.0/>, <https://creativecommons.org/licenses/by-nc-sa/4.0/>, <https://creativecommons.org/licenses/by-nd/4.0/>, <https://creativecommons.org/licenses/by-nc-nd/4.0/>, <https://creativecommons.org/publicdomain/mark/1.0/> .
+
+<https://creativecommons.org/publicdomain/zero/1.0/> a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:notation "CC0-1.0" ;
+    skos:prefLabel "CC0 1.0 Universal (public domain dedication)"@en ;
+    skos:scopeNote "Exported by its Creative Commons IRI, as the rico:Rule a record or instantiation is associated with (rico:isAssociatedWithRule), and as dcterms:license."@en ;
+    skos:definition "No rights reserved."@en .
+
+<https://creativecommons.org/licenses/by/4.0/> a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:notation "CC-BY-4.0" ;
+    skos:prefLabel "Attribution 4.0 International"@en ;
+    skos:scopeNote "Exported by its Creative Commons IRI, as the rico:Rule a record or instantiation is associated with (rico:isAssociatedWithRule), and as dcterms:license."@en ;
+    skos:definition "Reuse with credit."@en .
+
+<https://creativecommons.org/licenses/by-sa/4.0/> a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:notation "CC-BY-SA-4.0" ;
+    skos:prefLabel "Attribution-ShareAlike 4.0 International"@en ;
+    skos:scopeNote "Exported by its Creative Commons IRI, as the rico:Rule a record or instantiation is associated with (rico:isAssociatedWithRule), and as dcterms:license."@en ;
+    skos:definition "Reuse with credit, shared alike."@en .
+
+<https://creativecommons.org/licenses/by-nc/4.0/> a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:notation "CC-BY-NC-4.0" ;
+    skos:prefLabel "Attribution-NonCommercial 4.0 International"@en ;
+    skos:scopeNote "Exported by its Creative Commons IRI, as the rico:Rule a record or instantiation is associated with (rico:isAssociatedWithRule), and as dcterms:license."@en ;
+    skos:definition "Reuse with credit, not commercially."@en .
+
+<https://creativecommons.org/licenses/by-nc-sa/4.0/> a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:notation "CC-BY-NC-SA-4.0" ;
+    skos:prefLabel "Attribution-NonCommercial-ShareAlike 4.0 International"@en ;
+    skos:scopeNote "Exported by its Creative Commons IRI, as the rico:Rule a record or instantiation is associated with (rico:isAssociatedWithRule), and as dcterms:license."@en ;
+    skos:definition "Reuse with credit, not commercially, shared alike."@en .
+
+<https://creativecommons.org/licenses/by-nd/4.0/> a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:notation "CC-BY-ND-4.0" ;
+    skos:prefLabel "Attribution-NoDerivatives 4.0 International"@en ;
+    skos:scopeNote "Exported by its Creative Commons IRI, as the rico:Rule a record or instantiation is associated with (rico:isAssociatedWithRule), and as dcterms:license."@en ;
+    skos:definition "Reuse with credit, unchanged."@en .
+
+<https://creativecommons.org/licenses/by-nc-nd/4.0/> a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:notation "CC-BY-NC-ND-4.0" ;
+    skos:prefLabel "Attribution-NonCommercial-NoDerivatives 4.0 International"@en ;
+    skos:scopeNote "Exported by its Creative Commons IRI, as the rico:Rule a record or instantiation is associated with (rico:isAssociatedWithRule), and as dcterms:license."@en ;
+    skos:definition "Reuse with credit, not commercially, unchanged."@en .
+
+<https://creativecommons.org/publicdomain/mark/1.0/> a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:notation "PDM-1.0" ;
+    skos:prefLabel "Public Domain Mark 1.0"@en ;
+    skos:scopeNote "Exported by its Creative Commons IRI, as the rico:Rule a record or instantiation is associated with (rico:isAssociatedWithRule), and as dcterms:license."@en ;
+    skos:definition "Known to be free of copyright restrictions."@en .

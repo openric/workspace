@@ -1,0 +1,37 @@
+# OpenRiC Workspace - OpenRiC Workspace Rights Restrictions.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Whether a right allows an act (PREMIS restriction; Heratio's rights_grant.restriction).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/rights-restriction/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Rights Restrictions"@en ;
+    dcterms:description "Whether a right allows, disallows or conditions an act."@en ;
+    dcterms:issued "2026-10-27"^^xsd:date ;
+    skos:hasTopConcept v:allow, v:disallow, v:conditional .
+
+v:allow a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Allowed"@en ;
+    skos:scopeNote "PREMIS restriction of a rights grant; part of the rico:Rule's description."@en ;
+    skos:definition "The act is allowed."@en .
+
+v:disallow a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Not allowed"@en ;
+    skos:scopeNote "PREMIS restriction of a rights grant; part of the rico:Rule's description."@en ;
+    skos:definition "The act is not allowed."@en .
+
+v:conditional a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Allowed on conditions"@en ;
+    skos:scopeNote "PREMIS restriction of a rights grant; part of the rico:Rule's description."@en ;
+    skos:definition "The act is allowed on the conditions in the note."@en .

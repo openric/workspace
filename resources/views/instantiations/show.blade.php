@@ -37,6 +37,8 @@
     @include('description._view', ['subject' => $instantiation, 'standard' => \App\Description\Elements::INSTANTIATION, 'drafts' => $canUpdate])
     @include('description._names', ['subject' => $instantiation, 'kind' => 'instantiations', 'canUpdate' => $canUpdate])
     @include('description._identifiers', ['subject' => $instantiation, 'kind' => 'instantiations', 'canUpdate' => $canUpdate])
+    @include('description._rights', ['subject' => $instantiation, 'kind' => 'instantiations', 'canUpdate' => $canUpdate])
+    @include('description._community-labels', ['subject' => $instantiation, 'kind' => 'instantiations', 'canUpdate' => $canUpdate])
     @include('description._dates', ['subject' => $instantiation, 'kind' => 'instantiations', 'heading' => 'Dates', 'canUpdate' => $canUpdate, 'choices' => $dateChoices])
     @if(auth()->user()->mayAnywhere('read', 'storage'))
         @include('description._relations', ['subject' => $instantiation, 'kind' => 'instantiations', 'relations' => $relations->filter(fn ($r) => auth()->user()->may('read', 'storage', $r->other)), 'canUpdate' => $canUpdate,
