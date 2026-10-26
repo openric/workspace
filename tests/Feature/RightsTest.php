@@ -156,4 +156,41 @@ class RightsTest extends TestCase
         $this->actingAs($translator)->post("/records/{$this->record->id}/rights", ['basis' => 'copyright'])->assertForbidden();
         $this->actingAs($translator)->post("/records/{$this->record->id}/community-labels", ['label' => 'tk_a', 'applied_by' => 'institution'])->assertForbidden();
     }
+
+    public function test_the_report_the_holders_page_and_rights_for_the_clipboard(): void
+    {
+        $holder = app(AgentService::class)->create($this->institution, 'corporate-body', 'Riverside Photographic Society', 'en');
+        $other = app(RecordService::class)->create($this->institution, 'https://workspace.openric.org/vocab/level-of-description/item', 'Photograph of the bridge', 'en', null, $this->record->repository, 'P2');
+        $scan = app(InstantiationService::class)->create($other, 'Scan of the bridge', 'en');
+
+        // Both records on the clipboard get the same right, with their instantiations.
+        foreach ([$this->record, $other] as $record) {
+            $this->actingAs($this->editor)->post('/clipboard/add', ['type' => 'records', 'id' => $record->id]);
+        }
+        $this->actingAs($this->editor)->get('/rights/batch')->assertOk()->assertSee('Photograph of the bridge');
+        $this->actingAs($this->editor)->post('/rights/batch', ['what' => 'right', 'basis' => 'copyright', 'statement' => 'InC', 'holder' => $holder->id, 'with_instantiations' => '1'])
+            ->assertRedirect('/rights/batch')->assertSessionHas('status', '3 added, 0 skipped (not yours to change, or there already).');
+        $this->actingAs($this->editor)->post('/rights/batch', ['what' => 'label', 'label' => 'tk_a'])->assertSessionHas('status', '2 added, 0 skipped (not yours to change, or there already).');
+        $this->actingAs($this->editor)->post('/rights/batch', ['what' => 'label', 'label' => 'tk_a'])->assertSessionHas('status', '0 added, 2 skipped (not yours to change, or there already).');
+        $this->assertSame(3, Right::count());
+        $this->assertSame(2, CommunityLabel::count());
+
+        // The report counts what is in force; the instantiation left without one is listed.
+        app(InstantiationService::class)->create($this->record, 'Copy without rights', 'en');
+        $this->actingAs($this->editor)->get('/rights')->assertOk()->assertSee('In Copyright')->assertSee('TK Attribution')
+            ->assertSee('Riverside Photographic Society')->assertSee('Copy without rights');
+        $csv = $this->actingAs($this->editor)->get('/rights/report/statements.csv')->assertOk()->streamedContent();
+        $this->assertStringContainsString('"In Copyright",http://rightsstatements.org/vocab/InC/1.0/,3', $csv);
+        $this->actingAs($this->editor)->get('/rights/report/nothing.csv')->assertNotFound();
+
+        // The holder's page lists the rights it holds.
+        $this->actingAs($this->editor)->get("/agents/{$holder->id}")->assertOk()->assertSee('Rights held')->assertSee('Scan of the bridge');
+
+        // A translator may read the report but not assign rights.
+        $translator = app(AccountService::class)->create($this->institution, 'Translator', 'translator@example.org', 'correct horse battery staple');
+        app(AccountService::class)->grantTemplateRole($translator, 'translator');
+        $this->actingAs($translator)->get('/rights')->assertOk();
+        $this->actingAs($translator)->get('/rights/batch')->assertForbidden();
+        $this->actingAs($translator)->post('/rights/batch', ['what' => 'right', 'basis' => 'copyright'])->assertForbidden();
+    }
 }

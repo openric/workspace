@@ -46,6 +46,7 @@
                 'containers.index' => [__('Containers'), $user->mayAnywhere('read', 'storage'), 'containers.*'],
                 'storage.places' => [__('Physical storage'), $user->mayAnywhere('read', 'storage'), 'storage.*'],
                 'imports.index' => [__('Import'), $mayImport, 'imports.*'],
+                'rights.index' => [__('Rights'), $user->mayAnywhere('read', 'description'), 'rights.*'],
                 'proposals.index' => [__('Proposals to review'), $user->mayAnywhere('review-proposals', 'description'), 'proposals.*'],
                 'records.export-all' => [__('Export descriptions'), $user->mayAnywhere('read', 'description'), 'records.export-all'],
                 'agents.duplicates' => [__('Duplicate authority records'), $user->may('update', 'authority'), 'agents.duplicates'],

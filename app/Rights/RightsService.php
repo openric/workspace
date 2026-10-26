@@ -107,6 +107,35 @@ final class RightsService
         }));
     }
 
+    /**
+     * Give each of the records the same right, as Heratio's batch assignment does for the objects chosen; with
+     * $withInstantiations, their instantiations too. A record the account may not change is skipped and counted.
+     *
+     * @param  iterable<RecordResource>  $records
+     * @return array{added: int, skipped: int}
+     */
+    public function assignToMany(iterable $records, array $fields, bool $withInstantiations, User $actor): array
+    {
+        $added = $skipped = 0;
+        $this->values($actor->institution_id, $fields); // refuse a malformed right before anything is written
+        DB::transaction(function () use ($records, $fields, $withInstantiations, $actor, &$added, &$skipped) {
+            foreach ($records as $record) {
+                if (! $actor->may('update', 'description', $record)) {
+                    $skipped++;
+
+                    continue;
+                }
+                $subjects = $withInstantiations ? [$record, ...Instantiation::where('record_resource_id', $record->id)->whereNull('deleted_at')->get()] : [$record];
+                foreach ($subjects as $subject) {
+                    $this->add($subject, $fields, $actor);
+                    $added++;
+                }
+            }
+        });
+
+        return ['added' => $added, 'skipped' => $skipped];
+    }
+
     /** Mark the right deleted: it leaves every page and export, and its IRI is kept. */
     public function remove(Right $right, ?User $actor = null): void
     {

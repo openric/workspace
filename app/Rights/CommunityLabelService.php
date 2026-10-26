@@ -68,6 +68,32 @@ final class CommunityLabelService
             'local_contexts_project' => trim((string) ($fields['project'] ?? '')) ?: null, 'note' => trim((string) ($fields['note'] ?? '')) ?: null])));
     }
 
+    /**
+     * Apply the same Label to each of the records; one that carries it already, or that the account may not change, is skipped.
+     *
+     * @param  iterable<RecordResource>  $records
+     * @return array{added: int, skipped: int}
+     */
+    public function applyToMany(iterable $records, array $fields, User $actor): array
+    {
+        $added = $skipped = 0;
+        DB::transaction(function () use ($records, $fields, $actor, &$added, &$skipped) {
+            foreach ($records as $record) {
+                $label = Concept::choices(self::LABELS)->where('notation', (string) ($fields['label'] ?? ''))->first();
+                $carries = $label && CommunityLabel::where(['subject_table' => $record->getTable(), 'subject_id' => $record->getKey(), 'label_id' => $label->id])->exists();
+                if (! $actor->may('update', 'description', $record) || $carries) {
+                    $skipped++;
+
+                    continue;
+                }
+                $this->apply($record, $fields, $actor);
+                $added++;
+            }
+        });
+
+        return ['added' => $added, 'skipped' => $skipped];
+    }
+
     public function remove(CommunityLabel $label, ?User $actor = null): void
     {
         DB::transaction(fn () => AuditLog::actingAs($actor, fn () => $label->delete()));

@@ -143,7 +143,11 @@ Reuse was lower than hoped: only 32 of Heratio's Afrikaans strings carried over.
 
 Progress:
 - **v0.0.57**: rights on records and instantiations, each a rico:Rule with its basis, RightsStatements.org statement, Creative Commons licence, copyright status, jurisdiction, dates, holder and PREMIS grants. Traditional Knowledge and Biocultural Labels of Local Contexts, brought into phase 2 on 27 October 2026 (ADR 0008).
-- **Next**: rights holders' own pages, rights set through the clipboard, the rights report; then public display, the files API and the exports.
+- **v0.0.58**:
+  - under Manage, Rights, the rights report: in force today, by rights statement, licence and basis; the Labels applied; the rights holders; what has no right in force, each list as CSV;
+  - a right or a Label given to every archival description on the clipboard, and their instantiations if chosen, after Heratio's batch assignment;
+  - each authority record lists the rights it holds.
+- **Next**: public display, the files API and the exports.
 
 **3. Backup and restore (WS-011).** `deploy/deploy.sh` already backs up the database before a release. Copy `ahg-backup`: scheduled backups of the database and the object store together, an offsite copy (its local, rsync and S3 drivers, which do not touch the AtoM schema), and a restore that checks every file's SHA-256 and the audit chain afterwards. Done when a restore drill on a fresh machine is recorded, as the G2 evidence asks.
 

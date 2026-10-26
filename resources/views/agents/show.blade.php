@@ -28,6 +28,12 @@
 
     @include('description._names', ['subject' => $agent, 'kind' => 'agents', 'canUpdate' => $canUpdate])
     @include('description._identifiers', ['subject' => $agent, 'kind' => 'agents', 'canUpdate' => $canUpdate])
+    @php($held = app(\App\Rights\RightsReport::class)->heldBy($agent))
+    @if($held->isNotEmpty())
+        <h2 id="rights-held">{{ __('Rights held') }} @include('description._ric', ['term' => 'rico:isOrWasHolderOfIntellectualPropertyRightsOf'])</h2>
+        <ul>@foreach($held as ['right' => $right, 'subject' => $subject])<li><a href="{{ \App\Relations\EntityKinds::route($subject) }}#rights">{{ \App\Relations\EntityKinds::label($subject) }}</a>:
+            {{ collect([$right->basis->label(\App\Support\Vocab::languages()), $right->statement?->label(\App\Support\Vocab::languages()), $right->licence?->label(\App\Support\Vocab::languages())])->filter()->join(' · ') }}@unless($right->inForce()) <span class="meta">({{ __('not in force today') }})</span>@endunless</li>@endforeach</ul>
+    @endif
     @include('description._dates', ['subject' => $agent, 'kind' => 'agents', 'heading' => 'Dates (5.2.1)', 'canUpdate' => $canUpdate, 'choices' => $dateChoices])
     @if($agent->typeNotation() === 'person')
         @include('description._relations', ['subject' => $agent, 'kind' => 'agents', 'relations' => $relations, 'canUpdate' => $canUpdate,

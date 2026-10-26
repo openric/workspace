@@ -35,6 +35,7 @@ use App\Http\Controllers\RecordController;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\RelationController;
 use App\Http\Controllers\RepositoryController;
+use App\Http\Controllers\RightsAdminController;
 use App\Http\Controllers\RightsController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SessionController;
@@ -312,6 +313,12 @@ Route::middleware(['auth', 'active'])->group(function () {
                 Route::post("/{{$parameter}}/remove", [$controller, 'destroy'])->name('destroy');
             });
     }
+
+    // The rights report and rights for what is on the clipboard (roadmap phase 2); the controller checks read or update.
+    Route::get('/rights', [RightsAdminController::class, 'index'])->name('rights.index');
+    Route::get('/rights/report/{list}.csv', [RightsAdminController::class, 'csv'])->where('list', '[a-z]+')->name('rights.csv');
+    Route::get('/rights/batch', [RightsAdminController::class, 'batch'])->name('rights.batch');
+    Route::post('/rights/batch', [RightsAdminController::class, 'batchStore'])->name('rights.batch.store');
 
     // Rights and Local Contexts Labels of a unit of description or an instantiation (roadmap phase 2); each controller checks update on it.
     Route::prefix('{kind}/{id}')->where(['kind' => 'records|instantiations', 'id' => '[0-9a-f-]{36}', 'right' => '[0-9a-f-]{36}', 'label' => '[0-9a-f-]{36}'])->group(function () {
