@@ -33,7 +33,7 @@
                 <div class="collection-card-body">
                     <h3 class="collection-card-title">{{ $view->label($unit) }}</h3>
                     @if($summary)<p class="collection-card-summary">{{ $summary }}</p>@endif
-                    <span class="collection-card-count">{{ $unit->level?->label(['en', 'und']) }}@if($count) · {{ $count }} {{ $count === 1 ? 'unit' : 'units' }} inside @endif</span>
+                    <span class="collection-card-count">{{ $unit->level?->label(\App\Support\Vocab::languages()) }}@if($count) · {{ $count }} {{ $count === 1 ? 'unit' : 'units' }} inside @endif</span>
                 </div>
             </a>
         @endforeach

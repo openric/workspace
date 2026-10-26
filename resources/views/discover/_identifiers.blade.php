@@ -3,10 +3,10 @@
 @php($shown = $entity->identifiers()->with('identifierType.labels')->get()->reject(fn ($i) => $i->identifierType->notation === 'local'))
 @if($shown->isNotEmpty())
     <section aria-labelledby="identifiers-heading">
-        <h2 id="identifiers-heading">Identifiers @include('description._ric', ['term' => 'rico:Identifier'])</h2>
+        <h2 id="identifiers-heading">{{ __('Identifiers') }} @include('description._ric', ['term' => 'rico:Identifier'])</h2>
         <dl class="values">
             @foreach($shown as $identifier)
-                <dt>{{ $identifier->identifierType->label(['en', 'und']) }}</dt>
+                <dt>{{ $identifier->identifierType->label(\App\Support\Vocab::languages()) }}</dt>
                 <dd>@if(preg_match('~^https?://~', $identifier->value))<a href="{{ $identifier->value }}" rel="noopener">{{ $identifier->value }}</a>@else{{ $identifier->value }}@endif</dd>
             @endforeach
         </dl>

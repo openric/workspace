@@ -3,6 +3,7 @@
 use App\Api\Problem;
 use App\Http\Middleware\EnsureAccountActive;
 use App\Http\Middleware\RequireAccess;
+use App\Http\Middleware\SetLocale;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -21,6 +22,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->redirectGuestsTo(fn () => route('sign-in'));
         $middleware->redirectUsersTo(fn () => route('home'));
         $middleware->alias(['active' => EnsureAccountActive::class, 'access' => RequireAccess::class]);
+        // The interface's language for every web page (WS-005); the API answers in data, not prose.
+        $middleware->appendToGroup('web', SetLocale::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         // The OpenRiC API answers every error as RFC 7807 problem details (Core Discovery 0.6.0, section 4).

@@ -7,7 +7,7 @@
     <h1>Publication of {{ $name }}</h1>
     <p>Each value and name has its own state. Only published ones reach public discovery, the API and exports. A value someone changes goes back to draft, so it is published again only when someone publishes it.</p>
     <table style="border-collapse: collapse">
-        <tr><th style="text-align: left; padding: .25rem .75rem .25rem 0">Language</th>@foreach($states as $state)<th style="text-align: left; padding: .25rem .75rem">{{ $state->label(['en', 'und']) }}</th>@endforeach</tr>
+        <tr><th style="text-align: left; padding: .25rem .75rem .25rem 0">Language</th>@foreach($states as $state)<th style="text-align: left; padding: .25rem .75rem">{{ $state->label(\App\Support\Vocab::languages()) }}</th>@endforeach</tr>
         @forelse($summary as $language => $counts)
             <tr><td style="padding: .25rem .75rem .25rem 0">{{ $language }}</td>@foreach($states as $notation => $state)<td style="padding: .25rem .75rem">{{ $counts[$notation] ?? 0 }}</td>@endforeach</tr>
         @empty

@@ -8,14 +8,14 @@
     @php($canCreate = auth()->user()->may('create', 'vocabulary'))
     @foreach($kinds as $kind)
         <section>
-            <h2>{{ $kind->label(['en', 'und']) }}</h2>
+            <h2>{{ $kind->label(\App\Support\Vocab::languages()) }}</h2>
             <p><small>{{ $kind->labels->firstWhere('language', 'en')?->definition }}</small></p>
             @forelse($vocabularies[$kind->id] ?? [] as $vocabulary)
                 <p><a href="{{ route('vocabularies.show', $vocabulary) }}">{{ $vocabulary->title }}</a> ({{ $vocabulary->current_count }} {{ $vocabulary->current_count === 1 ? 'concept' : 'concepts' }}@if($vocabulary->concepts_count > $vocabulary->current_count), {{ $vocabulary->concepts_count - $vocabulary->current_count }} deprecated @endif)</p>
             @empty
                 <p>None yet.</p>
             @endforelse
-            @if($canCreate)<p><a href="{{ route('vocabularies.create', ['kind' => $kind->notation]) }}">New vocabulary of {{ mb_strtolower($kind->label(['en', 'und'])) }}</a></p>@endif
+            @if($canCreate)<p><a href="{{ route('vocabularies.create', ['kind' => $kind->notation]) }}">New vocabulary of {{ mb_strtolower($kind->label(\App\Support\Vocab::languages())) }}</a></p>@endif
         </section>
     @endforeach
 @endsection

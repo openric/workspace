@@ -9,7 +9,7 @@
         @if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif
         <label for="kind">What its concepts are</label>
         <select id="kind" name="kind" required style="font: inherit; padding: .5rem">
-            @foreach($kinds as $k)<option value="{{ $k->notation }}" @selected(old('kind', $kind) === $k->notation)>{{ $k->label(['en', 'und']) }}</option>@endforeach
+            @foreach($kinds as $k)<option value="{{ $k->notation }}" @selected(old('kind', $kind) === $k->notation)>{{ $k->label(\App\Support\Vocab::languages()) }}</option>@endforeach
         </select>
         @include('vocabularies._fields', ['vocabulary' => null])
         <button type="submit">Create vocabulary</button>

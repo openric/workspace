@@ -7,7 +7,7 @@
     <p>The arrangement (rico:hasOrHadPart), in order. Move units, or change their order, from each unit's page.</p>
     @php
         $line = fn ($u) => (($u->id === $record->id) ? '<strong aria-current="page">' : '').'<a href="'.e(route('records.show', $u)).'">'.e($u->described('title', [app()->getLocale(), 'en'])).'</a>'.(($u->id === $record->id) ? '</strong>' : '')
-            .' <small>'.e(collect([$u->level->label(['en', 'und']), $u->identifier])->filter()->join(', ')).'</small>';
+            .' <small>'.e(collect([$u->level->label(\App\Support\Vocab::languages()), $u->identifier])->filter()->join(', ')).'</small>';
         $branch = function ($parentId) use (&$branch, $byParent, $line) {
             $out = '';
             foreach ($byParent[$parentId] ?? [] as $unit) {

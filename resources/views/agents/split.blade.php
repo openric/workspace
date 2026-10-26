@@ -11,11 +11,11 @@
         @csrf
         <label for="type">Type of entity of the new record</label>
         <select id="type" name="type" style="font: inherit; padding: .5rem">
-            @foreach($types as $t)<option value="{{ $t->notation }}" @selected($agent->typeNotation() === $t->notation)>{{ $t->label(['en', 'und']) }}</option>@endforeach
+            @foreach($types as $t)<option value="{{ $t->notation }}" @selected($agent->typeNotation() === $t->notation)>{{ $t->label(\App\Support\Vocab::languages()) }}</option>@endforeach
         </select>
         <fieldset style="border: 0; padding: 0"><legend><strong>Names it takes</strong></legend>
             @foreach($agent->names as $n)
-                <label><input type="checkbox" name="names[]" value="{{ $n->id }}"> {{ $n->nameType->label(['en', 'und']) }}: <span lang="{{ $n->language }}">{{ $n->value }}</span></label>
+                <label><input type="checkbox" name="names[]" value="{{ $n->id }}"> {{ $n->nameType->label(\App\Support\Vocab::languages()) }}: <span lang="{{ $n->language }}">{{ $n->value }}</span></label>
             @endforeach
         </fieldset>
         <fieldset style="border: 0; padding: 0"><legend><strong>Relations it takes</strong></legend>

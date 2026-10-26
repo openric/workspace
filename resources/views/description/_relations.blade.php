@@ -16,13 +16,13 @@
     @php($from = $relation->datedAs('beginning')?->normalized_value)
     @php($to = $relation->datedAs('end')?->normalized_value)
     @php($summary = ucfirst($relation->phrase()).' '.\App\Relations\EntityKinds::label($relation->other)
-        .($relation->role ? ', as '.$relation->role->label(['en', 'und']) : '')
+        .($relation->role ? ', as '.$relation->role->label(\App\Support\Vocab::languages()) : '')
         .(($from || $to) ? ', '.($from ?? '?').' to '.($to ?? '?') : '')
         .' ('.$standingLabels[$relation->standing()].')')
     <details>
         <summary>{{ $summary }} @include('description._ric', ['term' => $relation->ricTerm()])@if($canUpdate) <small lang="en">- assert, edit or remove</small>@endif</summary>
         <p><a href="{{ \App\Relations\EntityKinds::route($relation->other) }}">{{ \App\Relations\EntityKinds::label($relation->other) }}</a>.
-           {{ collect([$relation->relationType->label(['en', 'und']), $relation->state?->label(['en', 'und']), $relation->certainty ? mb_strtolower($relation->certainty->label(['en', 'und'])) : null])->filter()->join(', ') }}.
+           {{ collect([$relation->relationType->label(\App\Support\Vocab::languages()), $relation->state?->label(\App\Support\Vocab::languages()), $relation->certainty ? mb_strtolower($relation->certainty->label(\App\Support\Vocab::languages())) : null])->filter()->join(', ') }}.
            @if($relation->description)<br><span lang="{{ $relation->language }}">{{ $relation->description }}</span>@endif
            @if($relation->source_of_information)<br>Source: <span lang="{{ $relation->language }}">{{ $relation->source_of_information }}</span>@endif
            <br><strong>Persistent IRI:</strong> <code>{{ $relation->iri }}</code></p>
@@ -31,7 +31,7 @@
         @php($current = $relation->currentAssertions()->pluck('id')->all())
         <ul>
         @foreach($relation->assertions as $assertion)
-            <li>{{ $assertion->status->label(['en', 'und']) }}: {{ $assertion->asserter() }} ({{ mb_strtolower($assertion->origin->label(['en', 'und'])) }}), {{ $assertion->asserted_at->format('Y-m-d H:i') }}
+            <li>{{ $assertion->status->label(\App\Support\Vocab::languages()) }}: {{ $assertion->asserter() }} ({{ mb_strtolower($assertion->origin->label(\App\Support\Vocab::languages())) }}), {{ $assertion->asserted_at->format('Y-m-d H:i') }}
                 @if($assertion->basis), on the basis: <span lang="{{ $assertion->basis_language }}">{{ $assertion->basis }}</span>@endif
                 @if($assertion->reviewer); reviewed by {{ $assertion->reviewer->name }}, {{ $assertion->reviewed_at->format('Y-m-d') }}@endif
                 @unless(in_array($assertion->id, $current, true)); superseded @endunless

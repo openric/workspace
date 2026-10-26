@@ -8,7 +8,7 @@
     @include('clipboard._button', ['type' => 'agents', 'id' => $agent->id])
     @if(session('status'))<p role="status">{{ session('status') }}</p>@endif
     @if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif
-    <p><strong>Type of entity:</strong> {{ $agent->agentType->label(['en', 'und']) }} @include('description._ric', ['term' => \App\Relations\EntityKinds::ricClass($agent)])
+    <p><strong>Type of entity:</strong> {{ $agent->agentType->label(\App\Support\Vocab::languages()) }} @include('description._ric', ['term' => \App\Relations\EntityKinds::ricClass($agent)])
         @if($agent->identifier)<br><strong>Identifier:</strong> {{ $agent->identifier }}@endif
         <br><strong>Persistent IRI:</strong> <code>{{ $agent->iri }}</code>
         @if($agent->isEmbargoed())<br><strong>Embargoed until {{ $agent->embargo_until->format('Y-m-d') }}:</strong> only those who may update authority records see it.@endif
@@ -77,6 +77,6 @@
     <h2>Control (5.4)</h2>
     <p>Description identifier: {{ $agent->description_identifier ?? 'none' }}.
         Maintained by: {{ $agent->maintainer ? $agent->maintainer->described('authorised-name', ['en']) : 'not set' }}.
-        Status: {{ $agent->descriptionStatus?->label(['en', 'und']) ?? 'not set' }}.
-        Level of detail: {{ $agent->descriptionDetail?->label(['en', 'und']) ?? 'not set' }}.</p>
+        Status: {{ $agent->descriptionStatus?->label(\App\Support\Vocab::languages()) ?? 'not set' }}.
+        Level of detail: {{ $agent->descriptionDetail?->label(\App\Support\Vocab::languages()) ?? 'not set' }}.</p>
 @endsection

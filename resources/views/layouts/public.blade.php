@@ -1,6 +1,6 @@
 {{-- OpenRiC Workspace - the public catalogue's page layout (WS-009). Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems. SPDX-License-Identifier: AGPL-3.0-or-later --}}
 <!doctype html>
-<html lang="en">
+<html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -30,25 +30,26 @@
     @hasSection('head')@yield('head')@endif
 </head>
 <body>
-<a class="skip" href="#content">Skip to the content</a>
+<a class="skip" href="#content">{{ __('Skip to the content') }}</a>
 <header>
     <a href="{{ route('discover.home') }}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: .75rem">
         @if($institution->logo_path)<img src="{{ route('branding.logo') }}?v={{ md5($institution->logo_path) }}" alt="" style="max-height: 48px; max-width: 160px">@endif
         <strong>{{ $institution->headerTitle() }}</strong>
     </a>
     <form method="get" action="{{ route('discover.home') }}" role="search" style="display: flex; gap: .5rem; align-items: center">
-        <label for="site-q" style="margin: 0; position: absolute; left: -999px">Search the catalogue</label>
-        <input id="site-q" name="q" value="{{ request('q') }}" placeholder="Search the catalogue" style="max-width: 16rem">
-        <button type="submit" style="margin: 0">Search</button>
-        <a href="{{ route('clipboard.index') }}" style="white-space: nowrap">Clipboard ({{ app(\App\Clipboard\ClipboardService::class)->count() }})</a>
-        @auth<a href="{{ route('home') }}">Workspace</a>@else<a href="{{ route('sign-in') }}" style="white-space: nowrap">Sign in</a>@endauth
+        <label for="site-q" style="margin: 0; position: absolute; left: -999px">{{ __('Search the catalogue') }}</label>
+        <input id="site-q" name="q" value="{{ request('q') }}" placeholder="{{ __('Search the catalogue') }}" style="max-width: 16rem">
+        <button type="submit" style="margin: 0">{{ __('Search') }}</button>
+        <a href="{{ route('clipboard.index') }}" style="white-space: nowrap">{{ __('Clipboard') }} ({{ app(\App\Clipboard\ClipboardService::class)->count() }})</a>
+        @auth<a href="{{ route('home') }}">Workspace</a>@else<a href="{{ route('sign-in') }}" style="white-space: nowrap">{{ __('Sign in') }}</a>@endauth
     </form>
+    @include('layouts._language')
 </header>
 <main id="content">
     @yield('content')
 </main>
 <footer style="max-width: 60rem; margin: 2rem auto; padding: 1rem; border-top: 1px solid var(--line)" class="meta">
-    Described in RiC (Records in Contexts). The data is open through the <a href="{{ route('api.service') }}">OpenRiC API</a> and <a href="{{ route('api.oai') }}?verb=Identify">OAI-PMH</a>.
+    {!! __('Described in RiC (Records in Contexts). The data is open through the :api and :oai.', ['api' => '<a href="'.e(route('api.service')).'">'.e(__('OpenRiC API')).'</a>', 'oai' => '<a href="'.e(route('api.oai')).'?verb=Identify">OAI-PMH</a>']) !!}
 </footer>
 </body>
 </html>

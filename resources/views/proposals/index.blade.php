@@ -25,7 +25,7 @@
             @php($k = $p->kind->notation)
             <section id="proposal-{{ $p->id }}" style="border: 1px solid var(--line); padding: 0 1rem; margin-bottom: 1rem">
                 <h3 style="font-size: 1.05rem">
-                    @php($heading = $p->kind->label(['en', 'und']).($k === 'value' ? ': '.$p->element->label(['en', 'und']) : '').($k === 'agent' && $p->agentType ? ' ('.mb_strtolower($p->agentType->label(['en', 'und'])).')' : ''))
+                    @php($heading = $p->kind->label(\App\Support\Vocab::languages()).($k === 'value' ? ': '.$p->element->label(\App\Support\Vocab::languages()) : '').($k === 'agent' && $p->agentType ? ' ('.mb_strtolower($p->agentType->label(\App\Support\Vocab::languages())).')' : ''))
                     {{ $heading }}
                     for <a href="{{ route('records.show', $p->record) }}">{{ \App\Relations\EntityKinds::label($p->record) }}</a>
                     <small>(<a href="{{ route('proposals.index', ['record' => $p->record_resource_id, 'status' => $status]) }}">all for this record</a>)</small>
@@ -65,7 +65,7 @@
                                 @endif
                                 <label><input type="radio" name="link" value="new" @checked(! $p->linked_id)> a new {{ $k === 'agent' ? 'authority record' : 'place' }} of this name</label>
                                 @if($k === 'agent')
-                                    <select name="agent_type" aria-label="Type of the new authority record">@foreach($agentTypes as $type)<option value="{{ $type->notation }}" @selected($type->id === $p->agent_type_id)>{{ $type->label(['en', 'und']) }}</option>@endforeach</select>
+                                    <select name="agent_type" aria-label="Type of the new authority record">@foreach($agentTypes as $type)<option value="{{ $type->notation }}" @selected($type->id === $p->agent_type_id)>{{ $type->label(\App\Support\Vocab::languages()) }}</option>@endforeach</select>
                                 @endif
                             </fieldset>
                         @endif
@@ -79,7 +79,7 @@
                     </form>
                     <p></p>
                 @else
-                    <p>{{ $p->status->label(['en', 'und']) }} by {{ $p->reviewedBy?->name }}, {{ $p->reviewed_at?->format('Y-m-d H:i') }}{{ $p->review_note ? ': '.$p->review_note : '' }}</p>
+                    <p>{{ $p->status->label(\App\Support\Vocab::languages()) }} by {{ $p->reviewedBy?->name }}, {{ $p->reviewed_at?->format('Y-m-d H:i') }}{{ $p->review_note ? ': '.$p->review_note : '' }}</p>
                 @endif
             </section>
         @empty
@@ -108,7 +108,7 @@
                     </form>
                     <p></p>
                 @else
-                    <p>{{ $a->status->label(['en', 'und']) }} by {{ $a->reviewer?->name }}, {{ $a->reviewed_at?->format('Y-m-d H:i') }}</p>
+                    <p>{{ $a->status->label(\App\Support\Vocab::languages()) }} by {{ $a->reviewer?->name }}, {{ $a->reviewed_at?->format('Y-m-d H:i') }}</p>
                 @endif
             </section>
         @empty

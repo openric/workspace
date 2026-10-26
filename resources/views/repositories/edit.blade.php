@@ -21,12 +21,12 @@
         <label for="description_status">Status (5.6.4)</label> @include('description._ric', ['term' => null])
         <select id="description_status" name="description_status" style="font: inherit; padding: .5rem">
             <option value="">Not set</option>
-            @foreach($statuses as $status)<option value="{{ $status->iri }}" @selected(old('description_status', $repository->descriptionStatus?->iri) === $status->iri)>{{ $status->label(['en', 'und']) }}</option>@endforeach
+            @foreach($statuses as $status)<option value="{{ $status->iri }}" @selected(old('description_status', $repository->descriptionStatus?->iri) === $status->iri)>{{ $status->label(\App\Support\Vocab::languages()) }}</option>@endforeach
         </select>
         <label for="description_detail">Level of detail (5.6.5)</label> @include('description._ric', ['term' => null])
         <select id="description_detail" name="description_detail" style="font: inherit; padding: .5rem">
             <option value="">Not set</option>
-            @foreach($details as $detail)<option value="{{ $detail->iri }}" @selected(old('description_detail', $repository->descriptionDetail?->iri) === $detail->iri)>{{ $detail->label(['en', 'und']) }}</option>@endforeach
+            @foreach($details as $detail)<option value="{{ $detail->iri }}" @selected(old('description_detail', $repository->descriptionDetail?->iri) === $detail->iri)>{{ $detail->label(\App\Support\Vocab::languages()) }}</option>@endforeach
         </select>
         <button type="submit">Save</button>
     </form>

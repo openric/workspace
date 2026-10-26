@@ -4,7 +4,7 @@
 <label for="{{ $prefix }}-role">Role of the agent (optional)</label> @include('description._ric', ['term' => ($type ?? null) === 'creation' ? 'rico:creationWithRole' : null])
 <select id="{{ $prefix }}-role" name="role" style="font: inherit; padding: .5rem">
     <option value="">None</option>
-    @foreach($choices['roles'] as $concept)<option value="{{ $concept->notation }}" @selected($relation?->role_id === $concept->id)>{{ $concept->label(['en', 'und']) }}</option>@endforeach
+    @foreach($choices['roles'] as $concept)<option value="{{ $concept->notation }}" @selected($relation?->role_id === $concept->id)>{{ $concept->label(\App\Support\Vocab::languages()) }}</option>@endforeach
 </select>
 @endif
 <label for="{{ $prefix }}-from">From (EDTF, optional)</label> @include('description._ric', ['term' => 'rico:hasBeginningDate'])
@@ -15,12 +15,12 @@
 <label for="{{ $prefix }}-state">State</label> @include('description._ric', ['term' => 'rico:relationState'])
 <select id="{{ $prefix }}-state" name="state" style="font: inherit; padding: .5rem">
     <option value="">Not given</option>
-    @foreach($choices['states'] as $concept)<option value="{{ $concept->notation }}" @selected($relation?->state_id === $concept->id)>{{ $concept->label(['en', 'und']) }}</option>@endforeach
+    @foreach($choices['states'] as $concept)<option value="{{ $concept->notation }}" @selected($relation?->state_id === $concept->id)>{{ $concept->label(\App\Support\Vocab::languages()) }}</option>@endforeach
 </select>
 <label for="{{ $prefix }}-certainty">Certainty</label> @include('description._ric', ['term' => 'rico:relationCertainty'])
 <select id="{{ $prefix }}-certainty" name="certainty" style="font: inherit; padding: .5rem">
     <option value="">Not given</option>
-    @foreach($choices['certainties'] as $concept)<option value="{{ $concept->notation }}" @selected($relation?->certainty_id === $concept->id)>{{ $concept->label(['en', 'und']) }}</option>@endforeach
+    @foreach($choices['certainties'] as $concept)<option value="{{ $concept->notation }}" @selected($relation?->certainty_id === $concept->id)>{{ $concept->label(\App\Support\Vocab::languages()) }}</option>@endforeach
 </select>
 <label for="{{ $prefix }}-description">Description of the relation (optional)</label> @include('description._ric', ['term' => 'rico:generalDescription'])
 <textarea id="{{ $prefix }}-description" name="description" rows="2" style="width: 100%; font: inherit; box-sizing: border-box">{{ $relation?->description }}</textarea>

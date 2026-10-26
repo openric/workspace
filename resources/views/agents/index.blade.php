@@ -14,12 +14,12 @@
         <div><label for="type" style="margin-top: 0">Type of entity</label>
             <select id="type" name="type" style="font: inherit; padding: .5rem">
                 <option value="">Any</option>
-                @foreach($types as $t)<option value="{{ $t->notation }}" @selected($type === $t->notation)>{{ $t->label(['en', 'und']) }}</option>@endforeach
+                @foreach($types as $t)<option value="{{ $t->notation }}" @selected($type === $t->notation)>{{ $t->label(\App\Support\Vocab::languages()) }}</option>@endforeach
             </select></div>
         <div><label for="status" style="margin-top: 0">Status</label>
             <select id="status" name="status" style="font: inherit; padding: .5rem">
                 <option value="">Any</option>
-                @foreach($statuses as $s)<option value="{{ $s->id }}" @selected($status === $s->id)>{{ $s->label(['en', 'und']) }}</option>@endforeach
+                @foreach($statuses as $s)<option value="{{ $s->id }}" @selected($status === $s->id)>{{ $s->label(\App\Support\Vocab::languages()) }}</option>@endforeach
             </select></div>
         <div><label for="sort" style="margin-top: 0">Sort by</label>
             <select id="sort" name="sort" style="font: inherit; padding: .5rem">
@@ -29,7 +29,7 @@
         <button type="submit" style="margin-top: 0">Show</button>
     </form>
     @forelse($agents as $agent)
-        <p><a href="{{ route('agents.show', $agent) }}">{{ $agent->described('agent-authorised-name', [app()->getLocale(), 'en']) }}</a>{{ collect([$agent->agentType->label(['en', 'und']), $agent->identifier, $agent->descriptionStatus?->label(['en', 'und']), $agent->isEmbargoed() ? 'embargoed until '.$agent->embargo_until->format('Y-m-d') : null])->filter()->map(fn ($s) => ', '.$s)->join('') }}
+        <p><a href="{{ route('agents.show', $agent) }}">{{ $agent->described('agent-authorised-name', [app()->getLocale(), 'en']) }}</a>{{ collect([$agent->agentType->label(\App\Support\Vocab::languages()), $agent->identifier, $agent->descriptionStatus?->label(\App\Support\Vocab::languages()), $agent->isEmbargoed() ? 'embargoed until '.$agent->embargo_until->format('Y-m-d') : null])->filter()->map(fn ($s) => ', '.$s)->join('') }}
             @include('description._row-actions', ['entity' => $agent])</p>
     @empty
         <p>{{ $query !== '' || $type !== '' || $status !== '' ? 'No authority record matches.' : 'No authority records yet.' }}</p>

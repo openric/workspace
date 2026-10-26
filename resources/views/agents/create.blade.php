@@ -9,7 +9,7 @@
         @if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif
         <label for="type">Type of entity (ISAAR(CPF) 5.1.1)</label> <small>(each choice names its RiC-O class)</small>
         <select id="type" name="type" required style="font: inherit; padding: .5rem">
-            @foreach($types as $t)<option value="{{ $t->notation }}" @selected(old('type', 'person') === $t->notation)>{{ $t->label(['en', 'und']) }} ({{ $t->ricTerm() }})</option>@endforeach
+            @foreach($types as $t)<option value="{{ $t->notation }}" @selected(old('type', 'person') === $t->notation)>{{ $t->label(\App\Support\Vocab::languages()) }} ({{ $t->ricTerm() }})</option>@endforeach
         </select>
         <label for="name">Authorised form of name (5.1.2)</label> @include('description._ric', ['term' => 'rico:AgentName'])
         <input id="name" name="name" required maxlength="1024" value="{{ old('name') }}">

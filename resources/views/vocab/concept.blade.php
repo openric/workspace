@@ -1,8 +1,8 @@
 {{-- OpenRiC Workspace - a concept page. Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems. SPDX-License-Identifier: AGPL-3.0-or-later --}}
 @extends('layouts.app')
-@section('title', $concept->label(['en', 'und']) ?? $concept->notation)
+@section('title', $concept->label(\App\Support\Vocab::languages()) ?? $concept->notation)
 @section('content')
-    <h1>{{ $concept->label(['en', 'und']) ?? $concept->notation }}</h1>
+    <h1>{{ $concept->label(\App\Support\Vocab::languages()) ?? $concept->notation }}</h1>
     <p><strong>Concept IRI:</strong> <code>{{ $concept->iri }}</code><br>
        <strong>In scheme:</strong> <a href="{{ $concept->vocabulary->iri }}">{{ $concept->vocabulary->title }}</a>
        @if($concept->broader)<br><strong>Broader:</strong> <a href="{{ $concept->broader->iri }}">{{ $concept->broader->notation }}</a>@endif</p>

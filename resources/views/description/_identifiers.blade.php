@@ -3,7 +3,7 @@
 @php($identifierTypes = \App\Models\Concept::choices(\App\Support\Vocab::IDENTIFIER_TYPES)->get())
 <h2>Identifiers @include('description._ric', ['term' => 'rico:Identifier'])</h2>
 @forelse($subject->identifiers as $identifier)
-    @php($summary = $identifier->identifierType->label(['en', 'und']).': '.$identifier->value)
+    @php($summary = $identifier->identifierType->label(\App\Support\Vocab::languages()).': '.$identifier->value)
     @unless($canUpdate)
         <p>{{ $summary }}</p>
         @continue

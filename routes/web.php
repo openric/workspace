@@ -40,8 +40,11 @@ use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\StorageController;
 use App\Http\Controllers\VocabularyController;
 use App\Http\Middleware\ServeDiscovery;
+use App\Http\Middleware\SetLocale;
 use App\Relations\EntityKinds;
 use App\Support\Vocab;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Route;
 
 // Public: the Workspace's own vocabulary IRIs (VocabularyController). The one
@@ -84,6 +87,20 @@ Route::prefix('clipboard')->name('clipboard.')->middleware('throttle:120,1')->gr
 });
 
 // The front page: the workspace for someone signed in, the public catalogue for everyone else.
+// Heratio's /set-locale (heratio-dev 4131171e4): choose the interface language, kept in the session and a
+// year-long cookie, and for a signed-in account as its own choice; back to the page, on this site only.
+Route::post('/language', function (Request $request) {
+    $language = (string) $request->input('lang', '');
+    if (SetLocale::supported($language)) {
+        session(['locale' => $language]);
+        Cookie::queue('locale', $language, 60 * 24 * 365, '/', null, true, false, false, 'lax');
+        $request->user()?->update(['interface_language' => $language]);
+    }
+    $back = (string) $request->input('redirect_to', '/');
+
+    return redirect(str_starts_with($back, '/') && ! str_starts_with($back, '//') ? $back : '/');
+})->middleware('throttle:60,1')->name('language');
+
 Route::get('/', fn () => auth()->check() ? view('home') : redirect()->route('discover.home'))->middleware(['web', 'active'])->name('home');
 
 // The public catalogue (WS-009): no sign-in; DiscoverController shows only what the Public role may read and is published.

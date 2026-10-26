@@ -115,7 +115,15 @@ Standing rules for every phase: vocabularies, never enums; every field names its
 
 ### Phase details
 
-**1. Interface in more than one language (WS-005).** The interface is English only; WS-005 asks for interface localisation beside the multilingual values the Workspace already keeps. Every screen's text moves to Laravel language files, with a language switch for each account and for the public catalogue. English and Afrikaans first. Heratio's `lang/*.json` holds translations for many languages; each file's origin is checked first, because strings taken from AtoM's XLIFF files carry Artefactual's copyright and must keep its notice. Done when a reviewer completes the V0.1 scenario in Afrikaans.
+**1. Interface in more than one language (WS-005).** The interface is English only; WS-005 asks for interface localisation beside the multilingual values the Workspace already keeps. Every screen's text moves to Laravel language files, with a language switch for each account and for the public catalogue. English and Afrikaans first. Heratio's `lang/*.json` holds translations for many languages; each file's origin is checked first, because strings taken from AtoM's XLIFF files carry Artefactual's copyright and must keep its notice. Done when a reviewer completes the V0.1 scenario in Afrikaans. Progress:
+- **v0.0.50**: the language machinery and the public side.
+  - Copied from Heratio: the language choice, in order the URL, session, cookie, the account's choice, then the browser; the switch at `/language`; Content-Language on every page.
+  - In both languages: the layouts, the menus, the public catalogue, sign-in, registration and the home page.
+  - Vocabulary labels and relation phrases now follow the reader's language.
+  - `lang/af.json` has 199 strings, 32 of them from Heratio; attribution is in `lang/README.md`.
+- **Still to do**: the staff screens, the messages written in code, Laravel's validation messages, and Afrikaans labels for the bundled vocabularies.
+
+Reuse was lower than hoped: only 32 of Heratio's Afrikaans strings carried over. Heratio's strings are keyed by its own English, which is mostly AtoM's, and the Workspace's screens were written in different English.
 
 **2. Rights statements and rights holders (WS-007).** WS-007 asks for rights on each file; today an instantiation only has free text for its rights. Copy `ahg-extended-rights`: a rights statement per instantiation from RightsStatements.org and the Creative Commons licences, as bundled vocabularies, with its basis (copyright, licence, statute, donor), its holder and its dates. The rights holder is an agent, related by a typed relation, from `ahg-rights-holder-manage`. Rights show in the public catalogue and in the files API, and go out in exports. The RiC term is checked first (`rico:Rule`, `rico:hasOrHadLegalStatus`, or a spec issue). Done when every delivered file carries its statement.
 

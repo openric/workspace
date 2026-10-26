@@ -11,7 +11,7 @@
             @foreach($custody as $relation)
                 @php($from = $relation->datedAs('beginning')?->normalized_value)
                 @php($to = $relation->datedAs('end')?->normalized_value)
-                <li>{{ ($from || $to) ? ($from ?? '?').' to '.($to ?? '?').': ' : 'Undated: ' }}{{ ucfirst($relation->phrase()) }} {{ \App\Relations\EntityKinds::label($relation->other) }}@if($relation->state), {{ mb_strtolower($relation->state->label(['en', 'und'])) }}@endif</li>
+                <li>{{ ($from || $to) ? ($from ?? '?').' to '.($to ?? '?').': ' : 'Undated: ' }}{{ ucfirst($relation->phrase()) }} {{ \App\Relations\EntityKinds::label($relation->other) }}@if($relation->state), {{ mb_strtolower($relation->state->label(\App\Support\Vocab::languages())) }}@endif</li>
             @endforeach
             <li>Now held by {{ $record->repository->described('authorised-name', ['en']) }}.</li>
         </ol>

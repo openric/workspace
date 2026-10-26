@@ -12,7 +12,7 @@
             @if($concept->replacedBy) Replaced by <a href="{{ route('concepts.show', $concept->replacedBy) }}">{{ $concept->replacedBy->anyLabel(['en']) }}</a>.@endif</p>
     @endif
     <p><strong>Persistent IRI:</strong> <code>{{ $concept->iri }}</code>
-        <br><strong>Kind:</strong> {{ $vocabulary->kind->label(['en', 'und']) }}@if($concept->notation !== null)<br><strong>Code:</strong> {{ $concept->notation }}@endif</p>
+        <br><strong>Kind:</strong> {{ $vocabulary->kind->label(\App\Support\Vocab::languages()) }}@if($concept->notation !== null)<br><strong>Code:</strong> {{ $concept->notation }}@endif</p>
     @php($canUpdate = auth()->user()->may('update', 'vocabulary', $concept))
     @php($canDelete = auth()->user()->may('delete', 'vocabulary', $concept))
     @if($canUpdate)<p><a href="{{ route('concepts.edit', $concept) }}" style="display: inline-block; padding: .5rem 1rem; background: var(--accent); color: var(--bg); text-decoration: none">Edit</a>
@@ -59,7 +59,7 @@
 
     <h2>Matches in other vocabularies</h2>
     @forelse($concept->matches as $match)
-        <p>{{ $match->matchType->label(['en', 'und']) }}: <a href="{{ $match->target_iri }}" rel="noopener noreferrer">{{ $match->target_label ?: $match->target_iri }}</a>@if($match->target_scheme) ({{ $match->target_scheme }})@endif
+        <p>{{ $match->matchType->label(\App\Support\Vocab::languages()) }}: <a href="{{ $match->target_iri }}" rel="noopener noreferrer">{{ $match->target_label ?: $match->target_iri }}</a>@if($match->target_scheme) ({{ $match->target_scheme }})@endif
             @if($canUpdate)<form method="post" action="{{ route('concepts.matches.destroy', [$concept, $match]) }}" style="display: inline">@csrf<button type="submit">Remove</button></form>@endif</p>
     @empty
         <p>None.</p>
@@ -71,7 +71,7 @@
                 @csrf
                 <label for="m-type">How it matches</label>
                 <select id="m-type" name="type" style="font: inherit; padding: .5rem">
-                    @foreach($matchTypes as $type)<option value="{{ $type->notation }}">{{ $type->label(['en', 'und']) }}</option>@endforeach
+                    @foreach($matchTypes as $type)<option value="{{ $type->notation }}">{{ $type->label(\App\Support\Vocab::languages()) }}</option>@endforeach
                 </select>
                 <label for="m-iri">IRI of the concept elsewhere (for example in LCSH, AAT or Wikidata)</label>
                 <input id="m-iri" name="iri" type="url" required maxlength="2048" placeholder="https://id.loc.gov/authorities/subjects/sh85007034">

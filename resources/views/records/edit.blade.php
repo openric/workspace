@@ -15,7 +15,7 @@
         <input id="identifier" name="identifier" value="{{ old('identifier', $record->identifier) }}">
         <label for="level">Level of description (3.1.4)</label> <small>(each choice names its RiC-O class)</small>
         <select id="level" name="level" style="font: inherit; padding: .5rem">
-            @foreach($levels as $level)<option value="{{ $level->iri }}" @selected(old('level', $record->level->iri) === $level->iri)>{{ $level->label(['en', 'und']) }} ({{ $level->ricTerm() ?? 'rico:RecordResource' }})</option>@endforeach
+            @foreach($levels as $level)<option value="{{ $level->iri }}" @selected(old('level', $record->level->iri) === $level->iri)>{{ $level->label(\App\Support\Vocab::languages()) }} ({{ $level->ricTerm() ?? 'rico:RecordResource' }})</option>@endforeach
         </select>
         @include('description._fields', ['subject' => $record, 'standard' => \App\Description\Elements::ISAD_G, 'language' => $language])
         @if($mayUpdate)
@@ -26,12 +26,12 @@
             <label for="description_status">Status</label> @include('description._ric', ['term' => null])
             <select id="description_status" name="description_status" style="font: inherit; padding: .5rem">
                 <option value="">Not set</option>
-                @foreach($statuses as $status)<option value="{{ $status->iri }}" @selected(old('description_status', $record->descriptionStatus?->iri) === $status->iri)>{{ $status->label(['en', 'und']) }}</option>@endforeach
+                @foreach($statuses as $status)<option value="{{ $status->iri }}" @selected(old('description_status', $record->descriptionStatus?->iri) === $status->iri)>{{ $status->label(\App\Support\Vocab::languages()) }}</option>@endforeach
             </select>
             <label for="description_detail">Level of detail</label> @include('description._ric', ['term' => null])
             <select id="description_detail" name="description_detail" style="font: inherit; padding: .5rem">
                 <option value="">Not set</option>
-                @foreach($details as $detail)<option value="{{ $detail->iri }}" @selected(old('description_detail', $record->descriptionDetail?->iri) === $detail->iri)>{{ $detail->label(['en', 'und']) }}</option>@endforeach
+                @foreach($details as $detail)<option value="{{ $detail->iri }}" @selected(old('description_detail', $record->descriptionDetail?->iri) === $detail->iri)>{{ $detail->label(\App\Support\Vocab::languages()) }}</option>@endforeach
             </select>
         </fieldset>
         @endif

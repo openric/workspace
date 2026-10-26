@@ -15,7 +15,7 @@
                 <tr>
                     <td style="padding: .3rem .5rem; vertical-align: top">{{ $unit->referenceCode() }}</td>
                     <td style="padding: .3rem .5rem; padding-left: {{ .5 + $depth }}rem; vertical-align: top"><a href="{{ route('records.show', $unit) }}">{{ $unit->described('title', [app()->getLocale(), 'en']) }}</a></td>
-                    <td style="padding: .3rem .5rem; vertical-align: top">{{ $unit->level->label(['en', 'und']) }}</td>
+                    <td style="padding: .3rem .5rem; vertical-align: top">{{ $unit->level->label(\App\Support\Vocab::languages()) }}</td>
                     <td style="padding: .3rem .5rem; vertical-align: top">{{ $creation?->display() ?? $unit->described('dates-expressed', ['en']) }}</td>
                     <td style="padding: .3rem .5rem; vertical-align: top">{{ $unit->described('extent', ['en']) }}</td>
                 </tr>

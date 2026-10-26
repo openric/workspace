@@ -18,11 +18,12 @@
     @auth
         <form method="post" action="{{ route('sign-out') }}">
             @csrf
-            <a href="{{ route('clipboard.index') }}">Clipboard ({{ app(\App\Clipboard\ClipboardService::class)->count() }})</a>
+            <a href="{{ route('clipboard.index') }}">{{ __('Clipboard') }} ({{ app(\App\Clipboard\ClipboardService::class)->count() }})</a>
             <a href="{{ route('account.profile') }}">{{ auth()->user()->name }}</a>
-            <button type="submit">Sign out</button>
+            <button type="submit">{{ __('Sign out') }}</button>
         </form>
     @endauth
+    @include('layouts._language')
 </header>
 @auth
     @php
@@ -34,26 +35,26 @@
         // As AtoM: what is described, then the working tools (its Manage), then administration (its Admin).
         $nav = array_filter(array_map(fn ($items) => array_filter($items, fn ($item) => $item[1]), [
             'Describe' => [
-                'records.index' => ['Archival descriptions', $user->mayAnywhere('read', 'description'), 'records.*|!records.export-all'],
-                'agents.index' => ['Authority records', $user->mayAnywhere('read', 'authority'), 'agents.*|!agents.duplicates'],
-                'activities.index' => ['Activities', $user->mayAnywhere('read', 'authority'), 'activities.*'],
-                'places.index' => ['Places', true, 'places.*'],
-                'repositories.index' => ['Repositories', $user->mayAnywhere('read', 'repository'), 'repositories.*'],
+                'records.index' => [__('Archival descriptions'), $user->mayAnywhere('read', 'description'), 'records.*|!records.export-all'],
+                'agents.index' => [__('Authority records'), $user->mayAnywhere('read', 'authority'), 'agents.*|!agents.duplicates'],
+                'activities.index' => [__('Activities'), $user->mayAnywhere('read', 'authority'), 'activities.*'],
+                'places.index' => [__('Places'), true, 'places.*'],
+                'repositories.index' => [__('Repositories'), $user->mayAnywhere('read', 'repository'), 'repositories.*'],
             ],
             'Manage' => [
-                'vocabularies.index' => ['Vocabularies', true, 'vocabularies.*'],
-                'containers.index' => ['Containers', $user->mayAnywhere('read', 'storage'), 'containers.*'],
-                'storage.places' => ['Storage places', $user->mayAnywhere('read', 'storage'), 'storage.*'],
-                'imports.index' => ['Imports', $mayImport, 'imports.*'],
-                'proposals.index' => ['Proposals to review', $user->mayAnywhere('review-proposals', 'description'), 'proposals.*'],
-                'records.export-all' => ['Export descriptions', $user->mayAnywhere('read', 'description'), 'records.export-all'],
-                'agents.duplicates' => ['Duplicate authority records', $user->may('update', 'authority'), 'agents.duplicates'],
+                'vocabularies.index' => [__('Vocabularies'), true, 'vocabularies.*'],
+                'containers.index' => [__('Containers'), $user->mayAnywhere('read', 'storage'), 'containers.*'],
+                'storage.places' => [__('Storage places'), $user->mayAnywhere('read', 'storage'), 'storage.*'],
+                'imports.index' => [__('Imports'), $mayImport, 'imports.*'],
+                'proposals.index' => [__('Proposals to review'), $user->mayAnywhere('review-proposals', 'description'), 'proposals.*'],
+                'records.export-all' => [__('Export descriptions'), $user->mayAnywhere('read', 'description'), 'records.export-all'],
+                'agents.duplicates' => [__('Duplicate authority records'), $user->may('update', 'authority'), 'agents.duplicates'],
             ],
             'Admin' => [
-                'accounts.index' => ['Accounts', $may('manage-accounts'), 'accounts.*'],
-                'roles.index' => ['Roles', $may('manage-roles'), 'roles.*'],
-                'audit' => ['Audit log', $may('view-audit-log'), 'audit'],
-                'settings.edit' => ['Settings', $may('manage-institution'), 'settings.*'],
+                'accounts.index' => [__('Accounts'), $may('manage-accounts'), 'accounts.*'],
+                'roles.index' => [__('Roles'), $may('manage-roles'), 'roles.*'],
+                'audit' => [__('Audit log'), $may('view-audit-log'), 'audit'],
+                'settings.edit' => [__('Settings'), $may('manage-institution'), 'settings.*'],
             ],
         ]));
         // An icon beside each main item, drawn here (24 by 24, stroked); the word stays, so the icon is hidden from screen readers.
@@ -75,11 +76,11 @@
     @endphp
     <nav aria-label="Main" class="main-nav">
         <ul>
-            <li><a href="{{ route('home') }}" @if(request()->routeIs('home')) aria-current="page" @endif>{{ $icon('Home') }}Home</a></li>
+            <li><a href="{{ route('home') }}" @if(request()->routeIs('home')) aria-current="page" @endif>{{ $icon('Home') }}{{ __('Home') }}</a></li>
             @foreach($nav as $group => $items)
                 @php($open = collect($items)->contains($current))
                 <li><details name="main-nav">
-                    <summary @class(['here' => $open])>{{ $icon($group) }}{{ $group }}</summary>
+                    <summary @class(['here' => $open])>{{ $icon($group) }}{{ __($group) }}</summary>
                     <ul>
                         @foreach($items as $name => $item)
                             <li><a href="{{ route($name) }}" @if($current($item)) aria-current="page" @endif>{{ $item[0] }}</a></li>
@@ -87,7 +88,7 @@
                     </ul>
                 </details></li>
             @endforeach
-            <li><a href="{{ route('discover.home') }}">{{ $icon('Public catalogue') }}Public catalogue</a></li>
+            <li><a href="{{ route('discover.home') }}">{{ $icon('Public catalogue') }}{{ __('Public catalogue') }}</a></li>
         </ul>
     </nav>
     <script>

@@ -12,7 +12,7 @@
         <input id="language" name="language" required value="{{ old('language', $language) }}">
         <label for="type">Type of entity (5.1.1)</label> <small>(each choice names its RiC-O class)</small>
         <select id="type" name="type" required style="font: inherit; padding: .5rem">
-            @foreach($types as $t)<option value="{{ $t->notation }}" @selected(old('type', $agent->typeNotation()) === $t->notation)>{{ $t->label(['en', 'und']) }} ({{ $t->ricTerm() }})</option>@endforeach
+            @foreach($types as $t)<option value="{{ $t->notation }}" @selected(old('type', $agent->typeNotation()) === $t->notation)>{{ $t->label(\App\Support\Vocab::languages()) }} ({{ $t->ricTerm() }})</option>@endforeach
         </select>
         <label for="identifier">Identifier (5.1.6)</label> @include('description._ric', ['term' => 'rico:Identifier'])
         <input id="identifier" name="identifier" maxlength="255" value="{{ old('identifier', $agent->identifier) }}">
@@ -29,12 +29,12 @@
             <label for="status">Status (5.4.4)</label> @include('description._ric', ['term' => null])
             <select id="status" name="status" style="font: inherit; padding: .5rem">
                 <option value="">Not set</option>
-                @foreach($statuses as $status)<option value="{{ $status->iri }}" @selected(old('status', $agent->descriptionStatus?->iri) === $status->iri)>{{ $status->label(['en', 'und']) }}</option>@endforeach
+                @foreach($statuses as $status)<option value="{{ $status->iri }}" @selected(old('status', $agent->descriptionStatus?->iri) === $status->iri)>{{ $status->label(\App\Support\Vocab::languages()) }}</option>@endforeach
             </select>
             <label for="detail">Level of detail (5.4.5)</label> @include('description._ric', ['term' => null])
             <select id="detail" name="detail" style="font: inherit; padding: .5rem">
                 <option value="">Not set</option>
-                @foreach($details as $detail)<option value="{{ $detail->iri }}" @selected(old('detail', $agent->descriptionDetail?->iri) === $detail->iri)>{{ $detail->label(['en', 'und']) }}</option>@endforeach
+                @foreach($details as $detail)<option value="{{ $detail->iri }}" @selected(old('detail', $agent->descriptionDetail?->iri) === $detail->iri)>{{ $detail->label(\App\Support\Vocab::languages()) }}</option>@endforeach
             </select>
             <label for="embargo_until">Embargoed until (for a living person, under POPIA or GDPR: until then only those who may update it see it)</label> @include('description._ric', ['term' => null])
             <input id="embargo_until" name="embargo_until" type="date" value="{{ old('embargo_until', $agent->embargo_until?->format('Y-m-d')) }}">

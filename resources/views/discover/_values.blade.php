@@ -7,7 +7,7 @@
             <summary><h2>{{ $area }}</h2></summary>
             <dl class="values">
                 @foreach($shown as [$element, $values])
-                    <dt>{{ $element->label(['en', 'und']) }} @include('description._ric', ['term' => $element])</dt>
+                    <dt>{{ $element->label(\App\Support\Vocab::languages()) }} @include('description._ric', ['term' => $element])</dt>
                     @foreach($values as $value)<dd lang="{{ $value->language }}">{!! nl2br(e($value->value)) !!}</dd>@endforeach
                 @endforeach
             </dl>

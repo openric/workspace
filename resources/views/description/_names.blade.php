@@ -8,7 +8,7 @@
 @forelse($names as $name)
     @php($from = $name->usedDate('used-from')?->normalized_value)
     @php($to = $name->usedDate('used-to')?->normalized_value)
-    @php($summary = $name->nameType->label(['en', 'und']).': '.$name->value.' ('.$name->language.', '.$name->state->label(['en', 'und']).(($from || $to) ? ', used '.($from ?? '?').' to '.($to ?? '?') : '').')')
+    @php($summary = $name->nameType->label(\App\Support\Vocab::languages()).': '.$name->value.' ('.$name->language.', '.$name->state->label(\App\Support\Vocab::languages()).(($from || $to) ? ', used '.($from ?? '?').' to '.($to ?? '?') : '').')')
     @unless($canUpdate)
         <p lang="{{ $name->language }}">{{ $summary }}</p>
         @continue

@@ -8,7 +8,7 @@
     <p>Records of the same type of entity where the authorised name of one equals a name of the other, ignoring case, spaces and punctuation. Merge a real duplicate; mark a pair that is not one, and it is not offered again.</p>
     @forelse($pairs as [$a, $b])
         <section style="border: 1px solid var(--line); padding: 0 1rem; margin-bottom: 1rem">
-            <h2 style="font-size: 1.1rem">{{ $a->agentType->label(['en', 'und']) }}</h2>
+            <h2 style="font-size: 1.1rem">{{ $a->agentType->label(\App\Support\Vocab::languages()) }}</h2>
             <div style="display: flex; gap: 2rem; flex-wrap: wrap">
                 @foreach([[$a, $b], [$b, $a]] as [$one, $other])
                     <div style="flex: 1; min-width: 14rem">

@@ -11,7 +11,7 @@
         @foreach($concepts as $concept)
             <tr>
                 <td><a href="{{ $concept->iri }}"><code>{{ $concept->notation }}</code></a>@if($concept->deprecated_at) (deprecated)@endif</td>
-                <td>{{ $concept->label(['en', 'und']) }}</td>
+                <td>{{ $concept->label(\App\Support\Vocab::languages()) }}</td>
                 <td>{{ $concept->labels->firstWhere('language', 'en')?->definition }}</td>
             </tr>
         @endforeach

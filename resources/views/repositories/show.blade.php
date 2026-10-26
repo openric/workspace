@@ -56,6 +56,6 @@
 
     <h2>Control</h2>
     <p>Description identifier: {{ $repository->description_identifier ?? 'none' }}.
-       Status: {{ $repository->descriptionStatus?->label(['en', 'und']) ?? 'not set' }}.
-       Level of detail: {{ $repository->descriptionDetail?->label(['en', 'und']) ?? 'not set' }}.</p>
+       Status: {{ $repository->descriptionStatus?->label(\App\Support\Vocab::languages()) ?? 'not set' }}.
+       Level of detail: {{ $repository->descriptionDetail?->label(\App\Support\Vocab::languages()) ?? 'not set' }}.</p>
 @endsection

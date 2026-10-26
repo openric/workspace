@@ -10,7 +10,7 @@
         <label for="relate">{{ $name }}</label>
         <select id="relate" name="relate" required style="font: inherit; padding: .5rem">
             @foreach($options as $option)
-                <option value="{{ $option['type'].'|'.$option['side'] }}" @selected($chosen && $chosen['type'].'|'.$chosen['side'] === $option['type'].'|'.$option['side'])>{{ $option['phrase'] }} ({{ \App\Models\Concept::where('iri', \App\Support\Vocab::BASE.'relation-type/'.$option['type'])->first()?->label(['en', 'und']) }})</option>
+                <option value="{{ $option['type'].'|'.$option['side'] }}" @selected($chosen && $chosen['type'].'|'.$chosen['side'] === $option['type'].'|'.$option['side'])>{{ $option['phrase'] }} ({{ \App\Models\Concept::where('iri', \App\Support\Vocab::BASE.'relation-type/'.$option['type'])->first()?->label(\App\Support\Vocab::languages()) }})</option>
             @endforeach
         </select>
         <label for="q">Find the other entity by name or identifier</label>

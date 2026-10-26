@@ -3,7 +3,7 @@
 @section('title', 'Permissions')
 @section('content')
     <p><a href="{{ $back }}">Back to {{ $holderName }}</a></p>
-    <h1>{{ $holderName }}: {{ $kind->label(['en', 'und']) }}</h1>
+    <h1>{{ $holderName }}: {{ $kind->label(\App\Support\Vocab::languages()) }}</h1>
     @if(session('status'))<p role="status">{{ session('status') }}</p>@endif
     @if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif
     <p>Grant allows the action, Deny refuses it, Inherit leaves it to the role above. A rule for one unit or repository comes before a rule for everything, and a denial wins over a grant at the same level.</p>
@@ -29,9 +29,9 @@
                         @php($current = $cell ? ($cell->is_grant ? 'grant' : 'deny') : 'inherit')
                         @php($name = 'cell['.$act->notation.'|'.$scope.']')
                         <tr>
-                            <th scope="row" style="font-weight: normal">{{ $act->label(['en', 'und']) }}<br><small>{{ $act->labels->firstWhere('language', 'en')?->definition }}</small></th>
+                            <th scope="row" style="font-weight: normal">{{ $act->label(\App\Support\Vocab::languages()) }}<br><small>{{ $act->labels->firstWhere('language', 'en')?->definition }}</small></th>
                             @foreach(['grant', 'deny', 'inherit'] as $choice)
-                                <td><input type="radio" name="{{ $name }}" value="{{ $choice }}" aria-label="{{ ucfirst($choice) }} {{ $act->label(['en', 'und']) }}, {{ $heading }}" style="width: auto" @checked($current === $choice)></td>
+                                <td><input type="radio" name="{{ $name }}" value="{{ $choice }}" aria-label="{{ ucfirst($choice) }} {{ $act->label(\App\Support\Vocab::languages()) }}, {{ $heading }}" style="width: auto" @checked($current === $choice)></td>
                             @endforeach
                         </tr>
                     @endforeach

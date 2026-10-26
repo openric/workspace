@@ -13,7 +13,7 @@
             </select></div>
         <div><label for="level" style="margin-top: 0">Level</label>
             <select id="level" name="level" style="font: inherit; padding: .5rem"><option value="">Any</option>
-                @foreach($levels as $l)<option value="{{ $l->id }}" @selected($filters['level'] === $l->id)>{{ $l->label(['en', 'und']) }}</option>@endforeach
+                @foreach($levels as $l)<option value="{{ $l->id }}" @selected($filters['level'] === $l->id)>{{ $l->label(\App\Support\Vocab::languages()) }}</option>@endforeach
             </select></div>
         <div><label for="publication" style="margin-top: 0">Publication</label>
             <select id="publication" name="publication" style="font: inherit; padding: .5rem">
@@ -32,7 +32,7 @@
     </form>
     @forelse($units as $unit)
         <p><a href="{{ route('records.show', $unit) }}">{{ $unit->described('title', [app()->getLocale(), 'en']) }}</a>
-            ({{ collect([$unit->level->label(['en', 'und']), $unit->referenceCode(), $unit->parent ? 'in '.$unit->parent->described('title', ['en']) : null, $unit->repository->described('authorised-name', ['en'])])->filter()->join(', ') }})
+            ({{ collect([$unit->level->label(\App\Support\Vocab::languages()), $unit->referenceCode(), $unit->parent ? 'in '.$unit->parent->described('title', ['en']) : null, $unit->repository->described('authorised-name', ['en'])])->filter()->join(', ') }})
             @include('description._row-actions', ['entity' => $unit])</p>
     @empty
         <p>{{ $query !== '' ? 'No unit of description matches.' : 'No archival descriptions yet.' }}</p>

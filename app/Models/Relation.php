@@ -93,7 +93,7 @@ class Relation extends Model
     {
         $type = config('workspace.relation_types.'.$this->relationType->notation);
 
-        return $type ? ($this->fromSource ? $type['forward'] : $type['inverse']) : $this->relationType->label(['en', 'und']);
+        return $type ? __($this->fromSource ? $type['forward'] : $type['inverse']) : $this->relationType->label(Vocab::languages());
     }
 
     /**

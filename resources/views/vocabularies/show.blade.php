@@ -7,7 +7,7 @@
     @if(session('status'))<p role="status">{{ session('status') }}</p>@endif
     @if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif
     @if($vocabulary->description)<p lang="{{ $vocabulary->language }}">{{ $vocabulary->description }}</p>@endif
-    <p><strong>Kind:</strong> {{ $vocabulary->kind->label(['en', 'und']) }}<br><strong>Persistent IRI:</strong> <code>{{ $vocabulary->iri }}</code></p>
+    <p><strong>Kind:</strong> {{ $vocabulary->kind->label(\App\Support\Vocab::languages()) }}<br><strong>Persistent IRI:</strong> <code>{{ $vocabulary->iri }}</code></p>
     <p>
         @if(auth()->user()->may('create', 'vocabulary'))<a href="{{ route('vocabularies.concepts.create', $vocabulary) }}">Add a concept</a> · <a href="{{ route('vocabularies.import-form', $vocabulary) }}">Import SKOS</a> · @endif
         @if(auth()->user()->may('update', 'vocabulary'))<a href="{{ route('vocabularies.edit', $vocabulary) }}">Edit title</a> · @endif

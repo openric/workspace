@@ -26,7 +26,7 @@
         <h2>Permissions of this account</h2>
         <p>Permissions set for this account alone come before those of its roles.</p>
         <ul>
-            @foreach($kinds as $kind)<li><a href="{{ route('accounts.permissions', [$account, $kind->notation]) }}">{{ $kind->label(['en', 'und']) }}</a></li>@endforeach
+            @foreach($kinds as $kind)<li><a href="{{ route('accounts.permissions', [$account, $kind->notation]) }}">{{ $kind->label(\App\Support\Vocab::languages()) }}</a></li>@endforeach
         </ul>
     @endcan
 

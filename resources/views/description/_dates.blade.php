@@ -2,7 +2,7 @@
 {{-- Needs: $subject (HasDates), $kind (URL segment), $heading, $canUpdate, $choices (DateService::choices). --}}
 <h2>{{ $heading }} @include('description._ric', ['term' => 'rico:Date'])</h2>
 @forelse($subject->dates as $date)
-    @php($summary = $date->property->label(['en', 'und']).': '.$date->display().($date->expressed && $date->normalized_value ? ' ('.$date->normalized_value.')' : '').($date->dateType ? ', '.$date->dateType->label(['en', 'und']) : ''))
+    @php($summary = $date->property->label(\App\Support\Vocab::languages()).': '.$date->display().($date->expressed && $date->normalized_value ? ' ('.$date->normalized_value.')' : '').($date->dateType ? ', '.$date->dateType->label(\App\Support\Vocab::languages()) : ''))
     @unless($canUpdate)
         <p>{{ $summary }} @include('description._ric', ['term' => $date->property])</p>
         @continue

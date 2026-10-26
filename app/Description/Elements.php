@@ -90,7 +90,7 @@ final class Elements
         foreach (self::of($standard) as $element) {
             $number = self::number($element);
             $area = $number ? implode('.', array_slice(explode('.', $number), 0, 2)) : null;
-            $heading = $area ? ($area.' '.(self::AREAS[$standard][$area] ?? '')) : 'Description';
+            $heading = $area ? ($area.' '.__(self::AREAS[$standard][$area] ?? '')) : __('Description');
             $areas[$heading] ??= new Collection;
             $areas[$heading]->push($element);
         }

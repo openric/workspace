@@ -36,7 +36,7 @@
     @include('clipboard._button', ['type' => 'records', 'id' => $record->id])
     @if(session('status'))<p role="status">{{ session('status') }}</p>@endif
     @if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif
-    <p>{{ $record->level->label(['en', 'und']) }} @include('description._ric', ['term' => \App\Relations\EntityKinds::ricClass($record)])@if($record->referenceCode()), {{ $record->referenceCode() }}@endif. Held by <a href="{{ route('repositories.show', $record->repository) }}">{{ $record->repository->described('authorised-name', ['en']) }}</a>.<br>
+    <p>{{ $record->level->label(\App\Support\Vocab::languages()) }} @include('description._ric', ['term' => \App\Relations\EntityKinds::ricClass($record)])@if($record->referenceCode()), {{ $record->referenceCode() }}@endif. Held by <a href="{{ route('repositories.show', $record->repository) }}">{{ $record->repository->described('authorised-name', ['en']) }}</a>.<br>
        <strong>Persistent IRI:</strong> <code>{{ $record->iri }}</code></p>
     <p><a href="{{ route('records.tree', $record) }}">Hierarchy</a> · <a href="{{ route('records.inventory', $record) }}">Inventory</a> · <a href="{{ route('records.finding-aid', $record) }}">Finding aid</a> · <a href="{{ route('records.print', $record) }}">Print view</a> · <a href="{{ route('records.export', $record) }}">Export</a>
        @if($canUpdate) · <a href="{{ route('history', ['records', $record->id]) }}">History</a>
@@ -52,7 +52,7 @@
     @include('records._provenance', ['record' => $record, 'relations' => $relations])
     @include('records._instantiations', ['record' => $record, 'canUpdate' => $canUpdate])
     <h2>Description control</h2>
-    <p>Description identifier: {{ $record->description_identifier ?? 'none' }}. Status: {{ $record->descriptionStatus?->label(['en', 'und']) ?? 'not set' }}. Level of detail: {{ $record->descriptionDetail?->label(['en', 'und']) ?? 'not set' }}.</p>
+    <p>Description identifier: {{ $record->description_identifier ?? 'none' }}. Status: {{ $record->descriptionStatus?->label(\App\Support\Vocab::languages()) ?? 'not set' }}. Level of detail: {{ $record->descriptionDetail?->label(\App\Support\Vocab::languages()) ?? 'not set' }}.</p>
     <h2>Cite as</h2>
     <p>{{ collect([$record->described('title', ['en']), $record->referenceCode(), $record->repository->described('authorised-name', ['en'])])->filter()->join(', ') }}. {{ $record->iri }} (accessed {{ now()->format('j F Y') }}).</p>
 
@@ -74,7 +74,7 @@
     <h2>Units inside</h2>
     @forelse($record->children as $child)
         <div>
-            <a href="{{ route('records.show', $child) }}">{{ $child->described('title', ['en']) }}</a> ({{ $child->level->label(['en', 'und']) }})
+            <a href="{{ route('records.show', $child) }}">{{ $child->described('title', ['en']) }}</a> ({{ $child->level->label(\App\Support\Vocab::languages()) }})
             @include('description._row-actions', ['entity' => $child])
             @if(auth()->user()->may('update', 'description', $child))
             <form method="post" action="{{ route('records.reorder', $child) }}" style="display: inline">@csrf<input type="hidden" name="direction" value="up"><button type="submit" aria-label="Move {{ $child->described('title', ['en']) }} up">Up</button></form>

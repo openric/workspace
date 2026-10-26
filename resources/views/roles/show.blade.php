@@ -11,7 +11,7 @@
     <p>What members of this role may do, for each kind of record. Inherited from {{ $role->parent?->name() ?? 'nothing' }} as well.</p>
     <ul>
         @foreach($kinds as $kind)
-            <li><a href="{{ route('roles.permissions', [$role, $kind->notation]) }}">{{ $kind->label(['en', 'und']) }}</a></li>
+            <li><a href="{{ route('roles.permissions', [$role, $kind->notation]) }}">{{ $kind->label(\App\Support\Vocab::languages()) }}</a></li>
         @endforeach
     </ul>
 

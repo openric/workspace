@@ -44,6 +44,12 @@ final class Vocab
 
     public const ASSERTION_STATUSES = self::BASE.'assertion-status/';
 
+    /** The languages to show a concept's label in: the interface's, then English, then undetermined (WS-005). */
+    public static function languages(): array
+    {
+        return array_values(array_unique([app()->getLocale(), 'en', 'und']));
+    }
+
     public static function role(string $notation): string
     {
         return self::ACCOUNT_ROLES.$notation;
