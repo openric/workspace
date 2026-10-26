@@ -21,6 +21,8 @@ use App\Models\Concept;
 use App\Models\Institution;
 use App\Models\RecordResource;
 use App\Models\RicDate;
+use App\Models\Right;
+use App\Rights\PublicRights;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use XMLWriter;
@@ -332,6 +334,29 @@ class Ead
             $x->endElement();
         }
         $x->endElement();
+
+        // Rights in force and Local Contexts Labels (ADR 0008), each a userestrict of its own, linked by its publisher's IRI.
+        $public = new PublicRights($this->view);
+        foreach ([...$public->rights($unit)->all(), ...$public->labels($unit)->all()] as $rule) {
+            $x->startElement('userestrict');
+            $x->writeAttribute('encodinganalog', '3.4.2');
+            $x->startElement('p');
+            $x->setIndent(false);
+            if ($rule instanceof Right) {
+                $x->text(PublicRights::summary($rule).($rule->holder ? '; '.__('Rights holder').': '.$this->view->label($rule->holder) : '').' ');
+                foreach ([$rule->statement, $rule->licence] as $concept) {
+                    if ($concept) {
+                        $this->ref($x, $concept->iri, $concept->notation);
+                        $x->text(' ');
+                    }
+                }
+            } else {
+                $this->ref($x, $rule->label->iri, (string) $rule->label->label(['en', 'und']));
+            }
+            $x->endElement();
+            $x->setIndent(true);
+            $x->endElement();
+        }
 
         foreach (self::NARRATIVE as $notation => $element) {
             if ($notation === 'rules-or-conventions' && $unit->parent_id === null) {

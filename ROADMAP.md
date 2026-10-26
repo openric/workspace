@@ -147,7 +147,9 @@ Progress:
   - under Manage, Rights, the rights report: in force today, by rights statement, licence and basis; the Labels applied; the rights holders; what has no right in force, each list as CSV;
   - a right or a Label given to every archival description on the clipboard, and their instantiations if chosen, after Heratio's batch assignment;
   - each authority record lists the rights it holds.
-- **Next**: public display, the files API and the exports.
+- **v0.0.59**: rights in force and Labels in the public catalogue (each record and each file), in the files API (with each PREMIS act's restriction), and in the exports: RiC-O (rico:isOrWasRegulatedBy, with the holder as rico:hasOrHadIntellectualPropertyRightsHolder), EAD3 (userestrict), Dublin Core (dc:rights) and MODS (accessCondition).
+  - A holder the public may not read is not named.
+  - Phase 2 is done.
 
 **3. Backup and restore (WS-011).** `deploy/deploy.sh` already backs up the database before a release. Copy `ahg-backup`: scheduled backups of the database and the object store together, an offsite copy (its local, rsync and S3 drivers, which do not touch the AtoM schema), and a restore that checks every file's SHA-256 and the audit chain afterwards. Done when a restore drill on a fresh machine is recorded, as the G2 evidence asks.
 

@@ -22,6 +22,8 @@ use App\Http\Controllers\Controller;
 use App\Models\DigitalFile;
 use App\Models\Instantiation;
 use App\Models\Institution;
+use App\Rights\PublicRights;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -116,6 +118,7 @@ class DiscoveryController extends Controller
         $instantiations = Instantiation::where('record_resource_id', $unit->id)->whereNull('deleted_at')
             ->with([...PublicCatalogue::WITH, 'availability', 'files.use', 'files.instantiation.record', 'files.instantiation.availability'])
             ->orderBy('position')->orderBy('id')->get();
+        $public = new PublicRights($view);
         $items = [];
         foreach ($instantiations as $instantiation) {
             // Shown as the public catalogue shows it: with a published title. Its text is the file's content, so only of a file a visitor may open.
@@ -134,10 +137,33 @@ class DiscoveryController extends Controller
                     'width' => $file->width, 'height' => $file->height, 'size_bytes' => $file->size_bytes,
                     'path' => parse_url(route('discover.file', $file), PHP_URL_PATH), 'url' => route('discover.file', $file)])->values()->all(),
                 'text' => $text,
+                'rights' => $this->rightsOf($public, $instantiation),
             ];
         }
 
-        return $this->json(['record' => $unit->id, 'title' => $view->label($unit), 'instantiations' => $items]);
+        return $this->json(['record' => $unit->id, 'title' => $view->label($unit), 'rights' => $this->rightsOf($public, $unit), 'instantiations' => $items]);
+    }
+
+    /**
+     * Rights in force and Local Contexts Labels, as plain JSON for the files API (ADR 0008): statements, licences and
+     * Labels by their publishers' IRIs; for each PREMIS act whether it is allowed.
+     *
+     * @return array{rules: list<array<string, mixed>>, labels: list<array<string, mixed>>}
+     */
+    private function rightsOf(PublicRights $public, Model $subject): array
+    {
+        $concept = fn ($c) => $c ? ['iri' => $c->iri, 'code' => $c->notation, 'label' => (string) $c->label(['en', 'und'])] : null;
+
+        return [
+            'rules' => $public->rights($subject)->map(fn ($right) => [
+                'iri' => $right->iri, 'basis' => $right->basis->notation, 'statement' => $concept($right->statement), 'licence' => $concept($right->licence),
+                'copyright_status' => $right->copyrightStatus?->notation, 'jurisdiction' => $right->jurisdiction,
+                'starts_on' => $right->starts_on?->toDateString(), 'ends_on' => $right->ends_on?->toDateString(),
+                'holder' => $right->holder ? ['iri' => $right->holder->iri, 'name' => $this->view(request())->label($right->holder)] : null,
+                'grants' => $right->grants->mapWithKeys(fn ($g) => [$g->act->notation => ['restriction' => $g->restriction->notation, 'note' => $g->note]])->all(),
+            ])->values()->all(),
+            'labels' => $public->labels($subject)->map(fn ($l) => $concept($l->label) + ['applied_by' => $l->appliedBy->notation])->values()->all(),
+        ];
     }
 
     public function agent(Request $request, string $key): JsonResponse

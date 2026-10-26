@@ -15,6 +15,7 @@
 namespace App\Exchange;
 
 use App\Models\RecordResource;
+use App\Rights\PublicRights;
 use XMLWriter;
 
 class DublinCore
@@ -81,6 +82,14 @@ class DublinCore
         }
         $text('rights', 'conditions-governing-access');
         $text('rights', 'conditions-governing-reproduction');
+        // Rights in force, by their RightsStatements.org and Creative Commons IRIs (ADR 0008).
+        foreach ((new PublicRights($view))->rights($unit) as $right) {
+            foreach ([$right->statement, $right->licence] as $concept) {
+                if ($concept) {
+                    $element('rights', $concept->iri);
+                }
+            }
+        }
         $x->endElement();
         $x->endDocument();
 

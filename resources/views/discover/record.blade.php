@@ -27,6 +27,7 @@
                 @include('description._viewer', ['instantiation' => $instantiation, 'files' => $files, 'title' => $view->label($instantiation), 'fileRoute' => 'discover.file'])
                 <figcaption>{{ $view->label($instantiation) }} @include('description._ric', ['term' => 'rico:Instantiation'])
                     <span class="meta">{{ collect([$instantiation->carrierType?->label(\App\Support\Vocab::languages())])->filter()->join('') }}</span>
+                    @include('discover._rights', ['subject' => $instantiation, 'view' => $view, 'compact' => true])
                     @if($files->has('master')) · <a href="{{ route('discover.file', [$files['master'], 'download' => 1]) }}">{{ __('Download the master (:type, :size, SHA-256 :sha...)', ['type' => $files['master']->mime_type, 'size' => \Illuminate\Support\Number::fileSize($files['master']->size_bytes, 1), 'sha' => substr($files['master']->sha256, 0, 12)]) }}</a>@endif</figcaption>
             </figure>
         @endforeach
@@ -56,6 +57,7 @@
         <h2>{{ __('Inside it (:count)', ['count' => $children->count()]) }}</h2>
         <ul>@foreach($children as $child)<li><a href="{{ route('discover.record', $child->id) }}">{{ $view->label($child) }}</a> <span class="meta">{{ collect([$child->level->label(\App\Support\Vocab::languages()), $child->referenceCode(), $child->dates->first()?->display()])->filter()->join(', ') }}</span></li>@endforeach</ul>
     @endif
+    @include('discover._rights', ['subject' => $unit, 'view' => $view])
     @include('discover._identifiers', ['entity' => $unit])
     <h2>{{ __('Cite and reuse') }}</h2>
     <p>{{ collect([$title, $unit->referenceCode(), $unit->repository ? $view->label($unit->repository) : null])->filter()->join(', ') }}. <code>{{ $unit->iri }}</code></p>

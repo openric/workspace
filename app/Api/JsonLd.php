@@ -21,6 +21,7 @@ use App\Models\RecordResource;
 use App\Models\Repository;
 use App\Models\RicDate;
 use App\Relations\EntityKinds;
+use App\Rights\PublicRights;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 
@@ -83,6 +84,16 @@ class JsonLd
         $out += $this->dates($unit->dates, $this->text($unit, 'dates-expressed'));
         if ($unit->repository && $this->view->readable($unit->repository)) {
             $out['rico:hasOrHadHolder'] = $this->stub($unit->repository);
+        }
+        // Rights in force and Local Contexts Labels, each a rico:Rule (ADR 0008); a holder the public may read.
+        $public = new PublicRights($this->view);
+        $rules = $this->rules($public, $unit);
+        if ($rules !== []) {
+            $out['rico:isOrWasRegulatedBy'] = $rules;
+        }
+        $holders = $public->rights($unit)->pluck('holder')->filter()->unique('id')->map(fn ($agent) => $this->stub($agent))->values()->all();
+        if ($holders !== []) {
+            $out['rico:hasOrHadIntellectualPropertyRightsHolder'] = $holders;
         }
         $creators = $this->view->creators($unit)->map(fn ($r) => $this->stub($r->other))->values()->all();
         if ($creators !== []) {
@@ -173,6 +184,26 @@ class JsonLd
     }
 
     /** A reference to an entity described elsewhere: its IRI, class and published name. */
+    /**
+     * The rules of a unit of description or an instantiation: each right in force, typed by its basis and associated
+     * with its RightsStatements.org statement and Creative Commons licence by their own IRIs, and each Local Contexts Label.
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function rules(PublicRights $public, Model $subject): array
+    {
+        $concept = fn ($c) => ['@id' => $c->iri, '@type' => 'rico:Rule', 'rico:name' => (string) $c->label(['en', 'und'])];
+        $rules = $public->rights($subject)->map(fn ($right) => array_filter([
+            '@id' => $right->iri, '@type' => 'rico:Rule', 'rico:name' => PublicRights::summary($right),
+            'rico:hasOrHadRuleType' => ['@id' => $right->basis->iri, 'rdfs:label' => (string) $right->basis->label(['en', 'und'])],
+            'rico:isAssociatedWithRule' => array_values(array_filter([$right->statement ? $concept($right->statement) : null, $right->licence ? $concept($right->licence) : null])) ?: null,
+            'rico:beginningDate' => $right->starts_on ? ['@value' => $right->starts_on->toDateString(), '@type' => 'xsd:date'] : null,
+            'rico:endDate' => $right->ends_on ? ['@value' => $right->ends_on->toDateString(), '@type' => 'xsd:date'] : null,
+        ], fn ($v) => $v !== null))->values()->all();
+
+        return [...$rules, ...$public->labels($subject)->map(fn ($label) => $concept($label->label))->values()->all()];
+    }
+
     public function stub(Model $entity): array
     {
         return array_filter(['@id' => $entity->getAttribute('iri'), '@type' => $this->type($entity), 'rico:name' => $this->view->label($entity)], fn ($v) => $v !== null);

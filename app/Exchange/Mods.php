@@ -15,6 +15,7 @@ namespace App\Exchange;
 use App\Models\Agent;
 use App\Models\Institution;
 use App\Models\RecordResource;
+use App\Rights\PublicRights;
 use Illuminate\Database\Eloquent\Model;
 use XMLWriter;
 
@@ -135,6 +136,18 @@ class Mods
                 $this->lang($value[1], $language);
                 $x->text($value[0]);
                 $x->endElement();
+            }
+        }
+        // Rights in force, by their RightsStatements.org and Creative Commons IRIs (ADR 0008).
+        foreach ((new PublicRights($view))->rights($unit) as $right) {
+            foreach ([$right->statement, $right->licence] as $concept) {
+                if ($concept) {
+                    $x->startElement('accessCondition');
+                    $x->writeAttribute('type', 'use and reproduction');
+                    $x->writeAttribute('xlink:href', $concept->iri);
+                    $x->text((string) $concept->label(['en', 'und']));
+                    $x->endElement();
+                }
             }
         }
         foreach (self::NOTES as $notation => $type) {
