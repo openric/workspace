@@ -28,3 +28,34 @@ Heratio's file also has the other strings of Heratio's interface in 68 languages
 ## af/validation.php
 
 Laravel's validation messages in Afrikaans, for the rules the Workspace uses, and the Afrikaans names of the common fields; written for the Workspace (neither Heratio nor PSIS has them), for review by Dr Johan Pieterse. A rule not listed falls back to Laravel's English.
+
+## Other languages
+
+An institution chooses the languages it offers under Settings, Interface languages: any language with a file here, and English always. Nothing in the code lists them (`App\Support\InterfaceLanguages`). A language is named in itself, from `languages.json`, which is Heratio's list from its culture switcher (heratio-dev `4131171e4`, `ahg-theme-b5`).
+
+The files below hold only the translations PSIS and Heratio already have for the Workspace's English, word for word: PSIS's (AtoM's) first, then Heratio's. Every other string is shown in English until the language is translated in full. None of them is reviewed. Those from PSIS are AtoM translators' work, © Artefactual Systems Inc. and the AtoM translators, AGPL-3.0; those from Heratio include machine translations made for Heratio.
+
+| Language | Tag | Strings of 1213 |
+|---|---|---|
+| Deutsch | `de` | 222 |
+| Español | `es` | 229 |
+| Français | `fr` | 212 |
+| Oshikwanyama | `kj` | 36 |
+| isiNdebele (Northern) / Sindebele | `nd` | 36 |
+| Nederlands | `nl` | 227 |
+| isiNdebele (Southern) | `nr` | 126 |
+| Sepedi | `nso` | 232 |
+| Português | `pt` | 231 |
+| chiShona | `sn` | 36 |
+| siSwati | `ss` | 232 |
+| Sesotho | `st` | 232 |
+| Setswana | `tn` | 230 |
+| Xitsonga | `ts` | 225 |
+| Umbundu | `umb` | 36 |
+| Tshivenda | `ve` | 190 |
+| isiXhosa | `xh` | 233 |
+| isiZulu | `zu` | 234 |
+
+: Translation files other than Afrikaans
+
+Not given a file yet: Kiswahili and Nepali, which have no translation of the Workspace's English in PSIS or Heratio; Arabic, which waits for right-to-left layout; and Khoisan, a family of languages rather than one.

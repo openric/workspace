@@ -27,6 +27,13 @@
         <textarea id="catalogue_credits" name="catalogue_credits" rows="6" aria-describedby="credits-help">{{ old('catalogue_credits', $institution->catalogue_credits) }}</textarea>
         <h2>{{ __('Users') }}</h2>
         <label style="font-weight: normal"><input type="hidden" name="registration_open" value="0"><input type="checkbox" name="registration_open" value="1" style="width: auto" @checked(old('registration_open', $institution->registration_open))> {{ __('Visitors may ask for an account; an administrator approves or rejects each request under Accounts') }}</label>
+        <h2>{{ __('Interface languages') }}</h2>
+        <p><small>{{ __('The languages people may choose for the screens of the Workspace and the public catalogue. English is always offered; a string with no translation in a language is shown in English.') }}</small></p>
+        @php($chosen = old('interface_languages', $institution->interface_languages ?? ['en']))
+        <input type="hidden" name="interface_languages[]" value="en">
+        @foreach(\App\Support\InterfaceLanguages::available() as $tag)
+            <label style="font-weight: normal; display: inline-block; margin-right: 1rem" lang="{{ $tag }}"><input type="checkbox" name="interface_languages[]" value="{{ $tag }}" style="width: auto" @checked($tag === 'en' || in_array($tag, $chosen, true)) @disabled($tag === 'en')> {{ \App\Support\InterfaceLanguages::name($tag) }}</label>
+        @endforeach
         <p><small>{{ __('The persistent IRIs of records are built from :iri, which is set at installation and does not change.', ['iri' => $institution->base_iri]) }}</small></p>
         <button type="submit">{{ __('Save settings') }}</button>
     </form>

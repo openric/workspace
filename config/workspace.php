@@ -29,10 +29,6 @@ return [
     // Requests a key may make per hour unless it says otherwise (Heratio's default rate limit).
     'api_key_hourly_limit' => (int) env('WORKSPACE_API_KEY_HOURLY_LIMIT', 1000),
 
-    // The languages the interface speaks (WS-005), BCP 47 tag => the language's own name; each but en
-    // needs lang/<tag>.json. The first is the default for a visitor whose browser asks for none of them.
-    'interface_languages' => ['en' => 'English', 'af' => 'Afrikaans'],
-
     // The shape of the permission matrix: for each kind of record (record-kind
     // vocabulary), the actions that apply to it (permission vocabulary), as
     // Heratio has one action list per class (ADR 0005).

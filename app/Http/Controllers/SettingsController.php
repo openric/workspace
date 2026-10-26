@@ -13,11 +13,13 @@ namespace App\Http\Controllers;
 
 use App\Audit\AuditLog;
 use App\Models\Institution;
+use App\Support\InterfaceLanguages;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -38,6 +40,8 @@ class SettingsController extends Controller
             'registration_open' => ['nullable', 'boolean'],
             'logo' => ['nullable', 'file', 'mimes:png,jpg,jpeg,webp', 'mimetypes:image/png,image/jpeg,image/webp', 'max:1024', 'dimensions:max_width=4000,max_height=4000'],
             'remove_logo' => ['nullable', 'boolean'],
+            'interface_languages' => ['nullable', 'array'],
+            'interface_languages.*' => ['string', Rule::in(InterfaceLanguages::available())],
         ]);
         $institution = $request->user()->institution;
         $disk = Storage::disk('local');
@@ -45,7 +49,8 @@ class SettingsController extends Controller
         $blank = fn (string $key) => trim((string) ($data[$key] ?? '')) === '' ? null : trim((string) $data[$key]);
         $changes = ['name' => $data['name'], 'header_title' => $blank('header_title'),
             'catalogue_introduction' => $blank('catalogue_introduction'), 'catalogue_credits' => $blank('catalogue_credits'),
-            'registration_open' => $request->boolean('registration_open')];
+            'registration_open' => $request->boolean('registration_open'),
+            'interface_languages' => array_values(array_unique(['en', ...($data['interface_languages'] ?? [])]))];
         if ($request->hasFile('logo')) {
             $file = $request->file('logo');
             // A new name each time, so no cache shows the old logo.

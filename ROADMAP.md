@@ -129,7 +129,13 @@ Standing rules for every phase: vocabularies, never enums; every field names its
 - **v0.0.54**: the messages written in code, about 70 status messages and the error messages people see, and Laravel's validation messages, with Afrikaans field names.
   - Errors the API answers stay in English, as do internal and operator messages.
   - `lang/af.json` has 1211 strings.
-- **Still to do**: Afrikaans labels for the bundled vocabularies (levels of description, entity types, relation types and the rest), from PSIS where its term is correct.
+- **v0.0.55**: interface languages are chosen, not coded. An institution offers, under Settings, any language with a translation file, as AtoM's and Heratio's i18n languages setting does; English is always offered.
+  - Languages are named in themselves from Heratio's list.
+  - 18 more languages, 10 of them South African, carry the translations PSIS and Heratio already have, and English for the rest, until they are translated in full.
+- **Still to do**:
+  - full translations of the other languages;
+  - Afrikaans labels for the bundled vocabularies (levels of description, entity types, relation types and the rest), from PSIS where its term is correct;
+  - right-to-left layout before Arabic.
 
 Reuse was lower than hoped: only 32 of Heratio's Afrikaans strings carried over. Heratio's strings are keyed by its own English, which is mostly AtoM's, and the Workspace's screens were written in different English.
 

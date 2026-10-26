@@ -91,7 +91,7 @@ Route::prefix('clipboard')->name('clipboard.')->middleware('throttle:120,1')->gr
 // year-long cookie, and for a signed-in account as its own choice; back to the page, on this site only.
 Route::post('/language', function (Request $request) {
     $language = (string) $request->input('lang', '');
-    if (SetLocale::supported($language)) {
+    if (SetLocale::supported($request, $language)) {
         session(['locale' => $language]);
         Cookie::queue('locale', $language, 60 * 24 * 365, '/', null, true, false, false, 'lax');
         $request->user()?->update(['interface_language' => $language]);

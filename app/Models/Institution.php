@@ -12,12 +12,12 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['name', 'base_iri', 'header_title', 'logo_path', 'logo_mime', 'catalogue_introduction', 'catalogue_credits', 'registration_open'])]
+#[Fillable(['name', 'base_iri', 'header_title', 'logo_path', 'logo_mime', 'catalogue_introduction', 'catalogue_credits', 'registration_open', 'interface_languages'])]
 class Institution extends Model
 {
     protected function casts(): array
     {
-        return ['registration_open' => 'boolean'];
+        return ['registration_open' => 'boolean', 'interface_languages' => 'array'];
     }
 
     use Audited, HasUuids;

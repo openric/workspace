@@ -81,6 +81,29 @@ class InterfaceLanguageTest extends TestCase
             ->assertSessionHas('status', 'U wagwoord is verander.');
     }
 
+    public function test_the_institution_chooses_the_languages_it_offers(): void
+    {
+        $institution = Institution::where('base_iri', self::SITE)->firstOrFail();
+        // Offered only English: Afrikaans is not taken, and there is no switch.
+        $institution->update(['interface_languages' => ['en']]);
+        $this->get(self::SITE.'/discover?lang=af')->assertSee('Search the catalogue')->assertDontSee('name="lang"', false);
+
+        // An administrator offers more, under Settings; English stays whatever is sent.
+        $admin = app(AccountService::class)->create($institution, 'Admin', 'admin@example.org', 'correct horse battery staple');
+        app(AccountService::class)->grantTemplateRole($admin, 'administrator');
+        $this->actingAs($admin)->get(self::SITE.'/settings')->assertOk()->assertSee('isiZulu')->assertSee('Sesotho');
+        $this->actingAs($admin)->post(self::SITE.'/settings', ['name' => 'Riverside Archives', 'interface_languages' => ['af', 'zu']])->assertRedirect();
+        $this->assertSame(['en', 'af', 'zu'], $institution->fresh()->interface_languages);
+        $this->actingAs($admin)->post(self::SITE.'/settings', ['name' => 'Riverside Archives', 'interface_languages' => ['xx']])->assertSessionHasErrors('interface_languages.0');
+
+        // The switch names each language in itself; a string isiZulu does not have yet is shown in English.
+        auth()->logout();
+        $this->flushSession();
+        $page = $this->get(self::SITE.'/discover?lang=zu')->assertOk()->assertSee('<html lang="zu">', false)->assertSee('>isiZulu<', false)->assertSee('>Afrikaans<', false);
+        $page->assertSee(json_decode(file_get_contents(lang_path('zu.json')), true)['Search']);
+        $page->assertSee('Search names, titles and reference codes');
+    }
+
     public function test_every_translated_string_has_its_afrikaans(): void
     {
         $af = json_decode(file_get_contents(base_path('lang/af.json')), true);
