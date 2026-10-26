@@ -98,13 +98,13 @@ Standing rules for every phase: vocabularies, never enums; every field names its
 | 8 | Reports and statistics | WS-016 | V0.5 | `ahg-reports`, `ahg-statistics` |
 | 9 | Accessions and donors | WS-014 | V1.0 | `ahg-accession-manage` (CAIS profile), `ahg-donor-manage` |
 | 10 | Work assignment and description workflow | WS-014 | V1.0 | `ahg-workflow` (not its Spectrum procedures) |
-| 11 | Exchange formats: EAD 3, EAC-CPF, EAC-F, RiC-O import; portable export | WS-015 | V1.0 | `ahg-metadata-export`, `ahg-portable-export` |
+| 11 | Exchange formats: EAD 3, EAC-CPF, EAC-F, RiC-O import; portable export; the Governance and Portability profiles | WS-010, WS-015 | V1.0 | `ahg-metadata-export`, `ahg-portable-export`; from `ahg-ric`: `RicDeprecationService`, `RdfImportService`, `RicDatasetService`, `RicRoundTripTest` |
 | 12 | Monitoring, scheduled fixity, update and restore runbooks | WS-017 | V1.0 | `ahg-observability`, `ahg-integrity`, `ahg-jobs-manage` |
 | 13 | Embargoes, retention and disposal | WS-017, WS-018 | V1.0 | `ahg-extended-rights` (embargo, retention schedule, disposal), `ahg-records-manage` (after discovery) |
 | 14 | IIIF manifests and viewer | WS-019 | V2.0 | `ahg-iiif-collection`, with openric/service #15 |
 | 15 | Preservation connectors | WS-019 | V2.0 | `ahg-preservation` (PREMIS events), `ahg-ocfl`, `ahg-archivematica` |
 | 16 | Federation and harvesting | WS-019 | V2.0 | `ahg-federation`, `ahg-resourcesync`, beside the existing OAI-PMH |
-| 17 | AI assistance through the review queue | WS-019 | V2.0 | `ahg-authority-resolution`, `ahg-translation`, `ahg-semantic-search` (output only as proposals) |
+| 17 | AI assistance through the review queue; the Inferred-Provenance and Graph-Grounding profiles | WS-019 | V2.0 | `ahg-authority-resolution`, `ahg-translation`, `ahg-semantic-search` (output only as proposals); from `ahg-ric`: `RicProvenanceService`, `GraphGroundingService` |
 | 18 | Privacy and jurisdiction packs | V2.0 and later | V2.0 | `ahg-privacy` (POPIA), `ahg-security-clearance`, `ahg-narssa` (per institution) |
 | 19 | Research services | WS-016, WS-019 | V2.0 | `ahg-research` (decide what to take first; 79,899 lines), `ahg-cart`, `ahg-favorites`, `ahg-feedback`, `ahg-share-link` |
 | 20 | Publishing and outreach | WS-019 | V2.0 | `ahg-landing-page`, `ahg-static-page`, `ahg-articles`, `ahg-help`, `ahg-doi-manage` |
@@ -146,7 +146,11 @@ Text read by a machine is a proposal for the instantiation's transcript, reviewe
 - EAC-F, which openric/service #14 asks for;
 - RiC-O import, with exception reports and dry runs like the existing import.
 
-The crosswalks of `ahg-metadata-export` are copied. `ahg-portable-export` (an offline catalogue for a USB stick or a reading room) is copied with light change. Done when each format round-trips the demonstration data, every rejected field is listed, and nothing is lost silently.
+The crosswalks of `ahg-metadata-export` are copied. With them, two OpenRiC profiles the Workspace does not yet declare:
+- **Governance**: a deleted entity's IRI answers as deprecated (`owl:deprecated`, `dcterms:isReplacedBy` its successor, the reason), never as missing, from a deprecation register; copied from Heratio's `RicDeprecationService`. Today a deleted record simply disappears from the API.
+- **Portability**: the RiC-O import above with a round-trip test, a DCAT and VoID dataset descriptor and a change feed; copied from `RdfImportService`, `RicDatasetService` and `RicRoundTripTest`.
+
+These profiles came from ArchiveHeritageGroup/OpenRiC #1 to #3, now in the specification. `ahg-portable-export` (an offline catalogue for a USB stick or a reading room) is copied with light change. Done when each format round-trips the demonstration data, every rejected field is listed, and nothing is lost silently.
 
 **12. Monitoring and operations (WS-017).**
 - Copy `ahg-observability` for health and metrics.
@@ -169,7 +173,11 @@ Each one is optional per institution. Done when an instantiation's preservation 
 
 **16. Federation and harvesting (WS-019).** Copy `ahg-federation` (shared search across Workspace institutions and peers, one visitor key per peer, as the MCP does) and `ahg-resourcesync`, beside the OAI-PMH that already exists. Done when two institutions search each other's published catalogue and neither sees the other's drafts.
 
-**17. AI assistance (WS-019).** Copy the candidate ranking of `ahg-authority-resolution`, so the review queue offers the likely authority record for a proposed name. Copy `ahg-translation` for proposed translations and `ahg-semantic-search` for search by meaning. All of it runs through the AI gateway and produces proposals only, as ADR 0007 decided. Done when every machine output in the Workspace can be traced to its proposal and its reviewer.
+**17. AI assistance (WS-019).** Copy the candidate ranking of `ahg-authority-resolution`, so the review queue offers the likely authority record for a proposed name. Copy `ahg-translation` for proposed translations and `ahg-semantic-search` for search by meaning. All of it runs through the AI gateway and produces proposals only, as ADR 0007 decided. With it, two more OpenRiC profiles:
+- **Inferred-Provenance**: what a model asserted is exported as inferred (`prov:wasGeneratedBy`, confidence), from the assertion origins the Workspace already records; copied from `RicProvenanceService`.
+- **Graph-Grounding**: `GET /ground`, disambiguation packs keyed to entity IRIs, for agents such as the MCP; copied from `GraphGroundingService`.
+
+These came from ArchiveHeritageGroup/OpenRiC #4 and #5. Done when every machine output in the Workspace can be traced to its proposal and its reviewer.
 
 **18. Privacy and jurisdiction packs.** Copy `ahg-privacy` (POPIA: personal information in descriptions, requests for access and correction), `ahg-security-clearance` and national packs such as `ahg-narssa`. Each is enabled per institution and decided by ADR. Done when a South African institution can show POPIA compliance for its catalogue.
 

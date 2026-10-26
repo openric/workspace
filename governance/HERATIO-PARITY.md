@@ -107,7 +107,7 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-research` | 79899 | V0.1 candidate | Planned | 19 | Decision first |
 | `ahg-researcher-manage` | 3111 | V0.1 candidate | Partial | 7 | Registration requests |
 | `ahg-resourcesync` | 926 | later: V1.0+ | Planned | 16 |  |
-| `ahg-ric` | 28399 | V0.1 candidate | Covered |  | RiC-native model, RiC-O export, assertions with provenance (ADR 0006) |
+| `ahg-ric` | 28399 | V0.1 candidate | Partial | 11, 17 | RiC-native model, RiC-O export, assertions with provenance (ADR 0006); not yet the Governance deprecation register, Portability (RiC-O import, round-trip, DCAT/VoID), Inferred-Provenance export or Graph-Grounding (`RicDeprecationService`, `RdfImportService`, `RicDatasetService`, `RicProvenanceService`, `GraphGroundingService`) |
 | `ahg-ric-manage` | 1464 | V0.1 candidate | Covered |  | Relations, their types, roles and assertions |
 | `ahg-rights` | 0 | V0.1 candidate | Planned | 2 |  |
 | `ahg-rights-holder-manage` | 5215 | V0.1 candidate | Planned | 2 |  |
@@ -133,4 +133,4 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 
 : Heratio packages and their Workspace status
 
-Totals: 21 covered, 19 partial, 80 planned, of 120.
+Totals: 20 covered, 20 partial, 80 planned, of 120.
