@@ -65,6 +65,17 @@ Three kinds of reuse come out of the numbers.
 
 The largest V0.1 candidates by size are `ahg-research` (79,899 lines), `ahg-core` (60,173) and `ahg-information-object-manage` (47,506). `ahg-research` is large enough that whether it belongs in V0.1 at all should be decided before anyone reads it for reuse.
 
+## Measured again (26 October 2026)
+
+The count above marks a file as coupled when it contains any of the words in the script's pattern. That pattern includes `status` and `slug`, which almost every file uses as an ordinary word. It overstates the coupling.
+
+Measured on heratio-dev, counting only the AtoM table names and query calls that name AtoM tables:
+- of 4,787 PHP files (913,501 lines), 988 files (21%) touch the AtoM schema;
+- 12,989 lines (1.4%) name an AtoM table;
+- no file carries Artefactual's or AtoM's copyright.
+
+Most of Heratio can therefore be copied as working code, with only its queries rewritten. On 26 October 2026 Dr Johan Pieterse made reuse of as much Heratio code as possible the rule (ROADMAP.md, Next phases).
+
 ## Draft prohibited-copy list
 
 For `CODE_PROVENANCE.md`, to be confirmed at G1:
