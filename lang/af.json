@@ -1437,5 +1437,7 @@
     "Your request for access was approved": "U versoek om toegang is goedgekeur",
     "A request for access waits for review": "'n Versoek om toegang wag op hersiening",
     "Your request for access was refused": "U versoek om toegang is geweier",
-    "Your request for access was received": "U versoek om toegang is ontvang"
+    "Your request for access was received": "U versoek om toegang is ontvang",
+    "more": "meer",
+    "less": "minder"
 }

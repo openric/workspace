@@ -8,7 +8,7 @@
             <dl class="values">
                 @foreach($shown as [$element, $values])
                     <dt>{{ $element->label(\App\Support\Vocab::languages()) }} @include('description._ric', ['term' => $element])</dt>
-                    @foreach($values as $value)<dd lang="{{ $value->language }}">{!! nl2br(e($value->value)) !!}</dd>@endforeach
+                    @foreach($values as $value)@include('description._long', ['value' => $value, 'tag' => 'dd'])@endforeach
                 @endforeach
             </dl>
         </details>

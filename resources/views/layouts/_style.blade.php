@@ -42,6 +42,12 @@
         /* Links inside running text are underlined, so they are not told apart by colour alone (WCAG 1.4.1). */
         main a, footer a { text-decoration: underline; text-underline-offset: 3px; }
         main details.area > summary a, main .ric a { text-decoration: none; }
+        /* A long value (description._long) shows six lines until "more" is opened. */
+        .long-text { display: block; }
+        .long:has(> details:not([open])) > .long-text { max-height: 9em; overflow: hidden; mask-image: linear-gradient(to bottom, #000 60%, transparent); }
+        .long > details > summary { cursor: pointer; color: var(--link); list-style: none; display: inline-block; }
+        .long > details > summary::-webkit-details-marker { display: none; }
+        .long > details[open] .long-more, .long > details:not([open]) .long-less { display: none; }
         :focus-visible { outline: 3px solid var(--link); outline-offset: 2px; border-radius: 3px; }
 
         /* Header: the institution's name and logo, with "Workspace" as the product label, as on every OpenRiC surface. */

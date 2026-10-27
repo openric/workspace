@@ -16,7 +16,7 @@
         @foreach($shown as [$element, $values])
             <h3 style="margin-bottom: .2rem">{{ \App\Description\Elements::number($element) }} {{ $element->label(\App\Support\Vocab::languages()) }} @include('description._ric', ['term' => $element])</h3>
             @foreach($values as $value)
-                <p lang="{{ $value->language }}" style="margin: .2rem 0">{!! nl2br(e($value->value)) !!}</p>
+                @include('description._long', ['value' => $value, 'style' => 'margin: .2rem 0'])
                 <p style="margin: 0 0 .6rem"><small>{{ $value->language }}, {{ __($value->is_original ? 'original' : 'translation') }}, {{ $value->state->label(\App\Support\Vocab::languages()) }}</small></p>
             @endforeach
         @endforeach

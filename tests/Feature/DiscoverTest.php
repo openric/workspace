@@ -135,6 +135,19 @@ class DiscoverTest extends TestCase
         $this->get(route('discover.file', $this->scan->file('reference')))->assertNotFound();
     }
 
+    public function test_a_long_value_starts_shortened_with_more_to_show_all_of_it_and_a_short_one_does_not(): void
+    {
+        $long = "Technical Metadata:\n\n".implode("\n", array_map(fn ($i) => "Tag $i: value $i", range(1, 20)))."\nThe last line.";
+        app(RecordService::class)->describe($this->fonds, ['physical-characteristics' => $long], 'en');
+        app(PublicationService::class)->apply($this->fonds, 'publish', null, false, $this->editor);
+
+        foreach ([$this->get("/discover/records/{$this->fonds->id}"), $this->actingAs($this->editor)->get(route('records.show', $this->fonds))] as $page) {
+            $page->assertOk()->assertSee('class="long"', false)->assertSee('The last line.')->assertSee('<span class="long-more">more</span>', false);
+        }
+        auth()->logout();
+        $this->get("/discover/records/{$this->item->id}")->assertSee('Names the witness at the marriage.')->assertDontSee('class="long"', false);
+    }
+
     public function test_the_home_page_shows_the_introduction_the_collections_carousel_and_the_credits(): void
     {
         $institution = Institution::find($this->fonds->institution_id);
