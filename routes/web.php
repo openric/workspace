@@ -53,7 +53,7 @@ use App\Http\Middleware\ServeDiscovery;
 use App\Http\Middleware\SetLocale;
 use App\Relations\EntityKinds;
 use App\Support\Vocab;
-use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
+use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Route;
@@ -128,7 +128,7 @@ Route::middleware(ServeDiscovery::class)->prefix('discover')->name('discover.')-
 });
 
 // The mail provider's bounce and complaint webhook (roadmap phase 7; Heratio's): public, HMAC-signed, so no session or CSRF token.
-Route::post('/webhooks/email/bounce', [EmailBounceController::class, 'receive'])->withoutMiddleware(ValidateCsrfToken::class)
+Route::post('/webhooks/email/bounce', [EmailBounceController::class, 'receive'])->withoutMiddleware(PreventRequestForgery::class)
     ->middleware('throttle:120,1')->name('email.bounce');
 
 Route::middleware('guest')->group(function () {

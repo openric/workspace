@@ -15,9 +15,12 @@ use App\Models\EmailBounce;
 use App\Models\Institution;
 use App\Models\SentEmail;
 use App\Models\User;
+use Illuminate\Contracts\Http\Kernel;
+use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
+use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Testing\TestResponse;
 use Tests\TestCase;
 
@@ -71,6 +74,11 @@ class EmailDeliveryTest extends TestCase
         $message = app('mailer')->getSymfonyTransport()->messages()->first()->getOriginalMessage();
         $this->assertFalse($message->getHeaders()->has('X-Workspace-Mailable'), 'the class name does not leave the server');
 
+        // Tests skip the CSRF check, so make sure the provider's call would not meet it either.
+        app(Kernel::class); // registers the middleware groups with the router
+        $middleware = app('router')->gatherRouteMiddleware(app('router')->getRoutes()->getByName('email.bounce'));
+        $this->assertContains(StartSession::class, $middleware, 'the web group is expanded');
+        $this->assertNotContains(PreventRequestForgery::class, $middleware);
         $this->bounce(['email' => 'thandi@example.org', 'type' => 'hard', 'reason' => 'mailbox unknown'], null)->assertStatus(401);
         $this->bounce(['email' => 'thandi@example.org', 'type' => 'hard', 'reason' => 'mailbox unknown'], 'the wrong secret')->assertStatus(401);
         $this->bounce(['email' => 'thandi@example.org', 'type' => 'hard', 'reason' => 'mailbox unknown'])->assertOk()->assertJson(['ok' => true, 'processed' => 1]);
