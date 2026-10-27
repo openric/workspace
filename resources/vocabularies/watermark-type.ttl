@@ -1,0 +1,44 @@
+# OpenRiC Workspace - OpenRiC Workspace Watermark Types.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What marks an image's reference copy (roadmap phase 5; Heratio's watermark_type, ahg-media-processing).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/watermark-type/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Watermark Types"@en ;
+    dcterms:description "What the Workspace writes on the reference copy of an image."@en ;
+    dcterms:issued "2026-10-27"^^xsd:date ;
+    skos:hasTopConcept v:copyright, v:confidential, v:draft, v:custom .
+
+v:copyright a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Copyright"@en ;
+    skos:scopeNote "Operational: how a viewing copy is marked, not part of any RiC description."@en ;
+    skos:definition "The copyright sign and the name of the institution, written across the image."@en .
+
+v:confidential a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Confidential"@en ;
+    skos:scopeNote "Operational: how a viewing copy is marked, not part of any RiC description."@en ;
+    skos:definition "The word Confidential, written across the image."@en .
+
+v:draft a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Draft"@en ;
+    skos:scopeNote "Operational: how a viewing copy is marked, not part of any RiC description."@en ;
+    skos:definition "The word Draft, written across the image."@en .
+
+v:custom a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Custom image"@en ;
+    skos:scopeNote "Operational: how a viewing copy is marked, not part of any RiC description."@en ;
+    skos:definition "An image the institution uploads, such as its logo."@en .

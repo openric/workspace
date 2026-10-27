@@ -17,8 +17,11 @@ namespace App\Description;
 use App\Access\AccessControl;
 use App\Audit\AuditLog;
 use App\Files\FileStore;
+use App\Files\Watermark;
+use App\Jobs\ExtractFileText;
 use App\Jobs\JobsService;
 use App\Jobs\MakeViewingCopies;
+use App\Jobs\ReadEmbeddedMetadata;
 use App\Models\Concept;
 use App\Models\DigitalFile;
 use App\Models\Instantiation;
@@ -78,9 +81,15 @@ class InstantiationService
 
             return $instantiation;
         }));
-        // The viewing copies are made in the background (roadmap phase 5); the file is kept and checked already.
+        // The viewing copies, embedded metadata and a PDF's text are read in the background (roadmap phase 5); the file is kept and checked already.
         $job = app(JobsService::class)->create($unit->institution_id, 'viewing-copies', __('Viewing copies of :name', ['name' => $originalName]), $actor, $instantiation);
         MakeViewingCopies::dispatch($job->id, $instantiation->id);
+        $job = app(JobsService::class)->create($unit->institution_id, 'embedded-metadata', __('Embedded metadata of :name', ['name' => $originalName]), $actor, $instantiation);
+        ReadEmbeddedMetadata::dispatch($job->id, $instantiation->id);
+        if ($master['mime_type'] === 'application/pdf') {
+            $job = app(JobsService::class)->create($unit->institution_id, 'file-text', __('Text of :name', ['name' => $originalName]), $actor, $instantiation);
+            ExtractFileText::dispatch($job->id, $instantiation->id);
+        }
 
         return $instantiation->load('files.use');
     }
@@ -95,10 +104,28 @@ class InstantiationService
         if ($master === null || $instantiation->files()->where('id', '!=', $master->id)->exists()) {
             return 0;
         }
-        $copies = $this->store->copies($instantiation->institution_id, $this->store->path($master->storage_path), $master->mime_type);
+        $watermark = app(Watermark::class)->configFor(Institution::findOrFail($instantiation->institution_id));
+        $copies = $this->store->copies($instantiation->institution_id, $this->store->path($master->storage_path), $master->mime_type, $watermark);
         DB::transaction(fn () => AuditLog::actingAs($actor, fn () => $this->addCopies($instantiation, $master->original_name, $copies)));
 
         return count($copies);
+    }
+
+    /**
+     * Make the copies for viewing again, as Heratio's regenerateDerivatives: after the watermark changed, or
+     * when a copy is wrong. The old copies' records go; their files stay in the store, kept by checksum, where
+     * another record may share them. The number of copies made.
+     */
+    public function remakeCopies(Instantiation $instantiation, ?User $actor = null): int
+    {
+        $master = $instantiation->file('master');
+        if ($master === null) {
+            return 0;
+        }
+        DB::transaction(fn () => AuditLog::actingAs($actor, fn () => $instantiation->files()->where('id', '!=', $master->id)->get()->each->delete()));
+        $instantiation->unsetRelation('files');
+
+        return $this->makeCopies($instantiation, $actor);
     }
 
     private function addCopies(Instantiation $instantiation, string $originalName, array $copies): void

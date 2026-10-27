@@ -34,7 +34,7 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-cart` | 2166 | later: V1.0+ | Planned | 19 | `ahgCartPlugin` |  |
 | `ahg-cdpa` | 2774 | later: jurisdiction | Planned | 18 | `ahgCDPAPlugin` |  |
 | `ahg-condition` | 1690 | later: V1.0+ | Planned | 21 | `ahgConditionPlugin` |  |
-| `ahg-core` | 60173 | V0.1 candidate | Covered |  | `ahgAccessibilityPlugin`, `ahgCorePlugin` | Framework, not a function: the Workspace has its own (Laravel, PostgreSQL) |
+| `ahg-core` | 60173 | V0.1 candidate | Covered |  | `ahgAccessibilityPlugin`, `ahgCorePlugin` | Framework, not a function: the Workspace has its own (Laravel, PostgreSQL); its alternative text for images, with the worklist, is the instantiation's alternative-text element (v0.0.64) |
 | `ahg-custom-fields` | 1338 | V0.1 candidate | Planned | 22 | `ahgCustomFieldsPlugin` | As description elements in local vocabularies |
 | `ahg-dacs-manage` | 1084 | V0.1 candidate | Planned | 11 | `ahgDacsManagePlugin`, `arDacsPlugin` | Description templates beside ISAD(G) |
 | `ahg-dam` | 4736 | out: GLAM sector | Planned | 21 | `ahgDAMPlugin` |  |
@@ -71,7 +71,7 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-ingest` | 5338 | later: V1.0+ | Planned | 22 | `ahgIngestPlugin` | Read PSIS ahgIngestPlugin too, which does more |
 | `ahg-integrity` | 3078 | later: V1.0+ | Partial | 12 | `ahgIntegrityPlugin` | Fixity checked on demand |
 | `ahg-ipsas` | 2129 | later: jurisdiction | Planned | 18 | `ahgIPSASPlugin` |  |
-| `ahg-jobs` | 950 | later: V1.0+ | Planned | 5 | none |  |
+| `ahg-jobs` | 950 | later: V1.0+ | Covered | 5 | none | Background jobs and their screen (v0.0.63) |
 | `ahg-jobs-manage` | 691 | later: V1.0+ | Planned | 12 | `ahgJobsManagePlugin` |  |
 | `ahg-label` | 1383 | later: V1.0+ | Planned | 22 | `ahgLabelPlugin` |  |
 | `ahg-landing-page` | 3557 | later: V1.0+ | Planned | 20 | `ahgLandingPagePlugin` |  |
@@ -79,11 +79,11 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-loan` | 3798 | out: GLAM sector | Planned | 21 | `ahgLoanPlugin` |  |
 | `ahg-marketing` | 726 | later: V1.0+ | Planned | 20 | none |  |
 | `ahg-marketplace` | 19926 | out: GLAM sector | Planned | 22 | `ahgMarketplacePlugin` |  |
-| `ahg-media-processing` | 2733 | V0.1 candidate | Partial | 5 | none | Reference copies and thumbnails made on upload |
+| `ahg-media-processing` | 2733 | V0.1 candidate | Partial | 5 | none | Reference copies and thumbnails in a job, made again on request, the institution's watermark on reference copies (v0.0.64); a watermark per object and by security classification in phase 18, audio and video previews and transcription later |
 | `ahg-media-streaming` | 1727 | V0.1 candidate | Planned | 22 | none |  |
 | `ahg-menu-manage` | 1790 | V0.1 candidate | Covered |  | `ahgMenuManagePlugin` | Navigation written fresh |
 | `ahg-metadata-export` | 15322 | V0.1 candidate | Partial | 11 | `ahgMetadataExportPlugin` | EAD, DC, MODS, CSV, RiC-O; more crosswalks in phase 11 |
-| `ahg-metadata-extraction` | 2770 | V0.1 candidate | Planned | 5 | `ahgMetadataExtractionPlugin` |  |
+| `ahg-metadata-extraction` | 2770 | V0.1 candidate | Partial | 5 | `ahgMetadataExtractionPlugin` | Embedded metadata read with exiftool and kept on the master; creator, date, title, description and copyright proposed for review (v0.0.64); keywords wait for a subject proposal kind |
 | `ahg-mods-manage` | 956 | out: GLAM sector | Partial | 21 | `ahgModsManagePlugin`, `sfModsPlugin` | MODS export |
 | `ahg-multi-tenant` | 2626 | later: V1.0+ | Covered |  | `ahgMultiTenantPlugin` | An institution per host, isolated by design; compare with PSIS ahgMultiTenantPlugin, which has more screens |
 | `ahg-museum` | 7661 | out: GLAM sector | Planned | 21 | `ahgMuseumPlugin` |  |
@@ -93,7 +93,7 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-oai` | 1847 | V0.1 candidate | Covered |  | `arOaiPlugin` | OAI-PMH, Export-Only profile |
 | `ahg-observability` | 1903 | later: V1.0+ | Planned | 12 | `ahgObservabilityPlugin` |  |
 | `ahg-ocfl` | 3106 | later: V1.0+ | Planned | 15 | `ahgOcflPlugin` |  |
-| `ahg-pdf-tools` | 2093 | V0.1 candidate | Planned | 5 | `ahgTiffPdfMergePlugin` |  |
+| `ahg-pdf-tools` | 2093 | V0.1 candidate | Partial | 5 | `ahgTiffPdfMergePlugin` | A PDF's text layer proposed as its transcript (v0.0.64); merging TIFFs into a PDF with the scanning workflows, phase 22 |
 | `ahg-portable-export` | 3000 | later: V1.0+ | Planned | 11 | `ahgPortableExportPlugin` | Read PSIS ahgPortableExportPlugin too, which does more |
 | `ahg-preservation` | 10211 | later: V1.0+ | Planned | 15 | `ahgPreservationPlugin` |  |
 | `ahg-privacy` | 16854 | later: jurisdiction | Planned | 18 | `ahgPrivacyPlugin` |  |
@@ -133,7 +133,7 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 
 : Heratio packages and their Workspace status
 
-Totals: 22 covered, 22 partial, 76 planned, of 120 (27 October 2026).
+Totals: 23 covered, 24 partial, 73 planned, of 120 (27 October 2026).
 
 ## PSIS plugins without a Heratio package
 

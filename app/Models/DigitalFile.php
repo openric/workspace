@@ -13,20 +13,23 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[Fillable(['institution_id', 'instantiation_id', 'use_id', 'original_name', 'mime_type', 'size_bytes', 'sha256', 'storage_path', 'width', 'height',
-    'scanned_with', 'scanned_at', 'fixity_checked_at', 'fixity_failed_at'])]
+    'scanned_with', 'scanned_at', 'fixity_checked_at', 'fixity_failed_at', 'embedded_metadata'])]
 class DigitalFile extends Model
 {
     use Audited, HasUuids;
 
-    /** A passing fixity check is not audited, so the daily check does not fill the log; a failure is. */
+    /**
+     * A passing fixity check is not audited, so the daily check does not fill the log; a failure is.
+     * Embedded metadata is read from the master, which never changes, so it can be read again at any time.
+     */
     public function notAudited(): array
     {
-        return ['fixity_checked_at'];
+        return ['fixity_checked_at', 'embedded_metadata'];
     }
 
     protected function casts(): array
     {
-        return ['scanned_at' => 'immutable_datetime', 'fixity_checked_at' => 'immutable_datetime', 'fixity_failed_at' => 'immutable_datetime', 'size_bytes' => 'integer'];
+        return ['scanned_at' => 'immutable_datetime', 'fixity_checked_at' => 'immutable_datetime', 'fixity_failed_at' => 'immutable_datetime', 'size_bytes' => 'integer', 'embedded_metadata' => 'array'];
     }
 
     public function instantiation(): BelongsTo

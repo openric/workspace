@@ -43,7 +43,7 @@ It runs `artisan schedule:run` as `www-data`, which can read the audit signing k
 
 ## Uploads
 
-A file may be as large as `WORKSPACE_MAX_UPLOAD_MB` (60 MB unless set). nginx's `client_max_body_size` and PHP's `upload_max_filesize` and `post_max_size` must allow at least that. Every upload is scanned with `clamdscan`, which needs the ClamAV daemon running; set `WORKSPACE_VIRUS_SCANNER=` to keep files as not scanned where there is no scanner. The viewing copies are made by ImageMagick's `convert` command and a PDF's first page by `pdftoppm` (packages `imagemagick` and `poppler-utils`), each in its own process, so a file they cannot read is kept without copies.
+A file may be as large as `WORKSPACE_MAX_UPLOAD_MB` (60 MB unless set). nginx's `client_max_body_size` and PHP's `upload_max_filesize` and `post_max_size` must allow at least that. Every upload is scanned with `clamdscan`, which needs the ClamAV daemon running; set `WORKSPACE_VIRUS_SCANNER=` to keep files as not scanned where there is no scanner. The viewing copies are made by ImageMagick's `convert` command and a PDF's first page by `pdftoppm` (packages `imagemagick` and `poppler-utils`), each in its own process, so a file they cannot read is kept without copies. A PDF's text is read by `pdftotext` (also `poppler-utils`), embedded metadata by `exiftool` (package `libimage-exiftool-perl`), and a watermark's text is drawn in DejaVu Sans (`fonts-dejavu-core`). Files kept before v0.0.64 are read with `sudo -u www-data php artisan workspace:files:read --as=<email address of the account the proposals come from>`.
 
 ## API keys
 

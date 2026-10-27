@@ -5,7 +5,7 @@
     @php($lang = \App\Support\Vocab::languages())
     <h1>{{ __('Jobs') }}</h1>
     @if(session('status'))<p role="status">{{ session('status') }}</p>@endif
-    <p>{{ $all ? __('Work the Workspace does in the background for everyone in the institution: imports, and the viewing copies of uploaded files.') : __('Work the Workspace does in the background for you: imports, and the viewing copies of files you upload.') }}</p>
+    <p>{{ $all ? __('Work the Workspace does in the background for everyone in the institution: imports, and the viewing copies, embedded metadata and text of uploaded files.') : __('Work the Workspace does in the background for you: imports, and the viewing copies, embedded metadata and text of files you upload.') }}</p>
     @if($stats)
         <p>{{ __(':total jobs: :pending waiting, :running running, :completed completed, :failed failed, :cancelled cancelled.', $stats) }}</p>
         <p><a href="{{ route('jobs.csv') }}">{{ __('Export as CSV') }}</a></p>

@@ -24,7 +24,7 @@
         <section aria-label="{{ __('Digital copies and carriers') }}">
         @foreach($instantiations as ['instantiation' => $instantiation, 'files' => $files])
             <figure style="margin: 1rem 0">
-                @include('description._viewer', ['instantiation' => $instantiation, 'files' => $files, 'title' => $view->label($instantiation), 'fileRoute' => 'discover.file'])
+                @include('description._viewer', ['instantiation' => $instantiation, 'files' => $files, 'title' => $view->label($instantiation), 'alt' => $view->value($instantiation, 'instantiation-alt-text'), 'fileRoute' => 'discover.file'])
                 <figcaption>{{ $view->label($instantiation) }} @include('description._ric', ['term' => 'rico:Instantiation'])
                     <span class="meta">{{ collect([$instantiation->carrierType?->label(\App\Support\Vocab::languages())])->filter()->join('') }}</span>
                     @include('discover._rights', ['subject' => $instantiation, 'view' => $view, 'compact' => true])

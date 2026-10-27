@@ -12,7 +12,8 @@ use App\Models\Instantiation;
 
 class MakeViewingCopies extends TrackedJob
 {
-    public function __construct(string $jobId, public string $instantiationId)
+    /** $remake: make them again, replacing the copies there are (after the watermark changed). */
+    public function __construct(string $jobId, public string $instantiationId, public bool $remake = false)
     {
         parent::__construct($jobId);
     }
@@ -20,7 +21,8 @@ class MakeViewingCopies extends TrackedJob
     protected function run(BackgroundJob $job): array
     {
         $instantiation = Instantiation::findOrFail($this->instantiationId);
+        $service = app(InstantiationService::class);
 
-        return ['copies' => app(InstantiationService::class)->makeCopies($instantiation, $job->user)];
+        return ['copies' => $this->remake ? $service->remakeCopies($instantiation, $job->user) : $service->makeCopies($instantiation, $job->user)];
     }
 }

@@ -15,8 +15,11 @@
     @endif
 
     @include('description._viewer', ['instantiation' => $instantiation, 'files' => $instantiation->files->filter(fn ($f) => $deliverable[$f->id])->keyBy(fn ($f) => $f->use->notation),
-        'title' => $instantiation->described('instantiation-title', ['en']), 'fileRoute' => 'files.show'])
+        'title' => $instantiation->described('instantiation-title', ['en']), 'alt' => $instantiation->described('instantiation-alt-text', [app()->getLocale(), 'en']), 'fileRoute' => 'files.show'])
     <h2>{{ __('Files') }}</h2>
+    @if($canUpdate && $instantiation->file('master'))
+        <form method="post" action="{{ route('instantiations.remake-copies', $instantiation) }}">@csrf<button type="submit" style="margin-top: 0">{{ __('Make the viewing copies again') }}</button></form>
+    @endif
     @forelse($instantiation->files->sortBy(fn ($f) => array_search($f->use->notation, ['master', 'reference', 'thumbnail'])) as $file)
         <section style="border-top: 1px solid var(--line); padding: .5rem 0">
             <h3 style="margin: .2rem 0">{{ $file->use->label(\App\Support\Vocab::languages()) }}</h3>
@@ -29,6 +32,14 @@
                 @if($file->use->notation === 'master')<br>{{ $file->scanned_with ? __('Scanned for viruses with :scanner on :date.', ['scanner' => $file->scanned_with, 'date' => $file->scanned_at->format('Y-m-d H:i')]) : __('Not scanned for viruses: no scanner was configured.') }}@endif</p>
             <p>@if($deliverable[$file->id])<a href="{{ route('files.show', $file) }}">{{ __('Open') }}</a> · <a href="{{ route('files.show', [$file, 'download' => 1]) }}">{{ __('Download') }}</a>@else<small>{{ __('You may not receive this file: its use needs the read-:use permission, and the instantiation is :availability.', ['use' => $file->use->notation, 'availability' => mb_strtolower($instantiation->availability->label(\App\Support\Vocab::languages()))]) }}</small>@endif
                 @if($canUpdate) <form method="post" action="{{ route('files.fixity', $file) }}" style="display: inline">@csrf<button type="submit" style="margin-top: 0; padding: .1rem .5rem">{{ __('Check fixity now') }}</button></form>@endif</p>
+            @if($file->embedded_metadata && $deliverable[$file->id])
+                <details><summary>{{ trans_choice('Embedded metadata: :count tag|Embedded metadata: :count tags', count($file->embedded_metadata), ['count' => count($file->embedded_metadata)]) }}</summary>
+                    <table><thead><tr><th scope="col">{{ __('Tag') }}</th><th scope="col">{{ __('Value') }}</th></tr></thead><tbody>
+                        @foreach($file->embedded_metadata as $tag => $value)<tr><td><code>{{ $tag }}</code></td><td style="word-break: break-word">{{ $value }}</td></tr>@endforeach
+                    </tbody></table>
+                    <p><small>{{ __('As the file gives it, read with exiftool. What a description can use was proposed for review.') }}</small></p>
+                </details>
+            @endif
         </section>
     @empty
         <p>{{ __('No file: a carrier recorded without one, such as the paper original.') }}</p>

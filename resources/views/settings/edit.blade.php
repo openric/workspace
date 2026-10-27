@@ -25,6 +25,8 @@
         <label for="catalogue_credits">{{ __('Credits for data reused from others') }}</label>
         <small id="credits-help">{{ __('Shown on the catalogue\'s home page. Many open-data licences require a credit with each reuse: give the author, the dataset, its version and date, and a link.') }}</small>
         <textarea id="catalogue_credits" name="catalogue_credits" rows="6" aria-describedby="credits-help">{{ old('catalogue_credits', $institution->catalogue_credits) }}</textarea>
+        <h2>{{ __('Images') }}</h2>
+        <p><a href="{{ route('watermark.edit') }}">{{ __('Watermark on the reference copies of images') }}</a></p>
         <h2>{{ __('Users') }}</h2>
         <label style="font-weight: normal"><input type="hidden" name="registration_open" value="0"><input type="checkbox" name="registration_open" value="1" style="width: auto" @checked(old('registration_open', $institution->registration_open))> {{ __('Visitors may ask for an account; an administrator approves or rejects each request under Accounts') }}</label>
         <h2>{{ __('Interface languages') }}</h2>

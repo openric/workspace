@@ -10,9 +10,11 @@ use App\Audit\Audited;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['name', 'base_iri', 'header_title', 'logo_path', 'logo_mime', 'catalogue_introduction', 'catalogue_credits', 'registration_open', 'interface_languages'])]
+#[Fillable(['name', 'base_iri', 'header_title', 'logo_path', 'logo_mime', 'catalogue_introduction', 'catalogue_credits', 'registration_open', 'interface_languages',
+    'watermark_type_id', 'watermark_position_id', 'watermark_opacity', 'watermark_min_size', 'watermark_image_path'])]
 class Institution extends Model
 {
     protected function casts(): array
@@ -31,6 +33,16 @@ class Institution extends Model
     public function headerTitle(): string
     {
         return $this->header_title ?: (string) config('app.name');
+    }
+
+    public function watermarkType(): BelongsTo
+    {
+        return $this->belongsTo(Concept::class, 'watermark_type_id');
+    }
+
+    public function watermarkPosition(): BelongsTo
+    {
+        return $this->belongsTo(Concept::class, 'watermark_position_id');
     }
 
     public function users(): HasMany

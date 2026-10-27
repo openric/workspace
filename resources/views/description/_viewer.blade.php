@@ -5,7 +5,8 @@
      wavesurfer waveform. PDFs: Heratio shows them in an iframe, which a sandboxed file response cannot fill, so they are drawn with Heratio's
      pdf.js here. GLB models keep model-viewer (description._model).
      Needs $instantiation, $files (the files the reader may receive, keyed by use: master, reference, thumbnail), $title and $fileRoute
-     ('files.show' signed in, 'discover.file' public). Shows nothing when no file suits a viewer. --}}
+     ('files.show' signed in, 'discover.file' public); $alt, the instantiation's alternative text in the reader's language, is what an
+     image or model is said to show, and its title when it has none. Shows nothing when no file suits a viewer. --}}
 @php
     $master = $files['master'] ?? null;
     $reference = $files['reference'] ?? null;
@@ -23,9 +24,10 @@
         default => null,
     };
     $viewerId = 'v-'.$instantiation->id;
+    $alt = ($alt ?? null) ?: $title;
 @endphp
 @if($kind === 'glb')
-    @include('description._model', ['src' => $url($reference ?? $master), 'alt' => $title])
+    @include('description._model', ['src' => $url($reference ?? $master), 'alt' => $alt])
 @elseif($kind === 'image')
     @php
         $image = $browserImage($reference) ? $reference : ($browserImage($master) ? $master : $thumbnail);
@@ -43,7 +45,7 @@
         <div id="osd-{{ $viewerId }}" class="viewer-stage" @if($mode !== 'openseadragon') style="display: none" @endif></div>
         <div id="mirador-{{ $viewerId }}" class="viewer-stage" @if($mode !== 'mirador') style="display: none" @endif></div>
         <div id="img-{{ $viewerId }}" class="viewer-stage viewer-image" @if($mode !== 'single') style="display: none" @endif>
-            <img src="{{ $url($image) }}" alt="{{ $title }}" width="{{ $image->width }}" height="{{ $image->height }}">
+            <img src="{{ $url($image) }}" alt="{{ $alt }}" width="{{ $image->width }}" height="{{ $image->height }}">
         </div>
     </div>
     @once
@@ -131,7 +133,7 @@
 @elseif($kind === 'mesh')
     <div class="file-viewer">
         <div id="{{ $viewerId }}-container" class="viewer-stage mesh-stage">
-            <canvas id="{{ $viewerId }}-canvas" style="width: 100%; height: 100%" aria-label="{{ $title }}" role="img"></canvas>
+            <canvas id="{{ $viewerId }}-canvas" style="width: 100%; height: 100%" aria-label="{{ $alt }}" role="img"></canvas>
             <p id="{{ $viewerId }}-loading" class="mesh-loading">{{ __('Loading the 3D model...') }}</p>
         </div>
         <p class="meta">{{ __('Drag to turn the model, scroll to zoom.') }}</p>

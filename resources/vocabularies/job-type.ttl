@@ -13,7 +13,7 @@ v: a skos:ConceptScheme ;
     dcterms:title "OpenRiC Workspace Job Types"@en ;
     dcterms:description "The kinds of work the Workspace runs in the background."@en ;
     dcterms:issued "2026-10-27"^^xsd:date ;
-    skos:hasTopConcept v:import, v:viewing-copies .
+    skos:hasTopConcept v:import, v:viewing-copies, v:file-text, v:embedded-metadata .
 
 v:import a skos:Concept ;
     skos:inScheme v: ;
@@ -28,3 +28,17 @@ v:viewing-copies a skos:Concept ;
     skos:prefLabel "Viewing copies"@en ;
     skos:scopeNote "Operational: the work of a background job, not part of any RiC description."@en ;
     skos:definition "Making the reference copy and thumbnail of an uploaded file."@en .
+
+v:file-text a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "File text"@en ;
+    skos:scopeNote "Operational: the work of a background job, not part of any RiC description."@en ;
+    skos:definition "Reading the text layer of an uploaded PDF, proposed as the transcript of its instantiation."@en .
+
+v:embedded-metadata a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Embedded metadata"@en ;
+    skos:scopeNote "Operational: the work of a background job, not part of any RiC description."@en ;
+    skos:definition "Reading the EXIF, IPTC, XMP or PDF metadata of an uploaded file, and proposing what a description can use."@en .

@@ -91,7 +91,7 @@ Standing rules for every phase: vocabularies, never enums; every field names its
 | 1 | Interface in more than one language | WS-005 | V0.1 | `lang/*.json` (copy after a provenance check: the strings may come from AtoM's translations, whose notice must travel with them) |
 | 2 | Rights statements and rights holders on files | WS-007 | V0.1 | `ahg-extended-rights`, `ahg-rights-holder-manage` |
 | 4 | Heratio migration check on a difficult sample | WS-013 | V0.1 | `ahg-data-migration`, with the existing AtoM import |
-| 5 | Background jobs, file text, embedded metadata and image alt text | WS-007, WS-016 | V0.5 | `ahg-pdf-tools`, `ahg-media-processing`; `ahg-metadata-extraction`, `ahg-jobs`; alt text from `ahg-core` (PSIS `ahgAccessibilityPlugin`) |
+| 5 | Background jobs, file text, embedded metadata, image alt text and watermarks | WS-007, WS-016 | V0.5 | `ahg-pdf-tools`, `ahg-media-processing`; `ahg-metadata-extraction`, `ahg-jobs`; alt text from `ahg-core` (PSIS `ahgAccessibilityPlugin`) |
 | 6 | Full-text search with facets | WS-016 | V0.5 | `ahg-search` (its queries on PostgreSQL full text instead of Elasticsearch, by ADR) |
 | 7 | Access requests for files on request; email delivery | WS-007, WS-011 | V0.5 | `ahg-access-request`, `ahg-researcher-manage`; Heratio `app/` `EmailBounceController`, `EmailSuppressionGate` (PSIS `ahgEmailDeliveryPlugin`) |
 | 8 | Reports, the report builder and statistics | WS-016 | V0.5 | `ahg-reports` (with `ReportBuilderController`; PSIS `ahgReportBuilderPlugin`), `ahg-statistics` |
@@ -171,7 +171,13 @@ Progress:
   - Copied from Heratio's `ahg-jobs`: the jobs record, its screen with statistics, filters, a job's detail, cancelling, a CSV export and clearing old jobs; AtoM's job tables become `background_jobs`, with types and statuses as vocabularies.
   - An upload keeps and checks its file at once and makes its viewing copies in the background; an import's dry run and import run in the background, and the import page refreshes itself until they are done.
   - The scheduler runs a worker each minute while there is work (`deploy/cron/openric-workspace`).
-- **Next**: text from a PDF's own text layer as a proposed transcript, embedded metadata, then alternative text for images.
+- **v0.0.64**: file text, embedded metadata, alternative text and watermarks. Phase 5 is done.
+  - Copied from Heratio's `ahg-pdf-tools`: a PDF's own text layer, read with pdftotext in a job, is proposed as its instantiation's transcript and reviewed in the queue. A scan without a text layer gives nothing; OCR is in phase 17.
+  - Copied from `ahg-metadata-extraction`: a file's EXIF, IPTC, XMP or PDF metadata, read with exiftool in a job, is kept on its master and shown to those who may receive the master. Its creator, date, title, description and copyright are proposed for the record rather than written into it.
+  - Copied from `ahg-core` (PSIS `ahgAccessibilityPlugin`): every image can carry alternative text in each language, as an element of its instantiation, used as the image's alt in the catalogue and the viewer. Manage, Alternative text lists the images without it, with the coverage.
+  - Copied from `ahg-media-processing`: the institution's watermark (copyright, confidential, draft or its own image) on the reference copy of each image, never on the master or thumbnail. Viewing copies can be made again after a change.
+  - `workspace:files:read --as=<email>` reads the files kept before this release.
+- Left for later phases: keywords, until there is a subject proposal kind; a watermark per object or by security classification (phase 18); merging TIFFs into a PDF (phase 22).
 
 **6. Full-text search (WS-016).** Search is a substring match on names and identifiers. Copy the behaviour of `ahg-search` (query syntax, facets by level, date, repository, subject and place, highlighting, analytics), on PostgreSQL full-text search with one configuration per language, decided by ADR against Elasticsearch, which Heratio uses. Index only what the reader may see, so the public catalogue and the API search published values only. Done when the acceptance queries and the access negative tests pass.
 

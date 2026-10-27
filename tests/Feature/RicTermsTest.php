@@ -22,8 +22,8 @@ class RicTermsTest extends TestCase
     private const VOCAB = 'https://workspace.openric.org/vocab/';
 
     /** The vocabularies whose concepts stand for fields or the values of fields. */
-    /** Terms proposed for the extension ontology and not yet in it: openric/spec#64 and #65. */
-    private const PROPOSED = ['openricx:hasNameType', 'openricx:transcript'];
+    /** Terms proposed for the extension ontology and not yet in it: openric/spec#64, #65 and #66. */
+    private const PROPOSED = ['openricx:hasNameType', 'openricx:transcript', 'openricx:alternativeText'];
 
     private const MAPPED = ['description-element', 'date-property', 'level-of-description', 'agent-type', 'identifier-type',
         'relation-type', 'relation-state', 'relation-certainty', 'date-qualifier'];

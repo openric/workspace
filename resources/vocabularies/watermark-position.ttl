@@ -1,0 +1,86 @@
+# OpenRiC Workspace - OpenRiC Workspace Watermark Positions.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Where the watermark goes on the image (Heratio's watermark_position dropdown and WatermarkService::POSITION_MAP).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/watermark-position/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Watermark Positions"@en ;
+    dcterms:description "Where the Workspace places the watermark on a reference copy."@en ;
+    dcterms:issued "2026-10-27"^^xsd:date ;
+    skos:hasTopConcept v:top-left, v:top-center, v:top-right, v:center-left, v:center, v:center-right, v:bottom-left, v:bottom-center, v:bottom-right, v:repeat .
+
+v:top-left a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Top left"@en ;
+    skos:scopeNote "Operational: how a viewing copy is marked, not part of any RiC description."@en ;
+    skos:definition "In the top left of the image."@en .
+
+v:top-center a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Top centre"@en ;
+    skos:scopeNote "Operational: how a viewing copy is marked, not part of any RiC description."@en ;
+    skos:definition "In the top centre of the image."@en .
+
+v:top-right a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Top right"@en ;
+    skos:scopeNote "Operational: how a viewing copy is marked, not part of any RiC description."@en ;
+    skos:definition "In the top right of the image."@en .
+
+v:center-left a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Centre left"@en ;
+    skos:scopeNote "Operational: how a viewing copy is marked, not part of any RiC description."@en ;
+    skos:definition "In the centre left of the image."@en .
+
+v:center a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Centre"@en ;
+    skos:scopeNote "Operational: how a viewing copy is marked, not part of any RiC description."@en ;
+    skos:definition "In the centre of the image."@en .
+
+v:center-right a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Centre right"@en ;
+    skos:scopeNote "Operational: how a viewing copy is marked, not part of any RiC description."@en ;
+    skos:definition "In the centre right of the image."@en .
+
+v:bottom-left a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Bottom left"@en ;
+    skos:scopeNote "Operational: how a viewing copy is marked, not part of any RiC description."@en ;
+    skos:definition "In the bottom left of the image."@en .
+
+v:bottom-center a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Bottom centre"@en ;
+    skos:scopeNote "Operational: how a viewing copy is marked, not part of any RiC description."@en ;
+    skos:definition "In the bottom centre of the image."@en .
+
+v:bottom-right a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Bottom right"@en ;
+    skos:scopeNote "Operational: how a viewing copy is marked, not part of any RiC description."@en ;
+    skos:definition "In the bottom right of the image."@en .
+
+v:repeat a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Repeated across the image"@en ;
+    skos:scopeNote "Operational: how a viewing copy is marked, not part of any RiC description."@en ;
+    skos:definition "Tiled over the whole image."@en .

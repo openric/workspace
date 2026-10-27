@@ -66,10 +66,11 @@ class FileStore
 
     /**
      * The reference copy and thumbnail of an image or a PDF, each kept like a master; none for other kinds of file.
+     * The reference copy of an image carries the watermark given (Watermark::configFor); a master never does, nor a thumbnail.
      *
      * @return array<string, array> use => what ingest() returns
      */
-    public function copies(string $institutionId, string $masterPath, string $mime): array
+    public function copies(string $institutionId, string $masterPath, string $mime, ?array $watermark = null): array
     {
         if ($mime === self::MODEL) {
             // ponytail: a browser needs the whole model to show it, so the reference copy of a GLB is the master itself,
@@ -111,6 +112,9 @@ class FileStore
                 if (! $process->isSuccessful() || filesize($temp) === 0) {
                     @unlink($temp);
                     throw new RuntimeException('ImageMagick could not read it: '.trim(mb_substr($process->getErrorOutput() ?: 'exit '.$process->getExitCode(), 0, 300)));
+                }
+                if ($use === 'reference' && $watermark !== null && str_starts_with($mime, 'image/')) {
+                    app(Watermark::class)->apply($temp, $watermark);
                 }
                 $sha = hash_file('sha256', $temp);
                 $copies[$use] = [...$this->keep($institutionId, $temp, $sha), 'sha256' => $sha, 'size_bytes' => (int) filesize($temp), 'mime_type' => 'image/jpeg',

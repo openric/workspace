@@ -52,6 +52,7 @@
                 'proposals.index' => [__('Proposals to review'), $user->mayAnywhere('review-proposals', 'description'), 'proposals.*'],
                 'records.export-all' => [__('Export descriptions'), $user->mayAnywhere('read', 'description'), 'records.export-all'],
                 'agents.duplicates' => [__('Duplicate authority records'), $user->may('update', 'authority'), 'agents.duplicates'],
+                'alt-text.index' => [__('Alternative text'), $user->mayAnywhere('update', 'description'), 'alt-text.*'],
                 'jobs.index' => [__('Jobs'), true, 'jobs.*'],
             ],
             'Admin' => [

@@ -28,7 +28,8 @@
         {{-- The images first, as AtoM shows the digital object above the description; the instantiations are managed below. --}}
         <section aria-label="{{ __('Digital copies') }}" style="display: flex; gap: 1rem; flex-wrap: wrap; margin: 1rem 0">
             @foreach($preview as [$instantiation, $files])
-                <div style="flex: 1 1 100%; min-width: 0">@include('description._viewer', ['instantiation' => $instantiation, 'files' => $files, 'title' => $instantiation->described('instantiation-title', [app()->getLocale(), 'en']), 'fileRoute' => 'files.show'])</div>
+                <div style="flex: 1 1 100%; min-width: 0">@include('description._viewer', ['instantiation' => $instantiation, 'files' => $files, 'title' => $instantiation->described('instantiation-title', [app()->getLocale(), 'en']),
+                    'alt' => $instantiation->described('instantiation-alt-text', [app()->getLocale(), 'en']), 'fileRoute' => 'files.show'])</div>
             @endforeach
         </section>
     @endif

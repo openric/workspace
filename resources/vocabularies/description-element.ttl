@@ -622,6 +622,13 @@ v:instantiation-transcript a skos:Concept ;
     skos:scopeNote "Kept as openricx:transcript, proposed in openric/spec#65: RiC-O 1.1 has no property for the text of an instantiation, so it is not exported until the extension ontology defines one. The text read from the carrier, such as an OCR or a transcription accepted from a proposal (ADR 0007); Heratio's transcript property of a digital object."@en ;
     skos:definition "The text of this carrier, as read from it."@en .
 
+v:instantiation-alt-text a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:instantiation ;
+    skos:prefLabel "Alternative text"@en ;
+    skos:scopeNote "Kept as openricx:alternativeText, proposed in openric/spec#66: RiC-O 1.1 has no property for it, so it is not exported in RiC until the extension ontology defines one. Written by staff, never by a model (WCAG 2.1 success criterion 1.1.1); shown as the image's alternative text in the catalogue and the viewer. Heratio's image_alt_text (ahg-core) and PSIS's ahgAccessibilityPlugin."@en ;
+    skos:definition "What the image shows, said in words for those who cannot see it, such as the council on the town hall steps."@en .
+
 v:container a skos:Concept ;
     skos:inScheme v: ;
     skos:topConceptOf v: ;

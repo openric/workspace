@@ -11,6 +11,7 @@
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\AgentController;
+use App\Http\Controllers\AltTextController;
 use App\Http\Controllers\ApiKeyController;
 use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\ClipboardController;
@@ -44,6 +45,7 @@ use App\Http\Controllers\SessionController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\StorageController;
 use App\Http\Controllers\VocabularyController;
+use App\Http\Controllers\WatermarkController;
 use App\Http\Middleware\ServeDiscovery;
 use App\Http\Middleware\SetLocale;
 use App\Relations\EntityKinds;
@@ -187,6 +189,7 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::get('/instantiations/{instantiation}', [InstantiationController::class, 'show'])->name('instantiations.show');
     Route::get('/instantiations/{instantiation}/edit', [InstantiationController::class, 'edit'])->name('instantiations.edit');
     Route::post('/instantiations/{instantiation}', [InstantiationController::class, 'update'])->name('instantiations.update');
+    Route::post('/instantiations/{instantiation}/copies', [WatermarkController::class, 'remake'])->name('instantiations.remake-copies');
     Route::get('/files/{file}', [InstantiationController::class, 'file'])->name('files.show');
     Route::post('/files/{file}/fixity', [InstantiationController::class, 'fixity'])->name('files.fixity');
 
@@ -303,6 +306,10 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::middleware('can:'.Vocab::permission('manage-institution'))->group(function () {
         Route::get('/settings', [SettingsController::class, 'edit'])->name('settings.edit');
         Route::post('/settings', [SettingsController::class, 'update'])->name('settings.update');
+        // The watermark on images' reference copies, and making the copies again (roadmap phase 5).
+        Route::get('/settings/watermark', [WatermarkController::class, 'edit'])->name('watermark.edit');
+        Route::post('/settings/watermark', [WatermarkController::class, 'update'])->name('watermark.update');
+        Route::post('/settings/watermark/remake', [WatermarkController::class, 'remakeAll'])->name('watermark.remake-all');
     });
 
     // Dates, names and identifiers of any described entity (ADR 0006); each controller checks update on the entity.
@@ -315,6 +322,10 @@ Route::middleware(['auth', 'active'])->group(function () {
                 Route::post("/{{$parameter}}/remove", [$controller, 'destroy'])->name('destroy');
             });
     }
+
+    // Alternative text for images (roadmap phase 5; Heratio's ahg-core alt-text worklist).
+    Route::get('/alt-text', [AltTextController::class, 'index'])->name('alt-text.index');
+    Route::post('/alt-text/{instantiation}', [AltTextController::class, 'store'])->whereUuid('instantiation')->name('alt-text.store');
 
     // Background jobs (roadmap phase 5): each account its own, all of them for one that may manage the institution.
     Route::get('/jobs', [JobsController::class, 'index'])->name('jobs.index');

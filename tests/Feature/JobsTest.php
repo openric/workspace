@@ -100,7 +100,8 @@ class JobsTest extends TestCase
             ->assertRedirect()->assertSessionHasNoErrors();
         $instantiation = Instantiation::where('record_resource_id', $this->item->id)->firstOrFail();
         $this->assertSame(['master'], $instantiation->files()->with('use')->get()->map(fn ($f) => $f->use->notation)->all(), 'only the file, kept and checked');
-        $job = BackgroundJob::where(['subject_table' => 'instantiations', 'subject_id' => $instantiation->id])->firstOrFail();
+        $job = BackgroundJob::where(['subject_table' => 'instantiations', 'subject_id' => $instantiation->id])
+            ->whereHas('type', fn ($q) => $q->where('notation', 'viewing-copies'))->firstOrFail();
         $this->assertSame('pending', $this->statusOf($job));
         $this->assertSame($this->editor->id, $job->user_id);
 
