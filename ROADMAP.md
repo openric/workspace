@@ -171,7 +171,10 @@ Progress:
   - Ranked results with the matches highlighted; facets by kind, level and repository; a range of years.
   - The index follows every change.
   - Lists in the screens are distinct rows in alternating colours, and the header's search fits a phone.
-- **Next**: staff search over drafts the reader may see, and search statistics.
+- **v0.0.61**: staff search and search statistics.
+  - The Workspace header has a search box. Accounts that may see drafts search everything; others search what is published. Each result is checked against what the account may read.
+  - Search statistics under Manage: what was searched most and which searches found nothing, over 7, 30, 90 or 365 days, with nothing kept about who searched.
+- **Next**: search by meaning comes in phase 17; phase 6 is otherwise done.
 
 **7. Access requests (WS-007, WS-011).** An instantiation "on request" can be opened today only by staff. Copy `ahg-access-request`: a signed-in researcher asks for a file, giving a reason; staff approve or refuse; approval gives that researcher time-limited access; each step is audited and emailed. Registered researchers come from `ahg-researcher-manage`, beside the registration requests that already exist. Done when a researcher's approved request opens the file and an expired one does not.
 

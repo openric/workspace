@@ -48,7 +48,4 @@ No new service to run. A catalogue of some hundreds of thousands of entities is 
 
 Revisit if relevance tuning, synonyms or search across very large federated catalogues are needed: the index table is derived and can be fed to another engine.
 
-Next steps:
-- staff search over the staff entries;
-- search statistics without visitors' addresses;
-- search by meaning (phase 17).
+Staff search over the staff entries and search statistics without visitors' addresses followed in v0.0.61. Next: search by meaning (phase 17).

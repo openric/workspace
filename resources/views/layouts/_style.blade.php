@@ -166,6 +166,16 @@
         main ul:not([class]):not(nav ul):not(.tree ul):not(.imageflow ul):not(.collections-carousel ul) > li:nth-child(even) { background: var(--surface); }
         main ul:not([class]):not(nav ul):not(.tree ul):not(.imageflow ul):not(.collections-carousel ul) > li > .meta { display: block; font-size: .85rem; margin-top: .15rem; }
         tbody tr:nth-child(even) { background: var(--surface); }
+        /* Search results: facets beside the results, under them on a narrow screen (ADR 0009). */
+        .search-layout { display: grid; grid-template-columns: 15rem 1fr; gap: 1.5rem; align-items: start; }
+        .search-facets h2 { font-size: 1rem; margin: 1rem 0 .3rem; border: 0; padding: 0; }
+        .search-facets .facets { list-style: none; padding: 0; margin: 0; font-size: .92rem; }
+        .search-facets .facets li { margin: .2rem 0; }
+        .facet-years input { max-width: 6rem; }
+        .snippet { display: block; font-size: .9rem; color: var(--muted-2); margin-top: .25rem; }
+        .snippet mark { background: #fef08a; color: #1f2937; padding: 0 .1rem; border-radius: 2px; }
+        @media (prefers-color-scheme: dark) { .snippet mark { background: #a16207; color: #fff; } }
+        @media (max-width: 52rem) { .search-layout { grid-template-columns: 1fr; } .search-facets { order: 2; } }
         /* Phones and narrow windows: nothing wider than the screen. Long IRIs and RiC-O terms wrap, wide tables scroll inside themselves, media shrink. */
         main, .main-nav { overflow-wrap: break-word; }
         code, .ric, dd, td { overflow-wrap: anywhere; }

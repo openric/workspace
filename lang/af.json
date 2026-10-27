@@ -1286,5 +1286,13 @@
     "you may not create authority records: choose an existing one": "u mag nie gesagsrekords skep nie: kies 'n bestaande een",
     "you may not create places: choose an existing one": "u mag nie plekke skep nie: kies 'n bestaande een",
     "you may not create repositories": "u mag nie bewaarplekke skep nie",
-    "· fixity failed": "· vastheid het misluk"
+    "· fixity failed": "· vastheid het misluk",
+    "Search statistics": "Soekstatistiek",
+    "What people searched for, in the public catalogue and in the Workspace. Nothing about who searched is kept.": "Waarna mense gesoek het, in die openbare katalogus en in die Werkruimte. Niks oor wie gesoek het, word bewaar nie.",
+    "Last :days days": "Laaste :days dae",
+    ":total searches, :unique different, :zero found nothing; :public in the public catalogue.": ":total soektogte, :unique verskillend, :zero het niks gevind nie; :public in die openbare katalogus.",
+    "Searched most": "Meeste gesoek",
+    "Results on average": "Gemiddelde resultate",
+    "Found nothing": "Niks gevind nie",
+    "What people look for and the catalogue does not yet describe, or describes in other words.": "Waarna mense soek wat die katalogus nog nie beskryf nie, of in ander woorde beskryf."
 }

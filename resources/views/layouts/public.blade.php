@@ -25,15 +25,6 @@
         .imageflow a:hover img, .imageflow a:focus-visible img { border-color: var(--link); }
         .catalogue-credits { text-align: justify; margin-top: 3rem; padding: 1.1rem 1.3rem; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); font-size: .92rem; color: var(--muted-2); }
         .catalogue-credits h2 { margin-top: 0; font-size: 1.05rem; border: 0; padding: 0; }
-        .search-layout { display: grid; grid-template-columns: 15rem 1fr; gap: 1.5rem; align-items: start; }
-        .search-facets h2 { font-size: 1rem; margin: 1rem 0 .3rem; border: 0; padding: 0; }
-        .search-facets .facets { list-style: none; padding: 0; margin: 0; font-size: .92rem; }
-        .search-facets .facets li { margin: .2rem 0; }
-        .facet-years input { max-width: 6rem; }
-        .snippet { display: block; font-size: .9rem; color: var(--muted-2); margin-top: .25rem; }
-        .snippet mark { background: #fef08a; color: #1f2937; padding: 0 .1rem; border-radius: 2px; }
-        @media (prefers-color-scheme: dark) { .snippet mark { background: #a16207; color: #fff; } }
-        @media (max-width: 52rem) { .search-layout { grid-template-columns: 1fr; } .search-facets { order: 2; } }
         @media (max-width: 40rem) { .catalogue-hero { padding: 1.5rem 1.1rem; border-radius: var(--radius); } .catalogue-lede { text-align: left; } }
     </style>
     @hasSection('head')@yield('head')@endif

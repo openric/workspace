@@ -56,6 +56,7 @@ final class SearchService
             return $q;
         };
 
+        $started = microtime(true);
         $total = $filtered()->count();
         $rows = $filtered()
             ->selectRaw("subject_table, subject_id, title,
@@ -66,6 +67,8 @@ final class SearchService
 
         $facet = fn (string $column, string $name) => $filtered([$name])->whereNotNull($column)->groupBy($column)->selectRaw("$column AS value, count(*) AS n")
             ->orderByDesc('n')->limit(20)->pluck('n', 'value')->map(fn ($n) => (int) $n)->all();
+
+        app(SearchAnalyticsService::class)->recordQuery($institution->id, $public, $query, $filters, $total, (microtime(true) - $started) * 1000);
 
         return [
             'total' => $total,

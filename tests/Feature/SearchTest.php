@@ -2,7 +2,7 @@
 
 // OpenRiC Workspace - full-text search (WS-016, roadmap phase 6, ADR 0009): what the public may read only, stemming
 // and accents, the query syntax, facets, a range of years, highlighting that cannot inject markup, and an index that
-// follows every change.
+// follows every change; staff search over drafts the account may see, and the search statistics.
 // Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
@@ -20,6 +20,8 @@ use App\Models\User;
 use App\Search\SearchIndex;
 use App\Search\SearchService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
 class SearchTest extends TestCase
@@ -109,5 +111,32 @@ class SearchTest extends TestCase
         // Withdrawn through the screens: gone from the public index at the end of the request.
         $this->actingAs($this->editor)->post(self::SITE."/records/{$this->photos->id}/publication", ['action' => 'withdraw']);
         $this->assertSame(0, $this->search('etude')['total']);
+    }
+
+    public function test_staff_search_shows_drafts_only_to_those_who_may_see_them(): void
+    {
+        $this->actingAs($this->editor)->get(self::SITE.'/search?q=courthouse')->assertOk()
+            ->assertSee('Minutes of the town council')->assertSee('Drafts are included.')->assertSee('<mark>courthouse</mark>', false);
+        $reader = app(AccountService::class)->create($this->institution, 'Reader', 'reader@example.org', 'correct horse battery staple');
+        $this->actingAs($reader)->get(self::SITE.'/search?q=courthouse')->assertOk()
+            ->assertSee('Published values only.')->assertSee('No results found.')->assertDontSee('Minutes of the town council');
+        $this->actingAs($reader)->get(self::SITE.'/search?q=committees')->assertOk()->assertSee('Minutes of the town council');
+    }
+
+    public function test_search_statistics_count_queries_without_keeping_who_searched(): void
+    {
+        $this->search('bridge');
+        $this->search('bridge');
+        $this->search('zeppelin');
+        $this->search('courthouse', public: false);
+        $this->assertSame(4, DB::table('search_queries')->count());
+        $this->assertNotContains('user_id', Schema::getColumnListing('search_queries'));
+
+        $this->actingAs($this->editor)->get(self::SITE.'/search/statistics')->assertForbidden();
+        $admin = app(AccountService::class)->create($this->institution, 'Admin', 'admin@example.org', 'correct horse battery staple');
+        app(AccountService::class)->grantTemplateRole($admin, 'administrator');
+        $this->actingAs($admin)->get(self::SITE.'/search/statistics')->assertOk()
+            ->assertSeeInOrder(['Searched most', 'bridge', '2', 'Found nothing', 'zeppelin'])
+            ->assertSee('4 searches, 3 different, 1 found nothing; 3 in the public catalogue.');
     }
 }

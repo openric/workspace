@@ -38,6 +38,7 @@ use App\Http\Controllers\RepositoryController;
 use App\Http\Controllers\RightsAdminController;
 use App\Http\Controllers\RightsController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\StorageController;
@@ -313,6 +314,11 @@ Route::middleware(['auth', 'active'])->group(function () {
                 Route::post("/{{$parameter}}/remove", [$controller, 'destroy'])->name('destroy');
             });
     }
+
+    // Full-text search and its statistics (roadmap phase 6, ADR 0009).
+    Route::get('/search', [SearchController::class, 'index'])->name('search');
+    Route::get('/search/statistics', [SearchController::class, 'statistics'])->name('search.statistics')
+        ->middleware('can:'.Vocab::permission('view-audit-log'));
 
     // The rights report and rights for what is on the clipboard (roadmap phase 2); the controller checks read or update.
     Route::get('/rights', [RightsAdminController::class, 'index'])->name('rights.index');

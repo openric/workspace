@@ -18,6 +18,7 @@
     @auth
         <form method="post" action="{{ route('sign-out') }}">
             @csrf
+            <a href="{{ route('search') }}">{{ __('Search') }}</a>
             <a href="{{ route('clipboard.index') }}">{{ __('Clipboard') }} ({{ app(\App\Clipboard\ClipboardService::class)->count() }})</a>
             <a href="{{ route('account.profile') }}">{{ auth()->user()->name }}</a>
             <button type="submit">{{ __('Log out') }}</button>
@@ -55,6 +56,7 @@
                 'accounts.index' => [__('Users'), $may('manage-accounts'), 'accounts.*'],
                 'roles.index' => [__('Roles'), $may('manage-roles'), 'roles.*'],
                 'audit' => [__('Audit log'), $may('view-audit-log'), 'audit'],
+                'search.statistics' => [__('Search statistics'), $may('view-audit-log'), 'search.statistics'],
                 'settings.edit' => [__('Settings'), $may('manage-institution'), 'settings.*'],
             ],
         ]));
