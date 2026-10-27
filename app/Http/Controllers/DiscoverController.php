@@ -19,11 +19,15 @@ use App\Description\TreeService;
 use App\Discovery\Graph;
 use App\Discovery\Links;
 use App\Files\FileResponse;
+use App\Models\Concept;
 use App\Models\DigitalFile;
 use App\Models\RecordResource;
 use App\Models\Relation;
+use App\Models\Repository;
 use App\Relations\EntityKinds;
 use App\Relations\RelationService;
+use App\Search\SearchIndex;
+use App\Search\SearchService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -45,17 +49,23 @@ class DiscoverController extends Controller
         $catalogue = $this->catalogue($request);
         $query = trim((string) $request->query('q', ''));
         $kind = array_key_exists($request->query('kind'), self::FOUND) ? $request->query('kind') : null;
-        $results = [];
+        // Full-text search of what the public may read (ADR 0009), with facets.
+        $search = null;
         if ($query !== '') {
-            foreach (array_keys(self::FOUND) as $key) {
-                if ($kind === null || $kind === $key) {
-                    $results[$key] = $catalogue->visible($key, $query);
-                }
-            }
+            $filters = ['kind' => $kind, 'level' => $this->uuidOrNull($request->query('level')), 'repository' => $this->uuidOrNull($request->query('repository')),
+                'from' => $this->yearOrNull($request->query('from')), 'to' => $this->yearOrNull($request->query('to'))];
+            $search = app(SearchService::class)->search($catalogue->institution, $query, true, $filters, max(1, (int) $request->query('page', 1)));
+            $search['filters'] = $filters;
+            $search['page'] = max(1, (int) $request->query('page', 1));
+            $byTable = collect($search['results'])->groupBy('table');
+            $entities = $byTable->flatMap(fn ($rows, $table) => collect(SearchIndex::KINDS)->first(fn ($c) => (new $c)->getTable() === $table)::whereIn('id', $rows->pluck('id'))->get())->keyBy('id');
+            $search['results'] = collect($search['results'])->map(fn ($row) => $row + ['entity' => $entities->get($row['id'])])->filter(fn ($row) => $row['entity'] !== null)->values();
+            $search['levels'] = Concept::whereIn('id', array_keys($search['facets']['level']))->with('labels')->get()->keyBy('id');
+            $search['repositories'] = Repository::whereIn('id', array_keys($search['facets']['repository']))->with(['names.nameType', 'names.state'])->get()->keyBy('id');
         }
         $records = $query === '' ? $catalogue->visible('records', '', false, ['level.labels']) : collect();
 
-        return view('discover.home', ['institution' => $catalogue->institution, 'query' => $query, 'kind' => $kind, 'results' => $results, 'kinds' => self::FOUND,
+        return view('discover.home', ['institution' => $catalogue->institution, 'query' => $query, 'kind' => $kind, 'search' => $search, 'kinds' => self::FOUND,
             'featured' => $query === '' ? $this->featured($catalogue, $records) : collect(),
             'view' => $catalogue->view, 'tops' => $records->whereNull('parent_id')->values(), 'counts' => $query === '' ? collect(array_keys(self::FOUND))->mapWithKeys(fn ($k) => [$k => $k === 'records' ? $records->count() : $catalogue->visible($k)->count()]) : collect(),
             'repositories' => $query === '' ? $catalogue->visible('repositories') : collect()]);
@@ -240,5 +250,15 @@ class DiscoverController extends Controller
     public static function noun(Model $entity): string
     {
         return EntityKinds::noun($entity);
+    }
+
+    private function uuidOrNull(mixed $value): ?string
+    {
+        return is_string($value) && preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/', $value) ? $value : null;
+    }
+
+    private function yearOrNull(mixed $value): ?int
+    {
+        return is_string($value) && preg_match('/^\d{1,4}$/', $value) ? (int) $value : null;
     }
 }

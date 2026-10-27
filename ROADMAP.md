@@ -164,6 +164,15 @@ Text read by a machine is a proposal for the instantiation's transcript, reviewe
 
 **6. Full-text search (WS-016).** Search is a substring match on names and identifiers. Copy the behaviour of `ahg-search` (query syntax, facets by level, date, repository, subject and place, highlighting, analytics), on PostgreSQL full-text search with one configuration per language, decided by ADR against Elasticsearch, which Heratio uses. Index only what the reader may see, so the public catalogue and the API search published values only. Done when the acceptance queries and the access negative tests pass.
 
+Progress:
+- **v0.0.60**: the public catalogue searches the full text of what is published, on PostgreSQL (ADR 0009).
+  - Stemming in each value's language; accents ignored.
+  - The search engine syntax ("a phrase", -word, OR).
+  - Ranked results with the matches highlighted; facets by kind, level and repository; a range of years.
+  - The index follows every change.
+  - Lists in the screens are distinct rows in alternating colours, and the header's search fits a phone.
+- **Next**: staff search over drafts the reader may see, and search statistics.
+
 **7. Access requests (WS-007, WS-011).** An instantiation "on request" can be opened today only by staff. Copy `ahg-access-request`: a signed-in researcher asks for a file, giving a reason; staff approve or refuse; approval gives that researcher time-limited access; each step is audited and emailed. Registered researchers come from `ahg-researcher-manage`, beside the registration requests that already exist. Done when a researcher's approved request opens the file and an expired one does not.
 
 **8. Reports and statistics (WS-016).** Copy the reports of `ahg-reports` (holdings by repository and level, publication status, completeness, rights, catalogue growth, collections health), with the authority completeness that already exists. Copy the usage counts of `ahg-statistics`, without storing visitors' addresses. Every report exports as CSV. Done when a pilot archivist answers their institution's routine questions without help.

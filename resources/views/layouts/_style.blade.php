@@ -159,6 +159,13 @@
         .with-tree { display: grid; grid-template-columns: minmax(14rem, 18rem) minmax(0, 1fr); gap: 2rem; align-items: start; }
         .tree-aside { position: sticky; top: 4rem; max-height: calc(100vh - 5rem); overflow: auto; padding: .9rem 1rem; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
         @media (max-width: 64rem) { .with-tree { display: block; } .tree-aside { position: static; max-height: 22rem; margin-bottom: 1.25rem; } }
+        /* Lists of things (search results, holdings, collections, relations) as distinct rows in alternating colours; menus, the tree and the image strip keep their own look. */
+        main ul:not([class]):not(nav ul):not(.tree ul):not(.imageflow ul):not(.collections-carousel ul) { list-style: none; padding: 0; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+        main ul:not([class]):not(nav ul):not(.tree ul):not(.imageflow ul):not(.collections-carousel ul) > li { margin: 0; padding: .6rem .85rem; border-bottom: 1px solid var(--line); }
+        main ul:not([class]):not(nav ul):not(.tree ul):not(.imageflow ul):not(.collections-carousel ul) > li:last-child { border-bottom: 0; }
+        main ul:not([class]):not(nav ul):not(.tree ul):not(.imageflow ul):not(.collections-carousel ul) > li:nth-child(even) { background: var(--surface); }
+        main ul:not([class]):not(nav ul):not(.tree ul):not(.imageflow ul):not(.collections-carousel ul) > li > .meta { display: block; font-size: .85rem; margin-top: .15rem; }
+        tbody tr:nth-child(even) { background: var(--surface); }
         /* Phones and narrow windows: nothing wider than the screen. Long IRIs and RiC-O terms wrap, wide tables scroll inside themselves, media shrink. */
         main, .main-nav { overflow-wrap: break-word; }
         code, .ric, dd, td { overflow-wrap: anywhere; }
@@ -177,5 +184,9 @@
             .main-nav > ul > li > a, .main-nav summary { padding: .55rem .6rem; }
             .main-nav details a { padding: .55rem .7rem; }
             button, input, select { min-height: 2.75rem; }
+            /* The header's search takes a line of its own, so its field is not cut short. */
+            header { flex-wrap: wrap; gap: .5rem; }
+            header form[role="search"] { flex: 1 1 100%; flex-wrap: wrap; }
+            header form[role="search"] input { flex: 1 1 10rem; max-width: none !important; }
         }
     </style>

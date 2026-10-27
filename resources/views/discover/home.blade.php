@@ -33,21 +33,54 @@
             </section>
         @endif
     @else
+        @php($lang = \App\Support\Vocab::languages())
+        @php($link = fn (array $change) => route('discover.home', array_filter([...['q' => $query, 'kind' => $kind] + $search['filters'], ...$change], fn ($v) => $v !== null && $v !== '')))
         <h1>{{ __('Search: :query', ['query' => $query]) }}</h1>
-        <p>@foreach($kinds as $key => $name)@if($kind === $key)<strong>{{ __($name) }}</strong>@else<a href="{{ route('discover.home', ['q' => $query, 'kind' => $key]) }}">{{ __($name) }}</a>@endif · @endforeach
-            @if($kind)<a href="{{ route('discover.home', ['q' => $query]) }}">{{ __('Everything') }}</a>@else<strong>{{ __('Everything') }}</strong>@endif</p>
-        @php($found = collect($results)->sum(fn ($c) => $c->count()))
-        <p role="status">{{ $found === 0 ? __('No results found.') : __(':count found.', ['count' => $found]) }}</p>
-        @foreach($results as $key => $entities)
-            @continue($entities->isEmpty())
-            <h2>{{ __($kinds[$key]) }} ({{ $entities->count() }})</h2>
-            <ul>
-                @foreach($entities->take($kind ? 200 : 20) as $entity)
-                    <li><a href="{{ \App\Discovery\Links::page($entity) }}">{{ $view->label($entity) }}</a>
-                        <span class="meta">{{ $entity instanceof \App\Models\RecordResource ? collect([$entity->referenceCode()])->filter()->join('') : __(\App\Relations\EntityKinds::noun($entity)) }}</span></li>
-                @endforeach
-            </ul>
-            @if(! $kind && $entities->count() > 20)<p><a href="{{ route('discover.home', ['q' => $query, 'kind' => $key]) }}">{{ __('All :count', ['count' => $entities->count()]) }}</a></p>@endif
-        @endforeach
+        <p role="status">{{ $search['total'] === 0 ? __('No results found.') : __(':count found.', ['count' => $search['total']]) }}</p>
+        <div class="search-layout">
+            <aside class="search-facets" aria-label="{{ __('Narrow the results') }}">
+                <h2>{{ __('Kind') }}</h2>
+                <ul class="facets">
+                    @if($kind)<li><a href="{{ $link(['kind' => null, 'page' => null]) }}">{{ __('Everything') }}</a></li>@endif
+                    @foreach($search['facets']['kind'] as $key => $n)<li>@if($kind === $key)<strong>{{ __($kinds[$key]) }}</strong>@else<a href="{{ $link(['kind' => $key, 'page' => null]) }}">{{ __($kinds[$key]) }}</a>@endif <span class="meta">{{ $n }}</span></li>@endforeach
+                </ul>
+                @if($search['facets']['level'] !== [])
+                    <h2>{{ __('Level of description') }}</h2>
+                    <ul class="facets">
+                        @if($search['filters']['level'])<li><a href="{{ $link(['level' => null, 'page' => null]) }}">{{ __('Any') }}</a></li>@endif
+                        @foreach($search['facets']['level'] as $id => $n)@if($concept = $search['levels']->get($id))<li>@if($search['filters']['level'] === $id)<strong>{{ $concept->label($lang) }}</strong>@else<a href="{{ $link(['level' => $id, 'page' => null]) }}">{{ $concept->label($lang) }}</a>@endif <span class="meta">{{ $n }}</span></li>@endif @endforeach
+                    </ul>
+                @endif
+                @if($search['facets']['repository'] !== [])
+                    <h2>{{ __('Repository') }}</h2>
+                    <ul class="facets">
+                        @if($search['filters']['repository'])<li><a href="{{ $link(['repository' => null, 'page' => null]) }}">{{ __('Any') }}</a></li>@endif
+                        @foreach($search['facets']['repository'] as $id => $n)@if($repository = $search['repositories']->get($id))<li>@if($search['filters']['repository'] === $id)<strong>{{ $view->label($repository) }}</strong>@else<a href="{{ $link(['repository' => $id, 'page' => null]) }}">{{ $view->label($repository) }}</a>@endif <span class="meta">{{ $n }}</span></li>@endif @endforeach
+                    </ul>
+                @endif
+                <h2>{{ __('Dates') }}</h2>
+                <form method="get" action="{{ route('discover.home') }}" class="facet-years">
+                    @foreach(array_filter(['q' => $query, 'kind' => $kind, 'level' => $search['filters']['level'], 'repository' => $search['filters']['repository']]) as $name => $value)<input type="hidden" name="{{ $name }}" value="{{ $value }}">@endforeach
+                    <label for="from">{{ __('From year') }}</label><input id="from" name="from" inputmode="numeric" size="5" value="{{ $search['filters']['from'] }}">
+                    <label for="to">{{ __('To year') }}</label><input id="to" name="to" inputmode="numeric" size="5" value="{{ $search['filters']['to'] }}">
+                    <button type="submit">{{ __('Apply') }}</button>
+                </form>
+            </aside>
+            <div>
+                <ul>
+                    @foreach($search['results'] as $row)
+                        <li><a href="{{ \App\Discovery\Links::page($row['entity']) }}">{{ $row['title'] }}</a>
+                            <span class="meta">{{ $row['entity'] instanceof \App\Models\RecordResource ? collect([$row['entity']->level?->label($lang), $row['entity']->referenceCode()])->filter()->join(', ') : __(\App\Relations\EntityKinds::noun($row['entity'])) }}</span>
+                            <span class="snippet">{{ $row['snippet'] }}</span></li>
+                    @endforeach
+                </ul>
+                @if($search['total'] > 20)
+                    <p>@if($search['page'] > 1)<a href="{{ $link(['page' => $search['page'] - 1]) }}">{{ __('Previous page') }}</a> · @endif
+                        {{ __('Page :page of :pages', ['page' => $search['page'], 'pages' => (int) ceil($search['total'] / 20)]) }}
+                        @if($search['page'] * 20 < $search['total']) · <a href="{{ $link(['page' => $search['page'] + 1]) }}">{{ __('Next page') }}</a>@endif</p>
+                @endif
+                <p class="meta">{{ __('Use quotes for a phrase, such as "town council"; a minus sign leaves a word out, such as council -minutes; OR finds either word.') }}</p>
+            </div>
+        </div>
     @endif
 @endsection
