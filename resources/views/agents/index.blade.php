@@ -28,12 +28,22 @@
             </select></div>
         <button type="submit" style="margin-top: 0">{{ __('Show') }}</button>
     </form>
-    @forelse($agents as $agent)
-        <p><a href="{{ route('agents.show', $agent) }}">{{ $agent->described('agent-authorised-name', [app()->getLocale(), 'en']) }}</a>{{ collect([$agent->agentType->label(\App\Support\Vocab::languages()), $agent->identifier, $agent->descriptionStatus?->label(\App\Support\Vocab::languages()), $agent->isEmbargoed() ? 'embargoed until '.$agent->embargo_until->format('Y-m-d') : null])->filter()->map(fn ($s) => ', '.$s)->join('') }}
-            @include('description._row-actions', ['entity' => $agent])</p>
-    @empty
+    @php($lang = [app()->getLocale(), 'en'])
+    @if($agents->isEmpty())
         <p>{{ __($query !== '' || $type !== '' || $status !== '' ? 'No authority record matches.' : 'No authority records yet.') }}</p>
-    @endforelse
+    @else
+        <p class="meta">{{ __(':count found.', ['count' => $agents->total()]) }}</p>
+        <ul>
+            @foreach($agents as $agent)
+                <li><a href="{{ route('agents.show', $agent) }}"><strong>{{ $agent->described('agent-authorised-name', $lang) }}</strong></a>
+                    @include('description._row-actions', ['entity' => $agent])
+                    <span class="meta">{{ collect([$agent->agentType->label(\App\Support\Vocab::languages()), $agent->described('agent-dates-of-existence', $lang) ?: $agent->dates->map->display()->filter()->join('; '), $agent->identifier,
+                        $agent->descriptionStatus?->label(\App\Support\Vocab::languages()), $agent->isEmbargoed() ? __('Embargoed until :date', ['date' => $agent->embargo_until->format('Y-m-d')]) : null])->filter()->join(' · ') }}</span>
+                    @if($places = $agent->described('agent-places', $lang))<span class="meta">{{ \Illuminate\Support\Str::limit(strip_tags($places), 120) }}</span>@endif
+                    @if($history = $agent->described('agent-history', $lang))<span class="summary">{{ \Illuminate\Support\Str::limit(strip_tags($history), 260) }}</span>@endif</li>
+            @endforeach
+        </ul>
+    @endif
     @if($agents->hasPages())
         <nav aria-label="{{ __('Pages') }}"><p>
             @if($agents->previousPageUrl())<a href="{{ $agents->previousPageUrl() }}" rel="prev">{{ __('Previous') }}</a>@endif

@@ -30,13 +30,22 @@
         <div><input type="hidden" name="top" value="0"><label style="margin-top: 0"><input type="checkbox" name="top" value="1" style="width: auto" @checked($filters['top'])> {{ __('Top-level only') }}</label></div>
         <button type="submit" style="margin-top: 0">{{ __('Show') }}</button>
     </form>
-    @forelse($units as $unit)
-        <p><a href="{{ route('records.show', $unit) }}">{{ $unit->described('title', [app()->getLocale(), 'en']) }}</a>
-            ({{ collect([$unit->level->label(\App\Support\Vocab::languages()), $unit->referenceCode(), $unit->parent ? 'in '.$unit->parent->described('title', ['en']) : null, $unit->repository->described('authorised-name', ['en'])])->filter()->join(', ') }})
-            @include('description._row-actions', ['entity' => $unit])</p>
-    @empty
+    @php($lang = [app()->getLocale(), 'en'])
+    @if($units->isEmpty())
         <p>{{ __($query !== '' ? 'No unit of description matches.' : 'No archival descriptions yet.') }}</p>
-    @endforelse
+    @else
+        <p class="meta">{{ __(':count found.', ['count' => $units->total()]) }}</p>
+        <ul>
+            @foreach($units as $unit)
+                <li><a href="{{ route('records.show', $unit) }}"><strong>{{ $unit->described('title', $lang) }}</strong></a>
+                    @include('description._row-actions', ['entity' => $unit])
+                    <span class="meta">{{ collect([$unit->level->label(\App\Support\Vocab::languages()), $unit->referenceCode(), $unit->described('dates-expressed', $lang) ?: $unit->dates->map->display()->filter()->join('; '), $unit->described('extent', $lang)])->filter()->join(' · ') }}</span>
+                    <span class="meta">{{ collect([$unit->repository?->described('authorised-name', $lang), $unit->parent ? __('Part of :title', ['title' => $unit->parent->described('title', $lang)]) : null,
+                        $unit->children_count ? trans_choice(':count lower level|:count lower levels', $unit->children_count) : null, $unit->instantiations_count ? trans_choice(':count file|:count files', $unit->instantiations_count) : null])->filter()->join(' · ') }}</span>
+                    @if($scope = $unit->described('scope-and-content', $lang))<span class="summary">{{ \Illuminate\Support\Str::limit(strip_tags($scope), 260) }}</span>@endif</li>
+            @endforeach
+        </ul>
+    @endif
     @if($units->hasPages())
         <nav aria-label="{{ __('Pages') }}"><p>
             @if($units->previousPageUrl())<a href="{{ $units->previousPageUrl() }}" rel="prev">{{ __('Previous') }}</a>@endif

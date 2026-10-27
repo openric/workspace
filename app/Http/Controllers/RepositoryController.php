@@ -34,7 +34,8 @@ class RepositoryController extends Controller
     public function index(Request $request): View
     {
         $repositories = Repository::where('institution_id', $request->user()->institution_id)->whereNull('deleted_at')
-            ->with('descriptionValues.element', 'names.nameType', 'identifiers.identifierType')->get()
+            ->with('descriptionValues.element', 'names.nameType', 'identifiers.identifierType', 'contactPoints', 'descriptionStatus.labels')
+            ->withCount(['records' => fn ($q) => $q->whereNull('deleted_at')])->get()
             ->filter(fn (Repository $r) => $request->user()->may('read', 'repository', $r))
             ->sortBy(fn (Repository $r) => mb_strtolower((string) $r->described('authorised-name', [app()->getLocale(), 'en'])));
 

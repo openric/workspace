@@ -165,6 +165,7 @@
         main ul:not([class]):not(nav ul):not(.tree ul):not(.imageflow ul):not(.collections-carousel ul) > li:last-child { border-bottom: 0; }
         main ul:not([class]):not(nav ul):not(.tree ul):not(.imageflow ul):not(.collections-carousel ul) > li:nth-child(even) { background: var(--surface); }
         main ul:not([class]):not(nav ul):not(.tree ul):not(.imageflow ul):not(.collections-carousel ul) > li > .meta { display: block; font-size: .85rem; margin-top: .15rem; }
+        main ul:not([class]):not(nav ul):not(.tree ul):not(.imageflow ul):not(.collections-carousel ul) > li > .summary { display: block; margin-top: .3rem; font-size: .92rem; line-height: 1.45; }
         tbody tr:nth-child(even) { background: var(--surface); }
         /* Search results: facets beside the results, under them on a narrow screen (ADR 0009). */
         .search-layout { display: grid; grid-template-columns: 15rem 1fr; gap: 1.5rem; align-items: start; }

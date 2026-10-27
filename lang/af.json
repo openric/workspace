@@ -1294,5 +1294,9 @@
     "Searched most": "Meeste gesoek",
     "Results on average": "Gemiddelde resultate",
     "Found nothing": "Niks gevind nie",
-    "What people look for and the catalogue does not yet describe, or describes in other words.": "Waarna mense soek wat die katalogus nog nie beskryf nie, of in ander woorde beskryf."
+    "What people look for and the catalogue does not yet describe, or describes in other words.": "Waarna mense soek wat die katalogus nog nie beskryf nie, of in ander woorde beskryf.",
+    "Part of :title": "Deel van :title",
+    ":count lower level|:count lower levels": ":count laer vlak|:count laer vlakke",
+    ":count file|:count files": ":count lêer|:count lêers",
+    ":count archival description|:count archival descriptions": ":count argiefbeskrywing|:count argiefbeskrywings"
 }

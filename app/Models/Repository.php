@@ -35,6 +35,12 @@ class Repository extends Model
             ->orderByDesc('is_primary')->orderBy('created_at');
     }
 
+    /** The units of description this repository holds. */
+    public function records(): HasMany
+    {
+        return $this->hasMany(RecordResource::class);
+    }
+
     public function descriptionStatus(): BelongsTo
     {
         return $this->belongsTo(Concept::class, 'description_status_id');

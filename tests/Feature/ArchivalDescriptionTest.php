@@ -116,7 +116,7 @@ class ArchivalDescriptionTest extends TestCase
     public function test_browse_searches_every_level_and_filters(): void
     {
         $this->actingAs($this->contributor)->get('/records')->assertOk()->assertSee('Riverside Parish Council records')->assertDontSee('Minutes, 1902');
-        $this->actingAs($this->contributor)->get('/records?q=minutes')->assertSee('Minutes, 1902')->assertSee('in Minutes');
+        $this->actingAs($this->contributor)->get('/records?q=minutes')->assertSee('Minutes, 1902')->assertSee('Part of Minutes');
         $this->actingAs($this->contributor)->get('/records?q=RPC/1/3')->assertSee('Minutes, 1902');
         $level = DB::table('concepts')->where('iri', self::LEVEL.'file')->value('id');
         $this->actingAs($this->contributor)->get("/records?top=0&level=$level")->assertSee('Minutes, 1902')->assertDontSee('Riverside Parish Council records</a>', false);

@@ -58,7 +58,8 @@ class RecordController extends Controller
             ->whereHas('nameType', fn ($q) => $q->where('iri', Vocab::NAME_TYPES.'authorised'))->orderBy('created_at')->limit(1);
         $units = RecordResource::where('institution_id', $user->institution_id)->whereNull('deleted_at')
             ->with('descriptionValues.element', 'names.nameType', 'identifiers.identifierType', 'level.labels', 'repository.names.nameType', 'repository.descriptionValues.element',
-                'repository.identifiers.identifierType', 'parent.names.nameType', 'parent.descriptionValues.element')
+                'repository.identifiers.identifierType', 'parent.names.nameType', 'parent.descriptionValues.element', 'dates.qualifier.labels')
+            ->withCount(['instantiations' => fn ($q) => $q->whereNull('deleted_at'), 'children' => fn ($q) => $q->whereNull('deleted_at')])
             ->when($filters['top'], fn ($q) => $q->whereNull('parent_id'))
             ->when($query !== '', fn ($q) => $q->where(fn ($q) => $q
                 ->whereIn('id', Name::where('subject_table', 'record_resources')->where('value', 'ilike', $like)->select('subject_id'))
