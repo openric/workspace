@@ -12,7 +12,10 @@ namespace App\Http\Controllers;
 
 use App\Description\Bcp47;
 use App\Exchange\Import\ImportService;
+use App\Jobs\JobsService;
+use App\Jobs\RunImport;
 use App\Models\Agent;
+use App\Models\BackgroundJob;
 use App\Models\Concept;
 use App\Models\Import;
 use App\Models\RecordResource;
@@ -77,16 +80,21 @@ class ImportController extends Controller
             'options' => ['agent_type' => $data['agent_type'] ?? null, 'create_terms' => (bool) ($data['create_terms'] ?? false),
                 'match_identifier' => (bool) ($data['match_identifier'] ?? false), 'default_level' => $describes ? ($data['default_level'] ?? null) : null],
         ]);
-        $this->imports->run($import, false);
+        $job = $this->queue($import, false);
 
-        return redirect()->route('imports.show', $import)->with('status', __('Dry run done: nothing has been written yet. Read the report, then import.'));
+        return redirect()->route('imports.show', $import)->with('status', $job->active()
+            ? __('The dry run is under way. This page shows the report when it is done.')
+            : __('Dry run done: nothing has been written yet. Read the report, then import.'));
     }
 
     public function show(Request $request, Import $import): View
     {
         $this->own($request, $import);
 
-        return view('imports.show', ['import' => $import->load('user', 'repository', 'parent'), 'mayCommit' => $import->committed_at === null && $import->user_id === $request->user()->id]);
+        $job = app(JobsService::class)->latestFor($import);
+
+        return view('imports.show', ['import' => $import->load('user', 'repository', 'parent'), 'job' => $job,
+            'mayCommit' => $import->committed_at === null && $import->user_id === $request->user()->id && ! $job?->active()]);
     }
 
     public function commit(Request $request, Import $import): RedirectResponse
@@ -96,9 +104,25 @@ class ImportController extends Controller
         if ($import->committed_at !== null) {
             return redirect()->route('imports.show', $import)->withErrors(['import' => 'This file was imported already. Upload it again to import it again.']);
         }
-        $actions = $this->imports->run($import, true)->actions();
+        if (app(JobsService::class)->latestFor($import)?->active()) {
+            return redirect()->route('imports.show', $import)->withErrors(['import' => __('This file is being read already; wait until it is done.')]);
+        }
+        $job = $this->queue($import, true);
+        if ($job->active()) {
+            return redirect()->route('imports.show', $import)->with('status', __('The import is under way. This page shows the report when it is done.'));
+        }
+        $actions = $import->refresh()->report['actions'] ?? ['created' => 0, 'updated' => 0, 'unchanged' => 0, 'rejected' => 0];
 
         return redirect()->route('imports.show', $import)->with('status', __('Imported: :created created, :updated updated, :unchanged unchanged, :rejected not imported.', $actions));
+    }
+
+    /** The dry run or the import as a background job (roadmap phase 5); where the queue runs at once, it is done on return. */
+    private function queue(Import $import, bool $commit): BackgroundJob
+    {
+        $job = app(JobsService::class)->create($import->institution_id, 'import', __($commit ? 'Import of :name' : 'Dry run of :name', ['name' => $import->file_name]), $import->user, $import);
+        RunImport::dispatch($job->id, $import->id, $commit);
+
+        return $job->refresh();
     }
 
     /** Another institution's import does not exist here. */

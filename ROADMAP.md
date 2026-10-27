@@ -166,6 +166,13 @@ Progress:
 
 Text taken from a PDF's own text layer is a proposal for the instantiation's transcript, reviewed in the queue built in v0.0.48. OCR of scanned pages is AI work and moves to phase 17. Done when an uploaded PDF produces a reviewable transcript and every image can carry alternative text.
 
+Progress:
+- **v0.0.63**: background jobs.
+  - Copied from Heratio's `ahg-jobs`: the jobs record, its screen with statistics, filters, a job's detail, cancelling, a CSV export and clearing old jobs; AtoM's job tables become `background_jobs`, with types and statuses as vocabularies.
+  - An upload keeps and checks its file at once and makes its viewing copies in the background; an import's dry run and import run in the background, and the import page refreshes itself until they are done.
+  - The scheduler runs a worker each minute while there is work (`deploy/cron/openric-workspace`).
+- **Next**: text from a PDF's own text layer as a proposed transcript, embedded metadata, then alternative text for images.
+
 **6. Full-text search (WS-016).** Search is a substring match on names and identifiers. Copy the behaviour of `ahg-search` (query syntax, facets by level, date, repository, subject and place, highlighting, analytics), on PostgreSQL full-text search with one configuration per language, decided by ADR against Elasticsearch, which Heratio uses. Index only what the reader may see, so the public catalogue and the API search published values only. Done when the acceptance queries and the access negative tests pass.
 
 Progress:

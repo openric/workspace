@@ -1,0 +1,30 @@
+# OpenRiC Workspace - OpenRiC Workspace Job Types.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# The kinds of work run in the background (roadmap phase 5; Heratio's ahg_job_execution.type).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/job-type/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Job Types"@en ;
+    dcterms:description "The kinds of work the Workspace runs in the background."@en ;
+    dcterms:issued "2026-10-27"^^xsd:date ;
+    skos:hasTopConcept v:import, v:viewing-copies .
+
+v:import a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Import"@en ;
+    skos:scopeNote "Operational: the work of a background job, not part of any RiC description."@en ;
+    skos:definition "Reading an import file: the dry run, or the import itself."@en .
+
+v:viewing-copies a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Viewing copies"@en ;
+    skos:scopeNote "Operational: the work of a background job, not part of any RiC description."@en ;
+    skos:definition "Making the reference copy and thumbnail of an uploaded file."@en .

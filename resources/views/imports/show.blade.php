@@ -6,6 +6,12 @@
     <h1>{{ __('Import of :name', ['name' => $import->file_name]) }}</h1>
     @if(session('status'))<p role="status">{{ session('status') }}</p>@endif
     @if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif
+    @if($job?->active())
+        @push('head')<meta http-equiv="refresh" content="5">@endpush
+        <p role="status"><strong>{{ __($job->hasStatus('running') ? 'Being read now.' : 'Waiting for a worker.') }}</strong> {{ __('This page refreshes itself until it is done.') }} <a href="{{ route('jobs.show', $job) }}">{{ __('See the job') }}</a></p>
+    @elseif($job?->hasStatus('failed'))
+        <div class="error" role="alert"><p>{{ __('Reading the file failed: :error', ['error' => $job->error_message]) }} <a href="{{ route('jobs.show', $job) }}">{{ __('See the job') }}</a></p></div>
+    @endif
     @php($report = $import->report ?? ['units' => [], 'issues' => [], 'counts' => [], 'actions' => []])
     @php($actions = $report['actions'] ?? ['created' => 0, 'updated' => 0, 'unchanged' => 0, 'rejected' => 0])
     @php($verb = $import->committed_at ? '' : 'would be ')

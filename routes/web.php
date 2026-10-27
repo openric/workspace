@@ -25,6 +25,7 @@ use App\Http\Controllers\IdentifierController;
 use App\Http\Controllers\ImportController;
 use App\Http\Controllers\InstantiationController;
 use App\Http\Controllers\IriController;
+use App\Http\Controllers\JobsController;
 use App\Http\Controllers\LocalVocabularyController;
 use App\Http\Controllers\NameController;
 use App\Http\Controllers\PasswordController;
@@ -314,6 +315,13 @@ Route::middleware(['auth', 'active'])->group(function () {
                 Route::post("/{{$parameter}}/remove", [$controller, 'destroy'])->name('destroy');
             });
     }
+
+    // Background jobs (roadmap phase 5): each account its own, all of them for one that may manage the institution.
+    Route::get('/jobs', [JobsController::class, 'index'])->name('jobs.index');
+    Route::get('/jobs/export.csv', [JobsController::class, 'csv'])->name('jobs.csv');
+    Route::post('/jobs/clear-inactive', [JobsController::class, 'clearInactive'])->name('jobs.clear-inactive');
+    Route::get('/jobs/{job}', [JobsController::class, 'show'])->whereUuid('job')->name('jobs.show');
+    Route::post('/jobs/{job}/cancel', [JobsController::class, 'cancel'])->whereUuid('job')->name('jobs.cancel');
 
     // Full-text search and its statistics (roadmap phase 6, ADR 0009).
     Route::get('/search', [SearchController::class, 'index'])->name('search');

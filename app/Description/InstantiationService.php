@@ -17,6 +17,8 @@ namespace App\Description;
 use App\Access\AccessControl;
 use App\Audit\AuditLog;
 use App\Files\FileStore;
+use App\Jobs\JobsService;
+use App\Jobs\MakeViewingCopies;
 use App\Models\Concept;
 use App\Models\DigitalFile;
 use App\Models\Instantiation;
@@ -69,15 +71,18 @@ class InstantiationService
         string $availability = 'online', ?User $actor = null): Instantiation
     {
         $master = $this->store->ingest($unit->institution_id, $path, $expectedSha256);
-        $copies = $this->store->copies($unit->institution_id, $this->store->path($master['storage_path']), $master['mime_type']);
 
-        return DB::transaction(fn () => AuditLog::actingAs($actor, function () use ($unit, $originalName, $language, $title, $availability, $master, $copies) {
+        $instantiation = DB::transaction(fn () => AuditLog::actingAs($actor, function () use ($unit, $originalName, $language, $title, $availability, $master) {
             $instantiation = $this->create($unit, trim((string) $title) !== '' ? (string) $title : $originalName, $language, 'digital-file', $availability);
             $this->addFile($instantiation, 'master', $originalName, $master);
-            $this->addCopies($instantiation, $originalName, $copies);
 
-            return $instantiation->load('files.use');
+            return $instantiation;
         }));
+        // The viewing copies are made in the background (roadmap phase 5); the file is kept and checked already.
+        $job = app(JobsService::class)->create($unit->institution_id, 'viewing-copies', __('Viewing copies of :name', ['name' => $originalName]), $actor, $instantiation);
+        MakeViewingCopies::dispatch($job->id, $instantiation->id);
+
+        return $instantiation->load('files.use');
     }
 
     /**

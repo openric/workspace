@@ -1,0 +1,14 @@
+# OpenRiC Workspace - the Laravel scheduler, which runs the background jobs (roadmap phase 5).
+#
+# Install on the live host as root:
+#   cp deploy/cron/openric-workspace /etc/cron.d/openric-workspace
+#   chown root:root /etc/cron.d/openric-workspace && chmod 0644 /etc/cron.d/openric-workspace
+#
+# Runs as www-data, which owns storage/ and can read the audit signing key; artisan run
+# as root would leave files under storage/ that the web server cannot write.
+
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+MAILTO=""
+
+* * * * * www-data flock -n /run/lock/openric-workspace-schedule.lock -c '/usr/bin/php8.3 /usr/share/nginx/openric-workspace-live/artisan schedule:run >> /usr/share/nginx/openric-workspace-live/storage/logs/schedule.log 2>&1'

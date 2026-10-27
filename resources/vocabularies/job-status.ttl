@@ -1,0 +1,51 @@
+# OpenRiC Workspace - OpenRiC Workspace Job Statuses.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Where a background job stands (roadmap phase 5; Heratio's job.status_id).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/job-status/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Job Statuses"@en ;
+    dcterms:description "Where a background job stands."@en ;
+    dcterms:issued "2026-10-27"^^xsd:date ;
+    skos:hasTopConcept v:pending, v:running, v:completed, v:failed, v:cancelled .
+
+v:pending a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Pending"@en ;
+    skos:scopeNote "Operational: the work of a background job, not part of any RiC description."@en ;
+    skos:definition "Waiting for a worker."@en .
+
+v:running a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Running"@en ;
+    skos:scopeNote "Operational: the work of a background job, not part of any RiC description."@en ;
+    skos:definition "A worker is doing it."@en .
+
+v:completed a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Completed"@en ;
+    skos:scopeNote "Operational: the work of a background job, not part of any RiC description."@en ;
+    skos:definition "Done."@en .
+
+v:failed a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Failed"@en ;
+    skos:scopeNote "Operational: the work of a background job, not part of any RiC description."@en ;
+    skos:definition "Stopped with an error, which is kept with the job."@en .
+
+v:cancelled a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Cancelled"@en ;
+    skos:scopeNote "Operational: the work of a background job, not part of any RiC description."@en ;
+    skos:definition "Stopped by a person before a worker ran it."@en .

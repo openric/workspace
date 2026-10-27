@@ -32,6 +32,15 @@ Back these up with the database dumps, which do not contain them: the audit sign
 
     15 2 * * * www-data /usr/bin/php /usr/share/nginx/openric-workspace-live/artisan workspace:fixity >> /usr/share/nginx/openric-workspace-live/storage/logs/fixity.log 2>&1
 
+## Background jobs
+
+Since v0.0.63 the viewing copies of an uploaded file, and an import's dry run and import, run in the background (roadmap phase 5). Laravel's database queue holds the work; the scheduler starts a worker each minute while there is any. Without the scheduler nothing in the background runs: uploads keep their files but get no viewing copies, and imports wait. Install it once, as root:
+
+    cp deploy/cron/openric-workspace /etc/cron.d/openric-workspace
+    chown root:root /etc/cron.d/openric-workspace && chmod 0644 /etc/cron.d/openric-workspace
+
+It runs `artisan schedule:run` as `www-data`, which can read the audit signing key. People see their jobs under Manage, Jobs; an account that may manage the institution sees them all, exports them as CSV and clears finished jobs older than 30 days. Files kept before v0.0.63 without copies are given them with `php artisan workspace:copies` as before.
+
 ## Uploads
 
 A file may be as large as `WORKSPACE_MAX_UPLOAD_MB` (60 MB unless set). nginx's `client_max_body_size` and PHP's `upload_max_filesize` and `post_max_size` must allow at least that. Every upload is scanned with `clamdscan`, which needs the ClamAV daemon running; set `WORKSPACE_VIRUS_SCANNER=` to keep files as not scanned where there is no scanner. The viewing copies are made by ImageMagick's `convert` command and a PDF's first page by `pdftoppm` (packages `imagemagick` and `poppler-utils`), each in its own process, so a file they cannot read is kept without copies.
