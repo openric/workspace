@@ -90,28 +90,32 @@ Standing rules for every phase: vocabularies, never enums; every field names its
 |---|---|---|---|---|
 | 1 | Interface in more than one language | WS-005 | V0.1 | `lang/*.json` (copy after a provenance check: the strings may come from AtoM's translations, whose notice must travel with them) |
 | 2 | Rights statements and rights holders on files | WS-007 | V0.1 | `ahg-extended-rights`, `ahg-rights-holder-manage` |
-| 3 | Backup, restore drill and restore verification | WS-011 | V0.1 | `ahg-backup` |
 | 4 | Heratio migration check on a difficult sample | WS-013 | V0.1 | `ahg-data-migration`, with the existing AtoM import |
-| 5 | Background jobs, file text and embedded metadata | WS-007, WS-016 | V0.5 | `ahg-pdf-tools`, `ahg-media-processing`; `ahg-metadata-extraction`, `ahg-jobs` |
+| 5 | Background jobs, file text, embedded metadata and image alt text | WS-007, WS-016 | V0.5 | `ahg-pdf-tools`, `ahg-media-processing`; `ahg-metadata-extraction`, `ahg-jobs`; alt text from `ahg-core` (PSIS `ahgAccessibilityPlugin`) |
 | 6 | Full-text search with facets | WS-016 | V0.5 | `ahg-search` (its queries on PostgreSQL full text instead of Elasticsearch, by ADR) |
-| 7 | Access requests for files on request | WS-007, WS-011 | V0.5 | `ahg-access-request`, `ahg-researcher-manage` |
-| 8 | Reports and statistics | WS-016 | V0.5 | `ahg-reports`, `ahg-statistics` |
-| 9 | Accessions and donors | WS-014 | V1.0 | `ahg-accession-manage` (CAIS profile), `ahg-donor-manage` |
+| 7 | Access requests for files on request; email delivery | WS-007, WS-011 | V0.5 | `ahg-access-request`, `ahg-researcher-manage`; Heratio `app/` `EmailBounceController`, `EmailSuppressionGate` (PSIS `ahgEmailDeliveryPlugin`) |
+| 8 | Reports, the report builder and statistics | WS-016 | V0.5 | `ahg-reports` (with `ReportBuilderController`; PSIS `ahgReportBuilderPlugin`), `ahg-statistics` |
+| 9 | Accessions, donors and agreements; provenance and custody history | WS-014 | V1.0 | `ahg-accession-manage` (CAIS profile), `ahg-donor-manage`; provenance from `ahg-information-object-manage` (PSIS `ahgProvenancePlugin`) |
 | 10 | Work assignment and description workflow | WS-014 | V1.0 | `ahg-workflow` (not its Spectrum procedures) |
-| 11 | Exchange formats: EAD 3, EAC-CPF, EAC-F, RiC-O import; portable export; the Governance and Portability profiles | WS-010, WS-015 | V1.0 | `ahg-metadata-export`, `ahg-portable-export`; from `ahg-ric`: `RicDeprecationService`, `RdfImportService`, `RicDatasetService`, `RicRoundTripTest` |
-| 12 | Monitoring, scheduled fixity, update and restore runbooks | WS-017 | V1.0 | `ahg-observability`, `ahg-integrity`, `ahg-jobs-manage` |
+| 11 | Exchange formats: EAD 3, EAC-CPF, EAC-F, RiC-O import; portable export; the Governance and Portability profiles | WS-010, WS-015 | V1.0 | `ahg-metadata-export`, `ahg-portable-export` (and PSIS `ahgPortableExportPlugin`, which does more); from `ahg-ric`: `RicDeprecationService`, `RdfImportService`, `RicDatasetService`, `RicRoundTripTest` |
+| 12 | Monitoring, scheduled fixity, single sign-on, update runbooks | WS-017 | V1.0 | `ahg-observability`, `ahg-integrity`, `ahg-jobs-manage`; OIDC from `ahg-user-manage` (AtoM `arOidcPlugin`) |
 | 13 | Embargoes, retention and disposal | WS-017, WS-018 | V1.0 | `ahg-extended-rights` (embargo, retention schedule, disposal), `ahg-records-manage` (after discovery) |
-| 14 | IIIF manifests and viewer | WS-019 | V2.0 | `ahg-iiif-collection`, with openric/service #15 |
-| 15 | Preservation connectors | WS-019 | V2.0 | `ahg-preservation` (PREMIS events), `ahg-ocfl`, `ahg-archivematica` |
+| 14 | IIIF manifests and viewer | WS-019 | V2.0 | `ahg-iiif-collection` (and PSIS `ahgIiifPlugin`, which does more), with openric/service #15 |
+| 15 | Preservation connectors; SWORD deposit | WS-019 | V2.0 | `ahg-preservation` (PREMIS events), `ahg-ocfl`, `ahg-archivematica`; SWORD after AtoM `qtSwordPlugin` (no Heratio twin) |
 | 16 | Federation and harvesting | WS-019 | V2.0 | `ahg-federation`, `ahg-resourcesync`, beside the existing OAI-PMH |
-| 17 | AI assistance through the review queue; the Inferred-Provenance and Graph-Grounding profiles | WS-019 | V2.0 | `ahg-authority-resolution`, `ahg-translation`, `ahg-semantic-search` (output only as proposals); from `ahg-ric`: `RicProvenanceService`, `GraphGroundingService` |
-| 18 | Privacy and jurisdiction packs | V2.0 and later | V2.0 | `ahg-privacy` (POPIA), `ahg-security-clearance`, `ahg-narssa` (per institution) |
+| 18 | Privacy and jurisdiction packs | V2.0 and later | V2.0 | `ahg-privacy` (POPIA), `ahg-security-clearance`, `ahg-narssa`, `ahg-naz`, `ahg-nmmz`, `ahg-cdpa`, `ahg-ipsas`, `ahg-icip` (per institution); SAHRA heritage permits after PSIS `ahgSAHRAPlugin` (no Heratio twin) |
 | 19 | Research services | WS-016, WS-019 | V2.0 | `ahg-research` (decide what to take first; 79,899 lines), `ahg-cart`, `ahg-favorites`, `ahg-feedback`, `ahg-share-link` |
 | 20 | Publishing and outreach | WS-019 | V2.0 | `ahg-landing-page`, `ahg-static-page`, `ahg-articles`, `ahg-help`, `ahg-doi-manage` |
-| 21 | Other GLAM domains on the RiC model | V2.0 and later | V2.0+ | `ahg-library`, `ahg-museum`, `ahg-gallery`, `ahg-dam`, `ahg-exhibition`, `ahg-loan`, `ahg-spectrum`, `ahg-3d-model`, `ahg-archaeology` and their companions (one domain at a time) |
-| 22 | Remaining Heratio services | V2.0 and later | V2.0+ | ingest, scanning, labels, condition, vendors, version history, C2PA and inference receipts, GraphQL, SharePoint and FTP intake, AI chat and compliance (copied or replaced, each by the parity register) |
+| 21 | Other GLAM domains on the RiC model | V2.0 and later | V2.0+ | `ahg-library`, `ahg-museum`, `ahg-gallery`, `ahg-dam`, `ahg-exhibition`, `ahg-loan`, `ahg-spectrum`, `ahg-3d-model`, `ahg-archaeology`, `ahg-heritage-manage` and their companions, with site records after PSIS `ahgSiteRecordPlugin` (no Heratio twin) (one domain at a time) |
+| 22 | Remaining Heratio services | V2.0 and later | V2.0+ | ingest (and PSIS `ahgIngestPlugin`, which does more), scanning, labels, condition, vendors, version history, C2PA, GraphQL, SharePoint and FTP intake (copied or replaced, each by the parity register) |
+| 3 | Backup, restore drill and restore verification | WS-011 | Last (deferred) | `ahg-backup` |
+| 17 | AI assistance through the review queue: OCR, authority candidates, translation, search by meaning, AI chat, compliance and condition assessment; the Inferred-Provenance and Graph-Grounding profiles | WS-019 | Last (deferred) | `ahg-authority-resolution`, `ahg-translation`, `ahg-semantic-search`, `ahg-ai-services`, `ahg-ai-chatbot`, `ahg-ai-compliance`, `ahg-inference-receipts`, `ahg-provenance-ai` (output only as proposals); from `ahg-ric`: `RicProvenanceService`, `GraphGroundingService` |
 
 : Next phases and their Heratio sources
+
+Order of work, as Dr Johan Pieterse set it on 27 October 2026: phases 4, 5, 7 to 16 and 18 to 22 first; backup (phase 3) and all AI work (phase 17) last. The Workspace live instance holds no real data, so backup waits until a pilot does; AI work waits until the functions it would assist exist. Phase numbers are kept, as releases and the parity register refer to them. Nothing outside phase 17 may depend on an AI model.
+
+Checked against PSIS on 27 October 2026. PSIS has 143 plugins: 124 of AHG's and 19 of AtoM's own. 118 of AHG's have a Heratio twin, some under another name, and by count of screens and actions Heratio does as much as PSIS or more for nearly all of them. PSIS does more for IIIF (81 against 51), ingest (21 against 14), portable export (18 against 11) and multi-tenancy (25 against 11); those phases read PSIS's behaviour as well as Heratio's code. Six AHG plugins have no Heratio package: email delivery (in Heratio's `app/`, phase 7), accessibility (in `ahg-core`, phase 5), SAHRA permits (phase 18), site records (phase 21), the AHG community registry (a separate product, out of scope) and the AtoM UI overrides (not needed). `governance/HERATIO-PARITY.md` lists every PSIS plugin beside its Heratio twin.
 
 ### Phase details
 
@@ -151,16 +155,16 @@ Progress:
   - A holder the public may not read is not named.
   - Phase 2 is done.
 
-**3. Backup and restore (WS-011).** `deploy/deploy.sh` already backs up the database before a release. Copy `ahg-backup`: scheduled backups of the database and the object store together, an offsite copy (its local, rsync and S3 drivers, which do not touch the AtoM schema), and a restore that checks every file's SHA-256 and the audit chain afterwards. Done when a restore drill on a fresh machine is recorded, as the G2 evidence asks.
+**3. Backup and restore (WS-011).** `deploy/deploy.sh` already backs up the database before a release. Copy `ahg-backup`: scheduled backups of the database and the object store together, an offsite copy (its local, rsync and S3 drivers, which do not touch the AtoM schema), and a restore that checks every file's SHA-256 and the audit chain afterwards. Done when a restore drill on a fresh machine is recorded, as the G2 evidence asks. Deferred to the end (27 October 2026): the live instance holds no real data and the code is on GitHub; until a pilot holds real records, the backup before each deploy is enough.
 
 **4. Heratio migration check (WS-013, G3).** The AtoM import reads AtoM CSV exports and AtoM's uploads. Copy the mapping rules of `ahg-data-migration` to take a difficult Heratio sample (inherited access rules, translations, relations, embargoed records). A reconciliation report lists, for each source row, what was kept, changed and lost. Done when the report for the agreed sample shows nothing lost silently.
 
 **5. Background jobs, file text and embedded metadata (WS-007, WS-016).** Uploads and imports run in the request today. Add a database-backed queue, copying the job runner and its screen from `ahg-jobs`. Then:
 - copy `PdfTextExtractService` from `ahg-pdf-tools` and the derivative and watermark code from `ahg-media-processing`, which do not touch the AtoM schema;
 - copy `ahg-metadata-extraction` for embedded metadata such as EXIF and XMP;
-- send scanned pages for OCR through the AI gateway.
+- copy the alternative text for images from `ahg-core` (PSIS `ahgAccessibilityPlugin`, table `image_alt_text`): written by staff, shown in the public catalogue and the viewer.
 
-Text read by a machine is a proposal for the instantiation's transcript, reviewed in the queue built in v0.0.48. Done when an uploaded PDF and a scanned page both produce a reviewable transcript.
+Text taken from a PDF's own text layer is a proposal for the instantiation's transcript, reviewed in the queue built in v0.0.48. OCR of scanned pages is AI work and moves to phase 17. Done when an uploaded PDF produces a reviewable transcript and every image can carry alternative text.
 
 **6. Full-text search (WS-016).** Search is a substring match on names and identifiers. Copy the behaviour of `ahg-search` (query syntax, facets by level, date, repository, subject and place, highlighting, analytics), on PostgreSQL full-text search with one configuration per language, decided by ADR against Elasticsearch, which Heratio uses. Index only what the reader may see, so the public catalogue and the API search published values only. Done when the acceptance queries and the access negative tests pass.
 
@@ -176,11 +180,11 @@ Progress:
   - Search statistics under Manage: what was searched most and which searches found nothing, over 7, 30, 90 or 365 days, with nothing kept about who searched.
 - **Next**: search by meaning comes in phase 17; phase 6 is otherwise done.
 
-**7. Access requests (WS-007, WS-011).** An instantiation "on request" can be opened today only by staff. Copy `ahg-access-request`: a signed-in researcher asks for a file, giving a reason; staff approve or refuse; approval gives that researcher time-limited access; each step is audited and emailed. Registered researchers come from `ahg-researcher-manage`, beside the registration requests that already exist. Done when a researcher's approved request opens the file and an expired one does not.
+**7. Access requests (WS-007, WS-011).** An instantiation "on request" can be opened today only by staff. Copy `ahg-access-request`: a signed-in researcher asks for a file, giving a reason; staff approve or refuse; approval gives that researcher time-limited access; each step is audited and emailed. Email is sent through a suppression gate copied from Heratio's `EmailSuppressionGate`, with bounces captured as its `EmailBounceController` does (PSIS `ahgEmailDeliveryPlugin`), so an address that bounces is not written to again. Registered researchers come from `ahg-researcher-manage`, beside the registration requests that already exist. Done when a researcher's approved request opens the file and an expired one does not.
 
-**8. Reports and statistics (WS-016).** Copy the reports of `ahg-reports` (holdings by repository and level, publication status, completeness, rights, catalogue growth, collections health), with the authority completeness that already exists. Copy the usage counts of `ahg-statistics`, without storing visitors' addresses. Every report exports as CSV. Done when a pilot archivist answers their institution's routine questions without help.
+**8. Reports and statistics (WS-016).** Copy the reports of `ahg-reports` (holdings by repository and level, publication status, completeness, rights, catalogue growth, collections health), with the authority completeness that already exists. Copy the usage counts of `ahg-statistics`, without storing visitors' addresses. Every report exports as CSV. Copy the report builder from `ahg-reports` (`ReportBuilderController`; PSIS `ahgReportBuilderPlugin`, 54 routes): templates, sections, saved and scheduled reports, export as Word, PDF, XLSX and CSV; its SQL queries are replaced by queries over the Workspace's own model, never free SQL. Done when a pilot archivist answers their institution's routine questions without help.
 
-**9. Accessions and donors (WS-014).** Copy `ahg-accession-manage`, which follows the Canadian CAIS profile (`CaaisProfileService`), and `ahg-donor-manage`. An accession register records what arrived, from whom, when and on what terms. The donor is an agent with contact points; the agreement is a record. RiC models an accession as an activity, so this needs an ADR on the mapping, and on keeping donor contact details encrypted as Heratio does. Done when a pilot archivist registers a deposit and links it to the fonds it became.
+**9. Accessions and donors (WS-014).** Copy `ahg-accession-manage`, which follows the Canadian CAIS profile (`CaaisProfileService`), and `ahg-donor-manage`. An accession register records what arrived, from whom, when and on what terms. The donor is an agent with contact points; the agreement is a record. RiC models an accession as an activity, so this needs an ADR on the mapping, and on keeping donor contact details encrypted as Heratio does. Donor agreements come with `ahg-donor-manage` (PSIS `ahgDonorAgreementPlugin`): types, documents, history and the accessions and records each covers. Provenance and custody history follow, copied from `ahg-information-object-manage` (PSIS `ahgProvenancePlugin`: provenance events, agents and documents): in RiC each change of custody or ownership is an activity with its agents, so the same ADR maps it. Done when a pilot archivist registers a deposit under its agreement, links it to the fonds it became, and the fonds shows its custody history.
 
 **10. Work assignment and workflow (WS-014).** Copy the task model of `ahg-workflow`: tasks on records, assigned to people, with due dates, overdue notices and bulk assignment. Its Spectrum procedures are museum work and stay out. The task states form a vocabulary, and publication remains the existing review and publish step. Done when a team divides a fonds' description among its members and sees what is left.
 
@@ -200,30 +204,32 @@ These profiles came from ArchiveHeritageGroup/OpenRiC #1 to #3, now in the speci
 - Copy `ahg-observability` for health and metrics.
 - Copy `ahg-integrity` for fixity checks on a schedule, with reports of failures.
 - Copy `ahg-jobs-manage` for the operator's view of jobs.
-- Write runbooks for updating, restoring and rotating keys.
+- Copy single sign-on through OpenID Connect from `ahg-user-manage` (AtoM `arOidcPlugin`), per institution, mapped to the Workspace's accounts and roles.
+- Write runbooks for updating and rotating keys; the restore runbook comes with phase 3.
 
 Done when the security, accessibility and disaster-recovery sign-offs of WS-017 have their evidence.
 
 **13. Embargoes, retention and disposal (WS-017, WS-018).** Copy the embargo service, notices and reports of `ahg-extended-rights`; agents' embargoes already exist, and this extends embargoes to records and files. Its retention schedule and disposal workflow, with `ahg-records-manage`, follow a discovery with a records manager. Disposal is a reviewed, audited activity that leaves a record of what was destroyed. Done when a disposal is approved, carried out and reported, with nothing removed outside it.
 
-**14. IIIF (WS-019).** Copy the manifest building of `ahg-iiif-collection`: a IIIF Presentation 3 manifest for each record from its reference copies, a collection for each fonds, and a viewer in the public catalogue. Follow the RiC and IIIF pattern of openric/service #15 as specification guidance. Done when the manifests validate and the MCP's image tool can follow them.
+**14. IIIF (WS-019).** Copy the manifest building of `ahg-iiif-collection`: a IIIF Presentation 3 manifest for each record from its reference copies, a collection for each fonds, and a viewer in the public catalogue. Follow the RiC and IIIF pattern of openric/service #15 as specification guidance. PSIS's `ahgIiifPlugin` has more than Heratio's package (81 routes against 51, among them IIIF authentication); read it for what Heratio lacks. Done when the manifests validate and the MCP's image tool can follow them.
 
 **15. Preservation connectors (WS-019).**
 - Copy PREMIS events from `ahg-preservation`: ingest, fixity, migration.
 - Copy the OCFL storage layout from `ahg-ocfl`.
 - Copy the Archivematica transfer and status from `ahg-archivematica`.
+- Accept deposits by SWORD, as AtoM's `qtSwordPlugin` does; Heratio has no twin, so this is written fresh against the existing import.
 
 Each one is optional per institution. Done when an instantiation's preservation history can be exported as PREMIS.
 
 **16. Federation and harvesting (WS-019).** Copy `ahg-federation` (shared search across Workspace institutions and peers, one visitor key per peer, as the MCP does) and `ahg-resourcesync`, beside the OAI-PMH that already exists. Done when two institutions search each other's published catalogue and neither sees the other's drafts.
 
-**17. AI assistance (WS-019).** Copy the candidate ranking of `ahg-authority-resolution`, so the review queue offers the likely authority record for a proposed name. Copy `ahg-translation` for proposed translations and `ahg-semantic-search` for search by meaning. All of it runs through the AI gateway and produces proposals only, as ADR 0007 decided. With it, two more OpenRiC profiles:
+**17. AI assistance (WS-019). Deferred to the end (27 October 2026).** All AI work is here, so nothing before it depends on a model: OCR of scanned pages (from phase 5), authority candidates, translation, search by meaning (after phase 6), the AI chatbot and AI compliance (from phase 22), AI condition assessment, inference receipts and the provenance of AI outputs. Copy the candidate ranking of `ahg-authority-resolution`, so the review queue offers the likely authority record for a proposed name. Copy `ahg-translation` for proposed translations and `ahg-semantic-search` for search by meaning. All of it runs through the AI gateway and produces proposals only, as ADR 0007 decided. With it, two more OpenRiC profiles:
 - **Inferred-Provenance**: what a model asserted is exported as inferred (`prov:wasGeneratedBy`, confidence), from the assertion origins the Workspace already records; copied from `RicProvenanceService`.
 - **Graph-Grounding**: `GET /ground`, disambiguation packs keyed to entity IRIs, for agents such as the MCP; copied from `GraphGroundingService`.
 
 These came from ArchiveHeritageGroup/OpenRiC #4 and #5. Done when every machine output in the Workspace can be traced to its proposal and its reviewer.
 
-**18. Privacy and jurisdiction packs.** Copy `ahg-privacy` (POPIA: personal information in descriptions, requests for access and correction), `ahg-security-clearance` and national packs such as `ahg-narssa`. Each is enabled per institution and decided by ADR. Done when a South African institution can show POPIA compliance for its catalogue.
+**18. Privacy and jurisdiction packs.** Copy `ahg-privacy` (POPIA: personal information in descriptions, requests for access and correction), `ahg-security-clearance` and national packs such as `ahg-narssa`, `ahg-naz` and `ahg-nmmz`, `ahg-cdpa`, `ahg-ipsas` and the rest of `ahg-icip` (Traditional Knowledge labels came in phase 2). SAHRA heritage permits under the National Heritage Resources Act follow PSIS's `ahgSAHRAPlugin`, which has no Heratio twin: a researcher applies, a supervisor endorses, the authority decides. Each is enabled per institution and decided by ADR. Done when a South African institution can show POPIA compliance for its catalogue.
 
 **19. Research services.** Copy the reading-room side: a researcher's cart and favourites (`ahg-cart`, `ahg-favorites`), feedback on records (`ahg-feedback`), time-limited share links that respect access rules (`ahg-share-link`). `ahg-research` is the largest Heratio package, at 79,899 lines; what of it the Workspace takes is decided by ADR before it is copied. Done when a researcher can find, collect, request and cite material in one visit.
 
@@ -233,11 +239,12 @@ These came from ArchiveHeritageGroup/OpenRiC #4 and #5. Done when every machine 
 - library: `ahg-library`, `ahg-biblio-bf`, `ahg-biblio-frbr`, `ahg-z3950`, `ahg-mods-manage`;
 - museum: `ahg-museum`, `ahg-spectrum`, `ahg-condition`, `ahg-loan`, `ahg-exhibition`, `ahg-artwork-request`;
 - gallery and digital assets: `ahg-gallery`, `ahg-dam`, `ahg-3d-model`, `ahg-image-ar`;
-- archaeology: `ahg-archaeology`, `ahg-harris-matrix`.
+- archaeology and heritage sites: `ahg-archaeology`, `ahg-harris-matrix`, and site records for archaeological, heritage and rock art sites after PSIS's `ahgSiteRecordPlugin` (no Heratio twin; locality shown by role);
+- heritage assets: `ahg-heritage-manage`, with heritage accounting (PSIS `ahgHeritageAccountingPlugin`).
 
 Done for each domain when its Heratio functions work on the RiC model and export in its own standard.
 
-**22. Remaining Heratio services.** Whatever the parity register still lists as open after phase 21 is copied, or replaced by something the Workspace already does. That includes ingest and scanning workflows, box labels, vendors, version history, C2PA and inference receipts (whose signing code is already copied for the audit chain), GraphQL, SharePoint and FTP intake, the AI chatbot and AI compliance. Done when the parity register has no open row.
+**22. Remaining Heratio services.** Whatever the parity register still lists as open after phase 21 is copied, or replaced by something the Workspace already does. That includes ingest (reading PSIS's `ahgIngestPlugin`, which does more) and scanning workflows, box labels, vendors, version history, C2PA, GraphQL, and SharePoint and FTP intake. The AI chatbot, AI compliance and inference receipts moved to phase 17. Done when the parity register has no open row.
 
 Not copied: the 12 templates on the prohibited-copy list, until each is compared with AtoM's own; the Workspace's own theme, menus and accounts already do their work. Everything else in Heratio is a candidate to copy.
 
