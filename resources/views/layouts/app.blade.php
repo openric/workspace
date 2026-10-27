@@ -53,10 +53,13 @@
                 'records.export-all' => [__('Export descriptions'), $user->mayAnywhere('read', 'description'), 'records.export-all'],
                 'agents.duplicates' => [__('Duplicate authority records'), $user->may('update', 'authority'), 'agents.duplicates'],
                 'alt-text.index' => [__('Alternative text'), $user->mayAnywhere('update', 'description'), 'alt-text.*'],
+                'access-requests.index' => [__('Access requests'), $user->mayAnywhere('review-access-requests', 'description'), 'access-requests.index'],
+                'access-requests.mine' => [__('My access requests'), true, 'access-requests.mine'],
                 'jobs.index' => [__('Jobs'), true, 'jobs.*'],
             ],
             'Admin' => [
                 'accounts.index' => [__('Users'), $may('manage-accounts'), 'accounts.*'],
+                'email.index' => [__('Email'), $may('manage-accounts'), 'email.*'],
                 'roles.index' => [__('Roles'), $may('manage-roles'), 'roles.*'],
                 'audit' => [__('Audit log'), $may('view-audit-log'), 'audit'],
                 'search.statistics' => [__('Search statistics'), $may('view-audit-log'), 'search.statistics'],

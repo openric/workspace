@@ -1,0 +1,44 @@
+# OpenRiC Workspace - OpenRiC Workspace Email Statuses.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What became of a message the Workspace sent (roadmap phase 7; Heratio's ahg_sent_email.status).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/email-status/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Email Statuses"@en ;
+    dcterms:description "Where a message the Workspace sends stands."@en ;
+    dcterms:issued "2026-10-27"^^xsd:date ;
+    skos:hasTopConcept v:queued, v:sent, v:suppressed, v:failed .
+
+v:queued a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Queued"@en ;
+    skos:scopeNote "Operational: email delivery, not part of any RiC description."@en ;
+    skos:definition "Handed to the mailer, waiting to be sent."@en .
+
+v:sent a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Sent"@en ;
+    skos:scopeNote "Operational: email delivery, not part of any RiC description."@en ;
+    skos:definition "Accepted by the mail server."@en .
+
+v:suppressed a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Suppressed"@en ;
+    skos:scopeNote "Operational: email delivery, not part of any RiC description."@en ;
+    skos:definition "Not sent: the address bounced or complained."@en .
+
+v:failed a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Failed"@en ;
+    skos:scopeNote "Operational: email delivery, not part of any RiC description."@en ;
+    skos:definition "The mail server refused it or could not be reached."@en .

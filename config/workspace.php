@@ -15,7 +15,7 @@ return [
     'audit_signing_key' => env('WORKSPACE_AUDIT_SIGNING_KEY', storage_path('keys/audit-signing.sk')),
 
     // The Workspace's own vocabularies, bundled with the code (resources/vocabularies).
-    'bundled_vocabularies' => ['account-role.ttl', 'permission.ttl', 'audit-action.ttl', 'description-element.ttl', 'language-value-state.ttl', 'description-status.ttl', 'description-detail.ttl', 'level-of-description.ttl', 'record-kind.ttl', 'date-property.ttl', 'date-qualifier.ttl', 'name-type.ttl', 'identifier-type.ttl', 'relation-type.ttl', 'relation-state.ttl', 'relation-certainty.ttl', 'assertion-origin.ttl', 'assertion-status.ttl', 'concept-scheme-kind.ttl', 'concept-match-type.ttl', 'agent-type.ttl', 'carrier-type.ttl', 'file-use.ttl', 'file-availability.ttl', 'container-type.ttl', 'storage-place-type.ttl', 'container-status.ttl', 'capacity-unit.ttl', 'storage-security-level.ttl', 'api-scope.ttl', 'proposal-kind.ttl', 'rights-basis.ttl', 'rights-statement.ttl', 'licence.ttl', 'copyright-status.ttl', 'rights-act.ttl', 'rights-restriction.ttl', 'tk-label.ttl', 'label-applier.ttl', 'job-type.ttl', 'job-status.ttl', 'watermark-type.ttl', 'watermark-position.ttl'],
+    'bundled_vocabularies' => ['account-role.ttl', 'permission.ttl', 'audit-action.ttl', 'description-element.ttl', 'language-value-state.ttl', 'description-status.ttl', 'description-detail.ttl', 'level-of-description.ttl', 'record-kind.ttl', 'date-property.ttl', 'date-qualifier.ttl', 'name-type.ttl', 'identifier-type.ttl', 'relation-type.ttl', 'relation-state.ttl', 'relation-certainty.ttl', 'assertion-origin.ttl', 'assertion-status.ttl', 'concept-scheme-kind.ttl', 'concept-match-type.ttl', 'agent-type.ttl', 'carrier-type.ttl', 'file-use.ttl', 'file-availability.ttl', 'container-type.ttl', 'storage-place-type.ttl', 'container-status.ttl', 'capacity-unit.ttl', 'storage-security-level.ttl', 'api-scope.ttl', 'proposal-kind.ttl', 'rights-basis.ttl', 'rights-statement.ttl', 'licence.ttl', 'copyright-status.ttl', 'rights-act.ttl', 'rights-restriction.ttl', 'tk-label.ttl', 'label-applier.ttl', 'job-type.ttl', 'job-status.ttl', 'watermark-type.ttl', 'watermark-position.ttl', 'email-bounce-type.ttl', 'email-status.ttl', 'access-request-status.ttl', 'access-request-urgency.ttl'],
 
     // API keys (ADR 0007, Heratio's ApiKeyService): what an account must hold, anywhere, for a key it
     // owns to carry each scope (api-scope vocabulary), as [action, kind] pairs of which any one will do.
@@ -35,7 +35,7 @@ return [
     'permission_matrix' => [
         'institution' => ['manage-institution', 'manage-accounts', 'manage-roles', 'view-audit-log'],
         'repository' => ['read', 'create', 'update', 'delete', 'publish'],
-        'description' => ['read', 'create', 'update', 'delete', 'view-draft', 'publish', 'read-master', 'read-reference', 'read-thumbnail', 'translate', 'review-proposals'],
+        'description' => ['read', 'create', 'update', 'delete', 'view-draft', 'publish', 'read-master', 'read-reference', 'read-thumbnail', 'translate', 'review-proposals', 'review-access-requests'],
         'vocabulary' => ['create', 'update', 'delete', 'publish'],
         'authority' => ['read', 'create', 'update', 'delete', 'publish'],
         'storage' => ['read', 'create', 'update', 'delete'],
@@ -172,7 +172,7 @@ return [
         'administrator' => ['parent' => 'signed-in', 'grants' => '*'],
         'editor' => ['parent' => 'signed-in', 'grants' => [
             'repository' => ['read', 'create', 'update', 'publish'],
-            'description' => ['read', 'create', 'update', 'delete', 'view-draft', 'publish', 'read-master', 'read-reference', 'read-thumbnail', 'review-proposals'],
+            'description' => ['read', 'create', 'update', 'delete', 'view-draft', 'publish', 'read-master', 'read-reference', 'read-thumbnail', 'review-proposals', 'review-access-requests'],
             'vocabulary' => ['create', 'update', 'publish'],
             'authority' => ['read', 'create', 'update', 'publish'],
             'storage' => ['read', 'create', 'update'],
@@ -209,4 +209,11 @@ return [
 
     // The OAI-PMH adminEmail when no repository gives a contact email (Export-Only).
     'oai_admin_email' => env('WORKSPACE_OAI_ADMIN_EMAIL'),
+
+    // Email delivery (roadmap phase 7). The mail provider's bounce and complaint webhook,
+    // POST /webhooks/email/bounce, is signed with this secret (an HMAC-SHA256 of the body in
+    // X-AHG-Signature); empty, every call is refused. The provider is found from the payload,
+    // or forced here: postmark, ses, sparkpost, mailgun or generic.
+    'email_bounce_secret' => env('WORKSPACE_EMAIL_BOUNCE_SECRET'),
+    'email_bounce_provider' => env('WORKSPACE_EMAIL_BOUNCE_PROVIDER'),
 ];

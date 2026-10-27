@@ -1,0 +1,44 @@
+# OpenRiC Workspace - OpenRiC Workspace Access Request Urgencies.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# How soon a requester needs the file (Heratio's access_request.urgency).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/access-request-urgency/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Access Request Urgencies"@en ;
+    dcterms:description "How soon the requester needs access."@en ;
+    dcterms:issued "2026-10-27"^^xsd:date ;
+    skos:hasTopConcept v:low, v:normal, v:high, v:critical .
+
+v:low a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Low"@en ;
+    skos:scopeNote "Operational: the handling of a request for access, not part of any RiC description."@en ;
+    skos:definition "Whenever it suits."@en .
+
+v:normal a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Normal"@en ;
+    skos:scopeNote "Operational: the handling of a request for access, not part of any RiC description."@en ;
+    skos:definition "In the usual time."@en .
+
+v:high a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "High"@en ;
+    skos:scopeNote "Operational: the handling of a request for access, not part of any RiC description."@en ;
+    skos:definition "Soon, such as for a deadline."@en .
+
+v:critical a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Critical"@en ;
+    skos:scopeNote "Operational: the handling of a request for access, not part of any RiC description."@en ;
+    skos:definition "At once, such as for a legal matter."@en .

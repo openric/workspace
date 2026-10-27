@@ -1,0 +1,51 @@
+# OpenRiC Workspace - OpenRiC Workspace Access Request Statuses.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Where a request for a file stands (roadmap phase 7; Heratio's access_request.status, ahg-access-request).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/access-request-status/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Access Request Statuses"@en ;
+    dcterms:description "Where a request for access to a file stands."@en ;
+    dcterms:issued "2026-10-27"^^xsd:date ;
+    skos:hasTopConcept v:pending, v:approved, v:denied, v:cancelled, v:expired .
+
+v:pending a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Pending"@en ;
+    skos:scopeNote "Operational: the handling of a request for access, not part of any RiC description."@en ;
+    skos:definition "Waiting for someone who reviews access requests."@en .
+
+v:approved a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Approved"@en ;
+    skos:scopeNote "Operational: the handling of a request for access, not part of any RiC description."@en ;
+    skos:definition "Granted: the requester may open the file until the access ends."@en .
+
+v:denied a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Refused"@en ;
+    skos:scopeNote "Operational: the handling of a request for access, not part of any RiC description."@en ;
+    skos:definition "Refused, with the reviewer's reason."@en .
+
+v:cancelled a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Cancelled"@en ;
+    skos:scopeNote "Operational: the handling of a request for access, not part of any RiC description."@en ;
+    skos:definition "Withdrawn by the requester."@en .
+
+v:expired a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Expired"@en ;
+    skos:scopeNote "Operational: the handling of a request for access, not part of any RiC description."@en ;
+    skos:definition "Approved once; the access has ended."@en .

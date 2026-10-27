@@ -167,6 +167,7 @@ class PdfTextTest extends TestCase
         Queue::fake();
 
         $this->artisan('workspace:files:read')->assertFailed();
+        $this->artisan('workspace:files:read', ['--as' => 'nobody@example.org'])->expectsOutputToContain('No account has the email address nobody@example.org.')->assertFailed();
         $this->artisan('workspace:files:read', ['--as' => 'admin@example.org'])->expectsOutputToContain('Queued: the embedded metadata of 1 files, the text of 1 PDFs.')->assertSuccessful();
         $job = BackgroundJob::whereHas('type', fn ($q) => $q->where('notation', 'file-text'))->sole();
         $this->assertSame($this->admin->id, $job->user_id);

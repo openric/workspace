@@ -66,3 +66,9 @@ The site stays in maintenance mode and the script prints two commands: one to de
 ## The live instance's own settings
 
 `.env` (mode 640, readable by `www-data`) sets `APP_ENV=production`, `APP_DEBUG=false` and the database role `openric_workspace`; its password is only in that file. php-fpm may write only `storage/` and `bootstrap/cache/` (the systemd drop-in `openric-workspace-storage.conf`). nginx serves `public/` with HSTS and the usual security headers; the certificate is renewed by certbot.
+
+## Email
+
+The Workspace sends mail for access requests (v0.0.65) through Laravel's mailer, in the background, so the cron entry for background jobs must be installed. Set `MAIL_MAILER`, `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_FROM_ADDRESS` and `MAIL_FROM_NAME` in `.env`; with `MAIL_MAILER=log` messages are written to the log and never sent. Every message, sent or held back, is listed under Admin, Email.
+
+Bounces and complaints come from the mail provider's webhook, `POST /webhooks/email/bounce`, signed with `WORKSPACE_EMAIL_BOUNCE_SECRET` (the HMAC-SHA256 of the body, hex, in `X-AHG-Signature`, optionally prefixed `sha256=`). With no secret every call is refused. Postmark, SES, SparkPost and Mailgun payloads are recognised; `WORKSPACE_EMAIL_BOUNCE_PROVIDER` forces one.

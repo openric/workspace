@@ -17,6 +17,14 @@
     @include('description._viewer', ['instantiation' => $instantiation, 'files' => $instantiation->files->filter(fn ($f) => $deliverable[$f->id])->keyBy(fn ($f) => $f->use->notation),
         'title' => $instantiation->described('instantiation-title', ['en']), 'alt' => $instantiation->described('instantiation-alt-text', [app()->getLocale(), 'en']), 'fileRoute' => 'files.show'])
     <h2>{{ __('Files') }}</h2>
+    @if(! $canUpdate && $instantiation->availability->notation === 'on-request')
+        @php($accessRequests = app(\App\AccessRequests\AccessRequestService::class))
+        @if($open = $accessRequests->open(auth()->user(), $instantiation))
+            <p><a href="{{ route('access-requests.show', $open) }}">{{ $open->grantsAccess() ? __('Your access to these files lasts until :date.', ['date' => $open->expires_at->format('Y-m-d')]) : __('Your request for these files waits for review.') }}</a></p>
+        @elseif($accessRequests->mayRequest(auth()->user(), $instantiation))
+            <p><a href="{{ route('access-requests.create', $instantiation) }}">{{ __('Ask for access to these files') }}</a></p>
+        @endif
+    @endif
     @if($canUpdate && $instantiation->file('master'))
         <form method="post" action="{{ route('instantiations.remake-copies', $instantiation) }}">@csrf<button type="submit" style="margin-top: 0">{{ __('Make the viewing copies again') }}</button></form>
     @endif

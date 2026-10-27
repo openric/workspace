@@ -27,9 +27,15 @@ class ReadFiles extends Command
 
     public function handle(JobsService $jobs): int
     {
-        $user = User::where('email', (string) $this->option('as'))->first();
-        if ($user === null) {
+        $email = trim((string) $this->option('as'));
+        if ($email === '') {
             $this->error('Name the account the proposals come from: --as=<email address>');
+
+            return self::FAILURE;
+        }
+        $user = User::whereRaw('LOWER(email) = ?', [strtolower($email)])->first();
+        if ($user === null) {
+            $this->error("No account has the email address $email.");
 
             return self::FAILURE;
         }

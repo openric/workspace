@@ -9,12 +9,14 @@
 // is decided in one place, deliverable(): the file's use needs its read
 // permission on the unit (read-master, read-reference, read-thumbnail), an
 // instantiation on request is delivered only to those who may update the
-// unit, a withdrawn one to nobody, and nothing of a deleted unit or
-// instantiation is delivered.
+// unit, or to a researcher whose request for it is approved and not over
+// (roadmap phase 7), a withdrawn one to nobody, and nothing of a deleted
+// unit or instantiation is delivered.
 
 namespace App\Description;
 
 use App\Access\AccessControl;
+use App\AccessRequests\AccessRequestService;
 use App\Audit\AuditLog;
 use App\Files\FileStore;
 use App\Files\Watermark;
@@ -172,6 +174,10 @@ class InstantiationService
             return false;
         }
         $may = fn (string $action) => app(AccessControl::class)->allows($user, $action, 'description', $unit, $user ? null : Institution::find($unit->institution_id));
+        // An approved access request opens every file of an instantiation on request, until it ends (roadmap phase 7).
+        if ($user !== null && $instantiation->availability->notation === 'on-request' && app(AccessRequestService::class)->grants($user, $instantiation)) {
+            return true;
+        }
         if (! $may('read-'.$file->use->notation) || ! $may('read')) {
             return false;
         }

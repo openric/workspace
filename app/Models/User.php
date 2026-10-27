@@ -13,6 +13,7 @@ namespace App\Models;
 use App\Access\AccessControl;
 use App\Audit\Audited;
 use App\Support\Vocab;
+use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -22,9 +23,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['institution_id', 'name', 'email', 'password', 'disabled_at', 'interface_language'])]
+#[Fillable(['institution_id', 'name', 'email', 'password', 'disabled_at', 'interface_language', 'email_bounced_at'])]
 #[Hidden(['password', 'remember_token'])]
-class User extends Authenticatable
+class User extends Authenticatable implements HasLocalePreference
 {
     use Audited, HasUuids, Notifiable;
 
@@ -33,8 +34,15 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'immutable_datetime',
             'disabled_at' => 'immutable_datetime',
+            'email_bounced_at' => 'immutable_datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /** Mail to the account is written in the interface language it chose (roadmap phase 7). */
+    public function preferredLocale(): ?string
+    {
+        return $this->interface_language;
     }
 
     public function institution(): BelongsTo

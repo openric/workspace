@@ -11,7 +11,7 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | Package | Lines | G1 scope | Status | Phase | PSIS plugins | Workspace today |
 |---|---|---|---|---|---|---|
 | `ahg-3d-model` | 7687 | out: GLAM sector | Planned | 21 | `ahg3DModelPlugin` |  |
-| `ahg-access-request` | 1928 | V0.1 candidate | Planned | 7 | `ahgAccessRequestPlugin` |  |
+| `ahg-access-request` | 1928 | V0.1 candidate | Partial | 7 | `ahgAccessRequestPlugin` | Requests for files on request, approved for some days or refused, each step emailed (v0.0.65); security clearance requests in phase 18 |
 | `ahg-accession-manage` | 6795 | later: V1.0+ | Planned | 9 | `ahgAccessionManagePlugin`, `qtAccessionPlugin` |  |
 | `ahg-acl` | 9750 | V0.1 candidate | Covered |  | `qbAclPlugin` | Roles and permissions with default deny (ADR 0005), written fresh |
 | `ahg-actor-manage` | 13061 | V0.1 candidate | Covered |  | `ahgActorManagePlugin`, `ahgAuthorityPlugin`, `ahgContactPlugin` | Authority records: ISAAR(CPF), merge, split, duplicates, completeness |
@@ -105,7 +105,7 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-repository-manage` | 4578 | V0.1 candidate | Covered |  | `ahgRepositoryManagePlugin` | Repositories with ISDIAH elements and contact points |
 | `ahg-request-publish` | 1876 | V0.1 candidate | Partial | 10 | `ahgRequestToPublishPlugin` | Review and publish of each value; requests in phase 10 |
 | `ahg-research` | 79899 | V0.1 candidate | Planned | 19 | `ahgResearchPlugin` | Decision first |
-| `ahg-researcher-manage` | 3111 | V0.1 candidate | Partial | 7 | `ahgResearcherPlugin` | Registration requests |
+| `ahg-researcher-manage` | 3111 | V0.1 candidate | Partial | 19 | `ahgResearcherPlugin` | Registration requests. The package itself is researcher submissions (descriptions and files drafted by researchers for staff review), not a register of researchers, so it moved to phase 19 |
 | `ahg-resourcesync` | 926 | later: V1.0+ | Planned | 16 | `ahgResourceSyncPlugin` |  |
 | `ahg-ric` | 28399 | V0.1 candidate | Partial | 11, 17 | `ahgRicExplorerPlugin` | RiC-native model, RiC-O export, assertions with provenance (ADR 0006); not yet the Governance deprecation register, Portability (RiC-O import, round-trip, DCAT/VoID), Inferred-Provenance export or Graph-Grounding (`RicDeprecationService`, `RdfImportService`, `RicDatasetService`, `RicProvenanceService`, `GraphGroundingService`) |
 | `ahg-ric-manage` | 1464 | V0.1 candidate | Covered |  | `ahgRicManagePlugin` | Relations, their types, roles and assertions |
@@ -133,7 +133,7 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 
 : Heratio packages and their Workspace status
 
-Totals: 23 covered, 24 partial, 73 planned, of 120 (27 October 2026).
+Totals: 23 covered, 25 partial, 72 planned, of 120 (27 October 2026).
 
 ## PSIS plugins without a Heratio package
 
@@ -141,7 +141,7 @@ Checked on 27 October 2026 against PSIS (`archive/plugins`, 143 plugins: 124 of 
 
 | PSIS plugin | What it does | Where it goes |
 |---|---|---|
-| `ahgEmailDeliveryPlugin` | Bounce capture, suppression list, a gate before each send | Phase 7; Heratio has it in `app/` (`EmailBounceController`, `EmailSuppressionGate`) |
+| `ahgEmailDeliveryPlugin` | Bounce capture, suppression list, a gate before each send | Done in v0.0.65 from Heratio's `app/` (`EmailBounceController`, `EmailSuppressionGate`, `EmailAuditListener`), with a screen for sent mail and held addresses |
 | `ahgSAHRAPlugin` | SAHRA heritage permits under the National Heritage Resources Act | Phase 18 |
 | `ahgSiteRecordPlugin` | Archaeological, heritage and rock art site records, locality shown by role | Phase 21 |
 | `ahgRegistryPlugin` | The AHG community hub and registry | Out of scope: a separate product |

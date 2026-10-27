@@ -8,6 +8,7 @@
 // requires a signed-in account,
 // and each action that needs more names its permission IRI.
 
+use App\Http\Controllers\AccessRequestController;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\AgentController;
@@ -20,6 +21,8 @@ use App\Http\Controllers\ConceptController;
 use App\Http\Controllers\DateController;
 use App\Http\Controllers\DeletionController;
 use App\Http\Controllers\DiscoverController;
+use App\Http\Controllers\EmailBounceController;
+use App\Http\Controllers\EmailController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\IdentifierController;
@@ -50,6 +53,7 @@ use App\Http\Middleware\ServeDiscovery;
 use App\Http\Middleware\SetLocale;
 use App\Relations\EntityKinds;
 use App\Support\Vocab;
+use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Route;
@@ -122,6 +126,10 @@ Route::middleware(ServeDiscovery::class)->prefix('discover')->name('discover.')-
     Route::get('/graph/{kind}/{id}', [DiscoverController::class, 'graph'])->where('kind', 'records|agents|repositories|places|activities')->name('graph');
     Route::get('/files/{file}', [DiscoverController::class, 'file'])->name('file');
 });
+
+// The mail provider's bounce and complaint webhook (roadmap phase 7; Heratio's): public, HMAC-signed, so no session or CSRF token.
+Route::post('/webhooks/email/bounce', [EmailBounceController::class, 'receive'])->withoutMiddleware(ValidateCsrfToken::class)
+    ->middleware('throttle:120,1')->name('email.bounce');
 
 Route::middleware('guest')->group(function () {
     Route::get('/sign-in', [SessionController::class, 'create'])->name('sign-in');
@@ -323,6 +331,16 @@ Route::middleware(['auth', 'active'])->group(function () {
             });
     }
 
+    // Requests for files available on request (roadmap phase 7; Heratio's ahg-access-request).
+    Route::get('/instantiations/{instantiation}/request-access', [AccessRequestController::class, 'create'])->whereUuid('instantiation')->name('access-requests.create');
+    Route::post('/instantiations/{instantiation}/request-access', [AccessRequestController::class, 'store'])->whereUuid('instantiation')->name('access-requests.store');
+    Route::get('/access-requests', [AccessRequestController::class, 'index'])->name('access-requests.index');
+    Route::get('/access-requests/mine', [AccessRequestController::class, 'mine'])->name('access-requests.mine');
+    Route::get('/access-requests/{accessRequest}', [AccessRequestController::class, 'show'])->whereUuid('accessRequest')->name('access-requests.show');
+    Route::post('/access-requests/{accessRequest}/approve', [AccessRequestController::class, 'approve'])->whereUuid('accessRequest')->name('access-requests.approve');
+    Route::post('/access-requests/{accessRequest}/deny', [AccessRequestController::class, 'deny'])->whereUuid('accessRequest')->name('access-requests.deny');
+    Route::post('/access-requests/{accessRequest}/cancel', [AccessRequestController::class, 'cancel'])->whereUuid('accessRequest')->name('access-requests.cancel');
+
     // Alternative text for images (roadmap phase 5; Heratio's ahg-core alt-text worklist).
     Route::get('/alt-text', [AltTextController::class, 'index'])->name('alt-text.index');
     Route::post('/alt-text/{instantiation}', [AltTextController::class, 'store'])->whereUuid('instantiation')->name('alt-text.store');
@@ -399,6 +417,9 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/registrations', [RegistrationController::class, 'index'])->name('registrations.index');
         Route::post('/registrations/{registration}/approve', [RegistrationController::class, 'approve'])->name('registrations.approve');
         Route::post('/registrations/{registration}/reject', [RegistrationController::class, 'reject'])->name('registrations.reject');
+        // Sent mail and the addresses held after a bounce (roadmap phase 7).
+        Route::get('/email', [EmailController::class, 'index'])->name('email.index');
+        Route::post('/email/held/{user}/clear', [EmailController::class, 'clear'])->whereUuid('user')->name('email.clear');
     });
 
     Route::middleware('can:'.Vocab::permission('manage-accounts'))->prefix('accounts')->name('accounts.')->group(function () {

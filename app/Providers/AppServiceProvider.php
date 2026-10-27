@@ -7,6 +7,7 @@
 namespace App\Providers;
 
 use App\Access\AccessControl;
+use App\Mail\EmailAuditListener;
 use App\Models\DescriptionValue;
 use App\Models\Identifier;
 use App\Models\Name;
@@ -16,6 +17,9 @@ use App\Search\SearchIndex;
 use App\Support\Vocab;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Mail\Events\MessageSending;
+use Illuminate\Mail\Events\MessageSent;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
@@ -40,6 +44,10 @@ class AppServiceProvider extends ServiceProvider
             $kind::saved(fn ($model) => SearchIndex::mark($model->getTable(), (string) $model->getKey()));
         }
         $this->app->terminating(fn () => app(SearchIndex::class)->flush());
+
+        // Every message sent is logged (roadmap phase 7; Heratio's EventServiceProvider wiring of EmailAuditListener).
+        Event::listen(MessageSending::class, [EmailAuditListener::class, 'handleMessageSending']);
+        Event::listen(MessageSent::class, [EmailAuditListener::class, 'handleMessageSent']);
 
         // Default deny: an ability that is a permission IRI is an administrative
         // permission (institution kind), decided by AccessControl (ADR 0005). Gate

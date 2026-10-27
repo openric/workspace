@@ -28,6 +28,7 @@
                 <figcaption>{{ $view->label($instantiation) }} @include('description._ric', ['term' => 'rico:Instantiation'])
                     <span class="meta">{{ collect([$instantiation->carrierType?->label(\App\Support\Vocab::languages())])->filter()->join('') }}</span>
                     @include('discover._rights', ['subject' => $instantiation, 'view' => $view, 'compact' => true])
+                    @if($instantiation->availability->notation === 'on-request') · <a href="{{ route('access-requests.create', $instantiation) }}">{{ __('Available on request: ask for access') }}</a>@endif
                     @if($files->has('master')) · <a href="{{ route('discover.file', [$files['master'], 'download' => 1]) }}">{{ __('Download the master (:type, :size, SHA-256 :sha...)', ['type' => $files['master']->mime_type, 'size' => \Illuminate\Support\Number::fileSize($files['master']->size_bytes, 1), 'sha' => substr($files['master']->sha256, 0, 12)]) }}</a>@endif</figcaption>
             </figure>
         @endforeach

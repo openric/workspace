@@ -1,0 +1,44 @@
+# OpenRiC Workspace - OpenRiC Workspace Email Bounce Types.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What a mail provider reports about a message that did not arrive (roadmap phase 7; Heratio's ahg_email_bounce.bounce_type).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/email-bounce-type/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Email Bounce Types"@en ;
+    dcterms:description "Kinds of report a mail provider sends back about a message."@en ;
+    dcterms:issued "2026-10-27"^^xsd:date ;
+    skos:hasTopConcept v:hard, v:soft, v:complaint, v:unknown .
+
+v:hard a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Hard bounce"@en ;
+    skos:scopeNote "Operational: email delivery, not part of any RiC description."@en ;
+    skos:definition "The address does not exist or will never accept mail: it is not written to again."@en .
+
+v:soft a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Soft bounce"@en ;
+    skos:scopeNote "Operational: email delivery, not part of any RiC description."@en ;
+    skos:definition "The message could not be delivered for now, such as a full mailbox; five in 30 days count as a hard bounce."@en .
+
+v:complaint a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Complaint"@en ;
+    skos:scopeNote "Operational: email delivery, not part of any RiC description."@en ;
+    skos:definition "The recipient marked the message as spam: the address is not written to again for 12 months."@en .
+
+v:unknown a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Unknown"@en ;
+    skos:scopeNote "Operational: email delivery, not part of any RiC description."@en ;
+    skos:definition "A report the provider gave no kind for."@en .
