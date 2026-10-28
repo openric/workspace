@@ -97,8 +97,17 @@ class SettingsAndScreensTest extends TestCase
         $this->actingAs($this->admin)->get('/repositories')->assertSee('aria-label="Main"', false)
             ->assertSee('</svg>Home<', false)->assertSee('>Settings<', false)->assertSee('aria-current="page"', false)
             // Grouped in submenus, and the group holding the page is marked.
-            ->assertSeeInOrder(['<summary class="here">', '</svg>Describe</summary>', '>Repositories<', '</svg>Manage</summary>', '>Taxonomies<', '>Containers<', '>Import<',
-                '>Duplicate authority records<', '</svg>Admin</summary>', '>Users<', '>Audit log<', '>Settings<'], false);
+            ->assertSeeInOrder(['<summary class="here">', '</svg>Describe</summary>', '>Repositories<', '</svg>Manage</summary>', '>Taxonomies<', '>Containers<',
+                '>Duplicate authority records<', '</svg>Import and export</summary>', '>Import<', '>Export descriptions<', '</svg>Admin</summary>', '>Users<', '>Audit log<', '>Settings<'], false);
+        // The account's own pages are under its name, not in the main menu.
+        $page = $this->actingAs($this->admin)->get('/repositories')->getContent();
+        preg_match('~<details class="user-menu".*?</details>~s', $page, $menu);
+        foreach (['>Profile<', '>Jobs<', '>My access requests<', '>Access requests<'] as $item) {
+            $this->assertStringContainsString($item, $menu[0]);
+        }
+        preg_match('~<nav aria-label="Main".*?</nav>~s', $page, $nav);
+        $this->assertStringNotContainsString('access requests<', $nav[0]);
+        $this->assertStringNotContainsString('>Jobs<', $nav[0]);
     }
 
     public function test_a_new_repository_opens_its_full_description_form(): void
@@ -123,7 +132,7 @@ class SettingsAndScreensTest extends TestCase
     {
         $page = $this->actingAs($this->admin)->get('/')->assertOk()->getContent();
         preg_match('~<nav aria-label="Main".*?</nav>~s', $page, $nav);
-        $this->assertSame(5, substr_count($nav[0], '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">'), 'Home, Describe, Manage, Admin and the public catalogue');
+        $this->assertSame(6, substr_count($nav[0], '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">'), 'Home, Describe, Manage, Import and export, Admin and the public catalogue');
         $this->assertStringContainsString('</svg>Describe</summary>', $nav[0]);
     }
 }

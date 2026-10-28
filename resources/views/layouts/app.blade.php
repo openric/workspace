@@ -21,7 +21,16 @@
             @csrf
             <a href="{{ route('search') }}">{{ __('Search') }}</a>
             <a href="{{ route('clipboard.index') }}">{{ __('Clipboard') }} ({{ app(\App\Clipboard\ClipboardService::class)->count() }})</a>
-            <a href="{{ route('account.profile') }}">{{ auth()->user()->name }}</a>
+            {{-- The account's own pages, under its name. --}}
+            <details class="user-menu" name="main-nav">
+                <summary @class(['here' => request()->routeIs('account.*', 'access-requests.*', 'jobs.*')])>{{ auth()->user()->name }}</summary>
+                <ul>
+                    <li><a href="{{ route('account.profile') }}" @if(request()->routeIs('account.profile')) aria-current="page" @endif>{{ __('Profile') }}</a></li>
+                    <li><a href="{{ route('jobs.index') }}" @if(request()->routeIs('jobs.*')) aria-current="page" @endif>{{ __('Jobs') }}</a></li>
+                    <li><a href="{{ route('access-requests.mine') }}" @if(request()->routeIs('access-requests.mine')) aria-current="page" @endif>{{ __('My access requests') }}</a></li>
+                    @if(auth()->user()->mayAnywhere('review-access-requests', 'description'))<li><a href="{{ route('access-requests.index') }}" @if(request()->routeIs('access-requests.index')) aria-current="page" @endif>{{ __('Access requests') }}</a></li>@endif
+                </ul>
+            </details>
             <button type="submit">{{ __('Log out') }}</button>
         </form>
     @endauth
@@ -34,7 +43,8 @@
         $mayImport = collect(array_keys(\App\Exchange\Import\ImportService::FORMATS))
             ->contains(fn ($format) => $user->mayAnywhere('create', \App\Exchange\Import\ImportService::permission($format)));
         // group => [route name => [label, shown, the routes it is current for, "!" before one it is not]]; a group with nothing shown is left out.
-        // As AtoM: what is described, then the working tools (its Manage), then administration (its Admin).
+        // As AtoM: what is described, then the working tools (its Manage), import and export (its Import), then administration (its Admin);
+        // the account's own pages (profile, jobs, access requests) are under its name in the header.
         $nav = array_filter(array_map(fn ($items) => array_filter($items, fn ($item) => $item[1]), [
             'Describe' => [
                 'records.index' => [__('Archival descriptions'), $user->mayAnywhere('read', 'description'), 'records.*|!records.export-all'],
@@ -47,15 +57,14 @@
                 'vocabularies.index' => [__('Taxonomies'), true, 'vocabularies.*'],
                 'containers.index' => [__('Containers'), $user->mayAnywhere('read', 'storage'), 'containers.*'],
                 'storage.places' => [__('Physical storage'), $user->mayAnywhere('read', 'storage'), 'storage.*'],
-                'imports.index' => [__('Import'), $mayImport, 'imports.*'],
                 'rights.index' => [__('Rights'), $user->mayAnywhere('read', 'description'), 'rights.*'],
                 'proposals.index' => [__('Proposals to review'), $user->mayAnywhere('review-proposals', 'description'), 'proposals.*'],
-                'records.export-all' => [__('Export descriptions'), $user->mayAnywhere('read', 'description'), 'records.export-all'],
                 'agents.duplicates' => [__('Duplicate authority records'), $user->may('update', 'authority'), 'agents.duplicates'],
                 'alt-text.index' => [__('Alternative text'), $user->mayAnywhere('update', 'description'), 'alt-text.*'],
-                'access-requests.index' => [__('Access requests'), $user->mayAnywhere('review-access-requests', 'description'), 'access-requests.index'],
-                'access-requests.mine' => [__('My access requests'), true, 'access-requests.mine'],
-                'jobs.index' => [__('Jobs'), true, 'jobs.*'],
+            ],
+            'Import and export' => [
+                'imports.index' => [__('Import'), $mayImport, 'imports.*'],
+                'records.export-all' => [__('Export descriptions'), $user->mayAnywhere('read', 'description'), 'records.export-all'],
             ],
             'Admin' => [
                 'accounts.index' => [__('Users'), $may('manage-accounts'), 'accounts.*'],
@@ -71,6 +80,7 @@
             'Home' => '<path d="M3 11l9-8 9 8"/><path d="M5 9.5V21h5v-6h4v6h5V9.5"/>',
             'Describe' => '<path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5"/><path d="M9 13h7M9 17h5"/>',
             'Manage' => '<path d="M3 4h18v5H3z"/><path d="M5 9v11h14V9"/><path d="M10 13h4"/>',
+            'Import and export' => '<path d="M7 4v13M3 13l4 4 4-4"/><path d="M17 20V7M13 11l4-4 4 4"/>',
             'Admin' => '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/>',
             'Public catalogue' => '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3.5 3.5 3.5 14.5 0 18M12 3c-3.5 3.5-3.5 14.5 0 18"/>',
         ];

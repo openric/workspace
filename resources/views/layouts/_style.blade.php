@@ -44,8 +44,8 @@
         main details.area > summary a, main .ric a { text-decoration: none; }
         /* A long value (description._long) shows six lines until "more" is opened. */
         .long-text { display: block; }
-        .long:has(> details:not([open])) > .long-text { max-height: 9em; overflow: hidden; mask-image: linear-gradient(to bottom, #000 60%, transparent); }
-        .long > details > summary { cursor: pointer; color: var(--link); list-style: none; display: inline-block; }
+        .long:has(> details:not([open])) > .long-text { max-height: 9em; overflow: hidden; -webkit-mask-image: linear-gradient(to bottom, #000 60%, transparent); mask-image: linear-gradient(to bottom, #000 60%, transparent); }
+        .long > details > summary { cursor: pointer; color: var(--link); list-style: none; padding: .3rem 0; }
         .long > details > summary::-webkit-details-marker { display: none; }
         .long > details[open] .long-more, .long > details:not([open]) .long-less { display: none; }
         :focus-visible { outline: 3px solid var(--link); outline-offset: 2px; border-radius: 3px; }
@@ -61,6 +61,15 @@
         .product { font-weight: 500; font-size: .78rem; color: var(--muted-2); background: var(--surface-2); padding: .15rem .5rem; border-radius: 10px; letter-spacing: .01em; white-space: nowrap; }
         header form { display: flex; align-items: center; gap: .5rem; margin: 0; }
         header form span { color: var(--muted-2); font-size: .9rem; }
+        /* The account's menu under its name, drawn as the main menu's lists are. */
+        .user-menu { position: relative; }
+        .user-menu summary { cursor: pointer; list-style: none; color: var(--link); padding: .35rem .2rem; }
+        .user-menu summary::-webkit-details-marker { display: none; }
+        .user-menu summary::after { content: ""; display: inline-block; width: .35rem; height: .35rem; margin-left: .45rem; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(45deg) translateY(-2px); opacity: .7; }
+        .user-menu summary.here { font-weight: 600; }
+        .user-menu ul { position: absolute; z-index: 60; top: calc(100% + .3rem); right: 0; min-width: 14rem; margin: 0; padding: .35rem; list-style: none; background: var(--bg); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow-lg); }
+        .user-menu li a { display: block; padding: .45rem .7rem; border-radius: 5px; color: var(--ink); text-decoration: none; }
+        .user-menu li a:hover, .user-menu li a[aria-current="page"] { background: var(--surface-2); color: var(--accent); }
         header button { margin: 0; padding: .35rem .8rem; font-size: .88rem; background: var(--bg); color: var(--ink); border-color: var(--line); box-shadow: none; }
         header button:hover { background: var(--surface-2); color: var(--accent); border-color: var(--link); box-shadow: none; }
         body > header { border-bottom: 1px solid var(--line); }

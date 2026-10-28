@@ -143,6 +143,8 @@ class DiscoverTest extends TestCase
 
         foreach ([$this->get("/discover/records/{$this->fonds->id}"), $this->actingAs($this->editor)->get(route('records.show', $this->fonds))] as $page) {
             $page->assertOk()->assertSee('class="long"', false)->assertSee('The last line.')->assertSee('<span class="long-more">more</span>', false);
+            // A details element inside a p is moved out of it by the browser, and "more" then does nothing.
+            $this->assertDoesNotMatchRegularExpression('~<p[^>]*class="long"~', $page->getContent());
         }
         auth()->logout();
         $this->get("/discover/records/{$this->item->id}")->assertSee('Names the witness at the marriage.')->assertDontSee('class="long"', false);
