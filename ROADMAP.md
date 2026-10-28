@@ -220,7 +220,10 @@ Progress:
   - It is filtered and sorted, and made of sections: summary, table, counts (by level, repository, type, publication or year) and text, moved up and down.
   - A report has a status from a vocabulary, is its owner's or shared with those who may read its kind, and can be copied. Three templates are bundled, and any report can be saved as the institution's template.
   - Each report downloads as CSV, XLSX, PDF (Dompdf) and Word (PhpWord), with table headings bold white on dark green.
-  - Still to come: schedules with email, share links and versions.
+  - Schedules make a report daily, weekly, monthly or quarterly at a time in `WORKSPACE_TIMEZONE`, keep the file, and email it through the Outbox to accounts of the institution that may read its kind, never to typed addresses. Every file made is kept to download again, and removed with its report.
+  - A share link opens a report without signing in. It always expires (at most 365 days), can be revoked, counts its openings, and only its hash is kept.
+  - A report's definition and sections are kept as numbered versions and restored, what it was before being kept first.
+  - Not copied: comments, attachments, links, widgets, snapshots of the data, the cover page and the review workflow of PSIS's builder.
 
 **9. Accessions and donors (WS-014).** Copy `ahg-accession-manage`, which follows the Canadian CAIS profile (`CaaisProfileService`), and `ahg-donor-manage`. An accession register records what arrived, from whom, when and on what terms. The donor is an agent with contact points; the agreement is a record. RiC models an accession as an activity, so this needs an ADR on the mapping, and on keeping donor contact details encrypted as Heratio does. Donor agreements come with `ahg-donor-manage` (PSIS `ahgDonorAgreementPlugin`): types, documents, history and the accessions and records each covers. Provenance and custody history follow, copied from `ahg-information-object-manage` (PSIS `ahgProvenancePlugin`: provenance events, agents and documents): in RiC each change of custody or ownership is an activity with its agents, so the same ADR maps it. Done when a pilot archivist registers a deposit under its agreement, links it to the fonds it became, and the fonds shows its custody history.
 

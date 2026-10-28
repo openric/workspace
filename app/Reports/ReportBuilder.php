@@ -276,7 +276,7 @@ final class ReportBuilder
         })->all();
 
         return ['title' => $report->name, 'description' => (string) $report->description, 'source' => __(self::SOURCE_TITLES[$report->source]),
-            'generated' => now()->format('Y-m-d H:i'), 'status' => $report->status->label(Vocab::languages()), 'cut' => $cut, 'sections' => $sections];
+            'generated' => now()->format('Y-m-d H:i'), 'status' => $report->status->label(Vocab::languages()), 'cut' => $cut, 'entities' => $entities->count(), 'sections' => $sections];
     }
 
     /** @return list<array{0: string, 1: string}> how many entities have each value of what is counted, most first */

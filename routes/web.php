@@ -130,6 +130,9 @@ Route::middleware(ServeDiscovery::class)->prefix('discover')->name('discover.')-
     Route::get('/files/{file}', [DiscoverController::class, 'file'])->name('file');
 });
 
+// A built report opened by its share link (roadmap phase 8): no sign-in; the link expires, and only its hash is kept.
+Route::get('/shared/reports/{token}', [ReportBuilderController::class, 'shared'])->middleware('throttle:60,1')->name('reports.shared');
+
 // The mail provider's bounce and complaint webhook (roadmap phase 7; Heratio's): public, HMAC-signed, so no session or CSRF token.
 Route::post('/webhooks/email/bounce', [EmailBounceController::class, 'receive'])->withoutMiddleware(PreventRequestForgery::class)
     ->middleware('throttle:120,1')->name('email.bounce');
@@ -381,6 +384,14 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::post('/{report}/sections/{section}/move', [ReportBuilderController::class, 'moveSection'])->name('sections.move');
         Route::post('/{report}/sections/{section}/remove', [ReportBuilderController::class, 'removeSection'])->name('sections.destroy');
         Route::get('/{report}/export/{format}', [ReportBuilderController::class, 'export'])->where('format', 'csv|xlsx|pdf|docx')->name('export');
+        Route::post('/{report}/archive', [ReportBuilderController::class, 'generate'])->name('generate');
+        Route::get('/{report}/archive/{archive}', [ReportBuilderController::class, 'archive'])->name('archive');
+        Route::post('/{report}/schedules', [ReportBuilderController::class, 'storeSchedule'])->name('schedules.store');
+        Route::post('/{report}/schedules/{schedule}/remove', [ReportBuilderController::class, 'destroySchedule'])->name('schedules.destroy');
+        Route::post('/{report}/shares', [ReportBuilderController::class, 'storeShare'])->name('shares.store');
+        Route::post('/{report}/shares/{share}/revoke', [ReportBuilderController::class, 'revokeShare'])->name('shares.revoke');
+        Route::post('/{report}/versions', [ReportBuilderController::class, 'storeVersion'])->name('versions.store');
+        Route::post('/{report}/versions/{version}/restore', [ReportBuilderController::class, 'restoreVersion'])->name('versions.restore');
     });
     foreach (array_keys(ReportService::LISTS) as $list) {
         Route::get("/reports/$list", [ReportController::class, 'show'])->defaults('list', $list)->name("reports.$list");

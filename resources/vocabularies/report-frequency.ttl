@@ -1,0 +1,44 @@
+# OpenRiC Workspace - OpenRiC Workspace Report Frequencies.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# How often a scheduled report is made (PSIS ahgReportBuilderPlugin and Heratio ahg-reports: report_schedule.frequency).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/report-frequency/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Report Frequencies"@en ;
+    dcterms:description "How often a scheduled report is made and sent."@en ;
+    dcterms:issued "2026-10-28"^^xsd:date ;
+    skos:hasTopConcept v:daily, v:weekly, v:monthly, v:quarterly .
+
+v:daily a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Daily"@en ;
+    skos:scopeNote "Operational: the report builder, not part of any RiC description."@en ;
+    skos:definition "Each day, at the time chosen."@en .
+
+v:weekly a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Weekly"@en ;
+    skos:scopeNote "Operational: the report builder, not part of any RiC description."@en ;
+    skos:definition "Each week, on the day and at the time chosen."@en .
+
+v:monthly a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Monthly"@en ;
+    skos:scopeNote "Operational: the report builder, not part of any RiC description."@en ;
+    skos:definition "Each month, on the day chosen (or the month's last day, if it is shorter) and at the time chosen."@en .
+
+v:quarterly a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Quarterly"@en ;
+    skos:scopeNote "Operational: the report builder, not part of any RiC description."@en ;
+    skos:definition "Every three months, on the day chosen (or the month's last day, if it is shorter) and at the time chosen."@en .

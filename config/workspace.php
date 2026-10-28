@@ -15,7 +15,7 @@ return [
     'audit_signing_key' => env('WORKSPACE_AUDIT_SIGNING_KEY', storage_path('keys/audit-signing.sk')),
 
     // The Workspace's own vocabularies, bundled with the code (resources/vocabularies).
-    'bundled_vocabularies' => ['account-role.ttl', 'permission.ttl', 'audit-action.ttl', 'description-element.ttl', 'language-value-state.ttl', 'description-status.ttl', 'description-detail.ttl', 'level-of-description.ttl', 'record-kind.ttl', 'date-property.ttl', 'date-qualifier.ttl', 'name-type.ttl', 'identifier-type.ttl', 'relation-type.ttl', 'relation-state.ttl', 'relation-certainty.ttl', 'assertion-origin.ttl', 'assertion-status.ttl', 'concept-scheme-kind.ttl', 'concept-match-type.ttl', 'agent-type.ttl', 'carrier-type.ttl', 'file-use.ttl', 'file-availability.ttl', 'container-type.ttl', 'storage-place-type.ttl', 'container-status.ttl', 'capacity-unit.ttl', 'storage-security-level.ttl', 'api-scope.ttl', 'proposal-kind.ttl', 'rights-basis.ttl', 'rights-statement.ttl', 'licence.ttl', 'copyright-status.ttl', 'rights-act.ttl', 'rights-restriction.ttl', 'tk-label.ttl', 'label-applier.ttl', 'job-type.ttl', 'job-status.ttl', 'watermark-type.ttl', 'watermark-position.ttl', 'email-bounce-type.ttl', 'email-status.ttl', 'access-request-status.ttl', 'access-request-urgency.ttl', 'usage-event.ttl', 'web-crawler.ttl', 'report-status.ttl', 'report-section-type.ttl'],
+    'bundled_vocabularies' => ['account-role.ttl', 'permission.ttl', 'audit-action.ttl', 'description-element.ttl', 'language-value-state.ttl', 'description-status.ttl', 'description-detail.ttl', 'level-of-description.ttl', 'record-kind.ttl', 'date-property.ttl', 'date-qualifier.ttl', 'name-type.ttl', 'identifier-type.ttl', 'relation-type.ttl', 'relation-state.ttl', 'relation-certainty.ttl', 'assertion-origin.ttl', 'assertion-status.ttl', 'concept-scheme-kind.ttl', 'concept-match-type.ttl', 'agent-type.ttl', 'carrier-type.ttl', 'file-use.ttl', 'file-availability.ttl', 'container-type.ttl', 'storage-place-type.ttl', 'container-status.ttl', 'capacity-unit.ttl', 'storage-security-level.ttl', 'api-scope.ttl', 'proposal-kind.ttl', 'rights-basis.ttl', 'rights-statement.ttl', 'licence.ttl', 'copyright-status.ttl', 'rights-act.ttl', 'rights-restriction.ttl', 'tk-label.ttl', 'label-applier.ttl', 'job-type.ttl', 'job-status.ttl', 'watermark-type.ttl', 'watermark-position.ttl', 'email-bounce-type.ttl', 'email-status.ttl', 'access-request-status.ttl', 'access-request-urgency.ttl', 'usage-event.ttl', 'web-crawler.ttl', 'report-status.ttl', 'report-section-type.ttl', 'report-frequency.ttl'],
 
     // API keys (ADR 0007, Heratio's ApiKeyService): what an account must hold, anywhere, for a key it
     // owns to carry each scope (api-scope vocabulary), as [action, kind] pairs of which any one will do.
@@ -220,4 +220,7 @@ return [
     // Usage statistics (roadmap phase 8): days the raw usage events are kept, as PSIS's retention_days; the daily
     // counts made from them are kept for good. The events hold no address, so this limits size, not exposure.
     'usage_retention_days' => (int) env('WORKSPACE_USAGE_RETENTION_DAYS', 90),
+
+    // The time zone the times of scheduled reports are given in (roadmap phase 8).
+    'timezone' => env('WORKSPACE_TIMEZONE', 'Africa/Johannesburg'),
 ];

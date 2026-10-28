@@ -33,6 +33,26 @@ class CustomReport extends Model
         return $this->belongsTo(Concept::class, 'status_id');
     }
 
+    public function schedules(): HasMany
+    {
+        return $this->hasMany(ReportSchedule::class, 'report_id')->orderBy('created_at');
+    }
+
+    public function archives(): HasMany
+    {
+        return $this->hasMany(ReportArchive::class, 'report_id')->orderByDesc('generated_at');
+    }
+
+    public function shares(): HasMany
+    {
+        return $this->hasMany(ReportShare::class, 'report_id')->orderByDesc('created_at');
+    }
+
+    public function versions(): HasMany
+    {
+        return $this->hasMany(ReportVersion::class, 'report_id')->orderByDesc('number');
+    }
+
     public function sections(): HasMany
     {
         return $this->hasMany(CustomReportSection::class, 'report_id')->orderBy('position')->orderBy('created_at');

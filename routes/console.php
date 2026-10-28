@@ -1,6 +1,7 @@
 <?php
 
 use App\AccessRequests\AccessRequestService;
+use App\Reports\ReportDelivery;
 use App\Reports\UsageService;
 use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Inspiring;
@@ -33,3 +34,11 @@ Artisan::command('workspace:usage:aggregate {--day= : count this day (YYYY-MM-DD
     $this->line($usage->prune((int) config('workspace.usage_retention_days')).' events past the retention period removed.');
 })->purpose('Count the usage events of today and yesterday into daily counts, and remove old events');
 Schedule::command('workspace:usage:aggregate')->hourly()->withoutOverlapping();
+
+// Scheduled reports (roadmap phase 8): every five minutes, each report whose schedule is due is made, kept in its
+// archive and sent to the schedule's accounts through the Outbox, as PSIS's ReportScheduler::runDueReports.
+Artisan::command('workspace:reports:run-scheduled', function (ReportDelivery $delivery) {
+    $result = $delivery->runDue();
+    $this->line("{$result['made']} scheduled reports made, {$result['failed']} failed.");
+})->purpose('Make and send the reports whose schedule is due');
+Schedule::command('workspace:reports:run-scheduled')->everyFiveMinutes()->withoutOverlapping();

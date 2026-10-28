@@ -11,19 +11,27 @@ namespace App\Http\Controllers;
 use App\Models\Concept;
 use App\Models\CustomReport;
 use App\Models\CustomReportSection;
+use App\Models\ReportArchive;
+use App\Models\ReportSchedule;
+use App\Models\ReportShare;
 use App\Models\ReportTemplate;
+use App\Models\ReportVersion;
 use App\Models\Repository;
+use App\Models\User;
 use App\Relations\EntityKinds;
 use App\Reports\ReportBuilder;
+use App\Reports\ReportDelivery;
 use App\Reports\ReportExport;
 use App\Support\Vocab;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use InvalidArgumentException;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ReportBuilderController extends Controller
 {
@@ -63,6 +71,9 @@ class ReportBuilderController extends Controller
 
         return view('reports.builder.show', ['report' => $report->load('owner', 'status.labels'), 'document' => $this->builder->document($report),
             'mayEdit' => $report->user_id === $request->user()->id, 'statuses' => Concept::choices(ReportBuilder::STATUSES)->with('labels')->get(),
+            'frequencies' => Concept::choices(ReportDelivery::FREQUENCIES)->with('labels')->get(), 'archives' => $report->archives()->limit(20)->get(),
+            'schedules' => $report->schedules()->with('frequency.labels')->get(), 'shares' => $report->shares()->get(), 'versions' => $report->versions()->with('author')->get(),
+            'accounts' => User::where('institution_id', $report->institution_id)->whereNull('disabled_at')->orderBy('name')->get()->filter(fn ($u) => ReportBuilder::mayUse($u, $report->source))->values(),
             'lists' => app(ReportController::class)->listsFor($request->user())]);
     }
 
@@ -123,7 +134,7 @@ class ReportBuilderController extends Controller
     public function destroy(Request $request, CustomReport $report): RedirectResponse
     {
         $this->own($request, $report);
-        $report->delete();
+        app(ReportDelivery::class)->remove($report);
 
         return redirect()->route('reports.builder.index')->with('status', __('Report removed.'));
     }
@@ -178,6 +189,98 @@ class ReportBuilderController extends Controller
 
         return response($body, 200, ['Content-Type' => $type,
             'Content-Disposition' => 'attachment; filename="'.(Str::slug($report->name) ?: 'report').'.'.$extension.'"', 'X-Content-Type-Options' => 'nosniff']);
+    }
+
+    /** Make the report in a format now and keep the file. */
+    public function generate(Request $request, CustomReport $report): RedirectResponse
+    {
+        $this->own($request, $report);
+        $format = $request->validate(['format' => ['required', Rule::in(array_keys(ReportExport::FORMATS))]])['format'];
+        app(ReportDelivery::class)->generate($report, $format, null, $request->user());
+
+        return redirect()->route('reports.builder.show', $report)->with('status', __('The file was made and kept.'));
+    }
+
+    public function archive(Request $request, CustomReport $report, ReportArchive $archive): StreamedResponse
+    {
+        $this->readable($request, $report);
+        abort_unless($archive->report_id === $report->id && Storage::disk('local')->exists($archive->path), 404);
+        [$extension, $type] = ReportExport::FORMATS[$archive->format];
+
+        return Storage::disk('local')->download($archive->path, (Str::slug($report->name) ?: 'report').'-'.$archive->generated_at->format('Y-m-d-Hi').'.'.$extension,
+            ['Content-Type' => $type, 'X-Content-Type-Options' => 'nosniff']);
+    }
+
+    public function storeSchedule(Request $request, CustomReport $report): RedirectResponse
+    {
+        $this->own($request, $report);
+        $data = $request->validate([
+            'frequency' => ['required', 'string', 'max:32'], 'day_of_week' => ['nullable', 'integer', 'between:1,7'], 'day_of_month' => ['nullable', 'integer', 'between:1,31'],
+            'time_of_day' => ['required', 'date_format:H:i'], 'format' => ['required', Rule::in(array_keys(ReportExport::FORMATS))],
+            'recipients' => ['required', 'array', 'min:1'], 'recipients.*' => ['uuid'],
+        ]);
+        try {
+            app(ReportDelivery::class)->schedule($report, $data, $request->user());
+        } catch (InvalidArgumentException $e) {
+            return back()->withInput()->withErrors(['schedule' => $e->getMessage()]);
+        }
+
+        return redirect()->route('reports.builder.show', $report)->with('status', __('Schedule added.'));
+    }
+
+    public function destroySchedule(Request $request, CustomReport $report, ReportSchedule $schedule): RedirectResponse
+    {
+        $this->own($request, $report);
+        abort_unless($schedule->report_id === $report->id, 404);
+        $schedule->delete();
+
+        return redirect()->route('reports.builder.show', $report)->with('status', __('Schedule removed.'));
+    }
+
+    public function storeShare(Request $request, CustomReport $report): RedirectResponse
+    {
+        $this->own($request, $report);
+        $days = (int) $request->validate(['days' => ['required', 'integer', 'between:1,'.ReportDelivery::SHARE_DAYS_MAX]])['days'];
+        [, $token] = app(ReportDelivery::class)->share($report, $days, $request->user());
+
+        // The link is shown once: only its hash is kept.
+        return redirect()->route('reports.builder.show', $report)->with('share_link', route('reports.shared', $token));
+    }
+
+    public function revokeShare(Request $request, CustomReport $report, ReportShare $share): RedirectResponse
+    {
+        $this->own($request, $report);
+        abort_unless($share->report_id === $report->id, 404);
+        $share->update(['revoked_at' => now()]);
+
+        return redirect()->route('reports.builder.show', $report)->with('status', __('Share link revoked.'));
+    }
+
+    /** A report opened by its share link, without signing in. */
+    public function shared(string $token): Response
+    {
+        $report = preg_match('/^[A-Za-z0-9]{64}$/', $token) ? app(ReportDelivery::class)->open($token) : null;
+        abort_if($report === null, 404);
+
+        return response()->view('reports.builder.print', ['document' => $this->builder->document($report->load('status.labels'))])
+            ->header('X-Robots-Tag', 'noindex, nofollow')->header('Referrer-Policy', 'no-referrer');
+    }
+
+    public function storeVersion(Request $request, CustomReport $report): RedirectResponse
+    {
+        $this->own($request, $report);
+        $version = app(ReportDelivery::class)->version($report, $request->user(), $request->validate(['summary' => ['nullable', 'string', 'max:500']])['summary'] ?? null);
+
+        return redirect()->route('reports.builder.show', $report)->with('status', __('Kept as version :number.', ['number' => $version->number]));
+    }
+
+    public function restoreVersion(Request $request, CustomReport $report, ReportVersion $version): RedirectResponse
+    {
+        $this->own($request, $report);
+        abort_unless($version->report_id === $report->id, 404);
+        app(ReportDelivery::class)->restore($version, $request->user());
+
+        return redirect()->route('reports.builder.show', $report)->with('status', __('Version :number restored.', ['number' => $version->number]));
     }
 
     public function destroyTemplate(Request $request, ReportTemplate $template): RedirectResponse
