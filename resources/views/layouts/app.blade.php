@@ -70,6 +70,7 @@
                 'reports.index' => [__('Overview'), $user->mayAnywhere('read', 'description'), 'reports.index'],
                 'reports.quality' => [__('Data quality'), $user->mayAnywhere('read', 'description'), 'reports.quality'],
                 'reports.usage' => [__('Usage statistics'), $user->mayAnywhere('read', 'description'), 'reports.usage'],
+                'reports.builder.index' => [__('Report builder'), $user->mayAnywhere('read', 'description'), 'reports.builder.*'],
                 ...collect(\App\Http\Controllers\ReportController::TITLES)->mapWithKeys(fn ($title, $list) => ['reports.'.$list => [__($title),
                     \App\Reports\ReportService::mayRead($user, $list), 'reports.'.$list]])->all(),
             ],

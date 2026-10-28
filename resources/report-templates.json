@@ -1,0 +1,37 @@
+[
+    {
+        "name": "Holdings summary",
+        "description": "How many archival descriptions there are, how many are published, and how they divide by level of description and by repository.",
+        "structure": {
+            "source": "record", "columns": ["name", "reference-code", "level", "repository", "published"], "filters": {}, "sort": {"by": "name"},
+            "sections": [
+                {"type": "summary", "title": "Summary"},
+                {"type": "counts", "title": "By level of description", "config": {"by": "level"}},
+                {"type": "counts", "title": "By repository", "config": {"by": "repository"}}
+            ]
+        }
+    },
+    {
+        "name": "List of archival descriptions",
+        "description": "Each archival description with its reference code, level, dates, extent and scope and content.",
+        "structure": {
+            "source": "record", "columns": ["name", "reference-code", "level", "element:dates-expressed", "element:extent", "element:scope-and-content"], "filters": {}, "sort": {"by": "name"},
+            "sections": [
+                {"type": "summary", "title": "Summary"},
+                {"type": "table", "title": "Archival descriptions"}
+            ]
+        }
+    },
+    {
+        "name": "List of authority records",
+        "description": "Each authority record with its type of entity, dates of existence and description identifier.",
+        "structure": {
+            "source": "agent", "columns": ["name", "type", "element:agent-dates-of-existence", "description-identifier", "published"], "filters": {}, "sort": {"by": "name"},
+            "sections": [
+                {"type": "summary", "title": "Summary"},
+                {"type": "counts", "title": "By type of entity", "config": {"by": "type"}},
+                {"type": "table", "title": "Authority records"}
+            ]
+        }
+    }
+]

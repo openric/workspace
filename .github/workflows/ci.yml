@@ -44,7 +44,7 @@ jobs:
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
-          extensions: pdo_pgsql, intl, mbstring, xmlreader, dom, imagick, gd, fileinfo
+          extensions: pdo_pgsql, intl, mbstring, xmlreader, dom, imagick, gd, fileinfo, zip
           coverage: none
       # convert (ImageMagick) makes the viewing copies and watermarks them, in DejaVu Sans; pdftoppm draws a PDF's first page
       # and pdftotext reads its text (App\Files\FileStore, PdfText, Watermark); exiftool reads embedded metadata (EmbeddedMetadata).

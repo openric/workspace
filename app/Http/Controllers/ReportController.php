@@ -9,6 +9,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Concept;
 use App\Models\Repository;
+use App\Models\User;
 use App\Relations\EntityKinds;
 use App\Reports\ReportService;
 use App\Reports\UsageService;
@@ -116,9 +117,14 @@ class ReportController extends Controller
             'types' => $list === 'authorities' ? Concept::choices(Vocab::BASE.'agent-type/')->with('labels')->get() : collect()]);
     }
 
-    /** @return list<string> the lists the account may read, for the menu of reports */
+    /** @return list<string> the lists an account may read, for the menu of reports */
+    public function listsFor(User $user): array
+    {
+        return array_values(array_filter(array_keys(ReportService::LISTS), fn ($list) => ReportService::mayRead($user, $list)));
+    }
+
     private function lists(Request $request): array
     {
-        return array_values(array_filter(array_keys(ReportService::LISTS), fn ($list) => ReportService::mayRead($request->user(), $list)));
+        return $this->listsFor($request->user());
     }
 }

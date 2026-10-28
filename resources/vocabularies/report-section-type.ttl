@@ -1,0 +1,44 @@
+# OpenRiC Workspace - OpenRiC Workspace Report Section Types.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# The kinds of section a built report is made of (PSIS ahgReportBuilderPlugin and Heratio ahg-reports: report_section.section_type, without its SQL query section).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/report-section-type/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Report Section Types"@en ;
+    dcterms:description "The kinds of section a built report is made of."@en ;
+    dcterms:issued "2026-10-28"^^xsd:date ;
+    skos:hasTopConcept v:summary, v:table, v:counts, v:text .
+
+v:summary a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Summary"@en ;
+    skos:scopeNote "Operational: the report builder, not part of any RiC description."@en ;
+    skos:definition "How many entities the report covers, and how many of them are published."@en .
+
+v:table a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Table"@en ;
+    skos:scopeNote "Operational: the report builder, not part of any RiC description."@en ;
+    skos:definition "The entities, one to a row, with the columns chosen."@en .
+
+v:counts a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Counts"@en ;
+    skos:scopeNote "Operational: the report builder, not part of any RiC description."@en ;
+    skos:definition "How many entities there are of each level, repository, type, publication or year."@en .
+
+v:text a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Text"@en ;
+    skos:scopeNote "Operational: the report builder, not part of any RiC description."@en ;
+    skos:definition "A heading and paragraphs written for the report."@en .

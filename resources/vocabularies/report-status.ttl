@@ -1,0 +1,51 @@
+# OpenRiC Workspace - OpenRiC Workspace Report Statuses.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Where a built report stands (PSIS ahgReportBuilderPlugin and Heratio ahg-reports: custom_report.status).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/report-status/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Report Statuses"@en ;
+    dcterms:description "Where a report built in the report builder stands."@en ;
+    dcterms:issued "2026-10-28"^^xsd:date ;
+    skos:hasTopConcept v:draft, v:in-review, v:approved, v:published, v:archived .
+
+v:draft a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Draft"@en ;
+    skos:scopeNote "Operational: the report builder, not part of any RiC description."@en ;
+    skos:definition "Being built."@en .
+
+v:in-review a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "In review"@en ;
+    skos:scopeNote "Operational: the report builder, not part of any RiC description."@en ;
+    skos:definition "Ready for someone to check."@en .
+
+v:approved a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Approved"@en ;
+    skos:scopeNote "Operational: the report builder, not part of any RiC description."@en ;
+    skos:definition "Checked and accepted."@en .
+
+v:published a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Published"@en ;
+    skos:scopeNote "Operational: the report builder, not part of any RiC description."@en ;
+    skos:definition "Issued to those it is for."@en .
+
+v:archived a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Archived"@en ;
+    skos:scopeNote "Operational: the report builder, not part of any RiC description."@en ;
+    skos:definition "No longer in use, kept for the record."@en .

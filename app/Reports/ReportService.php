@@ -184,13 +184,13 @@ final class ReportService
     }
 
     /** The live (not deleted) entities of a kind in the institution. */
-    private function live(string $kind, string $institutionId): Builder
+    public function live(string $kind, string $institutionId): Builder
     {
         return EntityKinds::get($kind)['class']::where('institution_id', $institutionId)->whereNull('deleted_at');
     }
 
     /** The ids of a kind's entities with a published authorised name, as PublicCatalogue::visible decides. */
-    private function published(string $kind): QueryBuilder
+    public function published(string $kind): QueryBuilder
     {
         return DB::table('names')->where('subject_table', (new (EntityKinds::get($kind)['class']))->getTable())
             ->whereIn('state_id', Concept::where('iri', Vocab::valueState('published'))->select('id'))

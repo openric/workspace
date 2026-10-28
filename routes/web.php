@@ -39,6 +39,7 @@ use App\Http\Controllers\PublicationController;
 use App\Http\Controllers\RecordController;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\RelationController;
+use App\Http\Controllers\ReportBuilderController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RepositoryController;
 use App\Http\Controllers\RightsAdminController;
@@ -363,6 +364,24 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
     Route::get('/reports/quality', [ReportController::class, 'quality'])->name('reports.quality');
     Route::get('/reports/usage', [ReportController::class, 'usage'])->name('reports.usage');
+    // The report builder (roadmap phase 8): the controller checks that the report is the account's own or shared, and on a kind it may read.
+    Route::prefix('reports/builder')->name('reports.builder.')->group(function () {
+        Route::get('/', [ReportBuilderController::class, 'index'])->name('index');
+        Route::post('/', [ReportBuilderController::class, 'store'])->name('store');
+        Route::post('/templates/{template}/remove', [ReportBuilderController::class, 'destroyTemplate'])->name('templates.destroy');
+        Route::get('/{report}', [ReportBuilderController::class, 'show'])->name('show');
+        Route::get('/{report}/edit', [ReportBuilderController::class, 'edit'])->name('edit');
+        Route::post('/{report}', [ReportBuilderController::class, 'update'])->name('update');
+        Route::post('/{report}/status', [ReportBuilderController::class, 'status'])->name('status');
+        Route::post('/{report}/copy', [ReportBuilderController::class, 'copy'])->name('copy');
+        Route::post('/{report}/template', [ReportBuilderController::class, 'saveTemplate'])->name('template');
+        Route::post('/{report}/remove', [ReportBuilderController::class, 'destroy'])->name('destroy');
+        Route::post('/{report}/sections', [ReportBuilderController::class, 'addSection'])->name('sections.store');
+        Route::post('/{report}/sections/{section}', [ReportBuilderController::class, 'updateSection'])->name('sections.update');
+        Route::post('/{report}/sections/{section}/move', [ReportBuilderController::class, 'moveSection'])->name('sections.move');
+        Route::post('/{report}/sections/{section}/remove', [ReportBuilderController::class, 'removeSection'])->name('sections.destroy');
+        Route::get('/{report}/export/{format}', [ReportBuilderController::class, 'export'])->where('format', 'csv|xlsx|pdf|docx')->name('export');
+    });
     foreach (array_keys(ReportService::LISTS) as $list) {
         Route::get("/reports/$list", [ReportController::class, 'show'])->defaults('list', $list)->name("reports.$list");
     }
