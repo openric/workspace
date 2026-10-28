@@ -26,6 +26,7 @@ use App\Models\Relation;
 use App\Models\Repository;
 use App\Relations\EntityKinds;
 use App\Relations\RelationService;
+use App\Reports\UsageService;
 use App\Search\SearchIndex;
 use App\Search\SearchService;
 use Illuminate\Database\Eloquent\Model;
@@ -113,6 +114,7 @@ class DiscoverController extends Controller
         $catalogue = $this->catalogue($request);
         $unit = $catalogue->find('records', $id, ['level.labels', 'repository.names.nameType', 'repository.names.state', 'instantiations.files.use', 'instantiations.names.nameType',
             'instantiations.names.state', 'instantiations.availability', 'instantiations.carrierType.labels']) ?? abort(404);
+        app(UsageService::class)->record($request, $catalogue->institution, 'view', $unit);
         $view = $catalogue->view;
         $ancestors = array_values(array_filter($unit->ancestors(), fn ($a) => $view->readable($a)));
         $children = $unit->children()->with('names.nameType', 'names.state', 'level.labels', 'identifiers.identifierType', 'dates.property')->get()->filter(fn ($c) => $view->readable($c))->values();
@@ -220,6 +222,10 @@ class DiscoverController extends Controller
         abort_unless($file->institution_id === $this->catalogue($request)->institution->id && $service->deliverable(null, $file), 404);
         $path = $service->path($file);
         abort_unless(is_file($path), 404);
+        // A picture shown in a page is not a download; a file asked for as one, or opened on its own, is.
+        if ($request->boolean('download') || ! str_starts_with($file->mime_type, 'image/')) {
+            app(UsageService::class)->record($request, $this->catalogue($request)->institution, 'download', $file->instantiation->record, $file);
+        }
 
         return FileResponse::make($file, $path, $request->boolean('download'));
     }
@@ -228,6 +234,7 @@ class DiscoverController extends Controller
     {
         $catalogue = $this->catalogue($request);
         $entity = $catalogue->find(Links::CATALOGUE[$kind], $id, $with) ?? abort(404);
+        app(UsageService::class)->record($request, $catalogue->institution, 'view', $entity);
 
         return view('discover.entity', ['entity' => $entity, 'kind' => $kind, 'standard' => self::STANDARDS[$kind], 'view' => $catalogue->view,
             'relations' => $this->relations($entity, $catalogue), 'institution' => $catalogue->institution, ...$more]);

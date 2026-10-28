@@ -1,0 +1,30 @@
+# OpenRiC Workspace - OpenRiC Workspace Usage Events.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What usage statistics count (PSIS ahgStatisticsPlugin, Heratio ahg-statistics: ahg_usage_event.event_type).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/usage-event/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Usage Events"@en ;
+    dcterms:description "What a visitor to the public catalogue did."@en ;
+    dcterms:issued "2026-10-28"^^xsd:date ;
+    skos:hasTopConcept v:view, v:download .
+
+v:view a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "View"@en ;
+    skos:scopeNote "Operational: usage statistics, not part of any RiC description."@en ;
+    skos:definition "A page of the public catalogue was opened."@en .
+
+v:download a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Download"@en ;
+    skos:scopeNote "Operational: usage statistics, not part of any RiC description."@en ;
+    skos:definition "A file was downloaded, or opened on its own rather than shown as a picture in a page."@en .

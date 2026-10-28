@@ -1,0 +1,307 @@
+# OpenRiC Workspace - OpenRiC Workspace Web Crawlers.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# The programs that read the public catalogue automatically, so usage statistics count them apart
+# (PSIS ahgStatisticsPlugin, Heratio ahg-statistics: ahg_bot_list, with its categories as the broader
+# concepts). Each hidden label is a piece of the user agent that names the program, matched without
+# regard to case. GPTBot, ClaudeBot, PerplexityBot, Bytespider, Amazonbot and Applebot are added to
+# PSIS's list.
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/web-crawler/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Web Crawlers"@en ;
+    dcterms:description "Programs that read the public catalogue automatically, by kind."@en ;
+    dcterms:issued "2026-10-28"^^xsd:date ;
+    skos:hasTopConcept v:search-engine, v:social, v:monitoring, v:crawler .
+
+v:search-engine a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Search engine"@en ;
+    skos:scopeNote "Operational: how usage statistics tell programs from people, not part of any RiC description."@en ;
+    skos:definition "A search engine indexing the catalogue."@en .
+
+v:social a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Social media"@en ;
+    skos:scopeNote "Operational: how usage statistics tell programs from people, not part of any RiC description."@en ;
+    skos:definition "A social media service showing a preview of a shared link."@en .
+
+v:monitoring a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Monitoring"@en ;
+    skos:scopeNote "Operational: how usage statistics tell programs from people, not part of any RiC description."@en ;
+    skos:definition "A service checking that the site is up."@en .
+
+v:crawler a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Crawler"@en ;
+    skos:scopeNote "Operational: how usage statistics tell programs from people, not part of any RiC description."@en ;
+    skos:definition "Another program that reads pages automatically, such as an SEO or AI crawler, an archive or a script."@en .
+
+v:googlebot a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:search-engine ;
+    skos:prefLabel "Googlebot"@en ;
+    skos:scopeNote "Operational: how usage statistics tell programs from people, not part of any RiC description."@en ;
+    skos:hiddenLabel "Googlebot" ;
+    skos:hiddenLabel "Google-Site-Verification" .
+
+v:bingbot a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:search-engine ;
+    skos:prefLabel "Bingbot"@en ;
+    skos:scopeNote "Operational: how usage statistics tell programs from people, not part of any RiC description."@en ;
+    skos:hiddenLabel "bingbot" ;
+    skos:hiddenLabel "msnbot" .
+
+v:yahoo-slurp a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:search-engine ;
+    skos:prefLabel "Yahoo Slurp"@en ;
+    skos:scopeNote "Operational: how usage statistics tell programs from people, not part of any RiC description."@en ;
+    skos:hiddenLabel "Slurp" .
+
+v:duckduckbot a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:search-engine ;
+    skos:prefLabel "DuckDuckBot"@en ;
+    skos:scopeNote "Operational: how usage statistics tell programs from people, not part of any RiC description."@en ;
+    skos:hiddenLabel "DuckDuckBot" .
+
+v:baiduspider a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:search-engine ;
+    skos:prefLabel "Baiduspider"@en ;
+    skos:scopeNote "Operational: how usage statistics tell programs from people, not part of any RiC description."@en ;
+    skos:hiddenLabel "Baiduspider" .
+
+v:yandex a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:search-engine ;
+    skos:prefLabel "Yandex"@en ;
+    skos:scopeNote "Operational: how usage statistics tell programs from people, not part of any RiC description."@en ;
+    skos:hiddenLabel "YandexBot" ;
+    skos:hiddenLabel "YandexImages" .
+
+v:applebot a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:search-engine ;
+    skos:prefLabel "Applebot"@en ;
+    skos:scopeNote "Operational: how usage statistics tell programs from people, not part of any RiC description."@en ;
+    skos:hiddenLabel "Applebot" .
+
+v:facebook a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:social ;
+    skos:prefLabel "Facebook"@en ;
+    skos:scopeNote "Operational: how usage statistics tell programs from people, not part of any RiC description."@en ;
+    skos:hiddenLabel "facebookexternalhit" ;
+    skos:hiddenLabel "Facebot" .
+
+v:twitter a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:social ;
+    skos:prefLabel "Twitter"@en ;
+    skos:scopeNote "Operational: how usage statistics tell programs from people, not part of any RiC description."@en ;
+    skos:hiddenLabel "Twitterbot" .
+
+v:linkedin a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:social ;
+    skos:prefLabel "LinkedIn"@en ;
+    skos:scopeNote "Operational: how usage statistics tell programs from people, not part of any RiC description."@en ;
+    skos:hiddenLabel "LinkedInBot" .
+
+v:pinterest a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:social ;
+    skos:prefLabel "Pinterest"@en ;
+    skos:scopeNote "Operational: how usage statistics tell programs from people, not part of any RiC description."@en ;
+    skos:hiddenLabel "Pinterest" .
+
+v:slack a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:social ;
+    skos:prefLabel "Slack"@en ;
+    skos:scopeNote "Operational: how usage statistics tell programs from people, not part of any RiC description."@en ;
+    skos:hiddenLabel "Slackbot" .
+
+v:whatsapp a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:social ;
+    skos:prefLabel "WhatsApp"@en ;
+    skos:scopeNote "Operational: how usage statistics tell programs from people, not part of any RiC description."@en ;
+    skos:hiddenLabel "WhatsApp" .
+
+v:telegram a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:social ;
+    skos:prefLabel "Telegram"@en ;
+    skos:scopeNote "Operational: how usage statistics tell programs from people, not part of any RiC description."@en ;
+    skos:hiddenLabel "TelegramBot" .
+
+v:uptime-robot a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:monitoring ;
+    skos:prefLabel "Uptime Robot"@en ;
+    skos:scopeNote "Operational: how usage statistics tell programs from people, not part of any RiC description."@en ;
+    skos:hiddenLabel "UptimeRobot" .
+
+v:pingdom a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:monitoring ;
+    skos:prefLabel "Pingdom"@en ;
+    skos:scopeNote "Operational: how usage statistics tell programs from people, not part of any RiC description."@en ;
+    skos:hiddenLabel "Pingdom" .
+
+v:statuscake a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:monitoring ;
+    skos:prefLabel "StatusCake"@en ;
+    skos:scopeNote "Operational: how usage statistics tell programs from people, not part of any RiC description."@en ;
+    skos:hiddenLabel "StatusCake" .
+
+v:new-relic a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:monitoring ;
+    skos:prefLabel "New Relic"@en ;
+    skos:scopeNote "Operational: how usage statistics tell programs from people, not part of any RiC description."@en ;
+    skos:hiddenLabel "NewRelicPinger" .
+
+v:ahrefs a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:crawler ;
+    skos:prefLabel "Ahrefs"@en ;
+    skos:scopeNote "Operational: how usage statistics tell programs from people, not part of any RiC description."@en ;
+    skos:hiddenLabel "AhrefsBot" .
+
+v:semrush a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:crawler ;
+    skos:prefLabel "SEMrush"@en ;
+    skos:scopeNote "Operational: how usage statistics tell programs from people, not part of any RiC description."@en ;
+    skos:hiddenLabel "SemrushBot" .
+
+v:majestic a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:crawler ;
+    skos:prefLabel "Majestic"@en ;
+    skos:scopeNote "Operational: how usage statistics tell programs from people, not part of any RiC description."@en ;
+    skos:hiddenLabel "MJ12bot" .
+
+v:screaming-frog a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:crawler ;
+    skos:prefLabel "Screaming Frog"@en ;
+    skos:scopeNote "Operational: how usage statistics tell programs from people, not part of any RiC description."@en ;
+    skos:hiddenLabel "Screaming Frog" .
+
+v:archive-org a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:crawler ;
+    skos:prefLabel "Archive.org"@en ;
+    skos:scopeNote "Operational: how usage statistics tell programs from people, not part of any RiC description."@en ;
+    skos:hiddenLabel "archive.org_bot" ;
+    skos:hiddenLabel "ia_archiver" .
+
+v:common-crawl a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:crawler ;
+    skos:prefLabel "Common Crawl"@en ;
+    skos:scopeNote "Operational: how usage statistics tell programs from people, not part of any RiC description."@en ;
+    skos:hiddenLabel "CCBot" .
+
+v:gptbot a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:crawler ;
+    skos:prefLabel "GPTBot"@en ;
+    skos:scopeNote "Operational: how usage statistics tell programs from people, not part of any RiC description."@en ;
+    skos:hiddenLabel "GPTBot" ;
+    skos:hiddenLabel "ChatGPT-User" .
+
+v:claudebot a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:crawler ;
+    skos:prefLabel "ClaudeBot"@en ;
+    skos:scopeNote "Operational: how usage statistics tell programs from people, not part of any RiC description."@en ;
+    skos:hiddenLabel "ClaudeBot" ;
+    skos:hiddenLabel "Claude-Web" .
+
+v:perplexitybot a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:crawler ;
+    skos:prefLabel "PerplexityBot"@en ;
+    skos:scopeNote "Operational: how usage statistics tell programs from people, not part of any RiC description."@en ;
+    skos:hiddenLabel "PerplexityBot" .
+
+v:bytespider a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:crawler ;
+    skos:prefLabel "Bytespider"@en ;
+    skos:scopeNote "Operational: how usage statistics tell programs from people, not part of any RiC description."@en ;
+    skos:hiddenLabel "Bytespider" .
+
+v:amazonbot a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:crawler ;
+    skos:prefLabel "Amazonbot"@en ;
+    skos:scopeNote "Operational: how usage statistics tell programs from people, not part of any RiC description."@en ;
+    skos:hiddenLabel "Amazonbot" .
+
+v:python-requests a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:crawler ;
+    skos:prefLabel "Python Requests"@en ;
+    skos:scopeNote "Operational: how usage statistics tell programs from people, not part of any RiC description."@en ;
+    skos:hiddenLabel "python-requests" .
+
+v:curl a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:crawler ;
+    skos:prefLabel "curl"@en ;
+    skos:scopeNote "Operational: how usage statistics tell programs from people, not part of any RiC description."@en ;
+    skos:hiddenLabel "curl/" .
+
+v:wget a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:crawler ;
+    skos:prefLabel "Wget"@en ;
+    skos:scopeNote "Operational: how usage statistics tell programs from people, not part of any RiC description."@en ;
+    skos:hiddenLabel "Wget/" .
+
+v:java a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:crawler ;
+    skos:prefLabel "Java"@en ;
+    skos:scopeNote "Operational: how usage statistics tell programs from people, not part of any RiC description."@en ;
+    skos:hiddenLabel "Java/" .
+
+v:go-http a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:crawler ;
+    skos:prefLabel "Go http"@en ;
+    skos:scopeNote "Operational: how usage statistics tell programs from people, not part of any RiC description."@en ;
+    skos:hiddenLabel "Go-http-client" .
+
+v:scrapy a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:crawler ;
+    skos:prefLabel "Scrapy"@en ;
+    skos:scopeNote "Operational: how usage statistics tell programs from people, not part of any RiC description."@en ;
+    skos:hiddenLabel "Scrapy" .
+
+v:headlesschrome a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:crawler ;
+    skos:prefLabel "HeadlessChrome"@en ;
+    skos:scopeNote "Operational: how usage statistics tell programs from people, not part of any RiC description."@en ;
+    skos:hiddenLabel "HeadlessChrome" .

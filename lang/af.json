@@ -1472,5 +1472,21 @@
     "User activity": "Gebruikersaktiwiteit",
     "What the catalogue holds, how much of it is published, and how it has grown. Published means the authorised name is published, so the public catalogue shows it.": "Wat die katalogus bevat, hoeveel daarvan gepubliseer is, en hoe dit gegroei het. Gepubliseer beteken die gemagtigde naam is gepubliseer, sodat die openbare katalogus dit wys.",
     "With it": "Daarmee",
-    "Without it": "Daarsonder"
+    "Without it": "Daarsonder",
+    "A visitor is counted once a day, so one who came on three days counts three times.": "'n Besoeker word een keer per dag getel, dus tel een wat op drie dae gekom het drie keer.",
+    "By signed-in users": "Deur aangemelde gebruikers",
+    "By web crawlers": "Deur webkruipers",
+    "Date": "Datum",
+    "Downloads": "Aflaaie",
+    "Each day": "Elke dag",
+    "For :name only.": "Slegs vir :name.",
+    "How the public catalogue is used: the pages viewed and the files downloaded. Web crawlers are counted apart, and no visitor's address is kept. The counts are made each hour.": "Hoe die openbare katalogus gebruik word: die bladsye wat besigtig en die lêers wat afgelaai is. Webkruipers word apart getel, en geen besoeker se adres word gehou nie. Die tellings word elke uur gemaak.",
+    "Most downloaded": "Meeste afgelaai",
+    "Most viewed": "Meeste besigtig",
+    "Programs that read the catalogue, known by the web crawlers vocabulary; from the events of the last :days days.": "Programme wat die katalogus lees, bekend volgens die woordeskat van webkruipers; uit die gebeure van die afgelope :days dae.",
+    "The whole catalogue": "Die hele katalogus",
+    "Usage statistics": "Gebruikstatistiek",
+    "Views": "Besigtigings",
+    "Visitors": "Besoekers",
+    "Web crawlers": "Webkruipers"
 }

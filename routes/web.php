@@ -362,6 +362,7 @@ Route::middleware(['auth', 'active'])->group(function () {
     // Reports and statistics (roadmap phase 8): the overview, data quality and one route for each list; the controller checks what each needs.
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
     Route::get('/reports/quality', [ReportController::class, 'quality'])->name('reports.quality');
+    Route::get('/reports/usage', [ReportController::class, 'usage'])->name('reports.usage');
     foreach (array_keys(ReportService::LISTS) as $list) {
         Route::get("/reports/$list", [ReportController::class, 'show'])->defaults('list', $list)->name("reports.$list");
     }

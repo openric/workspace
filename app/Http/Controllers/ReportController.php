@@ -8,8 +8,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Concept;
+use App\Models\Repository;
+use App\Relations\EntityKinds;
 use App\Reports\ReportService;
+use App\Reports\UsageService;
 use App\Support\Vocab;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -38,6 +42,40 @@ class ReportController extends Controller
         abort_unless($request->user()->mayAnywhere('read', 'description'), 403);
 
         return view('reports.quality', ['quality' => $this->reports->quality($request->user()->institution_id), 'lists' => $this->lists($request)]);
+    }
+
+    /** Usage statistics of the public catalogue (PSIS's statistics dashboard, with its item and repository pages as filters). */
+    public function usage(Request $request): View|StreamedResponse
+    {
+        abort_unless($request->user()->mayAnywhere('read', 'description'), 403);
+        $filters = $request->validate([
+            'from' => ['nullable', 'date_format:Y-m-d'], 'to' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:from'],
+            'repository' => ['nullable', 'uuid'], 'subject' => ['nullable', 'uuid'], 'format' => ['nullable', Rule::in(['csv'])], 'by' => ['nullable', Rule::in(['day', 'item'])],
+        ]);
+        $to = $filters['to'] ?? now()->toDateString();
+        $from = $filters['from'] ?? CarbonImmutable::parse($to)->subDays(29)->toDateString();
+        abort_if(CarbonImmutable::parse($from)->diffInDays(CarbonImmutable::parse($to)) > 3660, 422);
+        $usage = app(UsageService::class);
+        $statistics = $usage->statistics($request->user()->institution_id, $from, $to, $filters['repository'] ?? null, $filters['subject'] ?? null);
+
+        if (($filters['format'] ?? null) === 'csv') {
+            $rows = ($filters['by'] ?? 'day') === 'item'
+                ? [[__('Kind'), __('Name'), __('Views'), 'IRI'], ...$statistics['viewed']->map(fn ($r) => [__(EntityKinds::noun($r['entity'])), (string) EntityKinds::label($r['entity']), (string) $r['count'], $r['entity']->iri])]
+                : [[__('Date'), __('Views'), __('Downloads')], ...$statistics['days']->map(fn ($d, $day) => [$day, (string) $d['views'], (string) $d['downloads']])->values()];
+
+            return response()->streamDownload(function () use ($rows) {
+                $out = fopen('php://output', 'w');
+                foreach ($rows as $row) {
+                    fputcsv($out, $row);
+                }
+                fclose($out);
+            }, "usage-$from-$to.csv", ['Content-Type' => 'text/csv; charset=UTF-8']);
+        }
+
+        return view('reports.usage', ['statistics' => $statistics, 'from' => $from, 'to' => $to, 'filters' => $filters, 'lists' => $this->lists($request),
+            'subject' => isset($filters['subject']) ? $usage->subject($filters['subject']) : null,
+            'repositories' => Repository::where('institution_id', $request->user()->institution_id)->whereNull('deleted_at')->with(EntityKinds::get('repository')['with'])->get()
+                ->sortBy(fn ($r) => mb_strtolower((string) EntityKinds::label($r)))->values()]);
     }
 
     public function show(Request $request, string $list): View|StreamedResponse
