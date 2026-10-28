@@ -19,6 +19,10 @@
         <select id="urgency" name="urgency">
             @foreach($urgencies as $u)<option value="{{ $u->notation }}" @selected(old('urgency', 'normal') === $u->notation)>{{ $u->label($lang) }}: {{ $u->labels->firstWhere('language', 'en')?->definition }}</option>@endforeach
         </select>
+        <label for="access_type">{{ __('Access type') }}</label>
+        <select id="access_type" name="access_type">
+            @foreach($accessTypes as $t)<option value="{{ $t->notation }}" @selected(old('access_type', 'view') === $t->notation)>{{ $t->label($lang) }}</option>@endforeach
+        </select>
         <button type="submit">{{ __('Send the request') }}</button>
     </form>
 @endsection

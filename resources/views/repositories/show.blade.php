@@ -8,7 +8,8 @@
     <p>{{ __('Repository') }} @include('description._ric', ['term' => 'rico:CorporateBody'])</p>
     @if(session('status'))<p role="status">{{ session('status') }}</p>@endif
     @if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif
-    <p><strong>{{ __('Persistent IRI') }}:</strong> <code>{{ $repository->iri }}</code>@if($repository->identifier)<br><strong>{{ __('Identifier') }}:</strong> {{ $repository->identifier }}@endif @if($repository->repositoryType)<br><strong>{{ __('Type') }}:</strong> {{ $repository->repositoryType->label(\App\Support\Vocab::languages()) }}@endif</p>
+    <p><strong>{{ __('Persistent IRI') }}:</strong> <code>{{ $repository->iri }}</code>@if($repository->identifier)<br><strong>{{ __('Identifier') }}:</strong> {{ $repository->identifier }}@endif @if($repository->repositoryType)<br><strong>{{ __('Type') }}:</strong> {{ $repository->repositoryType->label(\App\Support\Vocab::languages()) }}@endif
+       @can(\App\Support\Vocab::permission('manage-institution'))<br><strong>{{ __('Upload limit') }}:</strong> {{ $repository->upload_limit_gb === null ? __('none') : __(':limit GB', ['limit' => (float) $repository->upload_limit_gb]) }}, {{ __(':used GB used', ['used' => number_format(app(\App\Description\RepositoryService::class)->usedBytes($repository) / 1_000_000_000, 2, '.', '')]) }}@endcan</p>
     @php($canUpdate = auth()->user()->may('update', 'repository', $repository))
     @if($canUpdate)
         @include('description._actions', ['subject' => $repository, 'editRoute' => 'repositories.edit', 'required' => 'authorised-name'])

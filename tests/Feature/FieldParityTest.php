@@ -10,6 +10,7 @@ use App\Access\RoleService;
 use App\Accounts\AccountService;
 use App\Description\ActivityService;
 use App\Description\Elements;
+use App\Description\InstantiationService;
 use App\Description\PublicationService;
 use App\Description\RecordService;
 use App\Description\RepositoryService;
@@ -98,6 +99,85 @@ class FieldParityTest extends TestCase
         $fonds = RecordResource::firstOrFail();
         $this->assertSame('en af', $fonds->described('languages-of-material-codes', ['zxx']));
         $this->assertSame(['ZA RA', 'The register.'], [$fonds->described('institution-identifier', ['en']), $fonds->described('sources-of-description', ['en'])]);
+    }
+
+    public function test_new_child_levels_are_added_from_the_edit_form(): void
+    {
+        $holder = app(RepositoryService::class)->create($this->institution, 'Riverside Archives', 'en', 'RA');
+        $fonds = app(RecordService::class)->create($this->institution, Vocab::BASE.'level-of-description/fonds', 'Council records', 'en', null, $holder, 'CR');
+        $form = ['language' => 'en', 'level' => Vocab::BASE.'level-of-description/fonds', 'identifier' => 'CR', 'values' => ['title' => 'Council records']];
+        $this->actingAs($this->editor)->get("/records/{$fonds->id}/edit")->assertOk()->assertSee('Add new child levels')->assertSee('name="child_levels[2][title]"', false);
+
+        // A row with a title needs a level; empty rows are passed over.
+        $this->actingAs($this->editor)->post("/records/{$fonds->id}", $form + ['child_levels' => [['title' => 'Minutes']]])->assertSessionHasErrors('child_levels.0.level');
+        $this->assertSame(0, $fonds->children()->count());
+        $this->actingAs($this->editor)->post("/records/{$fonds->id}", $form + ['child_levels' => [
+            ['identifier' => 'S1', 'level' => Vocab::BASE.'level-of-description/series', 'title' => 'Minutes'],
+            ['identifier' => '', 'level' => '', 'title' => ''],
+            ['identifier' => 'S2', 'level' => Vocab::BASE.'level-of-description/series', 'title' => 'Correspondence'],
+        ]])->assertRedirect()->assertSessionHasNoErrors();
+        $children = $fonds->children()->with('level')->get();
+        $this->assertSame([['S1', 'series', 'Minutes'], ['S2', 'series', 'Correspondence']], $children->map(fn ($c) => [$c->identifier, $c->level->notation, $c->described('title', ['en'])])->all());
+    }
+
+    public function test_a_repositorys_upload_limit_is_set_by_the_institution_and_refuses_a_file_past_it(): void
+    {
+        $store = sys_get_temp_dir().'/workspace-objects-'.bin2hex(random_bytes(6));
+        config(['workspace.object_store' => $store]);
+        $admin = app(AccountService::class)->create($this->institution, 'Admin', 'admin@example.org', 'correct horse battery staple');
+        app(AccountService::class)->grantTemplateRole($admin, 'administrator');
+        $holder = app(RepositoryService::class)->create($this->institution, 'Riverside Archives', 'en', 'RA');
+        $letter = app(RecordService::class)->create($this->institution, Vocab::BASE.'level-of-description/item', 'Letter', 'en', null, $holder, 'L1');
+        $form = ['language' => 'en', 'identifier' => 'RA', 'values' => ['authorised-name' => 'Riverside Archives']];
+        $upload = fn () => $this->actingAs($this->editor)->post("/records/{$letter->id}/instantiations", ['title' => 'Notes', 'language' => 'en', 'availability' => 'online',
+            'file' => UploadedFile::fake()->createWithContent('notes.txt', str_repeat('x', 600000))]);
+
+        // An editor neither sees nor sets it; the institution's administrator does.
+        $this->actingAs($this->editor)->get("/repositories/{$holder->id}/edit")->assertOk()->assertDontSee('Upload limit (GB)');
+        $this->actingAs($this->editor)->post("/repositories/{$holder->id}", $form + ['upload_limit_gb' => '0'])->assertRedirect();
+        $this->assertNull($holder->fresh()->upload_limit_gb);
+        $this->actingAs($admin)->post("/repositories/{$holder->id}", $form + ['upload_limit_gb' => '0'])->assertRedirect()->assertSessionHasNoErrors();
+        $this->assertSame('0.000', $holder->fresh()->upload_limit_gb);
+
+        // 0 switches uploads off; a limit refuses the file that would pass it, and counts what is kept.
+        $upload()->assertSessionHasErrors(['file' => 'Uploads to Riverside Archives are switched off.']);
+        $this->actingAs($admin)->post("/repositories/{$holder->id}", $form + ['upload_limit_gb' => '0.001']);
+        $upload()->assertSessionHasNoErrors();
+        $upload()->assertSessionHasErrors(['file' => 'The file would take Riverside Archives past its upload limit of 0.001 GB (0.00 GB used).']);
+        $this->assertSame(600000, app(RepositoryService::class)->usedBytes($holder));
+        $this->actingAs($admin)->get("/repositories/{$holder->id}")->assertSee('Upload limit');
+        exec('rm -rf '.escapeshellarg($store));
+    }
+
+    public function test_an_own_reference_copy_or_thumbnail_replaces_the_one_made_from_the_master(): void
+    {
+        $store = sys_get_temp_dir().'/workspace-objects-'.bin2hex(random_bytes(6));
+        config(['workspace.object_store' => $store]);
+        $holder = app(RepositoryService::class)->create($this->institution, 'Riverside Archives', 'en', 'RA');
+        $letter = app(RecordService::class)->create($this->institution, Vocab::BASE.'level-of-description/item', 'Letter', 'en', null, $holder, 'L1');
+        $png = function (string $colour, int $width) {
+            $image = new \Imagick;
+            $image->newImage($width, 400, new \ImagickPixel($colour));
+            $image->setImageFormat('png');
+
+            return $image->getImageBlob();
+        };
+        $path = tempnam(sys_get_temp_dir(), 'scan');
+        file_put_contents($path, $png('#d8c9a3', 900));
+        $scan = app(InstantiationService::class)->upload($letter, $path, 'letter.png', 'en', 'Scan', null, 'online', $this->editor);
+        unlink($path);
+        $made = $scan->fresh()->file('thumbnail')->sha256;
+
+        $this->actingAs($this->editor)->get("/instantiations/{$scan->id}")->assertSee('Give your own copy');
+        $this->actingAs($this->editor)->post("/instantiations/{$scan->id}/own-copy", ['use' => 'thumbnail',
+            'file' => UploadedFile::fake()->createWithContent('notes.txt', 'not an image')])->assertSessionHasErrors('file');
+        $this->actingAs($this->editor)->post("/instantiations/{$scan->id}/own-copy", ['use' => 'thumbnail',
+            'file' => UploadedFile::fake()->createWithContent('cover.png', $png('#10373e', 600))])->assertRedirect()->assertSessionHasNoErrors();
+        $scan = $scan->fresh();
+        $this->assertNotSame($made, $scan->file('thumbnail')->sha256);
+        $this->assertSame(1, $scan->files()->whereHas('use', fn ($q) => $q->where('notation', 'thumbnail'))->count());
+        $this->assertSame('letter-thumbnail.jpg', $scan->file('thumbnail')->original_name);
+        exec('rm -rf '.escapeshellarg($store));
     }
 
     public function test_repository_type_contact_coordinates_activity_control_area_and_rights_terms(): void

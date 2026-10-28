@@ -24,7 +24,11 @@
  * over is expired (expire()), where Heratio keeps expires_at unused; the approvers are the accounts
  * that may review access requests for the record, not a table; every change is audited through the
  * model, replacing access_request_log; requests belong to an institution. The approvers screen and
- * the mail switch are not copied: roles grant the permission, and mail is always sent.
+ * the mail switch are not copied: roles grant the permission, and mail is always sent. The general
+ * request (Heratio's store from new.blade.php: subject, request type, scope of everything, a collection
+ * or an item) is createGeneralRequest; once approved, it opens the files available on request of what
+ * it covers, which in Heratio waits on the security clearance. The access type of the object form,
+ * which Heratio asks for but does not keep, is kept.
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
@@ -40,6 +44,7 @@ use App\Mail\Outbox;
 use App\Models\AccessRequest;
 use App\Models\Concept;
 use App\Models\Instantiation;
+use App\Models\RecordResource;
 use App\Models\User;
 use App\Support\Vocab;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -52,6 +57,15 @@ class AccessRequestService
     public const STATUSES = Vocab::BASE.'access-request-status/';
 
     public const URGENCIES = Vocab::BASE.'access-request-urgency/';
+
+    public const SCOPES = Vocab::BASE.'access-request-scope/';
+
+    public const TYPES = Vocab::BASE.'access-request-type/';
+
+    public const ACCESS_TYPES = Vocab::BASE.'access-type/';
+
+    /** The levels a collection may be asked for at, as Heratio's COLLECTION_LEVELS. */
+    public const COLLECTION_LEVELS = ['fonds', 'collection', 'record-group', 'subfonds', 'series', 'subseries'];
 
     /** Days of access an approval gives unless the reviewer says otherwise, and the most it may give. */
     public const DEFAULT_DAYS = 30;
@@ -76,11 +90,32 @@ class AccessRequestService
             ->first(fn (AccessRequest $r) => $r->hasStatus('pending') || $r->grantsAccess());
     }
 
-    /** Does an approved request of the account, whose time is not over, open the instantiation's files? */
+    /**
+     * Does an approved request of the account, whose time is not over, open the instantiation's files? One for them, for
+     * their record, for a collection above it, or for everything does, while the account may still see the record.
+     */
     public function grants(User $user, Instantiation $instantiation): bool
     {
-        return AccessRequest::where(['user_id' => $user->id, 'instantiation_id' => $instantiation->id, 'status_id' => $this->concept(self::STATUSES, 'approved')])
-            ->where('expires_at', '>', now())->exists();
+        $unit = $instantiation->record;
+        $above = array_map(fn ($r) => $r->id, $unit->ancestors());
+
+        return $user->may('read', 'description', $unit) && AccessRequest::where(['user_id' => $user->id, 'status_id' => $this->concept(self::STATUSES, 'approved')])
+            ->where('expires_at', '>', now())
+            ->where(fn ($q) => $q->where('instantiation_id', $instantiation->id)->orWhere(fn ($q) => $q->whereNull('instantiation_id')
+                ->where(fn ($q) => $q->whereNull('record_resource_id')->orWhere('record_resource_id', $unit->id)
+                    ->orWhere(fn ($q) => $q->where('scope_id', $this->concept(self::SCOPES, 'collection'))->whereIn('record_resource_id', $above)))))
+            ->exists();
+    }
+
+    /** May the account ask for a collection or an item? It must see the record; a collection must be at a collection level. */
+    public function mayAsk(User $user, string $scope, ?RecordResource $record): bool
+    {
+        return match ($scope) {
+            'all' => $record === null,
+            'item' => $record !== null && $this->sees($user, $record),
+            'collection' => $record !== null && $this->sees($user, $record) && in_array($record->level?->notation, self::COLLECTION_LEVELS, true),
+            default => false,
+        };
     }
 
     public function createRequest(User $user, Instantiation $instantiation, array $data): AccessRequest
@@ -93,18 +128,66 @@ class AccessRequestService
         }
         $request = DB::transaction(fn () => AuditLog::actingAs($user, fn () => AccessRequest::create([
             'institution_id' => $user->institution_id, 'user_id' => $user->id, 'instantiation_id' => $instantiation->id,
+            'record_resource_id' => $instantiation->record_resource_id, 'scope_id' => $this->concept(self::SCOPES, 'item'),
+            'access_type_id' => $this->concept(self::ACCESS_TYPES, $data['access_type'] ?? 'view'),
             'reason' => trim((string) $data['reason']), 'justification' => trim((string) ($data['justification'] ?? '')) ?: null,
             'urgency_id' => $this->concept(self::URGENCIES, $data['urgency'] ?? 'normal'), 'status_id' => $this->concept(self::STATUSES, 'pending'),
         ])));
-        // Notify the requester (acknowledgement) and everyone who may review it (review queue heads-up).
-        $this->outbox->send($user, new AccessRequestSubmittedMail($user, $request));
-        foreach ($this->reviewersFor($instantiation) as $reviewer) {
-            if ($reviewer->id !== $user->id) {
+        $this->announce($request);
+
+        return $request;
+    }
+
+    /**
+     * Heratio's general request: a subject, what is asked for, and everything, a collection or an item; the description is
+     * the reason, as in Heratio.
+     *
+     * @param  array{subject: string, request_type: string, description: string, justification?: ?string, urgency?: ?string, scope: string}  $data
+     */
+    public function createGeneralRequest(User $user, array $data, ?RecordResource $record): AccessRequest
+    {
+        if (! $this->mayAsk($user, $data['scope'], $record)) {
+            throw new InvalidArgumentException($data['scope'] === 'collection' ? __('Choose which collection you need access to.') : __('Choose which item you need access to.'));
+        }
+        $scope = $this->concept(self::SCOPES, $data['scope']);
+        $asked = AccessRequest::where(['user_id' => $user->id, 'scope_id' => $scope, 'record_resource_id' => $record?->id])->whereNull('instantiation_id')->with('status')->get();
+        if ($asked->contains(fn (AccessRequest $r) => $r->hasStatus('pending') || $r->grantsAccess())) {
+            throw new InvalidArgumentException(__('You have asked for this already.'));
+        }
+        $request = DB::transaction(fn () => AuditLog::actingAs($user, fn () => AccessRequest::create([
+            'institution_id' => $user->institution_id, 'user_id' => $user->id, 'record_resource_id' => $record?->id, 'scope_id' => $scope,
+            'request_type_id' => $this->concept(self::TYPES, $data['request_type']), 'subject' => trim($data['subject']),
+            'reason' => trim($data['description']), 'justification' => trim((string) ($data['justification'] ?? '')) ?: null,
+            'urgency_id' => $this->concept(self::URGENCIES, $data['urgency'] ?? 'normal'), 'status_id' => $this->concept(self::STATUSES, 'pending'),
+        ])));
+        $this->announce($request);
+
+        return $request;
+    }
+
+    /** The collections an account may ask for, by title. @return Collection<int, RecordResource> */
+    public function collections(User $user): Collection
+    {
+        return RecordResource::where('institution_id', $user->institution_id)->whereNull('deleted_at')
+            ->whereHas('level', fn ($q) => $q->whereIn('notation', self::COLLECTION_LEVELS))->with('level.labels')->get()
+            ->filter(fn (RecordResource $r) => $user->may('read', 'description', $r))
+            ->sortBy(fn (RecordResource $r) => mb_strtolower((string) $r->described('title', [app()->getLocale(), 'en'])))->values();
+    }
+
+    /** Tell the requester (acknowledgement) and everyone who may review it (review queue heads-up). */
+    private function announce(AccessRequest $request): void
+    {
+        $this->outbox->send($request->user, new AccessRequestSubmittedMail($request->user, $request));
+        foreach ($this->reviewersFor($request) as $reviewer) {
+            if ($reviewer->id !== $request->user_id) {
                 $this->outbox->send($reviewer, new AccessRequestPendingMail($reviewer, $request));
             }
         }
+    }
 
-        return $request;
+    private function sees(User $user, RecordResource $record): bool
+    {
+        return $record->institution_id === $user->institution_id && $record->deleted_at === null && $user->may('read', 'description', $record);
     }
 
     public function approveRequest(AccessRequest $request, User $reviewer, int $days = self::DEFAULT_DAYS, ?string $notes = null): void
@@ -155,31 +238,32 @@ class AccessRequestService
      */
     public function forReviewer(User $reviewer, array $filters = [], int $perPage = 25): LengthAwarePaginator
     {
-        $ids = AccessRequest::where('institution_id', $reviewer->institution_id)->with('instantiation.record')->get(['id', 'instantiation_id'])
-            ->filter(fn (AccessRequest $r) => $this->access->allows($reviewer, 'review-access-requests', 'description', $r->instantiation->record))->modelKeys();
+        $ids = AccessRequest::where('institution_id', $reviewer->institution_id)->with('record')->get(['id', 'institution_id', 'record_resource_id'])
+            ->filter(fn (AccessRequest $r) => $this->mayReview($reviewer, $r))->modelKeys();
 
         return AccessRequest::whereKey($ids)
             ->when($filters['status'] ?? null, fn ($q, $s) => $q->where('status_id', $this->concept(self::STATUSES, $s)))
-            ->with('user', 'status.labels', 'urgency.labels', 'instantiation.record', 'reviewer')->latest()->latest('id')->paginate($perPage)->withQueryString();
+            ->with('user', 'status.labels', 'urgency.labels', 'instantiation', 'record', 'reviewer')->latest()->latest('id')->paginate($perPage)->withQueryString();
     }
 
     public function getMyRequests(User $user, int $perPage = 25): LengthAwarePaginator
     {
-        return AccessRequest::where('user_id', $user->id)->with('status.labels', 'urgency.labels', 'instantiation.record', 'reviewer')
+        return AccessRequest::where('user_id', $user->id)->with('status.labels', 'urgency.labels', 'instantiation', 'record', 'reviewer')
             ->latest()->latest('id')->paginate($perPage);
     }
 
-    /** @return Collection<int, User> the institution's active accounts that may review requests for the instantiation's record */
-    public function reviewersFor(Instantiation $instantiation): Collection
+    /** @return Collection<int, User> the institution's active accounts that may review the request */
+    public function reviewersFor(AccessRequest $request): Collection
     {
-        return User::where('institution_id', $instantiation->institution_id)->whereNull('disabled_at')->get()
-            ->filter(fn (User $u) => $this->access->allows($u, 'review-access-requests', 'description', $instantiation->record))->values();
+        return User::where('institution_id', $request->institution_id)->whereNull('disabled_at')->get()
+            ->filter(fn (User $u) => $this->mayReview($u, $request))->values();
     }
 
+    /** Who may review requests for the record asked for; for everything, who may review them across the institution. */
     public function mayReview(User $reviewer, AccessRequest $request): bool
     {
         return $request->institution_id === $reviewer->institution_id
-            && $this->access->allows($reviewer, 'review-access-requests', 'description', $request->instantiation->record);
+            && $this->access->allows($reviewer, 'review-access-requests', 'description', $request->record);
     }
 
     private function reviewable(AccessRequest $request, User $reviewer): void

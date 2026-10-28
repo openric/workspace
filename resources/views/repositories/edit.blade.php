@@ -18,6 +18,11 @@
             <option value="">{{ __('not set') }}</option>
             @foreach($types as $type)<option value="{{ $type->iri }}" @selected(old('repository_type', $repository->repositoryType?->iri) === $type->iri)>{{ $type->label(\App\Support\Vocab::languages()) }}</option>@endforeach
         </select>
+        @can(\App\Support\Vocab::permission('manage-institution'))
+            <label for="upload_limit_gb">{{ __('Upload limit (GB)') }}</label>
+            <small id="upload-limit-help">{{ __('Empty: no limit. 0: uploads to this repository are switched off. 1 GB = 1 000 000 000 bytes.') }}</small>
+            <input id="upload_limit_gb" name="upload_limit_gb" type="number" min="0" step="0.001" aria-describedby="upload-limit-help" value="{{ old('upload_limit_gb', $repository->upload_limit_gb === null ? '' : (float) $repository->upload_limit_gb) }}">
+        @endcan
         <label style="font-weight: normal"><input type="hidden" name="complete_reference_codes" value="0"><input type="checkbox" name="complete_reference_codes" value="1" style="width: auto" @checked(old('complete_reference_codes', $repository->complete_reference_codes))> {{ __('Each unit it holds carries its complete reference code, so codes are not built from the units above it') }}</label>
         @include('description._fields', ['subject' => $repository, 'standard' => \App\Description\Elements::ISDIAH, 'language' => $language])
         <h2>{{ __('Control') }} (ISDIAH 5.6)</h2>

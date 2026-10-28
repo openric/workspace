@@ -13,7 +13,8 @@
  * status filter), approve and deny. Changed: the route names a Workspace instantiation; the reviewer
  * gives the number of days of access; who may review is the review-access-requests permission on the
  * record, not the admin flag; the legacy /security/* routes, the clearance request and the approvers
- * screen are not copied (phase 18, and roles grant the permission).
+ * screen are not copied (phase 18, and roles grant the permission). The general request (new and store)
+ * is newRequest and storeGeneral; its item is chosen from the record's page, where Heratio searches for it.
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
@@ -23,6 +24,7 @@ use App\AccessRequests\AccessRequestService;
 use App\Models\AccessRequest;
 use App\Models\Concept;
 use App\Models\Instantiation;
+use App\Models\RecordResource;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -40,7 +42,46 @@ class AccessRequestController extends Controller
         }
 
         return view('access-requests.create', ['instantiation' => $instantiation->load('record'),
+            'urgencies' => Concept::choices(AccessRequestService::URGENCIES)->with('labels')->get(),
+            'accessTypes' => Concept::choices(AccessRequestService::ACCESS_TYPES)->with('labels')->get()]);
+    }
+
+    /** Heratio's new request: everything, a collection, or the item whose page it was opened from. */
+    public function newRequest(Request $request): View
+    {
+        $user = $request->user();
+        $record = $request->query('record') ? RecordResource::find($request->query('record')) : null;
+        $item = $record && $this->requests->mayAsk($user, 'item', $record) ? $record : null;
+
+        return view('access-requests.new', ['item' => $item, 'collections' => $this->requests->collections($user),
+            'scope' => old('scope', $request->query('scope', $item ? 'item' : 'all')), 'chosen' => old('collection', $record?->id),
+            'types' => Concept::choices(AccessRequestService::TYPES)->with('labels')->get(),
             'urgencies' => Concept::choices(AccessRequestService::URGENCIES)->with('labels')->get()]);
+    }
+
+    public function storeGeneral(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'subject' => ['required', 'string', 'max:255'],
+            'request_type' => ['required', 'string', 'in:'.Concept::choices(AccessRequestService::TYPES)->pluck('notation')->implode(',')],
+            'description' => ['required', 'string', 'max:4000'],
+            'justification' => ['nullable', 'string', 'max:4000'],
+            'urgency' => ['required', 'string', 'in:'.Concept::choices(AccessRequestService::URGENCIES)->pluck('notation')->implode(',')],
+            'scope' => ['required', 'string', 'in:'.Concept::choices(AccessRequestService::SCOPES)->pluck('notation')->implode(',')],
+            'collection' => ['required_if:scope,collection', 'nullable', 'uuid'],
+            'item' => ['required_if:scope,item', 'nullable', 'uuid'],
+        ], [
+            'collection.required_if' => __('Choose which collection you need access to.'),
+            'item.required_if' => __('Choose which item you need access to.'),
+        ]);
+        $id = ['collection' => $data['collection'] ?? null, 'item' => $data['item'] ?? null][$data['scope']] ?? null;
+        try {
+            $created = $this->requests->createGeneralRequest($request->user(), $data, $id ? RecordResource::find($id) : null);
+        } catch (InvalidArgumentException $e) {
+            return back()->withInput()->withErrors(['scope' => $e->getMessage()]);
+        }
+
+        return redirect()->route('access-requests.show', $created)->with('status', __('Your request was sent. You will have an email when it is answered.'));
     }
 
     public function store(Request $request, Instantiation $instantiation): RedirectResponse
@@ -50,6 +91,7 @@ class AccessRequestController extends Controller
             'reason' => ['required', 'string', 'max:4000'],
             'justification' => ['nullable', 'string', 'max:4000'],
             'urgency' => ['required', 'string', 'in:'.Concept::choices(AccessRequestService::URGENCIES)->pluck('notation')->implode(',')],
+            'access_type' => ['nullable', 'string', 'in:'.Concept::choices(AccessRequestService::ACCESS_TYPES)->pluck('notation')->implode(',')],
         ]);
         try {
             $created = $this->requests->createRequest($request->user(), $instantiation, $data);
@@ -78,7 +120,7 @@ class AccessRequestController extends Controller
 
     public function show(Request $request, AccessRequest $accessRequest): View
     {
-        return view('access-requests.show', ['accessRequest' => $this->visible($request, $accessRequest)->load('user', 'status.labels', 'urgency.labels', 'reviewer', 'instantiation.record'),
+        return view('access-requests.show', ['accessRequest' => $this->visible($request, $accessRequest)->load('user', 'status.labels', 'urgency.labels', 'reviewer', 'instantiation', 'record', 'covers.labels', 'requestType.labels', 'accessType.labels'),
             'mayReview' => $this->requests->mayReview($request->user(), $accessRequest) && $accessRequest->user_id !== $request->user()->id,
             'days' => AccessRequestService::DEFAULT_DAYS, 'maxDays' => AccessRequestService::MAX_DAYS]);
     }

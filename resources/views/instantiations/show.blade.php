@@ -21,12 +21,22 @@
         @php($accessRequests = app(\App\AccessRequests\AccessRequestService::class))
         @if($open = $accessRequests->open(auth()->user(), $instantiation))
             <p><a href="{{ route('access-requests.show', $open) }}">{{ $open->grantsAccess() ? __('Your access to these files lasts until :date.', ['date' => $open->expires_at->format('Y-m-d')]) : __('Your request for these files waits for review.') }}</a></p>
+        @elseif($accessRequests->grants(auth()->user(), $instantiation))
+            <p>{{ __('An approved access request opens these files.') }}</p>
         @elseif($accessRequests->mayRequest(auth()->user(), $instantiation))
             <p><a href="{{ route('access-requests.create', $instantiation) }}">{{ __('Ask for access to these files') }}</a></p>
         @endif
     @endif
     @if($canUpdate && $instantiation->file('master'))
         <form method="post" action="{{ route('instantiations.remake-copies', $instantiation) }}">@csrf<button type="submit" style="margin-top: 0">{{ __('Make the viewing copies again') }}</button></form>
+        <form method="post" action="{{ route('instantiations.replace-copy', $instantiation) }}" enctype="multipart/form-data">
+            @csrf
+            <label for="own-copy-use">{{ __('Give your own copy') }}</label>
+            <small id="own-copy-help">{{ __('An image used instead of the copy made from the master. Making the viewing copies again replaces it.') }}</small>
+            <select id="own-copy-use" name="use" aria-describedby="own-copy-help"><option value="reference">{{ __('Reference copy') }}</option><option value="thumbnail">{{ __('Thumbnail') }}</option></select>
+            <input type="file" name="file" accept="image/*" required aria-label="{{ __('Image') }}">
+            <button type="submit">{{ __('Replace the copy') }}</button>
+        </form>
     @endif
     @forelse($instantiation->files->sortBy(fn ($f) => array_search($f->use->notation, ['master', 'reference', 'thumbnail'])) as $file)
         <section style="border-top: 1px solid var(--line); padding: .5rem 0">

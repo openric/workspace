@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['institution_id', 'iri', 'description_identifier', 'description_status_id', 'description_detail_id', 'complete_reference_codes', 'repository_type_id'])]
+#[Fillable(['institution_id', 'iri', 'description_identifier', 'description_status_id', 'description_detail_id', 'complete_reference_codes', 'repository_type_id', 'upload_limit_gb'])]
 class Repository extends Model
 {
     use Audited, Describable, HasDates, HasIdentifiers, HasUuids;

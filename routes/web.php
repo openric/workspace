@@ -204,6 +204,7 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::get('/instantiations/{instantiation}/edit', [InstantiationController::class, 'edit'])->name('instantiations.edit');
     Route::post('/instantiations/{instantiation}', [InstantiationController::class, 'update'])->name('instantiations.update');
     Route::post('/instantiations/{instantiation}/copies', [WatermarkController::class, 'remake'])->name('instantiations.remake-copies');
+    Route::post('/instantiations/{instantiation}/own-copy', [InstantiationController::class, 'replaceCopy'])->name('instantiations.replace-copy');
     Route::get('/files/{file}', [InstantiationController::class, 'file'])->name('files.show');
     Route::post('/files/{file}/fixity', [InstantiationController::class, 'fixity'])->name('files.fixity');
 
@@ -341,6 +342,8 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::get('/instantiations/{instantiation}/request-access', [AccessRequestController::class, 'create'])->whereUuid('instantiation')->name('access-requests.create');
     Route::post('/instantiations/{instantiation}/request-access', [AccessRequestController::class, 'store'])->whereUuid('instantiation')->name('access-requests.store');
     Route::get('/access-requests', [AccessRequestController::class, 'index'])->name('access-requests.index');
+    Route::get('/access-requests/new', [AccessRequestController::class, 'newRequest'])->name('access-requests.new');
+    Route::post('/access-requests', [AccessRequestController::class, 'storeGeneral'])->name('access-requests.store-general');
     Route::get('/access-requests/mine', [AccessRequestController::class, 'mine'])->name('access-requests.mine');
     Route::get('/access-requests/{accessRequest}', [AccessRequestController::class, 'show'])->whereUuid('accessRequest')->name('access-requests.show');
     Route::post('/access-requests/{accessRequest}/approve', [AccessRequestController::class, 'approve'])->whereUuid('accessRequest')->name('access-requests.approve');

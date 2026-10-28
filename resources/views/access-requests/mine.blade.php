@@ -4,6 +4,7 @@
 @section('content')
     <h1>{{ __('My access requests') }}</h1>
     <p>{{ __('Your requests for files available on request. To ask for one, open the instantiation and choose Ask for access.') }}</p>
+    <p><a href="{{ route('access-requests.new') }}">{{ __('New access request') }}</a></p>
     @if($requests->isEmpty())
         <p>{{ __('No requests.') }}</p>
     @else

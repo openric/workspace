@@ -181,7 +181,7 @@ Asked for by Dr Johan Pieterse on 28 October 2026: each Workspace screen has a p
 | `notes[type, content]`, `publicationNotes`, `archivistNotes` | Note, Publication note, Archivist's note | Same; note types missing |
 | `relatedDescriptionsSearch` | Associated record relation | Modelled |
 | `subjectAccessPoints`, `placeAccessPoints`, `genreAccessPoints`, `nameAccessPoints` | Subject, place, documentary form and subject (agent) relations | Modelled |
-| `childLevels[]` (add lower levels from the form) | none (a lower level is added from its parent's page) | Missing |
+| `childLevels[]` (add lower levels from the form) | Add new child levels: identifier, level and title, three rows a save | Same, from v0.0.74 |
 | `description_identifier` | Description identifier | Same |
 | `institution_responsible_identifier` | Institution identifier | Same, from v0.0.73 |
 | `rules`, `description_status_id`, `description_detail_id`, `revision_history` | Rules or conventions, Status, Level of detail, Dates of descriptions | Same |
@@ -239,7 +239,7 @@ Asked for by Dr Johan Pieterse on 28 October 2026: each Workspace screen has a p
 | `desc_institution_identifier` (ISDIAH 5.6.2) | Institution identifier | Same, from v0.0.73 |
 | `desc_language`, `desc_script` (ISDIAH 5.6.7) | Language(s) and Script(s), from ISO 639 and ISO 15924 | Same, from v0.0.73 |
 | `geographic_subregion`, `thematic_area` | Geographic subregion, Thematic area, under Access points | Same, from v0.0.73 |
-| `upload_limit` | none | Missing |
+| `upload_limit` | Upload limit (GB), set by who may manage the institution; empty for no limit (AtoM's -1), 0 switches uploads off; refused uploads and the usage on the repository's page | Same, from v0.0.74 |
 | Theme (`edit-theme`: logo, banner, colours) | none | Missing |
 | Custom fields | none | Missing |
 | none | Complete reference codes | Workspace only |
@@ -292,7 +292,7 @@ Asked for by Dr Johan Pieterse on 28 October 2026: each Workspace screen has a p
 |---|---|---|
 | Upload, `replace_file` | Upload to an instantiation; a new file beside the old | Same |
 | `media_type_id` | Carrier type and media type | Same |
-| `repFile_reference`, `repFile_thumbnail` (own reference and thumbnail files) | none: made from the master | Missing |
+| `repFile_reference`, `repFile_thumbnail` (own reference and thumbnail files) | Give your own copy: an image for the reference copy or thumbnail, sized and watermarked as a made one | Same, from v0.0.74 |
 | `display_as_compound` | none | Missing |
 
 : Digital object, field by field
@@ -322,9 +322,11 @@ Asked for by Dr Johan Pieterse on 28 October 2026: each Workspace screen has a p
 | Heratio field | Workspace | Status |
 |---|---|---|
 | `reason`, `justification`, `urgency` | Reason, Justification, Urgency | Same |
-| `scope_type`, `scope_item_id` (an item) | The instantiation asked for | Same |
-| `scope_collection_id` (a whole collection) | none | Missing |
-| `request_type`, `access_type`, `subject`, `description` | none | Missing |
+| `scope_type` (all, collection, item) | What do you need access to? (Everything, A collection, A single item), a concept | Same, from v0.0.74 |
+| `scope_item_id` (an item) | The instantiation asked for, or a record asked for from its page (Heratio searches for it on the form) | Same; the item is chosen from its record, from v0.0.74 |
+| `scope_collection_id` (a whole collection) | A collection, chosen from the records at a collection level, with what is inside it | Same, from v0.0.74 |
+| `request_type`, `subject`, `description` | Request type (a concept), Subject, Description (kept as the reason, as Heratio does) | Same, from v0.0.74 |
+| `access_type` (request-object form, never kept by Heratio) | Access type, a concept, kept | Same, from v0.0.74 |
 | `requested_classification_id` (security clearance) | none | Phase 18 |
 
 : Access request, field by field

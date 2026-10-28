@@ -101,11 +101,17 @@ class RepositoryController extends Controller
             'description_identifier' => ['nullable', 'string', 'max:255'],
             'description_status' => ['nullable', 'string', Rule::in($this->concepts(Vocab::DESCRIPTION_STATUSES)->pluck('iri'))],
             'description_detail' => ['nullable', 'string', Rule::in($this->concepts(Vocab::DESCRIPTION_DETAILS)->pluck('iri'))],
+            'upload_limit_gb' => ['nullable', 'numeric', 'min:0', 'max:999999999'],
         ]);
         $values = array_intersect_key($data['values'] ?? [], array_flip($notations));
+        // The upload limit is the institution's to set, as Heratio's admin-only editUploadLimit; an editor cannot raise it.
+        $setsLimit = $request->has('upload_limit_gb') && $request->user()->can(Vocab::permission('manage-institution'));
         try {
             // One transaction: a refused description leaves the identifier unchanged too.
-            DB::transaction(function () use ($repository, $data, $values, $request) {
+            DB::transaction(function () use ($repository, $data, $values, $request, $setsLimit) {
+                if ($setsLimit) {
+                    $this->repositories->setUploadLimit($repository, isset($data['upload_limit_gb']) ? (float) $data['upload_limit_gb'] : null, $request->user());
+                }
                 $this->repositories->updateIdentity($repository, $data['identifier'] ?? null, $request->user());
                 $this->repositories->setType($repository, $data['repository_type'] ?? null, $request->user());
                 $this->repositories->setCompleteReferenceCodes($repository, (bool) ($data['complete_reference_codes'] ?? $repository->complete_reference_codes), $request->user());

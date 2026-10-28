@@ -16,6 +16,7 @@ use App\Models\Repository;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use InvalidArgumentException;
 
 class RepositoryService
 {
@@ -57,6 +58,38 @@ class RepositoryService
     public function setType(Repository $repository, ?string $typeIri, ?User $actor = null): void
     {
         DB::transaction(fn () => AuditLog::actingAs($actor, fn () => $repository->update(['repository_type_id' => $typeIri ? $this->concept($typeIri)->id : null])));
+    }
+
+    /** AtoM's upload limit, in gigabytes: none for no limit, 0 to switch uploads off. */
+    public function setUploadLimit(Repository $repository, ?float $gigabytes, ?User $actor = null): void
+    {
+        DB::transaction(fn () => AuditLog::actingAs($actor, fn () => $repository->update(['upload_limit_gb' => $gigabytes])));
+    }
+
+    /** Bytes of the files kept for the units the repository holds (Heratio's diskUsageBytes), copies included. */
+    public function usedBytes(Repository $repository): int
+    {
+        return (int) DB::table('digital_files')->join('instantiations', 'instantiations.id', '=', 'digital_files.instantiation_id')
+            ->join('record_resources', 'record_resources.id', '=', 'instantiations.record_resource_id')
+            ->where('record_resources.repository_id', $repository->id)->sum('digital_files.size_bytes');
+    }
+
+    /** Refuse a file that would take the repository past its upload limit, or any file when uploads are off. */
+    public function assertRoomFor(Repository $repository, int $bytes): void
+    {
+        if ($repository->upload_limit_gb === null) {
+            return;
+        }
+        $limit = (float) $repository->upload_limit_gb * 1_000_000_000;
+        if ($limit == 0) {
+            throw new InvalidArgumentException(__('uploads to :repository are switched off', ['repository' => $repository->described('authorised-name', [app()->getLocale(), 'en'])]));
+        }
+        $used = $this->usedBytes($repository);
+        if ($used + $bytes > $limit) {
+            throw new InvalidArgumentException(__('the file would take :repository past its upload limit of :limit GB (:used GB used)', [
+                'repository' => $repository->described('authorised-name', [app()->getLocale(), 'en']), 'limit' => (float) $repository->upload_limit_gb,
+                'used' => number_format($used / 1_000_000_000, 2, '.', '')]));
+        }
     }
 
     public function updateControl(Repository $repository, ?string $descriptionIdentifier, ?string $statusIri, ?string $detailIri, ?User $actor = null): void

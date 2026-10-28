@@ -75,6 +75,7 @@ class InstantiationService
     public function upload(RecordResource $unit, string $path, string $originalName, string $language, ?string $title = null, ?string $expectedSha256 = null,
         string $availability = 'online', ?User $actor = null): Instantiation
     {
+        app(RepositoryService::class)->assertRoomFor($unit->repository, (int) filesize($path));
         $master = $this->store->ingest($unit->institution_id, $path, $expectedSha256);
 
         $instantiation = DB::transaction(fn () => AuditLog::actingAs($actor, function () use ($unit, $originalName, $language, $title, $availability, $master) {
@@ -128,6 +129,33 @@ class InstantiationService
         $instantiation->unsetRelation('files');
 
         return $this->makeCopies($instantiation, $actor);
+    }
+
+    /**
+     * AtoM's own reference or thumbnail representation (repFile_reference, repFile_thumbnail): an image given for one
+     * copy instead of the one made from the master, sized and, for a reference copy, watermarked as a made one is.
+     * Making the copies again from the master replaces it.
+     */
+    public function replaceCopy(Instantiation $instantiation, string $use, string $path, ?User $actor = null): DigitalFile
+    {
+        if (! in_array($use, ['reference', 'thumbnail'], true) || $instantiation->file('master') === null) {
+            throw new InvalidArgumentException(__('only the reference copy or thumbnail of a kept file can be given'));
+        }
+        $mime = (string) mime_content_type($path);
+        if (! str_starts_with($mime, 'image/')) {
+            throw new InvalidArgumentException(__('give an image for the copy'));
+        }
+        $watermark = app(Watermark::class)->configFor(Institution::findOrFail($instantiation->institution_id));
+        // ponytail: copies() makes and keeps both sizes; the one not used stays in the store unreferenced, as an old copy
+        // does after remakeCopies. A copies() that takes the uses wanted would keep only the one.
+        $copy = $this->store->copies($instantiation->institution_id, $path, $mime, $watermark)[$use];
+
+        return DB::transaction(fn () => AuditLog::actingAs($actor, function () use ($instantiation, $use, $copy) {
+            $instantiation->files()->whereHas('use', fn ($q) => $q->where('notation', $use))->get()->each->delete();
+            $instantiation->unsetRelation('files');
+
+            return $this->addFile($instantiation, $use, pathinfo($instantiation->file('master')->original_name, PATHINFO_FILENAME).'-'.$use.'.jpg', $copy);
+        }));
     }
 
     private function addCopies(Instantiation $instantiation, string $originalName, array $copies): void

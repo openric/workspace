@@ -67,16 +67,23 @@ class AccessRequestTest extends TestCase
         }
         $holder = app(RepositoryService::class)->create($this->institution, 'Riverside Archives', 'en', 'RA');
         $this->record = app(RecordService::class)->create($this->institution, self::LEVEL.'item', 'Minute book, 1902', 'en', null, $holder, 'MB1');
+        $this->scan = $this->scanOf($this->record, 'Scan of the minute book');
+        foreach ([$holder, $this->record] as $entity) {
+            app(PublicationService::class)->apply($entity, 'publish', null, false, $this->editor);
+        }
+    }
+
+    private function scanOf(RecordResource $record, string $title): Instantiation
+    {
         $image = new Imagick;
         $image->newImage(900, 600, new ImagickPixel('#d8c9a3'));
         $image->setImageFormat('png');
         $path = tempnam(sys_get_temp_dir(), 'scan');
         file_put_contents($path, $image->getImageBlob());
-        $this->scan = app(InstantiationService::class)->upload($this->record, $path, 'minutes.png', 'en', 'Scan of the minute book', null, 'on-request', $this->editor);
+        $scan = app(InstantiationService::class)->upload($record, $path, 'scan.png', 'en', $title, null, 'on-request', $this->editor);
         unlink($path);
-        foreach ([$holder, $this->record] as $entity) {
-            app(PublicationService::class)->apply($entity, 'publish', null, false, $this->editor);
-        }
+
+        return $scan;
     }
 
     protected function tearDown(): void
@@ -167,6 +174,55 @@ class AccessRequestTest extends TestCase
         $this->actingAs($this->researcher)->get("/files/{$this->scan->file('master')->id}")->assertOk();
         $this->actingAs($this->researcher)->post("/access-requests/{$second->id}/cancel")->assertSessionHas('status', 'Your request is cancelled.');
         $this->actingAs($this->researcher)->get("/files/{$this->scan->file('master')->id}")->assertNotFound();
+    }
+
+    public function test_a_general_request_for_a_collection_an_item_or_everything_opens_what_it_covers(): void
+    {
+        $holder = $this->record->repository;
+        $fonds = app(RecordService::class)->create($this->institution, self::LEVEL.'fonds', 'Council records', 'en', null, $holder, 'CR');
+        $letter = app(RecordService::class)->create($this->institution, self::LEVEL.'item', 'Letter to the council', 'en', $fonds, $holder, 'CR1');
+        $letterScan = $this->scanOf($letter, 'Scan of the letter');
+        foreach ([$fonds, $letter] as $entity) {
+            app(PublicationService::class)->apply($entity, 'publish', null, false, $this->editor);
+        }
+        $form = ['subject' => 'Parish history', 'request_type' => 'research', 'description' => 'For a history of the parish council.', 'urgency' => 'normal'];
+
+        // A collection is chosen from the collection-level records; one is required when the scope is a collection.
+        $this->actingAs($this->researcher)->get('/access-requests/new')->assertOk()->assertSee('Council records (Fonds)')->assertDontSee('Minute book, 1902 (')
+            ->assertSee('To ask for a single item, open its record and choose Ask for access.');
+        $this->actingAs($this->researcher)->post('/access-requests', $form + ['scope' => 'collection'])->assertSessionHasErrors(['collection' => 'Choose which collection you need access to.']);
+        $this->actingAs($this->researcher)->post('/access-requests', $form + ['scope' => 'collection', 'collection' => $this->record->id])->assertSessionHasErrors('scope');
+        $this->actingAs($this->researcher)->post('/access-requests', $form + ['scope' => 'collection', 'collection' => $fonds->id])->assertRedirect()->assertSessionHasNoErrors();
+        $request = AccessRequest::where('user_id', $this->researcher->id)->sole();
+        $this->assertSame(['collection', $fonds->id, 'research', 'Parish history', null], [$request->covers->notation, $request->record_resource_id, $request->requestType->notation, $request->subject, $request->instantiation_id]);
+        $this->assertContains(['editor@example.org', 'A request for access waits for review'], $this->mails());
+        $this->actingAs($this->researcher)->post('/access-requests', $form + ['scope' => 'collection', 'collection' => $fonds->id])->assertSessionHasErrors(['scope' => 'You have asked for this already.']);
+        $this->actingAs($this->editor)->get("/access-requests/{$request->id}")->assertOk()->assertSee('Parish history')->assertSee('Research access')->assertSee('Council records');
+
+        // Approved, it opens the files of what is inside the collection, not those outside it.
+        $this->actingAs($this->researcher)->get("/files/{$letterScan->file('master')->id}")->assertNotFound();
+        $this->actingAs($this->editor)->post("/access-requests/{$request->id}/approve", ['days' => 7])->assertSessionHasNoErrors();
+        $this->actingAs($this->researcher)->get("/files/{$letterScan->file('master')->id}")->assertOk();
+        $this->actingAs($this->researcher)->get("/instantiations/{$letterScan->id}")->assertSee('An approved access request opens these files.');
+        $this->actingAs($this->researcher)->get("/files/{$this->scan->file('master')->id}")->assertNotFound();
+
+        // A single item is asked for from its record's page.
+        $this->actingAs($this->researcher)->get("/records/{$this->record->id}")->assertOk()->assertSee(route('access-requests.new', ['record' => $this->record->id, 'scope' => 'item']));
+        $this->actingAs($this->researcher)->get("/access-requests/new?record={$this->record->id}&scope=item")->assertOk()->assertSee('A single item: Minute book, 1902');
+
+        // Everything opens every file on request that the requester may see.
+        $this->actingAs($this->other)->post('/access-requests', $form + ['scope' => 'all', 'request_type' => 'view', 'collection' => $fonds->id])->assertRedirect()->assertSessionHasNoErrors();
+        $all = AccessRequest::where('user_id', $this->other->id)->sole();
+        $this->assertSame(['all', null], [$all->covers->notation, $all->record_resource_id]);
+        $this->actingAs($this->other)->get('/access-requests/mine')->assertSee('Parish history')->assertSee('Everything available on request');
+        $this->actingAs($this->editor)->post("/access-requests/{$all->id}/approve", ['days' => 7])->assertSessionHasNoErrors();
+        $this->actingAs($this->other)->get("/files/{$this->scan->file('master')->id}")->assertOk();
+        $this->actingAs($this->other)->get("/files/{$letterScan->file('master')->id}")->assertOk();
+
+        // The request for one instantiation keeps how the files will be used, which Heratio asks but does not keep.
+        $this->actingAs($this->contributor)->post("/instantiations/{$this->scan->id}/request-access", ['reason' => 'An exhibition.', 'urgency' => 'normal', 'access_type' => 'download'])->assertRedirect();
+        $this->assertSame(['download', 'item', $this->record->id], [AccessRequest::where('user_id', $this->contributor->id)->sole()->accessType->notation,
+            AccessRequest::where('user_id', $this->contributor->id)->sole()->covers->notation, AccessRequest::where('user_id', $this->contributor->id)->sole()->record_resource_id]);
     }
 
     public function test_an_online_file_cannot_be_asked_for_and_a_held_address_gets_no_mail(): void

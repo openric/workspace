@@ -35,6 +35,23 @@
             </select>
         </fieldset>
         @endif
+        @if($mayCreateInside)
+        <fieldset>
+            <legend>{{ __('Add new child levels') }}</legend>
+            <small>{{ __('Each row with a title becomes a unit inside this one when you save. To add more, save and edit again.') }}</small>
+            <table>
+                <thead><tr><th scope="col">{{ __('Identifier') }}</th><th scope="col">{{ __('Level of description') }}</th><th scope="col">{{ __('Title') }}</th></tr></thead>
+                <tbody>
+                @for($i = 0; $i < 3; $i++)
+                    <tr><td><input name="child_levels[{{ $i }}][identifier]" maxlength="255" aria-label="{{ __('Identifier') }}" value="{{ old("child_levels.$i.identifier") }}"></td>
+                        <td><select name="child_levels[{{ $i }}][level]" aria-label="{{ __('Level of description') }}" style="font: inherit; padding: .5rem"><option value=""></option>
+                            @foreach($levels as $level)<option value="{{ $level->iri }}" @selected(old("child_levels.$i.level") === $level->iri)>{{ $level->label(\App\Support\Vocab::languages()) }}</option>@endforeach</select></td>
+                        <td><input name="child_levels[{{ $i }}][title]" maxlength="2000" aria-label="{{ __('Title') }}" value="{{ old("child_levels.$i.title") }}"></td></tr>
+                @endfor
+                </tbody>
+            </table>
+        </fieldset>
+        @endif
         <button type="submit">{{ __('Save') }}</button>
     </form>
 @endsection

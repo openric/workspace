@@ -1,0 +1,37 @@
+# OpenRiC Workspace - OpenRiC Workspace Access Types.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# How the requester wants to use a file asked for (Heratio's request-object form, access_type).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/access-type/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Access Types"@en ;
+    dcterms:description "How the requester wants to use the files."@en ;
+    dcterms:issued "2026-10-28"^^xsd:date ;
+    skos:hasTopConcept v:view, v:download, v:copy .
+
+v:view a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "View only"@en ;
+    skos:scopeNote "Operational: the handling of a request for access, not part of any RiC description."@en ;
+    skos:definition "To see the files on screen."@en .
+
+v:download a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Download"@en ;
+    skos:scopeNote "Operational: the handling of a request for access, not part of any RiC description."@en ;
+    skos:definition "To save a copy of the files."@en .
+
+v:copy a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Physical copy"@en ;
+    skos:scopeNote "Operational: the handling of a request for access, not part of any RiC description."@en ;
+    skos:definition "To receive a printed or other physical copy."@en .

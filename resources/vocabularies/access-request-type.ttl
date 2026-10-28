@@ -1,0 +1,51 @@
+# OpenRiC Workspace - OpenRiC Workspace Access Request Types.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What a general request for access asks for (Heratio's access_request.request_type, as its new-request form offers them).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/access-request-type/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Access Request Types"@en ;
+    dcterms:description "What the requester asks to do."@en ;
+    dcterms:issued "2026-10-28"^^xsd:date ;
+    skos:hasTopConcept v:view, v:copy, v:publish, v:research, v:other .
+
+v:view a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "View restricted material"@en ;
+    skos:scopeNote "Operational: the handling of a request for access, not part of any RiC description."@en ;
+    skos:definition "To see material that is not open."@en .
+
+v:copy a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Request copies"@en ;
+    skos:scopeNote "Operational: the handling of a request for access, not part of any RiC description."@en ;
+    skos:definition "To have copies made."@en .
+
+v:publish a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Permission to publish"@en ;
+    skos:scopeNote "Operational: the handling of a request for access, not part of any RiC description."@en ;
+    skos:definition "To publish or reproduce material."@en .
+
+v:research a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Research access"@en ;
+    skos:scopeNote "Operational: the handling of a request for access, not part of any RiC description."@en ;
+    skos:definition "To use the material for research."@en .
+
+v:other a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Other"@en ;
+    skos:scopeNote "Operational: the handling of a request for access, not part of any RiC description."@en ;
+    skos:definition "Anything else, said in the description."@en .

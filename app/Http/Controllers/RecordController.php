@@ -210,7 +210,7 @@ class RecordController extends Controller
         abort_unless($this->mayWrite($request, $record, $language), 403);
 
         return view('records.edit', ['record' => $record, 'elements' => Elements::of(Elements::ISAD_G), 'levels' => $this->levels($request), 'language' => $language,
-            'mayUpdate' => $request->user()->may('update', 'description', $record),
+            'mayUpdate' => $request->user()->may('update', 'description', $record), 'mayCreateInside' => $request->user()->may('create', 'description', $record),
             'statuses' => Concept::choices(Vocab::DESCRIPTION_STATUSES)->get(), 'details' => Concept::choices(Vocab::DESCRIPTION_DETAILS)->get()]);
     }
 
@@ -226,7 +226,14 @@ class RecordController extends Controller
             'description_identifier' => ['nullable', 'string', 'max:255'],
             'description_status' => ['nullable', 'string', Rule::in(Concept::choices(Vocab::DESCRIPTION_STATUSES)->pluck('iri'))],
             'description_detail' => ['nullable', 'string', Rule::in(Concept::choices(Vocab::DESCRIPTION_DETAILS)->pluck('iri'))],
-        ]);
+            // Heratio's "Add new child levels": a row with a title becomes a unit inside this one; its level is required here.
+            'child_levels' => ['array', 'max:20'],
+            'child_levels.*.identifier' => ['nullable', 'string', 'max:255'],
+            'child_levels.*.level' => ['nullable', 'required_with:child_levels.*.title', Rule::in($this->levels($request)->pluck('iri'))],
+            'child_levels.*.title' => ['nullable', 'string', 'max:2000'],
+        ], ['child_levels.*.level.required_with' => __('Choose the level of each new child level.')]);
+        $children = array_values(array_filter($data['child_levels'] ?? [], fn ($row) => trim((string) ($row['title'] ?? '')) !== ''));
+        abort_if($children !== [] && ! $request->user()->may('create', 'description', $record), 403);
         $values = array_intersect_key($data['values'] ?? [], array_flip(Elements::notations(Elements::ISAD_G)));
         abort_unless($this->mayWrite($request, $record, $data['language']), 403);
         // A translator writes values only: the reference code and level need update.
@@ -235,7 +242,7 @@ class RecordController extends Controller
         $identityChanged = ($data['identifier'] ?? null) !== $record->identifier || $data['level'] !== $record->level->iri || $controlChanged;
         abort_if($identityChanged && ! $request->user()->may('update', 'description', $record), 403);
         try {
-            DB::transaction(function () use ($record, $data, $values, $request, $identityChanged, $controlChanged, $control) {
+            DB::transaction(function () use ($record, $data, $values, $request, $identityChanged, $controlChanged, $control, $children) {
                 if ($identityChanged) {
                     $this->records->updateIdentity($record, $data['identifier'] ?? null, $data['level'], $request->user());
                 }
@@ -243,6 +250,9 @@ class RecordController extends Controller
                     $this->records->updateControl($record, ...[...$control, $request->user()]);
                 }
                 $this->records->describe($record, $values, $data['language'], $request->user());
+                foreach ($children as $row) {
+                    $this->records->create($request->user()->institution, $row['level'], trim($row['title']), $data['language'], $record, null, ($row['identifier'] ?? null) ?: null, $request->user());
+                }
             });
         } catch (InvalidArgumentException $e) {
             return back()->withInput()->withErrors(['values' => $e->getMessage()]);

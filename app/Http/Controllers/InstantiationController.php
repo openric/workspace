@@ -85,6 +85,20 @@ class InstantiationController extends Controller
             'language' => $language, 'carrierTypes' => $this->choices(InstantiationService::CARRIER_TYPES), 'availabilities' => $this->choices(InstantiationService::AVAILABILITY)]);
     }
 
+    /** AtoM's own reference or thumbnail representation, given instead of the one made from the master. */
+    public function replaceCopy(Request $request, Instantiation $instantiation): RedirectResponse
+    {
+        $this->own($request, $instantiation, 'update');
+        $data = $request->validate(['use' => ['required', Rule::in(['reference', 'thumbnail'])], 'file' => ['required', 'file', 'image', 'max:'.(50 * 1024)]]);
+        try {
+            $this->instantiations->replaceCopy($instantiation, $data['use'], $request->file('file')->getRealPath(), $request->user());
+        } catch (InvalidArgumentException|RuntimeException $e) {
+            return back()->withErrors(['file' => ucfirst($e->getMessage()).'.']);
+        }
+
+        return redirect()->route('instantiations.show', $instantiation)->with('status', __('Copy replaced.'));
+    }
+
     public function update(Request $request, Instantiation $instantiation): RedirectResponse
     {
         $this->own($request, $instantiation, 'update');

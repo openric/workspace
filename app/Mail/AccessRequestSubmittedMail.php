@@ -35,6 +35,6 @@ class AccessRequestSubmittedMail extends WorkspaceMail
 
     public function content(): Content
     {
-        return new Content(view: 'mail.access-request.submitted', with: ['file' => $this->request->instantiation->described('instantiation-title', [app()->getLocale(), 'en'])]);
+        return new Content(view: 'mail.access-request.submitted', with: ['file' => $this->request->target()]);
     }
 }
