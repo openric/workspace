@@ -677,3 +677,164 @@ v:container-note a skos:Concept ;
     skos:prefLabel "Note"@en ;
     skos:scopeNote "Exported as rico:note."@en ;
     skos:definition "Anything else about the container."@en .
+
+v:alternate-title a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:isad-g ;
+    skos:prefLabel "Alternate title"@en ;
+    skos:scopeNote "ISAD(G) 3.1.2, AtoM's alternate title beside the title proper; kept as a name of the other type and exported as rico:hasOrHadTitle a rico:Title."@en ;
+    skos:definition "Another title the unit is known by, such as a parallel or former title."@en .
+
+v:edition a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:isad-g ;
+    skos:prefLabel "Edition"@en ;
+    skos:scopeNote "ISAD(G) 3.1, AtoM's edition statement (RAD 1.2, DACS); exported as rico:generalDescription."@en ;
+    skos:definition "The edition of a published unit, as the unit states it."@en .
+
+v:languages-of-material-codes a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:isad-g ;
+    skos:prefLabel "Language(s) of material"@en ;
+    skos:scopeNote "ISAD(G) 3.4.3, AtoM's languages of material from ISO 639; ISO codes, named in each interface language; exported as rico:hasOrHadLanguage."@en ;
+    skos:definition "The languages the unit is written in, chosen from ISO 639."@en .
+
+v:scripts-of-material-codes a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:isad-g ;
+    skos:prefLabel "Script(s) of material"@en ;
+    skos:scopeNote "ISAD(G) 3.4.3, AtoM's scripts of material from ISO 15924; ISO codes, named in each interface language; exported as rico:generalDescription."@en ;
+    skos:definition "The scripts the unit is written in, chosen from ISO 15924."@en .
+
+v:institution-identifier a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:isad-g ;
+    skos:prefLabel "Institution identifier"@en ;
+    skos:scopeNote "ISAD(G) 3.7, AtoM's institution identifier in the control area; exported as rico:generalDescription."@en ;
+    skos:definition "The institution responsible for the description, by its code or name."@en .
+
+v:languages-of-description a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:isad-g ;
+    skos:prefLabel "Language(s) of description"@en ;
+    skos:scopeNote "ISAD(G) 3.7, AtoM's languages of description from ISO 639; ISO codes; exported as rico:generalDescription."@en ;
+    skos:definition "The languages the description is written in."@en .
+
+v:scripts-of-description a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:isad-g ;
+    skos:prefLabel "Script(s) of description"@en ;
+    skos:scopeNote "ISAD(G) 3.7, AtoM's scripts of description from ISO 15924; ISO codes; exported as rico:generalDescription."@en ;
+    skos:definition "The scripts the description is written in."@en .
+
+v:sources-of-description a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:isad-g ;
+    skos:prefLabel "Sources"@en ;
+    skos:scopeNote "ISAD(G) 3.7, AtoM's sources in the control area; exported as openricx:descriptiveNote."@en ;
+    skos:definition "The sources the description was prepared from."@en .
+
+v:repository-institution-identifier a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:isdiah ;
+    skos:prefLabel "Institution identifier"@en ;
+    skos:scopeNote "ISDIAH 5.6.2; exported as rico:generalDescription."@en ;
+    skos:definition "The institution responsible for the description, by its code or name."@en .
+
+v:repository-languages a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:isdiah ;
+    skos:prefLabel "Language(s)"@en ;
+    skos:scopeNote "ISDIAH 5.6.7, languages of the description from ISO 639; ISO codes; exported as rico:generalDescription."@en ;
+    skos:definition "The languages the description is written in."@en .
+
+v:repository-scripts a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:isdiah ;
+    skos:prefLabel "Script(s)"@en ;
+    skos:scopeNote "ISDIAH 5.6.7, scripts of the description from ISO 15924; ISO codes; exported as rico:generalDescription."@en ;
+    skos:definition "The scripts the description is written in."@en .
+
+v:geographic-subregion a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:isdiah ;
+    skos:prefLabel "Geographic subregion"@en ;
+    skos:scopeNote "AtoM's geographic subregion access point of a repository; exported as rico:generalDescription."@en ;
+    skos:definition "The geographic subregion the repository serves or lies in."@en .
+
+v:thematic-area a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:isdiah ;
+    skos:prefLabel "Thematic area"@en ;
+    skos:scopeNote "AtoM's thematic area access point of a repository; exported as rico:generalDescription."@en ;
+    skos:definition "The subjects the repository's holdings centre on."@en .
+
+v:agent-languages a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:isaar-cpf ;
+    skos:prefLabel "Language(s)"@en ;
+    skos:scopeNote "ISAAR(CPF) 5.4.7, languages of the description from ISO 639; ISO codes; exported as rico:generalDescription."@en ;
+    skos:definition "The languages the description is written in."@en .
+
+v:agent-scripts a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:isaar-cpf ;
+    skos:prefLabel "Script(s)"@en ;
+    skos:scopeNote "ISAAR(CPF) 5.4.7, scripts of the description from ISO 15924; ISO codes; exported as rico:generalDescription."@en ;
+    skos:definition "The scripts the description is written in."@en .
+
+v:activity-classification a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:activity ;
+    skos:prefLabel "Classification"@en ;
+    skos:scopeNote "ISDF 5.1.5; exported as rico:generalDescription."@en ;
+    skos:definition "Where the function sits in the institution's classification scheme."@en .
+
+v:activity-institution-identifier a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:activity ;
+    skos:prefLabel "Institution identifiers"@en ;
+    skos:scopeNote "ISDF 5.4.2; exported as rico:generalDescription."@en ;
+    skos:definition "The institution responsible for the description, by its code or name."@en .
+
+v:activity-rules-conventions a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:activity ;
+    skos:prefLabel "Rules and/or conventions used"@en ;
+    skos:scopeNote "ISDF 5.4.3; exported as rico:isOrWasRegulatedBy a rico:Rule."@en ;
+    skos:definition "The rules the description follows."@en .
+
+v:activity-description-dates a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:activity ;
+    skos:prefLabel "Dates of creation, revision or deletion"@en ;
+    skos:scopeNote "ISDF 5.4.6; exported as rico:generalDescription."@en ;
+    skos:definition "When the description was made, revised or deleted."@en .
+
+v:activity-languages a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:activity ;
+    skos:prefLabel "Language(s)"@en ;
+    skos:scopeNote "ISDF 5.4.7, languages of the description from ISO 639; ISO codes; exported as rico:generalDescription."@en ;
+    skos:definition "The languages the description is written in."@en .
+
+v:activity-scripts a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:activity ;
+    skos:prefLabel "Script(s)"@en ;
+    skos:scopeNote "ISDF 5.4.7, scripts of the description from ISO 15924; ISO codes; exported as rico:generalDescription."@en ;
+    skos:definition "The scripts the description is written in."@en .
+
+v:activity-sources a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:activity ;
+    skos:prefLabel "Sources"@en ;
+    skos:scopeNote "ISDF 5.4.8; exported as openricx:descriptiveNote."@en ;
+    skos:definition "The sources the description was prepared from."@en .
+
+v:activity-maintenance-notes a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:activity ;
+    skos:prefLabel "Maintenance notes"@en ;
+    skos:scopeNote "ISDF 5.4.9; exported as rico:generalDescription."@en ;
+    skos:definition "Notes on how the description was created and maintained."@en .

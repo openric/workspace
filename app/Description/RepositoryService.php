@@ -53,6 +53,12 @@ class RepositoryService
     }
 
     /** ISDIAH 5.6.1, 5.6.4 and 5.6.5; status and detail are concept IRIs or null. */
+    /** Set its type (ISDIAH 5.1.5), or none. */
+    public function setType(Repository $repository, ?string $typeIri, ?User $actor = null): void
+    {
+        DB::transaction(fn () => AuditLog::actingAs($actor, fn () => $repository->update(['repository_type_id' => $typeIri ? $this->concept($typeIri)->id : null])));
+    }
+
     public function updateControl(Repository $repository, ?string $descriptionIdentifier, ?string $statusIri, ?string $detailIri, ?User $actor = null): void
     {
         DB::transaction(fn () => AuditLog::actingAs($actor, fn () => $repository->update([

@@ -58,6 +58,9 @@ class ContactPointService
             'fax' => ['nullable', 'string', 'max:64'],
             'email' => ['nullable', 'email', 'max:255'],
             'website' => ['nullable', 'url:http,https', 'max:1024'],
+            'latitude' => ['nullable', 'numeric', 'between:-90,90'],
+            'longitude' => ['nullable', 'numeric', 'between:-180,180'],
+            'note' => ['nullable', 'string', 'max:5000'],
         ]);
 
         // + keeps the left-hand keys, so what was sent wins over the empty defaults.

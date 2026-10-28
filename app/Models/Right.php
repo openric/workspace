@@ -15,7 +15,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable(['institution_id', 'iri', 'subject_table', 'subject_id', 'basis_id', 'statement_id', 'licence_id', 'copyright_status_id', 'jurisdiction',
-    'determined_on', 'citation', 'starts_on', 'ends_on', 'holder_id', 'note', 'note_language', 'deleted_at'])]
+    'determined_on', 'citation', 'licence_terms', 'policy_identifier', 'starts_on', 'ends_on', 'holder_id', 'note', 'note_language', 'deleted_at'])]
 class Right extends Model
 {
     use Audited, HasUuids;

@@ -155,3 +155,176 @@ Checked on 27 October 2026 against PSIS (`archive/plugins`, 143 plugins: 124 of 
 : PSIS plugins without a Heratio package
 
 Where PSIS does more than Heratio (count of screens and actions): IIIF 81 against 51, ingest 21 against 14, portable export 18 against 11, multi-tenancy 25 against 11. Those phases read PSIS's behaviour as well as Heratio's code.
+
+## Field by field
+
+Asked for by Dr Johan Pieterse on 28 October 2026: each Workspace screen has a place for every field of the matching Heratio screen. Heratio's fields are the input names of its edit forms (`packages/ahg-*/resources/views/edit.blade.php` and their partials, at `1aa1bb0b5`). "Same" means the same field under the same label; "modelled" means RiC keeps it as a name, identifier, date or relation row, shown on the same page; "missing" is a gap to close or to agree with Dr Johan Pieterse.
+
+### Archival description (`ahg-information-object-manage`)
+
+| Heratio field | Workspace | Status |
+|---|---|---|
+| `identifier` | Identifier | Same |
+| `altIds[label, value]` (alternative identifiers) | Identifiers, with a type (previous, barcode, other) | Modelled |
+| `title` | Title | Same |
+| `alternate_title` | Alternate title (names of the other type) | Same, from v0.0.73 |
+| `edition` | Edition | Same, from v0.0.73 |
+| `level_of_description_id` | Level of description | Same |
+| `repository_id` | Repository | Same |
+| `events[type, actor, date, start, end]` (dates and their actors) | Dates (creation, accumulation and others, as written and normalised) and the creation relation | Modelled |
+| `creators` (name of creator) | Creation and accumulation relations | Modelled |
+| `extent_and_medium` | Extent and medium | Same |
+| `archival_history`, `acquisition`, `scope_and_content`, `appraisal`, `accruals`, `arrangement` | The ISAD(G) elements of the same names | Same |
+| `access_conditions`, `reproduction_conditions`, `physical_characteristics`, `finding_aids` | The ISAD(G) elements of the same names | Same |
+| `location_of_originals`, `location_of_copies`, `related_units_of_description` | The ISAD(G) elements of the same names | Same |
+| `languages[]`, `scripts[]` (ISO 639 and ISO 15924 lists) and `language_notes` | Language(s) and Script(s) of material, chosen from ISO 639 and ISO 15924, and Language/scripts of material as the note | Same, from v0.0.73; EAD, MODS and Dublin Core carry the note only until phase 11 |
+| `notes[type, content]`, `publicationNotes`, `archivistNotes` | Note, Publication note, Archivist's note | Same; note types missing |
+| `relatedDescriptionsSearch` | Associated record relation | Modelled |
+| `subjectAccessPoints`, `placeAccessPoints`, `genreAccessPoints`, `nameAccessPoints` | Subject, place, documentary form and subject (agent) relations | Modelled |
+| `childLevels[]` (add lower levels from the form) | none (a lower level is added from its parent's page) | Missing |
+| `description_identifier` | Description identifier | Same |
+| `institution_responsible_identifier` | Institution identifier | Same, from v0.0.73 |
+| `rules`, `description_status_id`, `description_detail_id`, `revision_history` | Rules or conventions, Status, Level of detail, Dates of descriptions | Same |
+| `languagesOfDescription[]`, `scriptsOfDescription[]` | Language(s) and Script(s) of description, from ISO 639 and ISO 15924 | Same, from v0.0.73 |
+| `sources` | Sources | Same, from v0.0.73 |
+| `publication_status_id`, `updateDescendants` | Publication of each value and name, with "and everything inside" | Modelled |
+| `display_standard_id` | none: ISAD(G) only on screen; DC and MODS as exports | Missing |
+| `source_standard` | none | Missing |
+| `watermark_*` (per description) | Watermark per institution (Settings) | Missing: per description |
+| ICIP sensitivity | Traditional Knowledge and Biocultural Labels | Modelled |
+| Custom fields (`ahg-custom-fields`) | none | Missing |
+| `security_classification_*` | none | Phase 18 |
+| `collection_type_id` (GLAM sector) | none | Phase 21 |
+
+: Archival description, field by field
+
+### Authority record (`ahg-actor-manage`)
+
+| Heratio field | Workspace | Status |
+|---|---|---|
+| `entity_type_id` | Type of entity | Same |
+| `authorized_form_of_name` | Authorised form(s) of name | Same |
+| `other_names[parallel, standardized, other]` | Parallel, standardised and other forms of name | Same |
+| `corporate_body_identifiers` | Identifiers | Modelled |
+| `dates_of_existence` | Dates of existence, with existence, birth and death dates | Same |
+| `history`, `places`, `legal_status`, `functions`, `mandates`, `internal_structures`, `general_context` | The ISAAR(CPF) elements of the same names | Same |
+| `occupations[occupation, content]` | Occupation relation | Modelled |
+| `relatedActors[...]` | Agent relations (hierarchical, temporal, family, associated) | Modelled |
+| `relatedResources[...]` | Creation, accumulation and other relations to records | Modelled |
+| `parent_id` | Agent hierarchical relation | Modelled |
+| `maintaining_repository_id` | Maintained by | Same |
+| `description_identifier`, `institution_responsible_identifier` | Description identifier, Institution identifiers | Same |
+| `rules`, `description_status_id`, `description_detail_id`, `revision_history`, `sources`, `maintenance_notes` | The ISAAR(CPF) control elements of the same names | Same |
+| `language[]`, `script[]` (lists) | Language(s) and Script(s), from ISO 639 and ISO 15924, beside Languages and scripts as a note | Same, from v0.0.73 |
+| Contact area | Contact points | Same |
+| `embargo_until` | Embargoed until | Same |
+| `publication_status_id` | Publication of each value and name | Modelled |
+| `source_standard` | none | Missing |
+| ICIP sensitivity | none on authority records | Missing |
+| Custom fields | none | Missing |
+
+: Authority record, field by field
+
+### Repository (`ahg-repository-manage`)
+
+| Heratio field | Workspace | Status |
+|---|---|---|
+| `identifier`, `authorized_form_of_name`, `parallel_name`, `other_name` | Identifier, Authorised, parallel and other forms of name | Same |
+| `repository_type` (ISDIAH 5.1.5) | Type, from AtoM's repository types | Same, from v0.0.73 |
+| `contact_*` (type, primary, person, street, city, region, country, postal code, telephone, fax, email, website) | Contact points | Same |
+| `contact_latitude`, `contact_longitude`, `contact_note` | Latitude, Longitude, Note | Same, from v0.0.73 |
+| `history`, `geocultural_context`, `mandates`, `internal_structures`, `collecting_policies`, `buildings`, `holdings`, `finding_aids` | The ISDIAH elements of the same names | Same |
+| `opening_times`, `access_conditions`, `disabled_access`, `research_services`, `reproduction_services`, `public_facilities` | The ISDIAH elements of the same names | Same |
+| `desc_identifier`, `desc_rules`, `desc_status_id`, `desc_detail_id`, `desc_revision_history`, `desc_sources`, `maintenance_notes` | The ISDIAH control elements of the same names | Same |
+| `desc_institution_identifier` (ISDIAH 5.6.2) | Institution identifier | Same, from v0.0.73 |
+| `desc_language`, `desc_script` (ISDIAH 5.6.7) | Language(s) and Script(s), from ISO 639 and ISO 15924 | Same, from v0.0.73 |
+| `geographic_subregion`, `thematic_area` | Geographic subregion, Thematic area, under Access points | Same, from v0.0.73 |
+| `upload_limit` | none | Missing |
+| Theme (`edit-theme`: logo, banner, colours) | none | Missing |
+| Custom fields | none | Missing |
+| none | Complete reference codes | Workspace only |
+
+: Repository, field by field
+
+### Function (`ahg-function-manage`) and activity
+
+| Heratio field | Workspace | Status |
+|---|---|---|
+| `type_id` | Type of activity | Same |
+| `authorized_form_of_name`, `parallel_name`, `other_name` | Authorised, parallel and other forms of name | Same |
+| `classification` (ISDF 5.1.5) | Classification | Same, from v0.0.73 |
+| `dates` (ISDF 5.2.1) | Dates | Modelled |
+| `description`, `history`, `legislation` | Description, History, Legislation | Same |
+| `description_identifier`, `institution_identifier`, `rules`, `description_status_id`, `description_detail_id`, `revision_history`, `language`, `script`, `sources`, `maintenance_notes` (ISDF control area) | The ISDF 5.4 elements of the same names, with Language(s) and Script(s) from ISO lists | Same, from v0.0.73 |
+
+: Function and activity, field by field
+
+### Term (`ahg-term-taxonomy`) and concept
+
+| Heratio field | Workspace | Status |
+|---|---|---|
+| `taxonomy_id`, `code`, `name` | Vocabulary, Notation, Label in each language | Same |
+| `use_for` | Alternative and hidden labels | Same |
+| `parent_id`, `narrow_terms`, `related_terms` | Broader, narrower and related concepts | Same |
+| `crossMatches[source, target, match type]` | Matches to other schemes | Same |
+| `scopeNotes[]`, `sourceNotes[]`, `displayNotes[]` | Scope note, Source note, Display note (with a definition and a history note besides) | Same |
+| `converse_term`, `self_reciprocal` (relation-type terms) | none: relation types are a bundled vocabulary with their inverse wording | Missing for local terms |
+| `protocol_*` (ICIP protocol on a term) | none | Missing |
+
+: Term and concept, field by field
+
+### Physical storage (`ahg-storage-manage`) and container
+
+| Heratio field | Workspace | Status |
+|---|---|---|
+| `name`, `type_id`, `barcode`, `reference_code` | Name, Type, Barcode and other identifiers | Same |
+| `building`, `floor`, `room`, `aisle`, `bay`, `rack`, `shelf`, `position`, `location` | Storage places (building to shelf) with their place types, and Location as written | Modelled |
+| `width`, `height`, `depth` | Width, height, depth (cm) | Same |
+| `total_capacity`, `used_capacity`, `capacity_unit`, `total_linear_metres`, `used_linear_metres` | Capacity and capacity used, in a unit (linear metres among them) | Same |
+| `climate_controlled`, `temperature_min`, `temperature_max`, `humidity_min`, `humidity_max` | The same | Same |
+| `security_level`, `access_restrictions`, `status`, `notes` | Security level, Who may open it, Status, Note | Same |
+
+: Physical storage, field by field
+
+### Digital object and instantiation
+
+| Heratio field | Workspace | Status |
+|---|---|---|
+| Upload, `replace_file` | Upload to an instantiation; a new file beside the old | Same |
+| `media_type_id` | Carrier type and media type | Same |
+| `repFile_reference`, `repFile_thumbnail` (own reference and thumbnail files) | none: made from the master | Missing |
+| `display_as_compound` | none | Missing |
+
+: Digital object, field by field
+
+### Rights (`ahg-extended-rights`)
+
+| Heratio field | Workspace | Status |
+|---|---|---|
+| `basis`, `rights_statement_id`, `cc_license_id`, `copyright_status` | Basis, Rights statement, Licence, Copyright status | Same |
+| `acts[]`, `restrictions[]` | Grants: act and restriction | Same |
+| `copyright_status_date`, `statute_determination_date` | Status determined on | Same |
+| `copyright_jurisdiction`, `statute_jurisdiction` | Jurisdiction | Same |
+| `statute_citation` | Citation | Same |
+| `start_date`, `end_date`, `end_date_open`, `copyright_expiry_date` | In force from, until (open when empty) | Same |
+| `copyright_holder`, `rights_holder_name` | Rights holder (an authority record) | Modelled |
+| `copyright_note`, `statute_note`, `rights_note` | Note | Modelled: one note |
+| `restriction_reasons[]` (a reason beside each act) | The note of each grant | Same |
+| `license_type`, `license_identifier`, `license_url` | Licence (a concept with its IRI) | Modelled |
+| `license_terms` (a licence outside Creative Commons) | Licence terms | Same, from v0.0.73 |
+| `policy_identifier` | Policy identifier | Same, from v0.0.73 |
+| `donor_name` | none | Phase 9 |
+
+: Rights, field by field
+
+### Access request (`ahg-access-request`)
+
+| Heratio field | Workspace | Status |
+|---|---|---|
+| `reason`, `justification`, `urgency` | Reason, Justification, Urgency | Same |
+| `scope_type`, `scope_item_id` (an item) | The instantiation asked for | Same |
+| `scope_collection_id` (a whole collection) | none | Missing |
+| `request_type`, `access_type`, `subject`, `description` | none | Missing |
+| `requested_classification_id` (security clearance) | none | Phase 18 |
+
+: Access request, field by field

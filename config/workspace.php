@@ -15,7 +15,7 @@ return [
     'audit_signing_key' => env('WORKSPACE_AUDIT_SIGNING_KEY', storage_path('keys/audit-signing.sk')),
 
     // The Workspace's own vocabularies, bundled with the code (resources/vocabularies).
-    'bundled_vocabularies' => ['account-role.ttl', 'permission.ttl', 'audit-action.ttl', 'description-element.ttl', 'language-value-state.ttl', 'description-status.ttl', 'description-detail.ttl', 'level-of-description.ttl', 'record-kind.ttl', 'date-property.ttl', 'date-qualifier.ttl', 'name-type.ttl', 'identifier-type.ttl', 'relation-type.ttl', 'relation-state.ttl', 'relation-certainty.ttl', 'assertion-origin.ttl', 'assertion-status.ttl', 'concept-scheme-kind.ttl', 'concept-match-type.ttl', 'agent-type.ttl', 'carrier-type.ttl', 'file-use.ttl', 'file-availability.ttl', 'container-type.ttl', 'storage-place-type.ttl', 'container-status.ttl', 'capacity-unit.ttl', 'storage-security-level.ttl', 'api-scope.ttl', 'proposal-kind.ttl', 'rights-basis.ttl', 'rights-statement.ttl', 'licence.ttl', 'copyright-status.ttl', 'rights-act.ttl', 'rights-restriction.ttl', 'tk-label.ttl', 'label-applier.ttl', 'job-type.ttl', 'job-status.ttl', 'watermark-type.ttl', 'watermark-position.ttl', 'email-bounce-type.ttl', 'email-status.ttl', 'access-request-status.ttl', 'access-request-urgency.ttl', 'usage-event.ttl', 'web-crawler.ttl', 'report-status.ttl', 'report-section-type.ttl', 'report-frequency.ttl'],
+    'bundled_vocabularies' => ['account-role.ttl', 'permission.ttl', 'audit-action.ttl', 'description-element.ttl', 'language-value-state.ttl', 'description-status.ttl', 'description-detail.ttl', 'level-of-description.ttl', 'record-kind.ttl', 'date-property.ttl', 'date-qualifier.ttl', 'name-type.ttl', 'identifier-type.ttl', 'relation-type.ttl', 'relation-state.ttl', 'relation-certainty.ttl', 'assertion-origin.ttl', 'assertion-status.ttl', 'concept-scheme-kind.ttl', 'concept-match-type.ttl', 'agent-type.ttl', 'carrier-type.ttl', 'file-use.ttl', 'file-availability.ttl', 'container-type.ttl', 'storage-place-type.ttl', 'container-status.ttl', 'capacity-unit.ttl', 'storage-security-level.ttl', 'api-scope.ttl', 'proposal-kind.ttl', 'rights-basis.ttl', 'rights-statement.ttl', 'licence.ttl', 'copyright-status.ttl', 'rights-act.ttl', 'rights-restriction.ttl', 'tk-label.ttl', 'label-applier.ttl', 'job-type.ttl', 'job-status.ttl', 'watermark-type.ttl', 'watermark-position.ttl', 'email-bounce-type.ttl', 'email-status.ttl', 'access-request-status.ttl', 'access-request-urgency.ttl', 'usage-event.ttl', 'web-crawler.ttl', 'report-status.ttl', 'report-section-type.ttl', 'report-frequency.ttl', 'repository-type.ttl'],
 
     // API keys (ADR 0007, Heratio's ApiKeyService): what an account must hold, anywhere, for a key it
     // owns to carry each scope (api-scope vocabulary), as [action, kind] pairs of which any one will do.
@@ -138,6 +138,17 @@ return [
         'storage-place-type' => 'https://www.ica.org/standards/RiC/ontology#PlaceType',
     ],
 
+    // Description elements whose value is a list of ISO codes, as AtoM's language and script pick lists: language
+    // (ISO 639) or script (ISO 15924). The codes are kept in one value, separated by spaces, in the language
+    // zxx (no linguistic content), and named in the interface language (IsoCodes).
+    'code_elements' => [
+        'languages-of-material-codes' => 'language', 'scripts-of-material-codes' => 'script',
+        'languages-of-description' => 'language', 'scripts-of-description' => 'script',
+        'repository-languages' => 'language', 'repository-scripts' => 'script',
+        'agent-languages' => 'language', 'agent-scripts' => 'script',
+        'activity-languages' => 'language', 'activity-scripts' => 'script',
+    ],
+
     // Description elements that are names (ADR 0006): what the description form
     // writes there is kept as rico:Name entities of this name type (name-type
     // vocabulary). An authorised name is single, one in each language; the others
@@ -157,6 +168,7 @@ return [
         'activity-name' => 'authorised',
         'activity-parallel-name' => 'parallel',
         'activity-other-name' => 'other',
+        'alternate-title' => 'other',
         'instantiation-title' => 'authorised',
         'container-name' => 'authorised',
         'container-other-name' => 'other',

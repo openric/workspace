@@ -84,7 +84,7 @@ class RepositoryController extends Controller
         $repository->load('descriptionValues.element', 'names.nameType', 'identifiers.identifierType', 'descriptionStatus', 'descriptionDetail');
 
         return view('repositories.edit', ['repository' => $repository, 'elements' => $this->elements(), 'language' => $language,
-            'statuses' => $this->concepts(Vocab::DESCRIPTION_STATUSES), 'details' => $this->concepts(Vocab::DESCRIPTION_DETAILS)]);
+            'statuses' => $this->concepts(Vocab::DESCRIPTION_STATUSES), 'details' => $this->concepts(Vocab::DESCRIPTION_DETAILS), 'types' => $this->concepts(Vocab::BASE.'repository-type/')]);
     }
 
     public function update(Request $request, Repository $repository): RedirectResponse
@@ -95,8 +95,9 @@ class RepositoryController extends Controller
             'language' => ['required', 'string', fn ($a, $v, $fail) => Bcp47::valid((string) $v) || $fail(__('Give a BCP 47 language tag, such as en or af.'))],
             'identifier' => ['nullable', 'string', 'max:255'],
             'complete_reference_codes' => ['boolean'],
+            'repository_type' => ['nullable', 'string', Rule::in($this->concepts(Vocab::BASE.'repository-type/')->pluck('iri'))],
             'values' => ['array'],
-            'values.*' => ['nullable', 'string', 'max:65535'],
+            'values.*' => ['nullable', 'max:65535'], 'values.*.*' => ['nullable', 'string', 'max:8'],
             'description_identifier' => ['nullable', 'string', 'max:255'],
             'description_status' => ['nullable', 'string', Rule::in($this->concepts(Vocab::DESCRIPTION_STATUSES)->pluck('iri'))],
             'description_detail' => ['nullable', 'string', Rule::in($this->concepts(Vocab::DESCRIPTION_DETAILS)->pluck('iri'))],
@@ -106,6 +107,7 @@ class RepositoryController extends Controller
             // One transaction: a refused description leaves the identifier unchanged too.
             DB::transaction(function () use ($repository, $data, $values, $request) {
                 $this->repositories->updateIdentity($repository, $data['identifier'] ?? null, $request->user());
+                $this->repositories->setType($repository, $data['repository_type'] ?? null, $request->user());
                 $this->repositories->setCompleteReferenceCodes($repository, (bool) ($data['complete_reference_codes'] ?? $repository->complete_reference_codes), $request->user());
                 $this->repositories->updateControl($repository, $data['description_identifier'] ?? null, $data['description_status'] ?? null, $data['description_detail'] ?? null, $request->user());
                 $this->repositories->describe($repository, $values, $data['language'], $request->user());

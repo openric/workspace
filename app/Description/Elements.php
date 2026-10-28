@@ -52,6 +52,12 @@ final class Elements
         return config('workspace.name_elements')[$notation] ?? null;
     }
 
+    /** What a code element lists (language or script, config workspace.code_elements), or null if it is not one. */
+    public static function codeKind(string $notation): ?string
+    {
+        return config('workspace.code_elements')[$notation] ?? null;
+    }
+
     /** @return list<string> */
     public static function notations(string $standard): array
     {
@@ -71,12 +77,12 @@ final class Elements
         self::ACTIVITY => ['5.1' => 'Identity area', '5.2' => 'Context area'],
     ];
 
-    /** The element's number in its standard, such as 5.3.1 or 3.1.2, from its scope note. */
+    /** The element's number in its standard, such as 5.3.1 or 3.1.2, from its scope note; an AtoM field the standard does not number has its area's, such as 3.7. */
     public static function number(Concept $element): ?string
     {
         $note = (string) $element->labels->firstWhere('language', 'en')?->scope_note;
 
-        return preg_match('/(?:ISDIAH|ISAD\(G\)|ISAAR\(CPF\)|ISDF) (\d+\.\d+\.\d+)/', $note, $m) ? $m[1] : null;
+        return preg_match('/(?:ISDIAH|ISAD\(G\)|ISAAR\(CPF\)|ISDF) (\d+\.\d+(?:\.\d+)?)/', $note, $m) ? $m[1] : null;
     }
 
     /**
@@ -90,7 +96,9 @@ final class Elements
         foreach (self::of($standard) as $element) {
             $number = self::number($element);
             $area = $number ? implode('.', array_slice(explode('.', $number), 0, 2)) : null;
-            $heading = $area ? ($area.' '.__(self::AREAS[$standard][$area] ?? '')) : __('Description');
+            // An AtoM field a numbered standard has no element for (a repository's geographic subregion, say) is among
+            // its access points, as AtoM shows it; a standard with no numbers has one area.
+            $heading = $area ? ($area.' '.__(self::AREAS[$standard][$area] ?? '')) : (isset(self::AREAS[$standard]) ? __('Access points') : __('Description'));
             $areas[$heading] ??= new Collection;
             $areas[$heading]->push($element);
         }

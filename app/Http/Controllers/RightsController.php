@@ -59,7 +59,7 @@ class RightsController extends Controller
         $data = $request->validate([
             'basis' => ['required', 'string', 'max:64'], 'statement' => ['nullable', 'string', 'max:64'], 'licence' => ['nullable', 'string', 'max:64'],
             'copyright_status' => ['nullable', 'string', 'max:64'], 'jurisdiction' => ['nullable', 'string', 'max:2'], 'determined_on' => ['nullable', 'string', 'max:10'],
-            'citation' => ['nullable', 'string', 'max:2000'], 'starts_on' => ['nullable', 'string', 'max:10'], 'ends_on' => ['nullable', 'string', 'max:10'],
+            'citation' => ['nullable', 'string', 'max:2000'], 'licence_terms' => ['nullable', 'string', 'max:5000'], 'policy_identifier' => ['nullable', 'string', 'max:255'], 'starts_on' => ['nullable', 'string', 'max:10'], 'ends_on' => ['nullable', 'string', 'max:10'],
             'holder' => ['nullable', 'uuid'], 'note' => ['nullable', 'string', 'max:4000'], 'note_language' => ['nullable', 'string', 'max:35'],
             'grants' => ['nullable', 'array'], 'grants.*.restriction' => ['nullable', 'string', 'max:64'], 'grants.*.note' => ['nullable', 'string', 'max:1000'],
         ]);

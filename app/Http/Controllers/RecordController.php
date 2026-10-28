@@ -222,7 +222,7 @@ class RecordController extends Controller
             'identifier' => ['nullable', 'string', 'max:255'],
             'level' => ['required', Rule::in($this->levels($request)->pluck('iri'))],
             'values' => ['array'],
-            'values.*' => ['nullable', 'string', 'max:65535'],
+            'values.*' => ['nullable', 'max:65535'], 'values.*.*' => ['nullable', 'string', 'max:8'],
             'description_identifier' => ['nullable', 'string', 'max:255'],
             'description_status' => ['nullable', 'string', Rule::in(Concept::choices(Vocab::DESCRIPTION_STATUSES)->pluck('iri'))],
             'description_detail' => ['nullable', 'string', Rule::in(Concept::choices(Vocab::DESCRIPTION_DETAILS)->pluck('iri'))],

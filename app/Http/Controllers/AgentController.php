@@ -125,7 +125,7 @@ class AgentController extends Controller
             'type' => ['required', 'string', 'max:64'],
             'identifier' => ['nullable', 'string', 'max:255'],
             'values' => ['array'],
-            'values.*' => ['nullable', 'string', 'max:65535'],
+            'values.*' => ['nullable', 'max:65535'], 'values.*.*' => ['nullable', 'string', 'max:8'],
             'description_identifier' => ['nullable', 'string', 'max:255'],
             'maintainer' => ['nullable', 'uuid'],
             'status' => ['nullable', 'string', Rule::in(Concept::choices(Vocab::DESCRIPTION_STATUSES)->pluck('iri'))],

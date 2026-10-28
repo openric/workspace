@@ -221,7 +221,6 @@
     "Change password": "Verander wagwoord",
     "Change the place it lies in": "Verander die plek waarin dit lê",
     "Check fixity now": "Kontroleer vastheid nou",
-    "Citation, licence terms or policy identifier": "Aanhaling, lisensievoorwaardes of beleidsidentifiseerder",
     "Cite and reuse": "Haal aan en hergebruik",
     "Cite as": "Haal aan as",
     "Climate controlled": "Klimaatbeheer",
@@ -1584,5 +1583,11 @@
     "expired": "verval",
     "next": "volgende",
     "revoked": "herroep",
-    "scheduled": "geskeduleer"
+    "scheduled": "geskeduleer",
+    "Latitude": "Breedtegraad",
+    "Longitude": "Lengtegraad",
+    "Citation": "Aanhaling",
+    "Licence terms": "Lisensievoorwaardes",
+    "Policy identifier": "Beleidsidentifiseerder",
+    ":code is not an ISO :standard code": ":code is nie 'n ISO :standard-kode nie"
 }

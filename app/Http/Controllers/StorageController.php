@@ -145,7 +145,7 @@ class StorageController extends Controller
         $data = $request->validate([
             'language' => ['required', 'string', fn ($a, $v, $fail) => Bcp47::valid((string) $v) || $fail(__('Give a BCP 47 language tag, such as en or af.'))],
             'values' => ['array'],
-            'values.*' => ['nullable', 'string', 'max:65535'],
+            'values.*' => ['nullable', 'max:65535'], 'values.*.*' => ['nullable', 'string', 'max:8'],
             'type' => ['nullable', 'uuid'],
             'barcode' => ['nullable', 'string', 'max:255'],
             'identifier' => ['nullable', 'string', 'max:255'],

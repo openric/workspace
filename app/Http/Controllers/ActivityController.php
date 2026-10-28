@@ -15,6 +15,7 @@ use App\Description\Bcp47;
 use App\Description\DateService;
 use App\Description\Elements;
 use App\Models\Activity;
+use App\Models\Concept;
 use App\Models\Name;
 use App\Relations\RelationService;
 use App\Support\Vocab;
@@ -22,6 +23,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use InvalidArgumentException;
 
@@ -90,7 +92,8 @@ class ActivityController extends Controller
         abort_unless(Bcp47::valid($language), 404);
         $activity->load('descriptionValues.element', 'names.nameType', 'activityType');
 
-        return view('activities.edit', ['activity' => $activity, 'language' => $language, 'types' => $this->activities->types($activity->institution_id)]);
+        return view('activities.edit', ['activity' => $activity, 'language' => $language, 'types' => $this->activities->types($activity->institution_id),
+            'statuses' => Concept::choices(Vocab::DESCRIPTION_STATUSES)->with('labels')->get(), 'details' => Concept::choices(Vocab::DESCRIPTION_DETAILS)->with('labels')->get()]);
     }
 
     public function update(Request $request, Activity $activity): RedirectResponse
@@ -99,13 +102,17 @@ class ActivityController extends Controller
         $data = $request->validate([
             'language' => ['required', 'string', fn ($a, $v, $fail) => Bcp47::valid((string) $v) || $fail(__('Give a BCP 47 language tag, such as en or af.'))],
             'values' => ['array'],
-            'values.*' => ['nullable', 'string', 'max:65535'],
+            'values.*' => ['nullable', 'max:65535'], 'values.*.*' => ['nullable', 'string', 'max:8'],
             'type' => ['nullable', 'uuid'],
+            'description_identifier' => ['nullable', 'string', 'max:255'],
+            'description_status' => ['nullable', 'string', Rule::in(Concept::choices(Vocab::DESCRIPTION_STATUSES)->pluck('iri'))],
+            'description_detail' => ['nullable', 'string', Rule::in(Concept::choices(Vocab::DESCRIPTION_DETAILS)->pluck('iri'))],
         ]);
         $values = array_intersect_key($data['values'] ?? [], array_flip(Elements::notations(Elements::ACTIVITY)));
         try {
             DB::transaction(function () use ($activity, $data, $values, $request) {
                 $this->activities->updateType($activity, $data['type'] ?? null, $request->user());
+                $this->activities->updateControl($activity, $data['description_identifier'] ?? null, $data['description_status'] ?? null, $data['description_detail'] ?? null, $request->user());
                 $this->activities->describe($activity, $values, $data['language'], $request->user());
             });
         } catch (InvalidArgumentException $e) {

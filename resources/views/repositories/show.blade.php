@@ -8,7 +8,7 @@
     <p>{{ __('Repository') }} @include('description._ric', ['term' => 'rico:CorporateBody'])</p>
     @if(session('status'))<p role="status">{{ session('status') }}</p>@endif
     @if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif
-    <p><strong>{{ __('Persistent IRI') }}:</strong> <code>{{ $repository->iri }}</code>@if($repository->identifier)<br><strong>{{ __('Identifier') }}:</strong> {{ $repository->identifier }}@endif</p>
+    <p><strong>{{ __('Persistent IRI') }}:</strong> <code>{{ $repository->iri }}</code>@if($repository->identifier)<br><strong>{{ __('Identifier') }}:</strong> {{ $repository->identifier }}@endif @if($repository->repositoryType)<br><strong>{{ __('Type') }}:</strong> {{ $repository->repositoryType->label(\App\Support\Vocab::languages()) }}@endif</p>
     @php($canUpdate = auth()->user()->may('update', 'repository', $repository))
     @if($canUpdate)
         @include('description._actions', ['subject' => $repository, 'editRoute' => 'repositories.edit', 'required' => 'authorised-name'])
@@ -27,7 +27,7 @@
     <h2>{{ __('Contact points') }}</h2>
     @foreach($repository->contactPoints as $contact)
         @unless($canUpdate)
-            <p>{{ $contact->label ?: 'Contact' }}@if($contact->is_primary) {{ __('(primary)') }}@endif: {{ collect([$contact->contact_person, $contact->street_address, $contact->city, $contact->region, $contact->postal_code, $contact->country_code, $contact->telephone, $contact->fax, $contact->email, $contact->website])->filter()->join(', ') }}</p>
+            <p>{{ $contact->label ?: 'Contact' }}@if($contact->is_primary) {{ __('(primary)') }}@endif: {{ collect([$contact->contact_person, $contact->street_address, $contact->city, $contact->region, $contact->postal_code, $contact->country_code, $contact->telephone, $contact->fax, $contact->email, $contact->website, $contact->latitude !== null ? $contact->latitude.', '.$contact->longitude : null, $contact->note])->filter()->join(', ') }}</p>
             @continue
         @endunless
         <details>

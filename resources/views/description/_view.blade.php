@@ -16,8 +16,13 @@
         @foreach($shown as [$element, $values])
             <h3 style="margin-bottom: .2rem">{{ \App\Description\Elements::number($element) }} {{ $element->label(\App\Support\Vocab::languages()) }} @include('description._ric', ['term' => $element])</h3>
             @foreach($values as $value)
+                @if($codeKind = \App\Description\Elements::codeKind($element->notation))
+                    <p style="margin: .2rem 0">{{ \App\Description\IsoCodes::names($codeKind, $value->value) }}</p>
+                    <p style="margin: 0 0 .6rem"><small>{{ $value->value }}, {{ $value->state->label(\App\Support\Vocab::languages()) }}</small></p>
+                @else
                 @include('description._long', ['value' => $value, 'style' => 'margin: .2rem 0'])
                 <p style="margin: 0 0 .6rem"><small>{{ $value->language }}, {{ __($value->is_original ? 'original' : 'translation') }}, {{ $value->state->label(\App\Support\Vocab::languages()) }}</small></p>
+                @endif
             @endforeach
         @endforeach
     </details>

@@ -13,6 +13,11 @@
         <input id="language" name="language" required value="{{ old('language', $language) }}">
         <label for="identifier">{{ __('Identifier') }} (ISDIAH 5.1.1)</label> @include('description._ric', ['term' => 'rico:Identifier'])
         <input id="identifier" name="identifier" value="{{ old('identifier', $repository->identifier) }}">
+        <label for="repository_type">{{ __('Type') }} (ISDIAH 5.1.5)</label> @include('description._ric', ['term' => 'rico:hasOrHadCorporateBodyType'])
+        <select id="repository_type" name="repository_type" style="font: inherit; padding: .5rem">
+            <option value="">{{ __('not set') }}</option>
+            @foreach($types as $type)<option value="{{ $type->iri }}" @selected(old('repository_type', $repository->repositoryType?->iri) === $type->iri)>{{ $type->label(\App\Support\Vocab::languages()) }}</option>@endforeach
+        </select>
         <label style="font-weight: normal"><input type="hidden" name="complete_reference_codes" value="0"><input type="checkbox" name="complete_reference_codes" value="1" style="width: auto" @checked(old('complete_reference_codes', $repository->complete_reference_codes))> {{ __('Each unit it holds carries its complete reference code, so codes are not built from the units above it') }}</label>
         @include('description._fields', ['subject' => $repository, 'standard' => \App\Description\Elements::ISDIAH, 'language' => $language])
         <h2>{{ __('Control') }} (ISDIAH 5.6)</h2>

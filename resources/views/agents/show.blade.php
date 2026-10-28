@@ -51,7 +51,7 @@
     <h2>{{ __('Contact points') }}</h2>
     @forelse($agent->contactPoints as $contact)
         @unless($canUpdate)
-            <p>{{ $contact->label ?: 'Contact' }}@if($contact->is_primary) {{ __('(primary)') }}@endif: {{ collect([$contact->contact_person, $contact->street_address, $contact->city, $contact->region, $contact->postal_code, $contact->country_code, $contact->telephone, $contact->fax, $contact->email, $contact->website])->filter()->join(', ') }}</p>
+            <p>{{ $contact->label ?: 'Contact' }}@if($contact->is_primary) {{ __('(primary)') }}@endif: {{ collect([$contact->contact_person, $contact->street_address, $contact->city, $contact->region, $contact->postal_code, $contact->country_code, $contact->telephone, $contact->fax, $contact->email, $contact->website, $contact->latitude !== null ? $contact->latitude.', '.$contact->longitude : null, $contact->note])->filter()->join(', ') }}</p>
             @continue
         @endunless
         <details>

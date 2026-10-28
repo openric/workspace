@@ -18,6 +18,8 @@
                 $right->jurisdiction ? __('Jurisdiction').': '.$right->jurisdiction : null,
                 $right->starts_on || $right->ends_on ? __(':from to :to', ['from' => $right->starts_on?->toDateString() ?? '?', 'to' => $right->ends_on?->toDateString() ?? '?']) : null,
                 $right->citation,
+                $right->licence_terms ? __('Licence terms').': '.$right->licence_terms : null,
+                $right->policy_identifier ? __('Policy identifier').': '.$right->policy_identifier : null,
             ])->filter()->join('; ') }}</small>
             @if($right->holder) @include('description._ric', ['term' => 'rico:hasOrHadIntellectualPropertyRightsHolder'])@endif</p>
         @if($right->grants->isNotEmpty())

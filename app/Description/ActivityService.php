@@ -51,6 +51,16 @@ class ActivityService
         $this->descriptions->describe($activity, Elements::ACTIVITY, $values, $language, 'activity-name', $actor);
     }
 
+    /** The control area (ISDF 5.4.1, 5.4.4, 5.4.5): description identifier, status and level of detail, as an agent has them. */
+    public function updateControl(Activity $activity, ?string $descriptionIdentifier, ?string $statusIri, ?string $detailIri, ?User $actor = null): void
+    {
+        $id = fn (?string $iri) => $iri ? Concept::where('iri', $iri)->value('id') : null;
+        DB::transaction(fn () => AuditLog::actingAs($actor, fn () => $activity->update([
+            'description_identifier' => ($descriptionIdentifier ?? '') === '' ? null : $descriptionIdentifier,
+            'description_status_id' => $id($statusIri), 'description_detail_id' => $id($detailIri),
+        ])));
+    }
+
     public function updateType(Activity $activity, ?string $typeId, ?User $actor = null): void
     {
         $type = $this->type($activity->institution_id, $typeId);

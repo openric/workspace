@@ -14,6 +14,8 @@
 namespace App\Exchange\Import;
 
 use App\Description\Bcp47;
+use App\Description\Elements;
+use App\Description\IsoCodes;
 use App\Exchange\DescriptionCsv;
 
 class CsvReader
@@ -114,7 +116,7 @@ class CsvReader
             }
             $key = ($cells['legacyId'] ?? '') ?: (($cells['persistentIri'] ?? '') ?: null);
             if ($key !== null && isset($drafts[$key])) {
-                $this->values($drafts[$key], $cells, $rowLanguage);
+                $this->values($drafts[$key], $cells, $rowLanguage, $report);
 
                 continue;
             }
@@ -137,7 +139,7 @@ class CsvReader
             $draft->descriptionIdentifier = ($cells['descriptionIdentifier'] ?? '') ?: null;
             $draft->status = ($cells['descriptionStatus'] ?? '') ?: null;
             $draft->detail = ($cells['levelOfDetail'] ?? '') ?: null;
-            $this->values($draft, $cells, $rowLanguage);
+            $this->values($draft, $cells, $rowLanguage, $report);
             foreach ($this->split($cells['subjectAccessPoints'] ?? '') as $name) {
                 $draft->subjects[] = ['name' => $name, 'iri' => null];
             }
@@ -174,12 +176,25 @@ class CsvReader
         return array_values($drafts);
     }
 
-    private function values(UnitDraft $draft, array $cells, string $language): void
+    private function values(UnitDraft $draft, array $cells, string $language, Report $report): void
     {
         foreach (DescriptionCsv::COLUMNS as $column => $source) {
-            if ($source !== null && ! str_starts_with($source, ':') && isset($cells[$column])) {
-                $draft->value($language, $source, $cells[$column]);
+            if ($source === null || str_starts_with($source, ':') || ! isset($cells[$column])) {
+                continue;
             }
+            // AtoM's language and script codes, separated by |: the ISO codes the Workspace knows are kept.
+            if ($kind = Elements::codeKind($source)) {
+                $codes = $this->split($cells[$column]);
+                foreach (array_filter($codes, fn ($c) => ! IsoCodes::valid($kind, $c)) as $code) {
+                    $report->issue($draft->location, $column, $code, 'not an ISO '.($kind === 'script' ? '15924' : '639').' code; left out', 'left-out');
+                }
+                $cells[$column] = implode(' ', array_filter($codes, fn ($c) => IsoCodes::valid($kind, $c)));
+            }
+            $draft->value($language, $source, $cells[$column]);
+        }
+        // The institution identifier is computed on export (as written, else the repository's); on import it is as written.
+        if (($cells['institutionIdentifier'] ?? '') !== '') {
+            $draft->value($language, 'institution-identifier', $cells['institutionIdentifier']);
         }
     }
 
@@ -259,7 +274,6 @@ class CsvReader
         return match ($column) {
             'accessionNumber' => 'accessions are not kept yet; not read',
             'digitalObjectPath' => 'a path on the AtoM server is not fetched; export with digitalObjectURI to bring the file',
-            'language', 'script', 'scriptOfDescription' => 'language and script codes are not kept yet; the narrative languageNote is read',
             default => 'not read',
         };
     }

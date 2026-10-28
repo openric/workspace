@@ -95,6 +95,10 @@ class ExportView
     /** Every visible value of one element of the unit, by language, the original first. */
     public function values(Model $entity, string $notation): Collection
     {
+        // A name element (a parallel or other name, an alternate title) reads the entity's names of its type.
+        if ($type = Elements::nameType($notation)) {
+            return $entity->namesOfType($type)->filter(fn ($n) => $this->visible($n))->sortBy(fn ($n) => [! $n->is_original, $n->language])->values();
+        }
         $element = Vocab::element($notation);
 
         return $entity->descriptionValues->filter(fn ($v) => $v->element->iri === $element && $this->visible($v))

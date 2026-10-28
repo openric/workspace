@@ -24,7 +24,9 @@
 <label for="{{ $prefix }}-determined_on">{{ __('Status determined on') }}</label><input id="{{ $prefix }}-determined_on" name="determined_on" type="date" value="{{ old('determined_on', $right?->determined_on?->toDateString()) }}">
 <label for="{{ $prefix }}-starts_on">{{ __('In force from') }}</label><input id="{{ $prefix }}-starts_on" name="starts_on" type="date" value="{{ old('starts_on', $right?->starts_on?->toDateString()) }}">
 <label for="{{ $prefix }}-ends_on">{{ __('In force until') }}</label><input id="{{ $prefix }}-ends_on" name="ends_on" type="date" value="{{ old('ends_on', $right?->ends_on?->toDateString()) }}">
-<label for="{{ $prefix }}-citation">{{ __('Citation, licence terms or policy identifier') }}</label><input id="{{ $prefix }}-citation" name="citation" value="{{ old('citation', $right?->citation) }}">
+<label for="{{ $prefix }}-citation">{{ __('Citation') }}</label><input id="{{ $prefix }}-citation" name="citation" value="{{ old('citation', $right?->citation) }}">
+<label for="{{ $prefix }}-licence_terms">{{ __('Licence terms') }}</label><textarea id="{{ $prefix }}-licence_terms" name="licence_terms" rows="2" style="width: 100%; font: inherit">{{ old('licence_terms', $right?->licence_terms) }}</textarea>
+<label for="{{ $prefix }}-policy_identifier">{{ __('Policy identifier') }}</label><input id="{{ $prefix }}-policy_identifier" name="policy_identifier" value="{{ old('policy_identifier', $right?->policy_identifier) }}">
 <fieldset>
     <legend>{{ __('What it allows') }}</legend>
     @php($grants = $right?->grants->keyBy(fn ($g) => $g->act->notation) ?? collect())

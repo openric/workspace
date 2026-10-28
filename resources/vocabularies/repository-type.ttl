@@ -1,0 +1,94 @@
+# OpenRiC Workspace - OpenRiC Workspace Repository Types.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# The type of a repository (ISDIAH 5.1.5), AtoM's Repository Types taxonomy (taxonomy 38, as PSIS has it).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/repository-type/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Repository Types"@en ;
+    dcterms:description "The type of a repository (ISDIAH 5.1.5), as AtoM lists them."@en ;
+    dcterms:issued "2026-10-28"^^xsd:date ;
+    skos:hasTopConcept v:international, v:national, v:regional, v:provincial-state, v:community, v:religious, v:university, v:municipal, v:aboriginal, v:educational, v:medical, v:military, v:private .
+
+v:international a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "International"@en ;
+    skos:scopeNote "ISDIAH 5.1.5; exported as rico:hasOrHadCorporateBodyType."@en .
+
+v:national a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "National"@en ;
+    skos:scopeNote "ISDIAH 5.1.5; exported as rico:hasOrHadCorporateBodyType."@en .
+
+v:regional a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Regional"@en ;
+    skos:scopeNote "ISDIAH 5.1.5; exported as rico:hasOrHadCorporateBodyType."@en .
+
+v:provincial-state a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Provincial/state"@en ;
+    skos:scopeNote "ISDIAH 5.1.5; exported as rico:hasOrHadCorporateBodyType."@en .
+
+v:community a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Community"@en ;
+    skos:scopeNote "ISDIAH 5.1.5; exported as rico:hasOrHadCorporateBodyType."@en .
+
+v:religious a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Religious"@en ;
+    skos:scopeNote "ISDIAH 5.1.5; exported as rico:hasOrHadCorporateBodyType."@en .
+
+v:university a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "University"@en ;
+    skos:scopeNote "ISDIAH 5.1.5; exported as rico:hasOrHadCorporateBodyType."@en .
+
+v:municipal a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Municipal"@en ;
+    skos:scopeNote "ISDIAH 5.1.5; exported as rico:hasOrHadCorporateBodyType."@en .
+
+v:aboriginal a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Aboriginal"@en ;
+    skos:scopeNote "ISDIAH 5.1.5; exported as rico:hasOrHadCorporateBodyType."@en .
+
+v:educational a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Educational"@en ;
+    skos:scopeNote "ISDIAH 5.1.5; exported as rico:hasOrHadCorporateBodyType."@en .
+
+v:medical a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Medical"@en ;
+    skos:scopeNote "ISDIAH 5.1.5; exported as rico:hasOrHadCorporateBodyType."@en .
+
+v:military a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Military"@en ;
+    skos:scopeNote "ISDIAH 5.1.5; exported as rico:hasOrHadCorporateBodyType."@en .
+
+v:private a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Private"@en ;
+    skos:scopeNote "ISDIAH 5.1.5; exported as rico:hasOrHadCorporateBodyType."@en .

@@ -15,7 +15,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['institution_id', 'iri', 'activity_type_id'])]
+#[Fillable(['institution_id', 'iri', 'activity_type_id', 'description_identifier', 'description_status_id', 'description_detail_id'])]
 class Activity extends Model
 {
     use Audited, Describable, HasDates, HasIdentifiers, HasUuids;
@@ -32,6 +32,16 @@ class Activity extends Model
     }
 
     /** rico:hasActivityType */
+    public function descriptionStatus(): BelongsTo
+    {
+        return $this->belongsTo(Concept::class, 'description_status_id');
+    }
+
+    public function descriptionDetail(): BelongsTo
+    {
+        return $this->belongsTo(Concept::class, 'description_detail_id');
+    }
+
     public function activityType(): BelongsTo
     {
         return $this->belongsTo(Concept::class, 'activity_type_id');

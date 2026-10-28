@@ -198,6 +198,8 @@ final class RightsService
             'jurisdiction' => $jurisdiction === '' ? null : $jurisdiction,
             'determined_on' => $this->day($fields['determined_on'] ?? null),
             'citation' => trim((string) ($fields['citation'] ?? '')) ?: null,
+            'licence_terms' => trim((string) ($fields['licence_terms'] ?? '')) ?: null,
+            'policy_identifier' => trim((string) ($fields['policy_identifier'] ?? '')) ?: null,
             'starts_on' => $starts, 'ends_on' => $ends,
             'holder_id' => $holder?->id,
             'note' => $note === '' ? null : $note, 'note_language' => $note === '' ? null : $language,

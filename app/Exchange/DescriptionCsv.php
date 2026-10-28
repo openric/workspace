@@ -18,6 +18,7 @@
 
 namespace App\Exchange;
 
+use App\Description\Elements;
 use App\Models\Agent;
 use App\Models\RecordResource;
 use App\Models\Relation;
@@ -32,14 +33,14 @@ class DescriptionCsv
         'title' => 'title', 'levelOfDescription' => ':level', 'extentAndMedium' => 'extent', 'repository' => ':repository',
         'archivalHistory' => 'archival-history', 'acquisition' => 'acquisition', 'scopeAndContent' => 'scope-and-content', 'appraisal' => 'appraisal',
         'accruals' => 'accruals', 'arrangement' => 'arrangement', 'accessConditions' => 'conditions-governing-access',
-        'reproductionConditions' => 'conditions-governing-reproduction', 'language' => null, 'script' => null, 'languageNote' => 'languages-of-material',
+        'reproductionConditions' => 'conditions-governing-reproduction', 'language' => 'languages-of-material-codes', 'script' => 'scripts-of-material-codes', 'languageNote' => 'languages-of-material',
         'physicalCharacteristics' => 'physical-characteristics', 'findingAids' => 'finding-aids-note', 'locationOfOriginals' => 'location-of-originals',
         'locationOfCopies' => 'location-of-copies', 'relatedUnitsOfDescription' => 'related-units', 'publicationNote' => 'publication-note',
         'digitalObjectPath' => null, 'digitalObjectURI' => null, 'generalNote' => 'note',
         'subjectAccessPoints' => ':subjects', 'placeAccessPoints' => ':places', 'nameAccessPoints' => ':names', 'genreAccessPoints' => ':genres',
         'descriptionIdentifier' => ':description-identifier', 'institutionIdentifier' => ':institution-identifier', 'rules' => 'rules-or-conventions',
         'descriptionStatus' => ':description-status', 'levelOfDetail' => ':level-of-detail', 'revisionHistory' => 'dates-of-descriptions',
-        'languageOfDescription' => ':culture', 'scriptOfDescription' => null, 'sources' => null, 'archivistNote' => 'archivists-note',
+        'languageOfDescription' => ':culture', 'scriptOfDescription' => 'scripts-of-description', 'sources' => 'sources-of-description', 'archivistNote' => 'archivists-note',
         'publicationStatus' => ':publication-status', 'physicalObjectName' => ':physical-names', 'physicalObjectLocation' => ':physical-locations', 'physicalObjectType' => ':physical-types',
         'alternativeIdentifiers' => ':alternative-identifiers', 'alternativeIdentifierLabels' => ':alternative-identifier-labels',
         'eventDates' => ':event-dates', 'eventTypes' => ':event-types', 'eventStartDates' => ':event-start-dates', 'eventEndDates' => ':event-end-dates',
@@ -82,6 +83,8 @@ class DescriptionCsv
             $row[] = match (true) {
                 $source === null => '',
                 str_starts_with($source, ':') => (string) ($computed[substr($source, 1)] ?? ''),
+                // ISO codes are in no language: the same on every row, separated by | as AtoM writes them.
+                Elements::codeKind($source) !== null => str_replace(' ', '|', (string) $view->value($unit, $source, 'zxx')),
                 default => (string) ($translation ? $view->valueIn($unit, $source, $language) : $view->value($unit, $source, $language)),
             };
         }
@@ -103,7 +106,8 @@ class DescriptionCsv
             'level' => $unit->level->label(['en', 'und']), 'repository' => $unit->repository ? $view->label($unit->repository, $language) : '',
             'subjects' => $labels($points['subjects']), 'places' => $labels($points['places']), 'names' => $labels($points['names']), 'genres' => $labels($points['genres']),
             'description-identifier' => $unit->description_identifier,
-            'institution-identifier' => $unit->repository?->identifiers->first(fn ($i) => $i->identifierType->notation === 'isil')?->value ?? $unit->repository?->identifier,
+            // As written on the description, else the repository's ISIL or identifier.
+            'institution-identifier' => $view->value($unit, 'institution-identifier', $language) ?: $unit->repository?->identifiers->first(fn ($i) => $i->identifierType->notation === 'isil')?->value ?? $unit->repository?->identifier,
             'description-status' => $unit->descriptionStatus?->label(['en', 'und']), 'level-of-detail' => $unit->descriptionDetail?->label(['en', 'und']),
             'culture' => $language,
             'publication-status' => $title && $title->state?->iri === Vocab::valueState('published') ? 'Published' : 'Draft',

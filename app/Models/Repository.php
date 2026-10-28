@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['institution_id', 'iri', 'description_identifier', 'description_status_id', 'description_detail_id', 'complete_reference_codes'])]
+#[Fillable(['institution_id', 'iri', 'description_identifier', 'description_status_id', 'description_detail_id', 'complete_reference_codes', 'repository_type_id'])]
 class Repository extends Model
 {
     use Audited, Describable, HasDates, HasIdentifiers, HasUuids;
@@ -39,6 +39,12 @@ class Repository extends Model
     public function records(): HasMany
     {
         return $this->hasMany(RecordResource::class);
+    }
+
+    /** Its type (ISDIAH 5.1.5), from the repository-type vocabulary. */
+    public function repositoryType(): BelongsTo
+    {
+        return $this->belongsTo(Concept::class, 'repository_type_id');
     }
 
     public function descriptionStatus(): BelongsTo

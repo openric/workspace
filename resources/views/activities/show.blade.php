@@ -31,4 +31,9 @@
         'heading' => 'Units of description about it', 'types' => ['subject'], 'section' => 'su', 'add' => 'subject|target', 'addLabel' => 'Add a unit of description about it'])
     @include('description._names', ['subject' => $activity, 'kind' => 'activities', 'canUpdate' => $canUpdate])
     @include('description._identifiers', ['subject' => $activity, 'kind' => 'activities', 'canUpdate' => $canUpdate])
+
+    <h2>{{ __('Control') }}</h2>
+    <p>{{ __('Description identifier') }}: {{ $activity->description_identifier ?? __('none') }}.
+        {{ __('Status') }}: {{ $activity->descriptionStatus?->label(\App\Support\Vocab::languages()) ?? __('not set') }}.
+        {{ __('Level of detail') }}: {{ $activity->descriptionDetail?->label(\App\Support\Vocab::languages()) ?? __('not set') }}.</p>
 @endsection

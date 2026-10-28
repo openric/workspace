@@ -50,16 +50,25 @@ class DescriptionService
                     continue;
                 }
                 $element = $this->concept(Vocab::element($notation));
+                $valueLanguage = $language;
+                // A code element holds ISO codes, in no language: the same whichever language the form is in.
+                if ($kind = Elements::codeKind($notation)) {
+                    $codes = array_values(array_unique(array_filter(is_array($text) ? array_map('strval', $text) : preg_split('/[\s,;|]+/', (string) $text))));
+                    foreach ($codes as $code) {
+                        IsoCodes::valid($kind, $code) || throw new InvalidArgumentException(__(':code is not an ISO :standard code', ['code' => $code, 'standard' => $kind === 'script' ? '15924' : '639']));
+                    }
+                    [$text, $valueLanguage] = [implode(' ', $codes), 'zxx'];
+                }
                 $text = trim((string) $text);
                 $where = ['subject_table' => $subject->getTable(), 'subject_id' => $subject->getKey(), 'element_id' => $element->id];
-                $existing = DescriptionValue::where($where)->where('language', $language)->first();
+                $existing = DescriptionValue::where($where)->where('language', $valueLanguage)->first();
                 if ($text === '') {
                     $existing?->delete();
 
                     continue;
                 }
                 if ($existing === null) {
-                    DescriptionValue::create([...$where, 'institution_id' => $subject->getAttribute('institution_id'), 'language' => $language,
+                    DescriptionValue::create([...$where, 'institution_id' => $subject->getAttribute('institution_id'), 'language' => $valueLanguage,
                         'value' => $text, 'is_original' => ! DescriptionValue::where($where)->exists(), 'state_id' => $draft->id]);
                 } elseif ($existing->value !== $text) {
                     $existing->update(['value' => $text, 'state_id' => $draft->id]);
