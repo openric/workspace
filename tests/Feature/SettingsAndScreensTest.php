@@ -98,7 +98,7 @@ class SettingsAndScreensTest extends TestCase
             ->assertSee('</svg>Home<', false)->assertSee('>Settings<', false)->assertSee('aria-current="page"', false)
             // Grouped in submenus, and the group holding the page is marked.
             ->assertSeeInOrder(['<summary class="here">', '</svg>Describe</summary>', '>Repositories<', '</svg>Manage</summary>', '>Taxonomies<', '>Containers<',
-                '>Duplicate authority records<', '</svg>Import and export</summary>', '>Import<', '>Export descriptions<', '</svg>Admin</summary>', '>Users<', '>Audit log<', '>Settings<'], false);
+                '>Duplicate authority records<', '</svg>Import and export</summary>', '>Import<', '>Export descriptions<', '</svg>Reports</summary>', '>Overview<', '>Data quality<', '</svg>Admin</summary>', '>Users<', '>Audit log<', '>Settings<'], false);
         // The account's own pages are under its name, not in the main menu.
         $page = $this->actingAs($this->admin)->get('/repositories')->getContent();
         preg_match('~<details class="user-menu".*?</details>~s', $page, $menu);
@@ -132,7 +132,7 @@ class SettingsAndScreensTest extends TestCase
     {
         $page = $this->actingAs($this->admin)->get('/')->assertOk()->getContent();
         preg_match('~<nav aria-label="Main".*?</nav>~s', $page, $nav);
-        $this->assertSame(6, substr_count($nav[0], '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">'), 'Home, Describe, Manage, Import and export, Admin and the public catalogue');
+        $this->assertSame(7, substr_count($nav[0], '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">'), 'Home, Describe, Manage, Import and export, Reports, Admin and the public catalogue');
         $this->assertStringContainsString('</svg>Describe</summary>', $nav[0]);
     }
 }

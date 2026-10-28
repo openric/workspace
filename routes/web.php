@@ -39,6 +39,7 @@ use App\Http\Controllers\PublicationController;
 use App\Http\Controllers\RecordController;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\RelationController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RepositoryController;
 use App\Http\Controllers\RightsAdminController;
 use App\Http\Controllers\RightsController;
@@ -52,6 +53,7 @@ use App\Http\Controllers\WatermarkController;
 use App\Http\Middleware\ServeDiscovery;
 use App\Http\Middleware\SetLocale;
 use App\Relations\EntityKinds;
+use App\Reports\ReportService;
 use App\Support\Vocab;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Http\Request;
@@ -356,6 +358,13 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::get('/search', [SearchController::class, 'index'])->name('search');
     Route::get('/search/statistics', [SearchController::class, 'statistics'])->name('search.statistics')
         ->middleware('can:'.Vocab::permission('view-audit-log'));
+
+    // Reports and statistics (roadmap phase 8): the overview, data quality and one route for each list; the controller checks what each needs.
+    Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+    Route::get('/reports/quality', [ReportController::class, 'quality'])->name('reports.quality');
+    foreach (array_keys(ReportService::LISTS) as $list) {
+        Route::get("/reports/$list", [ReportController::class, 'show'])->defaults('list', $list)->name("reports.$list");
+    }
 
     // The rights report and rights for what is on the clipboard (roadmap phase 2); the controller checks read or update.
     Route::get('/rights', [RightsAdminController::class, 'index'])->name('rights.index');

@@ -95,6 +95,9 @@
 
         /* Tables, as openric.org: framed, rounded, small upper-case headings. */
         table { border-collapse: separate; border-spacing: 0; margin: 1.2rem 0; width: 100%; font-size: .94em; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+        /* A bar beside a count in a report; the count stays as text, so the bar is hidden from screen readers. */
+        .bar { display: inline-block; height: .6rem; min-width: 1px; background: var(--link); border-radius: 2px; vertical-align: middle; }
+        form.filters { display: flex; flex-wrap: wrap; gap: .6rem 1rem; align-items: end; }
         th, td { padding: .6rem .9rem; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); }
         tr:last-child td { border-bottom: 0; }
         th { background: var(--surface); font-weight: 600; font-size: .8em; letter-spacing: .03em; text-transform: uppercase; color: var(--muted-2); }

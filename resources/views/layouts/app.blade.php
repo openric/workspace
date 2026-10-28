@@ -43,7 +43,7 @@
         $mayImport = collect(array_keys(\App\Exchange\Import\ImportService::FORMATS))
             ->contains(fn ($format) => $user->mayAnywhere('create', \App\Exchange\Import\ImportService::permission($format)));
         // group => [route name => [label, shown, the routes it is current for, "!" before one it is not]]; a group with nothing shown is left out.
-        // As AtoM: what is described, then the working tools (its Manage), import and export (its Import), then administration (its Admin);
+        // As AtoM: what is described, then the working tools (its Manage), import and export (its Import), reports (Heratio's), then administration (its Admin);
         // the account's own pages (profile, jobs, access requests) are under its name in the header.
         $nav = array_filter(array_map(fn ($items) => array_filter($items, fn ($item) => $item[1]), [
             'Describe' => [
@@ -66,6 +66,12 @@
                 'imports.index' => [__('Import'), $mayImport, 'imports.*'],
                 'records.export-all' => [__('Export descriptions'), $user->mayAnywhere('read', 'description'), 'records.export-all'],
             ],
+            'Reports' => [
+                'reports.index' => [__('Overview'), $user->mayAnywhere('read', 'description'), 'reports.index'],
+                'reports.quality' => [__('Data quality'), $user->mayAnywhere('read', 'description'), 'reports.quality'],
+                ...collect(\App\Http\Controllers\ReportController::TITLES)->mapWithKeys(fn ($title, $list) => ['reports.'.$list => [__($title),
+                    \App\Reports\ReportService::mayRead($user, $list), 'reports.'.$list]])->all(),
+            ],
             'Admin' => [
                 'accounts.index' => [__('Users'), $may('manage-accounts'), 'accounts.*'],
                 'email.index' => [__('Email'), $may('manage-accounts'), 'email.*'],
@@ -81,6 +87,7 @@
             'Describe' => '<path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5"/><path d="M9 13h7M9 17h5"/>',
             'Manage' => '<path d="M3 4h18v5H3z"/><path d="M5 9v11h14V9"/><path d="M10 13h4"/>',
             'Import and export' => '<path d="M7 4v13M3 13l4 4 4-4"/><path d="M17 20V7M13 11l4-4 4 4"/>',
+            'Reports' => '<path d="M4 20V10M10 20V4M16 20v-7M2 20h20"/>',
             'Admin' => '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/>',
             'Public catalogue' => '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3.5 3.5 3.5 14.5 0 18M12 3c-3.5 3.5-3.5 14.5 0 18"/>',
         ];
