@@ -15,6 +15,7 @@ use App\Discovery\Links;
 use App\Models\Accession;
 use App\Models\Activity;
 use App\Models\Agent;
+use App\Models\Agreement;
 use App\Models\Concept;
 use App\Models\Instantiation;
 use App\Models\Place;
@@ -36,6 +37,7 @@ class IriController extends Controller
         Instantiation::IRI_SEGMENT => [Instantiation::class, 'instantiations.show', null],
         // Staff only: the page asks for the accession permissions.
         Accession::IRI_SEGMENT => [Accession::class, 'accessions.show', null],
+        Agreement::IRI_SEGMENT => [Agreement::class, 'agreements.show', null],
     ];
 
     public function resolve(Request $request, string $segment, string $id): RedirectResponse

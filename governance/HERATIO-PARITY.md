@@ -45,7 +45,7 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-display` | 10111 | V0.1 candidate | Partial | 20 | `ahgDisplayPlugin` | Public catalogue display; display profiles later |
 | `ahg-doi` | 0 | later: V1.0+ | Planned | 20 | none |  |
 | `ahg-doi-manage` | 4884 | later: V1.0+ | Planned | 20 | `ahgDoiPlugin` |  |
-| `ahg-donor-manage` | 3241 | later: V1.0+ | Partial | 9 | `ahgDonorAgreementPlugin`, `ahgDonorManagePlugin` | Donors as authority records with contact points, and the donor list, from v0.0.77 (9a); donor agreements in 9b |
+| `ahg-donor-manage` | 3241 | later: V1.0+ | Partial | 9 | `ahgDonorAgreementPlugin`, `ahgDonorManagePlugin` | Donors as authority records with contact points, and the donor list, from v0.0.77 (9a); donor agreements with their rights, restrictions, reminders and documents from v0.0.78 (9b) |
 | `ahg-dropdown-manage` | 1744 | V0.1 candidate | Covered |  | none | Every list is a SKOS vocabulary, editable |
 | `ahg-exhibition` | 26806 | out: GLAM sector | Planned | 21 | `ahgExhibitionPlugin` |  |
 | `ahg-export` | 1256 | V0.1 candidate | Covered |  | `ahgExportPlugin` | EAD, Dublin Core, MODS, CSV and RiC-O export |
@@ -389,6 +389,49 @@ Heratio's accession edit form and CAAIS partial (`edit.blade.php`, `partials/_ca
 | Donor name (an actor) | An authority record (person, family or corporate body) | Modelled |
 | Contact information (contact person, street address, city, region, country, postal code, telephone, fax, email, website, latitude, longitude, note, contact type) | Contact points of the authority record | Modelled |
 | Donor browse | Donors: the authority records that took part in an accession as its donor, with how many | Same, from v0.0.77 |
-| Donor agreements, reminders, documents, rights and restrictions | none | Phase 9b |
+| Donor agreements, reminders, documents, rights and restrictions | Donor agreements (below) | Same, from v0.0.78 |
 
 : Donor, field by field
+
+### Donor agreement (`ahg-donor-manage`, AtoM's `ahgDonorAgreementPlugin`)
+
+Heratio's `donor_agreement` and its child tables, its agreement dashboard, add, edit, view and reminders pages, and its `ahg:donor-reminders` command. A donor agreement is a kind of its own, exported as a rico:Record (ADR 0010).
+
+| Heratio field | Workspace | Status |
+|---|---|---|
+| `agreement_number` | Agreement number, unique in the institution | Same, from v0.0.78 |
+| `agreement_type_id` (`agreement_type`: name, slug, description, prefix) | Agreement type, a concept (the 14 types, with Heratio's prefix in the scope note), exported as the record's documentary form type | Same, from v0.0.78 |
+| `agreement_type.color`, `is_active`, `sort_order` | none: the look is not carried; a concept is deprecated instead of made inactive | Modelled |
+| `title`, `description` (and `donor_agreement_i18n` `title`, `description`) | Title, Description, in each language | Same, from v0.0.78 |
+| `donor_agreement_i18n` `restrictions`, `conditions`, `attribution_text`, `internal_notes` | Restrictions, Conditions, Attribution text, Internal notes, in each language | Same, from v0.0.78 |
+| `status` (draft, pending review, pending signature, active, expired, terminated, superseded) | Status, a concept | Same, from v0.0.78 |
+| `donor_id`, `actor_id`, `donor_name` | Donor: an authority record that created the agreement in the donor role | Modelled |
+| `donor_contact_info`, `institution_contact_info`, `legal_representative_contact` | Donor contact information, Institution contact information, Legal representative contact | Same, from v0.0.78 |
+| `repository_id`, `institution_name` | Repository | Modelled: the repository's own name |
+| `accession_id`, `donor_agreement_accession` (`is_primary`, `notes`) | Accessions it documents: documentation relations (rico:documents) | Modelled: no primary flag; a note on the relation |
+| `information_object_id`, `donor_agreement_record` (`relationship_type`: covers, partially covers, references) | Linked records: relations of the types covers, covers in part and refers to | Same, from v0.0.78 |
+| `legal_representative`, `legal_representative_title`, `repository_representative`, `repository_representative_title` | Parties | Same, from v0.0.78 |
+| `agreement_date`, `effective_date`, `expiry_date`, `review_date`, `termination_date` | Dates | Same, from v0.0.78 |
+| `termination_reason` | Termination reason | Same, from v0.0.78 |
+| `has_financial_terms`, `purchase_amount`, `currency`, `payment_terms` | Financial terms, Payment terms | Same, from v0.0.78 |
+| `scope_description`, `extent_statement` | Scope of the material, Extent statement | Same, from v0.0.78 |
+| `transfer_method`, `transfer_date`, `received_by` | Transfer | Same, from v0.0.78 |
+| `general_terms`, `special_conditions` | General terms, Special conditions | Same, from v0.0.78 |
+| `donor_signature_name`, `donor_signature_date`, `repository_signature_name`, `repository_signature_date`, `witness_name`, `witness_date` | Signatures | Same, from v0.0.78 |
+| `is_template` | A template for new agreements | Same, from v0.0.78 |
+| `parent_agreement_id`, `supersedes_agreement_id` | Part of, Supersedes | Same, from v0.0.78 |
+| `logo_path`, `logo_filename` | none: the Workspace prints no agreement | Missing |
+| `created_by`, `updated_by`, `created_at`, `updated_at`, `donor_agreement_history` | History, from the audit log | Modelled |
+| `donor_agreement_right` (right type, permission, conditions, digital, physical, metadata, start and end, donor approval, fee, fee structure, notes) | Rights | Same, from v0.0.78 |
+| `donor_agreement_restriction` (type, all or specific materials, box list, start and end, auto release, release date and trigger, override and authority, reason, legal basis, POPIA category, data subject consent, security clearance level, notes, active) | Restrictions | Same, from v0.0.78 |
+| `donor_agreement_reminder` (type, subject, description, date, advance days, recurring and pattern, recurrence end, priority, status, snooze, completion, action required) | Reminders, completed, snoozed, cancelled or made active again | Same, from v0.0.78 |
+| `donor_agreement_reminder.notification_recipients` (email addresses) | Accounts of the institution that may read agreements; with none, the account that made it | Modelled: never to an outside address or the donor |
+| `notify_email`, `is_sent`, `sent_at`, `donor_agreement_reminder_log` | Send by email; sent once for each date; the sent-mail log | Modelled |
+| `notify_system`, `action_url` | none: the Workspace has no notification bell; the mail links the agreement | Missing |
+| `donor_agreement_document` (type, file, title, description, date, version, signed, signature date, signed by, confidential, access restriction, uploaded by) | Documents, kept by SHA-256 and scanned through the file store | Same, from v0.0.78 |
+| `donor_agreement_document.checksum_md5` | none: SHA-256 only | Modelled |
+| Agreement dashboard filters (search, status, type, expiring within 7, 30 or 90 days) | The same filters | Same, from v0.0.78 |
+| Agreement reminders page | Agreement reminders, active or snoozed first, with their actions | Same, from v0.0.78 |
+| Autocomplete of accessions and records on the form | The relation form's search | Modelled |
+
+: Donor agreement, field by field

@@ -68,7 +68,7 @@ class ReportTest extends TestCase
         $this->actingAs($this->editor)->get('/reports/authorities')->assertOk()->assertSee('Botha, Maria');
         $this->actingAs($this->editor)->get('/reports/repositories')->assertOk()->assertSeeInOrder(['Riverside Archives', 'RA', '2'], false);
         $this->actingAs($this->editor)->get('/reports/updates')->assertOk()->assertSee('Minutes of 1952')->assertSee('Botha, Maria');
-        $this->actingAs($this->editor)->get('/reports/taxonomies')->assertOk()->assertSee('OpenRiC Workspace Levels of Description');
+        $this->actingAs($this->editor)->get('/reports/taxonomies')->assertOk()->assertSee('OpenRiC Workspace Accession Event Types');
 
         // User activity reads the audit log, so it needs the audit log's permission; the menu shows the lists the account may read.
         $this->actingAs($this->editor)->get('/reports/activity')->assertForbidden();

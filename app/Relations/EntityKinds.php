@@ -14,6 +14,7 @@ namespace App\Relations;
 use App\Models\Accession;
 use App\Models\Activity;
 use App\Models\Agent;
+use App\Models\Agreement;
 use App\Models\Concept;
 use App\Models\Container;
 use App\Models\Instantiation;
@@ -52,6 +53,9 @@ final class EntityKinds
         // Staff only: no role reads accessions unless given the accession permission, so the public never sees them.
         'accession' => ['class' => Accession::class, 'segment' => 'accessions', 'permission' => 'accession', 'readable' => true,
             'route' => 'accessions.show', 'index' => 'accessions.index', 'label' => 'accession-title', 'with' => ['names.nameType', 'descriptionValues.element', 'identifiers.identifierType'], 'noun' => 'accession', 'ric_class' => 'rico:Activity', 'ric_name' => 'rico:Name'],
+        // Staff only, as accessions: under the agreement permissions.
+        'agreement' => ['class' => Agreement::class, 'segment' => 'agreements', 'permission' => 'agreement', 'readable' => true,
+            'route' => 'agreements.show', 'index' => 'agreements.index', 'label' => 'agreement-title', 'with' => ['names.nameType', 'descriptionValues.element', 'identifiers.identifierType'], 'noun' => 'donor agreement', 'ric_class' => 'rico:Record', 'ric_name' => 'rico:Title'],
         'concept' => ['class' => Concept::class, 'segment' => 'concepts', 'permission' => 'vocabulary', 'readable' => false,
             'route' => 'concepts.show', 'index' => null, 'label' => null, 'with' => ['labels', 'vocabulary'], 'noun' => 'concept', 'ric_class' => null, 'ric_name' => null],
     ];
@@ -167,7 +171,7 @@ final class EntityKinds
         if ($entity instanceof Concept) {
             return $entity->anyLabel([...$languages, 'en', 'und']);
         }
-        if ($entity instanceof Accession) {
+        if ($entity instanceof Accession || $entity instanceof Agreement) {
             return $entity->heading($languages);
         }
 

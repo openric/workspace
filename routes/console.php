@@ -1,6 +1,7 @@
 <?php
 
 use App\AccessRequests\AccessRequestService;
+use App\Description\AgreementService;
 use App\Reports\ReportDelivery;
 use App\Reports\UsageService;
 use Carbon\CarbonImmutable;
@@ -42,3 +43,11 @@ Artisan::command('workspace:reports:run-scheduled', function (ReportDelivery $de
     $this->line("{$result['made']} scheduled reports made, {$result['failed']} failed.");
 })->purpose('Make and send the reports whose schedule is due');
 Schedule::command('workspace:reports:run-scheduled')->everyFiveMinutes()->withoutOverlapping();
+
+// Donor agreement reminders (roadmap phase 9b): each morning, the reminders whose warning period has begun are sent to
+// their accounts, as Heratio's ahg:donor-reminders; a reminder no account could be sent stays due for the next run.
+Artisan::command('workspace:agreements:remind {--day= : send as on this day (YYYY-MM-DD)}', function (AgreementService $agreements) {
+    $result = $agreements->sendDue($this->option('day') ? CarbonImmutable::parse($this->option('day')) : null);
+    $this->line("{$result['sent']} reminders sent, {$result['unsent']} not sent.");
+})->purpose('Send the donor agreement reminders that are due');
+Schedule::command('workspace:agreements:remind')->dailyAt('07:00')->withoutOverlapping();

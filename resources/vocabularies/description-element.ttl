@@ -13,7 +13,7 @@ v: a skos:ConceptScheme ;
     dcterms:title "OpenRiC Workspace Description Elements"@en ;
     dcterms:description "Elements of archival description, grouped under the ICA standard they come from. Only the elements, not the groups, are values of a description."@en ;
     dcterms:issued "2026-10-19"^^xsd:date ;
-    skos:hasTopConcept v:isdiah, v:isad-g, v:place, v:isaar-cpf, v:activity, v:instantiation, v:container, v:other-standards, v:accession .
+    skos:hasTopConcept v:isdiah, v:isad-g, v:place, v:isaar-cpf, v:activity, v:instantiation, v:container, v:other-standards, v:accession, v:agreement .
 
 v:authorised-name a skos:Concept ;
     skos:inScheme v: ;
@@ -1041,3 +1041,115 @@ v:accession-rules-or-conventions a skos:Concept ;
     skos:prefLabel "Rules or conventions"@en ;
     skos:scopeNote "CAAIS 7.1; exported as rico:generalDescription."@en ;
     skos:definition "The rules or conventions the accession record follows, such as CAAIS 1.0."@en .
+
+v:agreement a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Donor agreement"@en ;
+    skos:scopeNote "The elements of a donor agreement (exported as a rico:Record), as Heratio keeps them (donor_agreement and donor_agreement_i18n)."@en ;
+    skos:definition "Elements of a donor agreement."@en .
+
+v:agreement-title a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:agreement ;
+    skos:prefLabel "Title"@en ;
+    skos:scopeNote "Heratio's donor_agreement; kept as a rico:Title entity of name type authorised, one in each language (rico:hasOrHadTitle)."@en ;
+    skos:definition "The title of the agreement, such as Deed of gift: papers of the Botha family."@en .
+
+v:agreement-description a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:agreement ;
+    skos:prefLabel "Description"@en ;
+    skos:scopeNote "Heratio's donor_agreement; exported as rico:generalDescription."@en ;
+    skos:definition "What the agreement is."@en .
+
+v:agreement-scope a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:agreement ;
+    skos:prefLabel "Scope of the material"@en ;
+    skos:scopeNote "Heratio's donor_agreement; exported as rico:scopeAndContent."@en ;
+    skos:definition "The material the agreement covers."@en .
+
+v:agreement-extent a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:agreement ;
+    skos:prefLabel "Extent statement"@en ;
+    skos:scopeNote "Heratio's donor_agreement; exported as rico:generalDescription."@en ;
+    skos:definition "How much material the agreement covers."@en .
+
+v:agreement-general-terms a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:agreement ;
+    skos:prefLabel "General terms"@en ;
+    skos:scopeNote "Heratio's donor_agreement; exported as rico:generalDescription."@en ;
+    skos:definition "The terms of the agreement."@en .
+
+v:agreement-special-conditions a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:agreement ;
+    skos:prefLabel "Special conditions"@en ;
+    skos:scopeNote "Heratio's donor_agreement; exported as rico:generalDescription."@en ;
+    skos:definition "Conditions particular to this agreement."@en .
+
+v:agreement-restrictions a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:agreement ;
+    skos:prefLabel "Restrictions"@en ;
+    skos:scopeNote "Heratio's donor_agreement_i18n; exported as rico:generalDescription."@en ;
+    skos:definition "The restrictions in words, as the agreement states them."@en .
+
+v:agreement-conditions a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:agreement ;
+    skos:prefLabel "Conditions"@en ;
+    skos:scopeNote "Heratio's donor_agreement_i18n; exported as rico:generalDescription."@en ;
+    skos:definition "The conditions in words, as the agreement states them."@en .
+
+v:agreement-attribution a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:agreement ;
+    skos:prefLabel "Attribution text"@en ;
+    skos:scopeNote "Heratio's donor_agreement_i18n; exported as rico:generalDescription."@en ;
+    skos:definition "The credit line the donor asks for, such as Gift of the Botha family."@en .
+
+v:agreement-payment-terms a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:agreement ;
+    skos:prefLabel "Payment terms"@en ;
+    skos:scopeNote "Heratio's donor_agreement; exported as rico:generalDescription."@en ;
+    skos:definition "When and how a purchase is paid."@en .
+
+v:agreement-termination-reason a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:agreement ;
+    skos:prefLabel "Termination reason"@en ;
+    skos:scopeNote "Heratio's donor_agreement; exported as rico:generalDescription."@en ;
+    skos:definition "Why the agreement was terminated."@en .
+
+v:agreement-donor-contact a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:agreement ;
+    skos:prefLabel "Donor contact information"@en ;
+    skos:scopeNote "Heratio's donor_agreement; exported as rico:generalDescription."@en ;
+    skos:definition "The donor's contact details as the agreement gives them; the donor's own contact points are on the authority record."@en .
+
+v:agreement-institution-contact a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:agreement ;
+    skos:prefLabel "Institution contact information"@en ;
+    skos:scopeNote "Heratio's donor_agreement; exported as rico:generalDescription."@en ;
+    skos:definition "The institution's contact details as the agreement gives them."@en .
+
+v:agreement-legal-representative-contact a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:agreement ;
+    skos:prefLabel "Legal representative contact"@en ;
+    skos:scopeNote "Heratio's donor_agreement; exported as rico:generalDescription."@en ;
+    skos:definition "The contact details of the donor's legal representative."@en .
+
+v:agreement-internal-notes a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:agreement ;
+    skos:prefLabel "Internal notes"@en ;
+    skos:scopeNote "Heratio's donor_agreement; exported as rico:generalDescription, never outside the institution."@en ;
+    skos:definition "Notes for staff."@en .

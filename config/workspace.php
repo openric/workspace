@@ -15,7 +15,7 @@ return [
     'audit_signing_key' => env('WORKSPACE_AUDIT_SIGNING_KEY', storage_path('keys/audit-signing.sk')),
 
     // The Workspace's own vocabularies, bundled with the code (resources/vocabularies).
-    'bundled_vocabularies' => ['account-role.ttl', 'permission.ttl', 'audit-action.ttl', 'description-element.ttl', 'language-value-state.ttl', 'description-status.ttl', 'description-detail.ttl', 'level-of-description.ttl', 'record-kind.ttl', 'date-property.ttl', 'date-qualifier.ttl', 'name-type.ttl', 'identifier-type.ttl', 'relation-type.ttl', 'relation-state.ttl', 'relation-certainty.ttl', 'assertion-origin.ttl', 'assertion-status.ttl', 'concept-scheme-kind.ttl', 'concept-match-type.ttl', 'agent-type.ttl', 'carrier-type.ttl', 'file-use.ttl', 'file-availability.ttl', 'container-type.ttl', 'storage-place-type.ttl', 'container-status.ttl', 'capacity-unit.ttl', 'storage-security-level.ttl', 'api-scope.ttl', 'proposal-kind.ttl', 'rights-basis.ttl', 'rights-statement.ttl', 'licence.ttl', 'copyright-status.ttl', 'rights-act.ttl', 'rights-restriction.ttl', 'tk-label.ttl', 'label-applier.ttl', 'job-type.ttl', 'job-status.ttl', 'watermark-type.ttl', 'watermark-position.ttl', 'email-bounce-type.ttl', 'email-status.ttl', 'access-request-status.ttl', 'access-request-urgency.ttl', 'usage-event.ttl', 'web-crawler.ttl', 'report-status.ttl', 'report-section-type.ttl', 'report-frequency.ttl', 'repository-type.ttl', 'access-request-type.ttl', 'access-type.ttl', 'access-request-scope.ttl', 'icip-sensitivity.ttl', 'community-access-condition.ttl', 'display-standard.ttl', 'display-element.ttl', 'rad-material-designation.ttl', 'dcmi-type.ttl', 'mods-resource-type.ttl', 'acquisition-type.ttl', 'accession-resource-type.ttl', 'processing-status.ttl', 'processing-priority.ttl', 'accession-event-type.ttl', 'deaccession-scope.ttl', 'caais-extent-type.ttl', 'caais-extent-unit.ttl', 'caais-content-type.ttl', 'caais-carrier-type.ttl', 'caais-preservation-type.ttl', 'caais-source-confidentiality.ttl'],
+    'bundled_vocabularies' => ['account-role.ttl', 'permission.ttl', 'audit-action.ttl', 'description-element.ttl', 'language-value-state.ttl', 'description-status.ttl', 'description-detail.ttl', 'level-of-description.ttl', 'record-kind.ttl', 'date-property.ttl', 'date-qualifier.ttl', 'name-type.ttl', 'identifier-type.ttl', 'relation-type.ttl', 'relation-state.ttl', 'relation-certainty.ttl', 'assertion-origin.ttl', 'assertion-status.ttl', 'concept-scheme-kind.ttl', 'concept-match-type.ttl', 'agent-type.ttl', 'carrier-type.ttl', 'file-use.ttl', 'file-availability.ttl', 'container-type.ttl', 'storage-place-type.ttl', 'container-status.ttl', 'capacity-unit.ttl', 'storage-security-level.ttl', 'api-scope.ttl', 'proposal-kind.ttl', 'rights-basis.ttl', 'rights-statement.ttl', 'licence.ttl', 'copyright-status.ttl', 'rights-act.ttl', 'rights-restriction.ttl', 'tk-label.ttl', 'label-applier.ttl', 'job-type.ttl', 'job-status.ttl', 'watermark-type.ttl', 'watermark-position.ttl', 'email-bounce-type.ttl', 'email-status.ttl', 'access-request-status.ttl', 'access-request-urgency.ttl', 'usage-event.ttl', 'web-crawler.ttl', 'report-status.ttl', 'report-section-type.ttl', 'report-frequency.ttl', 'repository-type.ttl', 'access-request-type.ttl', 'access-type.ttl', 'access-request-scope.ttl', 'icip-sensitivity.ttl', 'community-access-condition.ttl', 'display-standard.ttl', 'display-element.ttl', 'rad-material-designation.ttl', 'dcmi-type.ttl', 'mods-resource-type.ttl', 'acquisition-type.ttl', 'accession-resource-type.ttl', 'processing-status.ttl', 'processing-priority.ttl', 'accession-event-type.ttl', 'deaccession-scope.ttl', 'caais-extent-type.ttl', 'caais-extent-unit.ttl', 'caais-content-type.ttl', 'caais-carrier-type.ttl', 'caais-preservation-type.ttl', 'caais-source-confidentiality.ttl', 'agreement-type.ttl', 'agreement-status.ttl', 'agreement-right.ttl', 'agreement-permission.ttl', 'agreement-restriction-type.ttl', 'popia-category.ttl', 'agreement-document-type.ttl', 'reminder-type.ttl', 'reminder-recurrence.ttl', 'reminder-priority.ttl', 'reminder-status.ttl'],
 
     // API keys (ADR 0007, Heratio's ApiKeyService): what an account must hold, anywhere, for a key it
     // owns to carry each scope (api-scope vocabulary), as [action, kind] pairs of which any one will do.
@@ -40,6 +40,7 @@ return [
         'authority' => ['read', 'create', 'update', 'delete', 'publish'],
         'storage' => ['read', 'create', 'update', 'delete'],
         'accession' => ['read', 'create', 'update', 'delete'],
+        'agreement' => ['read', 'create', 'update', 'delete'],
     ],
 
     // Which date properties (date-property vocabulary) each kind of entity (App\Relations\EntityKinds,
@@ -117,6 +118,7 @@ return [
         'container-name' => 'authorised',
         'container-other-name' => 'other',
         'accession-title' => 'authorised',
+        'agreement-title' => 'authorised',
     ],
 
     // The roles a new institution starts with, by account-role template, with
@@ -134,6 +136,7 @@ return [
             'authority' => ['read', 'create', 'update', 'publish'],
             'storage' => ['read', 'create', 'update'],
             'accession' => ['read', 'create', 'update', 'delete'],
+            'agreement' => ['read', 'create', 'update', 'delete'],
         ]],
         'contributor' => ['parent' => 'signed-in', 'grants' => [
             'repository' => ['read'],

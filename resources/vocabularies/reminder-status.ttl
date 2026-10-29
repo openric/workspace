@@ -1,0 +1,44 @@
+# OpenRiC Workspace - OpenRiC Workspace Reminder Statuses.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Where a reminder stands (Heratio's donor_agreement_reminder.status).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/reminder-status/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Reminder Statuses"@en ;
+    dcterms:description "Where a reminder stands (Heratio's donor_agreement_reminder.status)."@en ;
+    dcterms:issued "2026-10-29"^^xsd:date ;
+    skos:hasTopConcept v:active, v:snoozed, v:completed, v:cancelled .
+
+v:active a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Active"@en, "Aktief"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the donor agreement, as Heratio keeps it."@en ;
+    skos:definition "It will be sent when due."@en .
+
+v:snoozed a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Snoozed"@en, "Uitgestel"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the donor agreement, as Heratio keeps it."@en ;
+    skos:definition "Put off until a later date."@en .
+
+v:completed a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Completed"@en, "Voltooi"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the donor agreement, as Heratio keeps it."@en ;
+    skos:definition "Dealt with."@en .
+
+v:cancelled a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Cancelled"@en, "Gekanselleer"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the donor agreement, as Heratio keeps it."@en ;
+    skos:definition "No longer needed."@en .

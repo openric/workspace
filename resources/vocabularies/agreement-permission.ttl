@@ -1,0 +1,44 @@
+# OpenRiC Workspace - OpenRiC Workspace Agreement Permissions.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Whether a donor agreement allows a right (Heratio's donor_agreement_right.permission).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/agreement-permission/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Agreement Permissions"@en ;
+    dcterms:description "Whether a donor agreement allows a right (Heratio's donor_agreement_right.permission)."@en ;
+    dcterms:issued "2026-10-29"^^xsd:date ;
+    skos:hasTopConcept v:granted, v:restricted, v:prohibited, v:conditional .
+
+v:granted a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Granted"@en, "Toegestaan"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the donor agreement, as Heratio keeps it."@en ;
+    skos:definition "The institution may do it."@en .
+
+v:restricted a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Restricted"@en, "Beperk"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the donor agreement, as Heratio keeps it."@en ;
+    skos:definition "The institution may do it within limits."@en .
+
+v:prohibited a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Prohibited"@en, "Verbode"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the donor agreement, as Heratio keeps it."@en ;
+    skos:definition "The institution may not do it."@en .
+
+v:conditional a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Conditional"@en, "Voorwaardelik"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the donor agreement, as Heratio keeps it."@en ;
+    skos:definition "The institution may do it on conditions."@en .

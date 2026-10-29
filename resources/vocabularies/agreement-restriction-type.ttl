@@ -1,0 +1,121 @@
+# OpenRiC Workspace - OpenRiC Workspace Agreement Restriction Types.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Kinds of restriction a donor agreement places on the material (Heratio's donor_agreement_restriction.restriction_type).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/agreement-restriction-type/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Agreement Restriction Types"@en ;
+    dcterms:description "Kinds of restriction a donor agreement places on the material (Heratio's donor_agreement_restriction.restriction_type)."@en ;
+    dcterms:issued "2026-10-29"^^xsd:date ;
+    skos:hasTopConcept v:closure, v:partial-closure, v:redaction, v:permission-only, v:researcher-only, v:on-site-only, v:no-copying, v:no-publication, v:anonymisation, v:time-embargo, v:review-required, v:security-clearance, v:popia-restricted, v:legal-hold, v:cultural-protocol .
+
+v:closure a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Closure"@en, "Sluiting"@af ;
+    skos:scopeNote "Not a RiC-O term: a restriction of the donor agreement, as Heratio keeps it."@en ;
+    skos:definition "The material is closed."@en .
+
+v:partial-closure a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Partial closure"@en, "Gedeeltelike sluiting"@af ;
+    skos:scopeNote "Not a RiC-O term: a restriction of the donor agreement, as Heratio keeps it."@en ;
+    skos:definition "Some of the material is closed."@en .
+
+v:redaction a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Redaction"@en, "Uitwissing"@af ;
+    skos:scopeNote "Not a RiC-O term: a restriction of the donor agreement, as Heratio keeps it."@en ;
+    skos:definition "Parts are to be redacted before access."@en .
+
+v:permission-only a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Permission only"@en, "Slegs met toestemming"@af ;
+    skos:scopeNote "Not a RiC-O term: a restriction of the donor agreement, as Heratio keeps it."@en ;
+    skos:definition "Access only with the donor's permission."@en .
+
+v:researcher-only a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Researcher only"@en, "Slegs navorsers"@af ;
+    skos:scopeNote "Not a RiC-O term: a restriction of the donor agreement, as Heratio keeps it."@en ;
+    skos:definition "Access only for registered researchers."@en .
+
+v:on-site-only a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "On-site only"@en, "Slegs ter plaatse"@af ;
+    skos:scopeNote "Not a RiC-O term: a restriction of the donor agreement, as Heratio keeps it."@en ;
+    skos:definition "Access only in the reading room."@en .
+
+v:no-copying a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "No copying"@en, "Geen kopiëring"@af ;
+    skos:scopeNote "Not a RiC-O term: a restriction of the donor agreement, as Heratio keeps it."@en ;
+    skos:definition "No copies may be made."@en .
+
+v:no-publication a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "No publication"@en, "Geen publikasie"@af ;
+    skos:scopeNote "Not a RiC-O term: a restriction of the donor agreement, as Heratio keeps it."@en ;
+    skos:definition "Nothing may be published from it."@en .
+
+v:anonymisation a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Anonymisation"@en, "Anonimisering"@af ;
+    skos:scopeNote "Not a RiC-O term: a restriction of the donor agreement, as Heratio keeps it."@en ;
+    skos:definition "Names are to be removed before access."@en .
+
+v:time-embargo a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Time embargo"@en, "Tydsembargo"@af ;
+    skos:scopeNote "Not a RiC-O term: a restriction of the donor agreement, as Heratio keeps it."@en ;
+    skos:definition "Closed until a date."@en .
+
+v:review-required a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Review required"@en, "Hersiening vereis"@af ;
+    skos:scopeNote "Not a RiC-O term: a restriction of the donor agreement, as Heratio keeps it."@en ;
+    skos:definition "Each request is reviewed first."@en .
+
+v:security-clearance a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Security clearance"@en, "Sekuriteitsklaring"@af ;
+    skos:scopeNote "Not a RiC-O term: a restriction of the donor agreement, as Heratio keeps it."@en ;
+    skos:definition "Access only with a security clearance."@en .
+
+v:popia-restricted a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "POPIA restricted"@en, "POPIA-beperk"@af ;
+    skos:scopeNote "Not a RiC-O term: a restriction of the donor agreement, as Heratio keeps it."@en ;
+    skos:definition "Restricted under the Protection of Personal Information Act."@en .
+
+v:legal-hold a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Legal hold"@en, "Regsbewaring"@af ;
+    skos:scopeNote "Not a RiC-O term: a restriction of the donor agreement, as Heratio keeps it."@en ;
+    skos:definition "Kept unchanged for a legal matter."@en .
+
+v:cultural-protocol a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Cultural protocol"@en, "Kulturele protokol"@af ;
+    skos:scopeNote "Not a RiC-O term: a restriction of the donor agreement, as Heratio keeps it."@en ;
+    skos:definition "Access follows a community's protocol."@en .

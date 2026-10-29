@@ -1,0 +1,86 @@
+# OpenRiC Workspace - OpenRiC Workspace Reminder Types.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What a reminder of a donor agreement is about (Heratio's donor_agreement_reminder.reminder_type).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/reminder-type/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Reminder Types"@en ;
+    dcterms:description "What a reminder of a donor agreement is about (Heratio's donor_agreement_reminder.reminder_type)."@en ;
+    dcterms:issued "2026-10-29"^^xsd:date ;
+    skos:hasTopConcept v:expiry-warning, v:review-due, v:renewal-required, v:restriction-ending, v:payment-due, v:donor-contact, v:anniversary, v:audit, v:preservation-check, v:custom .
+
+v:expiry-warning a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Expiry warning"@en, "Vervalwaarskuwing"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the donor agreement, as Heratio keeps it."@en ;
+    skos:definition "The agreement is about to expire."@en .
+
+v:review-due a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Review due"@en, "Hersiening verskuldig"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the donor agreement, as Heratio keeps it."@en ;
+    skos:definition "The agreement is due for review."@en .
+
+v:renewal-required a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Renewal required"@en, "Hernuwing vereis"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the donor agreement, as Heratio keeps it."@en ;
+    skos:definition "The agreement must be renewed."@en .
+
+v:restriction-ending a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Restriction ending"@en, "Beperking eindig"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the donor agreement, as Heratio keeps it."@en ;
+    skos:definition "A restriction is about to end."@en .
+
+v:payment-due a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Payment due"@en, "Betaling verskuldig"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the donor agreement, as Heratio keeps it."@en ;
+    skos:definition "A payment is due."@en .
+
+v:donor-contact a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Donor contact"@en, "Skenkerkontak"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the donor agreement, as Heratio keeps it."@en ;
+    skos:definition "The donor is to be contacted."@en .
+
+v:anniversary a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Anniversary"@en, "Herdenking"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the donor agreement, as Heratio keeps it."@en ;
+    skos:definition "An anniversary of the agreement."@en .
+
+v:audit a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Audit"@en, "Oudit"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the donor agreement, as Heratio keeps it."@en ;
+    skos:definition "The agreement is to be audited."@en .
+
+v:preservation-check a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Preservation check"@en, "Bewaringskontrole"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the donor agreement, as Heratio keeps it."@en ;
+    skos:definition "The material's condition is to be checked."@en .
+
+v:custom a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Custom"@en, "Eie"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the donor agreement, as Heratio keeps it."@en ;
+    skos:definition "Another reminder."@en .

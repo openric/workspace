@@ -1,0 +1,114 @@
+# OpenRiC Workspace - OpenRiC Workspace Agreement Types.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Kinds of donor agreement (Heratio's agreement_type, from AtoM's ahgDonorAgreementPlugin).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/agreement-type/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Agreement Types"@en ;
+    dcterms:description "Kinds of donor agreement (Heratio's agreement_type, from AtoM's ahgDonorAgreementPlugin)."@en ;
+    dcterms:issued "2026-10-29"^^xsd:date ;
+    skos:hasTopConcept v:deed-of-gift, v:deed-of-donation, v:deed-of-deposit, v:loan-agreement, v:purchase-agreement, v:bequest, v:transfer-agreement, v:custody-agreement, v:licence-agreement, v:reproduction-agreement, v:access-agreement, v:mou, v:sla, v:collaboration-agreement .
+
+v:deed-of-gift a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Deed of Gift"@en, "Skenkingsakte"@af ;
+    skos:scopeNote "Exported as a rico:DocumentaryFormType of the agreement (rico:hasDocumentaryFormType); Heratio numbers it DOG."@en ;
+    skos:definition "Unconditional transfer of ownership."@en .
+
+v:deed-of-donation a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Deed of Donation"@en, "Donasieakte"@af ;
+    skos:scopeNote "Exported as a rico:DocumentaryFormType of the agreement (rico:hasDocumentaryFormType); Heratio numbers it DON."@en ;
+    skos:definition "Formal donation under South African law."@en .
+
+v:deed-of-deposit a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Deed of Deposit"@en, "Bewaargewingsakte"@af ;
+    skos:scopeNote "Exported as a rico:DocumentaryFormType of the agreement (rico:hasDocumentaryFormType); Heratio numbers it DOD."@en ;
+    skos:definition "Materials deposited; ownership retained."@en .
+
+v:loan-agreement a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Loan Agreement"@en, "Leenooreenkoms"@af ;
+    skos:scopeNote "Exported as a rico:DocumentaryFormType of the agreement (rico:hasDocumentaryFormType); Heratio numbers it LOA."@en ;
+    skos:definition "Temporary loan for exhibition or research."@en .
+
+v:purchase-agreement a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Purchase Agreement"@en, "Koopooreenkoms"@af ;
+    skos:scopeNote "Exported as a rico:DocumentaryFormType of the agreement (rico:hasDocumentaryFormType); Heratio numbers it PUR."@en ;
+    skos:definition "Acquisition through purchase."@en .
+
+v:bequest a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Bequest"@en, "Bemaking"@af ;
+    skos:scopeNote "Exported as a rico:DocumentaryFormType of the agreement (rico:hasDocumentaryFormType); Heratio numbers it BEQ."@en ;
+    skos:definition "Transfer through a will or testament."@en .
+
+v:transfer-agreement a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Transfer Agreement"@en, "Oordragooreenkoms"@af ;
+    skos:scopeNote "Exported as a rico:DocumentaryFormType of the agreement (rico:hasDocumentaryFormType); Heratio numbers it TRA."@en ;
+    skos:definition "Inter-institutional transfer."@en .
+
+v:custody-agreement a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Custody Agreement"@en, "Bewaringsooreenkoms"@af ;
+    skos:scopeNote "Exported as a rico:DocumentaryFormType of the agreement (rico:hasDocumentaryFormType); Heratio numbers it CUS."@en ;
+    skos:definition "Temporary custody pending disposition."@en .
+
+v:licence-agreement a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Licence Agreement"@en, "Lisensieooreenkoms"@af ;
+    skos:scopeNote "Exported as a rico:DocumentaryFormType of the agreement (rico:hasDocumentaryFormType); Heratio numbers it LIC."@en ;
+    skos:definition "A licence of rights without transfer of ownership."@en .
+
+v:reproduction-agreement a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Reproduction Agreement"@en, "Reproduksieooreenkoms"@af ;
+    skos:scopeNote "Exported as a rico:DocumentaryFormType of the agreement (rico:hasDocumentaryFormType); Heratio numbers it REP."@en ;
+    skos:definition "Agreement for reproduction rights."@en .
+
+v:access-agreement a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Access Agreement"@en, "Toegangsooreenkoms"@af ;
+    skos:scopeNote "Exported as a rico:DocumentaryFormType of the agreement (rico:hasDocumentaryFormType); Heratio numbers it ACC."@en ;
+    skos:definition "Special access arrangements."@en .
+
+v:mou a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Memorandum of Understanding"@en, "Memorandum van verstandhouding"@af ;
+    skos:scopeNote "Exported as a rico:DocumentaryFormType of the agreement (rico:hasDocumentaryFormType); Heratio numbers it MOU."@en ;
+    skos:definition "A non-binding agreement setting out intentions."@en .
+
+v:sla a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Service Level Agreement"@en, "Diensvlakooreenkoms"@af ;
+    skos:scopeNote "Exported as a rico:DocumentaryFormType of the agreement (rico:hasDocumentaryFormType); Heratio numbers it SLA."@en ;
+    skos:definition "Agreement defining service levels."@en .
+
+v:collaboration-agreement a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Collaboration Agreement"@en, "Samewerkingsooreenkoms"@af ;
+    skos:scopeNote "Exported as a rico:DocumentaryFormType of the agreement (rico:hasDocumentaryFormType); Heratio numbers it COL."@en ;
+    skos:definition "Partnership for joint projects, digitisation or research."@en .

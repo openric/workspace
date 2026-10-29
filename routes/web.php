@@ -13,6 +13,7 @@ use App\Http\Controllers\AccessRequestController;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\AgentController;
+use App\Http\Controllers\AgreementController;
 use App\Http\Controllers\AltTextController;
 use App\Http\Controllers\ApiKeyController;
 use App\Http\Controllers\AuditLogController;
@@ -88,7 +89,7 @@ Route::get('/branding/logo', [SettingsController::class, 'logo'])->name('brandin
 Route::get('/api/iiif/workspace', fn () => response()->json(['data' => []]))->name('iiif.workspaces');
 
 // Persistent IRIs resolve, for anyone: the controller sends a page only to those signed in.
-Route::get('/{segment}/{id}', [IriController::class, 'resolve'])->where(['segment' => 'record|agent|repository|activity|place|concept|instantiation|accession', 'id' => '[0-9a-f-]{36}'])->name('iri');
+Route::get('/{segment}/{id}', [IriController::class, 'resolve'])->where(['segment' => 'record|agent|repository|activity|place|concept|instantiation|accession|agreement', 'id' => '[0-9a-f-]{36}'])->name('iri');
 
 // The clipboard (Heratio's): for anyone; it holds only what the reader may see.
 Route::prefix('clipboard')->name('clipboard.')->middleware('throttle:120,1')->group(function () {
@@ -243,6 +244,24 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::post('/{accession}/description', [AccessionController::class, 'createDescription'])->name('description');
     });
 
+    // Donor agreements (Heratio's ahg-donor-manage agreements, roadmap phase 9b): staff only, under the agreement permissions.
+    Route::middleware('access:read,agreement')->prefix('agreements')->name('agreements.')->group(function () {
+        Route::get('/', [AgreementController::class, 'index'])->name('index');
+        Route::get('/reminders', [AgreementController::class, 'reminders'])->name('reminders');
+        Route::get('/new', [AgreementController::class, 'create'])->name('create');
+        Route::post('/', [AgreementController::class, 'store'])->name('store');
+        Route::get('/{agreement}', [AgreementController::class, 'show'])->name('show');
+        Route::get('/{agreement}/edit', [AgreementController::class, 'edit'])->name('edit');
+        Route::post('/{agreement}', [AgreementController::class, 'update'])->name('update');
+        Route::post('/{agreement}/rows/{rowKind}', [AgreementController::class, 'addRow'])->where('rowKind', 'rights|restrictions')->name('rows.store');
+        Route::post('/{agreement}/rows/{rowKind}/{row}/remove', [AgreementController::class, 'removeRow'])->where('rowKind', 'rights|restrictions|reminders')->whereUuid('row')->name('rows.destroy');
+        Route::post('/{agreement}/reminders', [AgreementController::class, 'addReminder'])->name('reminders.store');
+        Route::post('/{agreement}/reminders/{reminder}/status', [AgreementController::class, 'reminderStatus'])->whereUuid('reminder')->name('reminders.status');
+        Route::post('/{agreement}/documents', [AgreementController::class, 'addDocument'])->name('documents.store');
+        Route::get('/{agreement}/documents/{document}', [AgreementController::class, 'document'])->whereUuid('document')->name('documents.show');
+        Route::post('/{agreement}/documents/{document}/remove', [AgreementController::class, 'removeDocument'])->whereUuid('document')->name('documents.destroy');
+    });
+
     // Physical storage (openricx:Container): containers under the storage permissions, storage places
     // (places of a storage place type) made under the vocabulary permissions, as every place is.
     Route::middleware('access:read,storage')->group(function () {
@@ -357,7 +376,7 @@ Route::middleware(['auth', 'active'])->group(function () {
     // Dates, names and identifiers of any described entity (ADR 0006); each controller checks update on the entity.
     // A concept has labels instead (ConceptController).
     foreach (['dates' => [DateController::class, 'date'], 'names' => [NameController::class, 'name'], 'identifiers' => [IdentifierController::class, 'identifier']] as $part => [$controller, $parameter]) {
-        Route::prefix("{kind}/{id}/$part")->where(['kind' => 'records|repositories|places|agents|activities|instantiations|containers|accessions', 'id' => '[0-9a-f-]{36}', $parameter => '[0-9a-f-]{36}'])->name("$part.")
+        Route::prefix("{kind}/{id}/$part")->where(['kind' => 'records|repositories|places|agents|activities|instantiations|containers|accessions|agreements', 'id' => '[0-9a-f-]{36}', $parameter => '[0-9a-f-]{36}'])->name("$part.")
             ->group(function () use ($controller, $parameter) {
                 Route::post('/', [$controller, 'store'])->name('store');
                 Route::post("/{{$parameter}}", [$controller, 'update'])->name('update');
@@ -443,11 +462,11 @@ Route::middleware(['auth', 'active'])->group(function () {
     });
 
     // Delete a unit of description, a repository or a place, after confirming (EntityDeletion).
-    Route::get('{kind}/{id}/delete', [DeletionController::class, 'confirm'])->where(['kind' => 'records|repositories|places|agents|activities|instantiations|containers|accessions', 'id' => '[0-9a-f-]{36}'])->name('deletion.confirm');
-    Route::post('{kind}/{id}/delete', [DeletionController::class, 'destroy'])->where(['kind' => 'records|repositories|places|agents|activities|instantiations|containers|accessions', 'id' => '[0-9a-f-]{36}'])->name('deletion.destroy');
+    Route::get('{kind}/{id}/delete', [DeletionController::class, 'confirm'])->where(['kind' => 'records|repositories|places|agents|activities|instantiations|containers|accessions|agreements', 'id' => '[0-9a-f-]{36}'])->name('deletion.confirm');
+    Route::post('{kind}/{id}/delete', [DeletionController::class, 'destroy'])->where(['kind' => 'records|repositories|places|agents|activities|instantiations|containers|accessions|agreements', 'id' => '[0-9a-f-]{36}'])->name('deletion.destroy');
 
     // The modification history of an entity and its parts, from the audit log.
-    Route::get('{kind}/{id}/history', [HistoryController::class, 'show'])->where(['kind' => 'records|repositories|places|agents|activities|instantiations|containers|concepts|accessions', 'id' => '[0-9a-f-]{36}'])->name('history');
+    Route::get('{kind}/{id}/history', [HistoryController::class, 'show'])->where(['kind' => 'records|repositories|places|agents|activities|instantiations|containers|concepts|accessions|agreements', 'id' => '[0-9a-f-]{36}'])->name('history');
 
     // Review, publish and withdraw an entity's description (PublicationService).
     Route::get('{kind}/{id}/publication', [PublicationController::class, 'edit'])->where(['kind' => 'records|repositories|places|agents|activities|instantiations', 'id' => '[0-9a-f-]{36}'])->name('publication.edit');

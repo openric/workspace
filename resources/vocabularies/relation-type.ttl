@@ -13,7 +13,7 @@ v: a skos:ConceptScheme ;
     dcterms:title "OpenRiC Workspace Relation Types"@en ;
     dcterms:description "What kind of relation connects two entities."@en ;
     dcterms:issued "2026-10-20"^^xsd:date ;
-    skos:hasTopConcept v:associated-record, v:genetic, v:sequential, v:holding, v:creation, v:accumulation, v:management, v:ownership, v:agent-hierarchical, v:agent-temporal, v:agent-control, v:agent-associated, v:subject, v:place, v:place-containment, v:family, v:child, v:descendance, v:sibling, v:spouse, v:guardianship, v:adoption, v:fostering, v:membership, v:leadership, v:position-holding, v:position-in-group, v:group-subdivision, v:knowing, v:knowing-of, v:correspondence, v:teaching, v:study-at, v:work, v:occupation, v:legal-status, v:documentary-form, v:storage, v:location, v:performance, v:participation, v:result, v:documentation, v:subevent, v:material-creator, v:accrual .
+    skos:hasTopConcept v:associated-record, v:genetic, v:sequential, v:holding, v:creation, v:accumulation, v:management, v:ownership, v:agent-hierarchical, v:agent-temporal, v:agent-control, v:agent-associated, v:subject, v:place, v:place-containment, v:family, v:child, v:descendance, v:sibling, v:spouse, v:guardianship, v:adoption, v:fostering, v:membership, v:leadership, v:position-holding, v:position-in-group, v:group-subdivision, v:knowing, v:knowing-of, v:correspondence, v:teaching, v:study-at, v:work, v:occupation, v:legal-status, v:documentary-form, v:storage, v:location, v:performance, v:participation, v:result, v:documentation, v:subevent, v:material-creator, v:accrual, v:covers, v:partly-covers, v:refers-to .
 
 v:associated-record a skos:Concept ;
     skos:inScheme v: ;
@@ -336,3 +336,24 @@ v:accrual a skos:Concept ;
     skos:prefLabel "Accrual"@en ;
     skos:scopeNote "Exported as rico:isRelatedTo: AtoM's and Heratio's accrual, a later accession that adds to an earlier one."@en ;
     skos:definition "A later accession adds to an earlier one."@en .
+
+v:covers a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Coverage by an agreement"@en ;
+    skos:scopeNote "Shortcut rico:hasOrHadSubject, inverse rico:isOrWasSubjectOf, from a donor agreement (a rico:Record) to the unit of description it covers; RiC-O 1.1 has no Relation subclass for it, so its dates go on a rico:Relation. Heratio's donor_agreement_record, covers."@en ;
+    skos:definition "A donor agreement covers a unit of description."@en .
+
+v:partly-covers a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Partial coverage by an agreement"@en ;
+    skos:scopeNote "Shortcut rico:hasOrHadSubject, inverse rico:isOrWasSubjectOf, from a donor agreement (a rico:Record) to a unit of description it covers in part; RiC-O 1.1 has no Relation subclass for it, so its dates go on a rico:Relation. Heratio's donor_agreement_record, partially covers."@en ;
+    skos:definition "A donor agreement covers part of a unit of description."@en .
+
+v:refers-to a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Reference from an agreement"@en ;
+    skos:scopeNote "Exported as a rico:RecordResourceToRecordResourceRelation, linked by rico:recordResourceToRecordResourceRelation_role; shortcut rico:isRecordResourceAssociatedWithRecordResource. Heratio's donor_agreement_record, references: a donor agreement names a unit of description it does not cover."@en ;
+    skos:definition "A donor agreement refers to a unit of description."@en .

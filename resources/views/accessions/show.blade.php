@@ -83,6 +83,12 @@
         @endif
     </section>
 
+    @if(auth()->user()->mayAnywhere('read', 'agreement'))
+        @include('description._relations', ['subject' => $accession, 'kind' => 'accessions', 'relations' => $relations, 'canUpdate' => $canUpdate,
+            'heading' => 'Donor agreements', 'types' => ['documentation'], 'section' => 'ag'])
+        @if(auth()->user()->may('create', 'agreement'))<p><a href="{{ route('agreements.create') }}">{{ __('New agreement') }}</a></p>@endif
+    @endif
+
     @php($label = fn ($c) => $c?->label($lang))
     @foreach([
         'extents' => ['Extent statements', 'CAAIS 3.2', $accession->extents, fn ($r) => collect([$label($r->extentType), trim(($r->is_estimate ? 'ca. ' : '').($r->quantity === null ? '' : rtrim(rtrim((string) $r->quantity, '0'), '.')).' '.$label($r->unit)), $label($r->contentType), $label($r->carrierType), $r->digital_file_formats, $r->note])],

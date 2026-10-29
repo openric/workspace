@@ -37,6 +37,9 @@ final class Elements
     /** An accession: numbered after CAAIS 1.0. */
     public const ACCESSION = 'accession';
 
+    /** A donor agreement (a rico:Record): Heratio's fields, which no standard numbers. */
+    public const AGREEMENT = 'agreement';
+
     /** The elements of an archival description that DACS, RAD or MODS have and ISAD(G) does not. */
     public const OTHER_STANDARDS = 'other-standards';
 

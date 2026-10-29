@@ -1,0 +1,121 @@
+# OpenRiC Workspace - OpenRiC Workspace Agreement Rights.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What a donor agreement allows or restricts the institution to do (Heratio's donor_agreement_right.right_type).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/agreement-right/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Agreement Rights"@en ;
+    dcterms:description "What a donor agreement allows or restricts the institution to do (Heratio's donor_agreement_right.right_type)."@en ;
+    dcterms:issued "2026-10-29"^^xsd:date ;
+    skos:hasTopConcept v:replicate, v:migrate, v:modify, v:use, v:disseminate, v:delete, v:display, v:publish, v:digitise, v:reproduce, v:loan, v:exhibit, v:broadcast, v:commercial-use, v:derivative-works .
+
+v:replicate a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Replicate"@en, "Repliseer"@af ;
+    skos:scopeNote "Not a RiC-O term: a right of the donor agreement, as Heratio keeps it; the PREMIS act replicate."@en ;
+    skos:definition "Make exact copies, such as for preservation."@en .
+
+v:migrate a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Migrate"@en, "Migreer"@af ;
+    skos:scopeNote "Not a RiC-O term: a right of the donor agreement, as Heratio keeps it; the PREMIS act migrate."@en ;
+    skos:definition "Change the material to another format."@en .
+
+v:modify a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Modify"@en, "Wysig"@af ;
+    skos:scopeNote "Not a RiC-O term: a right of the donor agreement, as Heratio keeps it; the PREMIS act modify."@en ;
+    skos:definition "Change the content of the material."@en .
+
+v:use a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Use"@en, "Gebruik"@af ;
+    skos:scopeNote "Not a RiC-O term: a right of the donor agreement, as Heratio keeps it; the PREMIS act use."@en ;
+    skos:definition "Use the material."@en .
+
+v:disseminate a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Disseminate"@en, "Versprei"@af ;
+    skos:scopeNote "Not a RiC-O term: a right of the donor agreement, as Heratio keeps it; the PREMIS act disseminate."@en ;
+    skos:definition "Give copies to others."@en .
+
+v:delete a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Delete"@en, "Skrap"@af ;
+    skos:scopeNote "Not a RiC-O term: a right of the donor agreement, as Heratio keeps it; the PREMIS act delete."@en ;
+    skos:definition "Remove the material."@en .
+
+v:display a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Display"@en, "Vertoon"@af ;
+    skos:scopeNote "Not a RiC-O term: a right of the donor agreement, as Heratio keeps it; the PREMIS act render."@en ;
+    skos:definition "Show or play the material."@en .
+
+v:publish a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Publish"@en, "Publiseer"@af ;
+    skos:scopeNote "Not a RiC-O term: a right of the donor agreement, as Heratio keeps it; no PREMIS act."@en ;
+    skos:definition "Publish the material."@en .
+
+v:digitise a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Digitise"@en, "Digitaliseer"@af ;
+    skos:scopeNote "Not a RiC-O term: a right of the donor agreement, as Heratio keeps it; no PREMIS act."@en ;
+    skos:definition "Make digital copies of physical material."@en .
+
+v:reproduce a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Reproduce"@en, "Reproduseer"@af ;
+    skos:scopeNote "Not a RiC-O term: a right of the donor agreement, as Heratio keeps it; no PREMIS act."@en ;
+    skos:definition "Make copies for others, such as for researchers."@en .
+
+v:loan a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Loan"@en, "Leen uit"@af ;
+    skos:scopeNote "Not a RiC-O term: a right of the donor agreement, as Heratio keeps it; no PREMIS act."@en ;
+    skos:definition "Lend the material to another institution."@en .
+
+v:exhibit a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Exhibit"@en, "Stal uit"@af ;
+    skos:scopeNote "Not a RiC-O term: a right of the donor agreement, as Heratio keeps it; no PREMIS act."@en ;
+    skos:definition "Show the material in an exhibition."@en .
+
+v:broadcast a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Broadcast"@en, "Saai uit"@af ;
+    skos:scopeNote "Not a RiC-O term: a right of the donor agreement, as Heratio keeps it; no PREMIS act."@en ;
+    skos:definition "Broadcast the material."@en .
+
+v:commercial-use a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Commercial use"@en, "Kommersiële gebruik"@af ;
+    skos:scopeNote "Not a RiC-O term: a right of the donor agreement, as Heratio keeps it; no PREMIS act."@en ;
+    skos:definition "Use the material for gain."@en .
+
+v:derivative-works a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Derivative works"@en, "Afgeleide werke"@af ;
+    skos:scopeNote "Not a RiC-O term: a right of the donor agreement, as Heratio keeps it; no PREMIS act."@en ;
+    skos:definition "Make new works from the material."@en .

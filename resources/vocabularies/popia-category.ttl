@@ -1,0 +1,51 @@
+# OpenRiC Workspace - OpenRiC Workspace POPIA Categories.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# The kinds of personal information the Protection of Personal Information Act, 2013 (POPIA) protects (Heratio's donor_agreement_restriction.popia_category).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/popia-category/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace POPIA Categories"@en ;
+    dcterms:description "The kinds of personal information the Protection of Personal Information Act, 2013 (POPIA) protects (Heratio's donor_agreement_restriction.popia_category)."@en ;
+    dcterms:issued "2026-10-29"^^xsd:date ;
+    skos:hasTopConcept v:special-personal, v:personal, v:children, v:criminal, v:biometric .
+
+v:special-personal a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Special personal information"@en, "Spesiale persoonlike inligting"@af ;
+    skos:scopeNote "Not a RiC-O term: the POPIA category of a donor agreement's restriction, as Heratio keeps it; POPIA section 26."@en ;
+    skos:definition "Religion, race, health, sex life, political persuasion and the like."@en .
+
+v:personal a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Personal information"@en, "Persoonlike inligting"@af ;
+    skos:scopeNote "Not a RiC-O term: the POPIA category of a donor agreement's restriction, as Heratio keeps it; POPIA section 1."@en ;
+    skos:definition "Information about an identifiable living person."@en .
+
+v:children a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Personal information of children"@en, "Persoonlike inligting van kinders"@af ;
+    skos:scopeNote "Not a RiC-O term: the POPIA category of a donor agreement's restriction, as Heratio keeps it; POPIA section 34."@en ;
+    skos:definition "Information about a person under 18."@en .
+
+v:criminal a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Criminal behaviour"@en, "Kriminele gedrag"@af ;
+    skos:scopeNote "Not a RiC-O term: the POPIA category of a donor agreement's restriction, as Heratio keeps it; POPIA section 26."@en ;
+    skos:definition "Information about alleged or proven offences."@en .
+
+v:biometric a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Biometric information"@en, "Biometriese inligting"@af ;
+    skos:scopeNote "Not a RiC-O term: the POPIA category of a donor agreement's restriction, as Heratio keeps it; POPIA section 26."@en ;
+    skos:definition "Fingerprints, DNA, facial and voice recognition and the like."@en .
