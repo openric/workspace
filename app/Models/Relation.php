@@ -9,6 +9,7 @@ namespace App\Models;
 use App\Audit\Audited;
 use App\Description\HasDates;
 use App\Relations\EntityKinds;
+use App\Relations\RelationTypes;
 use App\Support\Vocab;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -88,27 +89,34 @@ class Relation extends Model
         };
     }
 
-    /** How the relation reads from the page's entity. */
+    /** How the relation reads from the page's entity, in the interface language. */
     public function phrase(): string
     {
-        $type = config('workspace.relation_types.'.$this->relationType->notation);
+        $type = RelationTypes::of($this);
 
-        return $type ? __($this->fromSource ? $type['forward'] : $type['inverse']) : $this->relationType->label(Vocab::languages());
+        return $type ? RelationTypes::phrase($type, $this->fromSource) : $this->relationType->label(Vocab::languages());
+    }
+
+    /** The bundled type the relation is, or that its institution's own type narrows: what it connects and how it is exported. */
+    public function kind(): string
+    {
+        return RelationTypes::of($this)['kind'] ?? (string) $this->relationType->notation;
     }
 
     /**
-     * The RiC-O term the relation is. For a type whose term depends on the class of the unit it comes from
-     * (config relation_types.*.record_set_term), a record set's relation takes that term.
+     * The RiC-O term the relation is: its bundled type's. For a type whose term depends on the class of the unit it
+     * comes from (relation_types.record_set_term), a record set's relation takes that term.
      */
     public function ricTerm(): ?string
     {
-        $recordSetTerm = config('workspace.relation_types.'.$this->relationType->notation.'.record_set_term');
+        $type = RelationTypes::of($this);
+        $recordSetTerm = $type['record_set_term'] ?? null;
         if ($recordSetTerm !== null && $this->source_table === 'record_resources'
             && ($unit = RecordResource::with('level.labels')->find($this->source_id)) && EntityKinds::ricClass($unit) === 'rico:RecordSet') {
             return $recordSetTerm;
         }
 
-        return $this->relationType->ricTerm();
+        return ($type['local'] ?? false) ? Concept::with('labels')->find($type['base_concept_id'])?->ricTerm() : $this->relationType->ricTerm();
     }
 
     public function datedAs(string $property): ?RicDate

@@ -1,0 +1,76 @@
+# OpenRiC Workspace - OpenRiC Workspace RAD General Material Designations.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# RAD 1.1C, AtoM's material type taxonomy (Heratio's materialTypeIds): the broad class of material a unit belongs to.
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/rad-material-designation/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace RAD General Material Designations"@en ;
+    dcterms:description "RAD 1.1C, AtoM's material type taxonomy (Heratio's materialTypeIds): the broad class of material a unit belongs to."@en ;
+    dcterms:issued "2026-10-29"^^xsd:date ;
+    skos:hasTopConcept v:architectural-drawing, v:cartographic-material, v:graphic-material, v:moving-images, v:multiple-media, v:object, v:philatelic-record, v:sound-recording, v:technical-drawing, v:textual-record .
+
+v:architectural-drawing a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Architectural drawing"@en, "Argitektoniese tekening"@af ;
+    skos:scopeNote "RAD 1.1C general material designation; not a RiC-O term, not exported in RiC."@en .
+
+v:cartographic-material a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Cartographic material"@en, "Kartografiese materiaal"@af ;
+    skos:scopeNote "RAD 1.1C general material designation; not a RiC-O term, not exported in RiC."@en .
+
+v:graphic-material a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Graphic material"@en, "Grafiese materiaal"@af ;
+    skos:scopeNote "RAD 1.1C general material designation; not a RiC-O term, not exported in RiC."@en .
+
+v:moving-images a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Moving images"@en, "Bewegende beelde"@af ;
+    skos:scopeNote "RAD 1.1C general material designation; not a RiC-O term, not exported in RiC."@en .
+
+v:multiple-media a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Multiple media"@en, "Veelvuldige media"@af ;
+    skos:scopeNote "RAD 1.1C general material designation; not a RiC-O term, not exported in RiC."@en .
+
+v:object a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Object"@en, "Voorwerp"@af ;
+    skos:scopeNote "RAD 1.1C general material designation; not a RiC-O term, not exported in RiC."@en .
+
+v:philatelic-record a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Philatelic record"@en, "Filatelistiese rekord"@af ;
+    skos:scopeNote "RAD 1.1C general material designation; not a RiC-O term, not exported in RiC."@en .
+
+v:sound-recording a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Sound recording"@en, "Klankopname"@af ;
+    skos:scopeNote "RAD 1.1C general material designation; not a RiC-O term, not exported in RiC."@en .
+
+v:technical-drawing a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Technical drawing"@en, "Tegniese tekening"@af ;
+    skos:scopeNote "RAD 1.1C general material designation; not a RiC-O term, not exported in RiC."@en .
+
+v:textual-record a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Textual record"@en, "Tekstuele rekord"@af ;
+    skos:scopeNote "RAD 1.1C general material designation; not a RiC-O term, not exported in RiC."@en .

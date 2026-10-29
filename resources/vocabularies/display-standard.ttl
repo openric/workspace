@@ -1,0 +1,53 @@
+# OpenRiC Workspace - OpenRiC Workspace Display Standards.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# The description standard an archival description is shown and edited in (AtoM's and Heratio's display standard,
+# information_object.display_standard_id), under AtoM's names for them. Each standard's elements, their numbers and
+# labels are the display-element vocabulary; the values are the same whichever standard shows them.
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/display-standard/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Display Standards"@en ;
+    dcterms:description "The description standard an archival description is shown and edited in."@en ;
+    dcterms:issued "2026-10-29"^^xsd:date ;
+    skos:hasTopConcept v:isad-g, v:dacs, v:rad, v:dc, v:mods .
+
+v:isad-g a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "ISAD(G), 2nd ed. International Council on Archives"@en, "ISAD(G), 2de uitg. Internasionale Argiefraad"@af ;
+    skos:scopeNote "Not a RiC-O term: how the Workspace shows the description, not exported. Shows the isad-g elements of the description-element vocabulary; a description with no display standard is shown in it."@en ;
+    skos:definition "General International Standard Archival Description."@en .
+
+v:dacs a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "DACS, 2nd ed. Society of American Archivists"@en, "DACS, 2de uitg. Society of American Archivists"@af ;
+    skos:scopeNote "Not a RiC-O term: how the Workspace shows the description, not exported. Shows the dacs elements of the display-element vocabulary."@en ;
+    skos:definition "Describing Archives: A Content Standard."@en .
+
+v:rad a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "RAD, July 2008 version. Canadian Council of Archives"@en, "RAD, Julie 2008-weergawe. Canadian Council of Archives"@af ;
+    skos:scopeNote "Not a RiC-O term: how the Workspace shows the description, not exported. Shows the rad elements of the display-element vocabulary."@en ;
+    skos:definition "Rules for Archival Description."@en .
+
+v:dc a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Dublin Core, Version 1.1. Dublin Core Metadata Initiative"@en, "Dublin Core, weergawe 1.1. Dublin Core Metadata Initiative"@af ;
+    skos:scopeNote "Not a RiC-O term: how the Workspace shows the description, not exported. Shows the dc elements of the display-element vocabulary."@en ;
+    skos:definition "The Dublin Core Metadata Element Set."@en .
+
+v:mods a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "MODS, Version 3.3. U.S. Library of Congress"@en, "MODS, weergawe 3.3. U.S. Library of Congress"@af ;
+    skos:scopeNote "Not a RiC-O term: how the Workspace shows the description, not exported. Shows the mods elements of the display-element vocabulary."@en ;
+    skos:definition "Metadata Object Description Schema."@en .

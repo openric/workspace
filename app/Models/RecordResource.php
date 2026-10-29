@@ -16,13 +16,30 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['institution_id', 'iri', 'level_id', 'repository_id', 'parent_id', 'position', 'description_identifier', 'description_status_id', 'description_detail_id', 'source_standard', 'display_as_compound'])]
+#[Fillable(['institution_id', 'iri', 'level_id', 'repository_id', 'parent_id', 'position', 'description_identifier', 'description_status_id', 'description_detail_id', 'source_standard', 'display_as_compound', 'display_standard_id'])]
 class RecordResource extends Model
 {
     use Audited, Describable, HasDates, HasIdentifiers, HasUuids;
 
     /** The URL path segment of its persistent IRI: {base IRI}/record/{UUID}. */
     public const IRI_SEGMENT = 'record';
+
+    public function displayStandard(): BelongsTo
+    {
+        return $this->belongsTo(Concept::class, 'display_standard_id');
+    }
+
+    /** The standard it is shown and edited in (display-standard notation): its own, else ISAD(G). */
+    public function standard(): string
+    {
+        return $this->displayStandard?->notation ?? 'isad-g';
+    }
+
+    /** The types its display standards give it: RAD's general material designation, the DCMI type, the MODS type of resource. */
+    public function resourceTypes(): HasMany
+    {
+        return $this->hasMany(RecordResourceType::class);
+    }
 
     public function level(): BelongsTo
     {

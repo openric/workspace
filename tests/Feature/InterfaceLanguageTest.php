@@ -11,6 +11,7 @@ use App\Access\RoleService;
 use App\Accounts\AccountService;
 use App\Models\Institution;
 use App\Models\User;
+use App\Relations\RelationTypes;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -115,10 +116,9 @@ class InterfaceLanguageTest extends TestCase
                 }
             }
         }
-        // Translated where they are shown: relation phrases, the storage environment labels (__($label)) and the publication messages (PublicationController).
-        foreach (config('workspace.relation_types') as $type) {
-            $keys = [...$keys, $type['forward'], $type['inverse']];
-        }
+        // Every bundled relation type reads in Afrikaans (relation_type_phrases).
+        $this->assertSame([], array_keys(array_filter(RelationTypes::all(null), fn (array $type) => ! isset($type['phrases']['af']))), 'relation types with no Afrikaans wording');
+        // Translated where they are shown: the storage environment labels (__($label)) and the publication messages (PublicationController).
         $keys = [...$keys, 'Lowest temperature (°C)', 'Highest temperature (°C)', 'Lowest relative humidity (%)', 'Highest relative humidity (%)',
             ...array_merge(...array_map(fn ($done) => ["Nothing to mark $done.", ":count value $done.", ":count values $done."], ['reviewed', 'published', 'withdrawn']))];
         $missing = array_values(array_diff(array_unique($keys), array_keys($af)));

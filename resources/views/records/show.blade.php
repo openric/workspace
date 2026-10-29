@@ -49,7 +49,8 @@
     @if($canUpdate || auth()->user()->may('translate', 'description', $record))
         @include('description._actions', ['subject' => $record, 'editRoute' => 'records.edit', 'required' => 'title'])
     @endif
-    @include('description._view', ['subject' => $record, 'standard' => \App\Description\Elements::ISAD_G, 'drafts' => $drafts])
+    @if($record->resourceTypes->isNotEmpty())<p><strong>{{ __('Types') }}:</strong> {{ $record->resourceTypes->map(fn ($t) => $t->type->label(\App\Support\Vocab::languages()))->join(', ') }}</p>@endif
+    @include('description._view', ['subject' => $record, 'standard' => $record->standard(), 'drafts' => $drafts])
     @include('records._creators', ['relations' => $relations, 'drafts' => $drafts])
     @include('records._provenance', ['record' => $record, 'relations' => $relations])
     @include('records._instantiations', ['record' => $record, 'canUpdate' => $canUpdate])

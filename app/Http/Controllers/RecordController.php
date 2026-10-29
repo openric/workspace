@@ -165,11 +165,11 @@ class RecordController extends Controller
         $user = $request->user();
         $record->load('descriptionValues.element.labels', 'descriptionValues.state.labels', 'names.nameType.labels', 'names.state.labels', 'names.dates.property', 'identifiers.identifierType.labels', 'level.labels', 'repository.descriptionValues.element', 'repository.names.nameType',
             'children.descriptionValues.element', 'children.names.nameType', 'children.identifiers.identifierType', 'children.level.labels', 'dates.property.labels', 'dates.dateType.labels', 'dates.qualifier.labels',
-            'instantiations.files.use', 'instantiations.names.nameType', 'instantiations.carrierType.labels', 'instantiations.availability.labels');
+            'instantiations.files.use', 'instantiations.names.nameType', 'instantiations.carrierType.labels', 'instantiations.availability.labels', 'displayStandard', 'resourceTypes.type.labels');
 
         $record->setRelation('children', $record->children->filter(fn ($child) => $user->may('read', 'description', $child))->values());
 
-        return view('records.show', ['record' => $record, 'elements' => Elements::of(Elements::ISAD_G), 'dateChoices' => app(DateService::class)->choices('record'), 'relations' => app(RelationService::class)->of($record),
+        return view('records.show', ['record' => $record, 'elements' => Elements::of($record->standard()), 'dateChoices' => app(DateService::class)->choices('record'), 'relations' => app(RelationService::class)->of($record),
             'drafts' => $user->may('view-draft', 'description', $record), 'canUpdate' => $user->may('update', 'description', $record),
             'canCreateInside' => $user->may('create', 'description', $record), 'childThumbnails' => $this->childThumbnails($record, $user),
             'tree' => (new TreeService($user))->window($record)]);
@@ -212,10 +212,13 @@ class RecordController extends Controller
         $this->own($request, $record);
         $language = (string) $request->query('language', 'en');
         abort_unless(Bcp47::valid($language), 404);
-        $record->load('descriptionValues.element', 'names.nameType', 'identifiers.identifierType', 'level');
+        $record->load('descriptionValues.element', 'names.nameType', 'identifiers.identifierType', 'level', 'displayStandard', 'resourceTypes.type');
         abort_unless($this->mayWrite($request, $record, $language), 403);
+        $typeList = RecordService::TYPE_LISTS[$record->standard()] ?? null;
 
-        return view('records.edit', ['record' => $record, 'elements' => Elements::of(Elements::ISAD_G), 'levels' => $this->levels($request), 'language' => $language,
+        return view('records.edit', ['record' => $record, 'elements' => Elements::of($record->standard()),
+            'standards' => Concept::choices(Vocab::BASE.'display-standard/')->with('labels')->get(),
+            'typeChoices' => $typeList ? Concept::choices(Vocab::BASE.$typeList.'/')->with('labels')->get() : collect(), 'levels' => $this->levels($request), 'language' => $language,
             'mayUpdate' => $request->user()->may('update', 'description', $record), 'mayCreateInside' => $request->user()->may('create', 'description', $record),
             'statuses' => Concept::choices(Vocab::DESCRIPTION_STATUSES)->get(), 'details' => Concept::choices(Vocab::DESCRIPTION_DETAILS)->get(),
             'watermark' => RecordWatermark::where('record_resource_id', $record->id)->with('watermarkType', 'watermarkPosition')->first(),
@@ -235,6 +238,10 @@ class RecordController extends Controller
             'description_status' => ['nullable', 'string', Rule::in(Concept::choices(Vocab::DESCRIPTION_STATUSES)->pluck('iri'))],
             'description_detail' => ['nullable', 'string', Rule::in(Concept::choices(Vocab::DESCRIPTION_DETAILS)->pluck('iri'))],
             'source_standard' => ['nullable', 'string', 'max:255'],
+            // Heratio's display standard, and "Make this selection the new default for existing children".
+            'display_standard' => ['nullable', 'string', Rule::in(Concept::choices(Vocab::BASE.'display-standard/')->pluck('notation'))],
+            'display_standard_inside' => ['boolean'],
+            'types' => ['array'], 'types.*' => ['string', 'max:64'],
             // Heratio's watermark for one object: the institution's (none chosen), none, or a type of its own.
             'watermark' => ['nullable', 'string', Rule::in(['none', ...Concept::choices(Vocab::BASE.'watermark-type/')->pluck('notation')])],
             'watermark_position' => ['nullable', 'string', Rule::in(Concept::choices(Vocab::BASE.'watermark-position/')->pluck('notation'))],
@@ -249,7 +256,7 @@ class RecordController extends Controller
         ], ['child_levels.*.level.required_with' => __('Choose the level of each new child level.')]);
         $children = array_values(array_filter($data['child_levels'] ?? [], fn ($row) => trim((string) ($row['title'] ?? '')) !== ''));
         abort_if($children !== [] && ! $request->user()->may('create', 'description', $record), 403);
-        $values = array_intersect_key($data['values'] ?? [], array_flip(Elements::notations(Elements::ISAD_G)));
+        $values = array_intersect_key($data['values'] ?? [], array_flip([...Elements::notations(Elements::ISAD_G), ...Elements::notations(Elements::OTHER_STANDARDS)]));
         abort_unless($this->mayWrite($request, $record, $data['language']), 403);
         // A translator writes values only: the reference code and level need update.
         $control = [($data['description_identifier'] ?? null) ?: null, ($data['description_status'] ?? null) ?: null, ($data['description_detail'] ?? null) ?: null];
@@ -258,11 +265,15 @@ class RecordController extends Controller
         $watermark = [($data['watermark'] ?? null) ?: null, ($data['watermark_position'] ?? null) ?: null, isset($data['watermark_opacity']) ? (int) $data['watermark_opacity'] : null];
         $watermarkChanged = $request->has('watermark') && $watermark !== [$own ? ($own->enabled ? $own->watermarkType?->notation : 'none') : null, $own?->watermarkPosition?->notation, $own?->opacity];
         $compoundChanged = $request->has('display_as_compound') && $request->boolean('display_as_compound') !== (bool) $record->display_as_compound;
+        $standardChanged = $request->has('display_standard') && ((($data['display_standard'] ?? null) ?: null) !== $record->displayStandard?->notation || $request->boolean('display_standard_inside'));
+        $typeList = RecordService::TYPE_LISTS[$record->standard()] ?? null;
+        $typesChanged = $typeList !== null && $request->has('types_shown')
+            && collect($data['types'] ?? [])->sort()->values()->all() !== $record->resourceTypes()->whereHas('type.vocabulary', fn ($q) => $q->where('iri', Vocab::BASE.$typeList.'/'))->with('type')->get()->pluck('type.notation')->sort()->values()->all();
         $sourceChanged = $request->has('source_standard') && (trim((string) ($data['source_standard'] ?? '')) ?: null) !== $record->source_standard;
-        $identityChanged = ($data['identifier'] ?? null) !== $record->identifier || $data['level'] !== $record->level->iri || $controlChanged || $sourceChanged || $watermarkChanged || $compoundChanged || $request->boolean('remake_copies');
+        $identityChanged = ($data['identifier'] ?? null) !== $record->identifier || $data['level'] !== $record->level->iri || $controlChanged || $sourceChanged || $watermarkChanged || $compoundChanged || $standardChanged || $typesChanged || $request->boolean('remake_copies');
         abort_if($identityChanged && ! $request->user()->may('update', 'description', $record), 403);
         try {
-            DB::transaction(function () use ($record, $data, $values, $request, $identityChanged, $controlChanged, $control, $children, $sourceChanged, $watermarkChanged, $watermark, $compoundChanged) {
+            DB::transaction(function () use ($record, $data, $values, $request, $identityChanged, $controlChanged, $control, $children, $sourceChanged, $watermarkChanged, $watermark, $compoundChanged, $standardChanged, $typesChanged, $typeList) {
                 if ($identityChanged) {
                     $this->records->updateIdentity($record, $data['identifier'] ?? null, $data['level'], $request->user());
                 }
@@ -278,6 +289,12 @@ class RecordController extends Controller
                 }
                 if ($sourceChanged) {
                     $this->records->setSourceStandard($record, $data['source_standard'] ?? null, $request->user());
+                }
+                if ($typesChanged) {
+                    $this->records->setResourceTypes($record, $typeList, $data['types'] ?? [], $request->user());
+                }
+                if ($standardChanged) {
+                    $this->records->setDisplayStandard($record, $data['display_standard'] ?? null, $request->boolean('display_standard_inside'), $request->user());
                 }
                 $this->records->describe($record, $values, $data['language'], $request->user());
                 foreach ($children as $row) {

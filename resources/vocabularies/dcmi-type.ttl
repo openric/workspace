@@ -1,0 +1,88 @@
+# OpenRiC Workspace - OpenRiC Workspace DCMI Types.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# The DCMI Type Vocabulary, AtoM's Dublin Core type taxonomy (Heratio's dcTypeIds).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/dcmi-type/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace DCMI Types"@en ;
+    dcterms:description "The DCMI Type Vocabulary, AtoM's Dublin Core type taxonomy (Heratio's dcTypeIds)."@en ;
+    dcterms:issued "2026-10-29"^^xsd:date ;
+    skos:hasTopConcept v:collection, v:dataset, v:event, v:image, v:interactive-resource, v:moving-image, v:physical-object, v:service, v:software, v:sound, v:still-image, v:text .
+
+v:collection a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Collection"@en, "Versameling"@af ;
+    skos:scopeNote "Exported as dc:type, by its label; not exported in RiC, which keeps no such list."@en .
+
+v:dataset a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Dataset"@en, "Datastel"@af ;
+    skos:scopeNote "Exported as dc:type, by its label; not exported in RiC, which keeps no such list."@en .
+
+v:event a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Event"@en, "Gebeurtenis"@af ;
+    skos:scopeNote "Exported as dc:type, by its label; not exported in RiC, which keeps no such list."@en .
+
+v:image a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Image"@en, "Beeld"@af ;
+    skos:scopeNote "Exported as dc:type, by its label; not exported in RiC, which keeps no such list."@en .
+
+v:interactive-resource a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Interactive resource"@en, "Interaktiewe hulpbron"@af ;
+    skos:scopeNote "Exported as dc:type, by its label; not exported in RiC, which keeps no such list."@en .
+
+v:moving-image a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Moving image"@en, "Bewegende beeld"@af ;
+    skos:scopeNote "Exported as dc:type, by its label; not exported in RiC, which keeps no such list."@en .
+
+v:physical-object a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Physical object"@en, "Fisiese voorwerp"@af ;
+    skos:scopeNote "Exported as dc:type, by its label; not exported in RiC, which keeps no such list."@en .
+
+v:service a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Service"@en, "Diens"@af ;
+    skos:scopeNote "Exported as dc:type, by its label; not exported in RiC, which keeps no such list."@en .
+
+v:software a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Software"@en, "Sagteware"@af ;
+    skos:scopeNote "Exported as dc:type, by its label; not exported in RiC, which keeps no such list."@en .
+
+v:sound a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Sound"@en, "Klank"@af ;
+    skos:scopeNote "Exported as dc:type, by its label; not exported in RiC, which keeps no such list."@en .
+
+v:still-image a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Still image"@en, "Stilbeeld"@af ;
+    skos:scopeNote "Exported as dc:type, by its label; not exported in RiC, which keeps no such list."@en .
+
+v:text a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Text"@en, "Teks"@af ;
+    skos:scopeNote "Exported as dc:type, by its label; not exported in RiC, which keeps no such list."@en .

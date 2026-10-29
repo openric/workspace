@@ -1,6 +1,6 @@
 {{-- OpenRiC Workspace - the relations of a public page that stand, each to the page of the entity at the other end. Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems. SPDX-License-Identifier: AGPL-3.0-or-later --}}
 {{-- Needs $relations (DiscoverController::relations), $view; optional $heading, $types (relation-type notations to show) or $except. --}}
-@php($shown = $relations->filter(fn ($r) => isset($types) ? in_array($r->relationType->notation, $types, true) : ! in_array($r->relationType->notation, $except ?? [], true)))
+@php($shown = $relations->filter(fn ($r) => isset($types) ? in_array($r->kind(), $types, true) : ! in_array($r->kind(), $except ?? [], true)))
 @if($shown->isNotEmpty())
     <h2>{{ $heading ?? __('Related') }}</h2>
     <ul>

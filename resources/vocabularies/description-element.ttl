@@ -13,7 +13,7 @@ v: a skos:ConceptScheme ;
     dcterms:title "OpenRiC Workspace Description Elements"@en ;
     dcterms:description "Elements of archival description, grouped under the ICA standard they come from. Only the elements, not the groups, are values of a description."@en ;
     dcterms:issued "2026-10-19"^^xsd:date ;
-    skos:hasTopConcept v:isdiah, v:isad-g, v:place, v:isaar-cpf, v:activity, v:instantiation, v:container .
+    skos:hasTopConcept v:isdiah, v:isad-g, v:place, v:isaar-cpf, v:activity, v:instantiation, v:container, v:other-standards .
 
 v:authorised-name a skos:Concept ;
     skos:inScheme v: ;
@@ -838,3 +838,129 @@ v:activity-maintenance-notes a skos:Concept ;
     skos:prefLabel "Maintenance notes"@en ;
     skos:scopeNote "ISDF 5.4.9; exported as rico:generalDescription."@en ;
     skos:definition "Notes on how the description was created and maintained."@en .
+
+v:other-standards a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Other description standards"@en ;
+    skos:scopeNote "Elements of an archival description (rico:RecordResource) that DACS, RAD or MODS have and ISAD(G) does not, as AtoM's and Heratio's templates keep them; shown only where the description's display standard has them (display-element vocabulary)."@en ;
+    skos:definition "Elements of the other display standards."@en .
+
+v:technical-access a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:other-standards ;
+    skos:prefLabel "Technical access"@en ;
+    skos:scopeNote "DACS 4.3, Heratio's technicalAccess; exported as rico:generalDescription."@en ;
+    skos:definition "Information about any special equipment required to view or access the material."@en .
+
+v:other-title-information a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:other-standards ;
+    skos:prefLabel "Other title information"@en ;
+    skos:scopeNote "RAD 1.1E, AtoM's otherTitleInformation; exported as rico:generalDescription."@en ;
+    skos:definition "A subtitle or other words that complete the title proper."@en .
+
+v:title-statement-of-responsibility a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:other-standards ;
+    skos:prefLabel "Statements of responsibility"@en ;
+    skos:scopeNote "RAD 1.1F, AtoM's titleStatementOfResponsibility; exported as rico:generalDescription."@en ;
+    skos:definition "Who is responsible for the intellectual content of the unit, as the title shows it."@en .
+
+v:edition-statement-of-responsibility a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:other-standards ;
+    skos:prefLabel "Statements of responsibility relating to the edition"@en ;
+    skos:scopeNote "RAD 1.2C, AtoM's editionStatementOfResponsibility; exported as rico:generalDescription."@en ;
+    skos:definition "Who is responsible for the edition."@en .
+
+v:statement-of-scale-cartographic a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:other-standards ;
+    skos:prefLabel "Statement of scale (cartographic)"@en ;
+    skos:scopeNote "RAD 5.3B, AtoM's statementOfScaleCartographic; exported as rico:generalDescription."@en ;
+    skos:definition "The scale of cartographic material, such as 1:50 000."@en .
+
+v:statement-of-projection a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:other-standards ;
+    skos:prefLabel "Statement of projection (cartographic)"@en ;
+    skos:scopeNote "RAD 5.3C, AtoM's statementOfProjection; exported as rico:generalDescription."@en ;
+    skos:definition "The projection of cartographic material."@en .
+
+v:statement-of-coordinates a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:other-standards ;
+    skos:prefLabel "Statement of coordinates (cartographic)"@en ;
+    skos:scopeNote "RAD 5.3D, AtoM's statementOfCoordinates; exported as rico:generalDescription."@en ;
+    skos:definition "The coordinates of cartographic material."@en .
+
+v:statement-of-scale-architectural a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:other-standards ;
+    skos:prefLabel "Statement of scale (architectural)"@en ;
+    skos:scopeNote "RAD 6.3B, AtoM's statementOfScaleArchitectural; exported as rico:generalDescription."@en ;
+    skos:definition "The scale of architectural and technical drawings."@en .
+
+v:issuing-jurisdiction-and-denomination a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:other-standards ;
+    skos:prefLabel "Issuing jurisdiction and denomination (philatelic)"@en ;
+    skos:scopeNote "RAD 12.3B, AtoM's issuingJurisdictionAndDenomination; exported as rico:generalDescription."@en ;
+    skos:definition "The jurisdiction that issued philatelic records, and their denomination."@en .
+
+v:title-proper-of-publishers-series a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:other-standards ;
+    skos:prefLabel "Title proper of publisher's series"@en ;
+    skos:scopeNote "RAD 1.6B, AtoM's titleProperOfPublishersSeries; exported as rico:generalDescription."@en ;
+    skos:definition "The title of the published series the unit belongs to."@en .
+
+v:parallel-titles-of-publishers-series a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:other-standards ;
+    skos:prefLabel "Parallel titles of publisher's series"@en ;
+    skos:scopeNote "RAD 1.6C, AtoM's parallelTitleOfPublishersSeries; exported as rico:generalDescription."@en ;
+    skos:definition "The title of the publisher's series in another language or script."@en .
+
+v:other-title-information-of-publishers-series a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:other-standards ;
+    skos:prefLabel "Other title information of publisher's series"@en ;
+    skos:scopeNote "RAD 1.6D, AtoM's otherTitleInformationOfPublishersSeries; exported as rico:generalDescription."@en ;
+    skos:definition "Other words that complete the title of the publisher's series."@en .
+
+v:statement-of-responsibility-of-publishers-series a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:other-standards ;
+    skos:prefLabel "Statement of responsibility relating to publisher's series"@en ;
+    skos:scopeNote "RAD 1.6E, AtoM's statementOfResponsibilityRelatingToPublishersSeries; exported as rico:generalDescription."@en ;
+    skos:definition "Who is responsible for the publisher's series."@en .
+
+v:numbering-within-publishers-series a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:other-standards ;
+    skos:prefLabel "Numbering within publisher's series"@en ;
+    skos:scopeNote "RAD 1.6F, AtoM's numberingWithinPublishersSeries; exported as rico:generalDescription."@en ;
+    skos:definition "The number of the unit within the publisher's series."@en .
+
+v:note-on-publishers-series a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:other-standards ;
+    skos:prefLabel "Note on publisher's series"@en ;
+    skos:scopeNote "RAD 1.8B, AtoM's noteOnPublishersSeries; exported as rico:generalDescription."@en ;
+    skos:definition "Anything else to say about the publisher's series."@en .
+
+v:standard-number a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:other-standards ;
+    skos:prefLabel "Standard number"@en ;
+    skos:scopeNote "RAD 1.9B, AtoM's standardNumber; exported as rico:generalDescription."@en ;
+    skos:definition "An internationally agreed number, such as an ISBN or ISSN."@en .
+
+v:publisher a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:other-standards ;
+    skos:prefLabel "Publisher"@en ;
+    skos:scopeNote "MODS originInfo/publisher, Heratio's publisher_name; exported as rico:generalDescription."@en ;
+    skos:definition "Who published the unit."@en .

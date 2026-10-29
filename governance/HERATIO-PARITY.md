@@ -36,10 +36,10 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-condition` | 1690 | later: V1.0+ | Planned | 21 | `ahgConditionPlugin` |  |
 | `ahg-core` | 60173 | V0.1 candidate | Covered |  | `ahgAccessibilityPlugin`, `ahgCorePlugin` | Framework, not a function: the Workspace has its own (Laravel, PostgreSQL); its alternative text for images, with the worklist, is the instantiation's alternative-text element (v0.0.64) |
 | `ahg-custom-fields` | 1338 | V0.1 candidate | Planned | 22 | `ahgCustomFieldsPlugin` | As description elements in local vocabularies |
-| `ahg-dacs-manage` | 1084 | V0.1 candidate | Planned | 11 | `ahgDacsManagePlugin`, `arDacsPlugin` | Description templates beside ISAD(G) |
+| `ahg-dacs-manage` | 1084 | V0.1 candidate | Covered |  | `ahgDacsManagePlugin`, `arDacsPlugin` | DACS display standard, from v0.0.76 |
 | `ahg-dam` | 4736 | out: GLAM sector | Planned | 21 | `ahgDAMPlugin` |  |
 | `ahg-data-migration` | 5270 | later: V1.0+ | Partial | 4 | `ahgDataMigrationPlugin` | AtoM CSV and EAD import with dry runs and reports |
-| `ahg-dc-manage` | 639 | V0.1 candidate | Partial | 11 | `ahgDcManagePlugin`, `sfDcPlugin` | Dublin Core export; a DC template in phase 11 |
+| `ahg-dc-manage` | 639 | V0.1 candidate | Covered |  | `ahgDcManagePlugin`, `sfDcPlugin` | Dublin Core export, and the Dublin Core display standard from v0.0.76 |
 | `ahg-dedupe` | 3144 | later: V1.0+ | Partial | 22 | `ahgDedupePlugin` | Duplicate authority records; other kinds later |
 | `ahg-discovery` | 5836 | V0.1 candidate | Covered |  | `ahgDiscoveryPlugin` | Public catalogue, relationship graph, OAI-PMH |
 | `ahg-display` | 10111 | V0.1 candidate | Partial | 20 | `ahgDisplayPlugin` | Public catalogue display; display profiles later |
@@ -84,7 +84,7 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-menu-manage` | 1790 | V0.1 candidate | Covered |  | `ahgMenuManagePlugin` | Navigation written fresh |
 | `ahg-metadata-export` | 15322 | V0.1 candidate | Partial | 11 | `ahgMetadataExportPlugin` | EAD, DC, MODS, CSV, RiC-O; more crosswalks in phase 11 |
 | `ahg-metadata-extraction` | 2770 | V0.1 candidate | Partial | 5 | `ahgMetadataExtractionPlugin` | Embedded metadata read with exiftool and kept on the master; creator, date, title, description and copyright proposed for review (v0.0.64); keywords wait for a subject proposal kind |
-| `ahg-mods-manage` | 956 | out: GLAM sector | Partial | 21 | `ahgModsManagePlugin`, `sfModsPlugin` | MODS export |
+| `ahg-mods-manage` | 956 | out: GLAM sector | Covered |  | `ahgModsManagePlugin`, `sfModsPlugin` | MODS export, and the MODS display standard from v0.0.76 |
 | `ahg-multi-tenant` | 2626 | later: V1.0+ | Covered |  | `ahgMultiTenantPlugin` | An institution per host, isolated by design; compare with PSIS ahgMultiTenantPlugin, which has more screens |
 | `ahg-museum` | 7661 | out: GLAM sector | Planned | 21 | `ahgMuseumPlugin` |  |
 | `ahg-narssa` | 581 | later: jurisdiction | Planned | 18 | `ahgNARSSAPlugin` |  |
@@ -98,7 +98,7 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-preservation` | 10211 | later: V1.0+ | Planned | 15 | `ahgPreservationPlugin` |  |
 | `ahg-privacy` | 16854 | later: jurisdiction | Planned | 18 | `ahgPrivacyPlugin` |  |
 | `ahg-provenance-ai` | 2662 | out: AI (V2+) | Planned | 17 (last) | none |  |
-| `ahg-rad-manage` | 1233 | V0.1 candidate | Planned | 11 | `ahgRadManagePlugin`, `sfRadPlugin` |  |
+| `ahg-rad-manage` | 1233 | V0.1 candidate | Covered |  | `ahgRadManagePlugin`, `sfRadPlugin` | RAD display standard, from v0.0.76 |
 | `ahg-rdm` | 2739 | later: V1.0+ | Planned | 22 | `ahgRdmPlugin` |  |
 | `ahg-records-manage` | 10687 | later: V1.0+ | Planned | 13 | `ahgRecordsManagePlugin` |  |
 | `ahg-reports` | 13861 | later: V1.0+ | Done | 8 | `ahgReportBuilderPlugin`, `ahgReportsPlugin` | Reports (overview, data quality, and six lists with filters and CSV), the authority completeness dashboard and the rights report; the report builder (saved reports, columns from the standards, sections, templates, export as CSV, XLSX, PDF and Word); the accession and donor reports come with phase 9; schedules with email, an archive of the files made, expiring share links and versions; not its comments, attachments, links, widgets, data snapshots or cover page |
@@ -188,7 +188,12 @@ Asked for by Dr Johan Pieterse on 28 October 2026: each Workspace screen has a p
 | `languagesOfDescription[]`, `scriptsOfDescription[]` | Language(s) and Script(s) of description, from ISO 639 and ISO 15924 | Same, from v0.0.73 |
 | `sources` | Sources | Same, from v0.0.73 |
 | `publication_status_id`, `updateDescendants` | Publication of each value and name, with "and everything inside" | Modelled |
-| `display_standard_id` | none: ISAD(G) only on screen; DC and MODS as exports | Missing |
+| `display_standard_id`, `update_descendants` | Display standard (ISAD(G), DACS, RAD, Dublin Core, MODS, under AtoM's names) and "Make this selection the new default for existing children"; the description is shown and edited, in the Workspace and the public catalogue, under the standard's own numbers, labels and areas, over the same values | Same, from v0.0.76 |
+| DACS `technicalAccess` | Technical access (DACS 4.3) | Same, from v0.0.76 |
+| RAD `otherTitleInformation`, `titleStatementOfResponsibility`, `editionStatementOfResponsibility`, `statementOfScaleCartographic`, `statementOfProjection`, `statementOfCoordinates`, `statementOfScaleArchitectural`, `issuingJurisdictionAndDenomination`, `titleProperOfPublishersSeries`, `parallelTitleOfPublishersSeries`, `otherTitleInformationOfPublishersSeries`, `statementOfResponsibilityRelatingToPublishersSeries`, `numberingWithinPublishersSeries`, `noteOnPublishersSeries`, `standardNumber` | The RAD elements of the same names, under RAD's numbers (1.1E to 1.9) | Same, from v0.0.76 |
+| RAD `materialTypeIds`, DC `dcTypeIds`, MODS `modsTypeIds` | General material designation, Type (DCMI) and Type of resource, from bundled lists; Dublin Core and MODS export them as dc:type and typeOfResource | Same, from v0.0.76 |
+| MODS `publisher_name`, `mods_note` | Publisher, and the Note | Same, from v0.0.76 |
+| MODS `creation_date`, `publication_date` (and their start dates) | Dates of the unit, with their date type | Modelled |
 | `source_standard` | Source standard, in the description control area | Same, from v0.0.75 |
 | `watermark_*` (per description) | Watermark for this description: the institution's, none, or its own type, position and opacity, with making the copies again | Same, from v0.0.75; Heratio's library of custom images is the institution's one image |
 | ICIP sensitivity | Traditional Knowledge and Biocultural Labels | Modelled |
@@ -268,7 +273,7 @@ Asked for by Dr Johan Pieterse on 28 October 2026: each Workspace screen has a p
 | `parent_id`, `narrow_terms`, `related_terms` | Broader, narrower and related concepts | Same |
 | `crossMatches[source, target, match type]` | Matches to other schemes | Same |
 | `scopeNotes[]`, `sourceNotes[]`, `displayNotes[]` | Scope note, Source note, Display note (with a definition and a history note besides) | Same |
-| `converse_term`, `self_reciprocal` (relation-type terms) | none: relation types are a bundled vocabulary with their inverse wording | Missing for local terms |
+| `converse_term`, `self_reciprocal` (relation-type terms) | Relation type on a concept of a relation-type vocabulary: Narrows (the bundled type it narrows), How it reads, Converse term, in each language; Self-reciprocal follows the bundled type. The bundled types and what they connect are rows, no longer configuration | Same, from v0.0.76 |
 | `protocol_*` (ICIP protocol on a term) | Community protocol: access condition, Label, owning community and region; a withholding condition hides the term and every unit of description tagged with it from the public, the API, OAI and accounts that may not change them, and keeps their files back; Labels bring Heratio's default conditions, which a record may override | Same, from v0.0.75; the AI fence waits for phase 17 and the owning community seeing its own material for Heratio's phase 3 |
 
 : Term and concept, field by field

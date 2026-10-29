@@ -34,16 +34,54 @@ final class Elements
     /** A storage container (openricx:Container): no ICA description standard covers it. */
     public const CONTAINER = 'container';
 
+    /** The elements of an archival description that DACS, RAD or MODS have and ISAD(G) does not. */
+    public const OTHER_STANDARDS = 'other-standards';
+
+    /** The display standards other than ISAD(G) (display-standard vocabulary), whose elements are the display-element vocabulary. */
+    public const DISPLAY = ['dacs', 'rad', 'dc', 'mods'];
+
     /** @var array<string, Collection<int, Concept>> */
     private static array $cache = [];
 
     /** Current elements of the standard, in the order of their numbers in it (an element added later still takes its place). */
     public static function of(string $standard): Collection
     {
+        if (in_array($standard, self::DISPLAY, true)) {
+            return self::$cache[$standard] ??= self::shown($standard);
+        }
+
         return self::$cache[$standard] ??= Concept::current()
             ->whereHas('broader', fn ($q) => $q->where('iri', Vocab::element($standard)))
             ->with('labels')->orderBy('id')->get()
             ->sort(fn (Concept $a, Concept $b) => version_compare(self::number($a) ?? '9', self::number($b) ?? '9') ?: strcmp($a->id, $b->id))->values();
+    }
+
+    /**
+     * The elements a display standard shows, in its order: each is the description element itself, so its values and
+     * the form's field are the same in every standard, labelled and numbered as the standard has it, with the
+     * element's definition as its help.
+     */
+    private static function shown(string $standard): Collection
+    {
+        $entries = Concept::current()->whereHas('broader', fn ($q) => $q->where('iri', Vocab::BASE.'display-element/'.$standard))->with('labels')->orderBy('id')->get();
+        $shows = fn (Concept $entry) => preg_match('/shows ([a-z0-9-]+)/', (string) $entry->labels->firstWhere('language', 'en')?->scope_note, $m) ? $m[1] : null;
+        $elements = Concept::current()->whereIn('iri', $entries->map(fn (Concept $e) => Vocab::element((string) $shows($e))))->with('labels')->get()->keyBy('notation');
+
+        return new Collection($entries->map(function (Concept $entry) use ($shows, $elements, $standard) {
+            $element = $elements[$shows($entry)] ?? null;
+            if ($element === null) {
+                return null;
+            }
+            $shown = clone $element;
+            $shown->setRelation('labels', $entry->labels->map(function ($label) use ($element) {
+                $own = $element->labels->firstWhere('language', $label->language) ?? $element->labels->firstWhere('language', 'en');
+
+                return tap(clone $label, fn ($l) => [$l->definition, $l->scope_note] = [$own?->definition, $own?->scope_note]);
+            }));
+            $shown->setAttribute('shown_number', preg_match('/^'.strtoupper($standard).' (\d+(?:\.\d+)*[A-Z]?)/', (string) $entry->labels->firstWhere('language', 'en')?->scope_note, $m) ? $m[1] : null);
+
+            return $shown;
+        })->filter()->values()->all());
     }
 
     /** The name type (name-type notation) an element's values are kept as, or null if it is not a name element. */
@@ -75,11 +113,20 @@ final class Elements
             '3.4' => 'Conditions of access and use area', '3.5' => 'Allied materials area', '3.6' => 'Notes area', '3.7' => 'Description control area'],
         self::ISAAR_CPF => ['5.1' => 'Identity area', '5.2' => 'Description area', '5.3' => 'Relationships area', '5.4' => 'Control area'],
         self::ACTIVITY => ['5.1' => 'Identity area', '5.2' => 'Context area'],
+        // The display standards' own headings, AtoM's; '' is the heading of the elements the standard does not number.
+        'dacs' => ['2' => 'Identity elements', '3' => 'Content and structure elements', '4' => 'Conditions of access and use elements',
+            '5' => 'Acquisition and appraisal elements', '6' => 'Related materials elements', '7' => 'Notes element', '8' => 'Description control element'],
+        'rad' => ['1.1' => 'Title and statement of responsibility area', '1.2' => 'Edition area', '1.3' => 'Class of material specific details area',
+            '1.4' => 'Dates of creation area', '1.5' => 'Physical description area', '1.6' => "Publisher's series area", '1.7' => 'Archival description area',
+            '1.8' => 'Notes area', '1.9' => 'Standard number area', '' => 'Control area'],
     ];
 
     /** The element's number in its standard, such as 5.3.1 or 3.1.2, from its scope note; an AtoM field the standard does not number has its area's, such as 3.7. */
     public static function number(Concept $element): ?string
     {
+        if (array_key_exists('shown_number', $element->getAttributes())) {
+            return $element->getAttribute('shown_number');
+        }
         $note = (string) $element->labels->firstWhere('language', 'en')?->scope_note;
 
         return preg_match('/(?:ISDIAH|ISAD\(G\)|ISAAR\(CPF\)|ISDF) (\d+\.\d+(?:\.\d+)?)/', $note, $m) ? $m[1] : null;
@@ -95,6 +142,16 @@ final class Elements
         $areas = [];
         foreach (self::of($standard) as $element) {
             $number = self::number($element);
+            if (in_array($standard, self::DISPLAY, true)) {
+                // DACS numbers its areas by chapter (2), RAD by rule (1.1, from 1.1B).
+                $area = collect([preg_match('/^\d+\.\d+/', (string) $number, $m) ? $m[0] : null, strtok((string) $number, '.')])
+                    ->first(fn ($candidate) => $candidate && isset(self::AREAS[$standard][$candidate]));
+                $heading = $area ? $area.' '.__(self::AREAS[$standard][$area]) : __(self::AREAS[$standard][''] ?? 'Description');
+                $areas[$heading] ??= new Collection;
+                $areas[$heading]->push($element);
+
+                continue;
+            }
             $area = $number ? implode('.', array_slice(explode('.', $number), 0, 2)) : null;
             // An AtoM field a numbered standard has no element for (a repository's geographic subregion, say) is among
             // its access points, as AtoM shows it; a standard with no numbers has one area.

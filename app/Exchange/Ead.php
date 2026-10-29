@@ -329,7 +329,7 @@ class Ead
             $x->writeAttribute('label', 'Creator');
             foreach ($creators as $relation) {
                 $this->name($x, $this->nameElement($relation->other), $this->view->label($relation->other), $relation->other->iri,
-                    $relation->relationType->notation === 'accumulation' ? 'accumulator' : 'creator');
+                    $relation->kind() === 'accumulation' ? 'accumulator' : 'creator');
             }
             $x->endElement();
         }

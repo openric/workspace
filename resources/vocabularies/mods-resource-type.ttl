@@ -1,0 +1,82 @@
+# OpenRiC Workspace - OpenRiC Workspace MODS Types of Resource.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# MODS typeOfResource values, AtoM's MODS resource type taxonomy (Heratio's modsTypeIds).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/mods-resource-type/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace MODS Types of Resource"@en ;
+    dcterms:description "MODS typeOfResource values, AtoM's MODS resource type taxonomy (Heratio's modsTypeIds)."@en ;
+    dcterms:issued "2026-10-29"^^xsd:date ;
+    skos:hasTopConcept v:text, v:cartographic, v:notated-music, v:sound-recording, v:sound-recording-musical, v:sound-recording-nonmusical, v:still-image, v:moving-image, v:three-dimensional-object, v:software-multimedia, v:mixed-material .
+
+v:text a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "text"@en, "teks"@af ;
+    skos:scopeNote "Exported as MODS typeOfResource; not exported in RiC, which keeps no such list."@en .
+
+v:cartographic a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "cartographic"@en, "kartografies"@af ;
+    skos:scopeNote "Exported as MODS typeOfResource; not exported in RiC, which keeps no such list."@en .
+
+v:notated-music a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "notated music"@en, "genoteerde musiek"@af ;
+    skos:scopeNote "Exported as MODS typeOfResource; not exported in RiC, which keeps no such list."@en .
+
+v:sound-recording a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "sound recording"@en, "klankopname"@af ;
+    skos:scopeNote "Exported as MODS typeOfResource; not exported in RiC, which keeps no such list."@en .
+
+v:sound-recording-musical a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "sound recording-musical"@en, "klankopname-musikaal"@af ;
+    skos:scopeNote "Exported as MODS typeOfResource; not exported in RiC, which keeps no such list."@en .
+
+v:sound-recording-nonmusical a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "sound recording-nonmusical"@en, "klankopname-niemusikaal"@af ;
+    skos:scopeNote "Exported as MODS typeOfResource; not exported in RiC, which keeps no such list."@en .
+
+v:still-image a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "still image"@en, "stilbeeld"@af ;
+    skos:scopeNote "Exported as MODS typeOfResource; not exported in RiC, which keeps no such list."@en .
+
+v:moving-image a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "moving image"@en, "bewegende beeld"@af ;
+    skos:scopeNote "Exported as MODS typeOfResource; not exported in RiC, which keeps no such list."@en .
+
+v:three-dimensional-object a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "three dimensional object"@en, "driedimensionele voorwerp"@af ;
+    skos:scopeNote "Exported as MODS typeOfResource; not exported in RiC, which keeps no such list."@en .
+
+v:software-multimedia a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "software, multimedia"@en, "sagteware, multimedia"@af ;
+    skos:scopeNote "Exported as MODS typeOfResource; not exported in RiC, which keeps no such list."@en .
+
+v:mixed-material a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "mixed material"@en, "gemengde materiaal"@af ;
+    skos:scopeNote "Exported as MODS typeOfResource; not exported in RiC, which keeps no such list."@en .

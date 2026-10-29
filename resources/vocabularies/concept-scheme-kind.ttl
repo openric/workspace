@@ -13,7 +13,7 @@ v: a skos:ConceptScheme ;
     dcterms:title "OpenRiC Workspace Concept Scheme Kinds"@en ;
     dcterms:description "The kinds of vocabulary an institution keeps for its access points and types."@en ;
     dcterms:issued "2026-10-20"^^xsd:date ;
-    skos:hasTopConcept v:subject, v:occupation-type, v:place-type, v:documentary-form-type, v:legal-status, v:activity-type, v:container-type, v:storage-place-type, v:level-of-description .
+    skos:hasTopConcept v:subject, v:occupation-type, v:place-type, v:documentary-form-type, v:legal-status, v:activity-type, v:container-type, v:storage-place-type, v:level-of-description, v:relation-type .
 
 v:subject a skos:Concept ;
     skos:inScheme v: ;
@@ -77,3 +77,10 @@ v:level-of-description a skos:Concept ;
     skos:prefLabel "Levels of description"@en ;
     skos:scopeNote "The institution's own levels, beside the bundled level-of-description vocabulary (ISAD(G) 3.1.4), as AtoM's levels of description taxonomy allows. Each level's scope note names what its units are, rico:RecordSet, rico:Record or rico:RecordPart (rico:RecordResource where it names none); a record set is linked to its level by rico:hasRecordSetType, and EAD carries the level as otherlevel."@en ;
     skos:definition "Levels of arrangement an institution uses that the bundled list does not have, such as volume or document."@en .
+
+v:relation-type a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Relation types"@en ;
+    skos:scopeNote "The institution's own relation types, as AtoM's and Heratio's relation type taxonomies allow, each narrowing a bundled relation type (relation-type vocabulary) with its own wording and converse term. A relation of a local type connects what its bundled type connects and is exported as that type's rico:Relation subclass and shortcut properties, with its own IRI as the relation's type."@en ;
+    skos:definition "Kinds of relation an institution uses that the bundled list does not have, such as is the godparent of under guardianship."@en .

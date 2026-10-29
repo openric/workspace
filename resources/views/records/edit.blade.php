@@ -17,7 +17,15 @@
         <select id="level" name="level" style="font: inherit; padding: .5rem">
             @foreach($levels as $level)<option value="{{ $level->iri }}" @selected(old('level', $record->level->iri) === $level->iri)>{{ $level->label(\App\Support\Vocab::languages()) }} ({{ $level->ricTerm() ?? 'rico:RecordResource' }})</option>@endforeach
         </select>
-        @include('description._fields', ['subject' => $record, 'standard' => \App\Description\Elements::ISAD_G, 'language' => $language])
+        @include('description._fields', ['subject' => $record, 'standard' => $record->standard(), 'language' => $language])
+        @if($mayUpdate && $typeChoices->isNotEmpty())
+            <input type="hidden" name="types_shown" value="1">
+            @php($typesHeading = ['rad' => 'General material designation', 'dc' => 'Type', 'mods' => 'Type of resource'][$record->standard()])
+            <label for="types">{{ __($typesHeading) }}</label> @include('description._ric', ['term' => null])
+            <select id="types" name="types[]" multiple size="6" style="width: 100%">
+                @foreach($typeChoices as $type)<option value="{{ $type->notation }}" @selected(in_array($type->notation, old('types', $record->resourceTypes->pluck('type.notation')->all()), true))>{{ $type->label(\App\Support\Vocab::languages()) }}</option>@endforeach
+            </select>
+        @endif
         @if($mayUpdate)
         <fieldset style="margin-top: 1.5rem; border: 1px solid var(--line); padding: 0 1rem 1rem">
             <legend><strong>{{ __('Description control') }}</strong></legend>
@@ -26,6 +34,13 @@
             <label for="source_standard">{{ __('Source standard') }}</label> @include('description._ric', ['term' => null])
             <small id="source-standard-help">{{ __('Record the standard used when entering the description, such as ISAD(G), RAD or DACS.') }}</small>
             <input id="source_standard" name="source_standard" maxlength="255" aria-describedby="source-standard-help" value="{{ old('source_standard', $record->source_standard) }}">
+            <label for="display_standard">{{ __('Display standard') }}</label> @include('description._ric', ['term' => null])
+            <small id="display-standard-help">{{ __('The standard the description is shown and edited in; the values are the same in every standard.') }}</small>
+            <select id="display_standard" name="display_standard" aria-describedby="display-standard-help" style="font: inherit; padding: .5rem">
+                <option value="">{{ __('None: ISAD(G)') }}</option>
+                @foreach($standards as $standard)<option value="{{ $standard->notation }}" @selected(old('display_standard', $record->displayStandard?->notation) === $standard->notation)>{{ $standard->label(\App\Support\Vocab::languages()) }}</option>@endforeach
+            </select>
+            <label style="font-weight: normal"><input type="hidden" name="display_standard_inside" value="0"><input type="checkbox" name="display_standard_inside" value="1" style="width: auto"> {{ __('Make this selection the new default for existing children') }}</label>
             <label for="display_as_compound">{{ __('View children as compound?') }}</label>
             <small id="compound-help">{{ __('Yes: the public page shows the pictures of the units inside as one strip. No: they are reached one by one.') }}</small>
             <select id="display_as_compound" name="display_as_compound" aria-describedby="compound-help" style="font: inherit; padding: .5rem">

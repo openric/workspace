@@ -1,6 +1,6 @@
 {{-- OpenRiC Workspace - the creators of a unit (ISAD(G) 3.2.1) and the history their authority records give (3.2.2). Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems. SPDX-License-Identifier: AGPL-3.0-or-later --}}
 {{-- Needs $relations (RelationService::of the unit) and $drafts. --}}
-@php($creators = $relations->filter(fn ($r) => in_array($r->relationType->notation, ['creation', 'accumulation'], true) && in_array($r->standing(), ['accepted', 'disputed'], true)))
+@php($creators = $relations->filter(fn ($r) => in_array($r->kind(), ['creation', 'accumulation'], true) && in_array($r->standing(), ['accepted', 'disputed'], true)))
 <section>
     <h2>{{ __('Creator(s)') }} (3.2.1)</h2>
     @forelse($creators as $relation)

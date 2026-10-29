@@ -1,0 +1,644 @@
+# OpenRiC Workspace - OpenRiC Workspace Display Elements.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# The elements of each display standard other than ISAD(G) (display-standard vocabulary), in the order the standard
+# lists them, from Heratio's DACS, RAD, Dublin Core and MODS templates (ahg-dacs-manage, ahg-rad-manage, ahg-dc-manage,
+# ahg-mods-manage and their show pages) under AtoM's labels. Each names its number in the standard, where it has one,
+# and the description element it shows ("shows" in the scope note): a value is kept once, under its element, and every
+# standard shows the same value. A standard shows only the elements it lists.
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/display-element/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Display Elements"@en ;
+    dcterms:description "The elements each display standard shows, with their numbers and labels in it."@en ;
+    dcterms:issued "2026-10-29"^^xsd:date ;
+    skos:hasTopConcept v:dacs, v:rad, v:dc, v:mods .
+
+v:dacs a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "DACS elements"@en ;
+    skos:scopeNote "The elements the DACS display standard shows."@en .
+
+v:dacs-title a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:dacs ;
+    skos:prefLabel "Title"@en ;
+    skos:scopeNote "DACS 2.3; shows title."@en .
+
+v:dacs-alternate-title a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:dacs ;
+    skos:prefLabel "Alternate title"@en ;
+    skos:scopeNote "DACS 2.3; shows alternate-title."@en .
+
+v:dacs-dates-expressed a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:dacs ;
+    skos:prefLabel "Date"@en ;
+    skos:scopeNote "DACS 2.4; shows dates-expressed."@en .
+
+v:dacs-extent a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:dacs ;
+    skos:prefLabel "Extent"@en ;
+    skos:scopeNote "DACS 2.5; shows extent."@en .
+
+v:dacs-creator-history a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:dacs ;
+    skos:prefLabel "Administrative / biographical history"@en ;
+    skos:scopeNote "DACS 2.7; shows creator-history."@en .
+
+v:dacs-scope-and-content a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:dacs ;
+    skos:prefLabel "Scope and content"@en ;
+    skos:scopeNote "DACS 3.1; shows scope-and-content."@en .
+
+v:dacs-arrangement a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:dacs ;
+    skos:prefLabel "System of arrangement"@en ;
+    skos:scopeNote "DACS 3.2; shows arrangement."@en .
+
+v:dacs-conditions-governing-access a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:dacs ;
+    skos:prefLabel "Conditions governing access"@en ;
+    skos:scopeNote "DACS 4.1; shows conditions-governing-access."@en .
+
+v:dacs-physical-characteristics a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:dacs ;
+    skos:prefLabel "Physical access"@en ;
+    skos:scopeNote "DACS 4.2; shows physical-characteristics."@en .
+
+v:dacs-technical-access a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:dacs ;
+    skos:prefLabel "Technical access"@en ;
+    skos:scopeNote "DACS 4.3; shows technical-access."@en .
+
+v:dacs-conditions-governing-reproduction a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:dacs ;
+    skos:prefLabel "Conditions governing reproduction and use"@en ;
+    skos:scopeNote "DACS 4.4; shows conditions-governing-reproduction."@en .
+
+v:dacs-languages-of-material-codes a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:dacs ;
+    skos:prefLabel "Languages and scripts of the material"@en ;
+    skos:scopeNote "DACS 4.5; shows languages-of-material-codes."@en .
+
+v:dacs-scripts-of-material-codes a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:dacs ;
+    skos:prefLabel "Script of material"@en ;
+    skos:scopeNote "DACS 4.5; shows scripts-of-material-codes."@en .
+
+v:dacs-languages-of-material a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:dacs ;
+    skos:prefLabel "Language and script notes"@en ;
+    skos:scopeNote "DACS 4.5; shows languages-of-material."@en .
+
+v:dacs-finding-aids-note a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:dacs ;
+    skos:prefLabel "Finding aids"@en ;
+    skos:scopeNote "DACS 4.6; shows finding-aids-note."@en .
+
+v:dacs-archival-history a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:dacs ;
+    skos:prefLabel "Custodial history"@en ;
+    skos:scopeNote "DACS 5.1; shows archival-history."@en .
+
+v:dacs-acquisition a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:dacs ;
+    skos:prefLabel "Immediate source of acquisition"@en ;
+    skos:scopeNote "DACS 5.2; shows acquisition."@en .
+
+v:dacs-appraisal a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:dacs ;
+    skos:prefLabel "Appraisal, destruction and scheduling"@en ;
+    skos:scopeNote "DACS 5.3; shows appraisal."@en .
+
+v:dacs-accruals a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:dacs ;
+    skos:prefLabel "Accruals"@en ;
+    skos:scopeNote "DACS 5.4; shows accruals."@en .
+
+v:dacs-location-of-originals a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:dacs ;
+    skos:prefLabel "Existence and location of originals"@en ;
+    skos:scopeNote "DACS 6.1; shows location-of-originals."@en .
+
+v:dacs-location-of-copies a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:dacs ;
+    skos:prefLabel "Existence and location of copies"@en ;
+    skos:scopeNote "DACS 6.2; shows location-of-copies."@en .
+
+v:dacs-related-units a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:dacs ;
+    skos:prefLabel "Related archival materials"@en ;
+    skos:scopeNote "DACS 6.3; shows related-units."@en .
+
+v:dacs-publication-note a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:dacs ;
+    skos:prefLabel "Publication note"@en ;
+    skos:scopeNote "DACS 6.4; shows publication-note."@en .
+
+v:dacs-note a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:dacs ;
+    skos:prefLabel "General notes"@en ;
+    skos:scopeNote "DACS 7.1; shows note."@en .
+
+v:dacs-sources-of-description a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:dacs ;
+    skos:prefLabel "Sources used"@en ;
+    skos:scopeNote "DACS 8.1.1; shows sources-of-description."@en .
+
+v:dacs-archivists-note a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:dacs ;
+    skos:prefLabel "Archivist and date"@en ;
+    skos:scopeNote "DACS 8.1.2; shows archivists-note."@en .
+
+v:dacs-rules-or-conventions a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:dacs ;
+    skos:prefLabel "Rules or conventions"@en ;
+    skos:scopeNote "DACS 8.1.3; shows rules-or-conventions."@en .
+
+v:dacs-dates-of-descriptions a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:dacs ;
+    skos:prefLabel "Date(s) of description(s)"@en ;
+    skos:scopeNote "DACS 8.1.5; shows dates-of-descriptions."@en .
+
+v:dacs-institution-identifier a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:dacs ;
+    skos:prefLabel "Institution identifier"@en ;
+    skos:scopeNote "DACS 8.1; shows institution-identifier."@en .
+
+v:dacs-languages-of-description a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:dacs ;
+    skos:prefLabel "Language(s) of description"@en ;
+    skos:scopeNote "DACS 8.1; shows languages-of-description."@en .
+
+v:dacs-scripts-of-description a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:dacs ;
+    skos:prefLabel "Script(s) of description"@en ;
+    skos:scopeNote "DACS 8.1; shows scripts-of-description."@en .
+
+v:rad a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "RAD elements"@en ;
+    skos:scopeNote "The elements the RAD display standard shows."@en .
+
+v:rad-title a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:rad ;
+    skos:prefLabel "Title proper"@en ;
+    skos:scopeNote "RAD 1.1B; shows title."@en .
+
+v:rad-alternate-title a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:rad ;
+    skos:prefLabel "Parallel titles"@en ;
+    skos:scopeNote "RAD 1.1D; shows alternate-title."@en .
+
+v:rad-other-title-information a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:rad ;
+    skos:prefLabel "Other title information"@en ;
+    skos:scopeNote "RAD 1.1E; shows other-title-information."@en .
+
+v:rad-title-statement-of-responsibility a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:rad ;
+    skos:prefLabel "Statements of responsibility"@en ;
+    skos:scopeNote "RAD 1.1F; shows title-statement-of-responsibility."@en .
+
+v:rad-edition a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:rad ;
+    skos:prefLabel "Edition statement"@en ;
+    skos:scopeNote "RAD 1.2B; shows edition."@en .
+
+v:rad-edition-statement-of-responsibility a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:rad ;
+    skos:prefLabel "Statements of responsibility relating to the edition"@en ;
+    skos:scopeNote "RAD 1.2C; shows edition-statement-of-responsibility."@en .
+
+v:rad-statement-of-scale-cartographic a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:rad ;
+    skos:prefLabel "Statement of scale (cartographic)"@en ;
+    skos:scopeNote "RAD 1.3; shows statement-of-scale-cartographic."@en .
+
+v:rad-statement-of-projection a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:rad ;
+    skos:prefLabel "Statement of projection (cartographic)"@en ;
+    skos:scopeNote "RAD 1.3; shows statement-of-projection."@en .
+
+v:rad-statement-of-coordinates a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:rad ;
+    skos:prefLabel "Statement of coordinates (cartographic)"@en ;
+    skos:scopeNote "RAD 1.3; shows statement-of-coordinates."@en .
+
+v:rad-statement-of-scale-architectural a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:rad ;
+    skos:prefLabel "Statement of scale (architectural)"@en ;
+    skos:scopeNote "RAD 1.3; shows statement-of-scale-architectural."@en .
+
+v:rad-issuing-jurisdiction-and-denomination a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:rad ;
+    skos:prefLabel "Issuing jurisdiction and denomination (philatelic)"@en ;
+    skos:scopeNote "RAD 1.3; shows issuing-jurisdiction-and-denomination."@en .
+
+v:rad-dates-expressed a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:rad ;
+    skos:prefLabel "Dates of creation"@en ;
+    skos:scopeNote "RAD 1.4; shows dates-expressed."@en .
+
+v:rad-extent a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:rad ;
+    skos:prefLabel "Physical description"@en ;
+    skos:scopeNote "RAD 1.5; shows extent."@en .
+
+v:rad-title-proper-of-publishers-series a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:rad ;
+    skos:prefLabel "Title proper of publisher's series"@en ;
+    skos:scopeNote "RAD 1.6B; shows title-proper-of-publishers-series."@en .
+
+v:rad-parallel-titles-of-publishers-series a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:rad ;
+    skos:prefLabel "Parallel titles of publisher's series"@en ;
+    skos:scopeNote "RAD 1.6C; shows parallel-titles-of-publishers-series."@en .
+
+v:rad-other-title-information-of-publishers-series a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:rad ;
+    skos:prefLabel "Other title information of publisher's series"@en ;
+    skos:scopeNote "RAD 1.6D; shows other-title-information-of-publishers-series."@en .
+
+v:rad-statement-of-responsibility-of-publishers-series a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:rad ;
+    skos:prefLabel "Statement of responsibility relating to publisher's series"@en ;
+    skos:scopeNote "RAD 1.6E; shows statement-of-responsibility-of-publishers-series."@en .
+
+v:rad-numbering-within-publishers-series a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:rad ;
+    skos:prefLabel "Numbering within publisher's series"@en ;
+    skos:scopeNote "RAD 1.6F; shows numbering-within-publishers-series."@en .
+
+v:rad-note-on-publishers-series a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:rad ;
+    skos:prefLabel "Note on publisher's series"@en ;
+    skos:scopeNote "RAD 1.6G; shows note-on-publishers-series."@en .
+
+v:rad-creator-history a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:rad ;
+    skos:prefLabel "Administrative history / Biographical sketch"@en ;
+    skos:scopeNote "RAD 1.7B; shows creator-history."@en .
+
+v:rad-archival-history a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:rad ;
+    skos:prefLabel "Custodial history"@en ;
+    skos:scopeNote "RAD 1.7C; shows archival-history."@en .
+
+v:rad-scope-and-content a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:rad ;
+    skos:prefLabel "Scope and content"@en ;
+    skos:scopeNote "RAD 1.7D; shows scope-and-content."@en .
+
+v:rad-physical-characteristics a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:rad ;
+    skos:prefLabel "Physical condition"@en ;
+    skos:scopeNote "RAD 1.8; shows physical-characteristics."@en .
+
+v:rad-acquisition a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:rad ;
+    skos:prefLabel "Immediate source of acquisition"@en ;
+    skos:scopeNote "RAD 1.8; shows acquisition."@en .
+
+v:rad-arrangement a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:rad ;
+    skos:prefLabel "Arrangement"@en ;
+    skos:scopeNote "RAD 1.8; shows arrangement."@en .
+
+v:rad-languages-of-material-codes a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:rad ;
+    skos:prefLabel "Language of material"@en ;
+    skos:scopeNote "RAD 1.8; shows languages-of-material-codes."@en .
+
+v:rad-scripts-of-material-codes a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:rad ;
+    skos:prefLabel "Script of material"@en ;
+    skos:scopeNote "RAD 1.8; shows scripts-of-material-codes."@en .
+
+v:rad-languages-of-material a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:rad ;
+    skos:prefLabel "Language and script note"@en ;
+    skos:scopeNote "RAD 1.8; shows languages-of-material."@en .
+
+v:rad-location-of-originals a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:rad ;
+    skos:prefLabel "Location of originals"@en ;
+    skos:scopeNote "RAD 1.8; shows location-of-originals."@en .
+
+v:rad-location-of-copies a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:rad ;
+    skos:prefLabel "Availability of other formats"@en ;
+    skos:scopeNote "RAD 1.8; shows location-of-copies."@en .
+
+v:rad-conditions-governing-access a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:rad ;
+    skos:prefLabel "Restrictions on access"@en ;
+    skos:scopeNote "RAD 1.8; shows conditions-governing-access."@en .
+
+v:rad-conditions-governing-reproduction a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:rad ;
+    skos:prefLabel "Terms governing use, reproduction, and publication"@en ;
+    skos:scopeNote "RAD 1.8; shows conditions-governing-reproduction."@en .
+
+v:rad-finding-aids-note a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:rad ;
+    skos:prefLabel "Finding aids"@en ;
+    skos:scopeNote "RAD 1.8; shows finding-aids-note."@en .
+
+v:rad-related-units a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:rad ;
+    skos:prefLabel "Associated materials"@en ;
+    skos:scopeNote "RAD 1.8; shows related-units."@en .
+
+v:rad-accruals a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:rad ;
+    skos:prefLabel "Accruals"@en ;
+    skos:scopeNote "RAD 1.8; shows accruals."@en .
+
+v:rad-appraisal a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:rad ;
+    skos:prefLabel "Appraisal, destruction and scheduling"@en ;
+    skos:scopeNote "RAD 1.8; shows appraisal."@en .
+
+v:rad-publication-note a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:rad ;
+    skos:prefLabel "Publication note"@en ;
+    skos:scopeNote "RAD 1.8; shows publication-note."@en .
+
+v:rad-note a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:rad ;
+    skos:prefLabel "Other notes"@en ;
+    skos:scopeNote "RAD 1.8; shows note."@en .
+
+v:rad-standard-number a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:rad ;
+    skos:prefLabel "Standard number"@en ;
+    skos:scopeNote "RAD 1.9; shows standard-number."@en .
+
+v:rad-rules-or-conventions a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:rad ;
+    skos:prefLabel "Rules or conventions"@en ;
+    skos:scopeNote "RAD, control area; shows rules-or-conventions."@en .
+
+v:rad-sources-of-description a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:rad ;
+    skos:prefLabel "Sources"@en ;
+    skos:scopeNote "RAD, control area; shows sources-of-description."@en .
+
+v:rad-dates-of-descriptions a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:rad ;
+    skos:prefLabel "Dates of creation, revision and deletion"@en ;
+    skos:scopeNote "RAD, control area; shows dates-of-descriptions."@en .
+
+v:rad-archivists-note a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:rad ;
+    skos:prefLabel "Archivist's note"@en ;
+    skos:scopeNote "RAD, control area; shows archivists-note."@en .
+
+v:rad-institution-identifier a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:rad ;
+    skos:prefLabel "Institution identifier"@en ;
+    skos:scopeNote "RAD, control area; shows institution-identifier."@en .
+
+v:rad-languages-of-description a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:rad ;
+    skos:prefLabel "Language(s) of description"@en ;
+    skos:scopeNote "RAD, control area; shows languages-of-description."@en .
+
+v:rad-scripts-of-description a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:rad ;
+    skos:prefLabel "Script(s) of description"@en ;
+    skos:scopeNote "RAD, control area; shows scripts-of-description."@en .
+
+v:dc a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Dublin Core elements"@en ;
+    skos:scopeNote "The elements the Dublin Core display standard shows."@en .
+
+v:dc-title a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:dc ;
+    skos:prefLabel "Title"@en ;
+    skos:scopeNote "Dublin Core title; shows title."@en .
+
+v:dc-dates-expressed a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:dc ;
+    skos:prefLabel "Date"@en ;
+    skos:scopeNote "Dublin Core date; shows dates-expressed."@en .
+
+v:dc-scope-and-content a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:dc ;
+    skos:prefLabel "Description"@en ;
+    skos:scopeNote "Dublin Core description; shows scope-and-content."@en .
+
+v:dc-extent a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:dc ;
+    skos:prefLabel "Format"@en ;
+    skos:scopeNote "Dublin Core format; shows extent."@en .
+
+v:dc-location-of-originals a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:dc ;
+    skos:prefLabel "Source"@en ;
+    skos:scopeNote "Dublin Core source; shows location-of-originals."@en .
+
+v:dc-languages-of-material-codes a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:dc ;
+    skos:prefLabel "Language"@en ;
+    skos:scopeNote "Dublin Core language; shows languages-of-material-codes."@en .
+
+v:dc-related-units a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:dc ;
+    skos:prefLabel "Relation"@en ;
+    skos:scopeNote "Dublin Core relation; shows related-units."@en .
+
+v:dc-conditions-governing-access a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:dc ;
+    skos:prefLabel "Rights"@en ;
+    skos:scopeNote "Dublin Core rights; shows conditions-governing-access."@en .
+
+v:mods a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "MODS elements"@en ;
+    skos:scopeNote "The elements the MODS display standard shows."@en .
+
+v:mods-title a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:mods ;
+    skos:prefLabel "title"@en ;
+    skos:scopeNote "MODS titleInfo/title; shows title."@en .
+
+v:mods-alternate-title a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:mods ;
+    skos:prefLabel "alternative title"@en ;
+    skos:scopeNote "MODS titleInfo type alternative; shows alternate-title."@en .
+
+v:mods-publisher a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:mods ;
+    skos:prefLabel "publisher"@en ;
+    skos:scopeNote "MODS originInfo/publisher; shows publisher."@en .
+
+v:mods-dates-expressed a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:mods ;
+    skos:prefLabel "dateCreated / dateIssued"@en ;
+    skos:scopeNote "MODS originInfo/dateCreated; shows dates-expressed."@en .
+
+v:mods-edition a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:mods ;
+    skos:prefLabel "edition"@en ;
+    skos:scopeNote "MODS originInfo/edition; shows edition."@en .
+
+v:mods-languages-of-material-codes a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:mods ;
+    skos:prefLabel "languageTerm"@en ;
+    skos:scopeNote "MODS language/languageTerm; shows languages-of-material-codes."@en .
+
+v:mods-extent a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:mods ;
+    skos:prefLabel "extent"@en ;
+    skos:scopeNote "MODS physicalDescription/extent; shows extent."@en .
+
+v:mods-physical-characteristics a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:mods ;
+    skos:prefLabel "note (physical)"@en ;
+    skos:scopeNote "MODS physicalDescription/note; shows physical-characteristics."@en .
+
+v:mods-scope-and-content a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:mods ;
+    skos:prefLabel "abstract"@en ;
+    skos:scopeNote "MODS abstract; shows scope-and-content."@en .
+
+v:mods-note a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:mods ;
+    skos:prefLabel "note"@en ;
+    skos:scopeNote "MODS note; shows note."@en .
+
+v:mods-related-units a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:mods ;
+    skos:prefLabel "related"@en ;
+    skos:scopeNote "MODS relatedItem; shows related-units."@en .
+
+v:mods-location-of-originals a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:mods ;
+    skos:prefLabel "physicalLocation"@en ;
+    skos:scopeNote "MODS location/physicalLocation; shows location-of-originals."@en .
+
+v:mods-conditions-governing-access a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:mods ;
+    skos:prefLabel "restrictionOnAccess"@en ;
+    skos:scopeNote "MODS accessCondition restrictionOnAccess; shows conditions-governing-access."@en .
+
+v:mods-conditions-governing-reproduction a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:mods ;
+    skos:prefLabel "useAndReproduction"@en ;
+    skos:scopeNote "MODS accessCondition useAndReproduction; shows conditions-governing-reproduction."@en .
+
+v:mods-institution-identifier a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:mods ;
+    skos:prefLabel "recordContentSource"@en ;
+    skos:scopeNote "MODS recordInfo/recordContentSource; shows institution-identifier."@en .

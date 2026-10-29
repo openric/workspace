@@ -16,6 +16,7 @@ namespace App\Exchange;
 
 use App\Models\RecordResource;
 use App\Rights\PublicRights;
+use App\Support\Vocab;
 use XMLWriter;
 
 class DublinCore
@@ -66,6 +67,10 @@ class DublinCore
         $element('type', $unit->level->label(['en', 'und']));
         foreach ($points['genres'] as $relation) {
             $element('type', $view->label($relation->other));
+        }
+        // The DCMI types the Dublin Core display standard gives it.
+        foreach ($unit->resourceTypes()->whereHas('type.vocabulary', fn ($q) => $q->where('iri', Vocab::BASE.'dcmi-type/'))->with('type.labels')->get() as $type) {
+            $element('type', (string) $type->type->label(['en']));
         }
         $text('format', 'extent');
         $element('identifier', $unit->referenceCode());

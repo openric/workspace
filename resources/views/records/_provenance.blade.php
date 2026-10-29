@@ -1,6 +1,6 @@
 {{-- OpenRiC Workspace - custody and provenance of a unit, in time order: who created, accumulated, held, owned and managed it. Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems. SPDX-License-Identifier: AGPL-3.0-or-later --}}
 {{-- Needs $record and $relations. The current holder is the unit's repository; the rest are relations with their dates. --}}
-@php($custody = $relations->filter(fn ($r) => in_array($r->relationType->notation, ['creation', 'accumulation', 'holding', 'ownership', 'management'], true) && in_array($r->standing(), ['accepted', 'disputed'], true))
+@php($custody = $relations->filter(fn ($r) => in_array($r->kind(), ['creation', 'accumulation', 'holding', 'ownership', 'management'], true) && in_array($r->standing(), ['accepted', 'disputed'], true))
     ->sortBy(fn ($r) => [$r->datedAs('beginning')?->earliest?->format('Y-m-d') ?? '9999', $r->created_at]))
 <section>
     <h2>{{ __('Custody and provenance') }}</h2>

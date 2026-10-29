@@ -28,18 +28,18 @@ class DescriptionService
     public function __construct(private NameService $names) {}
 
     /**
-     * @param  string  $standard  Elements::ISDIAH or Elements::ISAD_G
+     * @param  string|list<string>  $standard  Elements::ISDIAH or Elements::ISAD_G, or the standards whose elements the subject keeps
      * @param  array<string, ?string>  $values  element notation => text
      * @param  string  $required  the element that must keep a value in some language
      */
-    public function describe(Model $subject, string $standard, array $values, string $language, string $required, ?User $actor = null): void
+    public function describe(Model $subject, string|array $standard, array $values, string $language, string $required, ?User $actor = null): void
     {
         if (! Bcp47::valid($language)) {
             throw new InvalidArgumentException("$language is not a BCP 47 language tag");
         }
-        $unknown = array_diff(array_keys($values), Elements::notations($standard));
+        $unknown = array_diff(array_keys($values), array_merge(...array_map(Elements::notations(...), (array) $standard)));
         if ($unknown !== []) {
-            throw new InvalidArgumentException("not $standard elements: ".implode(', ', $unknown));
+            throw new InvalidArgumentException('not '.implode(' or ', (array) $standard).' elements: '.implode(', ', $unknown));
         }
         DB::transaction(fn () => AuditLog::actingAs($actor, function () use ($subject, $values, $language, $required) {
             $draft = $this->concept(Vocab::valueState('draft'));

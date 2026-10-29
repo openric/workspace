@@ -95,7 +95,7 @@
             <section id="assertion-{{ $a->id }}" style="border: 1px solid var(--line); padding: 0 1rem; margin-bottom: 1rem">
                 <h3 style="font-size: 1.05rem">
                     @if($from)<a href="{{ \App\Relations\EntityKinds::route($from) }}">{{ \App\Relations\EntityKinds::label($from) }}</a>@endif
-                    {{ config('workspace.relation_types.'.$a->relation->relationType->notation.'.forward') }}
+                    {{ $a->relation->phrase() }}
                     @if($to)<a href="{{ \App\Relations\EntityKinds::route($to) }}">{{ \App\Relations\EntityKinds::label($to) }}</a>@endif
                 </h3>
                 <p><small>{{ __('Proposed by :name, :date', ['name' => $a->asserter(), 'date' => $a->asserted_at->format('Y-m-d H:i')]) }} @if($record), {{ __('from') }} <a href="{{ route('records.show', $record) }}">{{ \App\Relations\EntityKinds::label($record) }}</a>@endif</small></p>

@@ -1,6 +1,6 @@
 {{-- OpenRiC Workspace - the relations of a described entity, with their assertions and evidence (ADR 0006, WS-006). Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems. SPDX-License-Identifier: AGPL-3.0-or-later --}}
 {{-- Needs: $subject, $kind (URL segment), $relations (RelationService::of), $canUpdate. Without update, only accepted and disputed relations show. --}}
-{{-- Optional: $heading; $types, the relation types to show (default: all but access points, config workspace.relation_types); $section, a prefix that keeps
+{{-- Optional: $heading; $types, the relation types to show (default: all but access points, App\Relations\RelationTypes); $section, a prefix that keeps
      element ids apart when the partial is included more than once; $add, the relate value (type|side) the add link starts from; $addLabel. --}}
 @php($choices = \App\Http\Controllers\RelationController::choices())
 @php($standingLabels = ['accepted' => 'accepted', 'disputed' => 'disputed', 'proposed' => 'proposed, awaiting review', 'rejected' => 'rejected'])
@@ -10,7 +10,7 @@
 @php($add ??= null)
 @php($addLabel ??= 'Add a relation')
 <h2>{{ $heading }}</h2>
-@php($shown = $relations->filter(fn ($r) => $types === null ? ! ((config('workspace.relation_types.'.$r->relationType->notation)['access_point'] ?? false) || (config('workspace.relation_types.'.$r->relationType->notation)['own_section'] ?? false)) : in_array($r->relationType->notation, $types, true))
+@php($shown = $relations->filter(fn ($r) => $types === null ? ! ((\App\Relations\RelationTypes::of($r)['access_point'] ?? false) || (\App\Relations\RelationTypes::of($r)['own_section'] ?? false)) : in_array($r->kind(), $types, true))
     ->filter(fn ($r) => $canUpdate || in_array($r->standing(), ['accepted', 'disputed'], true)))
 @forelse($shown as $relation)
     @php($from = $relation->datedAs('beginning')?->normalized_value)
@@ -78,7 +78,7 @@
                 <form method="post" action="{{ route('relations.update', [$kind, $subject->getKey(), $relation]) }}">
                     @csrf
                     @include('description._relation-fields', ['prefix' => $section.'r'.$loop->index, 'relation' => $relation, 'type' => $relation->relationType->notation,
-                        'withRole' => (bool) (config('workspace.relation_types.'.$relation->relationType->notation)['role'] ?? false)])
+                        'withRole' => (bool) (\App\Relations\RelationTypes::of($relation)['role'] ?? false)])
                     <button type="submit">{{ __('Save relation') }}</button>
                 </form>
             </details>

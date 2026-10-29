@@ -127,7 +127,7 @@ class ExportView
         $this->relations[$unit->id] ??= app(RelationService::class)->of($unit)
             ->filter(fn (Relation $r) => in_array($r->standing(), ['accepted', 'disputed'], true) && $this->readable($r->other))->values();
 
-        return $type === null ? $this->relations[$unit->id] : $this->relations[$unit->id]->filter(fn (Relation $r) => $r->relationType->notation === $type)->values();
+        return $type === null ? $this->relations[$unit->id] : $this->relations[$unit->id]->filter(fn (Relation $r) => $r->kind() === $type)->values();
     }
 
     /**
@@ -152,7 +152,7 @@ class ExportView
     /** Creators and accumulators (ISAD(G) 3.2.1): agents the unit was created or accumulated by. */
     public function creators(RecordResource $unit): Collection
     {
-        return $this->relations($unit)->filter(fn (Relation $r) => in_array($r->relationType->notation, ['creation', 'accumulation'], true)
+        return $this->relations($unit)->filter(fn (Relation $r) => in_array($r->kind(), ['creation', 'accumulation'], true)
             && in_array(EntityKinds::of($r->other), ['agent', 'repository'], true) && $this->label($r->other) !== null)->values();
     }
 

@@ -146,7 +146,7 @@ class EacCpf
             }
             $x->endElement();
         }
-        $ofType = fn (string $type) => $relations->filter(fn (Relation $r) => $r->relationType->notation === $type && in_array($r->standing(), ['accepted', 'disputed'], true));
+        $ofType = fn (string $type) => $relations->filter(fn (Relation $r) => $r->kind() === $type && in_array($r->standing(), ['accepted', 'disputed'], true));
         $this->terms($x, 'places', 'place', 'placeEntry', $ofType('place'));
         $this->terms($x, 'legalStatuses', 'legalStatus', 'term', $ofType('legal-status'));
         if ($functions = $text('agent-functions')) {
@@ -183,10 +183,10 @@ class EacCpf
         if ($toAgents->isNotEmpty() || $toUnits->isNotEmpty()) {
             $x->startElement('relations');
             foreach ($toAgents as $relation) {
-                $this->relation($x, 'cpfRelation', 'cpfRelationType', self::CPF_RELATION_TYPES[$relation->relationType->notation] ?? 'associative', $relation);
+                $this->relation($x, 'cpfRelation', 'cpfRelationType', self::CPF_RELATION_TYPES[$relation->kind()] ?? 'associative', $relation);
             }
             foreach ($toUnits as $relation) {
-                $this->relation($x, 'resourceRelation', 'resourceRelationType', self::RESOURCE_RELATION_TYPES[$relation->relationType->notation] ?? 'other', $relation);
+                $this->relation($x, 'resourceRelation', 'resourceRelationType', self::RESOURCE_RELATION_TYPES[$relation->kind()] ?? 'other', $relation);
             }
             $x->endElement();
         }

@@ -131,7 +131,7 @@ class DescriptionCsv
     private function events(RecordResource $unit, ExportView $view, string $language): array
     {
         $events = [];
-        $creators = $view->creators($unit)->groupBy(fn (Relation $r) => $r->relationType->notation);
+        $creators = $view->creators($unit)->groupBy(fn (Relation $r) => $r->kind());
         foreach (self::EVENT_TYPES as $kind => $type) {
             $dates = $unit->dates->filter(fn ($d) => $d->property->notation === $kind)->values();
             $actors = ($creators[$kind] ?? collect())->values();

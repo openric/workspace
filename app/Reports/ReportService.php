@@ -95,7 +95,9 @@ final class ReportService
 
             return ['label' => $element->label($lang), 'number' => Elements::number($element), 'present' => $count($values)];
         });
-        $related = DB::table('relations')->whereIn('relation_type_id', Concept::whereIn('iri', [Vocab::BASE.'relation-type/creation', Vocab::BASE.'relation-type/accumulation'])->select('id'));
+        // Creation and accumulation, and the institution's own types that narrow them.
+        $creation = Concept::whereIn('iri', [Vocab::BASE.'relation-type/creation', Vocab::BASE.'relation-type/accumulation'])->select('id');
+        $related = DB::table('relations')->whereIn('relation_type_id', DB::table('relation_types')->whereIn('concept_id', $creation)->orWhereIn('base_id', clone $creation)->select('concept_id'));
         $kept = [
             ['label' => __('Reference code'), 'number' => '3.1.1', 'present' => $count(DB::table('identifiers')->where('subject_table', 'record_resources')
                 ->whereIn('identifier_type_id', Concept::where('iri', Vocab::IDENTIFIER_TYPES.'local')->select('id')))],

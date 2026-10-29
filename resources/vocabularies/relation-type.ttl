@@ -2,7 +2,7 @@
 # Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
 # SPDX-License-Identifier: AGPL-3.0-or-later
 #
-# The type of a reified relation between two entities (ADR 0006): each concept names the RiC-O 1.1 Relation subclass and its shortcut properties. Which kinds of entity each type connects is set in config workspace.relation_types.
+# The type of a reified relation between two entities (ADR 0006): each concept names the RiC-O 1.1 Relation subclass and its shortcut properties. Which kinds of entity each type connects, and how it reads, are rows (migration 2026_10_29_000100), where an institution may add its own types narrowing these.
 
 @prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
 @prefix dcterms: <http://purl.org/dc/terms/> .

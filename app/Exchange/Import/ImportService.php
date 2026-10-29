@@ -50,6 +50,7 @@ use App\Models\Repository;
 use App\Models\User;
 use App\Relations\EntityKinds;
 use App\Relations\RelationService;
+use App\Relations\RelationTypes;
 use App\Support\Vocab;
 use App\Vocabulary\ConceptService;
 use Illuminate\Database\Eloquent\Model;
@@ -838,7 +839,7 @@ class ImportService
     {
         $exists = Relation::where(['source_table' => $source->getTable(), 'source_id' => $source->getKey(), 'target_table' => $target->getTable(), 'target_id' => $target->getKey()])
             ->whereHas('relationType', fn ($q) => $q->where('iri', Vocab::BASE.'relation-type/'.$type))->exists()
-            || (config('workspace.relation_types.'.$type)['symmetric'] ?? false) && Relation::where(['source_table' => $target->getTable(), 'source_id' => $target->getKey(),
+            || (RelationTypes::get($type, null)['symmetric'] ?? false) && Relation::where(['source_table' => $target->getTable(), 'source_id' => $target->getKey(),
                 'target_table' => $source->getTable(), 'target_id' => $source->getKey()])->whereHas('relationType', fn ($q) => $q->where('iri', Vocab::BASE.'relation-type/'.$type))->exists();
         if ($exists) {
             return;

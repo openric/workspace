@@ -316,6 +316,7 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::post('/{concept}/related/{other}/remove', [ConceptController::class, 'unrelate'])->name('related.destroy');
         Route::post('/{concept}/matches', [ConceptController::class, 'addMatch'])->name('matches.store');
         Route::post('/{concept}/protocol', [ConceptController::class, 'protocol'])->name('protocol');
+        Route::post('/{concept}/relation-type', [ConceptController::class, 'relationType'])->name('relation-type');
         Route::post('/{concept}/matches/{match}/remove', [ConceptController::class, 'removeMatch'])->name('matches.destroy');
         Route::post('/{concept}/move', [ConceptController::class, 'move'])->name('move');
         Route::post('/{concept}/merge', [ConceptController::class, 'merge'])->name('merge');

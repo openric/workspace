@@ -121,6 +121,40 @@
         </details>
     @endif
 
+    @if($vocabulary->kind->notation === 'relation-type')
+        <h2>{{ __('Relation type') }}</h2>
+        @if($relationType)
+            <p><strong>{{ __('Narrows') }}:</strong> {{ \App\Relations\RelationTypes::phrase($narrowable[$relationType['kind']] ?? $relationType, true) }} ({{ $relationType['kind'] }})
+                @if($relationType['symmetric'])<br><strong>{{ __('Self-reciprocal') }}:</strong> {{ __('yes, as the type it narrows') }}@endif</p>
+            <table>
+                <thead><tr><th>{{ __('Language') }}</th><th>{{ __('How it reads') }}</th><th>{{ __('Converse term') }}</th></tr></thead>
+                <tbody>@foreach($relationType['phrases'] as $language => $phrase)<tr><td>{{ $language }}</td><td>{{ $phrase['forward'] }}</td><td>{{ $phrase['inverse'] }}</td></tr>@endforeach</tbody>
+            </table>
+        @else
+            <p>{{ __('Not a relation type yet: choose the bundled type it narrows and say how it reads.') }}</p>
+        @endif
+        @if($canUpdate)
+            <details @if(! $relationType) open @endif>
+                <summary>{{ $relationType ? __('Change the relation type') : __('Make it a relation type') }}</summary>
+                <form method="post" action="{{ route('concepts.relation-type', $concept) }}">
+                    @csrf
+                    <small>{{ __('It connects what the bundled type connects, takes its agent role, and is exported as that type. A symmetric type reads the same both ways.') }}</small>
+                    <label for="rt-base">{{ __('Narrows') }}</label>
+                    <select id="rt-base" name="base" style="font: inherit; padding: .5rem">
+                        @foreach($narrowable as $key => $type)<option value="{{ $key }}" @selected(($relationType['kind'] ?? null) === $key)>{{ \App\Relations\RelationTypes::phrase($type, true) }} / {{ \App\Relations\RelationTypes::phrase($type, false) }}</option>@endforeach
+                    </select>
+                    <label for="rt-language">{{ __('Language') }}</label>
+                    <input id="rt-language" name="language" maxlength="35" required value="{{ app()->getLocale() }}">
+                    <label for="rt-forward">{{ __('How it reads') }}</label>
+                    <input id="rt-forward" name="forward" maxlength="255" required placeholder="{{ __('is the godparent of') }}" value="{{ $relationType['phrases'][app()->getLocale()]['forward'] ?? '' }}">
+                    <label for="rt-inverse">{{ __('Converse term') }}</label>
+                    <input id="rt-inverse" name="inverse" maxlength="255" placeholder="{{ __('is the godchild of') }}" value="{{ $relationType['phrases'][app()->getLocale()]['inverse'] ?? '' }}">
+                    <button type="submit">{{ __('Save') }}</button>
+                </form>
+            </details>
+        @endif
+    @endif
+
     @include('description._relations', ['subject' => $concept, 'kind' => 'concepts', 'relations' => $relations, 'canUpdate' => $canUpdate,
         'heading' => 'Units of description about it', 'types' => ['subject'], 'section' => 'su', 'add' => $concept->deprecated_at ? null : 'subject|target',
         'addLabel' => 'Add a unit of description about it'])

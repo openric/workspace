@@ -251,7 +251,7 @@ class DiscoverController extends Controller
         $entity = $catalogue->find(Links::CATALOGUE[$kind], $id, $with) ?? abort(404);
         app(UsageService::class)->record($request, $catalogue->institution, 'view', $entity);
 
-        return view('discover.entity', ['entity' => $entity, 'kind' => $kind, 'standard' => self::STANDARDS[$kind], 'view' => $catalogue->view,
+        return view('discover.entity', ['entity' => $entity, 'kind' => $kind, 'standard' => $entity instanceof RecordResource ? $entity->standard() : self::STANDARDS[$kind], 'view' => $catalogue->view,
             'relations' => $this->relations($entity, $catalogue), 'institution' => $catalogue->institution, ...$more]);
     }
 

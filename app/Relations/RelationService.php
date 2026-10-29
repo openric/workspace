@@ -34,8 +34,6 @@ use InvalidArgumentException;
 
 class RelationService
 {
-    private const TYPES = Vocab::BASE.'relation-type/';
-
     private const ROLES = 'https://openric.org/vocab/role-type/';
 
     public function __construct(private DateService $dates) {}
@@ -50,9 +48,9 @@ class RelationService
      */
     public function create(Model $source, string $type, Model $target, array $fields, ?User $actor = null, array $assertion = []): Relation
     {
-        $definition = $this->definition($type);
+        $definition = $this->definition($type, $source->getAttribute('institution_id'));
         $this->allowedPair($definition, $type, $source, $target);
-        if ($type === 'location') {
+        if ($definition['kind'] === 'location') {
             $storage = app(StorageService::class);
             if (! $storage->isStoragePlace($target)) {
                 throw new InvalidArgumentException(__('a container is kept in a storage place: a place of a storage place type'));
@@ -64,7 +62,7 @@ class RelationService
         }
         foreach ([$source, $target] as $end) {
             if ($end instanceof Concept && ! in_array($end->vocabulary?->kind?->notation, $definition['schemes'] ?? [], true)) {
-                throw new InvalidArgumentException(__('a :type relation does not connect a concept of that vocabulary', ['type' => $type]));
+                throw new InvalidArgumentException(__('a :type relation does not connect a concept of that vocabulary', ['type' => $definition['kind']]));
             }
             if ($end instanceof Concept && $end->deprecated_at !== null) {
                 throw new InvalidArgumentException(__('a deprecated concept is not used for new relations'));
@@ -75,11 +73,11 @@ class RelationService
         }
         $values = $this->values($definition, $fields);
 
-        return DB::transaction(fn () => AuditLog::actingAs($actor, function () use ($source, $type, $target, $fields, $values, $actor, $assertion) {
+        return DB::transaction(fn () => AuditLog::actingAs($actor, function () use ($source, $definition, $target, $fields, $values, $actor, $assertion) {
             $institution = Institution::findOrFail($source->getAttribute('institution_id'));
             $id = (string) Str::uuid7();
             $relation = new Relation([...$values, 'institution_id' => $institution->id, 'iri' => $institution->base_iri.'/'.Relation::IRI_SEGMENT.'/'.$id,
-                'relation_type_id' => $this->concept(self::TYPES.$type)->id,
+                'relation_type_id' => $definition['concept_id'],
                 'source_table' => $source->getTable(), 'source_id' => $source->getKey(), 'target_table' => $target->getTable(), 'target_id' => $target->getKey()]);
             $relation->id = $id;
             $relation->save();
@@ -95,7 +93,7 @@ class RelationService
     /** Change what is said about the relation; what it connects and its type do not change (remove it and relate again). */
     public function update(Relation $relation, array $fields, ?User $actor = null): void
     {
-        $values = $this->values($this->definition($relation->relationType->notation), $fields);
+        $values = $this->values(RelationTypes::of($relation) ?? throw new InvalidArgumentException(__('the relation\'s type is not known')), $fields);
         DB::transaction(fn () => AuditLog::actingAs($actor, function () use ($relation, $values, $fields) {
             $relation->update($values);
             $this->setDates($relation, $fields);
@@ -197,7 +195,10 @@ class RelationService
     public function options(Model $entity): array
     {
         $options = [];
-        foreach (config('workspace.relation_types') as $type => $definition) {
+        foreach (RelationTypes::all($entity->getAttribute('institution_id')) as $type => $definition) {
+            if ($definition['deprecated']) {
+                continue;
+            }
             foreach (['source', 'target'] as $side) {
                 if ($side === 'target' && ($definition['symmetric'] ?? false)) {
                     continue;
@@ -211,7 +212,7 @@ class RelationService
                 }
                 if ($kinds !== []) {
                     $options[] = ['type' => $type, 'side' => $side, 'kinds' => array_values(array_unique($kinds)), 'schemes' => $definition['schemes'] ?? [],
-                        'phrase' => $side === 'source' ? $definition['forward'] : $definition['inverse']];
+                        'phrase' => RelationTypes::phrase($definition, $side === 'source'), 'kind' => $definition['kind'], 'role' => $definition['role']];
                 }
             }
         }
@@ -282,9 +283,11 @@ class RelationService
         return $assertion;
     }
 
-    private function definition(string $type): array
+    private function definition(string $type, ?string $institutionId): array
     {
-        return config('workspace.relation_types.'.$type) ?? throw new InvalidArgumentException("$type is not a relation type");
+        $definition = RelationTypes::get($type, $institutionId) ?? throw new InvalidArgumentException("$type is not a relation type");
+
+        return $definition['deprecated'] ? throw new InvalidArgumentException(__('a deprecated relation type is not used for new relations')) : $definition;
     }
 
     private function allowedPair(array $definition, string $type, Model $source, Model $target): void
@@ -294,7 +297,7 @@ class RelationService
                 return;
             }
         }
-        throw new InvalidArgumentException(__('a :type relation does not connect a :source to a :target', ['type' => $type, 'source' => __(EntityKinds::noun($source)), 'target' => __(EntityKinds::noun($target))]));
+        throw new InvalidArgumentException(__('a :type relation does not connect a :source to a :target', ['type' => $definition['kind'], 'source' => __(EntityKinds::noun($source)), 'target' => __(EntityKinds::noun($target))]));
     }
 
     private function values(array $definition, array $fields): array

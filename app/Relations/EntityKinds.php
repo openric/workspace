@@ -6,7 +6,7 @@
 //
 // Code, not data: each kind is a model class, and joins here together with
 // its table in a relations migration. Where relations take only some agents,
-// config workspace.relation_types names a kind with types after a colon, such
+// A relation type's pairs (relation_type_pairs) name a kind with types after a colon, such
 // as agent:person or agent:family|corporate-body (agent-type vocabulary).
 
 namespace App\Relations;
@@ -96,7 +96,7 @@ final class EntityKinds
         return null;
     }
 
-    /** The kinds a name in config workspace.relation_types stands for: a kind, a kind with types (agent:person), or a group such as agent. */
+    /** The kinds a name in a relation type's pairs (relation_type_pairs) stands for: a kind, a kind with types (agent:person), or a group such as agent. */
     public static function expand(string $kindOrGroup): array
     {
         return config('workspace.relation_kind_groups.'.$kindOrGroup) ?? (isset(self::KINDS[strtok($kindOrGroup, ':')]) ? [$kindOrGroup] : []);

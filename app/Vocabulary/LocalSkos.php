@@ -23,6 +23,7 @@ use App\Models\Concept;
 use App\Models\ConceptMatch;
 use App\Models\User;
 use App\Models\Vocabulary;
+use App\Relations\RelationTypes;
 use App\Support\Vocab;
 use EasyRdf\Graph;
 use EasyRdf\Literal;
@@ -79,6 +80,10 @@ class LocalSkos
                 $node->addType($ricClass);
             }
             $node->addResource('skos:inScheme', $scheme);
+            // An institution's own relation type narrows a bundled one.
+            if ($base = RelationTypes::get($concept->id, $vocabulary->institution_id)) {
+                $node->addResource('skos:broadMatch', $graph->resource(Concept::find($base['base_concept_id'])->iri));
+            }
             if ($concept->notation !== null) {
                 $node->addLiteral('skos:notation', $concept->notation);
             }

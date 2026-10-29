@@ -42,7 +42,7 @@
                 <label for="new_language">{{ __('Language of the name (BCP 47)') }}</label>
                 <input id="new_language" name="new_language" value="{{ old('new_language', 'en') }}" maxlength="35">
             @endif
-            @include('description._relation-fields', ['prefix' => 'new', 'relation' => null, 'type' => $chosen['type'], 'withRole' => (bool) (config('workspace.relation_types.'.$chosen['type'])['role'] ?? false)])
+            @include('description._relation-fields', ['prefix' => 'new', 'relation' => null, 'type' => $chosen['type'], 'withRole' => $chosen['role']])
             <label for="basis">{{ __('On what basis do you assert it (optional)') }}</label>
             <textarea id="basis" name="basis" rows="2" style="width: 100%; font: inherit; box-sizing: border-box">{{ old('basis') }}</textarea>
             <label for="basis_language">{{ __('Language of the basis (BCP 47)') }}</label>

@@ -18,6 +18,7 @@ use App\Models\ConceptProtocol;
 use App\Models\Place;
 use App\Models\Vocabulary;
 use App\Relations\RelationService;
+use App\Relations\RelationTypes;
 use App\Rights\CommunityLabelService;
 use App\Rights\CommunityProtocols;
 use App\Support\Vocab;
@@ -66,6 +67,8 @@ class ConceptController extends Controller
             'protocol' => ConceptProtocol::where('concept_id', $concept->id)->with('accessCondition.labels', 'label.labels', 'community.names')->first(),
             'conditions' => Concept::choices(CommunityProtocols::CONDITIONS)->whereNotNull('broader_id')->with('labels', 'broader')->get(),
             'labelChoices' => app(CommunityLabelService::class)->choices(),
+            'relationType' => $concept->vocabulary->kind->notation === 'relation-type' ? RelationTypes::get($concept->id, $concept->institution_id) : null,
+            'narrowable' => $concept->vocabulary->kind->notation === 'relation-type' ? RelationTypes::narrowable() : [],
             'communities' => Agent::where('institution_id', $concept->institution_id)->whereNull('deleted_at')->with('names.nameType', 'descriptionValues.element')->get()
                 ->sortBy(fn (Agent $a) => mb_strtolower((string) $a->described('agent-authorised-name', ['en'])))->values()]);
     }
@@ -80,6 +83,19 @@ class ConceptController extends Controller
         ]);
 
         return $this->attempt($concept, fn () => app(CommunityProtocols::class)->setProtocol($concept, $data, $request->user()), __('Community protocol saved.'));
+    }
+
+    /** A concept of a relation-type vocabulary as a relation type: the bundled type it narrows, how it reads and its converse term (Heratio's converse_term). */
+    public function relationType(Request $request, Concept $concept): RedirectResponse
+    {
+        $this->own($request, $concept, 'update');
+        $data = $request->validate([
+            'base' => ['required', 'string', 'max:64'], 'language' => ['required', 'string', 'max:35'],
+            'forward' => ['required', 'string', 'max:255'], 'inverse' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        return $this->attempt($concept, fn () => app(RelationTypes::class)->define($concept, $data['base'], $data['language'], $data['forward'], $data['inverse'] ?? null,
+            $request->user()), __('Relation type saved.'));
     }
 
     public function edit(Request $request, Concept $concept): View

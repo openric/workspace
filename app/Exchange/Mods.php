@@ -16,6 +16,7 @@ use App\Models\Agent;
 use App\Models\Institution;
 use App\Models\RecordResource;
 use App\Rights\PublicRights;
+use App\Support\Vocab;
 use Illuminate\Database\Eloquent\Model;
 use XMLWriter;
 
@@ -66,15 +67,20 @@ class Mods
             }
         }
         foreach ($view->creators($unit) as $relation) {
-            $this->name($relation->other, $relation->relationType->notation === 'accumulation' ? 'collector' : 'creator');
+            $this->name($relation->other, $relation->kind() === 'accumulation' ? 'collector' : 'creator');
         }
-        $x->startElement('typeOfResource');
-        if ($unit->children()->exists()) {
-            $x->writeAttribute('collection', 'yes');
+        // The MODS types of resource the unit was given, else mixed material.
+        $types = $unit->resourceTypes()->whereHas('type.vocabulary', fn ($q) => $q->where('iri', Vocab::BASE.'mods-resource-type/'))->with('type.labels')->get()
+            ->map(fn ($t) => (string) $t->type->label(['en']))->all() ?: ['mixed material'];
+        foreach ($types as $type) {
+            $x->startElement('typeOfResource');
+            if ($unit->children()->exists()) {
+                $x->writeAttribute('collection', 'yes');
+            }
+            $x->writeAttribute('manuscript', 'yes');
+            $x->text($type);
+            $x->endElement();
         }
-        $x->writeAttribute('manuscript', 'yes');
-        $x->text('mixed material');
-        $x->endElement();
         $x->startElement('genre');
         $x->writeAttribute('authority', 'local');
         $x->writeAttribute('valueURI', $unit->level->iri);

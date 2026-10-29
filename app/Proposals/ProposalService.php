@@ -47,6 +47,7 @@ use App\Models\RelationAssertion;
 use App\Models\User;
 use App\Relations\EntityKinds;
 use App\Relations\RelationService;
+use App\Relations\RelationTypes;
 use App\Support\Vocab;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
@@ -183,7 +184,7 @@ final class ProposalService
             $record = $relation->evidence->first()?->record;
             $items[] = [
                 'kind' => 'relationship', 'id' => $a->id, 'record' => $record?->id, 'title' => $record ? EntityKinds::label($record) : null,
-                'type' => $relation->relationType->notation,
+                'type' => $relation->kind(),
                 'value' => $this->phrase($relation),
                 'status' => $a->status->notation, 'review_note' => null,
                 'proposed_by' => $a->user->name, 'proposed_via' => $a->origin_label,
@@ -425,7 +426,7 @@ final class ProposalService
     /** Is there a relation of the type between the two agents (either way round, if it is symmetric) that is not rejected? */
     private function related(Model $subject, string $type, Model $object): bool
     {
-        $symmetric = (bool) (config("workspace.relation_types.$type.symmetric") ?? false);
+        $symmetric = (bool) (RelationTypes::get($type, null)['symmetric'] ?? false);
         $ends = fn ($q, Model $from, Model $to) => $q->where('source_table', $from->getTable())->where('source_id', $from->getKey())
             ->where('target_table', $to->getTable())->where('target_id', $to->getKey());
 
@@ -460,7 +461,7 @@ final class ProposalService
     {
         $agentEnd = fn (string $end) => in_array(strtok($end, ':'), self::AGENT_GROUPS, true);
 
-        return array_filter(config('workspace.relation_types'),
+        return array_filter(RelationTypes::all(null),
             fn (array $definition) => collect($definition['pairs'])->every(fn (array $pair) => $agentEnd($pair[0]) && $agentEnd($pair[1])));
     }
 
@@ -468,7 +469,7 @@ final class ProposalService
     private function phrase(Relation $relation): string
     {
         $name = fn (string $table, string $id) => ($entity = EntityKinds::get((string) EntityKinds::byTable($table))['class']::find($id)) ? EntityKinds::label($entity) : $id;
-        $type = config('workspace.relation_types.'.$relation->relationType->notation);
+        $type = RelationTypes::of($relation);
 
         return $name($relation->source_table, $relation->source_id).' '.($type['forward'] ?? $relation->relationType->notation).' '.$name($relation->target_table, $relation->target_id);
     }

@@ -19,6 +19,7 @@ use App\Models\RecordResource;
 use App\Models\Relation;
 use App\Relations\EntityKinds;
 use App\Relations\RelationService;
+use App\Relations\RelationTypes;
 use Illuminate\Database\Eloquent\Model;
 
 class Graph
@@ -76,7 +77,7 @@ class Graph
             if (! in_array($relation->standing(), ['accepted', 'disputed'], true) || ! $this->view->readable($relation->other)) {
                 continue;
             }
-            $type = config('workspace.relation_types.'.$relation->relationType->notation);
+            $type = RelationTypes::of($relation);
             $found[] = [$relation->other, $type['forward'] ?? $relation->relationType->label(['en']), $relation->ricTerm(), $relation->fromSource];
         }
         if ($entity instanceof RecordResource) {

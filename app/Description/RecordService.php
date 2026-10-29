@@ -10,8 +10,10 @@
 namespace App\Description;
 
 use App\Audit\AuditLog;
+use App\Models\Concept;
 use App\Models\Institution;
 use App\Models\RecordResource;
+use App\Models\RecordResourceType;
 use App\Models\RecordWatermark;
 use App\Models\Repository;
 use App\Models\User;
@@ -23,6 +25,9 @@ use InvalidArgumentException;
 
 class RecordService
 {
+    /** The display standards' own lists of types, by the standard that shows each: RAD, Dublin Core and MODS. */
+    public const TYPE_LISTS = ['rad' => 'rad-material-designation', 'dc' => 'dcmi-type', 'mods' => 'mods-resource-type'];
+
     public function __construct(private DescriptionService $descriptions, private IdentifierService $identifiers, private DateService $dates) {}
 
     public function create(Institution $institution, string $levelIri, string $title, string $language, ?RecordResource $parent = null, ?Repository $repository = null, ?string $identifier = null, ?User $actor = null): RecordResource
@@ -55,7 +60,8 @@ class RecordService
     /** @param  array<string, ?string>  $values  ISAD(G) element notation => text */
     public function describe(RecordResource $record, array $values, string $language, ?User $actor = null): void
     {
-        $this->descriptions->describe($record, Elements::ISAD_G, $values, $language, 'title', $actor);
+        // Whichever standard shows it, a unit keeps ISAD(G)'s elements and those only DACS, RAD or MODS have.
+        $this->descriptions->describe($record, [Elements::ISAD_G, Elements::OTHER_STANDARDS], $values, $language, 'title', $actor);
     }
 
     public function updateIdentity(RecordResource $record, ?string $identifier, string $levelIri, ?User $actor = null): void
@@ -101,6 +107,43 @@ class RecordService
     public function setDisplayAsCompound(RecordResource $record, bool $compound, ?User $actor = null): void
     {
         DB::transaction(fn () => AuditLog::actingAs($actor, fn () => $record->update(['display_as_compound' => $compound])));
+    }
+
+    /**
+     * The standard the unit is shown and edited in (display-standard notation; empty shows it in ISAD(G)), and with
+     * $inside that of every unit below it, as Heratio's "Make this selection the new default for existing children".
+     */
+    public function setDisplayStandard(RecordResource $record, ?string $standard, bool $inside = false, ?User $actor = null): void
+    {
+        $id = ($standard = trim((string) $standard)) === '' ? null
+            : ($this->descriptions->concept(Vocab::BASE.'display-standard/'.$standard)->id);
+        DB::transaction(fn () => AuditLog::actingAs($actor, function () use ($record, $id, $inside) {
+            $record->update(['display_standard_id' => $id]);
+            if ($inside) {
+                RecordResource::whereIn('id', $record->descendantIds())->get()->each(fn (RecordResource $unit) => $unit->update(['display_standard_id' => $id]));
+            }
+        }));
+        $record->unsetRelation('displayStandard');
+    }
+
+    /**
+     * The types one of a display standard's lists gives the unit (rad-material-designation, dcmi-type or
+     * mods-resource-type), replacing those it had from that list.
+     *
+     * @param  list<string>  $notations
+     */
+    public function setResourceTypes(RecordResource $record, string $list, array $notations, ?User $actor = null): void
+    {
+        $list = in_array($list, self::TYPE_LISTS, true) ? Vocab::BASE.$list.'/' : throw new InvalidArgumentException("$list is not a list of types");
+        $chosen = Concept::choices($list)->whereIn('notation', array_values(array_unique($notations)))->pluck('id')->all();
+        count($chosen) === count(array_unique($notations)) || throw new InvalidArgumentException(__('choose types from the list'));
+        DB::transaction(fn () => AuditLog::actingAs($actor, function () use ($record, $list, $chosen) {
+            $record->resourceTypes()->whereHas('type.vocabulary', fn ($q) => $q->where('iri', $list))->whereNotIn('type_id', $chosen)->get()->each->delete();
+            foreach ($chosen as $type) {
+                RecordResourceType::firstOrCreate(['record_resource_id' => $record->id, 'type_id' => $type], ['institution_id' => $record->institution_id]);
+            }
+        }));
+        $record->unsetRelation('resourceTypes');
     }
 
     /** The standard the description was written to (AtoM's source_standard), such as ISAD(G) or DACS. */
