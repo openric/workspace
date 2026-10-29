@@ -1,0 +1,34 @@
+# OpenRiC Workspace - OpenRiC Workspace CAAIS Extent Types.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# CAAIS 3.2.1 extent type, the examples CAAIS 1.0 gives, as Heratio seeds them.
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/caais-extent-type/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace CAAIS Extent Types"@en ;
+    dcterms:description "CAAIS 3.2.1 extent type, the examples CAAIS 1.0 gives, as Heratio seeds them."@en ;
+    dcterms:issued "2026-10-29"^^xsd:date ;
+    skos:hasTopConcept v:extent-received, v:extent-retained, v:extent-removed .
+
+v:extent-received a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Extent received"@en, "Omvang ontvang"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession, as AtoM and Heratio keep it; given in the CAAIS export."@en .
+
+v:extent-retained a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Extent retained"@en, "Omvang behou"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession, as AtoM and Heratio keep it; given in the CAAIS export."@en .
+
+v:extent-removed a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Extent removed"@en, "Omvang verwyder"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession, as AtoM and Heratio keep it; given in the CAAIS export."@en .

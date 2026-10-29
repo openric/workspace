@@ -1,0 +1,88 @@
+# OpenRiC Workspace - OpenRiC Workspace CAAIS Content Types.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# CAAIS 3.2.3 content type, the examples CAAIS 1.0 gives, as Heratio seeds them.
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/caais-content-type/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace CAAIS Content Types"@en ;
+    dcterms:description "CAAIS 3.2.3 content type, the examples CAAIS 1.0 gives, as Heratio seeds them."@en ;
+    dcterms:issued "2026-10-29"^^xsd:date ;
+    skos:hasTopConcept v:architectural-technical-drawings, v:artefacts, v:cartographic, v:datasets, v:graphic, v:interactive, v:moving-images, v:natural-objects, v:philatelic, v:photographs, v:sound-recordings, v:textual .
+
+v:architectural-technical-drawings a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Architectural and technical drawings"@en, "Argitektoniese en tegniese tekeninge"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession, as AtoM and Heratio keep it; given in the CAAIS export."@en .
+
+v:artefacts a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Artefacts"@en, "Artefakte"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession, as AtoM and Heratio keep it; given in the CAAIS export."@en .
+
+v:cartographic a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Cartographic materials"@en, "Kartografiese materiaal"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession, as AtoM and Heratio keep it; given in the CAAIS export."@en .
+
+v:datasets a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Datasets"@en, "Datastelle"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession, as AtoM and Heratio keep it; given in the CAAIS export."@en .
+
+v:graphic a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Graphic materials"@en, "Grafiese materiaal"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession, as AtoM and Heratio keep it; given in the CAAIS export."@en .
+
+v:interactive a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Interactive resources"@en, "Interaktiewe hulpbronne"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession, as AtoM and Heratio keep it; given in the CAAIS export."@en .
+
+v:moving-images a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Moving images"@en, "Bewegende beelde"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession, as AtoM and Heratio keep it; given in the CAAIS export."@en .
+
+v:natural-objects a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Natural objects"@en, "Natuurlike voorwerpe"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession, as AtoM and Heratio keep it; given in the CAAIS export."@en .
+
+v:philatelic a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Philatelic materials"@en, "Filatelistiese materiaal"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession, as AtoM and Heratio keep it; given in the CAAIS export."@en .
+
+v:photographs a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Photographs"@en, "Foto's"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession, as AtoM and Heratio keep it; given in the CAAIS export."@en .
+
+v:sound-recordings a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Sound recordings"@en, "Klankopnames"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession, as AtoM and Heratio keep it; given in the CAAIS export."@en .
+
+v:textual a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Textual records"@en, "Tekstuele rekords"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession, as AtoM and Heratio keep it; given in the CAAIS export."@en .

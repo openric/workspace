@@ -1,0 +1,82 @@
+# OpenRiC Workspace - OpenRiC Workspace Accession Event Types.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What happened to an accession and when (AtoM's accession event type taxonomy and the CAAIS 5.1.1 event types Heratio offers).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/accession-event-type/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Accession Event Types"@en ;
+    dcterms:description "What happened to an accession and when (AtoM's accession event type taxonomy and the CAAIS 5.1.1 event types Heratio offers)."@en ;
+    dcterms:issued "2026-10-29"^^xsd:date ;
+    skos:hasTopConcept v:physical-transfer, v:legal-transfer, v:deed-of-gift-signed, v:transfer-agreement-signed, v:ceremonial-protocol, v:reboxing-started, v:reboxing-completed, v:archival-appraisal, v:disk-image-created, v:checksums-created, v:deaccessioned .
+
+v:physical-transfer a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Physical transfer"@en, "Fisiese oordrag"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession, as AtoM and Heratio keep it; given in the CAAIS export."@en .
+
+v:legal-transfer a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Legal transfer"@en, "Regsoordrag"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession, as AtoM and Heratio keep it; given in the CAAIS export."@en .
+
+v:deed-of-gift-signed a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Deed of gift signed"@en, "Skenkingsakte onderteken"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession, as AtoM and Heratio keep it; given in the CAAIS export."@en .
+
+v:transfer-agreement-signed a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Transfer agreement signed"@en, "Oordragooreenkoms onderteken"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession, as AtoM and Heratio keep it; given in the CAAIS export."@en .
+
+v:ceremonial-protocol a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Ceremonial protocol"@en, "Seremoniële protokol"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession, as AtoM and Heratio keep it; given in the CAAIS export."@en .
+
+v:reboxing-started a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Reboxing started"@en, "Herverpakking begin"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession, as AtoM and Heratio keep it; given in the CAAIS export."@en .
+
+v:reboxing-completed a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Reboxing completed"@en, "Herverpakking voltooi"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession, as AtoM and Heratio keep it; given in the CAAIS export."@en .
+
+v:archival-appraisal a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Archival appraisal"@en, "Argivale waardering"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession, as AtoM and Heratio keep it; given in the CAAIS export."@en .
+
+v:disk-image-created a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Disk image created"@en, "Skyfbeeld gemaak"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession, as AtoM and Heratio keep it; given in the CAAIS export."@en .
+
+v:checksums-created a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Checksums created"@en, "Kontrolesomme gemaak"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession, as AtoM and Heratio keep it; given in the CAAIS export."@en .
+
+v:deaccessioned a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Deaccessioned"@en, "Gedeaksessioneer"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession, as AtoM and Heratio keep it; given in the CAAIS export."@en .

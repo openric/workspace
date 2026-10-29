@@ -34,6 +34,9 @@ final class Elements
     /** A storage container (openricx:Container): no ICA description standard covers it. */
     public const CONTAINER = 'container';
 
+    /** An accession: numbered after CAAIS 1.0. */
+    public const ACCESSION = 'accession';
+
     /** The elements of an archival description that DACS, RAD or MODS have and ISAD(G) does not. */
     public const OTHER_STANDARDS = 'other-standards';
 
@@ -113,6 +116,9 @@ final class Elements
             '3.4' => 'Conditions of access and use area', '3.5' => 'Allied materials area', '3.6' => 'Notes area', '3.7' => 'Description control area'],
         self::ISAAR_CPF => ['5.1' => 'Identity area', '5.2' => 'Description area', '5.3' => 'Relationships area', '5.4' => 'Control area'],
         self::ACTIVITY => ['5.1' => 'Identity area', '5.2' => 'Context area'],
+        // CAAIS 1.0's sections.
+        self::ACCESSION => ['1' => 'Identity section', '2' => 'Source information section', '3' => 'Materials section', '4' => 'Management section',
+            '5' => 'Event section', '6' => 'General section', '7' => 'Control section'],
         // The display standards' own headings, AtoM's; '' is the heading of the elements the standard does not number.
         'dacs' => ['2' => 'Identity elements', '3' => 'Content and structure elements', '4' => 'Conditions of access and use elements',
             '5' => 'Acquisition and appraisal elements', '6' => 'Related materials elements', '7' => 'Notes element', '8' => 'Description control element'],
@@ -129,7 +135,7 @@ final class Elements
         }
         $note = (string) $element->labels->firstWhere('language', 'en')?->scope_note;
 
-        return preg_match('/(?:ISDIAH|ISAD\(G\)|ISAAR\(CPF\)|ISDF) (\d+\.\d+(?:\.\d+)?)/', $note, $m) ? $m[1] : null;
+        return preg_match('/(?:ISDIAH|ISAD\(G\)|ISAAR\(CPF\)|ISDF|CAAIS) (\d+\.\d+(?:\.\d+)?)/', $note, $m) ? $m[1] : null;
     }
 
     /**
@@ -142,8 +148,8 @@ final class Elements
         $areas = [];
         foreach (self::of($standard) as $element) {
             $number = self::number($element);
-            if (in_array($standard, self::DISPLAY, true)) {
-                // DACS numbers its areas by chapter (2), RAD by rule (1.1, from 1.1B).
+            if (in_array($standard, [...self::DISPLAY, self::ACCESSION], true)) {
+                // DACS and CAAIS number their areas by chapter (2), RAD by rule (1.1, from 1.1B).
                 $area = collect([preg_match('/^\d+\.\d+/', (string) $number, $m) ? $m[0] : null, strtok((string) $number, '.')])
                     ->first(fn ($candidate) => $candidate && isset(self::AREAS[$standard][$candidate]));
                 $heading = $area ? $area.' '.__(self::AREAS[$standard][$area]) : __(self::AREAS[$standard][''] ?? 'Description');

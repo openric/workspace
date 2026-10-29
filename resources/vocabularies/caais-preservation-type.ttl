@@ -1,0 +1,52 @@
+# OpenRiC Workspace - OpenRiC Workspace CAAIS Preservation Requirement Types.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# CAAIS 4.3.1 preservation requirement type, the examples CAAIS 1.0 gives, as Heratio seeds them.
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/caais-preservation-type/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace CAAIS Preservation Requirement Types"@en ;
+    dcterms:description "CAAIS 4.3.1 preservation requirement type, the examples CAAIS 1.0 gives, as Heratio seeds them."@en ;
+    dcterms:issued "2026-10-29"^^xsd:date ;
+    skos:hasTopConcept v:physical-condition, v:conservation, v:supplies, v:labour, v:software-dependency, v:technical-access .
+
+v:physical-condition a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Physical condition"@en, "Fisiese toestand"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession, as AtoM and Heratio keep it; given in the CAAIS export."@en .
+
+v:conservation a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Conservation"@en, "Konservering"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession, as AtoM and Heratio keep it; given in the CAAIS export."@en .
+
+v:supplies a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Supplies"@en, "Voorrade"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession, as AtoM and Heratio keep it; given in the CAAIS export."@en .
+
+v:labour a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Labour"@en, "Arbeid"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession, as AtoM and Heratio keep it; given in the CAAIS export."@en .
+
+v:software-dependency a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Software dependency"@en, "Sagteware-afhanklikheid"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession, as AtoM and Heratio keep it; given in the CAAIS export."@en .
+
+v:technical-access a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Technical access"@en, "Tegniese toegang"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession, as AtoM and Heratio keep it; given in the CAAIS export."@en .

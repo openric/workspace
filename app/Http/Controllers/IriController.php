@@ -12,6 +12,7 @@
 namespace App\Http\Controllers;
 
 use App\Discovery\Links;
+use App\Models\Accession;
 use App\Models\Activity;
 use App\Models\Agent;
 use App\Models\Concept;
@@ -33,6 +34,8 @@ class IriController extends Controller
         Place::IRI_SEGMENT => [Place::class, 'places.show', null],
         Concept::IRI_SEGMENT => [Concept::class, 'concepts.show', null],
         Instantiation::IRI_SEGMENT => [Instantiation::class, 'instantiations.show', null],
+        // Staff only: the page asks for the accession permissions.
+        Accession::IRI_SEGMENT => [Accession::class, 'accessions.show', null],
     ];
 
     public function resolve(Request $request, string $segment, string $id): RedirectResponse

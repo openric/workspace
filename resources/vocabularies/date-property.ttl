@@ -13,7 +13,7 @@ v: a skos:ConceptScheme ;
     dcterms:title "OpenRiC Workspace Date Properties"@en ;
     dcterms:description "The meaning of a date for the entity it belongs to."@en ;
     dcterms:issued "2026-10-20"^^xsd:date ;
-    skos:hasTopConcept v:creation, v:accumulation, v:existence, v:birth, v:death, v:beginning, v:end, v:modification, v:relation, v:used-from, v:used-to, v:associated .
+    skos:hasTopConcept v:creation, v:accumulation, v:existence, v:birth, v:death, v:beginning, v:end, v:modification, v:relation, v:used-from, v:used-to, v:associated, v:acquisition .
 
 v:creation a skos:Concept ;
     skos:inScheme v: ;
@@ -98,3 +98,10 @@ v:associated a skos:Concept ;
     skos:prefLabel "Associated date"@en ;
     skos:scopeNote "Exported as rico:isAssociatedWithDate."@en ;
     skos:definition "Any other date associated with the entity."@en .
+
+v:acquisition a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Acquisition date"@en ;
+    skos:scopeNote "Exported as rico:isAssociatedWithDate: the date an accession was accessioned (AtoM's accession date), which CAAIS carries as an event."@en ;
+    skos:definition "The date the institution accessioned the material."@en .

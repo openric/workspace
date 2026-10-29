@@ -30,9 +30,9 @@ class DescriptionService
     /**
      * @param  string|list<string>  $standard  Elements::ISDIAH or Elements::ISAD_G, or the standards whose elements the subject keeps
      * @param  array<string, ?string>  $values  element notation => text
-     * @param  string  $required  the element that must keep a value in some language
+     * @param  ?string  $required  the element that must keep a value in some language, or none
      */
-    public function describe(Model $subject, string|array $standard, array $values, string $language, string $required, ?User $actor = null): void
+    public function describe(Model $subject, string|array $standard, array $values, string $language, ?string $required, ?User $actor = null): void
     {
         if (! Bcp47::valid($language)) {
             throw new InvalidArgumentException("$language is not a BCP 47 language tag");
@@ -73,6 +73,12 @@ class DescriptionService
                 } elseif ($existing->value !== $text) {
                     $existing->update(['value' => $text, 'state_id' => $draft->id]);
                 }
+            }
+            if ($required === null) {
+                $subject->unsetRelation('descriptionValues');
+                $subject->unsetRelation('names');
+
+                return;
             }
             $requiredElement = $this->concept(Vocab::element($required));
             $where = ['subject_table' => $subject->getTable(), 'subject_id' => $subject->getKey()];

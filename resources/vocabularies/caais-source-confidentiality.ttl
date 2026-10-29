@@ -1,0 +1,34 @@
+# OpenRiC Workspace - OpenRiC Workspace CAAIS Source Confidentiality.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# CAAIS 2.1.6 source confidentiality, the examples CAAIS 1.0 gives, as Heratio seeds them; a source with one is withheld from a CAAIS export for outside use.
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/caais-source-confidentiality/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace CAAIS Source Confidentiality"@en ;
+    dcterms:description "CAAIS 2.1.6 source confidentiality, the examples CAAIS 1.0 gives, as Heratio seeds them; a source with one is withheld from a CAAIS export for outside use."@en ;
+    dcterms:issued "2026-10-29"^^xsd:date ;
+    skos:hasTopConcept v:internal-use-only, v:not-public, v:anonymous .
+
+v:internal-use-only a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Internal use only"@en, "Slegs vir interne gebruik"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession, as AtoM and Heratio keep it; given in the CAAIS export."@en .
+
+v:not-public a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Not public"@en, "Nie openbaar nie"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession, as AtoM and Heratio keep it; given in the CAAIS export."@en .
+
+v:anonymous a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Anonymous"@en, "Anoniem"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession, as AtoM and Heratio keep it; given in the CAAIS export."@en .

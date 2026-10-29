@@ -11,7 +11,9 @@
 @php($addLabel ??= 'Add a relation')
 <h2>{{ $heading }}</h2>
 @php($shown = $relations->filter(fn ($r) => $types === null ? ! ((\App\Relations\RelationTypes::of($r)['access_point'] ?? false) || (\App\Relations\RelationTypes::of($r)['own_section'] ?? false)) : in_array($r->kind(), $types, true))
-    ->filter(fn ($r) => $canUpdate || in_array($r->standing(), ['accepted', 'disputed'], true)))
+    ->filter(fn ($r) => $canUpdate || in_array($r->standing(), ['accepted', 'disputed'], true))
+    // What the account may not read at the other end, such as an accession, is not shown.
+    ->filter(fn ($r) => ! auth()->check() || \App\Relations\EntityKinds::readable(auth()->user(), $r->other)))
 @forelse($shown as $relation)
     @php($from = $relation->datedAs('beginning')?->normalized_value)
     @php($to = $relation->datedAs('end')?->normalized_value)

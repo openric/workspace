@@ -54,6 +54,7 @@
                 'repositories.index' => [__('Repositories'), $user->mayAnywhere('read', 'repository'), 'repositories.*'],
             ],
             'Manage' => [
+                'accessions.index' => [__('Accessions'), $user->mayAnywhere('read', 'accession'), 'accessions.*'],
                 'vocabularies.index' => [__('Taxonomies'), true, 'vocabularies.*'],
                 'containers.index' => [__('Containers'), $user->mayAnywhere('read', 'storage'), 'containers.*'],
                 'storage.places' => [__('Physical storage'), $user->mayAnywhere('read', 'storage'), 'storage.*'],

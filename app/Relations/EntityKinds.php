@@ -11,6 +11,7 @@
 
 namespace App\Relations;
 
+use App\Models\Accession;
 use App\Models\Activity;
 use App\Models\Agent;
 use App\Models\Concept;
@@ -48,6 +49,9 @@ final class EntityKinds
             'route' => 'instantiations.show', 'index' => null, 'label' => 'instantiation-title', 'with' => ['names.nameType', 'descriptionValues.element', 'identifiers.identifierType'], 'noun' => 'instantiation', 'ric_class' => 'rico:Instantiation', 'ric_name' => 'rico:Title'],
         'container' => ['class' => Container::class, 'segment' => 'containers', 'permission' => 'storage', 'readable' => true,
             'route' => 'containers.show', 'index' => 'containers.index', 'label' => 'container-name', 'with' => ['names.nameType', 'descriptionValues.element', 'identifiers.identifierType', 'containerType.labels'], 'noun' => 'container', 'ric_class' => 'openricx:Container', 'ric_name' => 'rico:Name'],
+        // Staff only: no role reads accessions unless given the accession permission, so the public never sees them.
+        'accession' => ['class' => Accession::class, 'segment' => 'accessions', 'permission' => 'accession', 'readable' => true,
+            'route' => 'accessions.show', 'index' => 'accessions.index', 'label' => 'accession-title', 'with' => ['names.nameType', 'descriptionValues.element', 'identifiers.identifierType'], 'noun' => 'accession', 'ric_class' => 'rico:Activity', 'ric_name' => 'rico:Name'],
         'concept' => ['class' => Concept::class, 'segment' => 'concepts', 'permission' => 'vocabulary', 'readable' => false,
             'route' => 'concepts.show', 'index' => null, 'label' => null, 'with' => ['labels', 'vocabulary'], 'noun' => 'concept', 'ric_class' => null, 'ric_name' => null],
     ];
@@ -162,6 +166,9 @@ final class EntityKinds
     {
         if ($entity instanceof Concept) {
             return $entity->anyLabel([...$languages, 'en', 'und']);
+        }
+        if ($entity instanceof Accession) {
+            return $entity->heading($languages);
         }
 
         return (string) $entity->described(self::KINDS[self::of($entity)]['label'], $languages);

@@ -12,7 +12,7 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 |---|---|---|---|---|---|---|
 | `ahg-3d-model` | 7687 | out: GLAM sector | Planned | 21 | `ahg3DModelPlugin` |  |
 | `ahg-access-request` | 1928 | V0.1 candidate | Partial | 7 | `ahgAccessRequestPlugin` | Requests for files on request, approved for some days or refused, each step emailed (v0.0.65); security clearance requests in phase 18 |
-| `ahg-accession-manage` | 6795 | later: V1.0+ | Planned | 9 | `ahgAccessionManagePlugin`, `qtAccessionPlugin` |  |
+| `ahg-accession-manage` | 6795 | later: V1.0+ | Partial | 9 | `ahgAccessionManagePlugin`, `qtAccessionPlugin` | Accessions, CAAIS, deaccessions, CSV and CAAIS export from v0.0.77 (9a); intake (9c), appraisal, valuation, containers and rights (9d) to come |
 | `ahg-acl` | 9750 | V0.1 candidate | Covered |  | `qbAclPlugin` | Roles and permissions with default deny (ADR 0005), written fresh |
 | `ahg-actor-manage` | 13061 | V0.1 candidate | Covered |  | `ahgActorManagePlugin`, `ahgAuthorityPlugin`, `ahgContactPlugin` | Authority records: ISAAR(CPF), merge, split, duplicates, completeness |
 | `ahg-ai-chatbot` | 4924 | out: AI (V2+) | Planned | 17 (last) | `ahgChatbotPlugin` |  |
@@ -45,7 +45,7 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-display` | 10111 | V0.1 candidate | Partial | 20 | `ahgDisplayPlugin` | Public catalogue display; display profiles later |
 | `ahg-doi` | 0 | later: V1.0+ | Planned | 20 | none |  |
 | `ahg-doi-manage` | 4884 | later: V1.0+ | Planned | 20 | `ahgDoiPlugin` |  |
-| `ahg-donor-manage` | 3241 | later: V1.0+ | Planned | 9 | `ahgDonorAgreementPlugin`, `ahgDonorManagePlugin` | With donor agreements |
+| `ahg-donor-manage` | 3241 | later: V1.0+ | Partial | 9 | `ahgDonorAgreementPlugin`, `ahgDonorManagePlugin` | Donors as authority records with contact points, and the donor list, from v0.0.77 (9a); donor agreements in 9b |
 | `ahg-dropdown-manage` | 1744 | V0.1 candidate | Covered |  | none | Every list is a SKOS vocabulary, editable |
 | `ahg-exhibition` | 26806 | out: GLAM sector | Planned | 21 | `ahgExhibitionPlugin` |  |
 | `ahg-export` | 1256 | V0.1 candidate | Covered |  | `ahgExportPlugin` | EAD, Dublin Core, MODS, CSV and RiC-O export |
@@ -318,7 +318,7 @@ Asked for by Dr Johan Pieterse on 28 October 2026: each Workspace screen has a p
 | `license_type`, `license_identifier`, `license_url` | Licence (a concept with its IRI) | Modelled |
 | `license_terms` (a licence outside Creative Commons) | Licence terms | Same, from v0.0.73 |
 | `policy_identifier` | Policy identifier | Same, from v0.0.73 |
-| `donor_name` | none | Phase 9 |
+| `donor_name` | none | Phase 9d, with an accession's rights |
 
 : Rights, field by field
 
@@ -335,3 +335,60 @@ Asked for by Dr Johan Pieterse on 28 October 2026: each Workspace screen has a p
 | `requested_classification_id` (security clearance) | none | Phase 18 |
 
 : Access request, field by field
+
+### Accession (`ahg-accession-manage`)
+
+Heratio's accession edit form and CAAIS partial (`edit.blade.php`, `partials/_caais-edit.blade.php`) and its show page; the CAAIS numbers are the Workspace's section numbers (ADR 0010).
+
+| Heratio field | Workspace | Status |
+|---|---|---|
+| `identifier` (Accession number) | Accession number (CAAIS 1.2), unique in the institution | Same, from v0.0.77 |
+| `alternativeIdentifiers[identifier, identifierType, note]` | Identifiers of the accession, typed (previous, other) | Modelled: a type in place of a free label; no note |
+| `date` (Acquisition date) | Dates: Acquisition date | Modelled |
+| `editEvents[type, date, startDate, endDate]` (Date(s)) | Dates (CAAIS 3.1): creation and accumulation | Modelled |
+| `source_of_acquisition` | Immediate source of acquisition (CAAIS 2.1) | Same, from v0.0.77 |
+| `location_information` | Location information (CAAIS 4.1) | Same, from v0.0.77 |
+| `donor_id`, `donor_name` and the related donor dialogue | Donor/Transferring body area: an authority record taking part in the donor role | Modelled |
+| `donor_contact_person`, `donor_street_address`, `donor_city`, `donor_region`, `donor_country`, `donor_postal_code`, `donor_telephone`, `donor_fax`, `donor_email`, `donor_url`, `donor_latitude`, `donor_longitude`, `donor_note`, `donor_contact_type` | The donor's contact points on its authority record, the primary one shown on the accession | Modelled |
+| `acquisition_type_id` | Acquisition type (CAAIS 1.4) | Same, from v0.0.77 |
+| `resource_type_id` | Resource type | Same, from v0.0.77 |
+| `title` | Title (CAAIS 1.3) | Same, from v0.0.77 |
+| `creators` | Creators: authority records related as creators of the material | Modelled |
+| `archival_history` | Archival/Custodial history (CAAIS 2.2) | Same, from v0.0.77 |
+| `scope_and_content` | Scope and content (CAAIS 3.3) | Same, from v0.0.77 |
+| `appraisal` | Appraisal, destruction and scheduling (CAAIS 4.4) | Same, from v0.0.77 |
+| `physical_characteristics` | Physical condition (CAAIS 4.3) | Same, from v0.0.77 |
+| `received_extent_units` | Received extent units (CAAIS 3.2) | Same, from v0.0.77 |
+| `processing_status_id`, `processing_priority_id` | Processing status (CAAIS 1.6), Processing priority | Same, from v0.0.77 |
+| `processing_notes` | Processing notes (CAAIS 6.1) | Same, from v0.0.77 |
+| `information_objects[]` (linked descriptions) | Archival descriptions it resulted in, and "Create archival description" | Modelled |
+| `caais[repository_id]` | Repository (CAAIS 1.1) | Same, from v0.0.77 |
+| `caais[rules_or_conventions]` | Rules or conventions (CAAIS 7.1) | Same, from v0.0.77 |
+| Source confidentiality, per source (CAAIS 2.1.6) | Source confidentiality, per donor | Same, from v0.0.77 |
+| Extent statements (CAAIS 3.2: type, quantity, ca., unit, content type, carrier type, digital file formats, note) | Extent statements | Same, from v0.0.77 |
+| Language of material (CAAIS 3.4: language, statement) | Language of material, from ISO 639, with a statement | Same, from v0.0.77 |
+| Preservation requirements (CAAIS 4.3: type, requirement, note) | Preservation requirements | Same, from v0.0.77 |
+| Transfer and accessioning events (CAAIS 5.1: type, date, agent, note), and AtoM's Event(s) | Transfer and accessioning events | Same, from v0.0.77 |
+| Creation and revision dates and agents (CAAIS 7.2) | Date of creation or revision, from the audit log | Same, from v0.0.77 |
+| Accruals, Accrual to | Accruals | Modelled: relations |
+| Link physical storage | Physical storage | Modelled: storage relations to containers |
+| Deaccession area (`identifier`, `scope_id`, `date`, `description`, `extent`, `reason`) | Deaccessions | Same, from v0.0.77 |
+| Date created, Date modified, Source language | Date created, Date modified, Source language | Same, from v0.0.77 |
+| CSV export (Identifier, Title, Accession Date, Status, Priority, Created, Updated) | Export CSV, the same columns | Same, from v0.0.77 |
+| CAAIS export, one and all, `external` | Export CAAIS (heratio-caais-json/1), one and all, `external` | Same, from v0.0.77 |
+| Finalise, workflow status, queue, checklist, timeline, attachments, numbering | none | Phase 9c |
+| Rights area, appraisal, valuation, accession containers | none | Phase 9d |
+| Print | none: the browser prints the page | Missing |
+
+: Accession, field by field
+
+### Donor (`ahg-donor-manage`)
+
+| Heratio field | Workspace | Status |
+|---|---|---|
+| Donor name (an actor) | An authority record (person, family or corporate body) | Modelled |
+| Contact information (contact person, street address, city, region, country, postal code, telephone, fax, email, website, latitude, longitude, note, contact type) | Contact points of the authority record | Modelled |
+| Donor browse | Donors: the authority records that took part in an accession as its donor, with how many | Same, from v0.0.77 |
+| Donor agreements, reminders, documents, rights and restrictions | none | Phase 9b |
+
+: Donor, field by field

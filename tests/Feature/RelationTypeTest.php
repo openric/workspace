@@ -51,7 +51,8 @@ class RelationTypeTest extends TestCase
     public function test_the_bundled_types_are_rows_with_their_afrikaans(): void
     {
         $types = RelationTypes::all(null);
-        $this->assertCount(44, $types);
+        // The 44 the configuration held, and the two accessions brought (material-creator, accrual).
+        $this->assertCount(46, $types);
         $this->assertSame(['associated-record', 'genetic', 'sequential'], array_slice(array_keys($types), 0, 3));
         $this->assertSame([['record', 'agent']], $types['creation']['pairs']);
         $this->assertTrue($types['creation']['role']);

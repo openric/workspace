@@ -15,7 +15,7 @@ v: a skos:ConceptScheme ;
     dcterms:title "OpenRiC Workspace Record Kinds"@en ;
     dcterms:description "Kinds of record that permissions are granted on."@en ;
     dcterms:issued "2026-10-20"^^xsd:date ;
-    skos:hasTopConcept v:institution, v:repository, v:description, v:vocabulary, v:authority, v:storage .
+    skos:hasTopConcept v:institution, v:repository, v:description, v:vocabulary, v:authority, v:storage, v:accession .
 
 v:institution a skos:Concept ;
     skos:inScheme v: ;
@@ -53,3 +53,9 @@ v:storage a skos:Concept ;
     skos:topConceptOf v: ;
     skos:prefLabel "Physical storage"@en ;
     skos:definition "Containers, what they hold and where they are kept, and their movements. Storage places are places, under vocabularies and places."@en .
+
+v:accession a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Accessions"@en ;
+    skos:definition "Accession records: what the institution received, from whom and when, and what was deaccessioned. Staff only; never public."@en .

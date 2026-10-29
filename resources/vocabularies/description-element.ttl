@@ -13,7 +13,7 @@ v: a skos:ConceptScheme ;
     dcterms:title "OpenRiC Workspace Description Elements"@en ;
     dcterms:description "Elements of archival description, grouped under the ICA standard they come from. Only the elements, not the groups, are values of a description."@en ;
     dcterms:issued "2026-10-19"^^xsd:date ;
-    skos:hasTopConcept v:isdiah, v:isad-g, v:place, v:isaar-cpf, v:activity, v:instantiation, v:container, v:other-standards .
+    skos:hasTopConcept v:isdiah, v:isad-g, v:place, v:isaar-cpf, v:activity, v:instantiation, v:container, v:other-standards, v:accession .
 
 v:authorised-name a skos:Concept ;
     skos:inScheme v: ;
@@ -964,3 +964,80 @@ v:publisher a skos:Concept ;
     skos:prefLabel "Publisher"@en ;
     skos:scopeNote "MODS originInfo/publisher, Heratio's publisher_name; exported as rico:generalDescription."@en ;
     skos:definition "Who published the unit."@en .
+
+v:accession a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Accession"@en ;
+    skos:scopeNote "The elements of an accession (exported as a rico:Activity of the OpenRiC activity type transfer), numbered after the Canadian Archival Accession Information Standard (CAAIS) 1.0, as AtoM and Heratio keep them."@en ;
+    skos:definition "Elements of an accession record."@en .
+
+v:accession-title a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:accession ;
+    skos:prefLabel "Title"@en ;
+    skos:scopeNote "CAAIS 1.3; kept as a rico:Name entity of name type authorised, one in each language (rico:hasOrHadName)."@en ;
+    skos:definition "The title of the accession, as AtoM gives it; optional, as the accession number names it."@en .
+
+v:accession-source-of-acquisition a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:accession ;
+    skos:prefLabel "Immediate source of acquisition"@en ;
+    skos:scopeNote "CAAIS 2.1, AtoM's source of acquisition; exported as rico:generalDescription."@en ;
+    skos:definition "Who the material came from, where no donor is linked, and how."@en .
+
+v:accession-archival-history a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:accession ;
+    skos:prefLabel "Archival/Custodial history"@en ;
+    skos:scopeNote "CAAIS 2.2 preliminary custodial history; exported as rico:generalDescription."@en ;
+    skos:definition "Who held the material before it came, as far as is known."@en .
+
+v:accession-received-extent-units a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:accession ;
+    skos:prefLabel "Received extent units"@en ;
+    skos:scopeNote "CAAIS 3.2, AtoM's received extent units, the extent note where no extent statement is recorded; exported as rico:generalDescription."@en ;
+    skos:definition "How much material was received, in words."@en .
+
+v:accession-scope-and-content a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:accession ;
+    skos:prefLabel "Scope and content"@en ;
+    skos:scopeNote "CAAIS 3.3 preliminary scope and content; exported as rico:generalDescription."@en ;
+    skos:definition "What the material is about and what it holds, as first seen."@en .
+
+v:accession-location-information a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:accession ;
+    skos:prefLabel "Location information"@en ;
+    skos:scopeNote "CAAIS 4.1 storage location; exported as rico:generalDescription."@en ;
+    skos:definition "Where the material is kept until it is processed."@en .
+
+v:accession-physical-characteristics a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:accession ;
+    skos:prefLabel "Physical condition"@en ;
+    skos:scopeNote "CAAIS 4.3, AtoM's physical characteristics, the preservation note where no requirement is recorded; exported as rico:generalDescription."@en ;
+    skos:definition "The physical condition of the material on arrival."@en .
+
+v:accession-appraisal a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:accession ;
+    skos:prefLabel "Appraisal, destruction and scheduling"@en ;
+    skos:scopeNote "CAAIS 4.4 appraisal statement; exported as rico:generalDescription."@en ;
+    skos:definition "What was appraised, destroyed or scheduled, and why."@en .
+
+v:accession-processing-notes a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:accession ;
+    skos:prefLabel "Processing notes"@en ;
+    skos:scopeNote "CAAIS 6.1 general note, AtoM's processing notes; exported as rico:generalDescription."@en ;
+    skos:definition "Notes on the processing of the accession."@en .
+
+v:accession-rules-or-conventions a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:accession ;
+    skos:prefLabel "Rules or conventions"@en ;
+    skos:scopeNote "CAAIS 7.1; exported as rico:generalDescription."@en ;
+    skos:definition "The rules or conventions the accession record follows, such as CAAIS 1.0."@en .
