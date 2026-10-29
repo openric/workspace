@@ -14,7 +14,9 @@ use App\Models\Concept;
 use App\Models\Institution;
 use App\Models\Repository;
 use App\Models\User;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
 
@@ -58,6 +60,28 @@ class RepositoryService
     public function setType(Repository $repository, ?string $typeIri, ?User $actor = null): void
     {
         DB::transaction(fn () => AuditLog::actingAs($actor, fn () => $repository->update(['repository_type_id' => $typeIri ? $this->concept($typeIri)->id : null])));
+    }
+
+    /**
+     * AtoM's edit-theme: the background colour (#rrggbb, or none), the page content (Markdown), and a banner or logo
+     * image given, or removed. Images are kept under the local disk, repository-theme/{id}/.
+     *
+     * @param  array{background_colour?: ?string, content?: ?string, remove_banner?: bool, remove_logo?: bool}  $data
+     */
+    public function updateTheme(Repository $repository, array $data, ?UploadedFile $banner = null, ?UploadedFile $logo = null, ?User $actor = null): void
+    {
+        $fields = ['theme_background_colour' => ($c = strtolower(trim((string) ($data['background_colour'] ?? '')))) === '' ? null : $c,
+            'theme_content' => ($t = trim((string) ($data['content'] ?? ''))) === '' ? null : $t];
+        $gone = [];
+        foreach (['banner' => $banner, 'logo' => $logo] as $part => $file) {
+            $column = "theme_{$part}_path";
+            if ($file !== null || ! empty($data["remove_$part"])) {
+                $gone[] = $repository->$column;
+                $fields[$column] = $file?->storeAs("repository-theme/{$repository->id}", $part.'-'.Str::random(8).'.'.$file->extension(), 'local');
+            }
+        }
+        DB::transaction(fn () => AuditLog::actingAs($actor, fn () => $repository->update($fields)));
+        Storage::disk('local')->delete(array_filter($gone));
     }
 
     /** AtoM's upload limit, in gigabytes: none for no limit, 0 to switch uploads off. */

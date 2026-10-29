@@ -22,8 +22,9 @@
  * position as concepts) rather than the watermark_setting, watermark_type and custom_watermark
  * tables; Heratio's system types are images in public/images/watermarks, here they are text
  * written by ImageMagick (the copyright sign and the institution's name, Confidential, Draft), and
- * a custom image is the institution's upload. Not copied yet: a watermark for one object
- * (object_watermark_setting) and the one a security classification requires, which comes with
+ * a custom image is the institution's upload. The watermark for one object (object_watermark_setting)
+ * is a description's RecordWatermark, read before the institution's as Heratio reads it. Not copied
+ * yet: the one a security classification requires, which comes with
  * security clearance in phase 18; the Cantaloupe cache, since the Workspace has no image server.
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
@@ -31,6 +32,8 @@
 namespace App\Files;
 
 use App\Models\Institution;
+use App\Models\RecordResource;
+use App\Models\RecordWatermark;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\Process\Process;
@@ -51,9 +54,14 @@ class Watermark
      *
      * @return array{text: ?string, image: ?string, gravity: string, opacity: int, min_size: int}|null
      */
-    public function configFor(Institution $institution): ?array
+    public function configFor(Institution $institution, ?RecordResource $record = null): ?array
     {
-        $type = $institution->watermarkType?->notation;
+        // A description's own setting first, as Heratio's getWatermarkConfig: off is none; on, its own parts over the institution's.
+        $own = $record ? RecordWatermark::where('record_resource_id', $record->id)->with('watermarkType', 'watermarkPosition')->first() : null;
+        if ($own && ! $own->enabled) {
+            return null;
+        }
+        $type = $own?->watermarkType?->notation ?? $institution->watermarkType?->notation;
         if ($type === null) {
             return null;
         }
@@ -71,8 +79,8 @@ class Watermark
                 'copyright' => '© '.$institution->name, 'confidential' => 'Confidential', 'draft' => 'Draft', default => null,
             },
             'image' => $image,
-            'gravity' => self::POSITION_MAP[$institution->watermarkPosition?->notation ?? 'center'] ?? 'Center',
-            'opacity' => (int) $institution->watermark_opacity,
+            'gravity' => self::POSITION_MAP[$own?->watermarkPosition?->notation ?? $institution->watermarkPosition?->notation ?? 'center'] ?? 'Center',
+            'opacity' => (int) ($own?->opacity ?? $institution->watermark_opacity),
             'min_size' => (int) $institution->watermark_min_size,
         ];
     }

@@ -84,6 +84,43 @@
         </details>
     @endif
 
+    <h2>{{ __('Community protocol') }}</h2>
+    @php($lang = \App\Support\Vocab::languages())
+    @if($protocol)
+        <p><strong>{{ __('Access condition') }}:</strong> {{ $protocol->accessCondition->label($lang) }}@if($protocol->accessCondition->broader?->notation === 'withheld') ({{ __('withheld from the public, with every unit of description tagged with it') }})@endif
+            @if($protocol->label)<br><strong>{{ __('Label') }}:</strong> {{ $protocol->label->label($lang) }}@endif
+            @if($protocol->community)<br><strong>{{ __('Owning community') }}:</strong> <a href="{{ route('agents.show', $protocol->community) }}">{{ $protocol->community->described('agent-authorised-name', [app()->getLocale(), 'en']) }}</a>@endif
+            @if($protocol->region)<br><strong>{{ __('Region') }}:</strong> {{ $protocol->region }}@endif</p>
+    @else
+        <p>{{ __('None: the term is open.') }}</p>
+    @endif
+    @if($canUpdate)
+        <details>
+            <summary>{{ $protocol ? __('Change the community protocol') : __('Set a community protocol') }}</summary>
+            <form method="post" action="{{ route('concepts.protocol', $concept) }}">
+                @csrf
+                <small>{{ __('Traditional Knowledge or Biocultural Label and access condition. Withholding conditions hide the term, and every unit of description tagged with it, from the public and from accounts that may not change them.') }}</small>
+                <label for="p-condition">{{ __('Access condition') }}</label>
+                <select id="p-condition" name="access_condition" style="font: inherit; padding: .5rem">
+                    @foreach($conditions as $c)<option value="{{ $c->notation }}" @selected(($protocol?->accessCondition->notation ?? 'open') === $c->notation)>{{ $c->label($lang) }}@if($c->broader->notation === 'withheld') ({{ __('hidden') }})@endif</option>@endforeach
+                </select>
+                <label for="p-label">{{ __('Label') }}</label>
+                <select id="p-label" name="label" style="font: inherit; padding: .5rem">
+                    <option value="">{{ __('None') }}</option>
+                    @foreach($labelChoices as $group => $labels)<optgroup label="{{ strtoupper($group) }}">@foreach($labels as $l)<option value="{{ $l->notation }}" @selected($protocol?->label?->notation === $l->notation)>{{ $l->label($lang) }}</option>@endforeach</optgroup>@endforeach
+                </select>
+                <label for="p-community">{{ __('Owning community') }}</label>
+                <select id="p-community" name="community" style="font: inherit; padding: .5rem">
+                    <option value="">{{ __('None') }}</option>
+                    @foreach($communities as $a)<option value="{{ $a->id }}" @selected($protocol?->community_id === $a->id)>{{ $a->described('agent-authorised-name', [app()->getLocale(), 'en']) }}</option>@endforeach
+                </select>
+                <label for="p-region">{{ __('Region') }}</label>
+                <input id="p-region" name="region" maxlength="255" placeholder="southern_africa" value="{{ $protocol?->region }}">
+                <button type="submit">{{ __('Save') }}</button>
+            </form>
+        </details>
+    @endif
+
     @include('description._relations', ['subject' => $concept, 'kind' => 'concepts', 'relations' => $relations, 'canUpdate' => $canUpdate,
         'heading' => 'Units of description about it', 'types' => ['subject'], 'section' => 'su', 'add' => $concept->deprecated_at ? null : 'subject|target',
         'addLabel' => 'Add a unit of description about it'])

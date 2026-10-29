@@ -20,9 +20,11 @@ use App\Models\Concept;
 use App\Models\DigitalFile;
 use App\Models\Name;
 use App\Models\RecordResource;
+use App\Models\RecordWatermark;
 use App\Models\Repository;
 use App\Models\User;
 use App\Relations\RelationService;
+use App\Rights\CommunityProtocols;
 use App\Support\Vocab;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\JsonResponse;
@@ -73,7 +75,7 @@ class RecordController extends Controller
             ->when($filters['sort'] === 'title', fn ($q) => $q->orderBy($title))
             ->paginate(50)->withQueryString();
         // Permissions can be set on a single unit, so the page shows only what the account may read.
-        $units->setCollection($units->getCollection()->filter(fn (RecordResource $r) => $user->may('read', 'description', $r))->values());
+        $units->setCollection($units->getCollection()->filter(fn (RecordResource $r) => $user->may('read', 'description', $r) && app(CommunityProtocols::class)->allows($user, $r, 'description'))->values());
 
         return view('records.index', ['units' => $units, 'query' => $query, 'filters' => $filters, 'levels' => $this->levels($request),
             'repositories' => $this->repositories($request)]);
@@ -181,6 +183,10 @@ class RecordController extends Controller
      */
     private function childThumbnails(RecordResource $record, User $user): array
     {
+        // "View children as compound?" No: the units inside are reached one by one.
+        if (! $record->display_as_compound) {
+            return ['tiles' => collect(), 'total' => 0];
+        }
         $ids = collect(DB::select('WITH RECURSIVE inside AS (SELECT id FROM record_resources WHERE parent_id = ? AND deleted_at IS NULL
             UNION ALL SELECT r.id FROM record_resources r JOIN inside ON r.parent_id = inside.id WHERE r.deleted_at IS NULL) SELECT id FROM inside', [$record->id]))->pluck('id');
         if ($ids->isEmpty()) {
@@ -211,7 +217,9 @@ class RecordController extends Controller
 
         return view('records.edit', ['record' => $record, 'elements' => Elements::of(Elements::ISAD_G), 'levels' => $this->levels($request), 'language' => $language,
             'mayUpdate' => $request->user()->may('update', 'description', $record), 'mayCreateInside' => $request->user()->may('create', 'description', $record),
-            'statuses' => Concept::choices(Vocab::DESCRIPTION_STATUSES)->get(), 'details' => Concept::choices(Vocab::DESCRIPTION_DETAILS)->get()]);
+            'statuses' => Concept::choices(Vocab::DESCRIPTION_STATUSES)->get(), 'details' => Concept::choices(Vocab::DESCRIPTION_DETAILS)->get(),
+            'watermark' => RecordWatermark::where('record_resource_id', $record->id)->with('watermarkType', 'watermarkPosition')->first(),
+            'watermarkTypes' => Concept::choices(Vocab::BASE.'watermark-type/')->with('labels')->get(), 'positions' => Concept::choices(Vocab::BASE.'watermark-position/')->with('labels')->get()]);
     }
 
     public function update(Request $request, RecordResource $record): RedirectResponse
@@ -226,6 +234,13 @@ class RecordController extends Controller
             'description_identifier' => ['nullable', 'string', 'max:255'],
             'description_status' => ['nullable', 'string', Rule::in(Concept::choices(Vocab::DESCRIPTION_STATUSES)->pluck('iri'))],
             'description_detail' => ['nullable', 'string', Rule::in(Concept::choices(Vocab::DESCRIPTION_DETAILS)->pluck('iri'))],
+            'source_standard' => ['nullable', 'string', 'max:255'],
+            // Heratio's watermark for one object: the institution's (none chosen), none, or a type of its own.
+            'watermark' => ['nullable', 'string', Rule::in(['none', ...Concept::choices(Vocab::BASE.'watermark-type/')->pluck('notation')])],
+            'watermark_position' => ['nullable', 'string', Rule::in(Concept::choices(Vocab::BASE.'watermark-position/')->pluck('notation'))],
+            'watermark_opacity' => ['nullable', 'integer', 'between:1,100'],
+            'remake_copies' => ['boolean'],
+            'display_as_compound' => ['boolean'],
             // Heratio's "Add new child levels": a row with a title becomes a unit inside this one; its level is required here.
             'child_levels' => ['array', 'max:20'],
             'child_levels.*.identifier' => ['nullable', 'string', 'max:255'],
@@ -239,15 +254,30 @@ class RecordController extends Controller
         // A translator writes values only: the reference code and level need update.
         $control = [($data['description_identifier'] ?? null) ?: null, ($data['description_status'] ?? null) ?: null, ($data['description_detail'] ?? null) ?: null];
         $controlChanged = $request->has('description_identifier') && $control !== [$record->description_identifier, $record->descriptionStatus?->iri, $record->descriptionDetail?->iri];
-        $identityChanged = ($data['identifier'] ?? null) !== $record->identifier || $data['level'] !== $record->level->iri || $controlChanged;
+        $own = RecordWatermark::where('record_resource_id', $record->id)->with('watermarkType', 'watermarkPosition')->first();
+        $watermark = [($data['watermark'] ?? null) ?: null, ($data['watermark_position'] ?? null) ?: null, isset($data['watermark_opacity']) ? (int) $data['watermark_opacity'] : null];
+        $watermarkChanged = $request->has('watermark') && $watermark !== [$own ? ($own->enabled ? $own->watermarkType?->notation : 'none') : null, $own?->watermarkPosition?->notation, $own?->opacity];
+        $compoundChanged = $request->has('display_as_compound') && $request->boolean('display_as_compound') !== (bool) $record->display_as_compound;
+        $sourceChanged = $request->has('source_standard') && (trim((string) ($data['source_standard'] ?? '')) ?: null) !== $record->source_standard;
+        $identityChanged = ($data['identifier'] ?? null) !== $record->identifier || $data['level'] !== $record->level->iri || $controlChanged || $sourceChanged || $watermarkChanged || $compoundChanged || $request->boolean('remake_copies');
         abort_if($identityChanged && ! $request->user()->may('update', 'description', $record), 403);
         try {
-            DB::transaction(function () use ($record, $data, $values, $request, $identityChanged, $controlChanged, $control, $children) {
+            DB::transaction(function () use ($record, $data, $values, $request, $identityChanged, $controlChanged, $control, $children, $sourceChanged, $watermarkChanged, $watermark, $compoundChanged) {
                 if ($identityChanged) {
                     $this->records->updateIdentity($record, $data['identifier'] ?? null, $data['level'], $request->user());
                 }
                 if ($controlChanged) {
                     $this->records->updateControl($record, ...[...$control, $request->user()]);
+                }
+                if ($watermarkChanged) {
+                    // A position or opacity without a watermark of its own has nothing to apply to.
+                    $this->records->setWatermark($record, $watermark[0], $watermark[0] ? $watermark[1] : null, $watermark[0] ? $watermark[2] : null, $request->user());
+                }
+                if ($compoundChanged) {
+                    $this->records->setDisplayAsCompound($record, $request->boolean('display_as_compound'), $request->user());
+                }
+                if ($sourceChanged) {
+                    $this->records->setSourceStandard($record, $data['source_standard'] ?? null, $request->user());
                 }
                 $this->records->describe($record, $values, $data['language'], $request->user());
                 foreach ($children as $row) {
@@ -256,6 +286,12 @@ class RecordController extends Controller
             });
         } catch (InvalidArgumentException $e) {
             return back()->withInput()->withErrors(['values' => $e->getMessage()]);
+        }
+
+        if ($request->boolean('remake_copies')) {
+            foreach ($record->instantiations()->with('files.use')->get()->filter(fn ($i) => str_starts_with((string) $i->file('master')?->mime_type, 'image/')) as $instantiation) {
+                app(InstantiationService::class)->queueRemake($instantiation, $request->user());
+            }
         }
 
         return redirect()->route('records.show', $record)->with('status', __('Description saved.'));
@@ -312,6 +348,8 @@ class RecordController extends Controller
     {
         abort_unless($record->institution_id === $request->user()->institution_id && $record->deleted_at === null, 404);
         abort_unless($request->user()->may($action, 'description', $record), 403);
+        // A record a community protocol withholds is not there for who may not change it (Heratio's TermProtocolGate).
+        abort_unless(app(CommunityProtocols::class)->allows($request->user(), $record, 'description'), 404);
     }
 
     /** Writing a language: update, or translate in one of the account's translation languages (ADR 0005). */

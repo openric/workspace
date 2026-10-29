@@ -1,0 +1,67 @@
+# OpenRiC Workspace - OpenRiC Workspace ICIP Sensitivity Levels.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Indigenous Cultural and Intellectual Property sensitivity of an authority record (Heratio's actor.icip_sensitivity),
+# the seven SensitivityLevel concepts of Heratio's data/vocabularies/icip.ttl with their English definitions and
+# Afrikaans labels, in increasing restriction.
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/icip-sensitivity/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace ICIP Sensitivity Levels"@en ;
+    dcterms:description "How culturally sensitive an agent's description is, under ICIP protocols."@en ;
+    dcterms:issued "2026-10-28"^^xsd:date ;
+    skos:hasTopConcept v:open, v:restricted, v:culturally-sensitive, v:gender-restricted, v:age-restricted, v:deceased-persons-content, v:sacred-secret .
+
+v:open a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Open"@en, "Oop"@af ;
+    skos:scopeNote "Not a RiC-O term: a handling condition kept with the agent's description, as Heratio keeps it; not exported."@en ;
+    skos:definition "May be displayed, reproduced, and accessed without prior community consultation."@en .
+
+v:restricted a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Restricted"@en, "Beperk"@af ;
+    skos:scopeNote "Not a RiC-O term: a handling condition kept with the agent's description, as Heratio keeps it; not exported."@en ;
+    skos:definition "Access requires consent from a recognised custodian or community body."@en .
+
+v:culturally-sensitive a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Culturally sensitive"@en, "Kultureel sensitief"@af ;
+    skos:scopeNote "Not a RiC-O term: a handling condition kept with the agent's description, as Heratio keeps it; not exported."@en ;
+    skos:definition "Material requires careful contextual handling; warnings should accompany display or reproduction."@en .
+
+v:gender-restricted a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Gender-restricted"@en, "Geslagsbeperk"@af ;
+    skos:scopeNote "Not a RiC-O term: a handling condition kept with the agent's description, as Heratio keeps it; not exported."@en ;
+    skos:definition "May only be viewed, handled, or transmitted by people of a specific gender as defined by community protocol (men's business / women's business)."@en .
+
+v:age-restricted a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Age-restricted"@en, "Ouderdombeperk"@af ;
+    skos:scopeNote "Not a RiC-O term: a handling condition kept with the agent's description, as Heratio keeps it; not exported."@en ;
+    skos:definition "Knowledge available only to community members who have undergone specific initiation or attained a recognised age threshold."@en .
+
+v:deceased-persons-content a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Deceased persons content"@en, "Inhoud oor oorlede persone"@af ;
+    skos:scopeNote "Not a RiC-O term: a handling condition kept with the agent's description, as Heratio keeps it; not exported."@en ;
+    skos:definition "Names, images, voices, or knowledge of deceased persons that require culturally sensitive handling. In some communities such content must be temporarily withdrawn from public view after death."@en .
+
+v:sacred-secret a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Sacred / secret"@en, "Heilig / geheim"@af ;
+    skos:scopeNote "Not a RiC-O term: a handling condition kept with the agent's description, as Heratio keeps it; not exported."@en ;
+    skos:definition "Knowledge or items that may not be displayed publicly under any circumstances. Access requires explicit ceremonial authorisation."@en .

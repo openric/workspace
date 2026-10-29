@@ -12,8 +12,10 @@ namespace App\Description;
 use App\Audit\AuditLog;
 use App\Models\Institution;
 use App\Models\RecordResource;
+use App\Models\RecordWatermark;
 use App\Models\Repository;
 use App\Models\User;
+use App\Support\Vocab;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -72,6 +74,39 @@ class RecordService
             'description_status_id' => $statusIri ? $this->descriptions->concept($statusIri)->id : null,
             'description_detail_id' => $detailIri ? $this->descriptions->concept($detailIri)->id : null,
         ])));
+    }
+
+    /**
+     * The description's own watermark (Heratio's object_watermark_setting): null to follow the institution's, 'none' for
+     * none, or a watermark-type notation, with a position notation and an opacity that fall back to the institution's.
+     */
+    public function setWatermark(RecordResource $record, ?string $type, ?string $position = null, ?int $opacity = null, ?User $actor = null): void
+    {
+        DB::transaction(fn () => AuditLog::actingAs($actor, function () use ($record, $type, $position, $opacity) {
+            $own = RecordWatermark::where('record_resource_id', $record->id)->first();
+            if ($type === null) {
+                $own?->delete();
+
+                return;
+            }
+            $fields = ['enabled' => $type !== 'none',
+                'watermark_type_id' => $type !== 'none' ? $this->descriptions->concept(Vocab::BASE.'watermark-type/'.$type)->id : null,
+                'watermark_position_id' => $position ? $this->descriptions->concept(Vocab::BASE.'watermark-position/'.$position)->id : null,
+                'opacity' => $opacity];
+            $own ? $own->update($fields) : RecordWatermark::create($fields + ['institution_id' => $record->institution_id, 'record_resource_id' => $record->id]);
+        }));
+    }
+
+    /** AtoM's "View children as compound?": whether the public page shows the pictures of the units inside as one strip. */
+    public function setDisplayAsCompound(RecordResource $record, bool $compound, ?User $actor = null): void
+    {
+        DB::transaction(fn () => AuditLog::actingAs($actor, fn () => $record->update(['display_as_compound' => $compound])));
+    }
+
+    /** The standard the description was written to (AtoM's source_standard), such as ISAD(G) or DACS. */
+    public function setSourceStandard(RecordResource $record, ?string $standard, ?User $actor = null): void
+    {
+        DB::transaction(fn () => AuditLog::actingAs($actor, fn () => $record->update(['source_standard' => ($standard = trim((string) $standard)) === '' ? null : $standard])));
     }
 
     /**

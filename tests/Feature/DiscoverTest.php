@@ -214,6 +214,14 @@ class DiscoverTest extends TestCase
         $this->get("/discover/records/{$this->item->id}")->assertDontSee('aria-label="Pictures of the units inside"', false);
         // The same strip on the staff page.
         $this->actingAs($this->editor)->get("/records/{$this->fonds->id}")->assertSee('aria-label="Pictures of the units inside"', false)->assertSee(route('records.show', $this->item), false);
+        // "View children as compound?" No: no strip, on either page.
+        $this->actingAs($this->editor)->get("/records/{$this->fonds->id}/edit")->assertSee('View children as compound?');
+        $this->actingAs($this->editor)->post("/records/{$this->fonds->id}", ['language' => 'en', 'level' => $this->fonds->level->iri, 'identifier' => $this->fonds->identifier,
+            'values' => ['title' => $this->fonds->described('title', ['en'])], 'display_as_compound' => '0'])->assertRedirect()->assertSessionHasNoErrors();
+        $this->assertFalse($this->fonds->fresh()->display_as_compound);
+        $this->actingAs($this->editor)->get("/records/{$this->fonds->id}")->assertDontSee('aria-label="Pictures of the units inside"', false);
+        auth()->logout();
+        $this->get("/discover/records/{$this->fonds->id}")->assertDontSee('aria-label="Pictures of the units inside"', false);
     }
 
     public function test_a_repository_lists_the_published_units_it_holds_at_the_top_and_no_draft(): void

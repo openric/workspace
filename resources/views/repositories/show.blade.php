@@ -13,6 +13,7 @@
     @php($canUpdate = auth()->user()->may('update', 'repository', $repository))
     @if($canUpdate)
         @include('description._actions', ['subject' => $repository, 'editRoute' => 'repositories.edit', 'required' => 'authorised-name'])
+        <p><a href="{{ route('repositories.theme', $repository) }}">{{ __('Edit theme') }}</a></p>
     @endif
     @include('description._view', ['subject' => $repository, 'standard' => \App\Description\Elements::ISDIAH, 'drafts' => $canUpdate])
 

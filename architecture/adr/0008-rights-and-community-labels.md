@@ -38,3 +38,9 @@ Option 2.
 ## Consequences
 
 What a visitor may do with a file can be decided from its grants, which the public catalogue and the files API show. Heratio's data migrates field for field. If RiC-O 1.2 adds terms for acts or copyright status, the export can use them without changing the store.
+
+## Amendment, 28 October 2026: community protocols
+
+Heratio's community protocol engine (ahg-core TermProtocolService and TermProtocolGate, ahg-icip) is added. A term of the institution's own vocabularies may carry a protocol: an access condition, a Label, the owning community and a region (`concept_protocols`). Each Label brings a default condition (`community_label_conditions`, seeded from Heratio's map), and a Label on a record may carry its own instead (`community_labels.access_condition_id`, Heratio's object_protocol). The conditions are the community-access-condition vocabulary; those under "Withheld from the public" withhold. A record's condition is the strictest of its tagged terms' protocols and its Labels' conditions.
+
+A withheld term or record is hidden from the public catalogue, the API, OAI-PMH and accounts that may not change it, and its files are not delivered, an approved access request or not. Who may change it always sees it, as Heratio's staff bypass. The gate is `App\Rights\CommunityProtocols`, called from `EntityKinds::readable`, `ExportView::readable` and `InstantiationService::deliverable`. Not yet copied: the AI fence (phase 17) and the owning community seeing its own material. Evidence: `tests/Feature/CommunityProtocolTest.php`.

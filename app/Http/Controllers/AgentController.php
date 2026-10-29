@@ -114,6 +114,7 @@ class AgentController extends Controller
 
         return view('agents.edit', ['agent' => $agent, 'language' => $language, 'types' => Concept::choices(Agent::TYPES)->get(),
             'statuses' => Concept::choices(Vocab::DESCRIPTION_STATUSES)->get(), 'details' => Concept::choices(Vocab::DESCRIPTION_DETAILS)->get(),
+            'sensitivities' => Concept::choices(Vocab::BASE.'icip-sensitivity/')->with('labels')->get(),
             'repositories' => Repository::where('institution_id', $agent->institution_id)->whereNull('deleted_at')->with('names.nameType', 'descriptionValues.element')->get()]);
     }
 
@@ -131,6 +132,8 @@ class AgentController extends Controller
             'status' => ['nullable', 'string', Rule::in(Concept::choices(Vocab::DESCRIPTION_STATUSES)->pluck('iri'))],
             'detail' => ['nullable', 'string', Rule::in(Concept::choices(Vocab::DESCRIPTION_DETAILS)->pluck('iri'))],
             'embargo_until' => ['nullable', 'date_format:Y-m-d'],
+            'source_standard' => ['nullable', 'string', 'max:255'],
+            'icip_sensitivity' => ['nullable', 'string', Rule::in(Concept::choices(Vocab::BASE.'icip-sensitivity/')->pluck('iri'))],
         ]);
         $values = array_intersect_key($data['values'] ?? [], array_flip(Elements::notations(Elements::ISAAR_CPF)));
         try {

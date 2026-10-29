@@ -4,12 +4,21 @@
 @section('content')
     @php($nameElement = \App\Relations\EntityKinds::get($kind)['label'])
     @php([$name, $nameLanguage] = $view->valueWithLanguage($entity, $nameElement) ?? ['', 'en'])
+    @if($entity instanceof \App\Models\Repository && ($entity->theme_background_colour || $entity->theme_banner_path || $entity->theme_logo_path))
+        {{-- The repository's theme (AtoM's edit-theme): its colour behind its logo and banner. --}}
+        <div style="background: {{ $entity->theme_background_colour ?? 'transparent' }}; padding: {{ $entity->theme_background_colour ? '1rem' : '0' }}; margin-bottom: 1rem">
+            @if($entity->theme_logo_path)<img src="{{ route('discover.repository.image', [$entity->getKey(), 'logo']) }}" alt="{{ __('Logo of :name', ['name' => $name]) }}" style="max-height: 5rem; display: block">@endif
+            @if($entity->theme_banner_path)<img src="{{ route('discover.repository.image', [$entity->getKey(), 'banner']) }}" alt="" style="max-width: 100%; display: block; margin-top: .5rem">@endif
+        </div>
+    @endif
     <h1 lang="{{ $nameLanguage }}">{{ $name }}</h1>
+    @if($entity instanceof \App\Models\Repository && $entity->theme_content)<div class="theme-content">{!! \Illuminate\Support\Str::markdown($entity->theme_content, ['html_input' => 'strip', 'allow_unsafe_links' => false]) !!}</div>@endif
     @if(in_array($kind, ['agent', 'repository'], true))@include('clipboard._button', ['type' => $kind === 'agent' ? 'agents' : 'repositories', 'id' => $entity->getKey()])@endif
     <p class="meta">{{ ucfirst(__(\App\Relations\EntityKinds::noun($entity))) }} @include('description._ric', ['term' => \App\Relations\EntityKinds::ricClass($entity)])
         @if($entity instanceof \App\Models\Activity && $entity->activityType) · {{ $entity->activityType->anyLabel(\App\Support\Vocab::languages()) }} @include('description._ric', ['term' => 'rico:hasActivityType'])@endif
         @if($entity instanceof \App\Models\Place && $entity->placeType) · {{ $entity->placeType->anyLabel(\App\Support\Vocab::languages()) }}@endif
         @if($entity->getAttribute('identifier')) · {{ $entity->getAttribute('identifier') }}@endif</p>
+    @if($entity instanceof \App\Models\Agent && $entity->icipSensitivity)<p><strong>{{ __('ICIP sensitivity') }}:</strong> {{ $entity->icipSensitivity->anyLabel(\App\Support\Vocab::languages()) }}: {{ $entity->icipSensitivity->labels->firstWhere('language', 'en')?->definition }}</p>@endif
     @php($others = $entity->names->filter(fn ($n) => $view->visible($n) && $n->nameType->notation !== 'authorised'))
     @if($others->isNotEmpty())<p>{{ __('Also known as') }}: @foreach($others as $other)<span lang="{{ $other->language }}">{{ $other->value }}</span>@if(! $loop->last); @endif @endforeach</p>@endif
     @foreach($entity->dates as $date)<p><strong>{{ $date->property->label(\App\Support\Vocab::languages()) }}:</strong> {{ $date->display() }} @include('description._ric', ['term' => $date->property])</p>@endforeach

@@ -56,7 +56,8 @@
     <h2>{{ __('Description control') }}</h2>
     <p>{{ __('Description identifier') }}: {{ $record->description_identifier ?? __('none') }}.
         {{ __('Status') }}: {{ $record->descriptionStatus?->label(\App\Support\Vocab::languages()) ?? __('not set') }}.
-        {{ __('Level of detail') }}: {{ $record->descriptionDetail?->label(\App\Support\Vocab::languages()) ?? __('not set') }}.</p>
+        {{ __('Level of detail') }}: {{ $record->descriptionDetail?->label(\App\Support\Vocab::languages()) ?? __('not set') }}.
+        @if($record->source_standard){{ __('Source standard') }}: {{ $record->source_standard }}.@endif</p>
     <h2>{{ __('Cite as') }}</h2>
     <p>{{ collect([$record->described('title', ['en']), $record->referenceCode(), $record->repository->described('authorised-name', ['en'])])->filter()->join(', ') }}. {{ $record->iri }} ({{ __('accessed :date', ['date' => now()->translatedFormat('j F Y')]) }}).</p>
 

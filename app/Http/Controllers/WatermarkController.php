@@ -14,11 +14,9 @@
 namespace App\Http\Controllers;
 
 use App\Audit\AuditLog;
-use App\Jobs\JobsService;
-use App\Jobs\MakeViewingCopies;
+use App\Description\InstantiationService;
 use App\Models\Concept;
 use App\Models\Instantiation;
-use App\Models\User;
 use App\Support\Vocab;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -33,8 +31,6 @@ class WatermarkController extends Controller
     private const TYPES = Vocab::BASE.'watermark-type/';
 
     private const POSITIONS = Vocab::BASE.'watermark-position/';
-
-    public function __construct(private JobsService $jobs) {}
 
     public function edit(Request $request): View
     {
@@ -84,7 +80,7 @@ class WatermarkController extends Controller
             ->whereHas('files', fn ($q) => $q->where('mime_type', 'like', 'image/%')->whereHas('use', fn ($q) => $q->where('notation', 'master')))
             ->with('files.use')->orderBy('id')->chunkById(200, function ($chunk) use ($user, &$count) {
                 foreach ($chunk as $instantiation) {
-                    $this->queue($instantiation, $user);
+                    app(InstantiationService::class)->queueRemake($instantiation, $user);
                     $count++;
                 }
             });
@@ -99,14 +95,8 @@ class WatermarkController extends Controller
         abort_unless($instantiation->institution_id === $user->institution_id && $instantiation->deleted_at === null, 404);
         abort_unless($user->may('update', 'description', $instantiation->record), 403);
         abort_if($instantiation->file('master') === null, 404);
-        $this->queue($instantiation, $user);
+        app(InstantiationService::class)->queueRemake($instantiation, $user);
 
         return redirect()->route('instantiations.show', $instantiation)->with('status', __('The viewing copies are being made again.'));
-    }
-
-    private function queue(Instantiation $instantiation, User $user): void
-    {
-        $job = $this->jobs->create($instantiation->institution_id, 'viewing-copies', __('Viewing copies of :name, again', ['name' => $instantiation->file('master')->original_name]), $user, $instantiation);
-        MakeViewingCopies::dispatch($job->id, $instantiation->id, true);
     }
 }

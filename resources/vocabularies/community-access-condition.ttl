@@ -1,0 +1,89 @@
+# OpenRiC Workspace - OpenRiC Workspace Community Access Conditions.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# The access conditions of a community protocol, as Heratio's TermProtocolService has them (open, attribution,
+# non_commercial, community_voice, seasonal, gendered, restricted, sacred_secret). Which of them withhold material
+# from the public is data here: each is narrower than "Shown to the public" or "Withheld from the public", where
+# Heratio lists the withholding ones in its RESTRICTED constant.
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/community-access-condition/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Community Access Conditions"@en ;
+    dcterms:description "How a community's protocol lets its material be seen and used."@en ;
+    dcterms:issued "2026-10-28"^^xsd:date ;
+    skos:hasTopConcept v:shown, v:withheld .
+
+v:shown a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Shown to the public"@en ;
+    skos:scopeNote "Not a RiC-O term: a community protocol on the description, as Heratio keeps it; not exported."@en ;
+    skos:definition "The material stays in the public catalogue; the condition is an obligation shown with it."@en .
+
+v:withheld a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Withheld from the public"@en ;
+    skos:scopeNote "Not a RiC-O term: a community protocol on the description, as Heratio keeps it; not exported."@en ;
+    skos:definition "The material, and every record tagged with it, is hidden from the public and from accounts that may not change it."@en .
+
+v:open a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:shown ;
+    skos:prefLabel "Open"@en ;
+    skos:scopeNote "Not a RiC-O term: a community protocol on the description, as Heratio keeps it; not exported."@en ;
+    skos:definition "No condition beyond the rights of the material."@en .
+
+v:attribution a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:shown ;
+    skos:prefLabel "Attribution"@en ;
+    skos:scopeNote "Not a RiC-O term: a community protocol on the description, as Heratio keeps it; not exported."@en ;
+    skos:definition "Shown, with the community credited as its source."@en .
+
+v:non-commercial a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:shown ;
+    skos:prefLabel "Non-commercial"@en ;
+    skos:scopeNote "Not a RiC-O term: a community protocol on the description, as Heratio keeps it; not exported."@en ;
+    skos:definition "Shown; not for commercial use."@en .
+
+v:community-voice a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:withheld ;
+    skos:prefLabel "Community voice"@en ;
+    skos:scopeNote "Not a RiC-O term: a community protocol on the description, as Heratio keeps it; not exported."@en ;
+    skos:definition "Kept for the community to speak about; not shown to the public."@en .
+
+v:seasonal a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:withheld ;
+    skos:prefLabel "Seasonal"@en ;
+    skos:scopeNote "Not a RiC-O term: a community protocol on the description, as Heratio keeps it; not exported."@en ;
+    skos:definition "Shown only at certain times of year, under community protocol; withheld from the public catalogue."@en .
+
+v:gendered a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:withheld ;
+    skos:prefLabel "Gendered"@en ;
+    skos:scopeNote "Not a RiC-O term: a community protocol on the description, as Heratio keeps it; not exported."@en ;
+    skos:definition "Seen only by people of a gender the community names; withheld from the public catalogue."@en .
+
+v:restricted a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:withheld ;
+    skos:prefLabel "Restricted"@en ;
+    skos:scopeNote "Not a RiC-O term: a community protocol on the description, as Heratio keeps it; not exported."@en ;
+    skos:definition "Access only with the consent of the community or its custodian."@en .
+
+v:sacred-secret a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:withheld ;
+    skos:prefLabel "Sacred / secret"@en ;
+    skos:scopeNote "Not a RiC-O term: a community protocol on the description, as Heratio keeps it; not exported."@en ;
+    skos:definition "Never shown publicly; access needs explicit authorisation by the community."@en .

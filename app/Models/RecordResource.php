@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['institution_id', 'iri', 'level_id', 'repository_id', 'parent_id', 'position', 'description_identifier', 'description_status_id', 'description_detail_id'])]
+#[Fillable(['institution_id', 'iri', 'level_id', 'repository_id', 'parent_id', 'position', 'description_identifier', 'description_status_id', 'description_detail_id', 'source_standard', 'display_as_compound'])]
 class RecordResource extends Model
 {
     use Audited, Describable, HasDates, HasIdentifiers, HasUuids;

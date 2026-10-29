@@ -21,6 +21,7 @@ use App\Models\DigitalFile;
 use App\Models\Instantiation;
 use App\Models\RecordResource;
 use App\Relations\RelationService;
+use App\Rights\CommunityProtocols;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -157,6 +158,7 @@ class InstantiationController extends Controller
     {
         abort_unless($unit->institution_id === $request->user()->institution_id && $unit->deleted_at === null, 404);
         abort_unless($request->user()->may($action, 'description', $unit), 403);
+        abort_unless(app(CommunityProtocols::class)->allows($request->user(), $unit, 'description'), 404);
 
         return $unit;
     }

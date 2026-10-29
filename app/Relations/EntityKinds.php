@@ -20,6 +20,7 @@ use App\Models\Place;
 use App\Models\RecordResource;
 use App\Models\Repository;
 use App\Models\User;
+use App\Rights\CommunityProtocols;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
@@ -146,6 +147,10 @@ final class EntityKinds
         }
 
         if ($entity instanceof Agent && $entity->isEmbargoed() && ! $user->may('update', 'authority', $entity)) {
+            return false;
+        }
+        // A community protocol withholds the term or record from who may not change it (Heratio's TermProtocolGate).
+        if (! app(CommunityProtocols::class)->allows($user, $entity, $definition['permission'])) {
             return false;
         }
 

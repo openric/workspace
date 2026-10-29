@@ -23,7 +23,7 @@ class CommunityLabelController extends Controller
     {
         [$subject, $route] = $this->subject($request, $kind, $id);
         $data = $request->validate(['label' => ['required', 'string', 'max:64'], 'applied_by' => ['required', 'string', 'max:64'], 'community' => ['nullable', 'uuid'],
-            'project' => ['nullable', 'string', 'max:255'], 'note' => ['nullable', 'string', 'max:4000']]);
+            'project' => ['nullable', 'string', 'max:255'], 'note' => ['nullable', 'string', 'max:4000'], 'access_condition' => ['nullable', 'string', 'max:64']]);
         try {
             $this->labels->apply($subject, $data, $request->user());
         } catch (InvalidArgumentException $e) {

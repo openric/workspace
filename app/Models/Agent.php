@@ -17,7 +17,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['institution_id', 'iri', 'agent_type_id', 'description_identifier', 'maintainer_id', 'description_status_id', 'description_detail_id', 'embargo_until'])]
+#[Fillable(['institution_id', 'iri', 'agent_type_id', 'description_identifier', 'maintainer_id', 'description_status_id', 'description_detail_id', 'embargo_until', 'icip_sensitivity_id', 'source_standard'])]
 class Agent extends Model
 {
     use Audited, Describable, HasDates, HasIdentifiers, HasUuids;
@@ -61,6 +61,12 @@ class Agent extends Model
     public function descriptionDetail(): BelongsTo
     {
         return $this->belongsTo(Concept::class, 'description_detail_id');
+    }
+
+    /** Heratio's ICIP cultural-sensitivity classification of the record. */
+    public function icipSensitivity(): BelongsTo
+    {
+        return $this->belongsTo(Concept::class, 'icip_sensitivity_id');
     }
 
     public function contactPoints(): HasMany

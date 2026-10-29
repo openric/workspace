@@ -91,6 +91,13 @@ class AgentService
                 'description_detail_id' => $text('detail') ? $this->concept($text('detail'))->id : null,
                 'embargo_until' => $embargo === '' ? null : $embargo,
             ]);
+            // Kept unless given, so an import that does not carry it leaves it as it was.
+            if (array_key_exists('source_standard', $fields)) {
+                $agent->update(['source_standard' => $text('source_standard')]);
+            }
+            if (array_key_exists('icip_sensitivity', $fields)) {
+                $agent->update(['icip_sensitivity_id' => $text('icip_sensitivity') ? $this->concept($text('icip_sensitivity'))->id : null]);
+            }
             $agent->unsetRelation('agentType');
             if (array_key_exists('identifier', $fields)) {
                 $this->identifiers->setLocal($agent, $fields['identifier']);

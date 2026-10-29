@@ -23,9 +23,11 @@ use App\Support\Vocab;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use InvalidArgumentException;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class RepositoryController extends Controller
 {
@@ -123,6 +125,42 @@ class RepositoryController extends Controller
         }
 
         return redirect()->route('repositories.show', $repository)->with('status', __('Description saved.'));
+    }
+
+    /** AtoM's edit-theme: background colour, banner, logo and page content of the repository's public page. */
+    public function editTheme(Request $request, Repository $repository): View
+    {
+        $this->own($request, $repository, 'update');
+
+        return view('repositories.theme', ['repository' => $repository]);
+    }
+
+    public function updateTheme(Request $request, Repository $repository): RedirectResponse
+    {
+        $this->own($request, $repository, 'update');
+        $data = $request->validate([
+            'background_colour' => ['nullable', 'regex:/^#[0-9a-fA-F]{6}$/'],
+            'content' => ['nullable', 'string', 'max:20000'],
+            'banner' => ['nullable', 'file', 'mimes:jpeg,png,webp', 'max:5120'],
+            'logo' => ['nullable', 'file', 'mimes:jpeg,png,webp', 'max:5120'],
+            'remove_banner' => ['boolean'], 'remove_logo' => ['boolean'], 'no_background' => ['boolean'],
+        ]);
+        if ($request->boolean('no_background')) {
+            $data['background_colour'] = null;
+        }
+        $this->repositories->updateTheme($repository, $data, $request->file('banner'), $request->file('logo'), $request->user());
+
+        return redirect()->route('repositories.show', $repository)->with('status', __('Theme saved.'));
+    }
+
+    /** The banner or logo, for the theme form; the public catalogue serves its own. */
+    public function themeImage(Request $request, Repository $repository, string $part): BinaryFileResponse
+    {
+        $this->own($request, $repository);
+        $path = $repository->getAttribute("theme_{$part}_path");
+        abort_unless($path && Storage::disk('local')->exists($path), 404);
+
+        return response()->file(Storage::disk('local')->path($path));
     }
 
     public function storeContact(Request $request, Repository $repository): RedirectResponse

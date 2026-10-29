@@ -33,6 +33,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -139,6 +140,10 @@ class DiscoverController extends Controller
      */
     private function childThumbnails(PublicCatalogue $catalogue, RecordResource $unit): array
     {
+        // "View children as compound?" No: the units inside are reached one by one.
+        if (! $unit->display_as_compound) {
+            return [collect(), 0];
+        }
         $records = $catalogue->visible('records');
         $parents = $records->pluck('parent_id', 'id');
         $inside = $records->filter(function ($r) use ($parents, $unit) {
@@ -190,6 +195,16 @@ class DiscoverController extends Controller
             ->where('repository_id', $id)->whereNull('parent_id')->sortBy(fn ($unit) => mb_strtolower((string) $this->catalogue($request)->view->label($unit)))->values();
 
         return $this->entity($request, 'repository', $id, ['contactPoints'], ['holdings' => $holdings]);
+    }
+
+    /** A published repository's banner or logo (its theme). */
+    public function repositoryImage(Request $request, string $id, string $part): BinaryFileResponse
+    {
+        $repository = $this->catalogue($request)->find('repositories', $id) ?? abort(404);
+        $path = $repository->getAttribute("theme_{$part}_path");
+        abort_unless($path && Storage::disk('local')->exists($path), 404);
+
+        return response()->file(Storage::disk('local')->path($path), ['Cache-Control' => 'public, max-age=86400']);
     }
 
     public function place(Request $request, string $id): View

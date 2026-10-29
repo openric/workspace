@@ -3,6 +3,7 @@
 @php($service = app(\App\Rights\CommunityLabelService::class))
 @php($applied = $service->of($subject))
 @php($lang = \App\Support\Vocab::languages())
+@php($protocols = app(\App\Rights\CommunityProtocols::class))
 <h2 id="labels">{{ __('Traditional Knowledge and Biocultural Labels') }} @include('description._ric', ['term' => 'rico:Rule'])</h2>
 @error('labels')<p class="error" role="alert">{{ $message }}</p>@enderror
 @forelse($applied as $label)
@@ -11,6 +12,7 @@
             __('Applied by :who', ['who' => mb_strtolower($label->appliedBy->label($lang))]),
             $label->community ? __('Community').': '.$label->community->described('agent-authorised-name', $lang) : null,
             $label->local_contexts_project ? __('Local Contexts project').': '.$label->local_contexts_project : null,
+            __('Access condition').': '.($condition = $protocols->conditionOf($label))->label($lang).($condition->broader?->notation === 'withheld' ? ' ('.__('withheld from the public').')' : ''),
         ])->filter()->join('; ') }}</small>
         @if($label->note)<br>{{ $label->note }}@endif
         @if($canUpdate)<form method="post" action="{{ route('community-labels.destroy', [$kind, $subject->getKey(), $label]) }}" style="display: inline">@csrf<button type="submit" style="margin: 0; padding: .1rem .5rem">{{ __('Remove') }}</button></form>@endif</p>
@@ -39,6 +41,10 @@
                 @foreach(\App\Models\Agent::where('institution_id', auth()->user()->institution_id)->whereNull('deleted_at')->with('names')->get()->sortBy(fn ($a) => mb_strtolower((string) $a->described('agent-authorised-name', ['en']))) as $agent)
                     <option value="{{ $agent->id }}">{{ $agent->described('agent-authorised-name', $lang) }}</option>
                 @endforeach
+            </select>
+            <label for="condition-{{ $subject->getKey() }}">{{ __('Access condition') }}</label>
+            <select id="condition-{{ $subject->getKey() }}" name="access_condition"><option value="">{{ __('The Label\'s default') }}</option>
+                @foreach(\App\Models\Concept::choices(\App\Rights\CommunityProtocols::CONDITIONS)->whereNotNull('broader_id')->with('broader')->get() as $c)<option value="{{ $c->notation }}">{{ $c->label($lang) }}@if($c->broader->notation === 'withheld') ({{ __('hidden') }})@endif</option>@endforeach
             </select>
             <label for="project-{{ $subject->getKey() }}">{{ __('Local Contexts Hub project (optional)') }}</label><input id="project-{{ $subject->getKey() }}" name="project">
             <label for="label-note-{{ $subject->getKey() }}">{{ __('Note') }}</label><textarea id="label-note-{{ $subject->getKey() }}" name="note" rows="2"></textarea>

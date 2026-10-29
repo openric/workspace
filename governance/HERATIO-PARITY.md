@@ -189,8 +189,8 @@ Asked for by Dr Johan Pieterse on 28 October 2026: each Workspace screen has a p
 | `sources` | Sources | Same, from v0.0.73 |
 | `publication_status_id`, `updateDescendants` | Publication of each value and name, with "and everything inside" | Modelled |
 | `display_standard_id` | none: ISAD(G) only on screen; DC and MODS as exports | Missing |
-| `source_standard` | none | Missing |
-| `watermark_*` (per description) | Watermark per institution (Settings) | Missing: per description |
+| `source_standard` | Source standard, in the description control area | Same, from v0.0.75 |
+| `watermark_*` (per description) | Watermark for this description: the institution's, none, or its own type, position and opacity, with making the copies again | Same, from v0.0.75; Heratio's library of custom images is the institution's one image |
 | ICIP sensitivity | Traditional Knowledge and Biocultural Labels | Modelled |
 | Custom fields (`ahg-custom-fields`) | none | Missing |
 | `security_classification_*` | none | Phase 18 |
@@ -219,8 +219,8 @@ Asked for by Dr Johan Pieterse on 28 October 2026: each Workspace screen has a p
 | Contact area | Contact points | Same |
 | `embargo_until` | Embargoed until | Same |
 | `publication_status_id` | Publication of each value and name | Modelled |
-| `source_standard` | none | Missing |
-| ICIP sensitivity | none on authority records | Missing |
+| `source_standard` | Source standard, in the description control area | Same, from v0.0.75 |
+| ICIP sensitivity | ICIP cultural-sensitivity classification, Heratio's seven levels as a vocabulary, shown on the record and in the public catalogue | Same, from v0.0.75 |
 | Custom fields | none | Missing |
 
 : Authority record, field by field
@@ -240,7 +240,7 @@ Asked for by Dr Johan Pieterse on 28 October 2026: each Workspace screen has a p
 | `desc_language`, `desc_script` (ISDIAH 5.6.7) | Language(s) and Script(s), from ISO 639 and ISO 15924 | Same, from v0.0.73 |
 | `geographic_subregion`, `thematic_area` | Geographic subregion, Thematic area, under Access points | Same, from v0.0.73 |
 | `upload_limit` | Upload limit (GB), set by who may manage the institution; empty for no limit (AtoM's -1), 0 switches uploads off; refused uploads and the usage on the repository's page | Same, from v0.0.74 |
-| Theme (`edit-theme`: logo, banner, colours) | none | Missing |
+| Theme (`edit-theme`: logo, banner, colours) | Edit theme: background colour, banner, logo and page content on the public repository page | Same, from v0.0.75; the page content is Markdown with HTML removed, where AtoM takes HTML and inline CSS |
 | Custom fields | none | Missing |
 | none | Complete reference codes | Workspace only |
 
@@ -269,7 +269,7 @@ Asked for by Dr Johan Pieterse on 28 October 2026: each Workspace screen has a p
 | `crossMatches[source, target, match type]` | Matches to other schemes | Same |
 | `scopeNotes[]`, `sourceNotes[]`, `displayNotes[]` | Scope note, Source note, Display note (with a definition and a history note besides) | Same |
 | `converse_term`, `self_reciprocal` (relation-type terms) | none: relation types are a bundled vocabulary with their inverse wording | Missing for local terms |
-| `protocol_*` (ICIP protocol on a term) | none | Missing |
+| `protocol_*` (ICIP protocol on a term) | Community protocol: access condition, Label, owning community and region; a withholding condition hides the term and every unit of description tagged with it from the public, the API, OAI and accounts that may not change them, and keeps their files back; Labels bring Heratio's default conditions, which a record may override | Same, from v0.0.75; the AI fence waits for phase 17 and the owning community seeing its own material for Heratio's phase 3 |
 
 : Term and concept, field by field
 
@@ -293,7 +293,7 @@ Asked for by Dr Johan Pieterse on 28 October 2026: each Workspace screen has a p
 | Upload, `replace_file` | Upload to an instantiation; a new file beside the old | Same |
 | `media_type_id` | Carrier type and media type | Same |
 | `repFile_reference`, `repFile_thumbnail` (own reference and thumbnail files) | Give your own copy: an image for the reference copy or thumbnail, sized and watermarked as a made one | Same, from v0.0.74 |
-| `display_as_compound` | none | Missing |
+| `display_as_compound` | View children as compound? on the record: Yes (the default, as Heratio's) shows the imageflow of the units inside on the public page | Same, from v0.0.75 |
 
 : Digital object, field by field
 

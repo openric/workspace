@@ -9,19 +9,25 @@ namespace Tests\Feature;
 use App\Access\RoleService;
 use App\Accounts\AccountService;
 use App\Description\ActivityService;
+use App\Description\AgentService;
 use App\Description\Elements;
 use App\Description\InstantiationService;
 use App\Description\PublicationService;
 use App\Description\RecordService;
 use App\Description\RepositoryService;
+use App\Files\Watermark;
+use App\Models\BackgroundJob;
+use App\Models\Concept;
 use App\Models\Import;
 use App\Models\Institution;
 use App\Models\RecordResource;
+use App\Models\RecordWatermark;
 use App\Models\Right;
 use App\Models\User;
 use App\Support\Vocab;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class FieldParityTest extends TestCase
@@ -178,6 +184,120 @@ class FieldParityTest extends TestCase
         $this->assertSame(1, $scan->files()->whereHas('use', fn ($q) => $q->where('notation', 'thumbnail'))->count());
         $this->assertSame('letter-thumbnail.jpg', $scan->file('thumbnail')->original_name);
         exec('rm -rf '.escapeshellarg($store));
+    }
+
+    public function test_an_authority_record_carries_its_icip_sensitivity_on_screen_and_in_the_public_catalogue(): void
+    {
+        $agent = app(AgentService::class)->create($this->institution, 'person', 'Engelbrecht, Johanna', 'en');
+        $form = ['language' => 'en', 'type' => 'person', 'values' => ['agent-authorised-name' => 'Engelbrecht, Johanna']];
+        $this->actingAs($this->editor)->get("/agents/{$agent->id}/edit")->assertOk()->assertSee('ICIP cultural-sensitivity classification')->assertSee('Sacred / secret');
+        $this->actingAs($this->editor)->post("/agents/{$agent->id}", $form + ['icip_sensitivity' => 'https://example.org/taboo'])->assertSessionHasErrors('icip_sensitivity');
+        $this->actingAs($this->editor)->post("/agents/{$agent->id}", $form + ['icip_sensitivity' => Vocab::BASE.'icip-sensitivity/deceased-persons-content'])->assertRedirect()->assertSessionHasNoErrors();
+        $this->assertSame('deceased-persons-content', $agent->fresh()->icipSensitivity->notation);
+        $this->actingAs($this->editor)->get("/agents/{$agent->id}")->assertSee('ICIP sensitivity: Deceased persons content.');
+        $this->actingAs($this->editor)->get("/agents/{$agent->id}?language=af")->assertOk();
+        $this->assertSame('Inhoud oor oorlede persone', $agent->fresh()->icipSensitivity->label(['af']));
+
+        // Kept when a save does not carry it, as an import's does not; cleared when chosen so.
+        app(AgentService::class)->updateControl($agent->fresh(), ['type' => 'person']);
+        $this->assertNotNull($agent->fresh()->icip_sensitivity_id);
+        app(PublicationService::class)->apply($agent->fresh(), 'publish', null, false, $this->editor);
+        auth()->logout();
+        $this->get("/discover/agents/{$agent->id}")->assertOk()->assertSee('ICIP sensitivity')->assertSee('require culturally sensitive handling');
+        $this->actingAs($this->editor)->post("/agents/{$agent->id}", $form + ['icip_sensitivity' => ''])->assertRedirect();
+        $this->assertNull($agent->fresh()->icip_sensitivity_id);
+    }
+
+    public function test_the_source_standard_is_kept_in_the_description_control_area(): void
+    {
+        $holder = app(RepositoryService::class)->create($this->institution, 'Riverside Archives', 'en', 'RA');
+        $letter = app(RecordService::class)->create($this->institution, Vocab::BASE.'level-of-description/item', 'Letter', 'en', null, $holder, 'L1');
+        $this->actingAs($this->editor)->post("/records/{$letter->id}", ['language' => 'en', 'level' => Vocab::BASE.'level-of-description/item', 'identifier' => 'L1',
+            'values' => ['title' => 'Letter'], 'description_identifier' => '', 'source_standard' => 'DACS'])->assertRedirect()->assertSessionHasNoErrors();
+        $this->assertSame('DACS', $letter->fresh()->source_standard);
+        $this->actingAs($this->editor)->get("/records/{$letter->id}")->assertSee('Source standard: DACS.');
+
+        $agent = app(AgentService::class)->create($this->institution, 'person', 'Engelbrecht, Johanna', 'en');
+        $this->actingAs($this->editor)->post("/agents/{$agent->id}", ['language' => 'en', 'type' => 'person', 'values' => ['agent-authorised-name' => 'Engelbrecht, Johanna'],
+            'source_standard' => 'ISAAR(CPF)'])->assertRedirect()->assertSessionHasNoErrors();
+        $this->assertSame('ISAAR(CPF)', $agent->fresh()->source_standard);
+        $this->actingAs($this->editor)->get("/agents/{$agent->id}")->assertSee('Source standard: ISAAR(CPF).');
+    }
+
+    public function test_a_description_has_a_watermark_of_its_own_over_the_institutions(): void
+    {
+        $store = sys_get_temp_dir().'/workspace-objects-'.bin2hex(random_bytes(6));
+        config(['workspace.object_store' => $store]);
+        $this->institution->update(['watermark_type_id' => Concept::where('iri', Vocab::BASE.'watermark-type/copyright')->value('id'),
+            'watermark_position_id' => Concept::where('iri', Vocab::BASE.'watermark-position/center')->value('id'), 'watermark_opacity' => 40]);
+        $holder = app(RepositoryService::class)->create($this->institution, 'Riverside Archives', 'en', 'RA');
+        $letter = app(RecordService::class)->create($this->institution, Vocab::BASE.'level-of-description/item', 'Letter', 'en', null, $holder, 'L1');
+        $image = new \Imagick;
+        $image->newImage(900, 600, new \ImagickPixel('#d8c9a3'));
+        $image->setImageFormat('png');
+        $path = tempnam(sys_get_temp_dir(), 'scan');
+        file_put_contents($path, $image->getImageBlob());
+        app(InstantiationService::class)->upload($letter, $path, 'letter.png', 'en', 'Scan', null, 'online', $this->editor);
+        unlink($path);
+        $config = fn () => app(Watermark::class)->configFor($this->institution->fresh(), $letter->fresh());
+        $form = ['language' => 'en', 'level' => Vocab::BASE.'level-of-description/item', 'identifier' => 'L1', 'values' => ['title' => 'Letter']];
+        $this->assertSame(['© Riverside Archives', 'Center', 40], [$config()['text'], $config()['gravity'], $config()['opacity']], 'the institution\'s');
+
+        $this->actingAs($this->editor)->get("/records/{$letter->id}/edit")->assertOk()->assertSee('Watermark for this description');
+        $this->actingAs($this->editor)->post("/records/{$letter->id}", $form + ['watermark' => 'none'])->assertRedirect()->assertSessionHasNoErrors();
+        $this->assertNull($config());
+        // Its own type, position and opacity; and the images' copies made again.
+        $jobs = BackgroundJob::count();
+        $this->actingAs($this->editor)->post("/records/{$letter->id}", $form + ['watermark' => 'draft', 'watermark_position' => 'repeat', 'watermark_opacity' => 60, 'remake_copies' => 1])
+            ->assertRedirect()->assertSessionHasNoErrors();
+        $this->assertSame(['Draft', 'Repeat', 60], [$config()['text'], $config()['gravity'], $config()['opacity']]);
+        $this->assertSame($jobs + 1, BackgroundJob::count());
+        $this->actingAs($this->editor)->post("/records/{$letter->id}", $form + ['watermark' => 'nothing'])->assertSessionHasErrors('watermark');
+        // Following the institution's again removes its own.
+        $this->actingAs($this->editor)->post("/records/{$letter->id}", $form + ['watermark' => ''])->assertRedirect();
+        $this->assertSame(0, RecordWatermark::count());
+        $this->assertSame('© Riverside Archives', $config()['text']);
+        exec('rm -rf '.escapeshellarg($store));
+    }
+
+    public function test_a_repositorys_theme_shows_on_its_public_page_without_html(): void
+    {
+        Storage::fake('local');
+        $holder = app(RepositoryService::class)->create($this->institution, 'Riverside Archives', 'en', 'RA');
+        $png = function (string $colour) {
+            $image = new \Imagick;
+            $image->newImage(600, 120, new \ImagickPixel($colour));
+            $image->setImageFormat('png');
+
+            return $image->getImageBlob();
+        };
+        $this->actingAs($this->editor)->get("/repositories/{$holder->id}")->assertSee('Edit theme');
+        $this->actingAs($this->editor)->get("/repositories/{$holder->id}/theme")->assertOk()->assertSee('Background colour');
+        $this->actingAs($this->editor)->post("/repositories/{$holder->id}/theme", ['background_colour' => 'red'])->assertSessionHasErrors('background_colour');
+        $this->actingAs($this->editor)->post("/repositories/{$holder->id}/theme", ['background_colour' => '#10373E',
+            'content' => '**Open** Monday to Friday.<script>alert(1)</script>',
+            'banner' => UploadedFile::fake()->createWithContent('banner.png', $png('#e1b34f')), 'logo' => UploadedFile::fake()->createWithContent('logo.png', $png('#10373e'))])
+            ->assertRedirect()->assertSessionHasNoErrors();
+        $holder = $holder->fresh();
+        $this->assertSame('#10373e', $holder->theme_background_colour);
+        Storage::disk('local')->assertExists($holder->theme_banner_path);
+        $this->actingAs($this->editor)->get("/repositories/{$holder->id}/theme/logo")->assertOk();
+
+        // Not published: the public sees neither the page nor its images.
+        auth()->logout();
+        $this->get("/discover/repositories/{$holder->id}/theme/banner")->assertNotFound();
+        app(PublicationService::class)->apply($holder, 'publish', null, false, $this->editor);
+        auth()->logout();
+        $this->get("/discover/repositories/{$holder->id}")->assertOk()->assertSee('<strong>Open</strong> Monday to Friday.', false)->assertDontSee('<script>alert(1)</script>', false)
+            ->assertSee('background: #10373e', false)->assertSee(route('discover.repository.image', [$holder->id, 'logo']));
+        $this->get("/discover/repositories/{$holder->id}/theme/banner")->assertOk();
+
+        // Removing the banner removes its file.
+        $banner = $holder->theme_banner_path;
+        $this->actingAs($this->editor)->post("/repositories/{$holder->id}/theme", ['background_colour' => '#10373e', 'remove_banner' => 1])->assertRedirect();
+        $this->assertNull($holder->fresh()->theme_banner_path);
+        Storage::disk('local')->assertMissing($banner);
+        $this->assertNotNull($holder->fresh()->theme_logo_path);
     }
 
     public function test_repository_type_contact_coordinates_activity_control_area_and_rights_terms(): void

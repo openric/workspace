@@ -124,6 +124,7 @@ Route::middleware(ServeDiscovery::class)->prefix('discover')->name('discover.')-
     Route::get('/records/{id}/tree', [DiscoverController::class, 'treeChildren'])->name('record.tree');
     Route::get('/agents/{id}', [DiscoverController::class, 'agent'])->name('agent');
     Route::get('/repositories/{id}', [DiscoverController::class, 'repository'])->name('repository');
+    Route::get('/repositories/{id}/theme/{part}', [DiscoverController::class, 'repositoryImage'])->whereIn('part', ['banner', 'logo'])->name('repository.image');
     Route::get('/places/{id}', [DiscoverController::class, 'place'])->name('place');
     Route::get('/activities/{id}', [DiscoverController::class, 'activity'])->name('activity');
     Route::get('/graph/{kind}/{id}', [DiscoverController::class, 'graph'])->where('kind', 'records|agents|repositories|places|activities')->name('graph');
@@ -172,6 +173,9 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/{repository}', [RepositoryController::class, 'show'])->name('show');
         Route::get('/{repository}/edit', [RepositoryController::class, 'edit'])->name('edit');
         Route::post('/{repository}', [RepositoryController::class, 'update'])->name('update');
+        Route::get('/{repository}/theme', [RepositoryController::class, 'editTheme'])->name('theme');
+        Route::post('/{repository}/theme', [RepositoryController::class, 'updateTheme'])->name('theme.update');
+        Route::get('/{repository}/theme/{part}', [RepositoryController::class, 'themeImage'])->whereIn('part', ['banner', 'logo'])->name('theme.image');
         Route::post('/{repository}/contacts', [RepositoryController::class, 'storeContact'])->name('contacts.store');
         Route::post('/{repository}/contacts/{contact}', [RepositoryController::class, 'updateContact'])->name('contacts.update');
         Route::post('/{repository}/contacts/{contact}/remove', [RepositoryController::class, 'destroyContact'])->name('contacts.destroy');
@@ -311,6 +315,7 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::post('/{concept}/related', [ConceptController::class, 'relate'])->name('related.store');
         Route::post('/{concept}/related/{other}/remove', [ConceptController::class, 'unrelate'])->name('related.destroy');
         Route::post('/{concept}/matches', [ConceptController::class, 'addMatch'])->name('matches.store');
+        Route::post('/{concept}/protocol', [ConceptController::class, 'protocol'])->name('protocol');
         Route::post('/{concept}/matches/{match}/remove', [ConceptController::class, 'removeMatch'])->name('matches.destroy');
         Route::post('/{concept}/move', [ConceptController::class, 'move'])->name('move');
         Route::post('/{concept}/merge', [ConceptController::class, 'merge'])->name('merge');

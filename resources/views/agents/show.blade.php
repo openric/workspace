@@ -84,5 +84,7 @@
     <p>{{ __('Description identifier') }}: {{ $agent->description_identifier ?? __('none') }}.
         {{ __('Maintained by') }}: {{ $agent->maintainer ? $agent->maintainer->described('authorised-name', ['en']) : __('not set') }}.
         {{ __('Status') }}: {{ $agent->descriptionStatus?->label(\App\Support\Vocab::languages()) ?? __('not set') }}.
-        {{ __('Level of detail') }}: {{ $agent->descriptionDetail?->label(\App\Support\Vocab::languages()) ?? __('not set') }}.</p>
+        {{ __('Level of detail') }}: {{ $agent->descriptionDetail?->label(\App\Support\Vocab::languages()) ?? __('not set') }}.
+        @if($agent->source_standard){{ __('Source standard') }}: {{ $agent->source_standard }}.@endif
+        {{ __('ICIP sensitivity') }}: {{ $agent->icipSensitivity?->label(\App\Support\Vocab::languages()) ?? __('not classified') }}.</p>
 @endsection

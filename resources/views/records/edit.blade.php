@@ -23,6 +23,15 @@
             <legend><strong>{{ __('Description control') }}</strong></legend>
             <label for="description_identifier">{{ __('Description identifier') }}</label> @include('description._ric', ['term' => null])
             <input id="description_identifier" name="description_identifier" maxlength="255" value="{{ old('description_identifier', $record->description_identifier) }}">
+            <label for="source_standard">{{ __('Source standard') }}</label> @include('description._ric', ['term' => null])
+            <small id="source-standard-help">{{ __('Record the standard used when entering the description, such as ISAD(G), RAD or DACS.') }}</small>
+            <input id="source_standard" name="source_standard" maxlength="255" aria-describedby="source-standard-help" value="{{ old('source_standard', $record->source_standard) }}">
+            <label for="display_as_compound">{{ __('View children as compound?') }}</label>
+            <small id="compound-help">{{ __('Yes: the public page shows the pictures of the units inside as one strip. No: they are reached one by one.') }}</small>
+            <select id="display_as_compound" name="display_as_compound" aria-describedby="compound-help" style="font: inherit; padding: .5rem">
+                <option value="1" @selected(old('display_as_compound', $record->display_as_compound ? '1' : '0') === '1')>{{ __('Yes') }}</option>
+                <option value="0" @selected(old('display_as_compound', $record->display_as_compound ? '1' : '0') === '0')>{{ __('No') }}</option>
+            </select>
             <label for="description_status">{{ __('Status') }}</label> @include('description._ric', ['term' => null])
             <select id="description_status" name="description_status" style="font: inherit; padding: .5rem">
                 <option value="">{{ __('Not set') }}</option>
@@ -33,6 +42,27 @@
                 <option value="">{{ __('Not set') }}</option>
                 @foreach($details as $detail)<option value="{{ $detail->iri }}" @selected(old('description_detail', $record->descriptionDetail?->iri) === $detail->iri)>{{ $detail->label(\App\Support\Vocab::languages()) }}</option>@endforeach
             </select>
+        </fieldset>
+        @endif
+        @if($mayUpdate)
+        <fieldset>
+            <legend>{{ __('Watermark') }}</legend>
+            <small id="watermark-help">{{ __('Written on the reference copies of this description\'s images, instead of the institution\'s. Empty follows the institution\'s watermark.') }}</small>
+            @php($current = $watermark ? ($watermark->enabled ? $watermark->watermarkType?->notation : 'none') : null)
+            <label for="watermark">{{ __('Watermark for this description') }}</label>
+            <select id="watermark" name="watermark" aria-describedby="watermark-help" style="font: inherit; padding: .5rem">
+                <option value="">{{ __('The institution\'s') }}</option>
+                <option value="none" @selected(old('watermark', $current) === 'none')>{{ __('None') }}</option>
+                @foreach($watermarkTypes as $t)<option value="{{ $t->notation }}" @selected(old('watermark', $current) === $t->notation)>{{ $t->label(\App\Support\Vocab::languages()) }}</option>@endforeach
+            </select>
+            <label for="watermark_position">{{ __('Position') }}</label>
+            <select id="watermark_position" name="watermark_position" style="font: inherit; padding: .5rem">
+                <option value="">{{ __('The institution\'s') }}</option>
+                @foreach($positions as $p)<option value="{{ $p->notation }}" @selected(old('watermark_position', $watermark?->watermarkPosition?->notation) === $p->notation)>{{ $p->label(\App\Support\Vocab::languages()) }}</option>@endforeach
+            </select>
+            <label for="watermark_opacity">{{ __('Opacity (per cent)') }}</label>
+            <input id="watermark_opacity" name="watermark_opacity" type="number" min="1" max="100" value="{{ old('watermark_opacity', $watermark?->opacity) }}" placeholder="{{ __('The institution\'s') }}">
+            <label style="font-weight: normal"><input type="hidden" name="remake_copies" value="0"><input type="checkbox" name="remake_copies" value="1" style="width: auto"> {{ __('Make the viewing copies of its images again') }}</label>
         </fieldset>
         @endif
         @if($mayCreateInside)

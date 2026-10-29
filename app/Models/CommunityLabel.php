@@ -12,10 +12,16 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['institution_id', 'subject_table', 'subject_id', 'label_id', 'community_id', 'applied_by_id', 'local_contexts_project', 'note'])]
+#[Fillable(['institution_id', 'subject_table', 'subject_id', 'label_id', 'community_id', 'applied_by_id', 'local_contexts_project', 'note', 'access_condition_id'])]
 class CommunityLabel extends Model
 {
     use Audited, HasUuids;
+
+    /** Its own condition on this record, over the Label's default (Heratio's object_protocol). */
+    public function accessCondition(): BelongsTo
+    {
+        return $this->belongsTo(Concept::class, 'access_condition_id');
+    }
 
     public function label(): BelongsTo
     {

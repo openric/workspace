@@ -43,7 +43,10 @@ final class CommunityLabelService
         return Concept::choices(self::LABELS)->whereNotNull('broader_id')->with('broader.labels')->get()->groupBy(fn (Concept $c) => $c->broader->notation);
     }
 
-    /** Fields: label (notation, such as tk_a), applied_by (community or institution), community (an authority record's key), project, note. */
+    /**
+     * Fields: label (notation, such as tk_a), applied_by (community or institution), community (an authority record's key), project, note,
+     * and access_condition (a community-access-condition notation) when this record's condition is not the Label's default (Heratio's object_protocol).
+     */
     public function apply(Model $subject, array $fields, ?User $actor = null): CommunityLabel
     {
         if (! $subject instanceof RecordResource && ! $subject instanceof Instantiation) {
@@ -63,7 +66,11 @@ final class CommunityLabelService
         $appliedBy = Concept::choices(self::APPLIERS)->where('notation', (string) ($fields['applied_by'] ?? 'institution'))->first()
             ?? throw new InvalidArgumentException(__('a Label is applied by the community or by the institution'));
 
-        return DB::transaction(fn () => AuditLog::actingAs($actor, fn () => CommunityLabel::create([...$where,
+        $condition = ($fields['access_condition'] ?? '') === '' ? null : CommunityProtocols::condition((string) $fields['access_condition']);
+
+        CommunityProtocols::forget();
+
+        return DB::transaction(fn () => AuditLog::actingAs($actor, fn () => CommunityLabel::create([...$where, 'access_condition_id' => $condition?->id,
             'institution_id' => $subject->getAttribute('institution_id'), 'community_id' => $community?->id, 'applied_by_id' => $appliedBy->id,
             'local_contexts_project' => trim((string) ($fields['project'] ?? '')) ?: null, 'note' => trim((string) ($fields['note'] ?? '')) ?: null])));
     }
@@ -97,5 +104,6 @@ final class CommunityLabelService
     public function remove(CommunityLabel $label, ?User $actor = null): void
     {
         DB::transaction(fn () => AuditLog::actingAs($actor, fn () => $label->delete()));
+        CommunityProtocols::forget();
     }
 }

@@ -30,6 +30,7 @@ use App\Models\Instantiation;
 use App\Models\Institution;
 use App\Models\RecordResource;
 use App\Models\User;
+use App\Rights\CommunityProtocols;
 use App\Support\Vocab;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -107,11 +108,18 @@ class InstantiationService
         if ($master === null || $instantiation->files()->where('id', '!=', $master->id)->exists()) {
             return 0;
         }
-        $watermark = app(Watermark::class)->configFor(Institution::findOrFail($instantiation->institution_id));
+        $watermark = app(Watermark::class)->configFor(Institution::findOrFail($instantiation->institution_id), $instantiation->record);
         $copies = $this->store->copies($instantiation->institution_id, $this->store->path($master->storage_path), $master->mime_type, $watermark);
         DB::transaction(fn () => AuditLog::actingAs($actor, fn () => $this->addCopies($instantiation, $master->original_name, $copies)));
 
         return count($copies);
+    }
+
+    /** Make the copies for viewing again in the background, as a job the account can follow. */
+    public function queueRemake(Instantiation $instantiation, ?User $actor = null): void
+    {
+        $job = app(JobsService::class)->create($instantiation->institution_id, 'viewing-copies', __('Viewing copies of :name, again', ['name' => $instantiation->file('master')->original_name]), $actor, $instantiation);
+        MakeViewingCopies::dispatch($job->id, $instantiation->id, true);
     }
 
     /**
@@ -145,7 +153,7 @@ class InstantiationService
         if (! str_starts_with($mime, 'image/')) {
             throw new InvalidArgumentException(__('give an image for the copy'));
         }
-        $watermark = app(Watermark::class)->configFor(Institution::findOrFail($instantiation->institution_id));
+        $watermark = app(Watermark::class)->configFor(Institution::findOrFail($instantiation->institution_id), $instantiation->record);
         // ponytail: copies() makes and keeps both sizes; the one not used stays in the store unreferenced, as an old copy
         // does after remakeCopies. A copies() that takes the uses wanted would keep only the one.
         $copy = $this->store->copies($instantiation->institution_id, $path, $mime, $watermark)[$use];
@@ -199,6 +207,10 @@ class InstantiationService
         $instantiation = $file->instantiation;
         $unit = $instantiation->record;
         if ($instantiation->deleted_at !== null || $unit->deleted_at !== null || ($user !== null && $unit->institution_id !== $user->institution_id)) {
+            return false;
+        }
+        // A community protocol withholds the files of a record from who may not change it, an approved access request or not.
+        if (! app(CommunityProtocols::class)->allows($user, $unit, 'description')) {
             return false;
         }
         $may = fn (string $action) => app(AccessControl::class)->allows($user, $action, 'description', $unit, $user ? null : Institution::find($unit->institution_id));

@@ -11,11 +11,15 @@
 namespace App\Http\Controllers;
 
 use App\Description\Bcp47;
+use App\Models\Agent;
 use App\Models\Concept;
 use App\Models\ConceptMatch;
+use App\Models\ConceptProtocol;
 use App\Models\Place;
 use App\Models\Vocabulary;
 use App\Relations\RelationService;
+use App\Rights\CommunityLabelService;
+use App\Rights\CommunityProtocols;
 use App\Support\Vocab;
 use App\Vocabulary\ConceptService;
 use Illuminate\Http\RedirectResponse;
@@ -58,7 +62,24 @@ class ConceptController extends Controller
 
         return view('concepts.show', ['concept' => $concept, 'relations' => $relations, 'places' => $places, 'related' => $concept->related(),
             'otherVocabularies' => $sameKind, 'matchTypes' => Concept::choices(Vocab::MATCH_TYPES)->get(),
-            'siblings' => LocalVocabularyController::broaderChoices($concept->vocabulary)->reject(fn (Concept $c) => $c->id === $concept->id)->values()]);
+            'siblings' => LocalVocabularyController::broaderChoices($concept->vocabulary)->reject(fn (Concept $c) => $c->id === $concept->id)->values(),
+            'protocol' => ConceptProtocol::where('concept_id', $concept->id)->with('accessCondition.labels', 'label.labels', 'community.names')->first(),
+            'conditions' => Concept::choices(CommunityProtocols::CONDITIONS)->whereNotNull('broader_id')->with('labels', 'broader')->get(),
+            'labelChoices' => app(CommunityLabelService::class)->choices(),
+            'communities' => Agent::where('institution_id', $concept->institution_id)->whereNull('deleted_at')->with('names.nameType', 'descriptionValues.element')->get()
+                ->sortBy(fn (Agent $a) => mb_strtolower((string) $a->described('agent-authorised-name', ['en'])))->values()]);
+    }
+
+    /** Heratio's community protocol on a term: an access condition, the Label, the owning community and the region. */
+    public function protocol(Request $request, Concept $concept): RedirectResponse
+    {
+        $this->own($request, $concept, 'update');
+        $data = $request->validate([
+            'access_condition' => ['required', 'string', 'max:64'], 'label' => ['nullable', 'string', 'max:64'],
+            'community' => ['nullable', 'uuid'], 'region' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        return $this->attempt($concept, fn () => app(CommunityProtocols::class)->setProtocol($concept, $data, $request->user()), __('Community protocol saved.'));
     }
 
     public function edit(Request $request, Concept $concept): View
@@ -188,5 +209,7 @@ class ConceptController extends Controller
     {
         abort_unless($concept->institution_id !== null && $concept->institution_id === $request->user()->institution_id, 404);
         abort_unless($action === null || $request->user()->may($action, 'vocabulary', $concept), 403);
+        // A term a community protocol withholds is not there for who may not change it (Heratio's TermProtocolGate).
+        abort_unless(app(CommunityProtocols::class)->allows($request->user(), $concept, 'vocabulary'), 404);
     }
 }
