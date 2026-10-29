@@ -14,12 +14,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable(['name', 'base_iri', 'header_title', 'logo_path', 'logo_mime', 'catalogue_introduction', 'catalogue_credits', 'registration_open', 'interface_languages',
-    'watermark_type_id', 'watermark_position_id', 'watermark_opacity', 'watermark_min_size', 'watermark_image_path'])]
+    'watermark_type_id', 'watermark_position_id', 'watermark_opacity', 'watermark_min_size', 'watermark_image_path', 'accession_numbering_mask',
+    'agreement_numbering_mask', 'accession_auto_assign', 'accession_requires_agreement', 'accession_default_priority_id', 'accession_checklist_template_id'])]
 class Institution extends Model
 {
     protected function casts(): array
     {
-        return ['registration_open' => 'boolean', 'interface_languages' => 'array'];
+        return ['registration_open' => 'boolean', 'interface_languages' => 'array', 'accession_auto_assign' => 'boolean', 'accession_requires_agreement' => 'boolean'];
     }
 
     use Audited, HasUuids;

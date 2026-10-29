@@ -53,17 +53,22 @@ class AccessionService
 
     public function __construct(private DescriptionService $descriptions, private IdentifierService $identifiers, private RelationService $relations) {}
 
-    /** A new accession with its number (required, unique in the institution) and, optionally, a title. */
-    public function create(Institution $institution, string $number, ?string $title, string $language, ?User $actor = null): Accession
+    /**
+     * A new accession with its number (unique in the institution; with none, the next of the institution's numbering) and,
+     * optionally, a title. Its intake starts in draft, with the institution's default checklist.
+     */
+    public function create(Institution $institution, ?string $number, ?string $title, string $language, ?User $actor = null): Accession
     {
-        $number = $this->freeNumber($institution->id, $number);
+        $intake = app(AccessionIntakeService::class);
 
-        return DB::transaction(fn () => AuditLog::actingAs($actor, function () use ($institution, $number, $title, $language) {
+        return DB::transaction(fn () => AuditLog::actingAs($actor, function () use ($institution, $number, $title, $language, $actor, $intake) {
+            $number = trim((string) $number) === '' ? $this->nextNumber($institution) : $this->freeNumber($institution->id, (string) $number);
             $id = (string) Str::uuid7();
-            $accession = new Accession(['institution_id' => $institution->id, 'iri' => $institution->base_iri.'/'.Accession::IRI_SEGMENT.'/'.$id]);
+            $accession = new Accession(['institution_id' => $institution->id, 'iri' => $institution->base_iri.'/'.Accession::IRI_SEGMENT.'/'.$id, ...$intake->defaults($institution, $actor)]);
             $accession->id = $id;
             $accession->save();
             $this->identifiers->setLocal($accession, $number);
+            $intake->start($accession, $actor);
             if (trim((string) $title) !== '') {
                 $this->describe($accession, ['accession-title' => $title], $language);
             }
@@ -161,10 +166,15 @@ class AccessionService
         $language = (string) ($fields['language'] ?? 'en');
         Bcp47::valid($language) || throw new InvalidArgumentException(__('give the language as a BCP 47 tag, such as en or af'));
 
-        return DB::transaction(fn () => AuditLog::actingAs($actor, fn () => Deaccession::create(['institution_id' => $accession->institution_id,
-            'accession_id' => $accession->id, 'identifier' => $identifier, 'scope_id' => $scope->id, 'date' => $this->day($text('date')),
-            'description' => $text('description'), 'extent' => $text('extent'), 'reason' => $text('reason'), 'language' => $language,
-            'position' => Deaccession::where('accession_id', $accession->id)->count()])));
+        return DB::transaction(fn () => AuditLog::actingAs($actor, function () use ($accession, $identifier, $scope, $text, $language, $actor) {
+            $deaccession = Deaccession::create(['institution_id' => $accession->institution_id,
+                'accession_id' => $accession->id, 'identifier' => $identifier, 'scope_id' => $scope->id, 'date' => $this->day($text('date')),
+                'description' => $text('description'), 'extent' => $text('extent'), 'reason' => $text('reason'), 'language' => $language,
+                'position' => Deaccession::where('accession_id', $accession->id)->count()]);
+            app(AccessionIntakeService::class)->record($accession, 'deaccessioned', $actor, __('Deaccessioned: :identifier', ['identifier' => $identifier]));
+
+            return $deaccession;
+        }));
     }
 
     public function removeDeaccession(Accession $accession, string $id, ?User $actor = null): void
@@ -306,6 +316,18 @@ class AccessionService
     {
         return ['standard' => 'Canadian Archival Accession Information Standard (CAAIS)', 'standard_version' => '1.0', 'standard_publisher' => 'Canadian Council of Archives',
             'serialisation' => 'heratio-caais-json/1', 'generated_at' => now()->toIso8601String(), 'records' => $records];
+    }
+
+    /** The next number of the institution's accession numbering (Heratio's nextAccessionNumber), or of a repository's. */
+    public function nextNumber(Institution $institution, ?Repository $repository = null): string
+    {
+        return app(NumberingService::class)->next($institution, 'accession', $repository, null, function (string $number) use ($institution) {
+            try {
+                return $this->freeNumber($institution->id, $number) !== '';
+            } catch (InvalidArgumentException) {
+                return false;
+            }
+        });
     }
 
     private function freeNumber(string $institutionId, string $number, ?Accession $except = null): string

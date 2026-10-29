@@ -76,11 +76,11 @@ class AgreementController extends Controller
     {
         abort_unless($request->user()->may('create', 'agreement'), 403);
         $data = $request->validate([
-            'number' => ['required', 'string', 'max:255'], 'type' => ['required', 'string', 'max:64'], 'title' => ['nullable', 'string', 'max:2000'],
+            'number' => ['nullable', 'string', 'max:255'], 'type' => ['required', 'string', 'max:64'], 'title' => ['nullable', 'string', 'max:2000'],
             'language' => ['required', 'string', fn ($a, $v, $fail) => Bcp47::valid((string) $v) || $fail(__('Give a BCP 47 language tag, such as en or af.'))],
         ]);
         try {
-            $agreement = $this->agreements->create($request->user()->institution, $data['number'], $data['type'], $data['title'] ?? null, $data['language'], $request->user());
+            $agreement = $this->agreements->create($request->user()->institution, $data['number'] ?? null, $data['type'], $data['title'] ?? null, $data['language'], $request->user());
         } catch (InvalidArgumentException $e) {
             return back()->withInput()->withErrors(['number' => $e->getMessage()]);
         }

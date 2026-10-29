@@ -8,8 +8,8 @@
         @csrf
         @if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif
         <label for="number">{{ __('Agreement number') }}</label> @include('description._ric', ['term' => 'rico:Identifier'])
-        <input id="number" name="number" required maxlength="255" value="{{ old('number') }}" aria-describedby="number-help">
-        <small id="number-help">{{ __('Required, and unique in the institution, such as DOG-2026-001.') }}</small>
+        <input id="number" name="number" maxlength="255" value="{{ old('number') }}" aria-describedby="number-help">
+        <small id="number-help">{{ __('Unique in the institution, such as DOG-2026-001. Leave it empty for the next number, with the type\'s prefix.') }}</small>
         <label for="type">{{ __('Agreement type') }}</label> @include('description._ric', ['term' => 'rico:hasDocumentaryFormType'])
         <select id="type" name="type" style="font: inherit; padding: .5rem">@foreach($types as $t)<option value="{{ $t->notation }}" @selected(old('type') === $t->notation)>{{ $t->label(\App\Support\Vocab::languages()) }}</option>@endforeach</select>
         <label for="title">{{ __('Title') }}</label> @include('description._ric', ['term' => 'rico:Title'])

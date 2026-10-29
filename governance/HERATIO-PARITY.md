@@ -376,7 +376,19 @@ Heratio's accession edit form and CAAIS partial (`edit.blade.php`, `partials/_ca
 | Date created, Date modified, Source language | Date created, Date modified, Source language | Same, from v0.0.77 |
 | CSV export (Identifier, Title, Accession Date, Status, Priority, Created, Updated) | Export CSV, the same columns | Same, from v0.0.77 |
 | CAAIS export, one and all, `external` | Export CAAIS (heratio-caais-json/1), one and all, `external` | Same, from v0.0.77 |
-| Finalise, workflow status, queue, checklist, timeline, attachments, numbering | none | Phase 9c |
+| `accession_v2.status` (draft, submitted, under review, accepted, rejected, returned) and PSIS's transitions | Intake status, with Submit for review, Start review, Accept, Reject and Return for revision | Same, from v0.0.79 |
+| Finalise (`accepted_at`, with `finalisationBlockers`) | Accept (finalise), which needs a donor agreement documenting the accession when the institution asks for one | Modelled: Heratio looked for an attachment of a category its list does not have |
+| `accession_v2.priority`, `assigned_to`, `submitted_at`, `accepted_at`, `rejected_at`, `rejection_reason`, `intake_notes` | Priority, Assigned to, Submitted, Accepted, Rejected, Rejection reason, Intake notes | Same, from v0.0.79 |
+| `accession_v2.donor_agreement_id` | The agreements documenting it (9b) | Modelled |
+| Intake queue (status, priority, assignee, search, date range, sort) and its statistics | Intake queue, with the same filters and statistics | Same, from v0.0.79 |
+| Accession dashboard (total, by status, by priority, added in 30 days) | The statistics at the head of the intake queue | Same, from v0.0.79 |
+| `accession_intake_checklist` (label, completed, by, at, order) | Intake checklist: tick, untick, add, remove | Same, from v0.0.79 |
+| `accession_intake_template` (name, description, items, default) and the seeded Standard Intake | Checklist templates in the accession settings; Standard Intake given to every institution | Same, from v0.0.79 |
+| `accession_timeline` (event type, actor, description, metadata) | Timeline, with notes | Same, from v0.0.79 |
+| `accession_attachment` (file, category, description, uploaded by) | Attachments, kept by SHA-256 and scanned through the file store | Same, from v0.0.79 |
+| `accession_numbering_sequence` (mask, repository, last sequence, year) and `nextAccessionNumber` | Numbering: a number given when none is typed, from the institution's mask, each sequence starting again each year | Same, from v0.0.79 |
+| `accession_config`: `numbering_mask`, `auto_assign_enabled`, `require_donor_agreement`, `default_priority`, `intake_checklist_template_id` | Accession settings | Same, from v0.0.79 |
+| `accession_config`: `require_appraisal`, `appraisal_template_id`, `allow_container_barcodes`, `rights_inheritance_enabled` | none | Phase 9d |
 | Rights area, appraisal, valuation, accession containers | none | Phase 9d |
 | Print | none: the browser prints the page | Missing |
 

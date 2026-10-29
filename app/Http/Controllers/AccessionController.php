@@ -11,6 +11,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Description\AccessionIntakeService;
 use App\Description\AccessionService;
 use App\Description\Bcp47;
 use App\Description\DateService;
@@ -23,6 +24,7 @@ use App\Models\Identifier;
 use App\Models\Name;
 use App\Models\Relation;
 use App\Models\Repository;
+use App\Models\User;
 use App\Relations\RelationService;
 use App\Support\Vocab;
 use Illuminate\Database\Eloquent\Builder;
@@ -62,11 +64,11 @@ class AccessionController extends Controller
     {
         abort_unless($request->user()->may('create', 'accession'), 403);
         $data = $request->validate([
-            'number' => ['required', 'string', 'max:255'], 'title' => ['nullable', 'string', 'max:2000'],
+            'number' => ['nullable', 'string', 'max:255'], 'title' => ['nullable', 'string', 'max:2000'],
             'language' => ['required', 'string', fn ($a, $v, $fail) => Bcp47::valid((string) $v) || $fail(__('Give a BCP 47 language tag, such as en or af.'))],
         ]);
         try {
-            $accession = $this->accessions->create($request->user()->institution, $data['number'], $data['title'] ?? null, $data['language'], $request->user());
+            $accession = $this->accessions->create($request->user()->institution, $data['number'] ?? null, $data['title'] ?? null, $data['language'], $request->user());
         } catch (InvalidArgumentException $e) {
             return back()->withInput()->withErrors(['number' => $e->getMessage()]);
         }
@@ -80,12 +82,19 @@ class AccessionController extends Controller
         $accession->load([...self::WITH, 'descriptionValues.element.labels', 'descriptionValues.state.labels', 'names.state.labels', 'identifiers.identifierType.labels',
             'repository.names.nameType', 'acquisitionType.labels', 'resourceType.labels', 'dates.property.labels', 'dates.dateType.labels', 'dates.qualifier.labels',
             'events.eventType.labels', 'extents.extentType.labels', 'extents.unit.labels', 'extents.contentType.labels', 'extents.carrierType.labels',
-            'languages', 'preservationRequirements.requirementType.labels', 'sourceConfidentiality.confidentiality.labels', 'deaccessions.scope.labels']);
+            'languages', 'preservationRequirements.requirementType.labels', 'sourceConfidentiality.confidentiality.labels', 'deaccessions.scope.labels',
+            'intakeStatus.labels', 'intakePriority.labels', 'assignedTo', 'checklist.completedBy', 'attachments.category.labels', 'attachments.uploadedBy',
+            'timeline.eventType.labels', 'timeline.actor']);
+        $intake = app(AccessionIntakeService::class);
         $choices = fn (string $vocabulary) => Concept::choices(Vocab::BASE.$vocabulary.'/')->with('labels')->get();
 
         return view('accessions.show', ['accession' => $accession, 'dateChoices' => app(DateService::class)->choices('accession'),
             'relations' => app(RelationService::class)->of($accession), 'donors' => $this->accessions->donors($accession),
             'canUpdate' => $request->user()->may('update', 'accession', $accession), 'revisions' => $this->accessions->revisions($accession),
+            'intake' => ['blockers' => $intake->blockers($accession), 'progress' => $intake->progress($accession),
+                'transitions' => AccessionIntakeService::TRANSITIONS[$accession->intakeStatus->notation] ?? [],
+                'accounts' => User::where('institution_id', $accession->institution_id)->orderBy('name')->get()->filter(fn (User $u) => ! $u->isDisabled() && $u->may('update', 'accession'))->values(),
+                'templates' => $intake->templates($request->user()->institution), 'priorities' => $choices('intake-priority'), 'categories' => $choices('attachment-category')],
             'mayDescribe' => $request->user()->may('create', 'description'),
             'repositories' => $this->repositories($accession->institution_id),
             'levels' => Concept::bundledThenLocal(Vocab::BASE.'level-of-description/', 'level-of-description', $accession->institution_id),

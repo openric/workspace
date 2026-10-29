@@ -17,7 +17,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['institution_id', 'iri', 'repository_id', 'acquisition_type_id', 'resource_type_id', 'processing_status_id', 'processing_priority_id'])]
+#[Fillable(['institution_id', 'iri', 'repository_id', 'acquisition_type_id', 'resource_type_id', 'processing_status_id', 'processing_priority_id',
+    'intake_status_id', 'intake_priority_id', 'assigned_to_id', 'submitted_at', 'accepted_at', 'rejected_at', 'rejection_reason', 'intake_notes'])]
 class Accession extends Model
 {
     use Audited, Describable, HasDates, HasIdentifiers, HasUuids;
@@ -30,7 +31,7 @@ class Accession extends Model
 
     protected function casts(): array
     {
-        return ['deleted_at' => 'immutable_datetime'];
+        return ['deleted_at' => 'immutable_datetime', 'submitted_at' => 'immutable_datetime', 'accepted_at' => 'immutable_datetime', 'rejected_at' => 'immutable_datetime'];
     }
 
     /** CAAIS 1.1: the repository that accepts legal responsibility for the material. */
@@ -87,6 +88,38 @@ class Accession extends Model
     public function sourceConfidentiality(): HasMany
     {
         return $this->hasMany(AccessionSourceConfidentiality::class);
+    }
+
+    /** Its place in the intake workflow (PSIS's and Heratio's accession_v2). */
+    public function intakeStatus(): BelongsTo
+    {
+        return $this->belongsTo(Concept::class, 'intake_status_id');
+    }
+
+    public function intakePriority(): BelongsTo
+    {
+        return $this->belongsTo(Concept::class, 'intake_priority_id');
+    }
+
+    public function assignedTo(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'assigned_to_id');
+    }
+
+    public function checklist(): HasMany
+    {
+        return $this->hasMany(AccessionChecklistItem::class)->orderBy('position')->orderBy('created_at');
+    }
+
+    /** Its chain of custody, the latest first. */
+    public function timeline(): HasMany
+    {
+        return $this->hasMany(AccessionTimelineEvent::class)->orderByDesc('occurred_at')->orderByDesc('id');
+    }
+
+    public function attachments(): HasMany
+    {
+        return $this->hasMany(AccessionAttachment::class)->orderByDesc('created_at');
     }
 
     public function deaccessions(): HasMany

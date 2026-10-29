@@ -9,6 +9,7 @@
 // and each action that needs more names its permission IRI.
 
 use App\Http\Controllers\AccessionController;
+use App\Http\Controllers\AccessionIntakeController;
 use App\Http\Controllers\AccessRequestController;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\ActivityController;
@@ -230,6 +231,8 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/export.csv', [AccessionController::class, 'csv'])->name('csv');
         Route::get('/caais', [AccessionController::class, 'caaisAll'])->name('caais-all');
         Route::get('/donors', [AccessionController::class, 'donors'])->name('donors');
+        // The intake queue (roadmap phase 9c; PSIS's accessionIntake, Heratio's intake queue and dashboard).
+        Route::get('/queue', [AccessionIntakeController::class, 'queue'])->name('queue');
         Route::get('/new', [AccessionController::class, 'create'])->name('create');
         Route::post('/', [AccessionController::class, 'store'])->name('store');
         Route::get('/{accession}', [AccessionController::class, 'show'])->name('show');
@@ -242,6 +245,13 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::post('/{accession}/deaccessions', [AccessionController::class, 'deaccession'])->name('deaccessions.store');
         Route::post('/{accession}/deaccessions/{deaccession}/remove', [AccessionController::class, 'removeDeaccession'])->whereUuid('deaccession')->name('deaccessions.destroy');
         Route::post('/{accession}/description', [AccessionController::class, 'createDescription'])->name('description');
+        Route::post('/{accession}/intake', [AccessionIntakeController::class, 'transition'])->name('intake');
+        Route::post('/{accession}/assign', [AccessionIntakeController::class, 'assign'])->name('assign');
+        Route::post('/{accession}/timeline', [AccessionIntakeController::class, 'note'])->name('timeline');
+        Route::post('/{accession}/checklist', [AccessionIntakeController::class, 'checklist'])->name('checklist');
+        Route::post('/{accession}/attachments', [AccessionIntakeController::class, 'attach'])->name('attachments.store');
+        Route::get('/{accession}/attachments/{attachment}', [AccessionIntakeController::class, 'attachment'])->whereUuid('attachment')->name('attachments.show');
+        Route::post('/{accession}/attachments/{attachment}/remove', [AccessionIntakeController::class, 'detach'])->whereUuid('attachment')->name('attachments.destroy');
     });
 
     // Donor agreements (Heratio's ahg-donor-manage agreements, roadmap phase 9b): staff only, under the agreement permissions.
@@ -368,6 +378,11 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/settings', [SettingsController::class, 'edit'])->name('settings.edit');
         Route::post('/settings', [SettingsController::class, 'update'])->name('settings.update');
         // The watermark on images' reference copies, and making the copies again (roadmap phase 5).
+        // The accession settings, checklist templates and numbering (roadmap phase 9c; Heratio's intake configuration and numbering).
+        Route::get('/settings/accessions', [AccessionIntakeController::class, 'settings'])->name('accessions.settings');
+        Route::post('/settings/accessions', [AccessionIntakeController::class, 'updateSettings'])->name('accessions.settings.update');
+        Route::post('/settings/accessions/templates/{template?}', [AccessionIntakeController::class, 'saveTemplate'])->whereUuid('template')->name('accessions.templates.save');
+        Route::post('/settings/accessions/templates/{template}/remove', [AccessionIntakeController::class, 'removeTemplate'])->whereUuid('template')->name('accessions.templates.destroy');
         Route::get('/settings/watermark', [WatermarkController::class, 'edit'])->name('watermark.edit');
         Route::post('/settings/watermark', [WatermarkController::class, 'update'])->name('watermark.update');
         Route::post('/settings/watermark/remake', [WatermarkController::class, 'remakeAll'])->name('watermark.remake-all');

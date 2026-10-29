@@ -1,0 +1,58 @@
+# OpenRiC Workspace - OpenRiC Workspace Attachment Categories.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Kinds of file attached to an accession (PSIS's and Heratio's accession_attachment.category).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/attachment-category/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Attachment Categories"@en ;
+    dcterms:description "Kinds of file attached to an accession (PSIS's and Heratio's accession_attachment.category)."@en ;
+    dcterms:issued "2026-10-29"^^xsd:date ;
+    skos:hasTopConcept v:general, v:deed-of-gift, v:photograph, v:correspondence, v:inventory, v:other .
+
+v:general a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "General"@en, "Algemeen"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession's intake, as PSIS and Heratio keep it."@en ;
+    skos:definition "Any other file about the accession."@en .
+
+v:deed-of-gift a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Deed of gift"@en, "Skenkingsakte"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession's intake, as PSIS and Heratio keep it."@en ;
+    skos:definition "A deed of gift or transfer form."@en .
+
+v:photograph a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Photograph"@en, "Foto"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession's intake, as PSIS and Heratio keep it."@en ;
+    skos:definition "A photograph of the material as received."@en .
+
+v:correspondence a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Correspondence"@en, "Korrespondensie"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession's intake, as PSIS and Heratio keep it."@en ;
+    skos:definition "Letters and messages about the accession."@en .
+
+v:inventory a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Inventory"@en, "Inventaris"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession's intake, as PSIS and Heratio keep it."@en ;
+    skos:definition "A list of what was received."@en .
+
+v:other a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Other"@en, "Ander"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession's intake, as PSIS and Heratio keep it."@en ;
+    skos:definition "Another kind of file."@en .

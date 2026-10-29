@@ -46,3 +46,14 @@ Dr Johan Pieterse chose on 29 October 2026 to keep a donor agreement as a kind o
 - Agreements have their own permission kind, `agreement`, given to editors and administrators.
 - A reminder is mailed through the Outbox, advance days before its date, once for each date, to accounts of the institution that may read agreements, or else to the account that made it. It is never mailed to an outside address or to the donor, as Heratio's command could. A reminder that recurs moves to its next date, and one whose recurrence has ended is completed. `workspace:agreements:remind` runs each morning at 07:00.
 - Heratio's agreement history is the audit log. Heratio's logo for printing an agreement, its in-app notification and its MD5 checksum are not carried.
+
+## Amendment, 29 October 2026: intake (9c)
+
+Heratio's intake screens are placeholders over its tables, so 9c follows PSIS's ahgAccessionManagePlugin, where the intake works: its AccessionIntakeService and the numbering of its AccessionContainerService.
+
+- PSIS's accession_v2, one to one with the accession, becomes columns of the accession: intake status, priority, assignee, the times it was submitted, accepted and rejected, the rejection reason and the intake notes. The statuses and transitions are PSIS's: draft to submitted; submitted to under review or returned; under review to accepted, rejected or returned; returned to submitted. Accepting is Heratio's finalise.
+- When the institution asks for it, an accession is accepted only once a donor agreement documents it, through a documentation relation from 9b. Heratio's finalisationBlockers looked for an attachment of a category its own list does not have.
+- The checklist, the timeline (its chain of custody) and the attachments are rows of the accession. Attachments go through the file store like agreement documents. The timeline records each step, assignment, attachment and deaccession and takes notes; the audit log still keeps every change.
+- Checklist templates, the numbering masks and the accession settings are the institution's; the settings are columns of the institution, as the watermark settings are. Every institution is given Heratio's Standard Intake template.
+- A number is given when none is typed in. It comes from the institution's mask ({YEAR}, {MONTH}, {DAY}, {REPO}, {SEQ:n}, and {TYPE} for an agreement's type prefix), with each sequence starting at 1 again each year, as PSIS's does. Sequences are taken under a row lock, skip numbers already typed in by hand, and with {TYPE} run separately for each agreement type.
+- Appraisal, valuation, accession containers and accession rights, with their settings, are 9d.

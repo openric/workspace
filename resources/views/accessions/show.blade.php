@@ -18,6 +18,8 @@
         @if(auth()->user()->may('delete', 'accession', $accession))<a href="{{ route('deletion.confirm', ['accessions', $accession->id]) }}" style="display: inline-block; padding: .5rem 1rem; border: 1px solid var(--error); color: var(--error); text-decoration: none">{{ __('Delete') }}</a>@endif
     </div>
 
+    @include('accessions._intake')
+
     <h2>{{ __('Basic info') }}</h2>
     <p><strong>{{ __('Accession number') }}:</strong> {{ $accession->number() }}
         <br><strong>{{ __('Repository') }}:</strong> @if($accession->repository)<a href="{{ route('repositories.show', $accession->repository) }}">{{ $accession->repository->described('authorised-name', [app()->getLocale(), 'en']) }}</a>@else{{ __('not set') }}@endif

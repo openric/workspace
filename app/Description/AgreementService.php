@@ -59,13 +59,23 @@ class AgreementService
 
     public function __construct(private DescriptionService $descriptions, private IdentifierService $identifiers, private FileStore $store, private Outbox $outbox) {}
 
-    /** A new agreement, in draft, with its number (required, unique in the institution), its type and, optionally, a title. */
-    public function create(Institution $institution, string $number, string $type, ?string $title, string $language, ?User $actor = null): Agreement
+    /**
+     * A new agreement, in draft, with its number (unique in the institution; with none, the next of the institution's
+     * agreement numbering, with its type's prefix), its type and, optionally, a title.
+     */
+    public function create(Institution $institution, ?string $number, string $type, ?string $title, string $language, ?User $actor = null): Agreement
     {
-        $number = $this->freeNumber($institution->id, $number);
         $type = $this->term('agreement-type', $type) ?? throw new InvalidArgumentException(__('choose the type of agreement'));
 
         return DB::transaction(fn () => AuditLog::actingAs($actor, function () use ($institution, $number, $type, $title, $language) {
+            $number = trim((string) $number) !== '' ? $this->freeNumber($institution->id, (string) $number)
+                : app(NumberingService::class)->next($institution, 'agreement', null, $type->loadMissing('labels'), function (string $n) use ($institution) {
+                    try {
+                        return $this->freeNumber($institution->id, $n) !== '';
+                    } catch (InvalidArgumentException) {
+                        return false;
+                    }
+                });
             $id = (string) Str::uuid7();
             $agreement = new Agreement(['institution_id' => $institution->id, 'iri' => $institution->base_iri.'/'.Agreement::IRI_SEGMENT.'/'.$id,
                 'type_id' => $type->id, 'status_id' => $this->term('agreement-status', 'draft')->id]);

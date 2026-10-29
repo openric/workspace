@@ -1,0 +1,44 @@
+# OpenRiC Workspace - OpenRiC Workspace Intake Priorities.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# How urgent an accession's intake is (PSIS's and Heratio's accession_v2.priority).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/intake-priority/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Intake Priorities"@en ;
+    dcterms:description "How urgent an accession's intake is (PSIS's and Heratio's accession_v2.priority)."@en ;
+    dcterms:issued "2026-10-29"^^xsd:date ;
+    skos:hasTopConcept v:low, v:normal, v:high, v:urgent .
+
+v:low a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Low"@en, "Laag"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession's intake, as PSIS and Heratio keep it."@en ;
+    skos:definition "It can wait."@en .
+
+v:normal a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Normal"@en, "Normaal"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession's intake, as PSIS and Heratio keep it."@en ;
+    skos:definition "In the ordinary course."@en .
+
+v:high a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "High"@en, "Hoog"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession's intake, as PSIS and Heratio keep it."@en ;
+    skos:definition "Soon."@en .
+
+v:urgent a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Urgent"@en, "Dringend"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession's intake, as PSIS and Heratio keep it."@en ;
+    skos:definition "At once."@en .

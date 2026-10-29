@@ -1,0 +1,58 @@
+# OpenRiC Workspace - OpenRiC Workspace Intake Statuses.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Where an accession stands in the intake workflow (PSIS's and Heratio's accession_v2.status).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/intake-status/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Intake Statuses"@en ;
+    dcterms:description "Where an accession stands in the intake workflow (PSIS's and Heratio's accession_v2.status)."@en ;
+    dcterms:issued "2026-10-29"^^xsd:date ;
+    skos:hasTopConcept v:draft, v:submitted, v:under-review, v:accepted, v:rejected, v:returned .
+
+v:draft a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Draft"@en, "Konsep"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession's intake, as PSIS and Heratio keep it."@en ;
+    skos:definition "Being recorded; not yet submitted."@en .
+
+v:submitted a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Submitted"@en, "Ingedien"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession's intake, as PSIS and Heratio keep it."@en ;
+    skos:definition "Submitted for review."@en .
+
+v:under-review a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Under review"@en, "Word hersien"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession's intake, as PSIS and Heratio keep it."@en ;
+    skos:definition "Being reviewed."@en .
+
+v:accepted a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Accepted"@en, "Aanvaar"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession's intake, as PSIS and Heratio keep it."@en ;
+    skos:definition "Accepted into the holdings: finalised."@en .
+
+v:rejected a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Rejected"@en, "Afgekeur"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession's intake, as PSIS and Heratio keep it."@en ;
+    skos:definition "Not accepted."@en .
+
+v:returned a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Returned"@en, "Teruggestuur"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession's intake, as PSIS and Heratio keep it."@en ;
+    skos:definition "Returned for revision, to be submitted again."@en .

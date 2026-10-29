@@ -1,0 +1,100 @@
+# OpenRiC Workspace - OpenRiC Workspace Accession Timeline Events.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What happened to an accession, for its chain of custody (PSIS's and Heratio's accession_timeline.event_type).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/timeline-event/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Accession Timeline Events"@en ;
+    dcterms:description "What happened to an accession, for its chain of custody (PSIS's and Heratio's accession_timeline.event_type)."@en ;
+    dcterms:issued "2026-10-29"^^xsd:date ;
+    skos:hasTopConcept v:created, v:submitted, v:assigned, v:reviewed, v:accepted, v:rejected, v:returned, v:appraised, v:containerised, v:rights-assigned, v:deaccessioned, v:note .
+
+v:created a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Created"@en, "Geskep"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession's intake, as PSIS and Heratio keep it."@en ;
+    skos:definition "The accession was recorded."@en .
+
+v:submitted a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Submitted"@en, "Ingedien"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession's intake, as PSIS and Heratio keep it."@en ;
+    skos:definition "It was submitted for review."@en .
+
+v:assigned a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Assigned"@en, "Toegewys"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession's intake, as PSIS and Heratio keep it."@en ;
+    skos:definition "It was assigned to someone."@en .
+
+v:reviewed a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Reviewed"@en, "Hersien"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession's intake, as PSIS and Heratio keep it."@en ;
+    skos:definition "Its review began."@en .
+
+v:accepted a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Accepted"@en, "Aanvaar"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession's intake, as PSIS and Heratio keep it."@en ;
+    skos:definition "It was accepted."@en .
+
+v:rejected a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Rejected"@en, "Afgekeur"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession's intake, as PSIS and Heratio keep it."@en ;
+    skos:definition "It was rejected."@en .
+
+v:returned a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Returned"@en, "Teruggestuur"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession's intake, as PSIS and Heratio keep it."@en ;
+    skos:definition "It was returned for revision."@en .
+
+v:appraised a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Appraised"@en, "Beoordeel"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession's intake, as PSIS and Heratio keep it."@en ;
+    skos:definition "It was appraised."@en .
+
+v:containerised a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Containerised"@en, "In houers geplaas"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession's intake, as PSIS and Heratio keep it."@en ;
+    skos:definition "Its material was put in containers."@en .
+
+v:rights-assigned a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Rights assigned"@en, "Regte toegeken"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession's intake, as PSIS and Heratio keep it."@en ;
+    skos:definition "Rights were assigned to it."@en .
+
+v:deaccessioned a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Deaccessioned"@en, "Afgeskryf"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession's intake, as PSIS and Heratio keep it."@en ;
+    skos:definition "Some or all of it was deaccessioned."@en .
+
+v:note a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Note"@en, "Nota"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession's intake, as PSIS and Heratio keep it."@en ;
+    skos:definition "A note, such as an attachment added."@en .

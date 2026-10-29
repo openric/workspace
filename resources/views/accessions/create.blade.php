@@ -8,8 +8,8 @@
         @csrf
         @if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif
         <label for="number">{{ __('Accession number') }} (CAAIS 1.2)</label> @include('description._ric', ['term' => 'rico:Identifier'])
-        <input id="number" name="number" required maxlength="255" value="{{ old('number') }}" aria-describedby="number-help">
-        <small id="number-help">{{ __('Required, and unique in the institution, such as 2026-014.') }}</small>
+        <input id="number" name="number" maxlength="255" value="{{ old('number') }}" aria-describedby="number-help">
+        <small id="number-help">{{ __('Unique in the institution, such as 2026-014. Leave it empty for the next number of the institution\'s numbering.') }}</small>
         <label for="title">{{ __('Title') }} (CAAIS 1.3)</label> @include('description._ric', ['term' => 'rico:Name'])
         <input id="title" name="title" maxlength="2000" value="{{ old('title') }}">
         <label for="language">{{ __('Language of the title (BCP 47, e.g. en, af)') }}</label> @include('description._ric', ['term' => 'xml:lang'])
