@@ -1,0 +1,30 @@
+# OpenRiC Workspace - OpenRiC Workspace Publish Gate Severities.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What a failed publish gate does (Heratio's publish gate severity).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/publish-gate-severity/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Publish Gate Severities"@en ;
+    dcterms:description "What a failed publish gate does (Heratio's publish gate severity)."@en ;
+    dcterms:issued "2026-10-29"^^xsd:date ;
+    skos:hasTopConcept v:blocker, v:warning .
+
+v:blocker a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Blocker"@en, "Blokkeerder"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the workflow, as Heratio's ahg-workflow keeps it."@en ;
+    skos:definition "Publishing is refused until it passes."@en .
+
+v:warning a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Warning"@en, "Waarskuwing"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the workflow, as Heratio's ahg-workflow keeps it."@en ;
+    skos:definition "Publishing goes ahead, with a warning."@en .

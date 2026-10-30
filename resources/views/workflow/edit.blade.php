@@ -31,6 +31,7 @@
     @if($workflow)
         <section id="steps">
             <h2>{{ __('Steps') }}</h2>
+            <p><a href="{{ route('workflow.admin.diagram', $workflow) }}">{{ __('Diagram') }}</a></p>
             @forelse($workflow->steps as $step)
                 <div style="border-top: 1px solid var(--line); padding: .4rem 0">
                     <p style="margin: .2rem 0"><strong>{{ $step->position }}. {{ $step->name }}</strong> ({{ collect([$step->stepType->label($lang), $step->action->label($lang), $step->requiredRole?->name($lang),

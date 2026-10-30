@@ -13,7 +13,7 @@ v: a skos:ConceptScheme ;
     dcterms:title "OpenRiC Workspace Workflow History Actions"@en ;
     dcterms:description "What was done in a workflow (Heratio's workflow_history_action)."@en ;
     dcterms:issued "2026-10-29"^^xsd:date ;
-    skos:hasTopConcept v:started, v:created, v:claimed, v:released, v:reassigned, v:approved, v:rejected, v:returned, v:resubmitted, v:escalated, v:cancelled, v:completed, v:comment, v:note-added, v:attachment-added, v:attachment-removed, v:rights-decision, v:publish, v:unpublish, v:priority-changed, v:due-date-changed, v:sla-breach, v:sla-policy-applied, v:sla-due-overridden .
+    skos:hasTopConcept v:started, v:created, v:claimed, v:released, v:reassigned, v:approved, v:rejected, v:returned, v:resubmitted, v:escalated, v:cancelled, v:completed, v:comment, v:note-added, v:attachment-added, v:attachment-removed, v:rights-decision, v:publish, v:unpublish, v:priority-changed, v:due-date-changed, v:sla-warning, v:sla-breach, v:sla-policy-applied, v:sla-due-overridden .
 
 v:started a skos:Concept ;
     skos:inScheme v: ;
@@ -182,3 +182,10 @@ v:sla-due-overridden a skos:Concept ;
     skos:prefLabel "SLA Due Date Overridden"@en, "Diensvlak-sperdatum oorheers"@af ;
     skos:scopeNote "Not a RiC-O term: kept with the workflow, as Heratio's ahg-workflow keeps it."@en ;
     skos:definition "The service level due date was overridden."@en .
+
+v:sla-warning a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "SLA Warning"@en, "Diensvlakwaarskuwing"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the workflow, as PSIS's ahgWorkflowPlugin keeps it (sla_warning)."@en ;
+    skos:definition "The task is at risk of missing its service level."@en .

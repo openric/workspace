@@ -16,6 +16,7 @@
         @endif
     @endif
     @if($open->isEmpty() && $history->isEmpty())<p>{{ __('Not in a workflow.') }}</p>@endif
+    @if($subject instanceof \App\Models\RecordResource)<p><a href="{{ route('records.publish-readiness', $subject) }}">{{ __('Publish readiness') }}</a></p>@endif
     @if($canUpdate)
         @php($workflows = \App\Models\Workflow::where(['institution_id' => $subject->getAttribute('institution_id'), 'applies_to' => \App\Relations\EntityKinds::of($subject), 'is_active' => true])->orderBy('name')->get())
         @if($workflows->isNotEmpty())

@@ -13,6 +13,8 @@
         <br><strong>{{ __('Workflow') }}:</strong> {{ $task->workflow->name }}, {{ __('step :n', ['n' => $task->step->position]) }} ({{ $task->step->stepType->label($lang) }}; {{ $task->step->action->label($lang) }})
         <br><strong>{{ __('Status') }}:</strong> {{ $task->status->label($lang) }} · <strong>{{ __('Priority') }}:</strong> {{ $task->priority->label($lang) }}
         · <strong>{{ __('Due date') }}:</strong> {{ $task->due_date?->format('Y-m-d') ?? __('none') }}@if($task->isOverdue()) <strong>({{ __('overdue') }})</strong>@endif
+        <br><strong>{{ __('Service level') }}:</strong> {{ $sla['label'] }} ({{ __('due :date', ['date' => $sla['due_at']->toDateString()]) }}; {{ $sla['policy'] }})
+        · <strong>{{ __('Queue') }}:</strong> {{ $task->queue?->name ?? __('none') }} · <a href="{{ route('workflow.tasks.diagram', $task) }}">{{ __('Diagram') }}</a>
         <br><strong>{{ __('Assigned to') }}:</strong> {{ $task->assignedTo?->name ?? __('nobody') }} · <strong>{{ __('Submitted by') }}:</strong> {{ $task->submittedBy?->name ?? __('unknown') }}
         @if($task->decision->notation !== 'pending')<br><strong>{{ __('Decision') }}:</strong> {{ $task->decision->label($lang) }}, {{ $task->decisionBy?->name }} {{ $task->decision_at?->setTimezone(config('workspace.timezone'))->format('Y-m-d H:i') }}@if($task->decision_comment): {{ $task->decision_comment }}@endif @endif
         @if($task->retry_count > 0)<br><strong>{{ __('Returned') }}:</strong> {{ trans_choice(':count time|:count times', $task->retry_count, ['count' => $task->retry_count]) }}@endif</p>
@@ -73,6 +75,10 @@
                     <div style="flex: 1; min-width: 12rem"><label for="a-comment" style="margin-top: 0">{{ __('Why') }}</label><input id="a-comment" name="comment" maxlength="5000"></div>
                     <button type="submit" style="margin-top: 0">{{ __('Assign') }}</button></form>
             @endif
+            <form method="post" action="{{ route('workflow.tasks.queue', $task) }}" style="display: flex; gap: .5rem; align-items: end; margin-top: .5rem">@csrf
+                <div><label for="q-queue" style="margin-top: 0">{{ __('Queue') }}</label>
+                    <select id="q-queue" name="queue" style="font: inherit; padding: .5rem"><option value="">{{ __('None') }}</option>@foreach($queues as $q)<option value="{{ $q->id }}" @selected($task->queue_id === $q->id)>{{ $q->name }}</option>@endforeach</select></div>
+                <button type="submit" style="margin-top: 0">{{ __('Move') }}</button></form>
             <form method="post" action="{{ route('workflow.tasks.act', [$task, 'priority']) }}" style="display: flex; gap: .5rem; align-items: end; margin-top: .5rem">@csrf
                 <div><label for="p-priority" style="margin-top: 0">{{ __('Priority') }}</label>
                     <select id="p-priority" name="priority" style="font: inherit; padding: .5rem">@foreach($priorities as $p)<option value="{{ $p->notation }}" @selected($task->priority_id === $p->id)>{{ $p->label($lang) }}</option>@endforeach</select></div>

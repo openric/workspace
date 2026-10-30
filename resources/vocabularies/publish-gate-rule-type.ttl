@@ -1,0 +1,79 @@
+# OpenRiC Workspace - OpenRiC Workspace Publish Gate Rule Types.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What a publish gate checks before a description is published (Heratio's and PSIS's publish_gate_rule_type).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/publish-gate-rule-type/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Publish Gate Rule Types"@en ;
+    dcterms:description "What a publish gate checks before a description is published (Heratio's and PSIS's publish_gate_rule_type)."@en ;
+    dcterms:issued "2026-10-29"^^xsd:date ;
+    skos:hasTopConcept v:field-required, v:field-not-empty, v:min-description-length, v:has-digital-object, v:has-rights, v:has-access-condition, v:workflow-completed, v:security-cleared, v:iiif-ready .
+
+v:field-required a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Field Required"@en, "Veld vereis"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the workflow, as Heratio's ahg-workflow keeps it."@en ;
+    skos:definition "The element has a value."@en .
+
+v:field-not-empty a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Field Not Empty"@en, "Veld nie leeg nie"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the workflow, as Heratio's ahg-workflow keeps it."@en ;
+    skos:definition "The element has a value that is not blank."@en .
+
+v:min-description-length a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Minimum Description Length"@en, "Minimum lengte van beskrywing"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the workflow, as Heratio's ahg-workflow keeps it."@en ;
+    skos:definition "The element is at least so many characters long."@en .
+
+v:has-digital-object a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Has Digital Object"@en, "Het digitale objek"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the workflow, as Heratio's ahg-workflow keeps it."@en ;
+    skos:definition "The description has an instantiation with a file."@en .
+
+v:has-rights a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Has Rights Statement"@en, "Het regteverklaring"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the workflow, as Heratio's ahg-workflow keeps it."@en ;
+    skos:definition "The description has a right in force."@en .
+
+v:has-access-condition a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Has Access Conditions"@en, "Het toegangsvoorwaardes"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the workflow, as Heratio's ahg-workflow keeps it."@en ;
+    skos:definition "The description gives its conditions governing access."@en .
+
+v:workflow-completed a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Workflow Completed"@en, "Werkvloei voltooi"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the workflow, as Heratio's ahg-workflow keeps it."@en ;
+    skos:definition "No workflow task on the description is open."@en .
+
+v:security-cleared a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Security Clearance Passed"@en, "Veiligheidsklaring geslaag"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the workflow, as Heratio's ahg-workflow keeps it."@en ;
+    skos:definition "Security clearance passes; it passes until security clearance comes with phase 18."@en .
+
+v:iiif-ready a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "IIIF Ready"@en, "IIIF-gereed"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the workflow, as Heratio's ahg-workflow keeps it."@en ;
+    skos:definition "Ready for IIIF; it passes until IIIF comes with phase 14."@en .

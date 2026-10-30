@@ -9,7 +9,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Audit\AuditLog;
 use App\Description\PublicationService;
+use App\Description\PublishGateService;
+use App\Description\WorkflowService;
 use App\Models\Concept;
 use App\Models\RecordResource;
 use App\Relations\EntityKinds;
@@ -41,6 +44,7 @@ class PublicationController extends Controller
             'action' => ['required', Rule::in(array_keys(PublicationService::ACTIONS))],
             'language' => ['nullable', 'string', 'max:35'],
             'inside' => ['nullable', 'boolean'],
+            'force' => ['nullable', 'boolean'],
         ]);
         $user = $request->user();
         abort_unless($user->may($data['action'] === 'review' ? 'update' : 'publish', $permission, $entity), 403);
@@ -50,6 +54,30 @@ class PublicationController extends Controller
                 abort_unless($user->may($data['action'] === 'review' ? 'update' : 'publish', $permission, $unit), 403);
             }
         }
+        // Heratio's publish gates (roadmap phase 10b): a failed blocker refuses publishing, unless someone who manages
+        // workflows publishes anyway, which is audited; a warning is said.
+        $warnings = [];
+        if ($data['action'] === 'publish' && $entity instanceof RecordResource) {
+            $gates = app(PublishGateService::class);
+            $units = $inside ? [$entity, ...RecordResource::whereKey($entity->descendantIds())->whereNull('deleted_at')->get()] : [$entity];
+            $failed = [];
+            foreach ($units as $unit) {
+                foreach ($gates->evaluate($unit, $user) as $result) {
+                    match ($result['status']) {
+                        'failed' => $failed[] = $result['message'],
+                        'warning' => $warnings[] = $result['message'],
+                        default => null,
+                    };
+                }
+            }
+            $failed = array_values(array_unique($failed));
+            if ($failed !== []) {
+                if (! ($request->boolean('force') && app(WorkflowService::class)->manages($user))) {
+                    return redirect()->route('publication.edit', [$kind, $entity->getKey()])->withErrors(['publication' => __('Not published: :reasons.', ['reasons' => implode('; ', $failed)])]);
+                }
+                AuditLog::record(Vocab::action('update'), $entity, null, ['publish_gates_overridden' => $failed], $user, $entity->institution_id);
+            }
+        }
         $changed = $this->publication->apply($entity, $data['action'], ($data['language'] ?? '') ?: null, $inside, $user);
         // Each action's sentences in full, so each translates as a whole: nothing, one value, several.
         $done = ['review' => ['Nothing to mark reviewed.', ':count value reviewed.', ':count values reviewed.'],
@@ -57,7 +85,8 @@ class PublicationController extends Controller
             'withdraw' => ['Nothing to mark withdrawn.', ':count value withdrawn.', ':count values withdrawn.']][$data['action']];
 
         return redirect()->route(EntityKinds::get(EntityKinds::of($entity))['route'], $entity)
-            ->with('status', __($done[$changed === 0 ? 0 : ($changed === 1 ? 1 : 2)], ['count' => $changed]));
+            ->with('status', __($done[$changed === 0 ? 0 : ($changed === 1 ? 1 : 2)], ['count' => $changed])
+                .($warnings === [] ? '' : ' '.__('Warnings: :warnings.', ['warnings' => implode('; ', array_unique($warnings))])));
     }
 
     /** @return array{0: Model, 1: string} the entity and its permission kind; 404 outside the institution, 403 without update or publish */

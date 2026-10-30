@@ -2,6 +2,7 @@
 
 use App\AccessRequests\AccessRequestService;
 use App\Description\AgreementService;
+use App\Description\WorkflowSlaService;
 use App\Reports\ReportDelivery;
 use App\Reports\UsageService;
 use Carbon\CarbonImmutable;
@@ -51,3 +52,11 @@ Artisan::command('workspace:agreements:remind {--day= : send as on this day (YYY
     $this->line("{$result['sent']} reminders sent, {$result['unsent']} not sent.");
 })->purpose('Send the donor agreement reminders that are due');
 Schedule::command('workspace:agreements:remind')->dailyAt('07:00')->withoutOverlapping();
+
+// Service levels (roadmap phase 10b): each morning, PSIS's processSlaBreach. A task at risk or overdue is noted and its
+// account told once a day; a breached one is escalated once, by its policy.
+Artisan::command('workspace:workflow:sla', function (WorkflowSlaService $sla) {
+    $result = $sla->process();
+    $this->line("{$result['at_risk']} at risk, {$result['overdue']} overdue, {$result['escalated']} escalated.");
+})->purpose('Warn of workflow tasks at risk or overdue, and escalate those past their service level');
+Schedule::command('workspace:workflow:sla')->dailyAt('06:30')->timezone(config('workspace.timezone'))->withoutOverlapping();

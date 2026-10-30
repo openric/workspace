@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable(['institution_id', 'workflow_id', 'step_id', 'subject_table', 'subject_id', 'status_id', 'priority_id', 'submitted_by_id', 'assigned_to_id', 'claimed_at',
-    'due_date', 'decision_id', 'decision_comment', 'decision_at', 'decision_by_id', 'checklist_completed', 'metadata', 'previous_task_id', 'retry_count', 'escalated_at'])]
+    'due_date', 'decision_id', 'decision_comment', 'decision_at', 'decision_by_id', 'checklist_completed', 'metadata', 'previous_task_id', 'retry_count', 'escalated_at', 'queue_id'])]
 class WorkflowTask extends Model
 {
     use Audited, HasUuids;
@@ -68,6 +68,11 @@ class WorkflowTask extends Model
     public function decisionBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'decision_by_id');
+    }
+
+    public function queue(): BelongsTo
+    {
+        return $this->belongsTo(WorkflowQueue::class, 'queue_id');
     }
 
     public function history(): HasMany

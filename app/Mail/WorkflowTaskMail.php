@@ -15,9 +15,10 @@ use Illuminate\Mail\Mailables\Envelope;
 
 class WorkflowTaskMail extends WorkspaceMail
 {
-    /** What happened: assigned, approved, rejected, returned or completed. */
+    /** What happened: assigned, approved, rejected, returned or completed; due soon, overdue or escalated (phase 10b). */
     public const EVENTS = ['assigned' => 'A task for you: :step', 'approved' => 'Approved: :step', 'rejected' => 'Rejected: :step',
-        'returned' => 'Returned for revision: :step', 'completed' => 'Workflow completed: :workflow'];
+        'returned' => 'Returned for revision: :step', 'completed' => 'Workflow completed: :workflow', 'due-soon' => 'Due soon: :step',
+        'overdue' => 'Overdue: :step', 'escalated' => 'Escalated: :step'];
 
     public function __construct(User $recipient, public WorkflowTask $task, public string $event, public ?string $comment = null)
     {

@@ -22,7 +22,7 @@
  * tasks and team work, the history, and the bulk operations. Kept: the steps in order, the pool, only the assignee
  * deciding, a task under a row lock while it changes. Changed: the Workspace's tables and UUIDs; every list a
  * vocabulary; a team is a role; a task needs update on its record besides the step's roles and accounts; mail through
- * the Outbox; the audit log is the Workspace's. Queues, service levels, overdue notices and publish gates are phase 10b.
+ * the Outbox; the audit log is the Workspace's. Queues and service levels (WorkflowSlaService) and the publish gates (PublishGateService) came with phase 10b.
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
@@ -41,6 +41,7 @@ use App\Models\Role;
 use App\Models\User;
 use App\Models\Workflow;
 use App\Models\WorkflowHistory;
+use App\Models\WorkflowQueue;
 use App\Models\WorkflowStep;
 use App\Models\WorkflowTask;
 use App\Relations\EntityKinds;
@@ -58,7 +59,7 @@ final class WorkflowService
     public const KINDS = ['record' => 'record_resources', 'agent' => 'agents', 'repository' => 'repositories', 'accession' => 'accessions'];
 
     /** The bulk operations (Heratio's WorkflowBulkService). */
-    public const BULK = ['assign', 'priority', 'note', 'approve', 'reject', 'cancel'];
+    public const BULK = ['assign', 'priority', 'queue', 'note', 'approve', 'reject', 'cancel'];
 
     /** @var array<string, Concept> the concepts looked up, by vocabulary and notation */
     private array $terms = [];
@@ -199,7 +200,7 @@ final class WorkflowService
      * Start a workflow (the applicable one when none is given) for the subject: a task for its first active step, given
      * to the step's account when it has one, due after its escalation days. A subject with a task still open is refused.
      */
-    public function start(Model $subject, User $actor, ?Workflow $workflow = null, ?string $priority = null, ?string $dueDate = null, ?string $correlation = null): WorkflowTask
+    public function start(Model $subject, User $actor, ?Workflow $workflow = null, ?string $priority = null, ?string $dueDate = null, ?string $correlation = null, ?WorkflowQueue $queue = null): WorkflowTask
     {
         $workflow ??= $this->applicable($subject) ?? throw new InvalidArgumentException(__('no workflow applies to it'));
         $workflow->institution_id === $subject->getAttribute('institution_id') && $workflow->is_active || throw new InvalidArgumentException(__('the workflow is not one of the institution\'s active workflows'));
@@ -209,11 +210,18 @@ final class WorkflowService
         $first = $workflow->steps()->where('is_active', true)->first() ?? throw new InvalidArgumentException(__('the workflow has no steps'));
         $due = $this->day($dueDate) ?? ($first->escalation_days ? now()->addDays($first->escalation_days)->toDateString() : null);
 
-        return DB::transaction(fn () => AuditLog::actingAs($actor, function () use ($subject, $actor, $workflow, $first, $priority, $due, $correlation) {
-            $task = WorkflowTask::create(['institution_id' => $workflow->institution_id, 'workflow_id' => $workflow->id, 'step_id' => $first->id,
+        $queue === null || $queue->institution_id === $workflow->institution_id || throw new InvalidArgumentException(__('the queue is one of the institution\'s'));
+
+        return DB::transaction(fn () => AuditLog::actingAs($actor, function () use ($subject, $actor, $workflow, $first, $priority, $due, $correlation, $queue) {
+            $task = WorkflowTask::create(['institution_id' => $workflow->institution_id, 'workflow_id' => $workflow->id, 'step_id' => $first->id, 'queue_id' => $queue?->id,
                 'subject_table' => $subject->getTable(), 'subject_id' => $subject->getKey(), 'status_id' => $this->status($first->auto_assign_user_id ? 'claimed' : 'pending'),
                 'priority_id' => $this->term('workflow-priority', $priority ?: 'normal')->id, 'submitted_by_id' => $actor->id, 'assigned_to_id' => $first->auto_assign_user_id,
                 'claimed_at' => $first->auto_assign_user_id ? now() : null, 'due_date' => $due, 'decision_id' => $this->decision('pending')]);
+            // With no due date given or set by the step, its service level policy sets one (PSIS's applyPolicy).
+            if ($task->due_date === null) {
+                $task->update(['due_date' => app(WorkflowSlaService::class)->dueDate($task)]);
+                $this->log($task, 'sla-policy-applied', null, null, $actor, null, $correlation);
+            }
             $this->log($task, 'started', null, $task->status->notation, $actor, __('Workflow started: :name', ['name' => $workflow->name]), $correlation);
             $this->notify($task, 'assigned', $task->assignedTo);
 
@@ -227,7 +235,7 @@ final class WorkflowService
      *
      * @return array{started: int, skipped: int}
      */
-    public function startTree(RecordResource $record, User $actor, ?Workflow $workflow, bool $inside, ?string $priority = null, ?string $dueDate = null): array
+    public function startTree(RecordResource $record, User $actor, ?Workflow $workflow, bool $inside, ?string $priority = null, ?string $dueDate = null, ?WorkflowQueue $queue = null): array
     {
         $ids = $inside ? [$record->id, ...$record->descendantIds()] : [$record->id];
         $correlation = (string) Str::uuid7();
@@ -235,7 +243,7 @@ final class WorkflowService
         foreach (RecordResource::whereIn('id', $ids)->whereNull('deleted_at')->get() as $unit) {
             try {
                 $actor->may('update', 'description', $unit) || throw new InvalidArgumentException('not yours to change');
-                $this->start($unit, $actor, $workflow, $priority, $dueDate, $correlation);
+                $this->start($unit, $actor, $workflow, $priority, $dueDate, $correlation, $queue);
                 $started++;
             } catch (InvalidArgumentException) {
                 $skipped++;
@@ -337,7 +345,7 @@ final class WorkflowService
                 'subject_table' => $task->subject_table, 'subject_id' => $task->subject_id, 'status_id' => $this->status($step->auto_assign_user_id ? 'claimed' : 'pending'),
                 'priority_id' => $task->priority_id, 'submitted_by_id' => $task->submitted_by_id, 'assigned_to_id' => $step->auto_assign_user_id,
                 'claimed_at' => $step->auto_assign_user_id ? now() : null, 'due_date' => $step->escalation_days ? now()->addDays($step->escalation_days)->toDateString() : $task->due_date,
-                'decision_id' => $this->decision('pending'), 'previous_task_id' => $task->id]);
+                'decision_id' => $this->decision('pending'), 'previous_task_id' => $task->id, 'queue_id' => $task->queue_id]);
             $this->log($next, 'created', null, $next->status->notation, $user, __('Created when :step was approved', ['step' => $task->step->name]), $correlation);
             $this->notify($next, 'assigned', $next->assignedTo);
         }, $user);
@@ -414,6 +422,8 @@ final class WorkflowService
         in_array($operation, self::BULK, true) || throw new InvalidArgumentException(__('that is not a bulk operation'));
         $assignee = $operation === 'assign' ? (User::where('institution_id', $actor->institution_id)->find($params['assignee'] ?? null)
             ?? throw new InvalidArgumentException(__('choose whom to assign them to'))) : null;
+        $queue = $operation === 'queue' && ($params['queue'] ?? '') !== '' ? (WorkflowQueue::where('institution_id', $actor->institution_id)->find($params['queue'])
+            ?? throw new InvalidArgumentException(__('choose the queue'))) : null;
         $correlation = (string) Str::uuid7();
         $done = 0;
         $failed = [];
@@ -423,6 +433,7 @@ final class WorkflowService
                 match ($operation) {
                     'assign' => $this->assign($task, $assignee, $actor, $params['comment'] ?? null, $correlation),
                     'priority' => $this->prioritise($task, (string) ($params['priority'] ?? ''), $actor, $correlation),
+                    'queue' => app(WorkflowSlaService::class)->moveToQueue($task, $queue, $actor, $correlation),
                     'note' => $this->note($task, (string) (($params['note'] ?? '') ?: ($params['comment'] ?? '')), $actor, $correlation),
                     'approve' => $this->decide($task, 'approved', $actor, $params['comment'] ?? null, $task->step->checklist ?? [], $correlation),
                     'reject' => $this->decide($task, 'rejected', $actor, $params['comment'] ?? null, [], $correlation),

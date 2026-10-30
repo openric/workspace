@@ -14,6 +14,8 @@
             <tr><td colspan="5">{{ __('Nothing described yet.') }}</td></tr>
         @endforelse
     </table>
+    @if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif
+    @if($entity instanceof \App\Models\RecordResource)<p><a href="{{ route('records.publish-readiness', $entity) }}">{{ __('Publish readiness') }}</a></p>@endif
     <form method="post" action="{{ route('publication.update', [$kind, $entity->getKey()]) }}">
         @csrf
         <fieldset style="border: 0; padding: 0"><legend><strong>{{ __('What to do') }}</strong></legend>
@@ -27,6 +29,9 @@
         <input id="language" name="language" maxlength="35" style="max-width: 8rem">
         @if($inside > 0)
             <label><input type="checkbox" name="inside" value="1"> {{ __($inside === 1 ? 'And the :count unit of description inside it' : 'And the :count units of description inside it', ['count' => $inside]) }}</label>
+        @endif
+        @if($entity instanceof \App\Models\RecordResource && app(\App\Description\WorkflowService::class)->manages(auth()->user()))
+            <label><input type="checkbox" name="force" value="1"> {{ __('Publish even where a publish gate blocks it (recorded in the audit log)') }}</label>
         @endif
         <button type="submit">{{ __('Apply') }}</button>
     </form>

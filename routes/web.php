@@ -57,6 +57,7 @@ use App\Http\Controllers\StorageController;
 use App\Http\Controllers\VocabularyController;
 use App\Http\Controllers\WatermarkController;
 use App\Http\Controllers\WorkflowController;
+use App\Http\Controllers\WorkflowQueueController;
 use App\Http\Middleware\ServeDiscovery;
 use App\Http\Middleware\SetLocale;
 use App\Relations\EntityKinds;
@@ -207,6 +208,7 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/{record}/export', [ExportController::class, 'form'])->name('export');
         Route::get('/{record}/export/{format}', [ExportController::class, 'download'])->where('format', 'ead|ead3|csv|dc|mods')->name('export.download');
         // Provenance and custody history (roadmap phase 9e; Heratio's provenance); the controller checks update to change it.
+        Route::get('/{record}/publish-readiness', [WorkflowQueueController::class, 'readiness'])->name('publish-readiness');
         Route::get('/{record}/provenance', [ProvenanceController::class, 'index'])->name('provenance');
         Route::get('/{record}/provenance/export.csv', [ProvenanceController::class, 'csv'])->name('provenance.csv');
         Route::post('/{record}/provenance/overview', [ProvenanceController::class, 'overview'])->name('provenance.overview');
@@ -523,6 +525,18 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::post('/admin/{workflow}/steps/{step?}', [WorkflowController::class, 'saveStep'])->whereUuid(['workflow', 'step'])->name('admin.steps.save');
         Route::post('/admin/{workflow}/steps/{step}/move', [WorkflowController::class, 'moveStep'])->whereUuid(['workflow', 'step'])->name('admin.steps.move');
         Route::post('/admin/{workflow}/steps/{step}/remove', [WorkflowController::class, 'removeStep'])->whereUuid(['workflow', 'step'])->name('admin.steps.destroy');
+        // Queues, service levels, overdue tasks, publish gates and the diagram (roadmap phase 10b).
+        Route::get('/queues', [WorkflowQueueController::class, 'queues'])->name('queues');
+        Route::post('/queues/{queue?}', [WorkflowQueueController::class, 'saveQueue'])->whereUuid('queue')->name('queues.save');
+        Route::post('/policies/{policy?}', [WorkflowQueueController::class, 'savePolicy'])->whereUuid('policy')->name('policies.save');
+        Route::get('/overdue', [WorkflowQueueController::class, 'overdue'])->name('overdue');
+        Route::post('/tasks/{task}/queue', [WorkflowQueueController::class, 'move'])->whereUuid('task')->name('tasks.queue');
+        Route::get('/tasks/{task}/diagram', [WorkflowQueueController::class, 'taskDiagram'])->whereUuid('task')->name('tasks.diagram');
+        Route::get('/admin/gates', [WorkflowQueueController::class, 'gates'])->name('gates');
+        Route::post('/admin/gates/{rule?}', [WorkflowQueueController::class, 'saveGate'])->whereUuid('rule')->name('gates.save');
+        Route::post('/admin/gates/{rule}/remove', [WorkflowQueueController::class, 'removeGate'])->whereUuid('rule')->name('gates.destroy');
+        Route::post('/admin/publishing', [WorkflowQueueController::class, 'publishing'])->name('publishing');
+        Route::get('/admin/{workflow}/diagram', [WorkflowQueueController::class, 'diagram'])->whereUuid('workflow')->name('admin.diagram');
     });
     Route::post('{kind}/{id}/workflow', [WorkflowController::class, 'start'])->where(['kind' => 'records|agents|repositories|accessions', 'id' => '[0-9a-f-]{36}'])->name('workflow.start');
 

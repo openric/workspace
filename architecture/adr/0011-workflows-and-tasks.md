@@ -24,3 +24,12 @@ Roadmap phase 10 brings Heratio's ahg-workflow into the Workspace: work assignme
 
 - The history is the workflow's own account of what happened, beside the audit log, which still records every change. Heratio's IP address and user agent on each history row are not kept: the audit log keeps who did what.
 - Spectrum procedures stay out (roadmap phase 21), and so do Heratio's drag-and-drop designer and its edges for branching steps: steps run in order.
+
+## Amendment, 30 October 2026: queues, service levels and publish gates (10b)
+
+- Queues and service level policies are the institution's. Each institution is given Heratio's eight queues and PSIS's policies from its sla_policies.yml (the default, five days due, three days' warning, escalation after seven, and one for each queue). A task's policy is its queue's, else its workflow's, else the default, its days scaled by PSIS's priority factors (urgent 40%, high 60%, low 150%). A new task with no due date from the step gets its policy's.
+- A task's standing is PSIS's: on track, at risk, overdue or breached, from its due date, its warning days and its escalation days. Each morning `workspace:workflow:sla` notes a task at risk or overdue and tells whoever has it, once a day, and escalates a breached task once: telling its escalation account (the policy's, the step's, or whoever submitted it), telling those who manage workflows, or giving the task to the escalation account.
+- Publish gates are rules of the institution, checked when a description is published from its publication page. A failed blocker refuses publishing; a warning is said. Someone who manages workflows may publish anyway, and the audit log records which gates they passed over. PSIS's six seeded rules are given switched off, so publishing is unchanged until an administrator switches one on. Heratio's custom SQL rule is not carried: it ran SQL typed into a form. Security clearance and IIIF rules pass until phases 18 and 14.
+- When the institution asks for it (Heratio's workflow_required_for_publish), a description is published only once a workflow for it is approved: one was started, none of its tasks is open, and the last decided was approved.
+- Publishing through the API or an import is not gated: the gates guard the publication page, as Heratio's guard its publish action.
+

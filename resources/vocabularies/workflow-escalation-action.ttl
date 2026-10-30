@@ -1,0 +1,37 @@
+# OpenRiC Workspace - OpenRiC Workspace Workflow Escalation Actions.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What happens when a task breaches its service level (Heratio's workflow_escalation_action).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/workflow-escalation-action/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Workflow Escalation Actions"@en ;
+    dcterms:description "What happens when a task breaches its service level (Heratio's workflow_escalation_action)."@en ;
+    dcterms:issued "2026-10-29"^^xsd:date ;
+    skos:hasTopConcept v:notify-lead, v:notify-admin, v:auto-reassign .
+
+v:notify-lead a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Notify Team Lead"@en, "Stel spanleier in kennis"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the workflow, as Heratio's ahg-workflow keeps it."@en ;
+    skos:definition "Notify the escalation account, or whoever submitted the task."@en .
+
+v:notify-admin a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Notify Administrator"@en, "Stel administrateur in kennis"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the workflow, as Heratio's ahg-workflow keeps it."@en ;
+    skos:definition "Notify those who manage workflows."@en .
+
+v:auto-reassign a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Auto-Reassign"@en, "Hertoewys outomaties"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the workflow, as Heratio's ahg-workflow keeps it."@en ;
+    skos:definition "Give the task to the escalation account."@en .

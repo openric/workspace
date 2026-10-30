@@ -128,7 +128,7 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-user-manage` | 5651 | V0.1 candidate | Covered | 12 | `ahgUserManagePlugin`, `ahgUserRegistrationPlugin`, `arOidcPlugin` | Accounts, registration, roles; written fresh; OIDC single sign-on in phase 12 |
 | `ahg-vendor` | 6980 | later: V1.0+ | Planned | 22 | `ahgVendorPlugin` |  |
 | `ahg-version-control` | 3142 | later: V1.0+ | Partial | 22 | `ahgVersionControlPlugin` | Every change is in the audit log; version views later |
-| `ahg-workflow` | 7830 | later: V1.0+ | Partial | 10 | `ahgWorkflowPlugin` | Workflows, steps, tasks, pool, assignment, decisions, team work, history and bulk operations from v0.0.82 (10a); queues, service levels, overdue notices, publish gates and the diagram in 10b |
+| `ahg-workflow` | 7830 | later: V1.0+ | Covered | 10 | `ahgWorkflowPlugin` | Workflows, steps, tasks, pool, assignment, decisions, team work, history and bulk operations from v0.0.82 (10a); queues, service levels, overdue notices, publish gates, readiness and the diagram from v0.0.84 (10b); Spectrum procedures in phase 21 |
 | `ahg-z3950` | 5243 | out: GLAM sector | Planned | 21 | none |  |
 
 : Heratio packages and their Workspace status
@@ -444,10 +444,10 @@ Heratio's workflow screens and WorkflowService; PSIS's ahgWorkflowPlugin where H
 | `ahg_workflow_step`: `name`, `description`, `step_order`, `step_type`, `action_required` | Name, Description, the order (Move up, Move down), Step type, Action required | Same, from v0.0.82 |
 | `required_role_id`, `allowed_group_ids`, `allowed_user_ids` | Required role, Roles that may take it, Accounts that may take it | Same, from v0.0.82; groups are roles |
 | `required_clearance_level` | Required clearance level | Modelled: kept, applied with phase 18 |
-| `pool_enabled`, `auto_assign_user_id`, `escalation_days`, `escalation_user_id`, `notification_template`, `instructions`, `checklist`, `is_optional`, `is_active` | The same; the escalation days set the due date | Same, from v0.0.82; escalation itself in 10b |
+| `pool_enabled`, `auto_assign_user_id`, `escalation_days`, `escalation_user_id`, `notification_template`, `instructions`, `checklist`, `is_optional`, `is_active` | The same; the escalation days set the due date, and the escalation account is told when a task breaches | Same, from v0.0.82 and v0.0.84 |
 | `ahg_workflow_task`: `status`, `priority`, `submitted_by`, `assigned_to`, `claimed_at`, `due_date` | The same | Same, from v0.0.82 |
 | `decision`, `decision_comment`, `decision_at`, `decision_by`, `checklist_completed`, `previous_task_id`, `retry_count`, `metadata` | The same | Same, from v0.0.82 |
-| `escalated_at`, `queue_id` | `escalated_at` kept; queues | Phase 10b |
+| `escalated_at`, `queue_id` | Escalated, Queue | Same, from v0.0.84 |
 | `ahg_workflow_history` (action, from and to status, by, at, comment, metadata, correlation id) | History, on the task, the record and the dashboard | Same, from v0.0.82 |
 | `ip_address`, `user_agent` | none: the audit log keeps who did what | Modelled |
 | `ahg_workflow_notification` | Mail through the Outbox and its sent-mail log | Modelled |
@@ -456,9 +456,20 @@ Heratio's workflow screens and WorkflowService; PSIS's ahgWorkflowPlugin where H
 | Start workflow (PSIS, with `getApplicableWorkflow`) | Start a workflow on the record's page, and for everything inside it | Same, from v0.0.82 |
 | My work and Team work (PSIS) | My tasks; Team work by role, with who has how many | Same, from v0.0.82 |
 | Bulk transition, assign, note, priority | Bulk operations on My tasks, the pool and team work | Same, from v0.0.82 |
-| Bulk move to queue, queues, SLA policies, overdue | none | Phase 10b |
-| Publish readiness, publish simulate, gate rules, `workflow_required_for_publish` | none | Phase 10b |
-| Diagram, task diagram | none | Phase 10b |
+| `ahg_workflow_queue` (name, slug, description, sort order, active, SLA days, colour) and the eight seeded queues | Queues, the eight given to each institution | Same, from v0.0.84; the icon is not carried |
+| Move to queue, bulk move to queue | Queue on the task, and in the bulk operations | Same, from v0.0.84 |
+| `ahg_workflow_sla_policy` (name, queue, workflow, warning, due and escalation days, escalation account and action, active) and PSIS's `sla_policies.yml` | Service level policies, seeded from PSIS's file | Same, from v0.0.84; PSIS's business days were off and are not carried |
+| PSIS's SLA standing (on track, at risk, overdue, breached), priority factors, apply policy, override due date | Service level on each task and list, the due date from the policy, Due date with a reason | Same, from v0.0.84 |
+| `processSlaBreach` and `WorkflowNotifyOverdueCommand`: warnings, overdue notices, escalation (notify lead, notify admin, auto-reassign) | `workspace:workflow:sla`, each morning at 06:30 | Same, from v0.0.84 |
+| Overdue page and CSV, queue and user stats | Overdue tasks and its CSV; Queues with the counts by standing, queue and account | Same, from v0.0.84 |
+| `ahg_publish_gate_rule` (name, type, entity, level, material type, repository, field, config, message, severity, active, order) and PSIS's six seeds | Publish gates, the six seeded switched off | Same, from v0.0.84; material type waits for phase 21 |
+| Gate types field required, not empty, minimum length, digital object, rights, access conditions, workflow completed | The same | Same, from v0.0.84 |
+| Gate types security clearance, IIIF ready | Kept; they pass until phases 18 and 14 | Modelled |
+| Gate type custom SQL | none: it ran SQL typed into a form | Not copied |
+| `ahg_publish_gate_result` | The results of each check, as their history | Same, from v0.0.84 |
+| Publish readiness, publish simulate, publish execute with force | Publish readiness with what the public would see; publishing refused on a failed blocker, with an audited override for who manages workflows | Same, from v0.0.84 |
+| `workflow_required_for_publish` and `isWorkflowApprovedForPublish` | A description is published only once a workflow for it is approved | Same, from v0.0.84 |
+| Diagram, task diagram | Diagram of a workflow, and of a task's place in it | Same, from v0.0.84 |
 | Designer and edges (branching steps) | none: steps run in order | Not copied |
 
 : Workflow, field by field

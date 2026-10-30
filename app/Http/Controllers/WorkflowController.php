@@ -12,6 +12,7 @@
 namespace App\Http\Controllers;
 
 use App\Description\WorkflowService;
+use App\Description\WorkflowSlaService;
 use App\Http\Controllers\Concerns\ResolvesDescribedEntity;
 use App\Models\Concept;
 use App\Models\RecordResource;
@@ -79,13 +80,14 @@ class WorkflowController extends Controller
     {
         $user = $request->user();
         $this->own($request, $task);
-        $task->load('workflow', 'step.stepType.labels', 'step.action.labels', 'status.labels', 'priority.labels', 'decision.labels', 'assignedTo', 'submittedBy', 'decisionBy',
+        $task->load('queue', 'workflow', 'step.stepType.labels', 'step.action.labels', 'status.labels', 'priority.labels', 'decision.labels', 'assignedTo', 'submittedBy', 'decisionBy',
             'history.action.labels', 'history.performedBy', 'history.toStatus.labels', 'history.fromStatus.labels');
         $subject = $task->subject();
 
         return view('workflow.task', ['task' => $task, 'subject' => $subject, 'title' => $subject ? $this->workflows->title($subject) : null,
             'mayWork' => $this->workflows->mayWork($task, $user), 'eligible' => $this->workflows->eligible($task, $user), 'manages' => $this->workflows->manages($user),
-            'priorities' => $this->choices('workflow-priority'),
+            'priorities' => $this->choices('workflow-priority'), 'queues' => app(WorkflowSlaService::class)->queues($task->institution_id, true),
+            'sla' => app(WorkflowSlaService::class)->compute($task),
             'assignees' => User::where('institution_id', $task->institution_id)->orderBy('name')->get()->filter(fn (User $u) => $this->workflows->eligible($task, $u))->values()]);
     }
 
@@ -123,7 +125,7 @@ class WorkflowController extends Controller
     {
         $user = $request->user();
         $data = $request->validate(['tasks' => ['required', 'array', 'min:1', 'max:500'], 'tasks.*' => ['uuid'], 'operation' => ['required', 'in:'.implode(',', WorkflowService::BULK)],
-            'assignee' => ['nullable', 'uuid'], 'priority' => ['nullable', 'string', 'max:64'], 'note' => ['nullable', 'string', 'max:5000'], 'comment' => ['nullable', 'string', 'max:5000']]);
+            'assignee' => ['nullable', 'uuid'], 'priority' => ['nullable', 'string', 'max:64'], 'queue' => ['nullable', 'uuid'], 'note' => ['nullable', 'string', 'max:5000'], 'comment' => ['nullable', 'string', 'max:5000']]);
         try {
             $result = $this->workflows->bulk(WorkflowTask::where('institution_id', $user->institution_id)->whereIn('id', $data['tasks'])->get(), $data['operation'], $data, $user);
         } catch (InvalidArgumentException $e) {

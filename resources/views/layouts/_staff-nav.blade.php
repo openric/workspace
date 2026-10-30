@@ -32,8 +32,11 @@
                 'workflow.mine' => [__('My tasks'), true, 'workflow.mine|workflow.tasks.*'],
                 'workflow.pool' => [__('Pool'), true, 'workflow.pool'],
                 'workflow.team' => [__('Team work'), true, 'workflow.team'],
+                'workflow.queues' => [__('Queues'), true, 'workflow.queues'],
+                'workflow.overdue' => [__('Overdue'), true, 'workflow.overdue'],
                 'workflow.history' => [__('History'), true, 'workflow.history'],
                 'workflow.admin' => [__('Workflows'), $may('manage-workflows'), 'workflow.admin*'],
+                'workflow.gates' => [__('Publish gates'), $may('manage-workflows'), 'workflow.gates'],
             ],
             'Import and export' => [
                 'imports.index' => [__('Import'), $mayImport, 'imports.*'],
