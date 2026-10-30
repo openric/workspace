@@ -1,0 +1,258 @@
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# OpenRiC SHACL shapes — profile: core-discovery
+# ==============================================
+# Single-entity shapes for the minimum conformance target: records, agents,
+# repositories. Structural only — cross-entity ("this Record must be
+# referenced by…") checks live in profile: graph-traversal.
+#
+# Shapes in this file:
+#   - RecordSetShape        — fonds / series / file
+#   - RecordShape           — item-level records
+#   - PersonShape           — rico:Person
+#   - CorporateBodyShape    — rico:CorporateBody
+#   - FamilyShape           — rico:Family
+#   - AgentNameShape        — structured rico:hasOrHadAgentName values
+#   - RepositoryShape       — ISDIAH custodial institutions
+#
+# Usage:
+#   pyshacl -s always-on.shacl.ttl -s core-discovery.shacl.ttl \
+#           -d data.jsonld -f human
+
+@prefix sh:   <http://www.w3.org/ns/shacl#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rico: <https://www.ica.org/standards/RiC/ontology#> .
+@prefix openricx: <https://openric.org/ns/ext/v1#> .
+@prefix :     <https://openric.org/shapes#> .
+
+
+# ----------------------------------------------------------------------------
+# Record shapes
+# ----------------------------------------------------------------------------
+
+:RecordSetShape a sh:NodeShape ;
+    sh:targetClass rico:RecordSet ;
+    sh:name "RecordSet Validation" ;
+    sh:description "Validates RecordSet entities (fonds, series, files)" ;
+
+    sh:property [
+        sh:path rico:title ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:or ( [ sh:datatype xsd:string ] [ sh:datatype rdf:langString ] ) ;
+        sh:minLength 1 ;
+        sh:message "RecordSet must have exactly one non-empty title"
+    ] ;
+
+    sh:property [
+        sh:path rico:identifier ;
+        sh:maxCount 1 ;
+        sh:or ( [ sh:datatype xsd:string ] [ sh:datatype rdf:langString ] ) ;
+        sh:severity sh:Warning ;
+        sh:message "RecordSet should have an identifier (reference code)"
+    ] ;
+
+    sh:property [
+        sh:path rico:scopeAndContent ;
+        sh:maxCount 1 ;
+        sh:or ( [ sh:datatype xsd:string ] [ sh:datatype rdf:langString ] ) ;
+        sh:severity sh:Warning ;
+        sh:message "RecordSet should have scope and content description"
+    ] ;
+
+    sh:property [
+        sh:path rico:isOrWasPartOf ;
+        sh:class rico:RecordSet ;
+        sh:severity sh:Info ;
+        sh:message "Parent should be a RecordSet"
+    ] ;
+
+    sh:property [
+        sh:path rico:hasOrHadHolder ;
+        sh:class rico:CorporateBody ;
+        sh:severity sh:Warning ;
+        sh:message "RecordSet should be held by a repository (CorporateBody)"
+    ] .
+
+
+:RecordShape a sh:NodeShape ;
+    sh:targetClass rico:Record ;
+    sh:name "Record Validation" ;
+    sh:description "Validates Record entities (items)" ;
+
+    sh:property [
+        sh:path rico:title ;
+        sh:minCount 1 ;
+        sh:or ( [ sh:datatype xsd:string ] [ sh:datatype rdf:langString ] ) ;
+        sh:minLength 1 ;
+        sh:message "Record must have a title"
+    ] ;
+
+    sh:property [
+        sh:path rico:isOrWasPartOf ;
+        sh:minCount 1 ;
+        sh:severity sh:Warning ;
+        sh:message "Record should be part of a RecordSet"
+    ] .
+
+
+# ----------------------------------------------------------------------------
+# Agent shapes
+# ----------------------------------------------------------------------------
+# OpenRiC v0.1 accepts EITHER rico:name (shorthand, common in practice) OR
+# rico:hasOrHadAgentName (RiC-O canonical structured form). At least one must
+# be present.
+
+:PersonShape a sh:NodeShape ;
+    sh:targetClass rico:Person ;
+    sh:name "Person Validation" ;
+
+    sh:or (
+        [ sh:property [ sh:path rico:name ; sh:minCount 1 ] ]
+        [ sh:property [ sh:path rico:hasOrHadAgentName ; sh:minCount 1 ] ]
+    ) ;
+
+    sh:property [
+        sh:path rico:hasOrHadAgentName ;
+        sh:node :AgentNameShape ;
+        sh:severity sh:Info ;
+        sh:message "When present, rico:hasOrHadAgentName must be properly structured"
+    ] .
+
+
+:CorporateBodyShape a sh:NodeShape ;
+    sh:targetClass rico:CorporateBody ;
+    sh:name "CorporateBody Validation" ;
+
+    sh:or (
+        [ sh:property [ sh:path rico:name ; sh:minCount 1 ] ]
+        [ sh:property [ sh:path rico:hasOrHadAgentName ; sh:minCount 1 ] ]
+    ) ;
+
+    sh:property [
+        sh:path rico:hasOrHadAgentName ;
+        sh:node :AgentNameShape ;
+        sh:severity sh:Info ;
+        sh:message "When present, rico:hasOrHadAgentName must be properly structured"
+    ] .
+
+
+:FamilyShape a sh:NodeShape ;
+    sh:targetClass rico:Family ;
+    sh:name "Family Validation" ;
+
+    sh:or (
+        [ sh:property [ sh:path rico:name ; sh:minCount 1 ] ]
+        [ sh:property [ sh:path rico:hasOrHadAgentName ; sh:minCount 1 ] ]
+    ) .
+
+
+:AgentNameShape a sh:NodeShape ;
+    sh:name "AgentName Structure" ;
+
+    sh:property [
+        sh:path rico:textualValue ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:or ( [ sh:datatype xsd:string ] [ sh:datatype rdf:langString ] ) ;
+        sh:minLength 1 ;
+        sh:message "AgentName must have exactly one non-empty textualValue"
+    ] .
+
+
+# ----------------------------------------------------------------------------
+# Repository (ISDIAH) shape
+# ----------------------------------------------------------------------------
+# Repository = rico:CorporateBody acting as a custodial institution.
+# CorporateBodyShape above handles name; this layers ISDIAH-specific
+# recommendations on top.
+
+:RepositoryShape a sh:NodeShape ;
+    sh:targetSubjectsOf rico:hasOrHadHolder ;
+    sh:name "Repository (ISDIAH) Recommendations" ;
+    sh:description "Custodial institutions that hold records. Applied to any subject of isOrHasCurrentCustodian." ;
+
+    sh:property [
+        sh:path rico:identifier ;
+        sh:severity sh:Warning ;
+        sh:message "Repository should have an identifier (institution code)"
+    ] ;
+
+    sh:property [
+        sh:path rico:history ;
+        sh:severity sh:Info ;
+        sh:message "Repository should describe its history / founding context"
+    ] ;
+
+    sh:property [
+        sh:path rico:hasOrHadLocation ;
+        sh:severity sh:Info ;
+        sh:message "Repository should link to at least one Place"
+    ] ;
+
+    sh:property [
+        sh:path openricx:contact ;
+        sh:maxCount 1 ;
+        sh:node :ContactPointShape ;
+        sh:message "Repository MAY carry at most one openricx:contact, typed openricx:ContactPoint; see §3.4.1"
+    ] .
+
+
+# ----------------------------------------------------------------------------
+# ContactPoint shape (§3.4.1)
+# ----------------------------------------------------------------------------
+# All subfields OPTIONAL — emit only what you have. Implementations MUST NOT
+# invent alternative property names. schema:ContactPoint interop is allowed
+# outside the normative surface but is not checked here.
+
+:ContactPointShape a sh:NodeShape ;
+    sh:name "Contact Point" ;
+    sh:description "Single embedded contact object under openricx:contact — postal + telephone + email fields, all optional" ;
+
+    sh:property [
+        sh:path rdf:type ;
+        sh:hasValue openricx:ContactPoint ;
+        sh:message "openricx:contact value MUST be typed openricx:ContactPoint"
+    ] ;
+
+    sh:property [
+        sh:path openricx:streetAddress ;
+        sh:maxCount 1 ;
+        sh:or ( [ sh:datatype xsd:string ] [ sh:datatype rdf:langString ] )
+    ] ;
+
+    sh:property [
+        sh:path openricx:postalCode ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:string
+    ] ;
+
+    sh:property [
+        sh:path openricx:city ;
+        sh:maxCount 1 ;
+        sh:or ( [ sh:datatype xsd:string ] [ sh:datatype rdf:langString ] )
+    ] ;
+
+    sh:property [
+        sh:path openricx:country ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:string ;
+        sh:severity sh:Info ;
+        sh:message "Country RECOMMENDED as ISO 3166-1 alpha-2"
+    ] ;
+
+    sh:property [
+        sh:path openricx:telephone ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:string ;
+        sh:severity sh:Info ;
+        sh:message "Telephone RECOMMENDED in E.164 format"
+    ] ;
+
+    sh:property [
+        sh:path openricx:email ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:string
+    ] .

@@ -117,6 +117,8 @@ class AgentService
             throw new InvalidArgumentException(__('an agent merges into another current agent of the institution'));
         }
         DB::transaction(fn () => AuditLog::actingAs($actor, function () use ($duplicate, $kept, $actor) {
+            // First, while the public can still read what it was (ADR 0013).
+            app(DeprecationService::class)->record($duplicate, 'merged into '.$kept->iri, $kept, $actor);
             foreach (['source', 'target', 'context'] as $side) {
                 foreach (Relation::where([$side.'_table' => 'agents', $side.'_id' => $duplicate->id])->get() as $relation) {
                     $moved = [$side.'_id' => $kept->id];

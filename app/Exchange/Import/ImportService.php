@@ -69,11 +69,12 @@ class ImportService
 {
     public const FORMATS = ['csv' => 'Archival descriptions: CSV (AtoM ISAD(G) columns)', 'ead' => 'Archival descriptions: EAD 2002 or EAD3',
         'authority-csv' => 'Authority records: CSV (AtoM ISAAR(CPF) columns)', 'repository-csv' => 'Repositories: CSV (AtoM ISDIAH columns)',
-        'eac-cpf' => 'Authority records: EAC-CPF (one file, or a ZIP of files)', 'eac-f' => 'Activities: EAC-F (one file, or a ZIP of files)'];
+        'eac-cpf' => 'Authority records: EAC-CPF (one file, or a ZIP of files)', 'eac-f' => 'Activities: EAC-F (one file, or a ZIP of files)',
+        'ric-o' => 'RiC-O: JSON-LD, Turtle or RDF/XML (records, with the authority records and repositories the file describes)'];
 
     /** The table each format's entries become. */
     public const TABLES = ['csv' => 'record_resources', 'ead' => 'record_resources', 'authority-csv' => 'agents', 'repository-csv' => 'repositories',
-        'eac-cpf' => 'agents', 'eac-f' => 'activities'];
+        'eac-cpf' => 'agents', 'eac-f' => 'activities', 'ric-o' => 'record_resources'];
 
     /** The permission kind that governs each table's entries. */
     private const PERMISSIONS = ['record_resources' => 'description', 'agents' => 'authority', 'repositories' => 'repository', 'activities' => 'authority'];
@@ -153,6 +154,7 @@ class ImportService
                 'repository-csv' => app(AtomEntityReader::class)->read('repository', $import->content, $import->language, $this->report),
                 'eac-cpf' => app(EacCpfReader::class)->read($import->content, $import->language, $this->report),
                 'eac-f' => app(EacFReader::class)->read($import->content, $import->language, $this->report),
+                'ric-o' => app(RicReader::class)->read($import->content, $import->language, $this->report),
                 default => app(CsvReader::class)->read($import->content, $import->language, $this->report),
             };
         } catch (InvalidArgumentException $e) {
@@ -271,7 +273,8 @@ class ImportService
         try {
             $unit = DB::transaction(fn () => $this->withoutInnerSavepoints(fn () => match (true) {
                 $draft instanceof UnitDraft => $this->write($draft),
-                in_array($this->import->format, ['authority-csv', 'eac-cpf'], true) => $this->authority($draft),
+                $draft->table === 'repositories' => $this->repository($draft),
+                $draft->table === 'agents' || in_array($this->import->format, ['authority-csv', 'eac-cpf'], true) => $this->authority($draft),
                 $this->import->format === 'eac-f' => $this->activity($draft),
                 default => $this->repository($draft),
             }));
@@ -335,11 +338,15 @@ class ImportService
         $levelIri = $this->level($draft, $unit === null);
 
         if ($unit === null) {
-            $holder = $parent ? $this->holder($parent) : ($this->namedRepository($draft) ?? Repository::findOrFail($this->import->repository_id));
+            $holder = $parent ? $this->holder($parent) : ($this->byIri(Repository::class, $draft->repositoryIri) ?? $this->namedRepository($draft) ?? Repository::findOrFail($this->import->repository_id));
             if (! $this->user->may('create', 'description', $parent ?? $holder)) {
                 throw new InvalidArgumentException('you may not create units of description '.($parent ? 'inside that unit' : 'in that repository'));
             }
             $title = $values[$language]['title'] ?? throw new InvalidArgumentException('it has no title in '.$language.', and a new unit needs one');
+            // A RiC-O identifier is the reference code, which begins with the holder's code: the unit's own identifier follows it.
+            if ($draft->repositoryIri !== null && $draft->identifier !== null && (string) $holder->identifier !== '' && str_starts_with($draft->identifier, $holder->identifier.' ')) {
+                $draft->identifier = substr($draft->identifier, strlen($holder->identifier) + 1);
+            }
             $unit = $this->records->create($this->institution, $levelIri, $title, $language, $parent, $parent ? null : $holder, $draft->identifier, $this->user);
             $unit->wasRecentlyCreated = true;
         } else {
@@ -347,11 +354,20 @@ class ImportService
                 throw new InvalidArgumentException('it matches '.$unit->iri.', which you may not update');
             }
             $unit->wasRecentlyCreated = false;
+            // RiC-O gives a unit's reference code as its identifier, or its id when it has none: not a new identifier.
+            if ($draft->identifier !== null && in_array($draft->identifier, [$unit->referenceCode(), $unit->id, $unit->description_identifier], true)) {
+                $draft->identifier = $unit->identifier;
+            }
             if (($draft->identifier !== null && $draft->identifier !== $unit->identifier) || ($levelIri !== null && $levelIri !== $unit->level->iri)) {
                 $this->records->updateIdentity($unit, $draft->identifier ?? $unit->identifier, $levelIri ?? $unit->level->iri, $this->user);
             }
         }
         $holder = $this->holder($unit);
+        if ($draft->repositoryIri !== null && $draft->repositoryIri !== $holder->iri) {
+            $this->report->issue($draft->location, 'holder', $draft->repositoryIri, $unit->parent_id
+                ? 'a unit inside another is held by the holder of the unit at the top, '.EntityKinds::label($holder)
+                : 'held by '.EntityKinds::label($holder).': no repository here has this IRI', 'note');
+        }
         if ($draft->repositoryName !== null && mb_strtolower($draft->repositoryName) !== mb_strtolower((string) EntityKinds::label($holder))) {
             $this->report->issue($draft->location, 'repository', $draft->repositoryName, $unit->parent_id
                 ? 'a unit inside another is held by the holder of the unit at the top, '.EntityKinds::label($holder)
@@ -631,7 +647,7 @@ class ImportService
     /** A repository (ISDIAH): matched by its key in this source, or, when asked, by its one authorised name. */
     private function repository(EntityDraft $draft): Repository
     {
-        $repository = $this->keyed(Repository::class, $draft->key) ?? $this->byName(Repository::class, 'repositories', $draft);
+        $repository = $this->byIri(Repository::class, $draft->iri) ?? $this->keyed(Repository::class, $draft->key) ?? $this->byName(Repository::class, 'repositories', $draft);
         $language = $draft->language($this->import->language);
         if ($repository === null) {
             if (! $this->user->may('create', 'repository')) {
@@ -682,9 +698,17 @@ class ImportService
             foreach ($values as $notation => $text) {
                 $type = Elements::nameType($notation);
                 if ($type !== null && $type !== 'authorised') {
-                    $have = Name::where(['subject_table' => $entity->getTable(), 'subject_id' => $entity->getKey(), 'language' => $language])
+                    $names = fn (string $type) => Name::where(['subject_table' => $entity->getTable(), 'subject_id' => $entity->getKey(), 'language' => $language])
                         ->whereHas('nameType', fn ($q) => $q->where('iri', Vocab::NAME_TYPES.$type))->pluck('value')->all();
-                    $values[$notation] = implode("\n", array_unique([...$have, ...explode("\n", $text)]));
+                    $new = explode("\n", $text);
+                    // RiC-O writes parallel and standardised forms alike as openricx:alternativeForm: a standardised form is not a new parallel one.
+                    if ($type === 'parallel') {
+                        $new = array_diff($new, $names('standardised'));
+                    }
+                    $values[$notation] = implode("\n", array_unique([...$names($type), ...$new]));
+                    if ($values[$notation] === '') {
+                        unset($values[$notation]);
+                    }
                 }
             }
             $this->descriptions->describe($entity, $standard, $values, $language, $required, $this->user);
@@ -827,7 +851,8 @@ class ImportService
         $wanted = array_flip(Ead::LEVEL_NAMES)[$wanted] ?? $wanted;
         // The bundled levels, then the institution's own, by notation or by label.
         $levels = Concept::bundledThenLocal(self::LEVELS, 'level-of-description', $this->institution->id);
-        $level = $levels->first(fn (Concept $c) => $c->notation !== null && mb_strtolower((string) $c->notation) === $wanted)
+        $level = $levels->first(fn (Concept $c) => $c->iri === $draft->level)
+            ?? $levels->first(fn (Concept $c) => $c->notation !== null && mb_strtolower((string) $c->notation) === $wanted)
             ?? $levels->first(fn (Concept $c) => $c->labels->contains(fn ($l) => mb_strtolower($l->pref_label) === $wanted))
             ?? $this->newLevel($draft);
         if ($level === null) {
@@ -912,6 +937,8 @@ class ImportService
 
     private function unitDates(UnitDraft $draft, RecordResource $unit): void
     {
+        // RiC-O carries the unit's dates as written (ISAD(G) 3.1.3) on its first date that has no written form of its own.
+        $written = $unit->descriptionValues()->whereHas('element', fn ($q) => $q->where('notation', 'dates-expressed'))->pluck('value')->all();
         foreach ($draft->dates as $date) {
             $unit->load('dates.property');
             // The same date is the same span, however it is written: 1950-06 and 1950-06-01/1950-06-30 are one.
@@ -920,7 +947,7 @@ class ImportService
                 && ($date['normalized'] === null ? $d->normalized_value === null
                     : ($d->normalized_value === $date['normalized'] || ($bounds !== null && [$d->earliest?->format('Y-m-d'), $d->latest?->format('Y-m-d')] === $bounds)))
                 // A date with no written form is exported with its EDTF as the text; that text is not a new written form.
-                && ($date['expressed'] === null || $d->expressed === $date['expressed'] || ($d->expressed === null && $date['expressed'] === $d->normalized_value)));
+                && ($date['expressed'] === null || $d->expressed === $date['expressed'] || ($d->expressed === null && in_array($date['expressed'], [$d->normalized_value, ...$written], true))));
             if ($same) {
                 continue;
             }
@@ -938,6 +965,10 @@ class ImportService
     {
         foreach ($draft->creators as $creator) {
             if ($agent = $this->agent($draft, $creator['name'], $creator['type'], $creator['iri'], $language, $creator['history'], 'creator')) {
+                // A file that says only "creator" (RiC-O's rico:hasCreator) is met by an accumulator already linked.
+                if ($creator['relation'] === 'creation' && $this->related($unit, 'accumulation', $agent)) {
+                    continue;
+                }
                 $this->relate($draft, $unit, $creator['relation'], $agent);
             }
         }
@@ -980,11 +1011,7 @@ class ImportService
 
     private function relate(UnitDraft|EntityDraft $draft, Model $source, string $type, Model $target, array $fields = []): void
     {
-        $exists = Relation::where(['source_table' => $source->getTable(), 'source_id' => $source->getKey(), 'target_table' => $target->getTable(), 'target_id' => $target->getKey()])
-            ->whereHas('relationType', fn ($q) => $q->where('iri', Vocab::BASE.'relation-type/'.$type))->exists()
-            || (RelationTypes::get($type, null)['symmetric'] ?? false) && Relation::where(['source_table' => $target->getTable(), 'source_id' => $target->getKey(),
-                'target_table' => $source->getTable(), 'target_id' => $source->getKey()])->whereHas('relationType', fn ($q) => $q->where('iri', Vocab::BASE.'relation-type/'.$type))->exists();
-        if ($exists) {
+        if ($this->related($source, $type, $target)) {
             return;
         }
         try {
@@ -993,6 +1020,14 @@ class ImportService
         } catch (InvalidArgumentException $e) {
             $this->report->issue($draft->location, $type, EntityKinds::label($target), $e->getMessage().'; not linked', 'left-out');
         }
+    }
+
+    private function related(Model $source, string $type, Model $target): bool
+    {
+        return Relation::where(['source_table' => $source->getTable(), 'source_id' => $source->getKey(), 'target_table' => $target->getTable(), 'target_id' => $target->getKey()])
+            ->whereHas('relationType', fn ($q) => $q->where('iri', Vocab::BASE.'relation-type/'.$type))->exists()
+            || (RelationTypes::get($type, null)['symmetric'] ?? false) && Relation::where(['source_table' => $target->getTable(), 'source_id' => $target->getKey(),
+                'target_table' => $source->getTable(), 'target_id' => $source->getKey()])->whereHas('relationType', fn ($q) => $q->where('iri', Vocab::BASE.'relation-type/'.$type))->exists();
     }
 
     /** An agent by the IRI the file gives, else the one agent of that authorised name, else a new one where allowed. */
@@ -1171,13 +1206,17 @@ class ImportService
      */
     private function reconcile(): array
     {
-        $table = self::TABLES[$this->import->format] ?? 'record_resources';
         $imported = collect($this->report->units)->where('action', '!=', 'rejected');
         $ids = $imported->pluck('unit_id')->filter()->unique()->values()->all();
-        $present = DB::table($table)->whereIn('id', $ids)->whereNull('deleted_at')
-            ->whereIn('id', Name::where('subject_table', $table)->whereHas('nameType', fn ($q) => $q->where('iri', Vocab::NAME_TYPES.'authorised'))->select('subject_id'))->count();
-        $keyed = DB::table('import_keys')->where(['institution_id' => $this->institution->id, 'source' => $this->import->source, 'subject_table' => $table])
-            ->whereIn('subject_id', $ids)->distinct()->count('subject_id');
+        // Each entry in its own table: a RiC-O file holds units, authority records and repositories.
+        [$present, $keyed] = [0, 0];
+        foreach ($imported->groupBy(fn ($u) => $u['table'] ?? self::TABLES[$this->import->format] ?? 'record_resources') as $table => $entries) {
+            $inTable = $entries->pluck('unit_id')->filter()->unique()->values()->all();
+            $present += DB::table($table)->whereIn('id', $inTable)->whereNull('deleted_at')
+                ->whereIn('id', Name::where('subject_table', $table)->whereHas('nameType', fn ($q) => $q->where('iri', Vocab::NAME_TYPES.'authorised'))->select('subject_id'))->count();
+            $keyed += DB::table('import_keys')->where(['institution_id' => $this->institution->id, 'source' => $this->import->source, 'subject_table' => $table])
+                ->whereIn('subject_id', $inTable)->distinct()->count('subject_id');
+        }
         $actions = $this->report->actions();
 
         return [

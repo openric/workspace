@@ -2541,5 +2541,13 @@
     "it has no authorised name, and a new activity needs one": "dit het geen gemagtigde naam nie, en 'n nuwe aktiwiteit het een nodig",
     "the file is not a ZIP the Workspace can open": "die lêer is nie 'n ZIP wat die Workspace kan oopmaak nie",
     "the ZIP holds no XML file": "die ZIP bevat geen XML-lêer nie",
-    "you may not create activities": "u mag nie aktiwiteite skep nie"
+    "you may not create activities": "u mag nie aktiwiteite skep nie",
+    "If the public could see it, its persistent IRI goes on answering: as deprecated, with the reason and what replaces it.": "As die publiek dit kon sien, antwoord sy permanente IRI steeds: as verouderd, met die rede en wat dit vervang.",
+    "It is replaced by": "Dit word vervang deur",
+    "Its persistent identifier stays, so what cites it does not break:": "Sy permanente identifiseerder bly, sodat wat daarna verwys nie breek nie:",
+    "No current :kind here has that persistent IRI.": "Geen huidige :kind hier het daardie permanente IRI nie.",
+    "Replaced by (its persistent IRI)": "Vervang deur (sy permanente IRI)",
+    "This description was withdrawn on :date.": "Hierdie beskrywing is op :date onttrek.",
+    "what replaces it is another current entity of the same kind in the institution": "wat dit vervang, is 'n ander huidige entiteit van dieselfde soort in die instelling",
+    "Withdrawn": "Onttrek"
 }

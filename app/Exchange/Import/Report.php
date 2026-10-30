@@ -41,7 +41,8 @@ final class Report
     /** What became of an entry of the file: a unit of description, an authority record, a repository, a subject or a place. */
     public function unit(UnitDraft|EntityDraft $draft, string $action, ?string $unitId, ?string $message = null): void
     {
-        $this->units[] = ['location' => $draft->location, 'key' => $draft->key, 'title' => $draft->title(), 'action' => $action, 'unit_id' => $unitId, 'message' => $message];
+        $this->units[] = ['location' => $draft->location, 'key' => $draft->key, 'title' => $draft->title(), 'action' => $action, 'unit_id' => $unitId, 'message' => $message,
+            'table' => $draft instanceof UnitDraft ? 'record_resources' : $draft->table];
     }
 
     /** @return array<string, int> units by what became of them */

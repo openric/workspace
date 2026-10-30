@@ -256,6 +256,7 @@ On 30 October 2026 Dr Johan Pieterse split the phase: 11a the archival exchange 
 
 Progress:
 - **v0.0.85** (11a): EAC-CPF import and EAC-F export and import, each one file or a ZIP of files, with exports of every authority record or activity as a ZIP (ADR 0012). EAC-F is the EAS 2026-07 release's EAF 1.0.0, and the export is valid against its schema. A record the Workspace exported reads back with nothing written; each relation keeps its direction; every element the import does not read is listed. EAD3 export and import, with their round trip, were already in place.
+- **v0.0.86** (11b): RiC-O import of JSON-LD, Turtle or RDF/XML with its dry run, a round trip in each that writes nothing; the Portability profile (the dataset descriptor at `/dataset`, the change feed at `/changelog`) and the Governance profile (a deleted or merged entity the public could read answers 410 with `owl:deprecated`, its successor and the reason; the governance pin; SHACL as the gate in CI), both declared, after the specification's Governance 0.45.0 (v0.56.0) stated its IRI rule without Heratio's forms (ADR 0013).
 
 **12. Monitoring and operations (WS-017).**
 - Copy `ahg-observability` for health and metrics.

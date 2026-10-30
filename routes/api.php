@@ -1,9 +1,11 @@
 <?php
 
-// OpenRiC Workspace - the OpenRiC read API at /api/ric/v1: the Core Discovery (0.7.0) and Export-Only (0.10.0) profiles.
+// OpenRiC Workspace - the OpenRiC read API at /api/ric/v1: the Core Discovery (0.7.0), Export-Only (0.10.0), Portability
+// (0.43.0) and Governance (0.45.0) profiles.
 // Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+use App\Http\Controllers\Api\DatasetController;
 use App\Http\Controllers\Api\DiscoveryController;
 use App\Http\Controllers\Api\OaiController;
 use App\Http\Controllers\Api\ProposalController;
@@ -27,6 +29,9 @@ Route::middleware([ServeRicApi::class, 'throttle:600,1', AuthenticateApiKey::cla
     Route::get('/repositories', [DiscoveryController::class, 'repositories'])->name('api.repositories');
     Route::get('/repositories/{key}', [DiscoveryController::class, 'repository'])->name('api.repository');
     Route::get('/autocomplete', [DiscoveryController::class, 'autocomplete'])->name('api.autocomplete');
+    // Portability 3 and 4: the dataset descriptor and its change feed (phase 11b).
+    Route::get('/dataset', [DatasetController::class, 'dataset'])->name('api.dataset');
+    Route::get('/changelog', [DatasetController::class, 'changelog'])->name('api.changelog');
 });
 
 // Proposals need a key (ADR 0007): to send them, one with the write scope; to list them, any.

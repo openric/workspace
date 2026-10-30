@@ -28,7 +28,7 @@ use InvalidArgumentException;
 
 class EntityDeletion
 {
-    public function __construct(private RelationService $relations) {}
+    public function __construct(private RelationService $relations, private DeprecationService $deprecations) {}
 
     /** @return list<string> why the entity cannot be deleted yet, in words; empty if it can */
     public function blockers(Model $entity): array
@@ -63,12 +63,18 @@ class EntityDeletion
         ];
     }
 
-    public function delete(Model $entity, ?User $actor = null): void
+    /** Mark the entity deleted; its IRI answers as deprecated, with the reason and its successor, when the public could read it (ADR 0013). */
+    public function delete(Model $entity, ?User $actor = null, ?string $reason = null, ?Model $successor = null): void
     {
         if ($blockers = $this->blockers($entity)) {
             throw new InvalidArgumentException(implode(' ', $blockers));
         }
-        DB::transaction(fn () => AuditLog::actingAs($actor, function () use ($entity, $actor) {
+        if ($successor !== null && ($successor::class !== $entity::class || $successor->getKey() === $entity->getKey() || $successor->getAttribute('deleted_at') !== null
+            || $successor->getAttribute('institution_id') !== $entity->getAttribute('institution_id'))) {
+            throw new InvalidArgumentException(__('what replaces it is another current entity of the same kind in the institution'));
+        }
+        DB::transaction(fn () => AuditLog::actingAs($actor, function () use ($entity, $actor, $reason, $successor) {
+            $this->deprecations->record($entity, $reason, $successor, $actor);
             if ($entity instanceof RecordResource) {
                 RelationEvidence::where('record_resource_id', $entity->id)->get()->each(fn ($e) => $this->relations->removeEvidence($e, $actor));
             }

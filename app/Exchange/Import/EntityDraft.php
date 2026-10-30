@@ -64,6 +64,9 @@ final class EntityDraft
     /** The activity type's IRI, for an activity. */
     public ?string $typeIri = null;
 
+    /** The table the entry becomes, when a format holds more than one kind (RiC-O): agents or repositories. */
+    public ?string $table = null;
+
     public function value(string $language, string $notation, ?string $text): void
     {
         $text = trim((string) $text);

@@ -48,12 +48,13 @@
         </table>
     @endif
 
-    @php($route = ['agents' => 'agents.show', 'repositories' => 'repositories.show'][\App\Exchange\Import\ImportService::TABLES[$import->format] ?? ''] ?? 'records.show')
+    @php($routes = ['agents' => 'agents.show', 'repositories' => 'repositories.show', 'activities' => 'activities.show'])
     <h2>{{ __('Entries') }}</h2>
     <table>
         <thead><tr><th>{{ __('Where') }}</th><th>{{ __('Title') }}</th><th>{{ __('Becomes') }}</th></tr></thead>
         <tbody>
         @foreach($report['units'] ?? [] as $unit)
+            @php($route = $routes[$unit['table'] ?? \App\Exchange\Import\ImportService::TABLES[$import->format] ?? ''] ?? 'records.show')
             <tr><td>{{ $unit['location'] }}</td>
                 <td>@if($unit['unit_id'] && $import->committed_at || $unit['unit_id'] && $unit['action'] !== 'created')<a href="{{ route($route, $unit['unit_id']) }}">{{ $unit['title'] ?? '[no title]' }}</a>@else{{ $unit['title'] ?? '[no title]' }}@endif</td>
                 <td>{{ __(['created' => $import->committed_at ? 'created' : 'would be created', 'updated' => $import->committed_at ? 'updated' : 'would be updated', 'unchanged' => 'unchanged', 'rejected' => 'not imported'][$unit['action']]) }}@if($unit['message']): {{ $unit['message'] }}@endif</td></tr>

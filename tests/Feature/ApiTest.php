@@ -1,11 +1,11 @@
 <?php
 
-// OpenRiC Workspace - the read API: Core Discovery 0.7.0, checked against the spec's JSON Schemas (spec 0.55.0).
+// OpenRiC Workspace - the read API: Core Discovery 0.7.0, checked against the spec's JSON Schemas (spec 0.56.0).
 // Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
 // SPDX-License-Identifier: AGPL-3.0-or-later
 //
-// tests/Fixtures/openric-0.55.0 holds the JSON Schemas of the OpenRiC
-// specification 0.55.0 (https://openric.org/schemas/, CC BY 4.0).
+// tests/Fixtures/openric-0.56.0 holds the JSON Schemas of the OpenRiC
+// specification 0.56.0, unchanged since 0.55.0 (https://openric.org/schemas/, CC BY 4.0).
 
 namespace Tests\Feature;
 
@@ -92,7 +92,7 @@ class ApiTest extends TestCase
     private function valid(TestResponse $response, string $schema): array
     {
         $json = $response->getContent();
-        $result = (new Validator)->validate(json_decode($json), file_get_contents(base_path("tests/Fixtures/openric-0.55.0/$schema.schema.json")));
+        $result = (new Validator)->validate(json_decode($json), file_get_contents(base_path("tests/Fixtures/openric-0.56.0/$schema.schema.json")));
         $this->assertTrue($result->isValid(), "valid against $schema.schema.json: ".json_encode($result->isValid() ? [] : (new ErrorFormatter)->format($result->error())));
 
         return json_decode($json, true);
@@ -101,8 +101,9 @@ class ApiTest extends TestCase
     public function test_the_service_description_health_and_vocabulary(): void
     {
         $service = $this->valid($this->get(self::API.'/')->assertOk()->assertHeader('Vary', 'Accept')->assertHeader('Access-Control-Allow-Origin', '*'), 'service-description');
-        $this->assertSame(['spec_version' => '0.55.0', 'profiles' => [['id' => 'core-discovery', 'version' => '0.7.0', 'conformance' => 'full'],
-            ['id' => 'export-only', 'version' => '0.10.0', 'conformance' => 'full']]], $service['openric_conformance']);
+        $this->assertSame(['spec_version' => '0.56.0', 'profiles' => [['id' => 'core-discovery', 'version' => '0.7.0', 'conformance' => 'full'],
+            ['id' => 'export-only', 'version' => '0.10.0', 'conformance' => 'full'], ['id' => 'portability', 'version' => '0.43.0', 'conformance' => 'full'],
+            ['id' => 'governance', 'version' => '0.45.0', 'conformance' => 'full']]], $service['openric_conformance']);
         $this->assertSame(trim(file_get_contents(base_path('VERSION'))), $service['version']);
         $this->get(self::API.'/health')->assertOk()->assertExactJson(['status' => 'ok']);
         $vocabulary = $this->valid($this->get(self::API.'/vocabulary')->assertOk(), 'vocabulary');
@@ -130,7 +131,7 @@ class ApiTest extends TestCase
         foreach (['rico:hasOrHadSubject', 'rico:isOrWasSubjectOf', 'rico:hasOrHadInstantiation', 'rico:hasOrganicProvenance'] as $forbidden) {
             $this->assertArrayNotHasKey($forbidden, $record, "$forbidden needs a profile the service does not declare");
         }
-        $this->assertSame(['@id' => $this->fonds->iri, '@type' => 'rico:RecordSet', 'rico:name' => 'Riverside Parish Council records'],
+        $this->assertSame(['@id' => $this->fonds->iri, '@type' => 'rico:RecordSet', 'rico:title' => 'Riverside Parish Council records'],
             $this->getJson(self::API."/records/{$this->series->id}")->json('rico:isOrWasIncludedIn'));
     }
 

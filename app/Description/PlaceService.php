@@ -119,6 +119,8 @@ class PlaceService
         }
         $relations = app(RelationService::class);
         DB::transaction(fn () => AuditLog::actingAs($actor, function () use ($duplicate, $kept, $actor, $relations) {
+            // First, while the public can still read what it was (ADR 0013).
+            app(DeprecationService::class)->record($duplicate, 'merged into '.$kept->iri, $kept, $actor);
             foreach (['source', 'target', 'context'] as $side) {
                 foreach (Relation::where([$side.'_table' => 'places', $side.'_id' => $duplicate->id])->get() as $relation) {
                     $moved = [$side.'_id' => $kept->id];

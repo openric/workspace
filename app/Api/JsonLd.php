@@ -37,7 +37,7 @@ class JsonLd
     ];
 
     /** ISAD(G) elements written as literals (mapping 7.1), by notation. */
-    private const RECORD_TEXT = [
+    public const RECORD_TEXT = [
         'scope-and-content' => 'rico:scopeAndContent', 'archival-history' => 'rico:history', 'arrangement' => 'rico:structure',
         'accruals' => 'rico:accruals', 'appraisal' => 'openricx:hasAppraisalInformation', 'conditions-governing-access' => 'rico:conditionsOfAccess',
         'conditions-governing-reproduction' => 'rico:conditionsOfUse', 'note' => 'rico:generalDescription', 'archivists-note' => 'openricx:descriptiveNote',
@@ -45,13 +45,13 @@ class JsonLd
     ];
 
     /** ISAAR(CPF) elements written as literals (mapping 7.3). */
-    private const AGENT_TEXT = [
+    public const AGENT_TEXT = [
         'agent-history' => 'rico:history', 'agent-general-context' => 'openricx:generalContext', 'agent-internal-structure' => 'openricx:hasInternalStructure',
         'agent-mandates' => 'rico:authorizingMandate', 'agent-dates-of-existence' => 'rico:date',
     ];
 
     /** ISDIAH elements written as literals (mapping 7.4). */
-    private const REPOSITORY_TEXT = [
+    public const REPOSITORY_TEXT = [
         'history' => 'rico:history', 'geocultural-context' => 'openricx:generalContext', 'mandates' => 'rico:authorizingMandate',
         'administrative-structure' => 'openricx:hasInternalStructure', 'records-policies' => 'openricx:hasOrHadPolicy', 'opening-times' => 'openricx:openingHours',
         'access-conditions' => 'rico:conditionsOfAccess', 'accessibility' => 'openricx:accessibility',
@@ -237,7 +237,10 @@ class JsonLd
 
     public function stub(Model $entity): array
     {
-        return array_filter(['@id' => $entity->getAttribute('iri'), '@type' => $this->type($entity), 'rico:name' => $this->view->label($entity)], fn ($v) => $v !== null);
+        // A unit's name is its title (RiC-O 1.1; the OpenRiC shapes require rico:title of a rico:Record).
+        $name = $entity instanceof RecordResource ? 'rico:title' : 'rico:name';
+
+        return array_filter(['@id' => $entity->getAttribute('iri'), '@type' => $this->type($entity), $name => $this->view->label($entity)], fn ($v) => $v !== null);
     }
 
     /** The RiC-O class: a unit's level, an agent's type (with rico:Agent where its own class is not one Core Discovery names), a repository's rico:CorporateBody. */

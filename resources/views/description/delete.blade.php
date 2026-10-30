@@ -18,6 +18,9 @@
         @endif
         <form method="post" action="{{ route('deletion.destroy', [$kind, $entity->getKey()]) }}">
             @csrf
+            <p>{{ __('If the public could see it, its persistent IRI goes on answering: as deprecated, with the reason and what replaces it.') }}</p>
+            <p><label for="reason">{{ __('Reason') }}</label><br><textarea id="reason" name="reason" rows="2" maxlength="2000">{{ old('reason') }}</textarea></p>
+            <p><label for="replaced_by">{{ __('Replaced by (its persistent IRI)') }}</label><br><input id="replaced_by" name="replaced_by" type="url" size="70" value="{{ old('replaced_by') }}"></p>
             <button type="submit" style="background: var(--error)">{{ __('Delete :name', ['name' => $name]) }}</button>
         </form>
     @endif

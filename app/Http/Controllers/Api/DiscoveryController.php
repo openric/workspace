@@ -1,6 +1,6 @@
 <?php
 
-// OpenRiC Workspace - the OpenRiC read API, Core Discovery profile 0.7.0 (spec 0.55.0).
+// OpenRiC Workspace - the OpenRiC read API, Core Discovery profile 0.7.0 (spec 0.56.0).
 // Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
 // SPDX-License-Identifier: AGPL-3.0-or-later
 //
@@ -16,6 +16,7 @@ use App\Api\JsonLd;
 use App\Api\Problem;
 use App\Api\PublicCatalogue;
 use App\Api\Rdf;
+use App\Description\DeprecationService;
 use App\Description\InstantiationService;
 use App\Exchange\ExportView;
 use App\Http\Controllers\Controller;
@@ -32,7 +33,8 @@ use Illuminate\Support\Facades\DB;
 class DiscoveryController extends Controller
 {
     /** The profiles this service declares, with the versions it implements. */
-    public const PROFILES = [['id' => 'core-discovery', 'version' => '0.7.0', 'conformance' => 'full'], ['id' => 'export-only', 'version' => '0.10.0', 'conformance' => 'full']];
+    public const PROFILES = [['id' => 'core-discovery', 'version' => '0.7.0', 'conformance' => 'full'], ['id' => 'export-only', 'version' => '0.10.0', 'conformance' => 'full'],
+        ['id' => 'portability', 'version' => '0.43.0', 'conformance' => 'full'], ['id' => 'governance', 'version' => '0.45.0', 'conformance' => 'full']];
 
     /** The list type of each list. */
     private const LISTS = ['records' => 'openricx:RecordList', 'agents' => 'openricx:AgentList', 'repositories' => 'openricx:RepositoryList'];
@@ -94,7 +96,7 @@ class DiscoveryController extends Controller
         return $this->list($request, 'repositories', fn ($r) => $this->jsonLd($request)->stub($r));
     }
 
-    public function record(Request $request, string $key): JsonResponse
+    public function record(Request $request, string $key): JsonResponse|Response
     {
         $unit = $this->catalogue($request)->find('records', $key, self::RECORD_WITH);
 
@@ -107,7 +109,7 @@ class DiscoveryController extends Controller
      * (reference and thumbnail; never a master), at their addresses in the public catalogue. Plain JSON, not
      * JSON-LD: the Core Discovery profile does not describe instantiations.
      */
-    public function files(Request $request, string $key): JsonResponse
+    public function files(Request $request, string $key): JsonResponse|Response
     {
         $unit = $this->catalogue($request)->find('records', $key);
         if ($unit === null) {
@@ -166,14 +168,14 @@ class DiscoveryController extends Controller
         ];
     }
 
-    public function agent(Request $request, string $key): JsonResponse
+    public function agent(Request $request, string $key): JsonResponse|Response
     {
         $agent = $this->catalogue($request)->find('agents', $key, ['agentType.labels']);
 
         return $agent ? $this->json($this->jsonLd($request)->agent($agent)) : $this->missing($request, 'Agent', $key);
     }
 
-    public function repository(Request $request, string $key): JsonResponse
+    public function repository(Request $request, string $key): JsonResponse|Response
     {
         $repository = $this->catalogue($request)->find('repositories', $key, ['contactPoints']);
 
@@ -204,7 +206,7 @@ class DiscoveryController extends Controller
         }
         $unit = $this->catalogue($request)->find('records', $key, self::RECORD_WITH);
         if ($unit === null) {
-            return $this->missing($request, 'Record', $key);
+            return $this->missing($request, 'Record', $key, $format);
         }
         $dump = $this->jsonLd($request)->dump($unit);
         [$body, $type, $extension] = match ($format) {
@@ -264,9 +266,24 @@ class DiscoveryController extends Controller
             'openric:items' => $all->slice(($page - 1) * $limit, $limit)->map($item)->values()->all()]);
     }
 
-    private function missing(Request $request, string $what, string $key): JsonResponse
+    /**
+     * Not here: 410 Gone with the deprecated entity, when the public could read it before it was deleted or merged, in
+     * the format asked for (Governance profile 4, ADR 0013); else 404.
+     */
+    private function missing(Request $request, string $what, string $key, string $format = 'jsonld'): JsonResponse|Response
     {
-        return Problem::response($request, 404, "$what with key '$key' does not exist.");
+        $table = ['Record' => 'record_resources', 'Agent' => 'agents', 'Repository' => 'repositories'][$what];
+        $deprecation = preg_match('/^[0-9a-f-]{36}$/', $key) ? app(DeprecationService::class)->known($this->institution($request), $table, $key) : null;
+        if ($deprecation === null) {
+            return Problem::response($request, 404, "$what with key '$key' does not exist.");
+        }
+        $body = app(DeprecationService::class)->jsonLd($deprecation);
+
+        return match ($format) {
+            'turtle' => response(Rdf::serialise($body, 'turtle'), 410, ['Content-Type' => 'text/turtle; charset=utf-8']),
+            'rdfxml' => response(Rdf::serialise($body, 'rdfxml'), 410, ['Content-Type' => 'application/rdf+xml; charset=utf-8']),
+            default => response()->json($body, 410, ['Content-Type' => 'application/ld+json'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
+        };
     }
 
     /** A whole-number query parameter within bounds, its default when absent, or null when it is not one. */

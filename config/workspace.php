@@ -8,7 +8,7 @@ return [
 
     // The OpenRiC specification release this build implements (ADR 0003, rule 1;
     // conformance/README.md). Raised only together with the conformance matrix.
-    'openric_spec_version' => '0.55.0',
+    'openric_spec_version' => '0.56.0',
 
     // Ed25519 key that signs every audit row (ADR 0004). Kept outside git and the
     // database, readable only by the application; back it up with the database.

@@ -90,7 +90,7 @@ class PublicRightsTest extends TestCase
     public function test_the_api_says_the_same_as_rules_by_their_publishers_iris(): void
     {
         $json = $this->getJson(self::SITE."/api/ric/v1/records/{$this->record->id}")->assertOk();
-        $schema = file_get_contents(base_path('tests/Fixtures/openric-0.55.0/record.schema.json'));
+        $schema = file_get_contents(base_path('tests/Fixtures/openric-0.56.0/record.schema.json'));
         $this->assertTrue((new Validator)->validate(json_decode($json->getContent()), $schema)->isValid());
         $rules = $json->json('rico:isOrWasRegulatedBy');
         $this->assertCount(2, $rules);

@@ -65,6 +65,9 @@ final class UnitDraft
 
     public ?string $repositoryName = null;
 
+    /** The persistent IRI of the repository that holds the unit, when the file names it (a RiC-O rico:hasOrHadHolder). */
+    public ?string $repositoryIri = null;
+
     /** @var list<array{name: string, type: ?string, location: ?string}> containers the unit is kept in, as the file names them (AtoM physical objects, EAD container) */
     public array $containers = [];
 

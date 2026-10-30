@@ -13,6 +13,7 @@
 namespace App\Http\Controllers;
 
 use App\Api\PublicCatalogue;
+use App\Description\DeprecationService;
 use App\Description\Elements;
 use App\Description\InstantiationService;
 use App\Description\TreeService;
@@ -114,7 +115,7 @@ class DiscoverController extends Controller
     {
         $catalogue = $this->catalogue($request);
         $unit = $catalogue->find('records', $id, ['level.labels', 'repository.names.nameType', 'repository.names.state', 'instantiations.files.use', 'instantiations.names.nameType',
-            'instantiations.names.state', 'instantiations.availability', 'instantiations.carrierType.labels']) ?? abort(404);
+            'instantiations.names.state', 'instantiations.availability', 'instantiations.carrierType.labels']) ?? $this->gone($catalogue, 'record_resources', $id);
         app(UsageService::class)->record($request, $catalogue->institution, 'view', $unit);
         $view = $catalogue->view;
         $ancestors = array_values(array_filter($unit->ancestors(), fn ($a) => $view->readable($a)));
@@ -248,7 +249,7 @@ class DiscoverController extends Controller
     private function entity(Request $request, string $kind, string $id, array $with, array $more = []): View
     {
         $catalogue = $this->catalogue($request);
-        $entity = $catalogue->find(Links::CATALOGUE[$kind], $id, $with) ?? abort(404);
+        $entity = $catalogue->find(Links::CATALOGUE[$kind], $id, $with) ?? $this->gone($catalogue, ['agent' => 'agents', 'repository' => 'repositories', 'place' => 'places', 'activity' => 'activities'][$kind] ?? null, $id);
         app(UsageService::class)->record($request, $catalogue->institution, 'view', $entity);
 
         return view('discover.entity', ['entity' => $entity, 'kind' => $kind, 'standard' => $entity instanceof RecordResource ? $entity->standard() : self::STANDARDS[$kind], 'view' => $catalogue->view,
@@ -261,6 +262,13 @@ class DiscoverController extends Controller
         return app(RelationService::class)->of($entity)
             ->filter(fn (Relation $r) => in_array($r->standing(), ['accepted', 'disputed'], true) && $catalogue->view->readable($r->other))
             ->sortBy(fn (Relation $r) => [$r->phrase(), mb_strtolower((string) $catalogue->view->label($r->other))])->values();
+    }
+
+    /** A page the public saw, now deleted or merged: 410, saying why and what replaces it (ADR 0013); else 404. */
+    private function gone(PublicCatalogue $catalogue, ?string $table, string $id): never
+    {
+        $deprecation = $table === null ? null : app(DeprecationService::class)->known($catalogue->institution, $table, $id);
+        abort($deprecation ? response()->view('discover.withdrawn', ['deprecation' => $deprecation, 'institution' => $catalogue->institution], 410) : 404);
     }
 
     private function catalogue(Request $request): PublicCatalogue

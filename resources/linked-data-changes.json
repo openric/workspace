@@ -1,0 +1,32 @@
+[
+    {
+        "version": "0.0.86",
+        "date": "2026-10-30",
+        "impact": "additive",
+        "change": "Governance and Portability profiles: a deleted or merged entity that was published answers 410 Gone with owl:deprecated, dcterms:isReplacedBy and the reason, instead of 404; the dataset descriptor at /dataset and this change feed at /changelog; RiC-O import, which reads the export back. A unit named as the other end of a property (the unit above or inside, a creator's record) carries rico:title, not rico:name, as the OpenRiC shapes require of a rico:Record."
+    },
+    {
+        "version": "0.0.81",
+        "date": "2026-10-30",
+        "impact": "additive",
+        "change": "A record's provenance and custody history: each step a rico:Activity the record rico:isOrWasAffectedBy, with its owner taking part (rico:hasOrHadParticipant) and its own dates."
+    },
+    {
+        "version": "0.0.59",
+        "date": "2026-10-27",
+        "impact": "additive",
+        "change": "Rights in force and Local Contexts Labels: each a rico:Rule the record rico:isOrWasRegulatedBy, typed by its basis and associated with its RightsStatements.org statement and Creative Commons licence by their IRIs, with the rights holder (rico:hasOrHadIntellectualPropertyRightsHolder)."
+    },
+    {
+        "version": "0.0.24",
+        "date": "2026-10-20",
+        "impact": "additive",
+        "change": "Export-Only 0.9.0: OAI-PMH 2.0 with oai_dc and rico_ld, and the per-record export with the holder and creators it reaches, as JSON-LD, Turtle and RDF/XML of one triple set."
+    },
+    {
+        "version": "0.0.23",
+        "date": "2026-10-20",
+        "impact": "governance",
+        "change": "Core Discovery 0.6.0: records, agents and repositories in RiC-O 1.1 JSON-LD by the OpenRiC mapping, under persistent IRIs {base IRI}/{segment}/{UUID} minted once and never from a label."
+    }
+]

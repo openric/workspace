@@ -1,0 +1,60 @@
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# OpenRiC SHACL shapes — profile: export-only
+# ===========================================
+# Export-Only covers two outbound-bulk surfaces:
+#
+#   1. OAI-PMH v2.0 harvest at /oai (six verbs, XML bodies).
+#   2. Per-record JSON-LD / Turtle / RDF-XML dump at /records/{slug}/export.
+#
+# SHACL coverage is deliberately narrow. OAI-PMH responses are XML and
+# validate against the OAI-PMH XML Schema at
+#   http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd
+# — SHACL cannot validate XML, so OAI-PMH conformance in this profile is
+# structural (verb handling, error envelope) and is checked by the
+# conformance probe, not by shapes.
+#
+# What IS SHACL-able: the JSON-LD dump envelope. A dump wraps one or more
+# RiC-O entities in a single @graph. This file pins the envelope shape
+# (valid @context with rico prefix, @graph is a non-empty array of
+# objects) without constraining the entities themselves — those are
+# already validated by the other profile shape files as appropriate.
+#
+# Shape in this file:
+#   - DumpEnvelopeShape — @graph-wrapped RiC-O dump
+#
+# Usage:
+#   pyshacl -s always-on.shacl.ttl -s export-only.shacl.ttl \
+#           -d dump.jsonld -f human
+
+@prefix sh:   <http://www.w3.org/ns/shacl#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rico: <https://www.ica.org/standards/RiC/ontology#> .
+@prefix :     <https://openric.org/shapes#> .
+
+
+# ----------------------------------------------------------------------------
+# Dump envelope — GET /records/{slug}/export (default JSON-LD response)
+# ----------------------------------------------------------------------------
+# The envelope is the outermost JSON-LD object carrying an @graph array.
+# Individual entities inside @graph already validate under their own
+# profile shapes (PersonShape, RecordShape, PlaceShape, etc.) — the dump
+# envelope itself only needs to be well-formed.
+
+:DumpEnvelopeShape a sh:NodeShape ;
+    sh:name "RiC-O Dump Envelope" ;
+    sh:description "Outer wrapper of a content-negotiated export — must carry an @context with rico binding and a non-empty @graph." ;
+    sh:targetSubjectsOf rdf:first ;   # loose targeting; the envelope is typed by having @graph
+
+    # An envelope MUST have at least one entity in @graph. Empty dumps
+    # are a separate no-content response — they are served as HTTP 204,
+    # not as a @graph-wrapped empty array.
+    sh:or (
+        [ sh:property [
+            sh:path rdf:first ;
+            sh:minCount 1 ;
+            sh:message "@graph MUST contain at least one entity (empty dumps return HTTP 204, not an empty envelope)"
+        ] ]
+    ) .
