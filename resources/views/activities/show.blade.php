@@ -4,7 +4,7 @@
 @section('content')
     <p><a href="{{ route('activities.index') }}">{{ __('Activities') }}</a></p>
     <h1>{{ $activity->described('activity-name', [app()->getLocale(), 'en']) }}</h1>
-    <p>{{ __('Activity') }} @include('description._ric', ['term' => 'rico:Activity'])</p>
+    <p>{{ __('Activity') }} @include('description._ric', ['term' => 'rico:Activity']) · <a href="{{ route('activities.eac', $activity) }}">{{ __('Export as EAC-F') }}</a></p>
     @if(session('status'))<p role="status">{{ session('status') }}</p>@endif
     @if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif
     <p><strong>{{ __('Persistent IRI') }}:</strong> <code>{{ $activity->iri }}</code>

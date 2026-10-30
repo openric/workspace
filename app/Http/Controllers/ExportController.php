@@ -11,17 +11,22 @@
 namespace App\Http\Controllers;
 
 use App\Description\Bcp47;
+use App\Description\EacCpf;
 use App\Description\RecordService;
 use App\Exchange\DescriptionCsv;
 use App\Exchange\DublinCore;
+use App\Exchange\EacF;
 use App\Exchange\Ead;
 use App\Exchange\ExportView;
 use App\Exchange\Mods;
+use App\Models\Activity;
+use App\Models\Agent;
 use App\Models\RecordResource;
 use App\Models\Repository;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class ExportController extends Controller
 {
@@ -90,6 +95,35 @@ class ExportController extends Controller
             'Content-Type' => 'text/csv; charset=UTF-8',
             'Content-Disposition' => 'attachment; filename="archival-descriptions-'.now()->format('Y-m-d').'.csv"',
         ]);
+    }
+
+    /**
+     * Every authority record the account may read as EAC-CPF, or every activity as EAC-F, one file each in a ZIP that
+     * the import takes back (roadmap phase 11a).
+     */
+    public function contexts(Request $request, string $format): BinaryFileResponse
+    {
+        $user = $request->user();
+        abort_unless($user->mayAnywhere('read', 'authority'), 403);
+        [$class, $exporter, $usable] = $format === 'eac-cpf' ? [Agent::class, app(EacCpf::class), fn (Agent $a) => EacCpf::exportable($a)]
+            : [Activity::class, app(EacF::class), fn () => true];
+        $path = tempnam(sys_get_temp_dir(), 'eac');
+        $zip = new \ZipArchive;
+        $zip->open($path, \ZipArchive::OVERWRITE);
+        $class::where('institution_id', $user->institution_id)->whereNull('deleted_at')
+            ->when($class === Agent::class, fn ($q) => $q->whereNull('merged_into_id'))->orderBy('id')
+            ->chunk(200, function ($entities) use ($zip, $exporter, $usable, $user, $format) {
+                foreach ($entities as $entity) {
+                    if ($usable($entity) && $user->may('read', 'authority', $entity)) {
+                        $zip->addFromString($format.'-'.$entity->id.'.xml', $exporter->export($entity));
+                    }
+                }
+            });
+        $zip->numFiles > 0 || $zip->addFromString('README.txt', 'Nothing to export.');
+        $zip->close();
+
+        return response()->download($path, ($format === 'eac-cpf' ? 'authority-records' : 'activities').'-'.$format.'-'.now()->format('Y-m-d').'.zip',
+            ['Content-Type' => 'application/zip'])->deleteFileAfterSend();
     }
 
     /** Drafts only when asked for and the account may see the drafts of every unit the export holds. */

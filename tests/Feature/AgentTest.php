@@ -249,7 +249,8 @@ class AgentTest extends TestCase
         $doc->registerXPathNamespace('e', 'urn:isbn:1-931666-33-4');
         $this->assertSame('person', (string) $doc->xpath('//e:entityType')[0]);
         $this->assertSame('Engelbrecht, Johanna', (string) $doc->xpath('//e:nameEntry[@localType="authorised"]/e:part')[0]);
-        $this->assertSame('1871-01-01', (string) $doc->xpath('//e:existDates//e:fromDate/@standardDate')[0]);
+        // The EDTF as kept (phase 11a), so a year reads back as a year, not as 1 January.
+        $this->assertSame('1871', (string) $doc->xpath('//e:existDates//e:fromDate/@standardDate')[0]);
         $this->assertSame('family', (string) $doc->xpath('//e:cpfRelation/@cpfRelationType')[0]);
         $this->assertSame('creatorOf', (string) $doc->xpath('//e:resourceRelation/@resourceRelationType')[0]);
         $this->assertSame('Farmer and diarist.', (string) $doc->xpath('//e:biogHist/e:p')[0]);

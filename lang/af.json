@@ -2534,5 +2534,12 @@
     ":count late|:count late": ":count laat|:count laat",
     "Late": "Laat",
     "A task is at risk the warning days before it is due, and escalated the escalation days after it was made. Its queue's policy applies, else its workflow's, else the default; an urgent task has 40% of the days, a high one 60%, a low one 150%.": "'n Taak is in gevaar die waarskuwingsdae voor sy sperdatum, en word ge-eskaleer die eskalasiedae nadat dit gemaak is. Sy tou se beleid geld, anders sy werkvloei s'n, anders die verstek; 'n dringende taak kry 40% van die dae, 'n hoë een 60%, 'n lae een 150%.",
-    "the queue is one of the institution's": "die tou is een van die instelling s'n"
+    "the queue is one of the institution's": "die tou is een van die instelling s'n",
+    "Export all as EAC-CPF (ZIP)": "Voer almal uit as EAC-CPF (ZIP)",
+    "Export all as EAC-F (ZIP)": "Voer almal uit as EAC-F (ZIP)",
+    "Export as EAC-F": "Voer uit as EAC-F",
+    "it has no authorised name, and a new activity needs one": "dit het geen gemagtigde naam nie, en 'n nuwe aktiwiteit het een nodig",
+    "the file is not a ZIP the Workspace can open": "die lêer is nie 'n ZIP wat die Workspace kan oopmaak nie",
+    "the ZIP holds no XML file": "die ZIP bevat geen XML-lêer nie",
+    "you may not create activities": "u mag nie aktiwiteite skep nie"
 }

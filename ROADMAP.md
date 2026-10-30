@@ -252,6 +252,11 @@ The crosswalks of `ahg-metadata-export` are copied. With them, two OpenRiC profi
 
 These profiles came from ArchiveHeritageGroup/OpenRiC #1 to #3, now in the specification. `ahg-portable-export` (an offline catalogue for a USB stick or a reading room) is copied with light change. Done when each format round-trips the demonstration data, every rejected field is listed, and nothing is lost silently.
 
+On 30 October 2026 Dr Johan Pieterse split the phase: 11a the archival exchange formats, 11b the RiC-O import with the Portability and Governance profiles, 11c the offline catalogue.
+
+Progress:
+- **v0.0.85** (11a): EAC-CPF import and EAC-F export and import, each one file or a ZIP of files, with exports of every authority record or activity as a ZIP (ADR 0012). EAC-F is the EAS 2026-07 release's EAF 1.0.0, and the export is valid against its schema. A record the Workspace exported reads back with nothing written; each relation keeps its direction; every element the import does not read is listed. EAD3 export and import, with their round trip, were already in place.
+
 **12. Monitoring and operations (WS-017).**
 - Copy `ahg-observability` for health and metrics.
 - Copy `ahg-integrity` for fixity checks on a schedule, with reports of failures.

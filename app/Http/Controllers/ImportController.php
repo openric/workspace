@@ -69,13 +69,22 @@ class ImportController extends Controller
         $repository = $describes ? ($this->repositories($request)->firstWhere('id', $data['repository']) ?? abort(404)) : null;
         $parent = $describes && isset($data['parent']) ? $this->unit($request, $data['parent']) : null;
         $content = (string) file_get_contents($request->file('file')->getRealPath());
+        $sha256 = hash('sha256', $content);
+        // EAC-CPF and EAC-F come one record to a file: a ZIP of them is kept as the list of its XML files (phase 11a).
+        if (in_array($data['format'], ['eac-cpf', 'eac-f'], true) && str_starts_with($content, "PK\x03\x04")) {
+            try {
+                $content = ImportService::unzip($request->file('file')->getRealPath());
+            } catch (\InvalidArgumentException $e) {
+                return back()->withInput()->withErrors(['file' => ucfirst($e->getMessage()).'.']);
+            }
+        }
         if (! mb_check_encoding($content, 'UTF-8')) {
             return back()->withInput()->withErrors(['file' => 'The file is not UTF-8. Save it as UTF-8 (in a spreadsheet, "CSV UTF-8") and upload it again.']);
         }
         $name = $request->file('file')->getClientOriginalName();
         $import = Import::create([
             'institution_id' => $user->institution_id, 'user_id' => $user->id, 'format' => $data['format'],
-            'source' => trim((string) ($data['source'] ?? '')) ?: $name, 'file_name' => $name, 'file_sha256' => hash('sha256', $content),
+            'source' => trim((string) ($data['source'] ?? '')) ?: $name, 'file_name' => $name, 'file_sha256' => $sha256,
             'content' => $content, 'language' => $data['language'], 'repository_id' => $repository?->id, 'parent_id' => $parent?->id,
             'options' => ['agent_type' => $data['agent_type'] ?? null, 'create_terms' => (bool) ($data['create_terms'] ?? false),
                 'match_identifier' => (bool) ($data['match_identifier'] ?? false), 'default_level' => $describes ? ($data['default_level'] ?? null) : null],

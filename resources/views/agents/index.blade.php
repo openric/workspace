@@ -8,6 +8,7 @@
         @if(auth()->user()->may('create', 'authority'))<a href="{{ route('agents.create') }}">{{ __('New authority record') }}</a> · <a href="{{ route('imports.create') }}">{{ __('Import') }}</a> · @endif
         <a href="{{ route('agents.dashboard') }}">{{ __('Dashboard and work queue') }}</a>
         @if(auth()->user()->may('update', 'authority')) · <a href="{{ route('agents.duplicates') }}">{{ __('Possible duplicates') }}</a>@endif
+        · <a href="{{ route('exports.contexts', 'eac-cpf') }}">{{ __('Export all as EAC-CPF (ZIP)') }}</a>
     </p>
     <form method="get" action="{{ route('agents.index') }}" style="display: flex; gap: .75rem; flex-wrap: wrap; align-items: end">
         <div><label for="q" style="margin-top: 0">{{ __('Name or identifier') }}</label><input id="q" name="q" value="{{ $query }}" maxlength="200"></div>

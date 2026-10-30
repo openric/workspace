@@ -1,6 +1,6 @@
 <?php
 
-// OpenRiC Workspace - one authority record, repository, subject or place as an import file gives it, before it is matched or written.
+// OpenRiC Workspace - one authority record, repository, activity, subject or place as an import file gives it, before it is matched or written.
 // Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
@@ -43,6 +43,26 @@ final class EntityDraft
 
     /** The element that holds the authorised name. */
     public string $nameElement = '';
+
+    /** The entity's persistent IRI, when the file gives it (an EAC-CPF or EAC-F otherRecordId): matched before anything else. */
+    public ?string $iri = null;
+
+    /** @var list<array{type: string, value: string}> other identifiers: identifier-type notation and value */
+    public array $identifiers = [];
+
+    /** @var list<array{property: string, normalized: ?string, expressed: ?string}> dates (date-property notation) */
+    public array $dates = [];
+
+    /**
+     * Relations to entities the file names by IRI: the relation type's IRI or notation, the other end's IRI and label,
+     * which end this entity is (source or target; null when the file does not say), dates (EDTF) and a note.
+     *
+     * @var list<array{type: string, iri: ?string, label: string, end: ?string, from: ?string, to: ?string, description: ?string}>
+     */
+    public array $relations = [];
+
+    /** The activity type's IRI, for an activity. */
+    public ?string $typeIri = null;
 
     public function value(string $language, string $notation, ?string $text): void
     {

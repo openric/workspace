@@ -118,10 +118,9 @@ class EacCpf
             $x->writeAttribute('xml:lang', $name->language);
             $x->writeElement('part', $name->value);
             $this->useDates($x, $name->usedDate('used-from'), $name->usedDate('used-to'));
-            if ($name->nameType->notation === 'authorised') {
-                $x->writeElement('authorizedForm', $text('agent-rules-conventions') ?? 'ISAAR(CPF)');
-            } else {
-                $x->writeElement('alternativeForm', $text('agent-rules-conventions') ?? 'ISAAR(CPF)');
+            // The rules the form follows, when the record gives them: its localType already says which form it is.
+            if ($rules = $text('agent-rules-conventions')) {
+                $x->writeElement($name->nameType->notation === 'authorised' ? 'authorizedForm' : 'alternativeForm', $rules);
             }
             $x->endElement();
         }
@@ -228,11 +227,14 @@ class EacCpf
         if ($date === null) {
             return;
         }
+        // The EDTF itself (a range's start or end), so the date reads back as it is kept; else the day it means.
+        $value = (string) $date->normalized_value;
+        $standard = $value === '' ? $date->{$bound}?->format('Y-m-d') : (str_contains($value, '/') ? explode('/', $value, 2)[$bound === 'earliest' ? 0 : 1] : $value);
         $x->startElement($element);
-        if ($date->{$bound}) {
-            $x->writeAttribute('standardDate', $date->{$bound}->format('Y-m-d'));
+        if ($standard !== null && $standard !== '' && $standard !== '..') {
+            $x->writeAttribute('standardDate', $standard);
         }
-        $x->text($date->expressed ?? $date->normalized_value ?? '');
+        $x->text($date->expressed ?? $standard ?? '');
         $x->endElement();
     }
 
@@ -268,6 +270,8 @@ class EacCpf
         $x->writeAttribute('xlink:type', 'simple');
         $x->writeAttribute('xlink:href', $relation->other->iri);
         $x->writeAttribute('xlink:arcrole', $relation->relationType->iri);
+        // Which end of the relation this authority record is, so it reads back the right way round (phase 11a).
+        $x->writeAttribute('xlink:role', $relation->fromSource ? 'source' : 'target');
         $x->writeElement('relationEntry', EntityKinds::label($relation->other));
         $from = $relation->datedAs('beginning');
         $to = $relation->datedAs('end');

@@ -5,7 +5,8 @@
     <h1>{{ __('Activities') }} @include('description._ric', ['term' => 'rico:Activity'])</h1>
     @if(session('status'))<p role="status">{{ session('status') }}</p>@endif
     <p>{{ __('What people and organisations did: the creation of a series, a marriage, an appointment, a transfer. Each is linked to who performed it or took part, and what it resulted in.') }}</p>
-    @if(auth()->user()->may('create', 'authority'))<p><a href="{{ route('activities.create') }}">{{ __('New activity') }}</a></p>@endif
+    <p>@if(auth()->user()->may('create', 'authority'))<a href="{{ route('activities.create') }}">{{ __('New activity') }}</a> · <a href="{{ route('imports.create') }}">{{ __('Import') }}</a> · @endif
+        <a href="{{ route('exports.contexts', 'eac-f') }}">{{ __('Export all as EAC-F (ZIP)') }}</a></p>
     <form method="get" action="{{ route('activities.index') }}" style="display: flex; gap: .75rem; flex-wrap: wrap; align-items: end">
         <div><label for="q" style="margin-top: 0">{{ __('Name or identifier') }}</label><input id="q" name="q" value="{{ $query }}" maxlength="200"></div>
         <div><label for="type" style="margin-top: 0">{{ __('Activity type') }}</label>

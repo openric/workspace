@@ -22,6 +22,7 @@
 namespace App\Exchange\Import;
 
 use App\Audit\AuditLog;
+use App\Description\ActivityService;
 use App\Description\AgentService;
 use App\Description\ContactPointService;
 use App\Description\DateService;
@@ -35,11 +36,13 @@ use App\Description\RecordService;
 use App\Description\RepositoryService;
 use App\Description\StorageService;
 use App\Exchange\Ead;
+use App\Models\Activity;
 use App\Models\Agent;
 use App\Models\Concept;
 use App\Models\ContactPoint;
 use App\Models\Container;
 use App\Models\DigitalFile;
+use App\Models\Identifier;
 use App\Models\Import;
 use App\Models\Institution;
 use App\Models\Name;
@@ -47,6 +50,7 @@ use App\Models\Place;
 use App\Models\RecordResource;
 use App\Models\Relation;
 use App\Models\Repository;
+use App\Models\RicDate;
 use App\Models\User;
 use App\Relations\EntityKinds;
 use App\Relations\RelationService;
@@ -64,13 +68,15 @@ use RuntimeException;
 class ImportService
 {
     public const FORMATS = ['csv' => 'Archival descriptions: CSV (AtoM ISAD(G) columns)', 'ead' => 'Archival descriptions: EAD 2002 or EAD3',
-        'authority-csv' => 'Authority records: CSV (AtoM ISAAR(CPF) columns)', 'repository-csv' => 'Repositories: CSV (AtoM ISDIAH columns)'];
+        'authority-csv' => 'Authority records: CSV (AtoM ISAAR(CPF) columns)', 'repository-csv' => 'Repositories: CSV (AtoM ISDIAH columns)',
+        'eac-cpf' => 'Authority records: EAC-CPF (one file, or a ZIP of files)', 'eac-f' => 'Activities: EAC-F (one file, or a ZIP of files)'];
 
     /** The table each format's entries become. */
-    public const TABLES = ['csv' => 'record_resources', 'ead' => 'record_resources', 'authority-csv' => 'agents', 'repository-csv' => 'repositories'];
+    public const TABLES = ['csv' => 'record_resources', 'ead' => 'record_resources', 'authority-csv' => 'agents', 'repository-csv' => 'repositories',
+        'eac-cpf' => 'agents', 'eac-f' => 'activities'];
 
     /** The permission kind that governs each table's entries. */
-    private const PERMISSIONS = ['record_resources' => 'description', 'agents' => 'authority', 'repositories' => 'repository'];
+    private const PERMISSIONS = ['record_resources' => 'description', 'agents' => 'authority', 'repositories' => 'repository', 'activities' => 'authority'];
 
     private const LEVELS = Vocab::BASE.'level-of-description/';
 
@@ -104,6 +110,27 @@ class ImportService
         private RepositoryService $repositories, private ContactPointService $contacts, private InstantiationService $instantiations,
         private DescriptionService $descriptions) {}
 
+    /**
+     * The XML files of a ZIP, as the JSON list of {name, content} the EAC readers take. Files that are not XML are left
+     * out; a ZIP with none, or that is not one, is refused.
+     */
+    public static function unzip(string $path): string
+    {
+        $zip = new \ZipArchive;
+        $zip->open($path, \ZipArchive::RDONLY) === true || throw new InvalidArgumentException(__('the file is not a ZIP the Workspace can open'));
+        $files = [];
+        for ($i = 0; $i < $zip->numFiles; $i++) {
+            $name = (string) $zip->getNameIndex($i);
+            if (str_ends_with(strtolower($name), '.xml') && ! str_starts_with(basename($name), '.')) {
+                $files[] = ['name' => $name, 'content' => (string) $zip->getFromIndex($i)];
+            }
+        }
+        $zip->close();
+        $files !== [] || throw new InvalidArgumentException(__('the ZIP holds no XML file'));
+
+        return json_encode($files, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    }
+
     /** The permission kind an import of this format needs: description, authority or repository. */
     public static function permission(string $format): string
     {
@@ -124,6 +151,8 @@ class ImportService
                 'ead' => app(EadReader::class)->read($import->content, $import->language, $this->report),
                 'authority-csv' => app(AtomEntityReader::class)->read('authority', $import->content, $import->language, $this->report),
                 'repository-csv' => app(AtomEntityReader::class)->read('repository', $import->content, $import->language, $this->report),
+                'eac-cpf' => app(EacCpfReader::class)->read($import->content, $import->language, $this->report),
+                'eac-f' => app(EacFReader::class)->read($import->content, $import->language, $this->report),
                 default => app(CsvReader::class)->read($import->content, $import->language, $this->report),
             };
         } catch (InvalidArgumentException $e) {
@@ -242,7 +271,8 @@ class ImportService
         try {
             $unit = DB::transaction(fn () => $this->withoutInnerSavepoints(fn () => match (true) {
                 $draft instanceof UnitDraft => $this->write($draft),
-                $this->import->format === 'authority-csv' => $this->authority($draft),
+                in_array($this->import->format, ['authority-csv', 'eac-cpf'], true) => $this->authority($draft),
+                $this->import->format === 'eac-f' => $this->activity($draft),
                 default => $this->repository($draft),
             }));
         } catch (InvalidArgumentException|QueryException|RuntimeException $e) {
@@ -346,6 +376,9 @@ class ImportService
     /** Tie the entry's key in this source to the entity it became, so importing again updates it. */
     private function key(string $key, Model $entity): void
     {
+        if ($key === '') {
+            return;
+        }
         DB::table('import_keys')->upsert([['id' => (string) Str::uuid7(), 'institution_id' => $this->institution->id, 'source' => $this->import->source,
             'subject_table' => $entity->getTable(), 'key' => $key, 'subject_id' => $entity->getKey(), 'import_id' => $this->import->id,
             'created_at' => now(), 'updated_at' => now()]],
@@ -439,7 +472,7 @@ class ImportService
     private function authority(EntityDraft $draft): Agent
     {
         $type = $this->agentType($draft);
-        $agent = $this->keyed(Agent::class, $draft->key) ?? $this->byName(Agent::class, 'agents', $draft, $type);
+        $agent = $this->byIri(Agent::class, $draft->iri) ?? $this->keyed(Agent::class, $draft->key) ?? $this->byName(Agent::class, 'agents', $draft, $type);
         $language = $draft->language($this->import->language);
         if ($agent === null) {
             if (! $this->user->may('create', 'authority')) {
@@ -461,6 +494,10 @@ class ImportService
                 $this->identifiers->setLocal($agent, $draft->identifier, $this->user);
             }
         }
+        // An EAC recordId that is the record's own key is the Workspace's export of one without a description identifier.
+        if ($draft->descriptionIdentifier === $agent->id) {
+            $draft->descriptionIdentifier = null;
+        }
         $this->describeEntity($agent, Elements::ISAAR_CPF, $draft, 'agent-authorised-name');
         [$status, $detail] = [$this->controlConcept($draft, $draft->status, Vocab::DESCRIPTION_STATUSES, 'status'), $this->controlConcept($draft, $draft->detail, Vocab::DESCRIPTION_DETAILS, 'levelOfDetail')];
         if ($draft->descriptionIdentifier !== null || $status !== null || $detail !== null) {
@@ -480,9 +517,115 @@ class ImportService
                 $this->relate($draft, $place, 'place', $agent);
             }
         }
+        $this->extras($draft, $agent, $language);
         $this->key($draft->key, $agent);
 
         return $agent;
+    }
+
+    /**
+     * An activity (ISDF, from EAC-F): matched by its IRI or its key in this source, else made; its names, texts,
+     * type, identifiers, dates and relations (roadmap phase 11a).
+     */
+    private function activity(EntityDraft $draft): Activity
+    {
+        $activity = $this->byIri(Activity::class, $draft->iri) ?? $this->keyed(Activity::class, $draft->key) ?? $this->byName(Activity::class, 'activities', $draft);
+        $language = $draft->language($this->import->language);
+        $type = $draft->typeIri === null ? null : Concept::where('iri', $draft->typeIri)->value('id');
+        if ($draft->typeIri !== null && $type === null) {
+            $this->report->issue($draft->location, 'classification', $draft->typeIri, 'not an activity type the Workspace knows; left out', 'left-out');
+        }
+        if ($activity === null) {
+            if (! $this->user->may('create', 'authority')) {
+                throw new InvalidArgumentException(__('you may not create activities'));
+            }
+            $name = $draft->title() ?? throw new InvalidArgumentException(__('it has no authorised name, and a new activity needs one'));
+            $activity = app(ActivityService::class)->create($this->institution, $name, $language, $type, $this->user);
+            $activity->wasRecentlyCreated = true;
+        } else {
+            if (! $this->user->may('update', 'authority', $activity)) {
+                throw new InvalidArgumentException('it matches '.$activity->iri.', which you may not update');
+            }
+            $activity->wasRecentlyCreated = false;
+            if ($type !== null && $type !== $activity->activity_type_id) {
+                app(ActivityService::class)->updateType($activity, $type, $this->user);
+            }
+        }
+        $this->describeEntity($activity, Elements::ACTIVITY, $draft, 'activity-name');
+        if ($draft->descriptionIdentifier !== null && $draft->descriptionIdentifier !== $activity->id && $draft->descriptionIdentifier !== $activity->description_identifier) {
+            app(ActivityService::class)->updateControl($activity, $draft->descriptionIdentifier, $activity->descriptionStatus?->iri, $activity->descriptionDetail?->iri, $this->user);
+        }
+        if ($draft->identifier !== null && $draft->identifier !== $activity->identifier) {
+            $this->identifiers->setLocal($activity, $draft->identifier, $this->user);
+        }
+        $this->extras($draft, $activity, $language);
+        $this->key($draft->key, $activity);
+
+        return $activity;
+    }
+
+    /**
+     * What an EAC entry gives besides its names and texts: other identifiers, dates and relations to entities named by
+     * their IRIs, each once; what the Workspace cannot take is listed in the report.
+     */
+    private function extras(EntityDraft $draft, Model $entity, string $language): void
+    {
+        foreach ($draft->identifiers as $identifier) {
+            if (! Identifier::where(['subject_table' => $entity->getTable(), 'subject_id' => $entity->getKey(), 'value' => $identifier['value']])->exists()) {
+                try {
+                    $this->identifiers->add($entity, $identifier, $this->user);
+                } catch (InvalidArgumentException $e) {
+                    $this->report->issue($draft->location, 'entityId', $identifier['value'], $e->getMessage().'; left out', 'left-out');
+                }
+            }
+        }
+        foreach ($draft->dates as $date) {
+            $have = RicDate::where(['subject_table' => $entity->getTable(), 'subject_id' => $entity->getKey()])
+                ->whereHas('property', fn ($q) => $q->where('notation', $date['property']))->where('normalized_value', $date['normalized'])->exists();
+            if (! $have) {
+                try {
+                    $this->dates->add($entity, ['property' => $date['property'], 'normalized' => $date['normalized'], 'expressed' => $date['expressed'],
+                        'language' => $date['expressed'] === null ? null : $language], $this->user);
+                } catch (InvalidArgumentException $e) {
+                    $this->report->issue($draft->location, 'existDates', $date['normalized'] ?? $date['expressed'], $e->getMessage().'; left out', 'left-out');
+                }
+            }
+        }
+        foreach ($draft->relations as $relation) {
+            $other = $relation['iri'] === null ? null : $this->byIriAnywhere($relation['iri']);
+            $type = str_starts_with($relation['type'], Vocab::BASE.'relation-type/') ? substr($relation['type'], strlen(Vocab::BASE.'relation-type/')) : $relation['type'];
+            if ($other === null) {
+                $this->report->issue($draft->location, 'relation', $relation['label'] ?: $relation['iri'], 'nothing here has the IRI '.($relation['iri'] ?? '(none)').'; not linked', 'left-out');
+
+                continue;
+            }
+            if (! RelationTypes::get($type, $this->institution->id)) {
+                $this->report->issue($draft->location, 'relation', $relation['label'], '"'.$relation['type'].'" is not a relation type the Workspace knows; not linked', 'left-out');
+
+                continue;
+            }
+            $fields = array_filter(['from' => $relation['from'], 'to' => $relation['to'], 'description' => $relation['description'],
+                'language' => $relation['description'] ? $language : null]);
+            $relation['end'] === 'target' ? $this->relate($draft, $other, $type, $entity, $fields) : $this->relate($draft, $entity, $type, $other, $fields);
+        }
+    }
+
+    /** The entity of this class and institution with the persistent IRI, when there is one. */
+    private function byIri(string $class, ?string $iri): ?Model
+    {
+        return $iri === null ? null : $class::where(['institution_id' => $this->institution->id, 'iri' => $iri])->whereNull('deleted_at')->first();
+    }
+
+    /** Any entity of the institution a relation may reach, with the persistent IRI. */
+    private function byIriAnywhere(string $iri): ?Model
+    {
+        foreach ([Agent::class, Repository::class, RecordResource::class, Activity::class, Place::class] as $class) {
+            if ($found = $this->byIri($class, $iri)) {
+                return $found;
+            }
+        }
+
+        return Concept::where('iri', $iri)->first();
     }
 
     /** A repository (ISDIAH): matched by its key in this source, or, when asked, by its one authorised name. */

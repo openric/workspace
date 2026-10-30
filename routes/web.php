@@ -237,6 +237,7 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::post('/', [ActivityController::class, 'store'])->name('store');
         Route::get('/{activity}', [ActivityController::class, 'show'])->name('show');
         Route::get('/{activity}/edit', [ActivityController::class, 'edit'])->name('edit');
+        Route::get('/{activity}/eac-f', [ActivityController::class, 'eac'])->name('eac');
         Route::post('/{activity}', [ActivityController::class, 'update'])->name('update');
     });
 
@@ -504,6 +505,9 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::post('/community-labels', [CommunityLabelController::class, 'store'])->name('community-labels.store');
         Route::post('/community-labels/{label}/remove', [CommunityLabelController::class, 'destroy'])->name('community-labels.destroy');
     });
+
+    // Every authority record as EAC-CPF, or every activity as EAC-F, in a ZIP (roadmap phase 11a); the controller checks read.
+    Route::get('/exports/{format}.zip', [ExportController::class, 'contexts'])->where('format', 'eac-cpf|eac-f')->name('exports.contexts');
 
     // The workflow (roadmap phase 10a; Heratio's ahg-workflow, PSIS's ahgWorkflowPlugin): every signed-in account has
     // its tasks; working one needs update on its record; workflows and steps need Manage workflows (the controller checks).

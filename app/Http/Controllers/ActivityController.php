@@ -14,6 +14,7 @@ use App\Description\ActivityService;
 use App\Description\Bcp47;
 use App\Description\DateService;
 use App\Description\Elements;
+use App\Exchange\EacF;
 use App\Models\Activity;
 use App\Models\Concept;
 use App\Models\Name;
@@ -22,6 +23,7 @@ use App\Support\Vocab;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
@@ -128,6 +130,18 @@ class ActivityController extends Controller
     }
 
     /** Another institution's activity, or a deleted one, does not exist here (404); without the permission, 403. */
+    /** The activity as EAC-F (roadmap phase 11a). */
+    public function eac(Request $request, Activity $activity): Response
+    {
+        $this->own($request, $activity);
+        $name = preg_replace('/[^A-Za-z0-9-]+/', '-', (string) ($activity->description_identifier ?? $activity->id));
+
+        return response(app(EacF::class)->export($activity), 200, [
+            'Content-Type' => 'application/xml; charset=utf-8',
+            'Content-Disposition' => 'attachment; filename="eac-f-'.$name.'.xml"',
+        ]);
+    }
+
     private function own(Request $request, Activity $activity, string $action = 'read'): void
     {
         abort_unless($activity->institution_id === $request->user()->institution_id && $activity->deleted_at === null, 404);
