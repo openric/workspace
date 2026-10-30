@@ -1,0 +1,93 @@
+# OpenRiC Workspace - OpenRiC Workspace Provenance Acquisition Types.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# How the institution acquired the material (Heratio's provenance_overview.acquisition_type).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/provenance-acquisition-type/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Provenance Acquisition Types"@en ;
+    dcterms:description "How the institution acquired the material (Heratio's provenance_overview.acquisition_type)."@en ;
+    dcterms:issued "2026-10-29"^^xsd:date ;
+    skos:hasTopConcept v:purchase, v:gift, v:bequest, v:exchange, v:transfer, v:field-collection, v:excavation, v:commission, v:loan, v:found, v:unknown .
+
+v:purchase a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Purchase"@en, "Aankoop"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the record's provenance overview, as Heratio keeps it."@en ;
+    skos:definition "Bought."@en .
+
+v:gift a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Gift / Donation"@en, "Geskenk / Skenking"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the record's provenance overview, as Heratio keeps it."@en ;
+    skos:definition "Given."@en .
+
+v:bequest a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Bequest"@en, "Bemaking"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the record's provenance overview, as Heratio keeps it."@en ;
+    skos:definition "Left by will."@en .
+
+v:exchange a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Exchange"@en, "Ruil"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the record's provenance overview, as Heratio keeps it."@en ;
+    skos:definition "Exchanged."@en .
+
+v:transfer a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Transfer"@en, "Oordrag"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the record's provenance overview, as Heratio keeps it."@en ;
+    skos:definition "Transferred."@en .
+
+v:field-collection a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Field collection"@en, "Veldversameling"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the record's provenance overview, as Heratio keeps it."@en ;
+    skos:definition "Collected in the field."@en .
+
+v:excavation a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Excavation"@en, "Opgrawing"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the record's provenance overview, as Heratio keeps it."@en ;
+    skos:definition "Excavated."@en .
+
+v:commission a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Commission"@en, "Opdrag"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the record's provenance overview, as Heratio keeps it."@en ;
+    skos:definition "Commissioned."@en .
+
+v:loan a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Loan"@en, "Lening"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the record's provenance overview, as Heratio keeps it."@en ;
+    skos:definition "Lent."@en .
+
+v:found a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Found in collection"@en, "In versameling gevind"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the record's provenance overview, as Heratio keeps it."@en ;
+    skos:definition "Found in the collection."@en .
+
+v:unknown a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Unknown"@en, "Onbekend"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the record's provenance overview, as Heratio keeps it."@en ;
+    skos:definition "Not known."@en .

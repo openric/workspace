@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 #[Fillable(['institution_id', 'iri', 'level_id', 'repository_id', 'parent_id', 'position', 'description_identifier', 'description_status_id', 'description_detail_id', 'source_standard', 'display_as_compound', 'display_standard_id'])]
 class RecordResource extends Model
@@ -89,6 +90,23 @@ class RecordResource extends Model
     }
 
     /** rico:hasOrHadInstantiation: its carriers, such as digital files and paper copies, in order. */
+    /** Its provenance overview (roadmap phase 9e). */
+    public function provenanceOverview(): HasOne
+    {
+        return $this->hasOne(ProvenanceOverview::class);
+    }
+
+    /** Its provenance chain, the earliest step first; steps marked deleted are left out. */
+    public function provenanceEntries(): HasMany
+    {
+        return $this->hasMany(ProvenanceEntry::class)->whereNull('deleted_at')->orderBy('position');
+    }
+
+    public function provenanceDocuments(): HasMany
+    {
+        return $this->hasMany(ProvenanceDocument::class)->orderByDesc('created_at');
+    }
+
     public function instantiations(): HasMany
     {
         return $this->hasMany(Instantiation::class)->whereNull('deleted_at')->orderBy('position')->orderBy('created_at');

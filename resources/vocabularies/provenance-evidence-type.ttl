@@ -1,0 +1,51 @@
+# OpenRiC Workspace - OpenRiC Workspace Provenance Evidence Types.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# The kind of evidence for a provenance step (Heratio's provenance_entry.evidence_type).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/provenance-evidence-type/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Provenance Evidence Types"@en ;
+    dcterms:description "The kind of evidence for a provenance step (Heratio's provenance_entry.evidence_type)."@en ;
+    dcterms:issued "2026-10-29"^^xsd:date ;
+    skos:hasTopConcept v:documentary, v:physical, v:oral, v:circumstantial, v:none .
+
+v:documentary a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Documentary"@en, "Dokumentêr"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the provenance step, as Heratio keeps it."@en ;
+    skos:definition "Documents."@en .
+
+v:physical a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Physical"@en, "Fisies"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the provenance step, as Heratio keeps it."@en ;
+    skos:definition "Marks, labels or the object itself."@en .
+
+v:oral a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Oral"@en, "Mondeling"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the provenance step, as Heratio keeps it."@en ;
+    skos:definition "Oral testimony."@en .
+
+v:circumstantial a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Circumstantial"@en, "Omstandigheid"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the provenance step, as Heratio keeps it."@en ;
+    skos:definition "Circumstances."@en .
+
+v:none a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "None"@en, "Geen"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the provenance step, as Heratio keeps it."@en ;
+    skos:definition "No evidence."@en .

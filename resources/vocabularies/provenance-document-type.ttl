@@ -1,0 +1,170 @@
+# OpenRiC Workspace - OpenRiC Workspace Provenance Document Types.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Kinds of document that support a provenance (Heratio's provenance_document.document_type).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/provenance-document-type/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Provenance Document Types"@en ;
+    dcterms:description "Kinds of document that support a provenance (Heratio's provenance_document.document_type)."@en ;
+    dcterms:issued "2026-10-29"^^xsd:date ;
+    skos:hasTopConcept v:deed-of-gift, v:bill-of-sale, v:invoice, v:receipt, v:auction-catalog, v:exhibition-catalog, v:inventory, v:insurance-record, v:photograph, v:correspondence, v:certificate, v:customs-document, v:export-licence, v:import-permit, v:appraisal, v:condition-report, v:newspaper-clipping, v:publication, v:oral-history, v:affidavit, v:legal-document, v:other .
+
+v:deed-of-gift a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Deed of Gift"@en, "Skenkingsakte"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the record's provenance overview, as Heratio keeps it."@en ;
+    skos:definition "A deed of gift."@en .
+
+v:bill-of-sale a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Bill of Sale"@en, "Koopbrief"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the record's provenance overview, as Heratio keeps it."@en ;
+    skos:definition "A bill of sale."@en .
+
+v:invoice a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Invoice"@en, "Faktuur"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the record's provenance overview, as Heratio keeps it."@en ;
+    skos:definition "An invoice."@en .
+
+v:receipt a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Receipt"@en, "Kwitansie"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the record's provenance overview, as Heratio keeps it."@en ;
+    skos:definition "A receipt."@en .
+
+v:auction-catalog a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Auction Catalogue"@en, "Veilingkatalogus"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the record's provenance overview, as Heratio keeps it."@en ;
+    skos:definition "An auction catalogue."@en .
+
+v:exhibition-catalog a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Exhibition Catalogue"@en, "Uitstallingkatalogus"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the record's provenance overview, as Heratio keeps it."@en ;
+    skos:definition "An exhibition catalogue."@en .
+
+v:inventory a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Inventory"@en, "Inventaris"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the record's provenance overview, as Heratio keeps it."@en ;
+    skos:definition "An inventory."@en .
+
+v:insurance-record a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Insurance Record"@en, "Versekeringsrekord"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the record's provenance overview, as Heratio keeps it."@en ;
+    skos:definition "An insurance record."@en .
+
+v:photograph a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Photograph"@en, "Foto"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the record's provenance overview, as Heratio keeps it."@en ;
+    skos:definition "A photograph."@en .
+
+v:correspondence a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Correspondence"@en, "Korrespondensie"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the record's provenance overview, as Heratio keeps it."@en ;
+    skos:definition "Letters."@en .
+
+v:certificate a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Certificate"@en, "Sertifikaat"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the record's provenance overview, as Heratio keeps it."@en ;
+    skos:definition "A certificate."@en .
+
+v:customs-document a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Customs Document"@en, "Doeanedokument"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the record's provenance overview, as Heratio keeps it."@en ;
+    skos:definition "A customs document."@en .
+
+v:export-licence a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Export Licence"@en, "Uitvoerlisensie"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the record's provenance overview, as Heratio keeps it."@en ;
+    skos:definition "An export licence."@en .
+
+v:import-permit a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Import Permit"@en, "Invoerpermit"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the record's provenance overview, as Heratio keeps it."@en ;
+    skos:definition "An import permit."@en .
+
+v:appraisal a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Appraisal"@en, "Waardebepaling"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the record's provenance overview, as Heratio keeps it."@en ;
+    skos:definition "An appraisal."@en .
+
+v:condition-report a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Condition Report"@en, "Toestandsverslag"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the record's provenance overview, as Heratio keeps it."@en ;
+    skos:definition "A condition report."@en .
+
+v:newspaper-clipping a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Newspaper Clipping"@en, "Koerantuitknipsel"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the record's provenance overview, as Heratio keeps it."@en ;
+    skos:definition "A newspaper clipping."@en .
+
+v:publication a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Publication"@en, "Publikasie"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the record's provenance overview, as Heratio keeps it."@en ;
+    skos:definition "A publication."@en .
+
+v:oral-history a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Oral History"@en, "Mondelinge geskiedenis"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the record's provenance overview, as Heratio keeps it."@en ;
+    skos:definition "An oral history."@en .
+
+v:affidavit a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Affidavit"@en, "Beëdigde verklaring"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the record's provenance overview, as Heratio keeps it."@en ;
+    skos:definition "An affidavit."@en .
+
+v:legal-document a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Legal Document"@en, "Regsdokument"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the record's provenance overview, as Heratio keeps it."@en ;
+    skos:definition "A legal document."@en .
+
+v:other a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Other"@en, "Ander"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the record's provenance overview, as Heratio keeps it."@en ;
+    skos:definition "Another kind of document."@en .

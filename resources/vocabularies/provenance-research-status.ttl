@@ -1,0 +1,44 @@
+# OpenRiC Workspace - OpenRiC Workspace Provenance Research Statuses.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# How far provenance research has gone (Heratio's provenance_overview.research_status).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/provenance-research-status/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Provenance Research Statuses"@en ;
+    dcterms:description "How far provenance research has gone (Heratio's provenance_overview.research_status)."@en ;
+    dcterms:issued "2026-10-29"^^xsd:date ;
+    skos:hasTopConcept v:not-started, v:in-progress, v:complete, v:blocked .
+
+v:not-started a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Not started"@en, "Nie begin nie"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the record's provenance overview, as Heratio keeps it."@en ;
+    skos:definition "Not begun."@en .
+
+v:in-progress a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "In progress"@en, "Aan die gang"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the record's provenance overview, as Heratio keeps it."@en ;
+    skos:definition "Under way."@en .
+
+v:complete a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Complete"@en, "Voltooi"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the record's provenance overview, as Heratio keeps it."@en ;
+    skos:definition "Done."@en .
+
+v:blocked a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Blocked"@en, "Gestuit"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the record's provenance overview, as Heratio keeps it."@en ;
+    skos:definition "Cannot go on."@en .

@@ -1,0 +1,44 @@
+# OpenRiC Workspace - OpenRiC Workspace Provenance Custody Types.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# The kind of custody the institution has (Heratio's provenance_overview.custody_type).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/provenance-custody-type/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Provenance Custody Types"@en ;
+    dcterms:description "The kind of custody the institution has (Heratio's provenance_overview.custody_type)."@en ;
+    dcterms:issued "2026-10-29"^^xsd:date ;
+    skos:hasTopConcept v:permanent, v:temporary, v:loan, v:deposit .
+
+v:permanent a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Permanent"@en, "Permanent"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the record's provenance overview, as Heratio keeps it."@en ;
+    skos:definition "Permanent custody."@en .
+
+v:temporary a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Temporary"@en, "Tydelik"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the record's provenance overview, as Heratio keeps it."@en ;
+    skos:definition "Temporary custody."@en .
+
+v:loan a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Loan"@en, "Lening"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the record's provenance overview, as Heratio keeps it."@en ;
+    skos:definition "Custody on loan."@en .
+
+v:deposit a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Deposit"@en, "Bewaring"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the record's provenance overview, as Heratio keeps it."@en ;
+    skos:definition "Custody on deposit."@en .

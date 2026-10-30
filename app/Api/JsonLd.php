@@ -17,6 +17,7 @@ namespace App\Api;
 
 use App\Exchange\ExportView;
 use App\Models\Agent;
+use App\Models\ProvenanceEntry;
 use App\Models\RecordResource;
 use App\Models\Repository;
 use App\Models\RicDate;
@@ -94,6 +95,9 @@ class JsonLd
         $holders = $public->rights($unit)->pluck('holder')->filter()->unique('id')->map(fn ($agent) => $this->stub($agent))->values()->all();
         if ($holders !== []) {
             $out['rico:hasOrHadIntellectualPropertyRightsHolder'] = $holders;
+        }
+        if (($custody = $this->custody($unit)) !== []) {
+            $out['rico:isOrWasAffectedBy'] = $custody;
         }
         $creators = $this->view->creators($unit)->map(fn ($r) => $this->stub($r->other))->values()->all();
         if ($creators !== []) {
@@ -202,6 +206,33 @@ class JsonLd
         ], fn ($v) => $v !== null))->values()->all();
 
         return [...$rules, ...$public->labels($subject)->map(fn ($label) => $concept($label->label))->values()->all()];
+    }
+
+    /**
+     * The unit's provenance chain (roadmap phase 9e), unless its overview keeps it from the public: each step a
+     * rico:Activity of its transfer type, with its owner taking part (the authority record when the reader may see it,
+     * unnamed when it is not published, the name alone when there is none) and its start and end each a Date of its own,
+     * as RiC-AG treats dates.
+     *
+     * @return list<array<string, mixed>>
+     */
+    private function custody(RecordResource $unit): array
+    {
+        if ($unit->provenanceOverview && ! $unit->provenanceOverview->is_public) {
+            return [];
+        }
+        $date = fn (ProvenanceEntry $step, string $end) => $step->{$end.'_date'} === null ? null : array_filter([
+            '@id' => $step->iri.'#'.$end, '@type' => 'rico:Date', 'rico:normalizedDateValue' => $step->{$end.'_date'},
+            'rico:dateQualifier' => $step->{$end === 'start' ? 'startQualifier' : 'endQualifier'}?->label(['en', 'und'])]);
+
+        return $unit->provenanceEntries()->with('owner', 'transferType', 'startQualifier', 'endQualifier')->get()->map(fn (ProvenanceEntry $step) => array_filter([
+            '@id' => $step->iri, '@type' => 'rico:Activity', 'rico:name' => (string) $step->transferType->label(['en', 'und']),
+            'rico:hasActivityType' => ['@id' => $step->transferType->iri, 'rdfs:label' => (string) $step->transferType->label(['en', 'und'])],
+            // An owner whose authority record is not published is not named, as a rights holder is not.
+            'rico:hasOrHadParticipant' => $step->owner === null ? ['@type' => 'rico:Agent', 'rico:name' => $step->owner_name]
+                : ($this->view->readable($step->owner) ? $this->stub($step->owner) : ['@type' => 'rico:Agent']),
+            'rico:hasBeginningDate' => $date($step, 'start'), 'rico:hasEndDate' => $date($step, 'end'),
+        ], fn ($v) => $v !== null))->values()->all();
     }
 
     public function stub(Model $entity): array

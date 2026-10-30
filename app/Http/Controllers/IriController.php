@@ -19,6 +19,7 @@ use App\Models\Agreement;
 use App\Models\Concept;
 use App\Models\Instantiation;
 use App\Models\Place;
+use App\Models\ProvenanceEntry;
 use App\Models\RecordResource;
 use App\Models\Repository;
 use Illuminate\Http\RedirectResponse;
@@ -38,6 +39,8 @@ class IriController extends Controller
         // Staff only: the page asks for the accession permissions.
         Accession::IRI_SEGMENT => [Accession::class, 'accessions.show', null],
         Agreement::IRI_SEGMENT => [Agreement::class, 'agreements.show', null],
+        // A step of a provenance chain: its record's provenance page, at the step.
+        ProvenanceEntry::IRI_SEGMENT => [ProvenanceEntry::class, 'records.provenance', null],
     ];
 
     public function resolve(Request $request, string $segment, string $id): RedirectResponse
@@ -52,6 +55,10 @@ class IriController extends Controller
             $browser => Links::page($entity) ?? route($page, $entity),
             default => route($api, $entity->getKey()),
         };
+
+        if ($entity instanceof ProvenanceEntry) {
+            $target = route('records.provenance', $entity->record_resource_id).'#step-'.$entity->id;
+        }
 
         return redirect($target, 303)->header('Vary', 'Accept');
     }

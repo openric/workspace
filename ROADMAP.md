@@ -227,6 +227,13 @@ Progress:
 
 **9. Accessions and donors (WS-014).** Copy `ahg-accession-manage`, which follows the Canadian CAIS profile (`CaaisProfileService`), and `ahg-donor-manage`. An accession register records what arrived, from whom, when and on what terms. The donor is an agent with contact points; the agreement is a record. RiC models an accession as an activity, so this needs an ADR on the mapping, and on keeping donor contact details encrypted as Heratio does. Donor agreements come with `ahg-donor-manage` (PSIS `ahgDonorAgreementPlugin`): types, documents, history and the accessions and records each covers. Provenance and custody history follow, copied from `ahg-information-object-manage` (PSIS `ahgProvenancePlugin`: provenance events, agents and documents): in RiC each change of custody or ownership is an activity with its agents, so the same ADR maps it. Done when a pilot archivist registers a deposit under its agreement, links it to the fonds it became, and the fonds shows its custody history.
 
+Progress:
+- **v0.0.77** (9a): accessions, after Heratio's `ahg-accession-manage` and its CAAIS profile: the accession is its own kind, exported as a rico:Activity, the donor an authority record taking part in it (ADR 0010); CAAIS rows, deaccessions, the CSV and CAAIS exports.
+- **v0.0.78** (9b): donor agreements, a rico:Record of their own, with rights, restrictions, reminders and documents, after PSIS's `ahgDonorAgreementPlugin`.
+- **v0.0.79** (9c): the intake of accessions: PSIS's workflow, checklist, attachments, timeline, queue and numbering.
+- **v0.0.80** (9d): appraisal, valuation, containers and rights of accessions, and Heratio's whole add form.
+- **v0.0.81** (9e): provenance and custody history, after Heratio's provenance in `ahg-information-object-manage`: the overview, the chain of steps (each a rico:Activity affecting the record, with its owner taking part, and its own dates), documents, the timeline and CSV. A description made from an accession starts its chain from the donor and the repository. Phase 9 is done.
+
 **10. Work assignment and workflow (WS-014).** Copy the task model of `ahg-workflow`: tasks on records, assigned to people, with due dates, overdue notices and bulk assignment. Its Spectrum procedures are museum work and stay out. The task states form a vocabulary, and publication remains the existing review and publish step. Done when a team divides a fonds' description among its members and sees what is left.
 
 **11. Exchange formats (WS-015).** The Workspace imports AtoM CSV and EAD and exports EAD, Dublin Core, MODS, CSV and RiC-O. To add:

@@ -1,0 +1,212 @@
+# OpenRiC Workspace - OpenRiC Workspace Provenance Transfer Types.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# How a provenance step passed the material on (Heratio's provenance_entry.transfer_type, in its groups).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/provenance-transfer-type/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Provenance Transfer Types"@en ;
+    dcterms:description "How a provenance step passed the material on (Heratio's provenance_entry.transfer_type, in its groups)."@en ;
+    dcterms:issued "2026-10-29"^^xsd:date ;
+    skos:hasTopConcept v:sale, v:purchase, v:auction, v:gift, v:donation, v:bequest, v:inheritance, v:descent, v:transfer, v:exchange, v:loan-out, v:loan-return, v:deposit, v:withdrawal, v:creation, v:commission, v:discovery, v:excavation, v:found, v:theft, v:recovery, v:confiscation, v:restitution, v:repatriation, v:accessioning, v:deaccessioning, v:unknown, v:other .
+
+v:sale a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Sale"@en, "Verkoop"@af ;
+    skos:scopeNote "Exported as the rico:ActivityType of the provenance step, a rico:Activity that affects the record (rico:affectsOrAffected). Heratio's group: Ownership changes."@en ;
+    skos:definition "Ownership changes: sale."@en .
+
+v:purchase a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Purchase"@en, "Aankoop"@af ;
+    skos:scopeNote "Exported as the rico:ActivityType of the provenance step, a rico:Activity that affects the record (rico:affectsOrAffected). Heratio's group: Ownership changes."@en ;
+    skos:definition "Ownership changes: purchase."@en .
+
+v:auction a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Auction Sale"@en, "Veilingverkoop"@af ;
+    skos:scopeNote "Exported as the rico:ActivityType of the provenance step, a rico:Activity that affects the record (rico:affectsOrAffected). Heratio's group: Ownership changes."@en ;
+    skos:definition "Ownership changes: auction sale."@en .
+
+v:gift a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Gift"@en, "Geskenk"@af ;
+    skos:scopeNote "Exported as the rico:ActivityType of the provenance step, a rico:Activity that affects the record (rico:affectsOrAffected). Heratio's group: Ownership changes."@en ;
+    skos:definition "Ownership changes: gift."@en .
+
+v:donation a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Donation"@en, "Skenking"@af ;
+    skos:scopeNote "Exported as the rico:ActivityType of the provenance step, a rico:Activity that affects the record (rico:affectsOrAffected). Heratio's group: Ownership changes."@en ;
+    skos:definition "Ownership changes: donation."@en .
+
+v:bequest a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Bequest"@en, "Bemaking"@af ;
+    skos:scopeNote "Exported as the rico:ActivityType of the provenance step, a rico:Activity that affects the record (rico:affectsOrAffected). Heratio's group: Ownership changes."@en ;
+    skos:definition "Ownership changes: bequest."@en .
+
+v:inheritance a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Inheritance"@en, "Erfenis"@af ;
+    skos:scopeNote "Exported as the rico:ActivityType of the provenance step, a rico:Activity that affects the record (rico:affectsOrAffected). Heratio's group: Ownership changes."@en ;
+    skos:definition "Ownership changes: inheritance."@en .
+
+v:descent a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "By Descent"@en, "Deur afstamming"@af ;
+    skos:scopeNote "Exported as the rico:ActivityType of the provenance step, a rico:Activity that affects the record (rico:affectsOrAffected). Heratio's group: Ownership changes."@en ;
+    skos:definition "Ownership changes: by descent."@en .
+
+v:transfer a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Transfer"@en, "Oordrag"@af ;
+    skos:scopeNote "Exported as the rico:ActivityType of the provenance step, a rico:Activity that affects the record (rico:affectsOrAffected). Heratio's group: Ownership changes."@en ;
+    skos:definition "Ownership changes: transfer."@en .
+
+v:exchange a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Exchange"@en, "Ruil"@af ;
+    skos:scopeNote "Exported as the rico:ActivityType of the provenance step, a rico:Activity that affects the record (rico:affectsOrAffected). Heratio's group: Ownership changes."@en ;
+    skos:definition "Ownership changes: exchange."@en .
+
+v:loan-out a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Loan Out"@en, "Uitlening"@af ;
+    skos:scopeNote "Exported as the rico:ActivityType of the provenance step, a rico:Activity that affects the record (rico:affectsOrAffected). Heratio's group: Loans and deposits."@en ;
+    skos:definition "Loans and deposits: loan out."@en .
+
+v:loan-return a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Loan Return"@en, "Terugkeer van lening"@af ;
+    skos:scopeNote "Exported as the rico:ActivityType of the provenance step, a rico:Activity that affects the record (rico:affectsOrAffected). Heratio's group: Loans and deposits."@en ;
+    skos:definition "Loans and deposits: loan return."@en .
+
+v:deposit a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Deposit"@en, "Bewaring"@af ;
+    skos:scopeNote "Exported as the rico:ActivityType of the provenance step, a rico:Activity that affects the record (rico:affectsOrAffected). Heratio's group: Loans and deposits."@en ;
+    skos:definition "Loans and deposits: deposit."@en .
+
+v:withdrawal a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Withdrawal"@en, "Onttrekking"@af ;
+    skos:scopeNote "Exported as the rico:ActivityType of the provenance step, a rico:Activity that affects the record (rico:affectsOrAffected). Heratio's group: Loans and deposits."@en ;
+    skos:definition "Loans and deposits: withdrawal."@en .
+
+v:creation a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Creation"@en, "Skepping"@af ;
+    skos:scopeNote "Exported as the rico:ActivityType of the provenance step, a rico:Activity that affects the record (rico:affectsOrAffected). Heratio's group: Creation and discovery."@en ;
+    skos:definition "Creation and discovery: creation."@en .
+
+v:commission a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Commission"@en, "Opdrag"@af ;
+    skos:scopeNote "Exported as the rico:ActivityType of the provenance step, a rico:Activity that affects the record (rico:affectsOrAffected). Heratio's group: Creation and discovery."@en ;
+    skos:definition "Creation and discovery: commission."@en .
+
+v:discovery a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Discovery"@en, "Ontdekking"@af ;
+    skos:scopeNote "Exported as the rico:ActivityType of the provenance step, a rico:Activity that affects the record (rico:affectsOrAffected). Heratio's group: Creation and discovery."@en ;
+    skos:definition "Creation and discovery: discovery."@en .
+
+v:excavation a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Excavation"@en, "Opgrawing"@af ;
+    skos:scopeNote "Exported as the rico:ActivityType of the provenance step, a rico:Activity that affects the record (rico:affectsOrAffected). Heratio's group: Creation and discovery."@en ;
+    skos:definition "Creation and discovery: excavation."@en .
+
+v:found a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Found/Discovery"@en, "Gevind/Ontdekking"@af ;
+    skos:scopeNote "Exported as the rico:ActivityType of the provenance step, a rico:Activity that affects the record (rico:affectsOrAffected). Heratio's group: Creation and discovery."@en ;
+    skos:definition "Creation and discovery: found/discovery."@en .
+
+v:theft a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Theft"@en, "Diefstal"@af ;
+    skos:scopeNote "Exported as the rico:ActivityType of the provenance step, a rico:Activity that affects the record (rico:affectsOrAffected). Heratio's group: Loss and recovery."@en ;
+    skos:definition "Loss and recovery: theft."@en .
+
+v:recovery a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Recovery"@en, "Herwinning"@af ;
+    skos:scopeNote "Exported as the rico:ActivityType of the provenance step, a rico:Activity that affects the record (rico:affectsOrAffected). Heratio's group: Loss and recovery."@en ;
+    skos:definition "Loss and recovery: recovery."@en .
+
+v:confiscation a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Confiscation"@en, "Konfiskering"@af ;
+    skos:scopeNote "Exported as the rico:ActivityType of the provenance step, a rico:Activity that affects the record (rico:affectsOrAffected). Heratio's group: Loss and recovery."@en ;
+    skos:definition "Loss and recovery: confiscation."@en .
+
+v:restitution a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Restitution"@en, "Restitusie"@af ;
+    skos:scopeNote "Exported as the rico:ActivityType of the provenance step, a rico:Activity that affects the record (rico:affectsOrAffected). Heratio's group: Loss and recovery."@en ;
+    skos:definition "Loss and recovery: restitution."@en .
+
+v:repatriation a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Repatriation"@en, "Repatriasie"@af ;
+    skos:scopeNote "Exported as the rico:ActivityType of the provenance step, a rico:Activity that affects the record (rico:affectsOrAffected). Heratio's group: Loss and recovery."@en ;
+    skos:definition "Loss and recovery: repatriation."@en .
+
+v:accessioning a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Accessioning"@en, "Aanwinsing"@af ;
+    skos:scopeNote "Exported as the rico:ActivityType of the provenance step, a rico:Activity that affects the record (rico:affectsOrAffected). Heratio's group: Institutional."@en ;
+    skos:definition "Institutional: accessioning."@en .
+
+v:deaccessioning a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Deaccessioning"@en, "Afskrywing"@af ;
+    skos:scopeNote "Exported as the rico:ActivityType of the provenance step, a rico:Activity that affects the record (rico:affectsOrAffected). Heratio's group: Institutional."@en ;
+    skos:definition "Institutional: deaccessioning."@en .
+
+v:unknown a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Unknown"@en, "Onbekend"@af ;
+    skos:scopeNote "Exported as the rico:ActivityType of the provenance step, a rico:Activity that affects the record (rico:affectsOrAffected). Heratio's group: Other."@en ;
+    skos:definition "Other: unknown."@en .
+
+v:other a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Other"@en, "Ander"@af ;
+    skos:scopeNote "Exported as the rico:ActivityType of the provenance step, a rico:Activity that affects the record (rico:affectsOrAffected). Heratio's group: Other."@en ;
+    skos:definition "Other: other."@en .

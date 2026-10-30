@@ -39,6 +39,7 @@ use App\Http\Controllers\NameController;
 use App\Http\Controllers\PasswordController;
 use App\Http\Controllers\PlaceController;
 use App\Http\Controllers\ProposalReviewController;
+use App\Http\Controllers\ProvenanceController;
 use App\Http\Controllers\PublicationController;
 use App\Http\Controllers\RecordController;
 use App\Http\Controllers\RegistrationController;
@@ -91,7 +92,7 @@ Route::get('/branding/logo', [SettingsController::class, 'logo'])->name('brandin
 Route::get('/api/iiif/workspace', fn () => response()->json(['data' => []]))->name('iiif.workspaces');
 
 // Persistent IRIs resolve, for anyone: the controller sends a page only to those signed in.
-Route::get('/{segment}/{id}', [IriController::class, 'resolve'])->where(['segment' => 'record|agent|repository|activity|place|concept|instantiation|accession|agreement', 'id' => '[0-9a-f-]{36}'])->name('iri');
+Route::get('/{segment}/{id}', [IriController::class, 'resolve'])->where(['segment' => 'record|agent|repository|activity|place|concept|instantiation|accession|agreement|provenance', 'id' => '[0-9a-f-]{36}'])->name('iri');
 
 // The clipboard (Heratio's): for anyone; it holds only what the reader may see.
 Route::prefix('clipboard')->name('clipboard.')->middleware('throttle:120,1')->group(function () {
@@ -204,6 +205,16 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::post('/{record}/calculate-dates', [RecordController::class, 'calculateDates'])->name('calculate-dates');
         Route::get('/{record}/export', [ExportController::class, 'form'])->name('export');
         Route::get('/{record}/export/{format}', [ExportController::class, 'download'])->where('format', 'ead|ead3|csv|dc|mods')->name('export.download');
+        // Provenance and custody history (roadmap phase 9e; Heratio's provenance); the controller checks update to change it.
+        Route::get('/{record}/provenance', [ProvenanceController::class, 'index'])->name('provenance');
+        Route::get('/{record}/provenance/export.csv', [ProvenanceController::class, 'csv'])->name('provenance.csv');
+        Route::post('/{record}/provenance/overview', [ProvenanceController::class, 'overview'])->name('provenance.overview');
+        Route::post('/{record}/provenance/steps/{entry?}', [ProvenanceController::class, 'saveEntry'])->whereUuid('entry')->name('provenance.steps.save');
+        Route::post('/{record}/provenance/steps/{entry}/move', [ProvenanceController::class, 'move'])->whereUuid('entry')->name('provenance.steps.move');
+        Route::post('/{record}/provenance/steps/{entry}/remove', [ProvenanceController::class, 'removeEntry'])->whereUuid('entry')->name('provenance.steps.destroy');
+        Route::post('/{record}/provenance/documents', [ProvenanceController::class, 'addDocument'])->name('provenance.documents.store');
+        Route::get('/{record}/provenance/documents/{document}', [ProvenanceController::class, 'document'])->whereUuid('document')->name('provenance.documents.show');
+        Route::post('/{record}/provenance/documents/{document}/remove', [ProvenanceController::class, 'removeDocument'])->whereUuid('document')->name('provenance.documents.destroy');
     });
 
     // Instantiations and their files (rico:Instantiation, WS-007); the controller checks the unit's permissions.

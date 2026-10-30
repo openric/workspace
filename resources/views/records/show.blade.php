@@ -64,6 +64,13 @@
 
     @include('description._names', ['subject' => $record, 'kind' => 'records', 'canUpdate' => $canUpdate, 'drafts' => $drafts])
     @include('description._identifiers', ['subject' => $record, 'kind' => 'records', 'canUpdate' => $canUpdate])
+    <section id="custody">
+        <h2>{{ __('Provenance and custody history') }} @include('description._ric', ['term' => 'rico:isOrWasAffectedBy'])</h2>
+        @php($custody = $record->provenanceEntries()->with('ownerType.labels', 'transferType.labels', 'certainty.labels', 'startQualifier.labels', 'endQualifier.labels')->get())
+        @if($statement = $record->provenanceOverview?->summary)<p style="white-space: pre-line">{{ $statement }}</p>@endif
+        @if($custody->isNotEmpty())@include('records._custody', ['steps' => $custody, 'languages' => \App\Support\Vocab::languages()])@else<p>{{ __('No provenance entries yet.') }}</p>@endif
+        <p><a href="{{ route('records.provenance', $record) }}">{{ $canUpdate ? __('Manage provenance') : __('Full provenance') }}</a></p>
+    </section>
     @include('description._rights', ['subject' => $record, 'kind' => 'records', 'canUpdate' => $canUpdate])
     @include('description._community-labels', ['subject' => $record, 'kind' => 'records', 'canUpdate' => $canUpdate])
     @include('description._relations', ['subject' => $record, 'kind' => 'records', 'relations' => $relations, 'canUpdate' => $canUpdate])

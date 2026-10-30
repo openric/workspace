@@ -1,0 +1,51 @@
+# OpenRiC Workspace - OpenRiC Workspace Provenance Certainty Levels.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# How certain the provenance is (Heratio's certainty and certainty_level).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/provenance-certainty/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Provenance Certainty Levels"@en ;
+    dcterms:description "How certain the provenance is (Heratio's certainty and certainty_level)."@en ;
+    dcterms:issued "2026-10-29"^^xsd:date ;
+    skos:hasTopConcept v:certain, v:probable, v:possible, v:uncertain, v:unknown .
+
+v:certain a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Certain - Documented evidence"@en, "Seker - Gedokumenteerde bewyse"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the record's provenance overview, as Heratio keeps it."@en ;
+    skos:definition "Documented evidence."@en .
+
+v:probable a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Probable - Strong circumstantial evidence"@en, "Waarskynlik - Sterk omstandigheidsgetuienis"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the record's provenance overview, as Heratio keeps it."@en ;
+    skos:definition "Strong circumstantial evidence."@en .
+
+v:possible a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Possible - Some supporting evidence"@en, "Moontlik - Enkele stawende bewyse"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the record's provenance overview, as Heratio keeps it."@en ;
+    skos:definition "Some supporting evidence."@en .
+
+v:uncertain a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Uncertain - Limited evidence"@en, "Onseker - Beperkte bewyse"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the record's provenance overview, as Heratio keeps it."@en ;
+    skos:definition "Limited evidence."@en .
+
+v:unknown a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Unknown - No evidence"@en, "Onbekend - Geen bewyse"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the record's provenance overview, as Heratio keeps it."@en ;
+    skos:definition "No evidence."@en .

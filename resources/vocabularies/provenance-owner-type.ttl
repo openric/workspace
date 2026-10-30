@@ -1,0 +1,100 @@
+# OpenRiC Workspace - OpenRiC Workspace Provenance Owner Types.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# The kind of owner or holder in a provenance step (Heratio's provenance_entry.owner_type).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/provenance-owner-type/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Provenance Owner Types"@en ;
+    dcterms:description "The kind of owner or holder in a provenance step (Heratio's provenance_entry.owner_type)."@en ;
+    dcterms:issued "2026-10-29"^^xsd:date ;
+    skos:hasTopConcept v:unknown, v:person, v:family, v:organization, v:institution, v:dealer, v:auction-house, v:museum, v:corporate, v:government, v:religious, v:artist .
+
+v:unknown a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Unknown"@en, "Onbekend"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the provenance step, as Heratio keeps it."@en ;
+    skos:definition "Not known."@en .
+
+v:person a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Person"@en, "Persoon"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the provenance step, as Heratio keeps it."@en ;
+    skos:definition "A person."@en .
+
+v:family a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Family"@en, "Familie"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the provenance step, as Heratio keeps it."@en ;
+    skos:definition "A family."@en .
+
+v:organization a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Organisation"@en, "Organisasie"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the provenance step, as Heratio keeps it."@en ;
+    skos:definition "An organisation."@en .
+
+v:institution a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Institution"@en, "Instelling"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the provenance step, as Heratio keeps it."@en ;
+    skos:definition "An institution."@en .
+
+v:dealer a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Dealer"@en, "Handelaar"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the provenance step, as Heratio keeps it."@en ;
+    skos:definition "A dealer."@en .
+
+v:auction-house a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Auction house"@en, "Veilinghuis"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the provenance step, as Heratio keeps it."@en ;
+    skos:definition "An auction house."@en .
+
+v:museum a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Museum"@en, "Museum"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the provenance step, as Heratio keeps it."@en ;
+    skos:definition "A museum."@en .
+
+v:corporate a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Corporate"@en, "Korporatief"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the provenance step, as Heratio keeps it."@en ;
+    skos:definition "A company."@en .
+
+v:government a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Government"@en, "Regering"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the provenance step, as Heratio keeps it."@en ;
+    skos:definition "A government body."@en .
+
+v:religious a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Religious"@en, "Godsdienstig"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the provenance step, as Heratio keeps it."@en ;
+    skos:definition "A religious body."@en .
+
+v:artist a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Artist"@en, "Kunstenaar"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the provenance step, as Heratio keeps it."@en ;
+    skos:definition "The artist."@en .

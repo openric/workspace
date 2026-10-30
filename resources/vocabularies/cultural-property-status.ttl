@@ -1,0 +1,51 @@
+# OpenRiC Workspace - OpenRiC Workspace Cultural Property Statuses.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Whether the material is subject to a cultural property or restitution concern (Heratio's provenance_overview.cultural_property_status).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/cultural-property-status/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Cultural Property Statuses"@en ;
+    dcterms:description "Whether the material is subject to a cultural property or restitution concern (Heratio's provenance_overview.cultural_property_status)."@en ;
+    dcterms:issued "2026-10-29"^^xsd:date ;
+    skos:hasTopConcept v:none, v:flagged, v:claimed, v:restituted, v:cleared .
+
+v:none a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "None - no concern"@en, "Geen - geen kommer"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the record's provenance overview, as Heratio keeps it."@en ;
+    skos:definition "No concern."@en .
+
+v:flagged a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Flagged for review"@en, "Gemerk vir hersiening"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the record's provenance overview, as Heratio keeps it."@en ;
+    skos:definition "To be reviewed."@en .
+
+v:claimed a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Subject to a restitution claim"@en, "Onderhewig aan 'n restitusie-eis"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the record's provenance overview, as Heratio keeps it."@en ;
+    skos:definition "A restitution claim has been made."@en .
+
+v:restituted a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Restituted / repatriated"@en, "Gerestitueer / gerepatrieer"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the record's provenance overview, as Heratio keeps it."@en ;
+    skos:definition "Returned to its owners or community."@en .
+
+v:cleared a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Reviewed - cleared"@en, "Hersien - goedgekeur"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the record's provenance overview, as Heratio keeps it."@en ;
+    skos:definition "Reviewed and cleared."@en .

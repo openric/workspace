@@ -59,6 +59,13 @@
         <ul>@foreach($children as $child)<li><a href="{{ route('discover.record', $child->id) }}">{{ $view->label($child) }}</a> <span class="meta">{{ collect([$child->level->label(\App\Support\Vocab::languages()), $child->referenceCode(), $child->dates->first()?->display()])->filter()->join(', ') }}</span></li>@endforeach</ul>
     @endif
     @include('discover._rights', ['subject' => $unit, 'view' => $view])
+    {{-- Its provenance, unless its overview keeps it from the public (roadmap phase 9e). --}}
+    @php($custody = $unit->provenanceOverview?->is_public === false ? collect() : $unit->provenanceEntries()->with('owner', 'ownerType.labels', 'transferType.labels', 'certainty.labels', 'startQualifier.labels', 'endQualifier.labels')->get())
+    @if($custody->isNotEmpty())
+        <h2>{{ __('Provenance') }}</h2>
+        @if($statement = $unit->provenanceOverview?->summary)<p style="white-space: pre-line">{{ $statement }}</p>@endif
+        @include('records._custody', ['steps' => $custody, 'languages' => \App\Support\Vocab::languages(), 'public' => true, 'view' => $view])
+    @endif
     @include('discover._identifiers', ['entity' => $unit])
     <h2>{{ __('Cite and reuse') }}</h2>
     <p>{{ collect([$title, $unit->referenceCode(), $unit->repository ? $view->label($unit->repository) : null])->filter()->join(', ') }}. <code>{{ $unit->iri }}</code></p>

@@ -248,7 +248,7 @@ class AccessionService
      * A description made from the accession, as Heratio's createInformationObject: its title (or else its number),
      * its number as the reference code and its scope and content, held by the accession's repository or the one
      * given, with the accession resulting in it. When the institution passes rights down, the accession's rights that
-     * pass are copied onto it (Heratio's inheritRightsToIo).
+     * pass are copied onto it (Heratio's inheritRightsToIo). Its custody history starts from the donor and the repository.
      */
     public function createDescription(Accession $accession, string $levelIri, ?Repository $repository, string $language, User $actor): RecordResource
     {
@@ -265,6 +265,7 @@ class AccessionService
             if (Institution::whereKey($accession->institution_id)->value('accession_rights_inheritance')) {
                 app(RightsService::class)->inherit($accession, $record, $actor);
             }
+            app(ProvenanceService::class)->fromAccession($accession, $record, $actor);
 
             return $record;
         });

@@ -67,7 +67,7 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-iiif-collection` | 8745 | out: GLAM sector | Planned | 14 | `ahgIiifPlugin` | Read PSIS ahgIiifPlugin too, which does more |
 | `ahg-image-ar` | 896 | out: GLAM sector | Planned | 21 | `ahgImageArPlugin` |  |
 | `ahg-inference-receipts` | 1569 | out: AI (V2+) | Partial | 17 (last) | none | Its signing code is copied for the audit chain |
-| `ahg-information-object-manage` | 47506 | V0.1 candidate | Covered | 9 | `ahgInformationObjectManagePlugin`, `ahgProvenancePlugin` | Records and record sets: ISAD(G), hierarchy, levels, instantiations, publication; provenance and custody history in phase 9 |
+| `ahg-information-object-manage` | 47506 | V0.1 candidate | Covered | 9 | `ahgInformationObjectManagePlugin`, `ahgProvenancePlugin` | Records and record sets: ISAD(G), hierarchy, levels, instantiations, publication; provenance and custody history from v0.0.81 (9e) |
 | `ahg-ingest` | 5338 | later: V1.0+ | Planned | 22 | `ahgIngestPlugin` | Read PSIS ahgIngestPlugin too, which does more |
 | `ahg-integrity` | 3078 | later: V1.0+ | Partial | 12 | `ahgIntegrityPlugin` | Fixity checked on demand |
 | `ahg-ipsas` | 2129 | later: jurisdiction | Planned | 18 | `ahgIPSASPlugin` |  |
@@ -405,6 +405,32 @@ Heratio's accession edit form and CAAIS partial (`edit.blade.php`, `partials/_ca
 | Print | none: the browser prints the page | Missing |
 
 : Accession, field by field
+
+### Provenance (`ahg-information-object-manage` provenance)
+
+Heratio's provenance page (`provenance/index.blade.php`), its ProvenanceService and ProvenanceController; PSIS's ahgProvenancePlugin before them.
+
+| Heratio field | Workspace | Status |
+|---|---|---|
+| `provenance_overview`: `provenance_summary` | Provenance Statement | Same, from v0.0.81 |
+| `current_status`, `custody_type`, `acquisition_type`, `certainty_level`, `research_status`, `cultural_property_status` | The same, each a vocabulary | Same, from v0.0.81 |
+| `acquisition_date`, `acquisition_date_text`, `acquisition_price`, `acquisition_currency` | Acquisition Date, Date (text), Price, Currency | Same, from v0.0.81 |
+| `has_gaps`, `gap_description`, `research_notes`, `is_complete`, `is_public` | The same | Same, from v0.0.81 |
+| `nazi_era_provenance_checked`, `nazi_era_provenance_clear`, `nazi_era_notes`, `cultural_property_notes` | Nazi-era provenance (checked, result, notes), Cultural property notes | Same, from v0.0.81 |
+| `provenance_entry`: `owner_name`, `owner_type`, `owner_actor_id` | Owner Name, Owner Type, Authority record | Same, from v0.0.81 |
+| `owner_location`, `owner_location_tgn` | Location, Getty TGN identifier | Same, from v0.0.81 |
+| `start_date`, `start_date_qualifier`, `end_date`, `end_date_qualifier` | Start and End Date in EDTF, each with a qualifier; exported as Dates of their own | Modelled: EDTF, not free text |
+| `transfer_type` (in Heratio's groups) | Transfer Method, its group in each concept's note | Same, from v0.0.81 |
+| `transfer_details`, `sale_price`, `sale_currency`, `auction_house`, `auction_lot` | The same | Same, from v0.0.81 |
+| `certainty`, `sources`, `evidence_type`, `evidence_description`, `notes`, `is_gap`, `gap_explanation` | The same | Same, from v0.0.81 |
+| `sequence` and resequencing on delete | The order of the chain, with Move up and Move down | Same, from v0.0.81; moving is added |
+| Delete an entry | Delete: marked deleted, its IRI kept | Modelled |
+| `provenance_document` (type, title, description, date, date text, file, external URL, archive reference, public, entry) | Supporting documents, the file through the file store | Same, from v0.0.81 |
+| Timeline (D3) | Timeline: the dated steps in order | Modelled: a list, not a chart |
+| Export CSV | Export CSV, Heratio's columns | Same, from v0.0.81 |
+| Provenance and chain of custody on the description | Provenance and custody history on the record's page, and on the public page when the overview allows | Same, from v0.0.81; an owner whose authority record is not published is not named in public |
+
+: Provenance, field by field
 
 ### Donor (`ahg-donor-manage`)
 
