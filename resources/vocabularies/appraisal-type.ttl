@@ -1,0 +1,51 @@
+# OpenRiC Workspace - OpenRiC Workspace Appraisal Types.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What an appraisal of an accession weighs (PSIS's accession_appraisal.appraisal_type).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/appraisal-type/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Appraisal Types"@en ;
+    dcterms:description "What an appraisal of an accession weighs (PSIS's accession_appraisal.appraisal_type)."@en ;
+    dcterms:issued "2026-10-29"^^xsd:date ;
+    skos:hasTopConcept v:archival, v:monetary, v:insurance, v:historical, v:research .
+
+v:archival a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Archival"@en, "Argivaal"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession's appraisal and valuation, as PSIS and Heratio keep it."@en ;
+    skos:definition "Its archival value: whether it belongs in the holdings."@en .
+
+v:monetary a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Monetary"@en, "Geldelik"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession's appraisal and valuation, as PSIS and Heratio keep it."@en ;
+    skos:definition "What it is worth in money."@en .
+
+v:insurance a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Insurance"@en, "Versekering"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession's appraisal and valuation, as PSIS and Heratio keep it."@en ;
+    skos:definition "What it should be insured for."@en .
+
+v:historical a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Historical"@en, "Histories"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession's appraisal and valuation, as PSIS and Heratio keep it."@en ;
+    skos:definition "Its historical significance."@en .
+
+v:research a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Research"@en, "Navorsing"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession's appraisal and valuation, as PSIS and Heratio keep it."@en ;
+    skos:definition "Its value for research."@en .

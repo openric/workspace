@@ -8,6 +8,7 @@
 // requires a signed-in account,
 // and each action that needs more names its permission IRI.
 
+use App\Http\Controllers\AccessionAppraisalController;
 use App\Http\Controllers\AccessionController;
 use App\Http\Controllers\AccessionIntakeController;
 use App\Http\Controllers\AccessRequestController;
@@ -233,6 +234,8 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/donors', [AccessionController::class, 'donors'])->name('donors');
         // The intake queue (roadmap phase 9c; PSIS's accessionIntake, Heratio's intake queue and dashboard).
         Route::get('/queue', [AccessionIntakeController::class, 'queue'])->name('queue');
+        // The valuation report (roadmap phase 9d; PSIS's and Heratio's valuation report).
+        Route::get('/valuation-report', [AccessionAppraisalController::class, 'report'])->name('valuation-report');
         Route::get('/new', [AccessionController::class, 'create'])->name('create');
         Route::post('/', [AccessionController::class, 'store'])->name('store');
         Route::get('/{accession}', [AccessionController::class, 'show'])->name('show');
@@ -252,6 +255,13 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::post('/{accession}/attachments', [AccessionIntakeController::class, 'attach'])->name('attachments.store');
         Route::get('/{accession}/attachments/{attachment}', [AccessionIntakeController::class, 'attachment'])->whereUuid('attachment')->name('attachments.show');
         Route::post('/{accession}/attachments/{attachment}/remove', [AccessionIntakeController::class, 'detach'])->whereUuid('attachment')->name('attachments.destroy');
+        // Appraisal, valuation and containers (roadmap phase 9d; PSIS's accessionAppraisal and accessionContainer).
+        Route::post('/{accession}/appraisals/{appraisal?}', [AccessionAppraisalController::class, 'save'])->whereUuid('appraisal')->name('appraisals.save');
+        Route::post('/{accession}/appraisals/{appraisal}/remove', [AccessionAppraisalController::class, 'remove'])->whereUuid('appraisal')->name('appraisals.destroy');
+        Route::post('/{accession}/appraisals/{appraisal}/criteria', [AccessionAppraisalController::class, 'criteria'])->whereUuid('appraisal')->name('appraisals.criteria');
+        Route::post('/{accession}/valuations', [AccessionAppraisalController::class, 'value'])->name('valuations.store');
+        Route::post('/{accession}/valuations/{valuation}/remove', [AccessionAppraisalController::class, 'removeValuation'])->whereUuid('valuation')->name('valuations.destroy');
+        Route::post('/{accession}/containers', [AccessionIntakeController::class, 'containerise'])->name('containers.store');
     });
 
     // Donor agreements (Heratio's ahg-donor-manage agreements, roadmap phase 9b): staff only, under the agreement permissions.
@@ -383,6 +393,8 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::post('/settings/accessions', [AccessionIntakeController::class, 'updateSettings'])->name('accessions.settings.update');
         Route::post('/settings/accessions/templates/{template?}', [AccessionIntakeController::class, 'saveTemplate'])->whereUuid('template')->name('accessions.templates.save');
         Route::post('/settings/accessions/templates/{template}/remove', [AccessionIntakeController::class, 'removeTemplate'])->whereUuid('template')->name('accessions.templates.destroy');
+        Route::post('/settings/accessions/appraisal-templates/{template?}', [AccessionAppraisalController::class, 'saveTemplate'])->whereUuid('template')->name('accessions.appraisal-templates.save');
+        Route::post('/settings/accessions/appraisal-templates/{template}/remove', [AccessionAppraisalController::class, 'removeTemplate'])->whereUuid('template')->name('accessions.appraisal-templates.destroy');
         Route::get('/settings/watermark', [WatermarkController::class, 'edit'])->name('watermark.edit');
         Route::post('/settings/watermark', [WatermarkController::class, 'update'])->name('watermark.update');
         Route::post('/settings/watermark/remake', [WatermarkController::class, 'remakeAll'])->name('watermark.remake-all');
@@ -467,11 +479,14 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::get('/rights/batch', [RightsAdminController::class, 'batch'])->name('rights.batch');
     Route::post('/rights/batch', [RightsAdminController::class, 'batchStore'])->name('rights.batch.store');
 
-    // Rights and Local Contexts Labels of a unit of description or an instantiation (roadmap phase 2); each controller checks update on it.
-    Route::prefix('{kind}/{id}')->where(['kind' => 'records|instantiations', 'id' => '[0-9a-f-]{36}', 'right' => '[0-9a-f-]{36}', 'label' => '[0-9a-f-]{36}'])->group(function () {
+    // Rights of a unit of description, an instantiation (roadmap phase 2) or an accession (phase 9d), and Local Contexts
+    // Labels of the first two; each controller checks update on it.
+    Route::prefix('{kind}/{id}')->where(['kind' => 'records|instantiations|accessions', 'id' => '[0-9a-f-]{36}', 'right' => '[0-9a-f-]{36}'])->group(function () {
         Route::post('/rights', [RightsController::class, 'store'])->name('rights.store');
         Route::post('/rights/{right}', [RightsController::class, 'update'])->name('rights.update');
         Route::post('/rights/{right}/remove', [RightsController::class, 'destroy'])->name('rights.destroy');
+    });
+    Route::prefix('{kind}/{id}')->where(['kind' => 'records|instantiations', 'id' => '[0-9a-f-]{36}', 'label' => '[0-9a-f-]{36}'])->group(function () {
         Route::post('/community-labels', [CommunityLabelController::class, 'store'])->name('community-labels.store');
         Route::post('/community-labels/{label}/remove', [CommunityLabelController::class, 'destroy'])->name('community-labels.destroy');
     });

@@ -1,0 +1,51 @@
+# OpenRiC Workspace - OpenRiC Workspace Container Conditions.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# The physical condition of a container and what it holds (PSIS's accession_container.condition_status).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/container-condition/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Container Conditions"@en ;
+    dcterms:description "The physical condition of a container and what it holds (PSIS's accession_container.condition_status)."@en ;
+    dcterms:issued "2026-10-29"^^xsd:date ;
+    skos:hasTopConcept v:excellent, v:good, v:fair, v:poor, v:critical .
+
+v:excellent a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Excellent"@en, "Uitstekend"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the container, as PSIS's accession containers keep it."@en ;
+    skos:definition "As new."@en .
+
+v:good a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Good"@en, "Goed"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the container, as PSIS's accession containers keep it."@en ;
+    skos:definition "Sound, with slight wear."@en .
+
+v:fair a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Fair"@en, "Redelik"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the container, as PSIS's accession containers keep it."@en ;
+    skos:definition "Worn, but it holds."@en .
+
+v:poor a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Poor"@en, "Swak"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the container, as PSIS's accession containers keep it."@en ;
+    skos:definition "Damaged; it needs attention."@en .
+
+v:critical a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Critical"@en, "Kritiek"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the container, as PSIS's accession containers keep it."@en ;
+    skos:definition "At risk; it needs attention at once."@en .

@@ -44,6 +44,8 @@ class StorageService
 
     public const CAPACITY_UNITS = Vocab::BASE.'capacity-unit/';
 
+    public const CONDITIONS = Vocab::BASE.'container-condition/';
+
     public const PLACE_TYPES = Vocab::BASE.'storage-place-type/';
 
     /** The levels of the placement form, from the top: the bundled storage place types, as Heratio's box form has them. */
@@ -167,6 +169,10 @@ class StorageService
             'status_id' => $text('status') ? $this->concept(self::STATUSES.$text('status'))->id : null,
             'security_level_id' => $text('security_level') ? $this->concept(self::SECURITY_LEVELS.$text('security_level'))->id : null,
             'capacity_unit_id' => $text('capacity_unit') ? $this->concept(self::CAPACITY_UNITS.$text('capacity_unit'))->id : null,
+            // PSIS's accession container: its condition, weight and how many items it holds.
+            'condition_id' => $text('condition') ? $this->concept(self::CONDITIONS.$text('condition'))->id : null,
+            'weight_kg' => $number('weight_kg', 0.01, null, __('weight in kilograms')),
+            'item_count' => $text('item_count') === null ? null : (ctype_digit($text('item_count')) ? (int) $text('item_count') : throw new InvalidArgumentException(__('give the number of items as a whole number'))),
             'width_cm' => $number('width_cm', 0.1, null, __('width in centimetres')), 'height_cm' => $number('height_cm', 0.1, null, __('height in centimetres')),
             'depth_cm' => $number('depth_cm', 0.1, null, __('depth in centimetres')),
             'capacity' => $number('capacity', 0, null, __('capacity')), 'capacity_used' => $number('capacity_used', 0, null, __('capacity used')),

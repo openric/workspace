@@ -1,5 +1,6 @@
 {{-- OpenRiC Workspace - the rights of a unit of description or an instantiation, each a rico:Rule (WS-007, roadmap phase 2). Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems. SPDX-License-Identifier: AGPL-3.0-or-later --}}
-{{-- Needs: $subject (RecordResource or Instantiation), $kind (records or instantiations), $canUpdate. After Heratio's rights panel (ahg-extended-rights). --}}
+{{-- Needs: $subject (RecordResource, Instantiation or Accession), $kind (records, instantiations or accessions), $canUpdate. After Heratio's rights panel (ahg-extended-rights) and accession rights. --}}
+@php($inherits = $subject instanceof \App\Models\Accession)
 @php($rights = app(\App\Rights\RightsService::class)->of($subject))
 @php($choices = fn (string $vocabulary) => \App\Models\Concept::choices($vocabulary)->get())
 @php($lang = \App\Support\Vocab::languages())
@@ -20,6 +21,10 @@
                 $right->citation,
                 $right->licence_terms ? __('Licence terms').': '.$right->licence_terms : null,
                 $right->policy_identifier ? __('Policy identifier').': '.$right->policy_identifier : null,
+                $right->accessRestriction ? __('Restriction').': '.$right->accessRestriction->label($lang) : null,
+                $right->conditions ? __('Conditions').': '.$right->conditions : null,
+                $inherits ? __($right->inherit_to_children ? 'passes to the descriptions made from it' : 'stays with the accession') : null,
+                $right->inheritedFrom ? __('copied from the accession\'s right :iri', ['iri' => $right->inheritedFrom->iri]) : null,
             ])->filter()->join('; ') }}</small>
             @if($right->holder) @include('description._ric', ['term' => 'rico:hasOrHadIntellectualPropertyRightsHolder'])@endif</p>
         @if($right->grants->isNotEmpty())
@@ -31,7 +36,7 @@
                 <summary>{{ __('- edit or remove') }}</summary>
                 <form method="post" action="{{ route('rights.update', [$kind, $subject->getKey(), $right]) }}">
                     @csrf
-                    @include('description._right-fields', ['right' => $right, 'prefix' => 'r'.$loop->index, 'choices' => $choices])
+                    @include('description._right-fields', ['right' => $right, 'prefix' => 'r'.$loop->index, 'choices' => $choices, 'inherits' => $inherits])
                     <button type="submit">{{ __('Save right') }}</button>
                 </form>
                 <form method="post" action="{{ route('rights.destroy', [$kind, $subject->getKey(), $right]) }}">@csrf<button type="submit">{{ __('Remove right') }}</button></form>
@@ -47,7 +52,7 @@
         <summary>{{ __('Add a right') }}</summary>
         <form method="post" action="{{ route('rights.store', [$kind, $subject->getKey()]) }}">
             @csrf
-            @include('description._right-fields', ['right' => null, 'prefix' => 'new-right', 'choices' => $choices])
+            @include('description._right-fields', ['right' => null, 'prefix' => 'new-right', 'choices' => $choices, 'inherits' => $inherits])
             <button type="submit">{{ __('Add right') }}</button>
         </form>
     </details>

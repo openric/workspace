@@ -1,0 +1,51 @@
+# OpenRiC Workspace - OpenRiC Workspace Valuation Methods.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# How a valuation was arrived at (PSIS's accession_valuation_history.method).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/valuation-method/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Valuation Methods"@en ;
+    dcterms:description "How a valuation was arrived at (PSIS's accession_valuation_history.method)."@en ;
+    dcterms:issued "2026-10-29"^^xsd:date ;
+    skos:hasTopConcept v:cost, v:market, v:income, v:replacement, v:nominal .
+
+v:cost a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Cost"@en, "Koste"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession's appraisal and valuation, as PSIS and Heratio keep it."@en ;
+    skos:definition "What it cost."@en .
+
+v:market a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Market"@en, "Mark"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession's appraisal and valuation, as PSIS and Heratio keep it."@en ;
+    skos:definition "What it would fetch in the market."@en .
+
+v:income a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Income"@en, "Inkomste"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession's appraisal and valuation, as PSIS and Heratio keep it."@en ;
+    skos:definition "What it earns."@en .
+
+v:replacement a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Replacement"@en, "Vervanging"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession's appraisal and valuation, as PSIS and Heratio keep it."@en ;
+    skos:definition "What it would cost to replace."@en .
+
+v:nominal a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Nominal"@en, "Nominaal"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession's appraisal and valuation, as PSIS and Heratio keep it."@en ;
+    skos:definition "A nominal value, such as R1 for a heritage asset that cannot be valued."@en .

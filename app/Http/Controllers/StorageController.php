@@ -134,7 +134,7 @@ class StorageController extends Controller
 
         return view('storage.edit', ['container' => $container, 'language' => $language, 'types' => $this->storage->types($container->institution_id),
             'statuses' => Concept::choices(StorageService::STATUSES)->get(), 'securityLevels' => Concept::choices(StorageService::SECURITY_LEVELS)->get(),
-            'units' => Concept::choices(StorageService::CAPACITY_UNITS)->get(), 'barcode' => $this->barcode($container),
+            'units' => Concept::choices(StorageService::CAPACITY_UNITS)->get(), 'conditions' => Concept::choices(StorageService::CONDITIONS)->get(), 'barcode' => $this->barcode($container),
             'levels' => $this->levelChoices(), 'current' => $this->storage->levelsOf($this->storage->place($container))]);
     }
 
@@ -152,8 +152,9 @@ class StorageController extends Controller
             'status' => ['nullable', Rule::in($notations(StorageService::STATUSES))],
             'security_level' => ['nullable', Rule::in($notations(StorageService::SECURITY_LEVELS))],
             'capacity_unit' => ['nullable', Rule::in($notations(StorageService::CAPACITY_UNITS))],
+            'condition' => ['nullable', Rule::in($notations(StorageService::CONDITIONS))],
             'climate_controlled' => ['nullable', Rule::in(['', '0', '1'])],
-            ...array_fill_keys(['width_cm', 'height_cm', 'depth_cm', 'capacity', 'capacity_used', 'temperature_min', 'temperature_max', 'humidity_min', 'humidity_max'], ['nullable', 'string', 'max:20']),
+            ...array_fill_keys(['width_cm', 'height_cm', 'depth_cm', 'capacity', 'capacity_used', 'weight_kg', 'item_count', 'temperature_min', 'temperature_max', 'humidity_min', 'humidity_max'], ['nullable', 'string', 'max:20']),
             ...$this->levelRules(),
         ]);
         $values = array_intersect_key($data['values'] ?? [], array_flip(Elements::notations(Elements::CONTAINER)));

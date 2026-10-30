@@ -19,11 +19,11 @@
         @include('description._fields', ['subject' => $container, 'standard' => \App\Description\Elements::CONTAINER, 'language' => $language])
 
         <fieldset><legend>{{ __('Collection management (not in RiC-O)') }}</legend>
-            @foreach(['status' => ['Status', $statuses], 'security_level' => ['Security', $securityLevels]] as $field => [$label, $choices])
+            @foreach(['status' => ['Status', $statuses], 'security_level' => ['Security', $securityLevels], 'condition' => ['Condition', $conditions]] as $field => [$label, $choices])
                 <label for="{{ $field }}">{{ __($label) }}</label>
                 <select id="{{ $field }}" name="{{ $field }}" style="font: inherit; padding: .5rem">
                     <option value="">{{ __('Not set') }}</option>
-                    @php($current = ['status' => $container->status?->notation, 'security_level' => $container->securityLevel?->notation][$field])
+                    @php($current = ['status' => $container->status?->notation, 'security_level' => $container->securityLevel?->notation, 'condition' => $container->condition?->notation][$field])
                     @foreach($choices as $c)<option value="{{ $c->notation }}" @selected(old($field, $current) === $c->notation)>{{ $c->label(['en']) }}</option>@endforeach
                 </select>
             @endforeach
@@ -40,6 +40,10 @@
                         <option value="">{{ __('Not set') }}</option>
                         @foreach($units as $u)<option value="{{ $u->notation }}" @selected(old('capacity_unit', $container->capacityUnit?->notation) === $u->notation)>{{ $u->label(['en']) }}</option>@endforeach
                     </select></div>
+            </div>
+            <div style="display: flex; gap: .75rem; flex-wrap: wrap">
+                <div><label for="weight_kg">{{ __('Weight (kg)') }}</label><input id="weight_kg" name="weight_kg" inputmode="decimal" style="max-width: 8rem" value="{{ old('weight_kg', $container->weight_kg) }}"></div>
+                <div><label for="item_count">{{ __('Number of items') }}</label><input id="item_count" name="item_count" inputmode="numeric" style="max-width: 8rem" value="{{ old('item_count', $container->item_count) }}"></div>
             </div>
             <label for="climate_controlled">{{ __('Climate controlled') }}</label>
             <select id="climate_controlled" name="climate_controlled" style="font: inherit; padding: .5rem">

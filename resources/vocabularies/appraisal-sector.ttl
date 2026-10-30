@@ -1,0 +1,51 @@
+# OpenRiC Workspace - OpenRiC Workspace Appraisal Template Sectors.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# The kind of institution an appraisal template is for (PSIS's accession_appraisal_template.sector).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/appraisal-sector/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Appraisal Template Sectors"@en ;
+    dcterms:description "The kind of institution an appraisal template is for (PSIS's accession_appraisal_template.sector)."@en ;
+    dcterms:issued "2026-10-29"^^xsd:date ;
+    skos:hasTopConcept v:archive, v:library, v:museum, v:gallery, v:dam .
+
+v:archive a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Archive"@en, "Argief"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession's appraisal and valuation, as PSIS and Heratio keep it."@en ;
+    skos:definition "Archives."@en .
+
+v:library a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Library"@en, "Biblioteek"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession's appraisal and valuation, as PSIS and Heratio keep it."@en ;
+    skos:definition "Libraries."@en .
+
+v:museum a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Museum"@en, "Museum"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession's appraisal and valuation, as PSIS and Heratio keep it."@en ;
+    skos:definition "Museums."@en .
+
+v:gallery a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Gallery"@en, "Galery"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession's appraisal and valuation, as PSIS and Heratio keep it."@en ;
+    skos:definition "Galleries."@en .
+
+v:dam a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Digital assets"@en, "Digitale bates"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession's appraisal and valuation, as PSIS and Heratio keep it."@en ;
+    skos:definition "Digital asset management."@en .

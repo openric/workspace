@@ -23,6 +23,8 @@
  * rights-restriction) instead of codes; a right is held by a unit of description or an instantiation; its holder
  * is an authority record; a right is marked deleted, never removed; the audit log is the Workspace's.
  * Embargoes, orphan works and retention are not here (roadmap phases 13 and 18).
+ * An accession holds rights too (Heratio's accession_rights, roadmap phase 9d), with what each does to access, its
+ * conditions and whether it passes to the descriptions made from the accession; passing is a copy that names its source.
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
@@ -32,6 +34,7 @@ namespace App\Rights;
 
 use App\Audit\AuditLog;
 use App\Description\Bcp47;
+use App\Models\Accession;
 use App\Models\Agent;
 use App\Models\Concept;
 use App\Models\Instantiation;
@@ -61,24 +64,26 @@ final class RightsService
 
     public const RESTRICTIONS = Vocab::BASE.'rights-restriction/';
 
-    /** The rights of a unit of description or an instantiation that are not deleted, with what they need to be shown. */
+    public const ACCESS = Vocab::BASE.'rights-access/';
+
+    /** The rights of a unit of description, an instantiation or an accession that are not deleted, with what they need to be shown. */
     public function of(Model $subject): Collection
     {
         return Right::where(['subject_table' => $subject->getTable(), 'subject_id' => $subject->getKey()])->whereNull('deleted_at')
-            ->with(['basis.labels', 'statement.labels', 'licence.labels', 'copyrightStatus.labels', 'holder.names', 'grants.act.labels', 'grants.restriction.labels'])
+            ->with(['basis.labels', 'statement.labels', 'licence.labels', 'copyrightStatus.labels', 'holder.names', 'grants.act.labels', 'grants.restriction.labels', 'accessRestriction.labels', 'inheritedFrom'])
             ->orderBy('created_at')->get();
     }
 
     /**
      * Fields: basis (rights-basis notation, required), statement (such as InC), licence (such as CC-BY-4.0),
      * copyright_status, jurisdiction (ISO 3166-1 alpha-2), determined_on, starts_on, ends_on (YYYY-MM-DD),
-     * citation, holder (an authority record's key), note and note_language (BCP 47), and grants:
-     * [{act, restriction, starts_on, ends_on, note}].
+     * citation, holder (an authority record's key), note and note_language (BCP 47), access_restriction (rights-access),
+     * conditions, inherit_to_children (an accession's), and grants: [{act, restriction, starts_on, ends_on, note}].
      */
     public function add(Model $subject, array $fields, ?User $actor = null): Right
     {
-        if (! $subject instanceof RecordResource && ! $subject instanceof Instantiation) {
-            throw new InvalidArgumentException(__('a right is held by a unit of description or an instantiation'));
+        if (! $subject instanceof RecordResource && ! $subject instanceof Instantiation && ! $subject instanceof Accession) {
+            throw new InvalidArgumentException(__('a right is held by a unit of description, an instantiation or an accession'));
         }
         $values = $this->values($subject->getAttribute('institution_id'), $fields);
 
@@ -134,6 +139,34 @@ final class RightsService
         });
 
         return ['added' => $added, 'skipped' => $skipped];
+    }
+
+    /**
+     * Copy the accession's rights that pass down onto a description made from it (Heratio's inheritRightsToIo), each
+     * naming the right it came from; a right copied there before is not copied again.
+     */
+    public function inherit(Accession $accession, RecordResource $record, ?User $actor = null): int
+    {
+        $copied = Right::where(['subject_table' => 'record_resources', 'subject_id' => $record->id])->whereNotNull('inherited_from_id')->pluck('inherited_from_id')->all();
+        $count = 0;
+        foreach ($this->of($accession)->where('inherit_to_children', true)->whereNotIn('id', $copied) as $right) {
+            $fields = $right->only(['basis_id', 'statement_id', 'licence_id', 'copyright_status_id', 'jurisdiction', 'determined_on', 'citation', 'licence_terms',
+                'policy_identifier', 'starts_on', 'ends_on', 'holder_id', 'note', 'note_language', 'access_restriction_id', 'conditions']);
+            DB::transaction(fn () => AuditLog::actingAs($actor, function () use ($record, $right, $fields) {
+                $institution = Institution::findOrFail($record->institution_id);
+                $id = (string) Str::uuid7();
+                $copy = new Right([...$fields, 'institution_id' => $institution->id, 'iri' => $institution->base_iri.'/'.Right::IRI_SEGMENT.'/'.$id,
+                    'subject_table' => 'record_resources', 'subject_id' => $record->id, 'inherit_to_children' => false, 'inherited_from_id' => $right->id]);
+                $copy->id = $id;
+                $copy->save();
+                foreach ($right->grants as $grant) {
+                    RightGrant::create(['right_id' => $copy->id, ...$grant->only(['act_id', 'restriction_id', 'starts_on', 'ends_on', 'note'])]);
+                }
+            }));
+            $count++;
+        }
+
+        return $count;
     }
 
     /** Mark the right deleted: it leaves every page and export, and its IRI is kept. */
@@ -203,6 +236,9 @@ final class RightsService
             'starts_on' => $starts, 'ends_on' => $ends,
             'holder_id' => $holder?->id,
             'note' => $note === '' ? null : $note, 'note_language' => $note === '' ? null : $language,
+            'access_restriction_id' => $optional(self::ACCESS, 'access_restriction'),
+            'conditions' => trim((string) ($fields['conditions'] ?? '')) ?: null,
+            'inherit_to_children' => ! array_key_exists('inherit_to_children', $fields) || (bool) $fields['inherit_to_children'],
         ];
     }
 

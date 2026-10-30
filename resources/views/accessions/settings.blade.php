@@ -1,4 +1,4 @@
-{{-- OpenRiC Workspace - the accession settings: numbering, assignment, what accepting needs, the default priority and checklist, the checklist templates and the numbering sequences (Heratio's intake configuration and numbering, PSIS's accessionIntake config and numbering). Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems. SPDX-License-Identifier: AGPL-3.0-or-later --}}
+{{-- OpenRiC Workspace - the accession settings: numbering, assignment, what accepting needs, the default priority and checklist, the checklist and appraisal templates and the numbering sequences (Heratio's intake configuration, appraisal templates and numbering, PSIS's accessionIntake config and numbering). Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems. SPDX-License-Identifier: AGPL-3.0-or-later --}}
 @extends('layouts.app')
 @section('title', __('Accession settings'))
 @section('content')
@@ -20,6 +20,11 @@
         <label style="font-weight: normal"><input type="checkbox" name="accession_auto_assign" value="1" @checked(old('accession_auto_assign', $institution->accession_auto_assign)) style="width: auto"> {{ __('Assign a new accession to whoever records it') }}</label>
         <input type="hidden" name="accession_requires_agreement" value="0">
         <label style="font-weight: normal"><input type="checkbox" name="accession_requires_agreement" value="1" @checked(old('accession_requires_agreement', $institution->accession_requires_agreement)) style="width: auto"> {{ __('An accession is accepted only once a donor agreement documents it') }}</label>
+        @foreach(['accession_requires_appraisal' => 'An accession is accepted only once an appraisal has been completed', 'accession_container_barcodes' => 'Give the containers of accessions barcodes',
+            'accession_rights_inheritance' => 'Pass an accession\'s rights to the descriptions made from it'] as $field => $text)
+            <input type="hidden" name="{{ $field }}" value="0">
+            <label style="font-weight: normal"><input type="checkbox" name="{{ $field }}" value="1" @checked(old($field, $institution->{$field})) style="width: auto"> {{ __($text) }}</label>
+        @endforeach
         <label for="default_priority">{{ __('Default priority') }}</label>
         <select id="default_priority" name="default_priority" style="font: inherit; padding: .5rem"><option value="">{{ __('Normal') }}</option>@foreach($priorities as $p)<option value="{{ $p->notation }}" @selected($institution->accession_default_priority_id === $p->id)>{{ $p->label($lang) }}</option>@endforeach</select>
         <label for="checklist_template">{{ __('Default intake checklist template') }}</label>
@@ -49,6 +54,31 @@
                 <label for="nt-name">{{ __('Name') }}</label><input id="nt-name" name="name" required maxlength="255">
                 <label for="nt-description">{{ __('Description') }}</label><input id="nt-description" name="description" maxlength="2000">
                 <label for="nt-items">{{ __('Items, one per line') }}</label><textarea id="nt-items" name="items" rows="6" required style="width: 100%; font: inherit"></textarea>
+                <button type="submit">{{ __('Add') }}</button>
+            </form>
+        </details>
+    </section>
+
+    <section id="appraisal-templates">
+        <h2>{{ __('Appraisal templates') }}</h2>
+        <p id="criteria-help">{{ __('One criterion per line: its name, its weight and a description, separated by |, such as "Evidential value | 1.0 | Value as evidence of functions and activities".') }}</p>
+        @php($criteriaText = fn ($t) => collect($t->criteria)->map(fn ($c) => trim($c['name'].' | '.$c['weight'].' | '.($c['description'] ?? ''), ' |'))->join("\n"))
+        @foreach($appraisalTemplates as $t)
+            <details>
+                <summary>{{ $t->name }}@if($t->is_default) ({{ __('default') }})@endif, {{ trans_choice(':count criterion|:count criteria', count($t->criteria), ['count' => count($t->criteria)]) }}@if($t->sector), {{ $t->sector->label($lang) }}@endif</summary>
+                <form method="post" action="{{ route('accessions.appraisal-templates.save', $t->id) }}">
+                    @csrf
+                    @include('accessions._appraisal-template-fields', ['t' => $t, 'prefix' => 'at-'.$t->id, 'criteria' => $criteriaText($t)])
+                    <button type="submit">{{ __('Save') }}</button>
+                </form>
+                <form method="post" action="{{ route('accessions.appraisal-templates.destroy', $t->id) }}">@csrf<button type="submit">{{ __('Delete') }}</button></form>
+            </details>
+        @endforeach
+        <details>
+            <summary>{{ __('Add a template') }}</summary>
+            <form method="post" action="{{ route('accessions.appraisal-templates.save') }}">
+                @csrf
+                @include('accessions._appraisal-template-fields', ['t' => null, 'prefix' => 'at-new', 'criteria' => ''])
                 <button type="submit">{{ __('Add') }}</button>
             </form>
         </details>

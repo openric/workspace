@@ -15,7 +15,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable(['institution_id', 'iri', 'subject_table', 'subject_id', 'basis_id', 'statement_id', 'licence_id', 'copyright_status_id', 'jurisdiction',
-    'determined_on', 'citation', 'licence_terms', 'policy_identifier', 'starts_on', 'ends_on', 'holder_id', 'note', 'note_language', 'deleted_at'])]
+    'determined_on', 'citation', 'licence_terms', 'policy_identifier', 'starts_on', 'ends_on', 'holder_id', 'note', 'note_language', 'deleted_at',
+    'access_restriction_id', 'conditions', 'inherit_to_children', 'inherited_from_id'])]
 class Right extends Model
 {
     use Audited, HasUuids;
@@ -25,7 +26,7 @@ class Right extends Model
 
     protected function casts(): array
     {
-        return ['determined_on' => 'immutable_date', 'starts_on' => 'immutable_date', 'ends_on' => 'immutable_date', 'deleted_at' => 'immutable_datetime'];
+        return ['determined_on' => 'immutable_date', 'starts_on' => 'immutable_date', 'ends_on' => 'immutable_date', 'deleted_at' => 'immutable_datetime', 'inherit_to_children' => 'boolean'];
     }
 
     public function basis(): BelongsTo
@@ -51,6 +52,17 @@ class Right extends Model
     public function holder(): BelongsTo
     {
         return $this->belongsTo(Agent::class, 'holder_id');
+    }
+
+    public function accessRestriction(): BelongsTo
+    {
+        return $this->belongsTo(Concept::class, 'access_restriction_id');
+    }
+
+    /** The accession's right this one was copied from, when it was. */
+    public function inheritedFrom(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'inherited_from_id');
     }
 
     public function grants(): HasMany

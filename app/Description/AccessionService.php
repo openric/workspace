@@ -22,6 +22,7 @@ use App\Models\AccessionPreservationRequirement;
 use App\Models\AccessionSourceConfidentiality;
 use App\Models\Agent;
 use App\Models\Concept;
+use App\Models\ContactPoint;
 use App\Models\Deaccession;
 use App\Models\Identifier;
 use App\Models\Institution;
@@ -30,6 +31,7 @@ use App\Models\Relation;
 use App\Models\Repository;
 use App\Models\User;
 use App\Relations\RelationService;
+use App\Rights\RightsService;
 use App\Support\Vocab;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
@@ -75,6 +77,65 @@ class AccessionService
 
             return $accession;
         }));
+    }
+
+    /**
+     * Heratio's add form in one go: the accession with its number, title and texts (values), repository, types,
+     * status and priority, an alternative identifier, its acquisition date and a date of the material, a transfer or
+     * accessioning event, its donor (an authority record, or a new one with its primary contact), the creators of the
+     * material and the descriptions made from it. Anything left empty is left out.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    public function register(Institution $institution, array $data, User $actor): Accession
+    {
+        $language = (string) $data['language'];
+        $agents = fn (array $keys) => collect($keys)->filter()->unique()->map(fn ($key) => Agent::where('institution_id', $institution->id)->whereNull('deleted_at')->find($key)
+            ?? throw new InvalidArgumentException(__('the authority record is one of the institution\'s')));
+
+        return DB::transaction(function () use ($institution, $data, $language, $actor, $agents) {
+            $values = array_intersect_key($data['values'] ?? [], array_flip(Elements::notations(Elements::ACCESSION)));
+            $accession = $this->create($institution, $data['number'] ?? null, $values['accession-title'] ?? null, $language, $actor);
+            unset($values['accession-title']);
+            $this->update($accession, ['number' => $accession->number()] + $data, $actor);
+            $this->describe($accession, $values, $language, $actor);
+            if (($identifier = trim((string) ($data['identifier_value'] ?? ''))) !== '') {
+                $this->identifiers->add($accession, ['type' => ($data['identifier_type'] ?? '') ?: 'other', 'value' => $identifier], $actor);
+            }
+            $dates = app(DateService::class);
+            if (($day = trim((string) ($data['acquisition_date'] ?? ''))) !== '') {
+                $dates->add($accession, ['property' => 'acquisition', 'normalized' => $day], $actor);
+            }
+            $range = implode('/', array_filter([trim((string) ($data['material_start'] ?? '')), trim((string) ($data['material_end'] ?? ''))], fn ($d) => $d !== ''));
+            if ($range !== '' || trim((string) ($data['material_expressed'] ?? '')) !== '') {
+                $dates->add($accession, ['property' => ($data['material_property'] ?? '') ?: 'creation', 'normalized' => $range === '' ? null : $range,
+                    'expressed' => trim((string) ($data['material_expressed'] ?? '')) ?: null, 'language' => $language], $actor);
+            }
+            if (($data['event']['event_type'] ?? '') !== '') {
+                $this->addRow($accession, 'events', $data['event'], $actor);
+            }
+            $donor = $agents([$data['donor'] ?? null])->first();
+            if ($donor === null && ($name = trim((string) ($data['donor_name'] ?? ''))) !== '') {
+                $donor = app(AgentService::class)->create($institution, ($data['donor_type'] ?? '') ?: 'person', $name, $language, null, $actor);
+                $contact = array_intersect_key($data['donor_contact'] ?? [], array_flip(ContactPoint::FIELDS));
+                if (array_filter($contact, fn ($v) => trim((string) $v) !== '') !== []) {
+                    app(ContactPointService::class)->save($donor, $contact + ['is_primary' => true], null, $actor);
+                }
+            }
+            if ($donor) {
+                $this->relations->create($accession, 'participation', $donor, ['role' => 'donor'], $actor);
+            }
+            foreach ($agents($data['creators'] ?? []) as $creator) {
+                $this->relations->create($accession, 'material-creator', $creator, [], $actor);
+            }
+            foreach (collect($data['records'] ?? [])->filter()->unique() as $key) {
+                $record = RecordResource::where('institution_id', $institution->id)->whereNull('deleted_at')->find($key)
+                    ?? throw new InvalidArgumentException(__('the archival description is one of the institution\'s'));
+                $this->relations->create($accession, 'result', $record, [], $actor);
+            }
+
+            return $accession;
+        });
     }
 
     /** @param  array<string, ?string>  $values  accession element notation => text */
@@ -186,7 +247,8 @@ class AccessionService
     /**
      * A description made from the accession, as Heratio's createInformationObject: its title (or else its number),
      * its number as the reference code and its scope and content, held by the accession's repository or the one
-     * given, with the accession resulting in it.
+     * given, with the accession resulting in it. When the institution passes rights down, the accession's rights that
+     * pass are copied onto it (Heratio's inheritRightsToIo).
      */
     public function createDescription(Accession $accession, string $levelIri, ?Repository $repository, string $language, User $actor): RecordResource
     {
@@ -200,6 +262,9 @@ class AccessionService
                 $records->describe($record, ['scope-and-content' => $scope], $language, $actor);
             }
             $this->relations->create($accession, 'result', $record, [], $actor);
+            if (Institution::whereKey($accession->institution_id)->value('accession_rights_inheritance')) {
+                app(RightsService::class)->inherit($accession, $record, $actor);
+            }
 
             return $record;
         });

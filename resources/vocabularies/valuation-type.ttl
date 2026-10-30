@@ -1,0 +1,44 @@
+# OpenRiC Workspace - OpenRiC Workspace Valuation Types.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Why a valuation of an accession was made, for GRAP 103 and IPSAS 45 (PSIS's accession_valuation_history.valuation_type).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/valuation-type/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Valuation Types"@en ;
+    dcterms:description "Why a valuation of an accession was made, for GRAP 103 and IPSAS 45 (PSIS's accession_valuation_history.valuation_type)."@en ;
+    dcterms:issued "2026-10-29"^^xsd:date ;
+    skos:hasTopConcept v:initial, v:revaluation, v:impairment, v:disposal .
+
+v:initial a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Initial"@en, "Aanvanklik"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession's appraisal and valuation, as PSIS and Heratio keep it."@en ;
+    skos:definition "Its first valuation, when it was acquired."@en .
+
+v:revaluation a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Revaluation"@en, "Herwaardasie"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession's appraisal and valuation, as PSIS and Heratio keep it."@en ;
+    skos:definition "A later valuation."@en .
+
+v:impairment a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Impairment"@en, "Waardedaling"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession's appraisal and valuation, as PSIS and Heratio keep it."@en ;
+    skos:definition "A loss of value, such as from damage."@en .
+
+v:disposal a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Disposal"@en, "Vervreemding"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession's appraisal and valuation, as PSIS and Heratio keep it."@en ;
+    skos:definition "Its value when it was disposed of."@en .

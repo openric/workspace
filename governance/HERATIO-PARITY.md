@@ -12,7 +12,7 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 |---|---|---|---|---|---|---|
 | `ahg-3d-model` | 7687 | out: GLAM sector | Planned | 21 | `ahg3DModelPlugin` |  |
 | `ahg-access-request` | 1928 | V0.1 candidate | Partial | 7 | `ahgAccessRequestPlugin` | Requests for files on request, approved for some days or refused, each step emailed (v0.0.65); security clearance requests in phase 18 |
-| `ahg-accession-manage` | 6795 | later: V1.0+ | Partial | 9 | `ahgAccessionManagePlugin`, `qtAccessionPlugin` | Accessions, CAAIS, deaccessions, CSV and CAAIS export from v0.0.77 (9a); intake (9c), appraisal, valuation, containers and rights (9d) to come |
+| `ahg-accession-manage` | 6795 | later: V1.0+ | Partial | 9 | `ahgAccessionManagePlugin`, `qtAccessionPlugin` | Accessions, CAAIS, deaccessions, CSV and CAAIS export from v0.0.77 (9a); intake from v0.0.79 (9c); appraisal, valuation, containers, rights and the whole add form from v0.0.80 (9d) |
 | `ahg-acl` | 9750 | V0.1 candidate | Covered |  | `qbAclPlugin` | Roles and permissions with default deny (ADR 0005), written fresh |
 | `ahg-actor-manage` | 13061 | V0.1 candidate | Covered |  | `ahgActorManagePlugin`, `ahgAuthorityPlugin`, `ahgContactPlugin` | Authority records: ISAAR(CPF), merge, split, duplicates, completeness |
 | `ahg-ai-chatbot` | 4924 | out: AI (V2+) | Planned | 17 (last) | `ahgChatbotPlugin` |  |
@@ -288,6 +288,7 @@ Asked for by Dr Johan Pieterse on 28 October 2026: each Workspace screen has a p
 | `total_capacity`, `used_capacity`, `capacity_unit`, `total_linear_metres`, `used_linear_metres` | Capacity and capacity used, in a unit (linear metres among them) | Same |
 | `climate_controlled`, `temperature_min`, `temperature_max`, `humidity_min`, `humidity_max` | The same | Same |
 | `security_level`, `access_restrictions`, `status`, `notes` | Security level, Who may open it, Status, Note | Same |
+| PSIS `accession_container`: `condition_status`, `weight_kg`, `item_count` | Condition, Weight (kg), Number of items | Same, from v0.0.80 |
 
 : Physical storage, field by field
 
@@ -318,7 +319,7 @@ Asked for by Dr Johan Pieterse on 28 October 2026: each Workspace screen has a p
 | `license_type`, `license_identifier`, `license_url` | Licence (a concept with its IRI) | Modelled |
 | `license_terms` (a licence outside Creative Commons) | Licence terms | Same, from v0.0.73 |
 | `policy_identifier` | Policy identifier | Same, from v0.0.73 |
-| `donor_name` | none | Phase 9d, with an accession's rights |
+| `donor_name` | Rights holder (an authority record), on an accession's rights as on others | Modelled, from v0.0.80 |
 
 : Rights, field by field
 
@@ -342,6 +343,7 @@ Heratio's accession edit form and CAAIS partial (`edit.blade.php`, `partials/_ca
 
 | Heratio field | Workspace | Status |
 |---|---|---|
+| The add form (`edit.blade.php` with no accession): every field below on one page | Add new accession record: basic info, an alternative identifier, the acquisition date, the donor or a new donor with their primary contact, the administration area, a date of the material, an event, creators, the CAAIS elements and the descriptions made from it | Same, from v0.0.80; more dates, events, extents, languages and preservation requirements are added on the accession's page |
 | `identifier` (Accession number) | Accession number (CAAIS 1.2), unique in the institution | Same, from v0.0.77 |
 | `alternativeIdentifiers[identifier, identifierType, note]` | Identifiers of the accession, typed (previous, other) | Modelled: a type in place of a free label; no note |
 | `date` (Acquisition date) | Dates: Acquisition date | Modelled |
@@ -388,8 +390,18 @@ Heratio's accession edit form and CAAIS partial (`edit.blade.php`, `partials/_ca
 | `accession_attachment` (file, category, description, uploaded by) | Attachments, kept by SHA-256 and scanned through the file store | Same, from v0.0.79 |
 | `accession_numbering_sequence` (mask, repository, last sequence, year) and `nextAccessionNumber` | Numbering: a number given when none is typed, from the institution's mask, each sequence starting again each year | Same, from v0.0.79 |
 | `accession_config`: `numbering_mask`, `auto_assign_enabled`, `require_donor_agreement`, `default_priority`, `intake_checklist_template_id` | Accession settings | Same, from v0.0.79 |
-| `accession_config`: `require_appraisal`, `appraisal_template_id`, `allow_container_barcodes`, `rights_inheritance_enabled` | none | Phase 9d |
-| Rights area, appraisal, valuation, accession containers | none | Phase 9d |
+| `accession_config`: `require_appraisal`, `allow_container_barcodes`, `rights_inheritance_enabled` | Accession settings: accepting needs a completed appraisal; containers get barcodes; rights pass to descriptions made from it | Same, from v0.0.80, defaults as Heratio's install seeds them |
+| `accession_config`: `appraisal_template_id` | The default appraisal template | Modelled: a template is marked default |
+| `accession_appraisal` (type, appraiser, monetary value, currency, significance, recommendation, summary, detailed notes, appraised at) | Appraisal: the same, the appraiser an authority record | Same, from v0.0.80; Heratio's form is a stub over PSIS's table |
+| `accession_appraisal_criterion` (name, score 1 to 5, weight, notes) and the weighted score | Criteria, scored, with the weighted score | Same, from v0.0.80 |
+| `accession_appraisal_template` (name, description, criteria, sector, default) and the seeded Archival Appraisal | Appraisal templates in the accession settings; Archival Appraisal given to every institution | Same, from v0.0.80 |
+| Finalise with `require_appraisal` (an appraisal that is not pending) | Accept (finalise) needs a completed appraisal when the institution asks | Same, from v0.0.80 |
+| `accession_valuation_history` (type, amount, currency, date, valuer, method, reference document, notes) | Valuation, the latest its current value | Same, from v0.0.80 |
+| Valuation report (current value per accession, totals by currency, counts by type) | Valuation report | Same, from v0.0.80 |
+| `accession_container` (type, label, barcode, location, condition, item count, weight, dimensions, notes) | Containers: storage containers linked to the accession, added from its page | Modelled: one container in storage, not a second list; dimensions and notes on the container |
+| `accession_container_item` (lines in a container not yet described) | none: the descriptions placed in the container | Modelled |
+| `accession_rights` (basis, holder, start, end, restriction, conditions, grant act and restriction, notes, inherit) | Rights of the accession: the Workspace's rights, with Restriction, Conditions and Passes to the descriptions | Same, from v0.0.80 |
+| `accession_rights_inherited` | A description's right copied from the accession's, naming its source | Modelled: a copy, so it can change on its own |
 | Print | none: the browser prints the page | Missing |
 
 : Accession, field by field

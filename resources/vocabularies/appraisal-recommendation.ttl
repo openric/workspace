@@ -1,0 +1,51 @@
+# OpenRiC Workspace - OpenRiC Workspace Appraisal Recommendations.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What an appraisal recommends (PSIS's and Heratio's accession_appraisal.recommendation).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/appraisal-recommendation/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Appraisal Recommendations"@en ;
+    dcterms:description "What an appraisal recommends (PSIS's and Heratio's accession_appraisal.recommendation)."@en ;
+    dcterms:issued "2026-10-29"^^xsd:date ;
+    skos:hasTopConcept v:pending, v:accept, v:reject, v:partial, v:defer .
+
+v:pending a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Pending"@en, "Hangende"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession's appraisal and valuation, as PSIS and Heratio keep it."@en ;
+    skos:definition "Not yet decided."@en .
+
+v:accept a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Accept"@en, "Aanvaar"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession's appraisal and valuation, as PSIS and Heratio keep it."@en ;
+    skos:definition "Accept it into the holdings."@en .
+
+v:reject a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Reject"@en, "Afkeur"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession's appraisal and valuation, as PSIS and Heratio keep it."@en ;
+    skos:definition "Do not accept it."@en .
+
+v:partial a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Partial"@en, "Gedeeltelik"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession's appraisal and valuation, as PSIS and Heratio keep it."@en ;
+    skos:definition "Accept part of it."@en .
+
+v:defer a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Defer"@en, "Uitstel"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the accession's appraisal and valuation, as PSIS and Heratio keep it."@en ;
+    skos:definition "Decide later."@en .

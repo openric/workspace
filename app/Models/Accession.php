@@ -122,6 +122,17 @@ class Accession extends Model
         return $this->hasMany(AccessionAttachment::class)->orderByDesc('created_at');
     }
 
+    public function appraisals(): HasMany
+    {
+        return $this->hasMany(AccessionAppraisal::class)->orderByDesc('appraised_on')->orderByDesc('created_at');
+    }
+
+    /** Its valuations, the latest first: the first is its current value. */
+    public function valuations(): HasMany
+    {
+        return $this->hasMany(AccessionValuation::class)->orderByDesc('valued_on')->orderByDesc('created_at');
+    }
+
     public function deaccessions(): HasMany
     {
         return $this->hasMany(Deaccession::class)->orderBy('date')->orderBy('created_at');

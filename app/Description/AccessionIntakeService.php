@@ -20,9 +20,12 @@ use App\Models\AccessionChecklistItem;
 use App\Models\AccessionTimelineEvent;
 use App\Models\ChecklistTemplate;
 use App\Models\Concept;
+use App\Models\Container;
 use App\Models\Institution;
+use App\Models\Place;
 use App\Models\Relation;
 use App\Models\User;
+use App\Relations\RelationService;
 use App\Support\Vocab;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
@@ -101,7 +104,7 @@ class AccessionIntakeService
         }));
     }
 
-    /** What stands in the way of accepting it (Heratio's finalisationBlockers): an agreement documenting it, when the institution asks for one. */
+    /** What stands in the way of accepting it (Heratio's finalisationBlockers): an agreement documenting it and a completed appraisal, when the institution asks for them. */
     public function blockers(Accession $accession): array
     {
         $blockers = [];
@@ -111,7 +114,7 @@ class AccessionIntakeService
             $blockers[] = __('no donor agreement documents it');
         }
 
-        return $blockers;
+        return [...$blockers, ...app(AccessionAppraisalService::class)->blockers($accession)];
     }
 
     public function assign(Accession $accession, ?User $assignee, User $actor): void
@@ -213,6 +216,37 @@ class AccessionIntakeService
         DB::transaction(fn () => AuditLog::actingAs($actor, function () use ($attachment, $actor) {
             $attachment->delete();
             $this->record($attachment->accession, 'note', $actor, __('Attachment removed: :name', ['name' => $attachment->original_name]));
+        }));
+    }
+
+    /**
+     * A new container for the accession's material (PSIS's createContainer): a storage container, linked to the accession
+     * by the storage relation, with its type, condition, weight and item count, its barcode when the institution uses
+     * them, and the storage place it is kept in. Fields: name, type (a key), condition (a notation), weight_kg,
+     * item_count, barcode, place (a key), language.
+     */
+    public function containerise(Accession $accession, array $fields, User $actor): Container
+    {
+        $storage = app(StorageService::class);
+        $institution = Institution::findOrFail($accession->institution_id);
+        $name = trim((string) ($fields['name'] ?? '')) ?: throw new InvalidArgumentException(__('give the container a name'));
+        $place = ($fields['place'] ?? '') === '' ? null : (Place::where('institution_id', $institution->id)->whereNull('deleted_at')->find($fields['place'])
+            ?? throw new InvalidArgumentException(__('the place is one of the institution\'s')));
+
+        return DB::transaction(fn () => AuditLog::actingAs($actor, function () use ($accession, $fields, $actor, $storage, $institution, $name, $place) {
+            $container = $storage->create($institution, $name, (string) ($fields['language'] ?? 'en'), ($fields['type'] ?? '') ?: null, null, $actor);
+            $storage->updateFacts($container, ['type' => $container->container_type_id, 'status' => 'active', 'condition' => $fields['condition'] ?? null,
+                'weight_kg' => $fields['weight_kg'] ?? null, 'item_count' => $fields['item_count'] ?? null], $actor);
+            if ($institution->accession_container_barcodes && trim((string) ($fields['barcode'] ?? '')) !== '') {
+                $storage->setBarcode($container, $fields['barcode'], $actor);
+            }
+            if ($place) {
+                $storage->move($container, $place, null, null, $actor);
+            }
+            app(RelationService::class)->create($accession, 'storage', $container, [], $actor);
+            $this->record($accession, 'containerised', $actor, __('Container added: :name', ['name' => $name]), ['container_id' => $container->id]);
+
+            return $container;
         }));
     }
 

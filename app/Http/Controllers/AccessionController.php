@@ -11,19 +11,23 @@
 
 namespace App\Http\Controllers;
 
+use App\Description\AccessionAppraisalService;
 use App\Description\AccessionIntakeService;
 use App\Description\AccessionService;
 use App\Description\Bcp47;
 use App\Description\DateService;
 use App\Description\Elements;
 use App\Description\IsoCodes;
+use App\Description\StorageService;
 use App\Models\Accession;
 use App\Models\Agent;
 use App\Models\Concept;
 use App\Models\Identifier;
 use App\Models\Name;
+use App\Models\RecordResource;
 use App\Models\Relation;
 use App\Models\Repository;
+use App\Models\Right;
 use App\Models\User;
 use App\Relations\RelationService;
 use App\Support\Vocab;
@@ -56,8 +60,19 @@ class AccessionController extends Controller
     public function create(Request $request): View
     {
         abort_unless($request->user()->may('create', 'accession'), 403);
+        $institutionId = $request->user()->institution_id;
+        $choices = fn (string $vocabulary) => Concept::choices(Vocab::BASE.$vocabulary.'/')->with('labels')->get();
 
-        return view('accessions.create');
+        return view('accessions.create', ['terms' => collect(AccessionService::TERMS)->map($choices), 'repositories' => $this->repositories($institutionId),
+            'agents' => Agent::where('institution_id', $institutionId)->whereNull('deleted_at')->with('names')->get()
+                ->sortBy(fn (Agent $a) => mb_strtolower((string) $a->described('agent-authorised-name', ['en'])))->values(),
+            // ponytail: every description in one list, as the rights holder's authority records; a search field when an institution holds thousands.
+            'records' => RecordResource::where('institution_id', $institutionId)->whereNull('deleted_at')->with('names')->limit(2000)->get()
+                ->sortBy(fn (RecordResource $r) => mb_strtolower((string) $r->described('title', ['en'])))->values(),
+            'agentTypes' => Concept::choices(Agent::TYPES)->with('labels')->get(), 'identifierTypes' => Concept::choices(Vocab::IDENTIFIER_TYPES)->with('labels')->get()
+                ->reject(fn (Concept $c) => in_array($c->notation, ['local', 'barcode'], true))->values(),
+            'events' => $choices('accession-event-type'), 'materialProperties' => app(DateService::class)->choices('accession')['properties']->reject(fn (Concept $c) => $c->notation === 'acquisition')->values(),
+            'accession' => new Accession(['institution_id' => $institutionId])]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -66,14 +81,29 @@ class AccessionController extends Controller
         $data = $request->validate([
             'number' => ['nullable', 'string', 'max:255'], 'title' => ['nullable', 'string', 'max:2000'],
             'language' => ['required', 'string', fn ($a, $v, $fail) => Bcp47::valid((string) $v) || $fail(__('Give a BCP 47 language tag, such as en or af.'))],
+            'repository' => ['nullable', 'uuid'], 'acquisition_type' => ['nullable', 'string', 'max:64'], 'resource_type' => ['nullable', 'string', 'max:64'],
+            'processing_status' => ['nullable', 'string', 'max:64'], 'processing_priority' => ['nullable', 'string', 'max:64'],
+            'values' => ['array'], 'values.*' => ['nullable', 'string', 'max:65535'],
+            'identifier_type' => ['nullable', 'string', 'max:64'], 'identifier_value' => ['nullable', 'string', 'max:255'],
+            'acquisition_date' => ['nullable', 'date_format:Y-m-d'], 'material_property' => ['nullable', 'string', 'max:64'], 'material_expressed' => ['nullable', 'string', 'max:255'],
+            'material_start' => ['nullable', 'string', 'max:10'], 'material_end' => ['nullable', 'string', 'max:10'],
+            'event' => ['array'], 'event.event_type' => ['nullable', 'string', 'max:64'], 'event.date' => ['nullable', 'string', 'max:10'], 'event.agent' => ['nullable', 'string', 'max:255'], 'event.note' => ['nullable', 'string', 'max:65535'],
+            'donor' => ['nullable', 'uuid'], 'donor_name' => ['nullable', 'string', 'max:2000'], 'donor_type' => ['nullable', 'string', 'max:64'],
+            'donor_contact' => ['array'], 'donor_contact.email' => ['nullable', 'email', 'max:255'], 'donor_contact.website' => ['nullable', 'url:http,https', 'max:1024'],
+            'donor_contact.country_code' => ['nullable', 'string', 'regex:/^[A-Za-z]{2}$/'], 'donor_contact.latitude' => ['nullable', 'numeric', 'between:-90,90'],
+            'donor_contact.longitude' => ['nullable', 'numeric', 'between:-180,180'], 'donor_contact.*' => ['nullable', 'string', 'max:5000'],
+            'creators' => ['array'], 'creators.*' => ['nullable', 'uuid'], 'records' => ['array'], 'records.*' => ['nullable', 'uuid'],
         ]);
+        if (($data['title'] ?? '') !== '' && ($data['values']['accession-title'] ?? '') === '') {
+            $data['values']['accession-title'] = $data['title'];
+        }
         try {
-            $accession = $this->accessions->create($request->user()->institution, $data['number'] ?? null, $data['title'] ?? null, $data['language'], $request->user());
+            $accession = $this->accessions->register($request->user()->institution, $data, $request->user());
         } catch (InvalidArgumentException $e) {
             return back()->withInput()->withErrors(['number' => $e->getMessage()]);
         }
 
-        return redirect()->route('accessions.show', $accession)->with('status', __('Accession registered. Add its donor, what came in and when.'));
+        return redirect()->route('accessions.show', $accession)->with('status', __('Accession registered.'));
     }
 
     public function show(Request $request, Accession $accession): View
@@ -84,7 +114,8 @@ class AccessionController extends Controller
             'events.eventType.labels', 'extents.extentType.labels', 'extents.unit.labels', 'extents.contentType.labels', 'extents.carrierType.labels',
             'languages', 'preservationRequirements.requirementType.labels', 'sourceConfidentiality.confidentiality.labels', 'deaccessions.scope.labels',
             'intakeStatus.labels', 'intakePriority.labels', 'assignedTo', 'checklist.completedBy', 'attachments.category.labels', 'attachments.uploadedBy',
-            'timeline.eventType.labels', 'timeline.actor']);
+            'timeline.eventType.labels', 'timeline.actor', 'appraisals.type.labels', 'appraisals.significance.labels', 'appraisals.recommendation.labels',
+            'appraisals.appraiser.names', 'appraisals.recordedBy', 'appraisals.criteria', 'valuations.type.labels', 'valuations.method.labels', 'valuations.recordedBy']);
         $intake = app(AccessionIntakeService::class);
         $choices = fn (string $vocabulary) => Concept::choices(Vocab::BASE.$vocabulary.'/')->with('labels')->get();
 
@@ -95,6 +126,13 @@ class AccessionController extends Controller
                 'transitions' => AccessionIntakeService::TRANSITIONS[$accession->intakeStatus->notation] ?? [],
                 'accounts' => User::where('institution_id', $accession->institution_id)->orderBy('name')->get()->filter(fn (User $u) => ! $u->isDisabled() && $u->may('update', 'accession'))->values(),
                 'templates' => $intake->templates($request->user()->institution), 'priorities' => $choices('intake-priority'), 'categories' => $choices('attachment-category')],
+            'care' => ['types' => $choices('appraisal-type'), 'significance' => $choices('appraisal-significance'), 'recommendations' => $choices('appraisal-recommendation'),
+                'valuationTypes' => $choices('valuation-type'), 'methods' => $choices('valuation-method'), 'templates' => app(AccessionAppraisalService::class)->templates($request->user()->institution),
+                'agents' => Agent::where('institution_id', $accession->institution_id)->whereNull('deleted_at')->with('names')->get()
+                    ->sortBy(fn (Agent $a) => mb_strtolower((string) $a->described('agent-authorised-name', ['en'])))->values(),
+                'containerTypes' => app(StorageService::class)->types($accession->institution_id), 'conditions' => $choices('container-condition'),
+                'places' => app(StorageService::class)->storagePlaces($accession->institution_id), 'barcodes' => (bool) $request->user()->institution->fresh()->accession_container_barcodes,
+                'mayStore' => $request->user()->may('create', 'storage')],
             'mayDescribe' => $request->user()->may('create', 'description'),
             'repositories' => $this->repositories($accession->institution_id),
             'levels' => Concept::bundledThenLocal(Vocab::BASE.'level-of-description/', 'level-of-description', $accession->institution_id),
@@ -194,7 +232,10 @@ class AccessionController extends Controller
             return redirect()->route('accessions.show', $accession)->withErrors(['accession' => $e->getMessage()]);
         }
 
-        return redirect()->route('records.edit', $record)->with('status', __('Archival description created from accession.'));
+        $inherited = Right::where(['subject_table' => 'record_resources', 'subject_id' => $record->id])->whereNotNull('inherited_from_id')->count();
+
+        return redirect()->route('records.edit', $record)->with('status', __('Archival description created from accession.')
+            .($inherited > 0 ? ' '.trans_choice('It inherited :count right from the accession.|It inherited :count rights from the accession.', $inherited, ['count' => $inherited]) : ''));
     }
 
     /** Heratio's donor browse: the authority records that took part in an accession as its donor. */

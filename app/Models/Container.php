@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[Fillable(['institution_id', 'iri', 'container_type_id', 'status_id', 'security_level_id', 'width_cm', 'height_cm', 'depth_cm', 'capacity', 'capacity_used',
-    'capacity_unit_id', 'climate_controlled', 'temperature_min', 'temperature_max', 'humidity_min', 'humidity_max'])]
+    'capacity_unit_id', 'climate_controlled', 'temperature_min', 'temperature_max', 'humidity_min', 'humidity_max', 'condition_id', 'weight_kg', 'item_count'])]
 class Container extends Model
 {
     use Audited, Describable, HasDates, HasIdentifiers, HasUuids;
@@ -44,6 +44,11 @@ class Container extends Model
     public function status(): BelongsTo
     {
         return $this->belongsTo(Concept::class, 'status_id');
+    }
+
+    public function condition(): BelongsTo
+    {
+        return $this->belongsTo(Concept::class, 'condition_id');
     }
 
     public function securityLevel(): BelongsTo

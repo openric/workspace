@@ -15,12 +15,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable(['name', 'base_iri', 'header_title', 'logo_path', 'logo_mime', 'catalogue_introduction', 'catalogue_credits', 'registration_open', 'interface_languages',
     'watermark_type_id', 'watermark_position_id', 'watermark_opacity', 'watermark_min_size', 'watermark_image_path', 'accession_numbering_mask',
-    'agreement_numbering_mask', 'accession_auto_assign', 'accession_requires_agreement', 'accession_default_priority_id', 'accession_checklist_template_id'])]
+    'agreement_numbering_mask', 'accession_auto_assign', 'accession_requires_agreement', 'accession_default_priority_id', 'accession_checklist_template_id',
+    'accession_requires_appraisal', 'accession_container_barcodes', 'accession_rights_inheritance'])]
 class Institution extends Model
 {
     protected function casts(): array
     {
-        return ['registration_open' => 'boolean', 'interface_languages' => 'array', 'accession_auto_assign' => 'boolean', 'accession_requires_agreement' => 'boolean'];
+        return ['registration_open' => 'boolean', 'interface_languages' => 'array', 'accession_auto_assign' => 'boolean', 'accession_requires_agreement' => 'boolean', 'accession_requires_appraisal' => 'boolean', 'accession_container_barcodes' => 'boolean', 'accession_rights_inheritance' => 'boolean'];
     }
 
     use Audited, HasUuids;

@@ -1,4 +1,4 @@
-{{-- OpenRiC Workspace - one accession: basic info, its texts, dates, donors, creators and the descriptions made from it, the CAAIS statements, deaccessions and its record's history (Heratio's accession show). Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems. SPDX-License-Identifier: AGPL-3.0-or-later --}}
+{{-- OpenRiC Workspace - one accession: basic info, its intake, texts, dates, donors, creators, storage and containers, the descriptions made from it, agreements, appraisal, valuation and rights, the CAAIS statements, deaccessions and its record's history (Heratio's accession show). Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems. SPDX-License-Identifier: AGPL-3.0-or-later --}}
 @extends('layouts.app')
 @section('title', $accession->heading([app()->getLocale(), 'en']))
 @section('content')
@@ -61,6 +61,7 @@
     @if(auth()->user()->mayAnywhere('read', 'storage'))
         @include('description._relations', ['subject' => $accession, 'kind' => 'accessions', 'relations' => $relations->filter(fn ($r) => $r->kind() !== 'storage' || auth()->user()->may('read', 'storage', $r->other)), 'canUpdate' => $canUpdate,
             'heading' => 'Physical storage', 'types' => ['storage'], 'section' => 'st', 'add' => 'storage|source', 'addLabel' => 'Link physical storage'])
+        @include('accessions._containers')
     @endif
     <section id="descriptions">
         @include('description._relations', ['subject' => $accession, 'kind' => 'accessions', 'relations' => $relations, 'canUpdate' => $canUpdate,
@@ -90,6 +91,9 @@
             'heading' => 'Donor agreements', 'types' => ['documentation'], 'section' => 'ag'])
         @if(auth()->user()->may('create', 'agreement'))<p><a href="{{ route('agreements.create') }}">{{ __('New agreement') }}</a></p>@endif
     @endif
+
+    @include('accessions._appraisal')
+    @include('description._rights', ['subject' => $accession, 'kind' => 'accessions', 'canUpdate' => $canUpdate])
 
     @php($label = fn ($c) => $c?->label($lang))
     @foreach([

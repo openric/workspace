@@ -9,6 +9,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Description\AccessionAppraisalService;
 use App\Description\AccessionIntakeService;
 use App\Description\NumberingService;
 use App\Files\FileResponse;
@@ -149,6 +150,18 @@ class AccessionIntakeController extends Controller
         return $this->attempt($accession, fn () => $this->intake->detach($file, $request->user()), __('Removed.'), 'attachments');
     }
 
+    /** A new container for the accession's material, linked to it (PSIS's accessionContainer). */
+    public function containerise(Request $request, Accession $accession): RedirectResponse
+    {
+        $this->own($request, $accession);
+        abort_unless($request->user()->may('create', 'storage'), 403);
+        $data = $request->validate(['name' => ['required', 'string', 'max:255'], 'type' => ['nullable', 'uuid'], 'condition' => ['nullable', 'string', 'max:64'],
+            'weight_kg' => ['nullable', 'string', 'max:20'], 'item_count' => ['nullable', 'string', 'max:10'], 'barcode' => ['nullable', 'string', 'max:255'],
+            'place' => ['nullable', 'uuid'], 'language' => ['required', 'string', 'max:35']]);
+
+        return $this->attempt($accession, fn () => $this->intake->containerise($accession, $data, $request->user()), __('Container added.'), 'containers');
+    }
+
     /** Heratio's intake configuration and numbering, and the checklist templates. */
     public function settings(Request $request): View
     {
@@ -156,6 +169,8 @@ class AccessionIntakeController extends Controller
         $templates = $this->intake->templates($institution);
 
         return view('accessions.settings', ['institution' => $institution->fresh(), 'templates' => $templates, 'tokens' => NumberingService::TOKENS,
+            'appraisalTemplates' => app(AccessionAppraisalService::class)->templates($institution),
+            'sectors' => Concept::choices(Vocab::BASE.'appraisal-sector/')->with('labels')->get(),
             'priorities' => Concept::choices(Vocab::BASE.'intake-priority/')->with('labels')->get(),
             'sequences' => DB::table('numbering_sequences as s')->where('s.institution_id', $institution->id)->orderBy('s.kind')->get()]);
     }
@@ -166,14 +181,17 @@ class AccessionIntakeController extends Controller
         $data = $request->validate([
             'accession_numbering_mask' => ['required', 'string', 'max:100', fn ($a, $v, $fail) => NumberingService::valid((string) $v) || $fail(__('A numbering mask needs a sequence, {SEQ} or {SEQ:n}.'))],
             'agreement_numbering_mask' => ['required', 'string', 'max:100', fn ($a, $v, $fail) => NumberingService::valid((string) $v) || $fail(__('A numbering mask needs a sequence, {SEQ} or {SEQ:n}.'))],
-            'accession_auto_assign' => ['nullable', 'boolean'], 'accession_requires_agreement' => ['nullable', 'boolean'],
+            'accession_auto_assign' => ['nullable', 'boolean'], 'accession_requires_agreement' => ['nullable', 'boolean'], 'accession_requires_appraisal' => ['nullable', 'boolean'],
+            'accession_container_barcodes' => ['nullable', 'boolean'], 'accession_rights_inheritance' => ['nullable', 'boolean'],
             'default_priority' => ['nullable', 'string', 'max:64'], 'checklist_template' => ['nullable', 'uuid'],
         ]);
         $priority = ($data['default_priority'] ?? '') === '' ? null : Concept::choices(Vocab::BASE.'intake-priority/')->where('notation', $data['default_priority'])->firstOrFail();
         $template = ($data['checklist_template'] ?? '') === '' ? null : ChecklistTemplate::where('institution_id', $institution->id)->findOrFail($data['checklist_template']);
         $institution->update(['accession_numbering_mask' => $data['accession_numbering_mask'], 'agreement_numbering_mask' => $data['agreement_numbering_mask'],
             'accession_auto_assign' => (bool) ($data['accession_auto_assign'] ?? false), 'accession_requires_agreement' => (bool) ($data['accession_requires_agreement'] ?? false),
-            'accession_default_priority_id' => $priority?->id, 'accession_checklist_template_id' => $template?->id]);
+            'accession_default_priority_id' => $priority?->id, 'accession_checklist_template_id' => $template?->id,
+            'accession_requires_appraisal' => (bool) ($data['accession_requires_appraisal'] ?? false), 'accession_container_barcodes' => (bool) ($data['accession_container_barcodes'] ?? false),
+            'accession_rights_inheritance' => (bool) ($data['accession_rights_inheritance'] ?? false)]);
 
         return redirect()->route('accessions.settings')->with('status', __('Accession settings saved.'));
     }

@@ -1,0 +1,51 @@
+# OpenRiC Workspace - OpenRiC Workspace Rights Access Restrictions.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What a right does to access (Heratio's accession_rights.restriction_type).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/rights-access/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Rights Access Restrictions"@en ;
+    dcterms:description "What a right does to access (Heratio's accession_rights.restriction_type)."@en ;
+    dcterms:issued "2026-10-29"^^xsd:date ;
+    skos:hasTopConcept v:open, v:partial, v:conditional, v:restricted, v:closed .
+
+v:open a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Open"@en, "Oop"@af ;
+    skos:scopeNote "Not a RiC-O term: what the right does to access, kept with the rico:Rule, as Heratio's accession rights keep it."@en ;
+    skos:definition "No restriction."@en .
+
+v:partial a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Partial"@en, "Gedeeltelik"@af ;
+    skos:scopeNote "Not a RiC-O term: what the right does to access, kept with the rico:Rule, as Heratio's accession rights keep it."@en ;
+    skos:definition "Part of it is restricted."@en .
+
+v:conditional a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Conditional"@en, "Voorwaardelik"@af ;
+    skos:scopeNote "Not a RiC-O term: what the right does to access, kept with the rico:Rule, as Heratio's accession rights keep it."@en ;
+    skos:definition "Open on conditions."@en .
+
+v:restricted a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Restricted"@en, "Beperk"@af ;
+    skos:scopeNote "Not a RiC-O term: what the right does to access, kept with the rico:Rule, as Heratio's accession rights keep it."@en ;
+    skos:definition "Open only to some."@en .
+
+v:closed a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Closed"@en, "Gesluit"@af ;
+    skos:scopeNote "Not a RiC-O term: what the right does to access, kept with the rico:Rule, as Heratio's accession rights keep it."@en ;
+    skos:definition "Not open."@en .

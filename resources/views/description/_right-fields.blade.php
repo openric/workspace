@@ -1,5 +1,5 @@
 {{-- OpenRiC Workspace - the fields of a right (Heratio's rights edit form, ahg-extended-rights). Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems. SPDX-License-Identifier: AGPL-3.0-or-later --}}
-{{-- Needs: $right (or null), $prefix (unique id prefix), $choices (vocabulary IRI => concepts). Every list is a vocabulary. --}}
+{{-- Needs: $right (or null), $prefix (unique id prefix), $choices (vocabulary IRI => concepts); $inherits for an accession's. Every list is a vocabulary. --}}
 @php($lang = \App\Support\Vocab::languages())
 @php($select = function (string $name, string $vocabulary, ?\App\Models\Concept $current, bool $optional) use ($choices, $lang, $prefix) {
     $html = '<select id="'.e($prefix.'-'.$name).'" name="'.e($name).'">'.($optional ? '<option value="">'.e(__('Not given')).'</option>' : '');
@@ -42,5 +42,11 @@
         </div>
     @endforeach
 </fieldset>
+<label for="{{ $prefix }}-access_restriction">{{ __('Restriction') }}</label>{{ $select('access_restriction', \App\Rights\RightsService::ACCESS, $right?->accessRestriction, true) }}
+<label for="{{ $prefix }}-conditions">{{ __('Conditions') }}</label><textarea id="{{ $prefix }}-conditions" name="conditions" rows="2">{{ old('conditions', $right?->conditions) }}</textarea>
+@if($inherits ?? false)
+    <input type="hidden" name="inherit_to_children" value="0">
+    <label style="font-weight: normal"><input type="checkbox" name="inherit_to_children" value="1" @checked(old('inherit_to_children', $right?->inherit_to_children ?? true)) style="width: auto"> {{ __('Passes to the descriptions made from the accession') }}</label>
+@endif
 <label for="{{ $prefix }}-note">{{ __('Note') }}</label><textarea id="{{ $prefix }}-note" name="note" rows="2">{{ old('note', $right?->note) }}</textarea>
 <label for="{{ $prefix }}-note_language">{{ __('Language of the note (BCP 47)') }}</label><input id="{{ $prefix }}-note_language" name="note_language" size="8" value="{{ old('note_language', $right?->note_language ?? 'en') }}">
