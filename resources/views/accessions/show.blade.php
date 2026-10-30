@@ -19,6 +19,7 @@
     </div>
 
     @include('accessions._intake')
+    @include('workflow._subject', ['subject' => $accession, 'kind' => 'accessions', 'canUpdate' => $canUpdate])
 
     <h2>{{ __('Basic info') }}</h2>
     <p><strong>{{ __('Accession number') }}:</strong> {{ $accession->number() }}

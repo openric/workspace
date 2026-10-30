@@ -56,6 +56,7 @@ use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\StorageController;
 use App\Http\Controllers\VocabularyController;
 use App\Http\Controllers\WatermarkController;
+use App\Http\Controllers\WorkflowController;
 use App\Http\Middleware\ServeDiscovery;
 use App\Http\Middleware\SetLocale;
 use App\Relations\EntityKinds;
@@ -501,6 +502,29 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::post('/community-labels', [CommunityLabelController::class, 'store'])->name('community-labels.store');
         Route::post('/community-labels/{label}/remove', [CommunityLabelController::class, 'destroy'])->name('community-labels.destroy');
     });
+
+    // The workflow (roadmap phase 10a; Heratio's ahg-workflow, PSIS's ahgWorkflowPlugin): every signed-in account has
+    // its tasks; working one needs update on its record; workflows and steps need Manage workflows (the controller checks).
+    Route::prefix('workflow')->name('workflow.')->group(function () {
+        Route::get('/', [WorkflowController::class, 'dashboard'])->name('dashboard');
+        Route::get('/my-tasks', [WorkflowController::class, 'mine'])->name('mine');
+        Route::get('/pool', [WorkflowController::class, 'pool'])->name('pool');
+        Route::get('/team', [WorkflowController::class, 'team'])->name('team');
+        Route::get('/history', [WorkflowController::class, 'history'])->name('history');
+        Route::post('/bulk', [WorkflowController::class, 'bulk'])->name('bulk');
+        Route::get('/tasks/{task}', [WorkflowController::class, 'show'])->whereUuid('task')->name('tasks.show');
+        Route::post('/tasks/{task}/{action}', [WorkflowController::class, 'act'])->whereUuid('task')->where('action', 'claim|release|begin|assign|decide|resubmit|cancel|note|priority|due')->name('tasks.act');
+        Route::get('/admin', [WorkflowController::class, 'index'])->name('admin');
+        Route::get('/admin/new', [WorkflowController::class, 'edit'])->name('admin.create');
+        Route::post('/admin', [WorkflowController::class, 'save'])->name('admin.store');
+        Route::get('/admin/{workflow}', [WorkflowController::class, 'edit'])->whereUuid('workflow')->name('admin.edit');
+        Route::post('/admin/{workflow}', [WorkflowController::class, 'save'])->whereUuid('workflow')->name('admin.update');
+        Route::post('/admin/{workflow}/remove', [WorkflowController::class, 'remove'])->whereUuid('workflow')->name('admin.destroy');
+        Route::post('/admin/{workflow}/steps/{step?}', [WorkflowController::class, 'saveStep'])->whereUuid(['workflow', 'step'])->name('admin.steps.save');
+        Route::post('/admin/{workflow}/steps/{step}/move', [WorkflowController::class, 'moveStep'])->whereUuid(['workflow', 'step'])->name('admin.steps.move');
+        Route::post('/admin/{workflow}/steps/{step}/remove', [WorkflowController::class, 'removeStep'])->whereUuid(['workflow', 'step'])->name('admin.steps.destroy');
+    });
+    Route::post('{kind}/{id}/workflow', [WorkflowController::class, 'start'])->where(['kind' => 'records|agents|repositories|accessions', 'id' => '[0-9a-f-]{36}'])->name('workflow.start');
 
     // Delete a unit of description, a repository or a place, after confirming (EntityDeletion).
     Route::get('{kind}/{id}/delete', [DeletionController::class, 'confirm'])->where(['kind' => 'records|repositories|places|agents|activities|instantiations|containers|accessions|agreements', 'id' => '[0-9a-f-]{36}'])->name('deletion.confirm');

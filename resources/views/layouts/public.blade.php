@@ -13,9 +13,9 @@
         /* The catalogue's home page: openric.org's hero and plain-language lede. */
         .catalogue-hero { margin: 0 0 1.5rem; padding: 2.5rem 2.5rem 2.25rem; border: 1px solid var(--line); border-radius: 12px;
             background: radial-gradient(ellipse 60% 80% at 15% 0%, rgba(31, 95, 168, .08), transparent 60%), radial-gradient(ellipse 50% 60% at 85% 100%, rgba(16, 185, 129, .07), transparent 60%), linear-gradient(to bottom, var(--surface) 0%, var(--bg) 100%); }
-        .catalogue-hero h1 { font-size: clamp(2rem, 4vw, 2.9rem); letter-spacing: -.028em; }
-        .catalogue-lede { font-size: 1.1rem; color: var(--muted-2); text-align: justify; hyphens: auto; }
-        .catalogue-counts { color: var(--muted); font-size: .95rem; }
+        .catalogue-hero h1 { font-size: clamp(1.6rem, 3vw, 2.2rem); letter-spacing: -.02em; }
+        .catalogue-lede { font-size: .95rem; color: var(--muted-2); text-align: justify; hyphens: auto; }
+        .catalogue-counts { color: var(--muted); font-size: .88rem; }
         .catalogue-search div { display: flex; gap: .5rem; max-width: 34rem; } .catalogue-search input { max-width: none; flex: 1; } .catalogue-search button { margin: 0; }
 .imageflow { margin: 1rem 0; padding: .6rem; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
         .imageflow ul { display: flex; gap: .6rem; overflow-x: auto; list-style: none; margin: 0; padding: 0 0 .3rem; scrollbar-width: thin; }
@@ -40,11 +40,12 @@
         <label for="site-q" style="margin: 0; position: absolute; left: -999px">{{ __('Search the catalogue') }}</label>
         <input id="site-q" name="q" value="{{ request('q') }}" placeholder="{{ __('Search the catalogue') }}" style="max-width: 16rem">
         <button type="submit" style="margin: 0">{{ __('Search') }}</button>
-        <a href="{{ route('clipboard.index') }}" style="white-space: nowrap">{{ __('Clipboard') }} ({{ app(\App\Clipboard\ClipboardService::class)->count() }})</a>
-        @auth<a href="{{ route('home') }}">Workspace</a>@else<a href="{{ route('sign-in') }}" style="white-space: nowrap">{{ __('Log in') }}</a>@endauth
+        @guest<a href="{{ route('clipboard.index') }}" style="white-space: nowrap">{{ __('Clipboard') }} ({{ app(\App\Clipboard\ClipboardService::class)->count() }})</a><a href="{{ route('sign-in') }}" style="white-space: nowrap">{{ __('Log in') }}</a>@endguest
     </form>
+    @include('layouts._account')
     @include('layouts._language')
 </header>
+@include('layouts._staff-nav')
 <main id="content">
     @yield('content')
 </main>

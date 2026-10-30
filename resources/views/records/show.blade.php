@@ -64,6 +64,7 @@
 
     @include('description._names', ['subject' => $record, 'kind' => 'records', 'canUpdate' => $canUpdate, 'drafts' => $drafts])
     @include('description._identifiers', ['subject' => $record, 'kind' => 'records', 'canUpdate' => $canUpdate])
+    @include('workflow._subject', ['subject' => $record, 'kind' => 'records', 'canUpdate' => $canUpdate])
     <section id="custody">
         <h2>{{ __('Provenance and custody history') }} @include('description._ric', ['term' => 'rico:isOrWasAffectedBy'])</h2>
         @php($custody = $record->provenanceEntries()->with('ownerType.labels', 'transferType.labels', 'certainty.labels', 'startQualifier.labels', 'endQualifier.labels')->get())

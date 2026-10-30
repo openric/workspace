@@ -14,7 +14,7 @@ v: a skos:ConceptScheme ;
     dcterms:title "OpenRiC Workspace Permissions"@en ;
     dcterms:description "Actions a role or an account may be granted or denied, on a kind of record, at the scope of everything, one repository or one record. Anything not granted is denied, and a denial wins over a grant at the same scope (ADR 0005)."@en ;
     dcterms:issued "2026-10-19"^^xsd:date ;
-    skos:hasTopConcept v:manage-institution, v:manage-accounts, v:view-audit-log, v:describe, v:review, v:publish, v:manage-roles, v:read, v:create, v:update, v:delete, v:view-draft, v:read-master, v:read-reference, v:read-thumbnail, v:translate, v:review-proposals, v:review-access-requests .
+    skos:hasTopConcept v:manage-institution, v:manage-accounts, v:view-audit-log, v:describe, v:review, v:publish, v:manage-roles, v:manage-workflows, v:read, v:create, v:update, v:delete, v:view-draft, v:read-master, v:read-reference, v:read-thumbnail, v:translate, v:review-proposals, v:review-access-requests .
 
 v:manage-institution a skos:Concept ;
     skos:inScheme v: ;
@@ -62,6 +62,13 @@ v:manage-roles a skos:Concept ;
     skos:prefLabel "Manage roles"@en ;
     skos:scopeNote "Administrative; Heratio admin ACL pages."@en ;
     skos:definition "Create and change roles, their members and their permissions."@en .
+
+v:manage-workflows a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Manage workflows"@en ;
+    skos:scopeNote "Administrative; Heratio's workflow administration (ahg-workflow, admin only)."@en ;
+    skos:definition "Create and change workflows and their steps."@en .
 
 v:read a skos:Concept ;
     skos:inScheme v: ;

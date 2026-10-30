@@ -1,0 +1,184 @@
+# OpenRiC Workspace - OpenRiC Workspace Workflow History Actions.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What was done in a workflow (Heratio's workflow_history_action).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/workflow-history-action/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Workflow History Actions"@en ;
+    dcterms:description "What was done in a workflow (Heratio's workflow_history_action)."@en ;
+    dcterms:issued "2026-10-29"^^xsd:date ;
+    skos:hasTopConcept v:started, v:created, v:claimed, v:released, v:reassigned, v:approved, v:rejected, v:returned, v:resubmitted, v:escalated, v:cancelled, v:completed, v:comment, v:note-added, v:attachment-added, v:attachment-removed, v:rights-decision, v:publish, v:unpublish, v:priority-changed, v:due-date-changed, v:sla-breach, v:sla-policy-applied, v:sla-due-overridden .
+
+v:started a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Started"@en, "Begin"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the workflow, as Heratio's ahg-workflow keeps it."@en ;
+    skos:definition "A workflow was started."@en .
+
+v:created a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Created"@en, "Geskep"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the workflow, as Heratio's ahg-workflow keeps it."@en ;
+    skos:definition "A task was created for the next step."@en .
+
+v:claimed a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Claimed"@en, "Geëis"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the workflow, as Heratio's ahg-workflow keeps it."@en ;
+    skos:definition "A task was claimed."@en .
+
+v:released a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Released"@en, "Vrygestel"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the workflow, as Heratio's ahg-workflow keeps it."@en ;
+    skos:definition "A task was released to the pool."@en .
+
+v:reassigned a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Reassigned"@en, "Hertoegewys"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the workflow, as Heratio's ahg-workflow keeps it."@en ;
+    skos:definition "A task was assigned to someone."@en .
+
+v:approved a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Approved"@en, "Goedgekeur"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the workflow, as Heratio's ahg-workflow keeps it."@en ;
+    skos:definition "A task was approved."@en .
+
+v:rejected a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Rejected"@en, "Afgekeur"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the workflow, as Heratio's ahg-workflow keeps it."@en ;
+    skos:definition "A task was rejected."@en .
+
+v:returned a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Returned"@en, "Teruggestuur"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the workflow, as Heratio's ahg-workflow keeps it."@en ;
+    skos:definition "A task was returned for revision."@en .
+
+v:resubmitted a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Resubmitted"@en, "Herindien"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the workflow, as Heratio's ahg-workflow keeps it."@en ;
+    skos:definition "A returned task was submitted again."@en .
+
+v:escalated a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Escalated"@en, "Ge-eskaleer"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the workflow, as Heratio's ahg-workflow keeps it."@en ;
+    skos:definition "A task was escalated."@en .
+
+v:cancelled a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Cancelled"@en, "Gekanselleer"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the workflow, as Heratio's ahg-workflow keeps it."@en ;
+    skos:definition "A task was cancelled."@en .
+
+v:completed a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Completed"@en, "Voltooi"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the workflow, as Heratio's ahg-workflow keeps it."@en ;
+    skos:definition "A workflow was completed."@en .
+
+v:comment a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Comment"@en, "Kommentaar"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the workflow, as Heratio's ahg-workflow keeps it."@en ;
+    skos:definition "A comment."@en .
+
+v:note-added a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Note Added"@en, "Nota bygevoeg"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the workflow, as Heratio's ahg-workflow keeps it."@en ;
+    skos:definition "A note was added."@en .
+
+v:attachment-added a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Attachment Added"@en, "Aanhangsel bygevoeg"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the workflow, as Heratio's ahg-workflow keeps it."@en ;
+    skos:definition "An attachment was added."@en .
+
+v:attachment-removed a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Attachment Removed"@en, "Aanhangsel verwyder"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the workflow, as Heratio's ahg-workflow keeps it."@en ;
+    skos:definition "An attachment was removed."@en .
+
+v:rights-decision a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Rights Decision"@en, "Regtebesluit"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the workflow, as Heratio's ahg-workflow keeps it."@en ;
+    skos:definition "A decision on rights."@en .
+
+v:publish a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Published"@en, "Gepubliseer"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the workflow, as Heratio's ahg-workflow keeps it."@en ;
+    skos:definition "It was published."@en .
+
+v:unpublish a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Unpublished"@en, "Onttrek"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the workflow, as Heratio's ahg-workflow keeps it."@en ;
+    skos:definition "It was unpublished."@en .
+
+v:priority-changed a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Priority Changed"@en, "Prioriteit verander"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the workflow, as Heratio's ahg-workflow keeps it."@en ;
+    skos:definition "The priority was changed."@en .
+
+v:due-date-changed a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Due Date Changed"@en, "Sperdatum verander"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the workflow, as Heratio's ahg-workflow keeps it."@en ;
+    skos:definition "The due date was changed."@en .
+
+v:sla-breach a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "SLA Breach"@en, "Diensvlakbreuk"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the workflow, as Heratio's ahg-workflow keeps it."@en ;
+    skos:definition "The service level was breached."@en .
+
+v:sla-policy-applied a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "SLA Policy Applied"@en, "Diensvlakbeleid toegepas"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the workflow, as Heratio's ahg-workflow keeps it."@en ;
+    skos:definition "A service level policy was applied."@en .
+
+v:sla-due-overridden a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "SLA Due Date Overridden"@en, "Diensvlak-sperdatum oorheers"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the workflow, as Heratio's ahg-workflow keeps it."@en ;
+    skos:definition "The service level due date was overridden."@en .

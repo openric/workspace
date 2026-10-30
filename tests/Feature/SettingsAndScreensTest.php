@@ -132,7 +132,7 @@ class SettingsAndScreensTest extends TestCase
     {
         $page = $this->actingAs($this->admin)->get('/')->assertOk()->getContent();
         preg_match('~<nav aria-label="Main".*?</nav>~s', $page, $nav);
-        $this->assertSame(7, substr_count($nav[0], '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">'), 'Home, Describe, Manage, Import and export, Reports, Admin and the public catalogue');
+        $this->assertSame(8, substr_count($nav[0], '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">'), 'Home, Describe, Manage, Workflow, Import and export, Reports, Admin and the public catalogue');
         $this->assertStringContainsString('</svg>Describe</summary>', $nav[0]);
     }
 }

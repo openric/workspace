@@ -35,6 +35,8 @@ class SettingsController extends Controller
         $data = $request->validate([
             'name' => ['required', 'string', 'max:500'],
             'header_title' => ['nullable', 'string', 'max:255'],
+            'catalogue_heading' => ['nullable', 'string', 'max:255'],
+            'catalogue_show_counts' => ['nullable', 'boolean'],
             'catalogue_introduction' => ['nullable', 'string', 'max:5000'],
             'catalogue_credits' => ['nullable', 'string', 'max:5000'],
             'registration_open' => ['nullable', 'boolean'],
@@ -48,7 +50,8 @@ class SettingsController extends Controller
         $old = $institution->logo_path;
         $blank = fn (string $key) => trim((string) ($data[$key] ?? '')) === '' ? null : trim((string) $data[$key]);
         $changes = ['name' => $data['name'], 'header_title' => $blank('header_title'),
-            'catalogue_introduction' => $blank('catalogue_introduction'), 'catalogue_credits' => $blank('catalogue_credits'),
+            'catalogue_heading' => $blank('catalogue_heading'), 'catalogue_introduction' => $blank('catalogue_introduction'), 'catalogue_credits' => $blank('catalogue_credits'),
+            'catalogue_show_counts' => $request->has('catalogue_show_counts') ? $request->boolean('catalogue_show_counts') : $institution->catalogue_show_counts,
             'registration_open' => $request->boolean('registration_open'),
             'interface_languages' => array_values(array_unique(['en', ...($data['interface_languages'] ?? [])]))];
         if ($request->hasFile('logo')) {

@@ -1,0 +1,58 @@
+# OpenRiC Workspace - OpenRiC Workspace Workflow Step Types.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What a step of a workflow is for (Heratio's workflow_step_type).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/workflow-step-type/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Workflow Step Types"@en ;
+    dcterms:description "What a step of a workflow is for (Heratio's workflow_step_type)."@en ;
+    dcterms:issued "2026-10-29"^^xsd:date ;
+    skos:hasTopConcept v:describe, v:review, v:approve, v:quality-check, v:final-review, v:publish .
+
+v:describe a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Describe"@en, "Beskryf"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the workflow, as Heratio's ahg-workflow keeps it."@en ;
+    skos:definition "Describing the unit: the Workspace adds it, so a team can divide description work."@en .
+
+v:review a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Review"@en, "Hersien"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the workflow, as Heratio's ahg-workflow keeps it."@en ;
+    skos:definition "Reviewing it."@en .
+
+v:approve a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Approve"@en, "Goedkeur"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the workflow, as Heratio's ahg-workflow keeps it."@en ;
+    skos:definition "Approving it."@en .
+
+v:quality-check a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Quality Check"@en, "Gehaltekontrole"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the workflow, as Heratio's ahg-workflow keeps it."@en ;
+    skos:definition "Checking its quality."@en .
+
+v:final-review a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Final Review"@en, "Finale hersiening"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the workflow, as Heratio's ahg-workflow keeps it."@en ;
+    skos:definition "The last review."@en .
+
+v:publish a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Publish"@en, "Publiseer"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the workflow, as Heratio's ahg-workflow keeps it."@en ;
+    skos:definition "Publishing it."@en .

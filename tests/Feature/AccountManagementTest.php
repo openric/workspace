@@ -106,7 +106,7 @@ class AccountManagementTest extends TestCase
         $this->get($link)->assertOk()->assertSee('Set your password');
         $set = ['token' => $token, 'email' => $query['email'], 'password' => 'my own long passphrase', 'password_confirmation' => 'my own long passphrase'];
         $this->post('/set-password', $set)->assertRedirect(route('sign-in'));
-        $this->post('/sign-in', ['email' => 'new@example.org', 'password' => 'my own long passphrase'])->assertRedirect(route('home'));
+        $this->post('/sign-in', ['email' => 'new@example.org', 'password' => 'my own long passphrase'])->assertRedirect(route('discover.home'));
         $this->post('/sign-out');
 
         $this->post('/set-password', [...$set, 'password' => 'another long passphrase', 'password_confirmation' => 'another long passphrase'])

@@ -5,9 +5,9 @@
     @if($query === '')
         {{-- The hero, as openric.org's: the institution's own introduction, what is published, and search. --}}
         <section class="catalogue-hero">
-            <h1>{{ __('The catalogue of :institution', ['institution' => $institution->name]) }}</h1>
+            <h1>{{ $institution->catalogue_heading ?? __('The catalogue of :institution', ['institution' => $institution->name]) }}</h1>
             @if($institution->catalogue_introduction)<div class="catalogue-lede">@include('discover._text', ['text' => $institution->catalogue_introduction])</div>@endif
-            <p class="catalogue-counts">{{ __(':records archival descriptions, :agents people, families and organisations, :activities activities and :places places are published here, described in Records in Contexts.', $counts->all()) }}</p>
+            @if($institution->catalogue_show_counts)<p class="catalogue-counts">{{ __(':records archival descriptions, :agents people, families and organisations, :activities activities and :places places are published here, described in Records in Contexts.', $counts->all()) }}</p>@endif
             <form method="get" action="{{ route('discover.home') }}" role="search" class="catalogue-search">
                 <label for="q">{{ __('Search names, titles and reference codes') }}</label>
                 <div><input id="q" name="q" required><button type="submit">{{ __('Search') }}</button></div>

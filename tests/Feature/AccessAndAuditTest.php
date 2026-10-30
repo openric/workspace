@@ -68,7 +68,7 @@ class AccessAndAuditTest extends TestCase
     {
         $this->account('editor');
 
-        $this->post('/sign-in', ['email' => 'Archivist@Example.org', 'password' => self::PASSWORD])->assertRedirect(route('home'));
+        $this->post('/sign-in', ['email' => 'Archivist@Example.org', 'password' => self::PASSWORD])->assertRedirect(route('discover.home'));
         $this->assertAuthenticated();
         $this->get('/')->assertOk()->assertSee('Riverside Parish Council Archives')->assertSee('Archivist');
         $this->post('/sign-out')->assertRedirect(route('discover.home'));

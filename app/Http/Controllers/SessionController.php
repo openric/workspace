@@ -40,7 +40,8 @@ class SessionController extends Controller
         $request->session()->regenerate();
         AuditLog::record(Vocab::action('sign-in'), $request->user());
 
-        return redirect()->intended(route('home'));
+        // The public catalogue, with the staff menus; a page asked for before signing in comes first.
+        return redirect()->intended(route('discover.home'));
     }
 
     public function destroy(Request $request): RedirectResponse

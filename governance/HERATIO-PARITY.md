@@ -128,7 +128,7 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-user-manage` | 5651 | V0.1 candidate | Covered | 12 | `ahgUserManagePlugin`, `ahgUserRegistrationPlugin`, `arOidcPlugin` | Accounts, registration, roles; written fresh; OIDC single sign-on in phase 12 |
 | `ahg-vendor` | 6980 | later: V1.0+ | Planned | 22 | `ahgVendorPlugin` |  |
 | `ahg-version-control` | 3142 | later: V1.0+ | Partial | 22 | `ahgVersionControlPlugin` | Every change is in the audit log; version views later |
-| `ahg-workflow` | 7830 | later: V1.0+ | Planned | 10 | `ahgWorkflowPlugin` |  |
+| `ahg-workflow` | 7830 | later: V1.0+ | Partial | 10 | `ahgWorkflowPlugin` | Workflows, steps, tasks, pool, assignment, decisions, team work, history and bulk operations from v0.0.82 (10a); queues, service levels, overdue notices, publish gates and the diagram in 10b |
 | `ahg-z3950` | 5243 | out: GLAM sector | Planned | 21 | none |  |
 
 : Heratio packages and their Workspace status
@@ -431,6 +431,37 @@ Heratio's provenance page (`provenance/index.blade.php`), its ProvenanceService 
 | Provenance and chain of custody on the description | Provenance and custody history on the record's page, and on the public page when the overview allows | Same, from v0.0.81; an owner whose authority record is not published is not named in public |
 
 : Provenance, field by field
+
+### Workflow (`ahg-workflow`)
+
+Heratio's workflow screens and WorkflowService; PSIS's ahgWorkflowPlugin where Heratio's are placeholders (my work, team work, timeline, the step forms). Spectrum procedures are out (phase 21).
+
+| Heratio field | Workspace | Status |
+|---|---|---|
+| `ahg_workflow`: `name`, `description`, `scope_type`, `scope_id`, `trigger_event`, `applies_to` | Name, Description, Scope (with its repository or collection), Trigger, Applies to | Same, from v0.0.82 |
+| `is_active`, `is_default`, `require_all_steps`, `allow_parallel`, `auto_archive_days`, `notification_enabled` | The same | Same, from v0.0.82; parallel steps and archiving are kept, not yet applied |
+| `spectrum_procedure` | none | Phase 21 |
+| `ahg_workflow_step`: `name`, `description`, `step_order`, `step_type`, `action_required` | Name, Description, the order (Move up, Move down), Step type, Action required | Same, from v0.0.82 |
+| `required_role_id`, `allowed_group_ids`, `allowed_user_ids` | Required role, Roles that may take it, Accounts that may take it | Same, from v0.0.82; groups are roles |
+| `required_clearance_level` | Required clearance level | Modelled: kept, applied with phase 18 |
+| `pool_enabled`, `auto_assign_user_id`, `escalation_days`, `escalation_user_id`, `notification_template`, `instructions`, `checklist`, `is_optional`, `is_active` | The same; the escalation days set the due date | Same, from v0.0.82; escalation itself in 10b |
+| `ahg_workflow_task`: `status`, `priority`, `submitted_by`, `assigned_to`, `claimed_at`, `due_date` | The same | Same, from v0.0.82 |
+| `decision`, `decision_comment`, `decision_at`, `decision_by`, `checklist_completed`, `previous_task_id`, `retry_count`, `metadata` | The same | Same, from v0.0.82 |
+| `escalated_at`, `queue_id` | `escalated_at` kept; queues | Phase 10b |
+| `ahg_workflow_history` (action, from and to status, by, at, comment, metadata, correlation id) | History, on the task, the record and the dashboard | Same, from v0.0.82 |
+| `ip_address`, `user_agent` | none: the audit log keeps who did what | Modelled |
+| `ahg_workflow_notification` | Mail through the Outbox and its sent-mail log | Modelled |
+| Dashboard, My tasks, Pool, View task, Claim, Release, Approve, Reject | The same | Same, from v0.0.82 |
+| Assign to user (`assignToUser`), Return and Resubmit (PSIS) | Assign, Return for revision, Resubmit | Same, from v0.0.82 |
+| Start workflow (PSIS, with `getApplicableWorkflow`) | Start a workflow on the record's page, and for everything inside it | Same, from v0.0.82 |
+| My work and Team work (PSIS) | My tasks; Team work by role, with who has how many | Same, from v0.0.82 |
+| Bulk transition, assign, note, priority | Bulk operations on My tasks, the pool and team work | Same, from v0.0.82 |
+| Bulk move to queue, queues, SLA policies, overdue | none | Phase 10b |
+| Publish readiness, publish simulate, gate rules, `workflow_required_for_publish` | none | Phase 10b |
+| Diagram, task diagram | none | Phase 10b |
+| Designer and edges (branching steps) | none: steps run in order | Not copied |
+
+: Workflow, field by field
 
 ### Donor (`ahg-donor-manage`)
 

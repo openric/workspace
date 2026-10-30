@@ -236,6 +236,9 @@ Progress:
 
 **10. Work assignment and workflow (WS-014).** Copy the task model of `ahg-workflow`: tasks on records, assigned to people, with due dates, overdue notices and bulk assignment. Its Spectrum procedures are museum work and stay out. The task states form a vocabulary, and publication remains the existing review and publish step. Done when a team divides a fonds' description among its members and sees what is left.
 
+Progress:
+- **v0.0.82** (10a): workflows and their steps, tasks on records claimed from the pool or assigned, decided, returned and resubmitted, my tasks, team work by role, history and bulk operations, after Heratio's `ahg-workflow` and PSIS's `ahgWorkflowPlugin` (ADR 0011). A workflow started for a fonds and everything inside it divides the work, and the fonds shows what is left. 10b: queues, service levels, overdue notices, publish gates and the diagram.
+
 **11. Exchange formats (WS-015).** The Workspace imports AtoM CSV and EAD and exports EAD, Dublin Core, MODS, CSV and RiC-O. To add:
 - EAD 3;
 - EAC-CPF import (export exists);
