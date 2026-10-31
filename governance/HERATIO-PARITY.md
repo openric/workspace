@@ -64,7 +64,7 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-help` | 5771 | later: V1.0+ | Planned | 20 | `ahgHelpPlugin` |  |
 | `ahg-heritage-manage` | 12679 | V0.1 candidate | Planned | 21 | `ahgHeritagePlugin`, `ahgHeritageAccountingPlugin` | Heritage asset register and heritage accounting, with the museum domain |
 | `ahg-icip` | 6793 | later: jurisdiction | Partial | 18 | `ahgICIPPlugin` | Traditional Knowledge and Biocultural labels (v0.0.59); the rest of ICIP in phase 18 |
-| `ahg-iiif-collection` | 8745 | out: GLAM sector | Planned | 14 | `ahgIiifPlugin` | Read PSIS ahgIiifPlugin too, which does more |
+| `ahg-iiif-collection` | 8745 | out: GLAM sector | Partial | 14 | `ahgIiifPlugin` | Presentation 3 manifests (PSIS's manifest, Heratio's audio and video canvases), fonds collections, curated collections, Change Discovery, Content State, the Mirador viewer and the IIIF-ready gate from v0.0.87 (14a, ADR 0014); Content Search, Auth Flow 2.0, saved workspaces and validation in 14b; NER annotations in phase 17, 3D reports in phase 21 |
 | `ahg-image-ar` | 896 | out: GLAM sector | Planned | 21 | `ahgImageArPlugin` |  |
 | `ahg-inference-receipts` | 1569 | out: AI (V2+) | Partial | 17 (last) | none | Its signing code is copied for the audit chain |
 | `ahg-information-object-manage` | 47506 | V0.1 candidate | Covered | 9 | `ahgInformationObjectManagePlugin`, `ahgProvenancePlugin` | Records and record sets: ISAD(G), hierarchy, levels, instantiations, publication; provenance and custody history from v0.0.81 (9e) |
@@ -94,7 +94,7 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-observability` | 1903 | later: V1.0+ | Planned | 12 | `ahgObservabilityPlugin` |  |
 | `ahg-ocfl` | 3106 | later: V1.0+ | Planned | 15 | `ahgOcflPlugin` |  |
 | `ahg-pdf-tools` | 2093 | V0.1 candidate | Partial | 5 | `ahgTiffPdfMergePlugin` | A PDF's text layer proposed as its transcript (v0.0.64); merging TIFFs into a PDF with the scanning workflows, phase 22 |
-| `ahg-portable-export` | 3000 | later: V1.0+ | Planned | 11 | `ahgPortableExportPlugin` | Read PSIS ahgPortableExportPlugin too, which does more |
+| `ahg-portable-export` | 3000 | later: V1.0+ | Planned | 11c, deferred | `ahgPortableExportPlugin` | Read PSIS ahgPortableExportPlugin too, which does more; deferred by Dr Johan Pieterse on 30 October 2026 |
 | `ahg-preservation` | 10211 | later: V1.0+ | Planned | 15 | `ahgPreservationPlugin` |  |
 | `ahg-privacy` | 16854 | later: jurisdiction | Planned | 18 | `ahgPrivacyPlugin` |  |
 | `ahg-provenance-ai` | 2662 | out: AI (V2+) | Planned | 17 (last) | none |  |

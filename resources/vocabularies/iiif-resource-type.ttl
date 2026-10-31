@@ -1,0 +1,30 @@
+# OpenRiC Workspace - OpenRiC Workspace IIIF Resource Types.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What an item of a curated IIIF collection is, when it is another institution's IIIF resource named by its URI (Heratio's iiif_collection_item.item_type).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/iiif-resource-type/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace IIIF Resource Types"@en ;
+    dcterms:description "What an item of a curated IIIF collection is, when it is another institution's IIIF resource named by its URI (Heratio's iiif_collection_item.item_type)."@en ;
+    dcterms:issued "2026-10-30"^^xsd:date ;
+    skos:hasTopConcept v:manifest, v:collection .
+
+v:manifest a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Manifest"@en, "Manifes"@af ;
+    skos:scopeNote "Not a RiC-O term: a IIIF Presentation 3 resource type."@en ;
+    skos:definition "A IIIF manifest: one described object and its views."@en .
+
+v:collection a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Collection"@en, "Versameling"@af ;
+    skos:scopeNote "Not a RiC-O term: a IIIF Presentation 3 resource type."@en ;
+    skos:definition "A IIIF collection: a list of manifests and collections."@en .

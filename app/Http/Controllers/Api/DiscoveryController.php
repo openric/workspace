@@ -20,6 +20,7 @@ use App\Description\DeprecationService;
 use App\Description\InstantiationService;
 use App\Exchange\ExportView;
 use App\Http\Controllers\Controller;
+use App\Iiif\Presentation;
 use App\Models\DigitalFile;
 use App\Models\Instantiation;
 use App\Models\Institution;
@@ -143,7 +144,9 @@ class DiscoveryController extends Controller
             ];
         }
 
-        return $this->json(['record' => $unit->id, 'title' => $view->label($unit), 'rights' => $this->rightsOf($public, $unit), 'instantiations' => $items]);
+        $manifest = (new Presentation($this->catalogue($request)))->hasManifest($unit) ? route('iiif.manifest', $unit->id) : null;
+
+        return $this->json(['record' => $unit->id, 'title' => $view->label($unit), 'rights' => $this->rightsOf($public, $unit), 'iiif_manifest' => $manifest, 'instantiations' => $items]);
     }
 
     /**

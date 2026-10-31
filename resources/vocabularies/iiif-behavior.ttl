@@ -1,0 +1,51 @@
+# OpenRiC Workspace - OpenRiC Workspace IIIF Collection Behaviours.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# How a viewer presents a curated IIIF collection: the IIIF Presentation 3 behavior values Heratio's iiif_collection.viewing_hint offers.
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/iiif-behavior/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace IIIF Collection Behaviours"@en ;
+    dcterms:description "How a viewer presents a curated IIIF collection: the IIIF Presentation 3 behavior values Heratio's iiif_collection.viewing_hint offers."@en ;
+    dcterms:issued "2026-10-30"^^xsd:date ;
+    skos:hasTopConcept v:individuals, v:paged, v:continuous, v:multi-part, v:unordered .
+
+v:individuals a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Individuals"@en, "Afsonderlik"@af ;
+    skos:scopeNote "Not a RiC-O term: a IIIF Presentation 3 behavior value, written as the collection's behavior."@en ;
+    skos:definition "Each item is shown on its own."@en .
+
+v:paged a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Paged"@en, "Bladsygewys"@af ;
+    skos:scopeNote "Not a RiC-O term: a IIIF Presentation 3 behavior value, written as the collection's behavior."@en ;
+    skos:definition "The items are pages, shown as facing pairs."@en .
+
+v:continuous a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Continuous"@en, "Aaneenlopend"@af ;
+    skos:scopeNote "Not a RiC-O term: a IIIF Presentation 3 behavior value, written as the collection's behavior."@en ;
+    skos:definition "The items are parts of one surface, shown joined, as a scroll."@en .
+
+v:multi-part a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Multi-part"@en, "Meerdelig"@af ;
+    skos:scopeNote "Not a RiC-O term: a IIIF Presentation 3 behavior value, written as the collection's behavior."@en ;
+    skos:definition "The items are parts of one logical whole, such as volumes of a set."@en .
+
+v:unordered a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Unordered"@en, "Ongeorden"@af ;
+    skos:scopeNote "Not a RiC-O term: a IIIF Presentation 3 behavior value, written as the collection's behavior."@en ;
+    skos:definition "The items have no inherent order."@en .

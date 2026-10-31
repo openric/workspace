@@ -30,6 +30,8 @@ use App\Http\Controllers\EmailController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\IdentifierController;
+use App\Http\Controllers\IiifCollectionController;
+use App\Http\Controllers\IiifController;
 use App\Http\Controllers\ImportController;
 use App\Http\Controllers\InstantiationController;
 use App\Http\Controllers\IriController;
@@ -136,6 +138,17 @@ Route::middleware(ServeDiscovery::class)->prefix('discover')->name('discover.')-
     Route::get('/activities/{id}', [DiscoverController::class, 'activity'])->name('activity');
     Route::get('/graph/{kind}/{id}', [DiscoverController::class, 'graph'])->where('kind', 'records|agents|repositories|places|activities')->name('graph');
     Route::get('/files/{file}', [DiscoverController::class, 'file'])->name('file');
+    Route::get('/records/{id}/iiif', [IiifController::class, 'viewer'])->name('iiif');
+});
+
+// IIIF Presentation 3, Change Discovery and Content State (roadmap phase 14a, ADR 0014): what the public catalogue shows.
+Route::middleware([ServeDiscovery::class, 'throttle:600,1'])->prefix('iiif')->name('iiif.')->group(function () {
+    Route::get('/collection', [IiifController::class, 'top'])->name('top');
+    Route::get('/records/{id}/manifest', [IiifController::class, 'manifest'])->name('manifest');
+    Route::get('/records/{id}/collection', [IiifController::class, 'collection'])->name('collection');
+    Route::get('/collections/{collection}', [IiifController::class, 'curated'])->whereUuid('collection')->name('curated');
+    Route::get('/discovery/changes', [IiifController::class, 'changes'])->name('changes');
+    Route::get('/content-state', [IiifController::class, 'contentState'])->name('content-state');
 });
 
 // A built report opened by its share link (roadmap phase 8): no sign-in; the link expires, and only its hash is kept.
@@ -459,6 +472,17 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::get('/reports/quality', [ReportController::class, 'quality'])->name('reports.quality');
     Route::get('/reports/usage', [ReportController::class, 'usage'])->name('reports.usage');
     // The report builder (roadmap phase 8): the controller checks that the report is the account's own or shared, and on a kind it may read.
+    // Curated IIIF collections (roadmap phase 14a, ADR 0014): who may publish descriptions may curate them.
+    Route::prefix('iiif-collections')->name('iiif-collections.')->group(function () {
+        Route::get('/', [IiifCollectionController::class, 'index'])->name('index');
+        Route::post('/', [IiifCollectionController::class, 'save'])->name('store');
+        Route::get('/{collection}', [IiifCollectionController::class, 'show'])->whereUuid('collection')->name('show');
+        Route::post('/{collection}', [IiifCollectionController::class, 'save'])->whereUuid('collection')->name('update');
+        Route::post('/{collection}/delete', [IiifCollectionController::class, 'destroy'])->whereUuid('collection')->name('destroy');
+        Route::post('/{collection}/items', [IiifCollectionController::class, 'add'])->whereUuid('collection')->name('items.add');
+        Route::post('/{collection}/items/{item}/move/{direction}', [IiifCollectionController::class, 'move'])->whereUuid(['collection', 'item'])->whereIn('direction', ['up', 'down'])->name('items.move');
+        Route::post('/{collection}/items/{item}/remove', [IiifCollectionController::class, 'remove'])->whereUuid(['collection', 'item'])->name('items.remove');
+    });
     Route::prefix('reports/builder')->name('reports.builder.')->group(function () {
         Route::get('/', [ReportBuilderController::class, 'index'])->name('index');
         Route::post('/', [ReportBuilderController::class, 'store'])->name('store');

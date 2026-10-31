@@ -256,6 +256,7 @@ On 30 October 2026 Dr Johan Pieterse split the phase: 11a the archival exchange 
 
 Progress:
 - **v0.0.85** (11a): EAC-CPF import and EAC-F export and import, each one file or a ZIP of files, with exports of every authority record or activity as a ZIP (ADR 0012). EAC-F is the EAS 2026-07 release's EAF 1.0.0, and the export is valid against its schema. A record the Workspace exported reads back with nothing written; each relation keeps its direction; every element the import does not read is listed. EAD3 export and import, with their round trip, were already in place.
+- 11c (the offline catalogue) was deferred by Dr Johan Pieterse on 30 October 2026, as not important now.
 - **v0.0.86** (11b): RiC-O import of JSON-LD, Turtle or RDF/XML with its dry run, a round trip in each that writes nothing; the Portability profile (the dataset descriptor at `/dataset`, the change feed at `/changelog`) and the Governance profile (a deleted or merged entity the public could read answers 410 with `owl:deprecated`, its successor and the reason; the governance pin; SHACL as the gate in CI), both declared, after the specification's Governance 0.45.0 (v0.56.0) stated its IRI rule without Heratio's forms (ADR 0013).
 
 **12. Monitoring and operations (WS-017).**
@@ -270,6 +271,11 @@ Done when the security, accessibility and disaster-recovery sign-offs of WS-017 
 **13. Embargoes, retention and disposal (WS-017, WS-018).** Copy the embargo service, notices and reports of `ahg-extended-rights`; agents' embargoes already exist, and this extends embargoes to records and files. Its retention schedule and disposal workflow, with `ahg-records-manage`, follow a discovery with a records manager. Disposal is a reviewed, audited activity that leaves a record of what was destroyed. Done when a disposal is approved, carried out and reported, with nothing removed outside it.
 
 **14. IIIF (WS-019).** Copy the manifest building of `ahg-iiif-collection`: a IIIF Presentation 3 manifest for each record from its reference copies, a collection for each fonds, and a viewer in the public catalogue. Follow the RiC and IIIF pattern of openric/service #15 as specification guidance. PSIS's `ahgIiifPlugin` has more than Heratio's package (81 routes against 51, among them IIIF authentication); read it for what Heratio lacks. Done when the manifests validate and the MCP's image tool can follow them.
+
+On 30 October 2026 Dr Johan Pieterse split the phase, and chose manifests that paint the reference copy with no IIIF Image API server: 14a the manifests, collections, curated collections, viewer, Change Discovery and Content State; 14b Content Search 2.0, Auth Flow 2.0, saved viewer workspaces and the validation dashboard.
+
+Progress:
+- **v0.0.87** (14a): a IIIF Presentation 3 manifest for each published record with an image, sound or video a visitor may receive, each instantiation a canvas, after PSIS's manifest and Heratio's audio and video canvases; a collection for each record with parts and one for the institution; curated collections after Heratio's; Change Discovery 1.0 from the records' datestamps and the deprecation register; Content State 1.0; Mirador on the record's manifest in the public catalogue; RiC-O naming the manifest; the IIIF-ready publish gate (ADR 0014).
 
 **15. Preservation connectors (WS-019).**
 - Copy PREMIS events from `ahg-preservation`: ingest, fixity, migration.

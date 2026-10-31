@@ -16,7 +16,9 @@
 namespace App\Api;
 
 use App\Exchange\ExportView;
+use App\Iiif\Presentation;
 use App\Models\Agent;
+use App\Models\Institution;
 use App\Models\ProvenanceEntry;
 use App\Models\RecordResource;
 use App\Models\Repository;
@@ -109,6 +111,10 @@ class JsonLd
         $children = $unit->children->filter(fn ($c) => $this->view->readable($c))->map(fn ($c) => $this->stub($c))->values()->all();
         if ($children !== []) {
             $out['rico:includesOrIncluded'] = $children;
+        }
+        // Its images, sound and video as a IIIF manifest, for the public (ADR 0014): RiC describes, IIIF presents.
+        if ($this->view->user === null && (new Presentation(new PublicCatalogue(Institution::findOrFail($unit->institution_id))))->hasManifest($unit)) {
+            $out['rdfs:seeAlso'] = ['@id' => route('iiif.manifest', $unit->id)];
         }
 
         return $out;

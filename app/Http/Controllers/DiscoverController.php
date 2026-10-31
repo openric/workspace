@@ -20,6 +20,7 @@ use App\Description\TreeService;
 use App\Discovery\Graph;
 use App\Discovery\Links;
 use App\Files\FileResponse;
+use App\Iiif\Presentation;
 use App\Models\Concept;
 use App\Models\DigitalFile;
 use App\Models\RecordResource;
@@ -130,7 +131,7 @@ class DiscoverController extends Controller
         return view('discover.record', ['unit' => $unit, 'view' => $view, 'ancestors' => $ancestors, 'children' => $children, 'instantiations' => $instantiations,
             'relations' => $this->relations($unit, $catalogue), 'institution' => $catalogue->institution,
             'childThumbnails' => $childThumbnails, 'childThumbnailTotal' => $childThumbnailTotal,
-            'tree' => (new TreeService(null, $catalogue))->window($unit)]);
+            'tree' => (new TreeService(null, $catalogue))->window($unit), 'iiif' => (new Presentation($catalogue))->hasManifest($unit)]);
     }
 
     /**

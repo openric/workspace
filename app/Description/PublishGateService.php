@@ -19,7 +19,7 @@
  * isWorkflowRequiredForPublish and isWorkflowApprovedForPublish at 7663253e9 (governance/CODE_PROVENANCE.md, roadmap
  * phase 10b): the rules and their seeds, evaluate, canPublish, getBlockers, the result history and simulatePublish.
  * Changed: the Workspace's description elements for the field rules; rights in force and files on instantiations;
- * security clearance and IIIF pass until phases 18 and 14 bring them; Heratio's custom SQL rule is not carried, as
+ * IIIF ready is a file a manifest can paint (phase 14a); security clearance passes until phase 18 brings it; Heratio's custom SQL rule is not carried, as
  * it ran SQL typed into a form; the seeded rules start switched off.
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
@@ -179,8 +179,11 @@ final class PublishGateService
             'has-rights' => app(RightsService::class)->of($record)->contains(fn ($r) => $r->inForce()),
             'has-access-condition' => $value($rule->field_name ?? 'conditions-governing-access') !== '',
             'workflow-completed' => ! app(WorkflowService::class)->open()->where(['subject_table' => 'record_resources', 'subject_id' => $record->id])->exists(),
-            // ponytail: security clearance (phase 18) and IIIF (phase 14) are not in the Workspace yet; their rules pass until they are.
-            'security-cleared', 'iiif-ready' => true,
+            // IIIF ready (phase 14a): a file a manifest can paint, an image a browser shows, or sound or video.
+            'iiif-ready' => DigitalFile::whereIn('instantiation_id', $record->instantiations()->whereNull('deleted_at')->select('id'))
+                ->where(fn ($q) => $q->whereIn('mime_type', ['image/jpeg', 'image/png', 'image/gif', 'image/webp'])->orWhere('mime_type', 'like', 'audio/%')->orWhere('mime_type', 'like', 'video/%'))->exists(),
+            // ponytail: security clearance comes with phase 18; its rule passes until then.
+            'security-cleared' => true,
             default => true,
         };
     }

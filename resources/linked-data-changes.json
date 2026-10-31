@@ -1,5 +1,11 @@
 [
     {
+        "version": "0.0.87",
+        "date": "2026-10-30",
+        "impact": "additive",
+        "change": "A record with an image, sound or video a visitor may receive names its IIIF Presentation 3 manifest with rdfs:seeAlso; the manifest's seeAlso is the record's RiC-O description."
+    },
+    {
         "version": "0.0.86",
         "date": "2026-10-30",
         "impact": "additive",
