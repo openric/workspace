@@ -136,3 +136,13 @@ The relation types and what they connect move out of `config workspace.relation_
 ## Amendment, 29 October 2026: display standards
 
 As Dr Johan Pieterse decided on 28 October 2026, an archival description may be shown and edited in DACS, RAD, Dublin Core or MODS as well as ISAD(G), which is AtoM's and Heratio's display standard (`record_resources.display_standard_id`, display-standard vocabulary). It can be passed down to every unit inside. A value is still kept once, under its description element. The display-element vocabulary lists each standard's entries in its order, with the standard's number and label, and the element each one shows. `Elements::of()` returns those elements under the standard's labels, so the form fields and values do not change between standards. The elements that DACS, RAD and MODS have and ISAD(G) does not are description elements of their own (other-standards), exported as `rico:generalDescription`. RAD's general material designation, the DCMI type and the MODS type of resource are bundled lists (`record_resource_types`), and Dublin Core and MODS export the last two.
+
+## Amendment, 31 October 2026: where the RiC term is shown
+
+The form audit of 31 October 2026 found data forms of later phases with no term, and 46 administration forms that never had one. Dr Johan Pieterse chose (option C):
+
+- **Every field of a form that describes or keeps data** shows its term: the RiC-O 1.1 or extension ontology term it is kept or exported as, or "not in RiC-O" where the Workspace keeps it outside the RiC-O export (embargoes, retention and disposal, the privacy registers, IIIF collections).
+- **Administration forms show terms only where they shape RiC data:** a vocabulary and its concepts their SKOS and Dublin Core terms (`skos:prefLabel`, `skos:broader`, `dcterms:title`, ...), the accession and agreement numbering masks `rico:identifier`, and a publish gate the term of the element it checks.
+- **No terms** on accounts, roles, password, API keys, institution settings, the watermark, the theme, workflows, the report builder, imports and the clipboard: they describe nothing in RiC.
+
+The term partial takes `rico:`, `openricx:`, `skos:` and `dcterms:` terms. A field named only by an `aria-label` still has its term beside it.

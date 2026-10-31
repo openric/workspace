@@ -3,24 +3,24 @@
 @php($text = $concept?->labels->firstWhere('language', $language))
 @php($alts = $concept ? $concept->altLabels->where('language', $language) : collect())
 @php($area = 'width: 100%; font: inherit; box-sizing: border-box')
-<label for="label">{{ __('Preferred label') }} (skos:prefLabel){{ $concept ? '; '.__('empty removes this language') : '' }}</label>
+<label for="label">{{ __('Preferred label') }}{{ $concept ? '; '.__('empty removes this language') : '' }}</label> @include('description._ric', ['term' => 'skos:prefLabel'])
 <input id="label" name="label" maxlength="1024" @unless($concept) required @endunless value="{{ old('label', $text?->pref_label) }}">
-<label for="language">{{ __('Language (BCP 47)') }}</label>
+<label for="language">{{ __('Language (BCP 47)') }}</label> @include('description._ric', ['term' => 'xml:lang'])
 <input id="language" name="language" required maxlength="35" value="{{ old('language', $language ?? 'en') }}">
-<label for="alt_labels">{{ __('Use for: alternative labels, one per line (skos:altLabel)') }}</label>
+<label for="alt_labels">{{ __('Use for: alternative labels, one per line') }}</label> @include('description._ric', ['term' => 'skos:altLabel'])
 <textarea id="alt_labels" name="alt_labels" rows="2" style="{{ $area }}">{{ old('alt_labels', $alts->where('is_hidden', false)->pluck('label')->join("\n")) }}</textarea>
-<label for="hidden_labels">{{ __('Hidden labels, found by search but never shown, one per line (skos:hiddenLabel)') }}</label>
+<label for="hidden_labels">{{ __('Hidden labels, found by search but never shown, one per line') }}</label> @include('description._ric', ['term' => 'skos:hiddenLabel'])
 <textarea id="hidden_labels" name="hidden_labels" rows="2" style="{{ $area }}">{{ old('hidden_labels', $alts->where('is_hidden', true)->pluck('label')->join("\n")) }}</textarea>
-@foreach(['definition' => 'Definition (skos:definition)', 'scope_note' => 'Scope note (skos:scopeNote)', 'history_note' => 'History note (skos:historyNote)', 'source_note' => 'Source note: where the term comes from (dcterms:source)', 'display_note' => 'Display note (skos:note)'] as $note => $noteLabel)
-    <label for="{{ $note }}">{{ $noteLabel }}</label>
+@foreach(['definition' => ['Definition', 'skos:definition'], 'scope_note' => ['Scope note', 'skos:scopeNote'], 'history_note' => ['History note', 'skos:historyNote'], 'source_note' => ['Source note: where the term comes from', 'dcterms:source'], 'display_note' => ['Display note', 'skos:note']] as $note => [$noteLabel, $noteTerm])
+    <label for="{{ $note }}">{{ __($noteLabel) }}</label> @include('description._ric', ['term' => $noteTerm])
     <textarea id="{{ $note }}" name="{{ $note }}" rows="2" style="{{ $area }}">{{ old($note, $text?->{$note}) }}</textarea>
 @endforeach
-<label for="notation">{{ __('Code (skos:notation, optional)') }}</label>
+<label for="notation">{{ __('Code (optional)') }}</label> @include('description._ric', ['term' => 'skos:notation'])
 <input id="notation" name="notation" maxlength="255" value="{{ old('notation', $concept?->notation) }}">
-<label for="broader">{{ __('Broader concept (skos:broader)') }}</label>
+<label for="broader">{{ __('Broader concept') }}</label> @include('description._ric', ['term' => 'skos:broader'])
 <select id="broader" name="broader" style="font: inherit; padding: .5rem">
     <option value="">{{ __('None: a top concept') }}</option>
     @foreach($choices as $choice)<option value="{{ $choice->id }}" @selected(old('broader', $concept?->broader_id ?? $broader?->id) === $choice->id)>{{ $choice->anyLabel(['en']) }}</option>@endforeach
 </select>
-<label for="narrower">{{ __('Add narrower concepts, one per line, in this language') }}</label>
+<label for="narrower">{{ __('Add narrower concepts, one per line, in this language') }}</label> @include('description._ric', ['term' => 'skos:narrower'])
 <textarea id="narrower" name="narrower" rows="2" style="{{ $area }}">{{ old('narrower') }}</textarea>

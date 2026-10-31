@@ -14,7 +14,7 @@
         <button type="submit">{{ __('Save') }}</button></form>
     <h2>{{ __('Rules') }}</h2>
     @foreach($rules as $r)
-        <details><summary><strong>{{ $r->name }}</strong> ({{ collect([$r->ruleType->label($lang), $r->severity->label($lang), $r->field_name, $r->level?->label($lang), $r->repository?->described('authorised-name', $lang), $r->is_active ? null : __('off')])->filter()->join(', ') }})</summary>
+        <details><summary><strong>{{ $r->name }}</strong> ({{ collect([$r->ruleType->label($lang), $r->severity->label($lang), $r->field_name ? trim($r->field_name.' '.(($term = \App\Models\Concept::firstWhere('iri', \App\Support\Vocab::element($r->field_name))?->ricTerm()) ? '('.$term.')' : '')) : null, $r->level?->label($lang), $r->repository?->described('authorised-name', $lang), $r->is_active ? null : __('off')])->filter()->join(', ') }})</summary>
             <form method="post" action="{{ route('workflow.gates.save', $r) }}">@csrf @include('workflow._gate-fields', ['r' => $r, 'p' => 'g'.$loop->index])<button type="submit">{{ __('Save') }}</button></form>
             <form method="post" action="{{ route('workflow.gates.destroy', $r) }}">@csrf<button type="submit">{{ __('Delete') }}</button></form>
         </details>

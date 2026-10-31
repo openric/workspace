@@ -7,7 +7,7 @@
     <form method="post" action="{{ route('vocabularies.store') }}">
         @csrf
         @if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif
-        <label for="kind">{{ __('What its concepts are') }}</label>
+        <label for="kind">{{ __('What its concepts are') }}</label> @include('description._ric', ['term' => null])
         <select id="kind" name="kind" required style="font: inherit; padding: .5rem">
             @foreach($kinds as $k)<option value="{{ $k->notation }}" @selected(old('kind', $kind) === $k->notation)>{{ $k->label(\App\Support\Vocab::languages()) }}</option>@endforeach
         </select>

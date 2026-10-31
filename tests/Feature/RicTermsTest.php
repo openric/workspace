@@ -95,5 +95,16 @@ class RicTermsTest extends TestCase
         app(AccountService::class)->grantTemplateRole($admin, 'administrator');
         $this->actingAs($admin)->get(route('privacy.create', 'requests'))->assertOk()->assertSee('not in RiC-O');
         $this->actingAs($admin)->get(route('retention.index'))->assertOk()->assertSee('not in RiC-O');
+
+        // Administration forms show terms only where they shape RiC data (Dr Johan Pieterse, option C, 31 October 2026):
+        // a vocabulary and its concepts their SKOS and Dublin Core terms, the numbering masks the identifier, a publish
+        // gate the term of the element it checks; accounts and the like none.
+        $this->actingAs($admin)->get(route('vocabularies.create'))->assertOk()->assertSee('<a href="http://purl.org/dc/terms/title"', false);
+        $made = $this->actingAs($admin)->post(route('vocabularies.store'), ['kind' => 'subject', 'title' => 'Local subjects', 'language' => 'en']);
+        $this->actingAs($admin)->get($made->headers->get('Location').'/concepts/new')->assertOk()
+            ->assertSee('<a href="http://www.w3.org/2004/02/skos/core#prefLabel"', false)->assertSee('dcterms:source')->assertDontSee('(skos:altLabel)');
+        $this->actingAs($admin)->get(route('accessions.settings'))->assertOk()->assertSee('rico:identifier');
+        $this->actingAs($admin)->get(route('workflow.gates'))->assertOk()->assertSee('(rico:scopeAndContent)');
+        $this->actingAs($admin)->get(route('accounts.create'))->assertOk()->assertDontSee('class="ric"', false);
     }
 }

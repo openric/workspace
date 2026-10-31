@@ -49,7 +49,7 @@
     @if($canUpdate && $siblings->isNotEmpty())
         <form method="post" action="{{ route('concepts.related.store', $concept) }}" style="display: flex; gap: .5rem; align-items: end">
             @csrf
-            <div><label for="related" style="margin-top: 0">{{ __('Relate to (skos:related)') }}</label>
+            <div><label for="related" style="margin-top: 0">{{ __('Relate to') }}</label> @include('description._ric', ['term' => 'skos:related'])
                 <select id="related" name="related" style="font: inherit; padding: .5rem">
                     @foreach($siblings as $sibling)<option value="{{ $sibling->id }}">{{ $sibling->anyLabel(['en']) }}</option>@endforeach
                 </select></div>

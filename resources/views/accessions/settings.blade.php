@@ -11,9 +11,9 @@
         @csrf
         <h2>{{ __('Numbering') }}</h2>
         <p id="mask-help">{{ __('A number given when none is typed in. Tokens: :tokens. {SEQ:5} pads the sequence to five digits; {REPO} is the repository\'s identifier and {TYPE} the agreement type\'s prefix, such as DOG. Each sequence starts at 1 again each year.', ['tokens' => implode(', ', $tokens)]) }}</p>
-        <label for="accession_numbering_mask">{{ __('Accession numbering mask') }}</label>
+        <label for="accession_numbering_mask">{{ __('Accession numbering mask') }}</label> @include('description._ric', ['term' => 'rico:identifier'])
         <input id="accession_numbering_mask" name="accession_numbering_mask" required maxlength="100" aria-describedby="mask-help" value="{{ old('accession_numbering_mask', $institution->accession_numbering_mask) }}">
-        <label for="agreement_numbering_mask">{{ __('Agreement numbering mask') }}</label>
+        <label for="agreement_numbering_mask">{{ __('Agreement numbering mask') }}</label> @include('description._ric', ['term' => 'rico:identifier'])
         <input id="agreement_numbering_mask" name="agreement_numbering_mask" required maxlength="100" aria-describedby="mask-help" value="{{ old('agreement_numbering_mask', $institution->agreement_numbering_mask) }}">
         <h2>{{ __('Intake') }}</h2>
         <input type="hidden" name="accession_auto_assign" value="0">

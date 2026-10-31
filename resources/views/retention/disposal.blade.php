@@ -31,7 +31,7 @@
         in_array($s, ['pending', 'recommended'], true) ? ['cancel', 'Cancel', true] : null,
     ]) as [$step, $label, $reason])
         <form method="post" action="{{ route('disposals.step', [$disposal, $step]) }}" style="margin: .3rem 0">@csrf
-            <input name="comment" size="40" placeholder="{{ $reason ? __('Reason') : __('Comment') }}" @if($reason) required @endif aria-label="{{ $reason ? __('Reason') : __('Comment') }}">
+            <input name="comment" size="40" placeholder="{{ $reason ? __('Reason') : __('Comment') }}" @if($reason) required @endif aria-label="{{ $reason ? __('Reason') : __('Comment') }}"> @include('description._ric', ['term' => null])
             <button type="submit">{{ __($label) }}</button></form>
     @endforeach
     @if($s === 'cleared')
