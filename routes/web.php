@@ -27,6 +27,7 @@ use App\Http\Controllers\DeletionController;
 use App\Http\Controllers\DiscoverController;
 use App\Http\Controllers\EmailBounceController;
 use App\Http\Controllers\EmailController;
+use App\Http\Controllers\EmbargoController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\IdentifierController;
@@ -543,6 +544,15 @@ Route::middleware(['auth', 'active'])->group(function () {
 
     // Rights of a unit of description, an instantiation (roadmap phase 2) or an accession (phase 9d), and Local Contexts
     // Labels of the first two; each controller checks update on it.
+    // Embargoes on units of description (roadmap phase 13a, ADR 0015).
+    Route::get('/embargoes', [EmbargoController::class, 'index'])->name('embargoes.index');
+    Route::prefix('records/{record}/embargoes')->name('records.embargoes.')->whereUuid(['record', 'embargo', 'exception'])->group(function () {
+        Route::post('/', [EmbargoController::class, 'store'])->name('store');
+        Route::post('/{embargo}', [EmbargoController::class, 'update'])->name('update');
+        Route::post('/{embargo}/lift', [EmbargoController::class, 'lift'])->name('lift');
+        Route::post('/{embargo}/exceptions', [EmbargoController::class, 'except'])->name('exceptions.add');
+        Route::post('/{embargo}/exceptions/{exception}/remove', [EmbargoController::class, 'removeException'])->name('exceptions.remove');
+    });
     Route::prefix('{kind}/{id}')->where(['kind' => 'records|instantiations|accessions', 'id' => '[0-9a-f-]{36}', 'right' => '[0-9a-f-]{36}'])->group(function () {
         Route::post('/rights', [RightsController::class, 'store'])->name('rights.store');
         Route::post('/rights/{right}', [RightsController::class, 'update'])->name('rights.update');

@@ -23,6 +23,7 @@ use App\Models\RecordResource;
 use App\Models\Repository;
 use App\Models\User;
 use App\Rights\CommunityProtocols;
+use App\Rights\Embargoes;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
@@ -155,6 +156,10 @@ final class EntityKinds
         }
 
         if ($entity instanceof Agent && $entity->isEmbargoed() && ! $user->may('update', 'authority', $entity)) {
+            return false;
+        }
+        // A record under a full embargo, for who may not change it and has no exception (phase 13a, ADR 0015).
+        if ($entity instanceof RecordResource && ! app(Embargoes::class)->allows($user, $entity, 'record')) {
             return false;
         }
         // A community protocol withholds the term or record from who may not change it (Heratio's TermProtocolGate).

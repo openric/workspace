@@ -1,0 +1,79 @@
+# OpenRiC Workspace - OpenRiC Workspace Embargo Reasons.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Why a unit of description is under embargo (Heratio's embargo reasons).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/embargo-reason/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Embargo Reasons"@en ;
+    dcterms:description "Why a unit of description is under embargo (Heratio's embargo reasons)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:donor-restriction, v:copyright, v:privacy, v:legal, v:commercial, v:research, v:cultural, v:security, v:other .
+
+v:donor-restriction a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Donor restriction"@en, "Skenkerbeperking"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the embargo, as Heratio's ahg-extended-rights maps it (mapReasonToEnum)."@en ;
+    skos:definition "The donor or depositor asked for it, in the agreement or since."@en .
+
+v:copyright a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Copyright"@en, "Kopiereg"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the embargo, as Heratio's ahg-extended-rights maps it (mapReasonToEnum)."@en ;
+    skos:definition "Copyright or another intellectual property right does not yet allow it."@en .
+
+v:privacy a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Privacy"@en, "Privaatheid"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the embargo, as Heratio's ahg-extended-rights maps it (mapReasonToEnum)."@en ;
+    skos:definition "It holds personal information about living people (POPIA)."@en .
+
+v:legal a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Legal"@en, "Regsrede"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the embargo, as Heratio's ahg-extended-rights maps it (mapReasonToEnum)."@en ;
+    skos:definition "A law, a court order or legal advice withholds it."@en .
+
+v:commercial a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Commercial"@en, "Kommersieel"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the embargo, as Heratio's ahg-extended-rights maps it (mapReasonToEnum)."@en ;
+    skos:definition "It holds commercially sensitive information."@en .
+
+v:research a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Research"@en, "Navorsing"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the embargo, as Heratio's ahg-extended-rights maps it (mapReasonToEnum)."@en ;
+    skos:definition "It is reserved for research not yet published."@en .
+
+v:cultural a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Cultural"@en, "Kultureel"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the embargo, as Heratio's ahg-extended-rights maps it (mapReasonToEnum)."@en ;
+    skos:definition "A community protocol or cultural sensitivity withholds it."@en .
+
+v:security a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Security"@en, "Sekuriteit"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the embargo, as Heratio's ahg-extended-rights maps it (mapReasonToEnum)."@en ;
+    skos:definition "It holds information whose release would harm security."@en .
+
+v:other a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Other"@en, "Ander"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the embargo, as Heratio's ahg-extended-rights maps it (mapReasonToEnum)."@en ;
+    skos:definition "Another reason, given in the note."@en .

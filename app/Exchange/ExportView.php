@@ -28,6 +28,7 @@ use App\Models\User;
 use App\Relations\EntityKinds;
 use App\Relations\RelationService;
 use App\Rights\CommunityProtocols;
+use App\Rights\Embargoes;
 use App\Support\Vocab;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
@@ -191,6 +192,10 @@ class ExportView
         // The public: an embargoed authority record is never read, and an entity is read only once its name is published.
         $definition = EntityKinds::get(EntityKinds::of($entity));
         if (($entity instanceof Agent && $entity->isEmbargoed()) || ($definition['label'] !== null && $this->label($entity) === null)) {
+            return false;
+        }
+        // Nor a record under a full embargo (phase 13a, ADR 0015).
+        if ($entity instanceof RecordResource && ! app(Embargoes::class)->allows(null, $entity, 'record')) {
             return false;
         }
         // Nor a term or record a community protocol withholds (Heratio's TermProtocolGate).

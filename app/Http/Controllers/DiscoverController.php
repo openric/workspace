@@ -29,6 +29,7 @@ use App\Models\Repository;
 use App\Relations\EntityKinds;
 use App\Relations\RelationService;
 use App\Reports\UsageService;
+use App\Rights\Embargoes;
 use App\Search\SearchIndex;
 use App\Search\SearchService;
 use Illuminate\Database\Eloquent\Model;
@@ -131,7 +132,8 @@ class DiscoverController extends Controller
         return view('discover.record', ['unit' => $unit, 'view' => $view, 'ancestors' => $ancestors, 'children' => $children, 'instantiations' => $instantiations,
             'relations' => $this->relations($unit, $catalogue), 'institution' => $catalogue->institution,
             'childThumbnails' => $childThumbnails, 'childThumbnailTotal' => $childThumbnailTotal,
-            'tree' => (new TreeService(null, $catalogue))->window($unit), 'iiif' => (new Presentation($catalogue))->hasManifest($unit)]);
+            'tree' => (new TreeService(null, $catalogue))->window($unit), 'iiif' => (new Presentation($catalogue))->hasManifest($unit),
+            'embargo' => $request->user() && $request->user()->may('update', 'description', $unit) ? null : app(Embargoes::class)->inForce($unit)]);
     }
 
     /**

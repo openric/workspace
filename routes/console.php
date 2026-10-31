@@ -5,6 +5,7 @@ use App\Description\AgreementService;
 use App\Description\WorkflowSlaService;
 use App\Reports\ReportDelivery;
 use App\Reports\UsageService;
+use App\Rights\Embargoes;
 use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
@@ -60,3 +61,10 @@ Artisan::command('workspace:workflow:sla', function (WorkflowSlaService $sla) {
     $this->line("{$result['at_risk']} at risk, {$result['overdue']} overdue, {$result['escalated']} escalated.");
 })->purpose('Warn of workflow tasks at risk or overdue, and escalate those past their service level');
 Schedule::command('workspace:workflow:sla')->dailyAt('06:30')->timezone(config('workspace.timezone'))->withoutOverlapping();
+
+// Embargoes (roadmap phase 13a, ADR 0015): warn before one ends, and give notice once one has ended.
+Artisan::command('workspace:embargoes', function (Embargoes $embargoes) {
+    $counts = $embargoes->process();
+    $this->info("Warned of {$counts['warned']} embargoes ending; told of {$counts['ended']} ended.");
+})->purpose('Warn before an embargo ends, and give notice once one has ended');
+Schedule::command('workspace:embargoes')->dailyAt('06:40')->timezone(config('workspace.timezone'))->withoutOverlapping();

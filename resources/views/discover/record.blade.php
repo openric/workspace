@@ -20,6 +20,10 @@
             @if($childThumbnailTotal > $childThumbnails->count())<p class="meta">{{ __('Showing :shown of :total pictures of the units inside.', ['shown' => $childThumbnails->count(), 'total' => $childThumbnailTotal]) }}</p>@endif
         </section>
     @endif
+    @if($embargo)
+        <p role="note" class="meta"><strong>{{ __('Under embargo') }}</strong>@if($embargo->ends_on) {{ __('until :date', ['date' => $embargo->ends_on->format('j F Y')]) }}@endif:
+            {{ $embargo->public_message ?? __('some or all of its digital copies are withheld.') }}</p>
+    @endif
     @if($instantiations->isNotEmpty())
         <section aria-label="{{ __('Digital copies and carriers') }}">
         @foreach($instantiations as ['instantiation' => $instantiation, 'files' => $files])

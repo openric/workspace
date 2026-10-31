@@ -73,6 +73,7 @@
         <p><a href="{{ route('records.provenance', $record) }}">{{ $canUpdate ? __('Manage provenance') : __('Full provenance') }}</a></p>
     </section>
     @include('description._rights', ['subject' => $record, 'kind' => 'records', 'canUpdate' => $canUpdate])
+    @include('records._embargoes', ['record' => $record, 'canUpdate' => $canUpdate])
     @include('description._community-labels', ['subject' => $record, 'kind' => 'records', 'canUpdate' => $canUpdate])
     @include('description._relations', ['subject' => $record, 'kind' => 'records', 'relations' => $relations, 'canUpdate' => $canUpdate])
     @include('description._relations', ['subject' => $record, 'kind' => 'records', 'relations' => $relations, 'canUpdate' => $canUpdate,

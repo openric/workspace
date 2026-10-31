@@ -1,0 +1,44 @@
+# OpenRiC Workspace - OpenRiC Workspace Embargo Types.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What an embargo on a unit of description withholds from who may not change it (Heratio's embargo.embargo_type).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/embargo-type/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Embargo Types"@en ;
+    dcterms:description "What an embargo on a unit of description withholds from who may not change it (Heratio's embargo.embargo_type)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:full, v:metadata-only, v:digital-only, v:partial .
+
+v:full a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Full"@en, "Volledig"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the embargo, as Heratio's ahg-extended-rights keeps it (embargo.embargo_type)."@en ;
+    skos:definition "The description and every file are withheld: the record does not exist for them."@en .
+
+v:metadata-only a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Description only"@en, "Slegs beskrywing"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the embargo, as Heratio's ahg-extended-rights keeps it (embargo.embargo_type)."@en ;
+    skos:definition "The description is shown; no file is, not even the thumbnail."@en .
+
+v:digital-only a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Files withheld"@en, "Lêers weerhou"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the embargo, as Heratio's ahg-extended-rights keeps it (embargo.embargo_type)."@en ;
+    skos:definition "The description and the thumbnail are shown; the reference copy and the master are withheld."@en .
+
+v:partial a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "No master"@en, "Geen meester"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the embargo, as Heratio's ahg-extended-rights keeps it (embargo.embargo_type)."@en ;
+    skos:definition "The description, thumbnail and reference copy are shown; the master is withheld, so nothing can be taken away whole."@en .

@@ -31,6 +31,7 @@ use App\Models\Institution;
 use App\Models\RecordResource;
 use App\Models\User;
 use App\Rights\CommunityProtocols;
+use App\Rights\Embargoes;
 use App\Support\Vocab;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -211,6 +212,10 @@ class InstantiationService
         }
         // A community protocol withholds the files of a record from who may not change it, an approved access request or not.
         if (! app(CommunityProtocols::class)->allows($user, $unit, 'description')) {
+            return false;
+        }
+        // An embargo withholds the files its type says, an approved access request or not (phase 13a, ADR 0015).
+        if (! app(Embargoes::class)->allows($user, $unit, $file->use->notation)) {
             return false;
         }
         $may = fn (string $action) => app(AccessControl::class)->allows($user, $action, 'description', $unit, $user ? null : Institution::find($unit->institution_id));

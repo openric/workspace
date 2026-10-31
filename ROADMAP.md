@@ -270,6 +270,11 @@ Done when the security, accessibility and disaster-recovery sign-offs of WS-017 
 
 **13. Embargoes, retention and disposal (WS-017, WS-018).** Copy the embargo service, notices and reports of `ahg-extended-rights`; agents' embargoes already exist, and this extends embargoes to records and files. Its retention schedule and disposal workflow, with `ahg-records-manage`, follow a discovery with a records manager. Disposal is a reviewed, audited activity that leaves a record of what was destroyed. Done when a disposal is approved, carried out and reported, with nothing removed outside it.
 
+On 31 October 2026 Dr Johan Pieterse split the phase: 13a embargoes; 13b retention schedules, disposal classes, reviews, the disposal workflow and destruction certificates, a destroyed record keeping its description as evidence with its files erased. The rest of `ahg-records-manage` (file plans, email capture, classification rules, declaration, vital records, compliance) goes to a later phase of its own.
+
+Progress:
+- **v0.0.89** (13a): embargoes on records and their files, after Heratio's `ahg-extended-rights`: four types withholding the record, every file, the copies or the master from who may not change it, in the catalogue, the API, staff pages and file delivery; exceptions for an account, a role or an IP range; on everything inside; in force by their dates until lifted; a daily warning before one ends and notice once it has; the list, statistics and CSV (ADR 0015).
+
 **14. IIIF (WS-019).** Copy the manifest building of `ahg-iiif-collection`: a IIIF Presentation 3 manifest for each record from its reference copies, a collection for each fonds, and a viewer in the public catalogue. Follow the RiC and IIIF pattern of openric/service #15 as specification guidance. PSIS's `ahgIiifPlugin` has more than Heratio's package (81 routes against 51, among them IIIF authentication); read it for what Heratio lacks. Done when the manifests validate and the MCP's image tool can follow them.
 
 On 30 October 2026 Dr Johan Pieterse split the phase, and chose manifests that paint the reference copy with no IIIF Image API server: 14a the manifests, collections, curated collections, viewer, Change Discovery and Content State; 14b Content Search 2.0, Auth Flow 2.0, saved viewer workspaces and the validation dashboard.
