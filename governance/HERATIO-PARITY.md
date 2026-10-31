@@ -96,7 +96,7 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-pdf-tools` | 2093 | V0.1 candidate | Partial | 5 | `ahgTiffPdfMergePlugin` | A PDF's text layer proposed as its transcript (v0.0.64); merging TIFFs into a PDF with the scanning workflows, phase 22 |
 | `ahg-portable-export` | 3000 | later: V1.0+ | Planned | 11c, deferred | `ahgPortableExportPlugin` | Read PSIS ahgPortableExportPlugin too, which does more; deferred by Dr Johan Pieterse on 30 October 2026 |
 | `ahg-preservation` | 10211 | later: V1.0+ | Planned | 15 | `ahgPreservationPlugin` |  |
-| `ahg-privacy` | 16854 | later: jurisdiction | Partial | 18a, 18b | `ahgPrivacyPlugin` | POPIA governance (registers, requests, compromises, assessments, controls, report) from v0.0.91 (18a, ADR 0016); PII scanning and redaction in 18b |
+| `ahg-privacy` | 16854 | later: jurisdiction | Partial | 18a, 18b | `ahgPrivacyPlugin` | POPIA governance (registers, requests, compromises, assessments, controls, report) from v0.0.91 (18a, ADR 0016); PII scanning, field redaction and file screening from v0.0.94 (18b); not visual redaction of images, named-entity recognition, the Article 30 export or the autopilot |
 | `ahg-provenance-ai` | 2662 | out: AI (V2+) | Planned | 17 (last) | none |  |
 | `ahg-rad-manage` | 1233 | V0.1 candidate | Covered |  | `ahgRadManagePlugin`, `sfRadPlugin` | RAD display standard, from v0.0.76 |
 | `ahg-rdm` | 2739 | later: V1.0+ | Planned | 22 | `ahgRdmPlugin` |  |
@@ -646,3 +646,20 @@ Added on 31 October 2026.
 | GDPR Article 30 export, compliance autopilot, data inventory | none | Not carried (ADR 0016) |
 
 : Privacy registers, field by field
+
+### Privacy in the catalogue (`ahg-privacy` PII scan, redaction and file screening)
+
+Added on 31 October 2026 with 18b.
+
+| Heratio field | Workspace | Status |
+|---|---|---|
+| PII scan of an object (`ahg_pii_scan_report`: jurisdiction, hits by type, findings, coverage, status, notes) | Scan for personal information, under a jurisdiction; what was found and where; what it read; the decision | Same, from v0.0.94 |
+| `ahg_pii_finding_embedded` (findings in a file's metadata, each with its resolution) | Findings in a file's embedded metadata, among the scan's; the decision is on the record's latest scan | Modelled |
+| `field_name`, `redaction_type`, `redaction_pattern`, `reason`, `is_sensitive` | Field, How, Keep (for a partial redaction), Reason, Special personal information | Same, from v0.0.94 |
+| `legal_basis_reference` | Legal basis reference | Same, from v0.0.94 |
+| `privacy_reason_id`, `redaction_status`, `notes` (the record's profile) | The reason of each field; a record is redacted where a field is | Modelled |
+| `decision` (release, withhold), `ground`, `note` | Release (risk accepted or redacted) or withhold, Ground, Why | Same, from v0.0.94 |
+| `privacy_screening_repositories`, `privacy_screening_collections` (settings of ids) | Where files must be screened: a repository, or a record and everything inside it | Modelled: rows |
+| Visual redaction of image regions | none | Not carried (ADR 0016): needs an image server |
+
+: Privacy in the catalogue, field by field

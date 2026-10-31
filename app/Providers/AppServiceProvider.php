@@ -11,8 +11,10 @@ use App\Mail\EmailAuditListener;
 use App\Models\DescriptionValue;
 use App\Models\Identifier;
 use App\Models\Name;
+use App\Models\RecordRedaction;
 use App\Models\RicDate;
 use App\Models\User;
+use App\Privacy\Redaction;
 use App\Search\SearchIndex;
 use App\Support\Vocab;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -30,6 +32,8 @@ class AppServiceProvider extends ServiceProvider
     {
         // One per request, so its cache of roles and concepts lives as long as the request.
         $this->app->scoped(AccessControl::class);
+        // And its cache of which fields of a record are redacted (phase 18b).
+        $this->app->scoped(Redaction::class);
     }
 
     public function boot(): void
@@ -43,6 +47,9 @@ class AppServiceProvider extends ServiceProvider
         foreach (SearchIndex::KINDS as $kind) {
             $kind::saved(fn ($model) => SearchIndex::mark($model->getTable(), (string) $model->getKey()));
         }
+        // A field redacted, or no longer, changes what the public entry may hold (phase 18b).
+        RecordRedaction::saved(fn ($model) => SearchIndex::mark('record_resources', (string) $model->record_resource_id));
+        RecordRedaction::deleted(fn ($model) => SearchIndex::mark('record_resources', (string) $model->record_resource_id));
         $this->app->terminating(fn () => app(SearchIndex::class)->flush());
 
         // Every message sent is logged (roadmap phase 7; Heratio's EventServiceProvider wiring of EmailAuditListener).

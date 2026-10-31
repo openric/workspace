@@ -1,0 +1,44 @@
+# OpenRiC Workspace - OpenRiC Workspace Personal Information Scan Statuses.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Where a scan of a record for personal information stands, and so whether its files may reach the public where screening is required (Heratio's ahg_pii_scan_report.status).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/pii-scan-status/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Personal Information Scan Statuses"@en ;
+    dcterms:description "Where a scan of a record for personal information stands, and so whether its files may reach the public where screening is required (Heratio's ahg_pii_scan_report.status)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:pending, v:withheld, v:redacted, v:accepted-risk .
+
+v:pending a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Not yet decided"@en, "Nog nie besluit nie"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's privacy screening, as Heratio's ahg-privacy keeps it."@en ;
+    skos:definition "Scanned, no decision yet. A scan that read the text of every file and found nothing clears the files by itself."@en .
+
+v:withheld a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Files withheld"@en, "Lêers teruggehou"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's privacy screening, as Heratio's ahg-privacy keeps it."@en ;
+    skos:definition "A person withheld the files from the public, on a ground given."@en .
+
+v:redacted a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Redacted"@en, "Geredigeer"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's privacy screening, as Heratio's ahg-privacy keeps it."@en ;
+    skos:definition "What was found is redacted, and the files are released."@en .
+
+v:accepted-risk a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Released, risk accepted"@en, "Vrygestel, risiko aanvaar"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's privacy screening, as Heratio's ahg-privacy keeps it."@en ;
+    skos:definition "A person released the files though the scan found personal information, on a ground given."@en .

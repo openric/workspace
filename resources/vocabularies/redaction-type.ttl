@@ -1,0 +1,37 @@
+# OpenRiC Workspace - OpenRiC Workspace Redaction Types.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# How a field of a description is redacted for the public (Heratio's information_object_privacy_field.redaction_type).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/redaction-type/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Redaction Types"@en ;
+    dcterms:description "How a field of a description is redacted for the public (Heratio's information_object_privacy_field.redaction_type)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:full, v:partial, v:pseudonymised .
+
+v:full a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Full"@en, "Volledig"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's privacy screening, as Heratio's ahg-privacy keeps it."@en ;
+    skos:definition "The value is replaced by a notice that personal information was removed."@en .
+
+v:partial a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Partial"@en, "Gedeeltelik"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's privacy screening, as Heratio's ahg-privacy keeps it."@en ;
+    skos:definition "Part of the value is kept, by the pattern chosen."@en .
+
+v:pseudonymised a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Pseudonymised"@en, "Gepseudonimiseer"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's privacy screening, as Heratio's ahg-privacy keeps it."@en ;
+    skos:definition "The value is replaced by a stable pseudonym, the same for the same value, that cannot be reversed."@en .

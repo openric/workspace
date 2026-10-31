@@ -30,6 +30,7 @@ use App\Models\Instantiation;
 use App\Models\Institution;
 use App\Models\RecordResource;
 use App\Models\User;
+use App\Privacy\Screening;
 use App\Rights\CommunityProtocols;
 use App\Rights\Embargoes;
 use App\Support\Vocab;
@@ -216,6 +217,10 @@ class InstantiationService
         }
         // An embargo withholds the files its type says, an approved access request or not (phase 13a, ADR 0015).
         if (! app(Embargoes::class)->allows($user, $unit, $file->use->notation)) {
+            return false;
+        }
+        // Where screening is required, the files wait until the record is screened and cleared (phase 18b, ADR 0016).
+        if (app(Screening::class)->withholds($user, $unit)) {
             return false;
         }
         $may = fn (string $action) => app(AccessControl::class)->allows($user, $action, 'description', $unit, $user ? null : Institution::find($unit->institution_id));

@@ -45,6 +45,7 @@ use App\Http\Controllers\NameController;
 use App\Http\Controllers\PasswordController;
 use App\Http\Controllers\PlaceController;
 use App\Http\Controllers\PrivacyController;
+use App\Http\Controllers\PrivacyScreeningController;
 use App\Http\Controllers\ProposalReviewController;
 use App\Http\Controllers\ProvenanceController;
 use App\Http\Controllers\PublicationController;
@@ -552,6 +553,10 @@ Route::middleware(['auth', 'active'])->group(function () {
         $registers = implode('|', array_keys(Registers::ALL));
         Route::get('/', [PrivacyController::class, 'index'])->name('index');
         Route::get('/controls', [PrivacyController::class, 'controls'])->name('controls');
+        // Privacy in the catalogue (roadmap phase 18b): where files are screened, and the scans waiting for a decision.
+        Route::get('/screening', [PrivacyScreeningController::class, 'index'])->name('screening');
+        Route::post('/screening/scopes', [PrivacyScreeningController::class, 'requireScope'])->name('screening.require');
+        Route::post('/screening/scopes/{scope}/remove', [PrivacyScreeningController::class, 'removeScope'])->whereUuid('scope')->name('screening.remove');
         Route::get('/{register}', [PrivacyController::class, 'register'])->where('register', $registers)->name('register');
         Route::get('/{register}/new', [PrivacyController::class, 'create'])->where('register', $registers)->name('create');
         Route::post('/{register}', [PrivacyController::class, 'save'])->where('register', $registers)->name('store');
@@ -581,6 +586,14 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::get('/disposals/{disposal}', [RetentionController::class, 'disposal'])->whereUuid('disposal')->name('disposals.show');
     Route::post('/disposals/{disposal}/{step}', [RetentionController::class, 'step'])->whereUuid('disposal')
         ->whereIn('step', ['recommend', 'approve', 'clear', 'reject', 'cancel', 'execute', 'verify'])->name('disposals.step');
+    // A record scanned for personal information, its fields redacted for the public, its files released or withheld
+    // (roadmap phase 18b, ADR 0016).
+    Route::prefix('records/{record}/privacy')->name('records.privacy.')->whereUuid(['record', 'redaction'])->group(function () {
+        Route::post('/scan', [PrivacyScreeningController::class, 'scan'])->name('scan');
+        Route::post('/redactions', [PrivacyScreeningController::class, 'redact'])->name('redact');
+        Route::post('/redactions/{redaction}/remove', [PrivacyScreeningController::class, 'unredact'])->name('unredact');
+        Route::post('/files', [PrivacyScreeningController::class, 'decide'])->name('files');
+    });
     // Embargoes on units of description (roadmap phase 13a, ADR 0015).
     Route::get('/embargoes', [EmbargoController::class, 'index'])->name('embargoes.index');
     Route::prefix('records/{record}/embargoes')->name('records.embargoes.')->whereUuid(['record', 'embargo', 'exception'])->group(function () {

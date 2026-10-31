@@ -20,11 +20,13 @@ use App\Models\Agent;
 use App\Models\Concept;
 use App\Models\Container;
 use App\Models\Institution;
+use App\Models\Name;
 use App\Models\Place;
 use App\Models\RecordResource;
 use App\Models\Relation;
 use App\Models\RicDate;
 use App\Models\User;
+use App\Privacy\Redaction;
 use App\Relations\EntityKinds;
 use App\Relations\RelationService;
 use App\Rights\CommunityProtocols;
@@ -78,7 +80,7 @@ class ExportView
         $language ??= $this->languageOf($entity);
         $chosen = $values->first(fn ($v) => $v->language === $language) ?? $values->first(fn ($v) => $v->is_original) ?? $values->first();
 
-        return $chosen ? [$chosen->value, $chosen->language] : null;
+        return $chosen ? [$this->said($entity, $notation, (string) $chosen->value), $chosen->language] : null;
     }
 
     public function value(Model $entity, string $notation, ?string $language = null): ?string
@@ -99,12 +101,35 @@ class ExportView
     {
         // A name element (a parallel or other name, an alternate title) reads the entity's names of its type.
         if ($type = Elements::nameType($notation)) {
-            return $entity->namesOfType($type)->filter(fn ($n) => $this->visible($n))->sortBy(fn ($n) => [! $n->is_original, $n->language])->values();
+            return $this->redacted($entity, $notation, $entity->namesOfType($type)->filter(fn ($n) => $this->visible($n))->sortBy(fn ($n) => [! $n->is_original, $n->language])->values());
         }
         $element = Vocab::element($notation);
 
-        return $entity->descriptionValues->filter(fn ($v) => $v->element->iri === $element && $this->visible($v))
-            ->sortBy(fn ($v) => [! $v->is_original, $v->language])->values();
+        return $this->redacted($entity, $notation, $entity->descriptionValues->filter(fn ($v) => $v->element->iri === $element && $this->visible($v))
+            ->sortBy(fn ($v) => [! $v->is_original, $v->language])->values());
+    }
+
+    /** A record's value as the view may read it: a field redacted for the public is redacted (phase 18b, ADR 0016). */
+    public function said(Model $entity, string $notation, string $value): string
+    {
+        return $entity instanceof RecordResource ? app(Redaction::class)->shown($this->user, $entity, $notation, $value) : $value;
+    }
+
+    /** A value or name of the entity as the view may read it, by the field it is described under. */
+    public function saidOf(Model $entity, Model $part): string
+    {
+        $notation = $part instanceof Name ? (Redaction::NAME_FIELDS[$part->nameType?->notation] ?? '') : (string) $part->element?->notation;
+
+        return $this->said($entity, $notation, (string) $part->value);
+    }
+
+    private function redacted(Model $entity, string $notation, Collection $values): Collection
+    {
+        if (! $entity instanceof RecordResource || ! app(Redaction::class)->of($entity)->has($notation)) {
+            return $values;
+        }
+
+        return $values->map(fn ($v) => tap(clone $v, fn ($c) => $c->value = $this->said($entity, $notation, (string) $v->value)));
     }
 
     /** Every language the unit has a visible value or name in, its original first. */

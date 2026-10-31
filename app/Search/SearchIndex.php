@@ -88,20 +88,25 @@ final class SearchIndex
             $institution = Institution::find($entity->getAttribute('institution_id'));
             $public = new ExportView(null, false, null, $institution);
             if ($public->readable($entity)) {
-                $this->write($entity, true, $public->label($entity), fn ($part) => $public->visible($part));
+                // The public entry holds what the public may read: a redacted field redacted (phase 18b).
+                $this->write($entity, true, $public->label($entity), fn ($part) => $public->visible($part), fn ($part) => $public->saidOf($entity, $part));
             }
             $this->write($entity, false, EntityKinds::label($entity), fn () => true);
         });
     }
 
-    /** @param  callable(Model): bool  $shows */
-    private function write(Model $entity, bool $public, ?string $title, callable $shows): void
+    /**
+     * @param  callable(Model): bool  $shows
+     * @param  (callable(Model): string)|null  $says
+     */
+    private function write(Model $entity, bool $public, ?string $title, callable $shows, ?callable $says = null): void
     {
+        $says ??= fn ($part) => (string) $part->value;
         // [text, BCP 47 language or null, weight]
         $parts = [];
         foreach ($entity->names ?? [] as $name) {
             if ($shows($name)) {
-                $parts[] = [$name->value, $name->language, 'A'];
+                $parts[] = [$says($name), $name->language, 'A'];
             }
         }
         foreach ($entity->identifiers ?? [] as $identifier) {
@@ -109,7 +114,7 @@ final class SearchIndex
         }
         foreach ($entity->descriptionValues ?? [] as $value) {
             if ($shows($value)) {
-                $parts[] = [$value->value, $value->language, 'C'];
+                $parts[] = [$says($value), $value->language, 'C'];
             }
         }
         if ($parts === []) {

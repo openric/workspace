@@ -81,3 +81,39 @@ IPSAS goes with heritage accounting in phase 21. Two-factor sign-in goes with si
 ## Amendment (v0.0.92, 31 October 2026)
 
 The form audit of 31 October 2026 found four fields of Heratio's registers 18a had left out: a data subject request's priority (a vocabulary row) and notes, a PAIA request's fee exemption, and a security compromise's cause. They are added to the registers' definitions. Every field of the registers says that RiC-O 1.1 has no term for it.
+
+## Decision (18b): privacy in the catalogue
+
+- **The scanner** is Heratio's `PiiScanService` (`App\Privacy\PiiScanner`): patterns for email addresses, telephone numbers, national identity numbers, card numbers, IP addresses and dates of birth, with the checks that go with them:
+  - a South African identity number's check digit (a wrong one is reported at low confidence, as possible, as Heratio does)
+  - Luhn for cards
+  - context words
+  - an institution's own terms
+
+  There is no model and no network. A scan that could not evaluate a pattern is not complete, so it never clears anything.
+- **A scan reads** the record's names and description values, its files' embedded metadata, and the transcript of each file, and keeps what it found (at most 500 findings) with the jurisdiction it looked under. Its coverage says whether every file's text was read: "the description and the files" only when every instantiation with a file has a transcript.
+- **Fields redacted for the public** (Heratio's `information_object_privacy_field`): each field of a record in full, in part by a pattern (email, telephone, the last four of an identity number, the year of a date), or pseudonymised (`Subject-` and six characters of a SHA-256, the same for the same value), with a reason, a legal basis reference and whether it is special personal information.
+  - The redaction is applied where every public surface reads a unit's values (ExportView), so the catalogue, the API, JSON-LD, OAI-PMH, IIIF and the public search entry all say the same. The record keeps the original.
+  - **Who reads the original:** an account that may change the record (it sees the value on its form anyway) or manage privacy. Heratio lets administrators only.
+- **File screening** (Heratio's `FileScreeningGate`): an institution requires screening for a repository's records, or for a record and everything inside it. These are rows, where Heratio has two settings of ids.
+  - There, a record's files are withheld from anyone who may not change it until its latest scan clears them: a person released them (risk accepted), or marked what was found redacted, or a scan that read every file found nothing and nobody has withheld them since.
+  - Releasing needs a scan and a reason; withholding needs neither. The description is not affected.
+- **Who does this work:** Manage privacy, as in 18a. The record page has a privacy panel for it, and the privacy pages a list of where screening is required, the scans that found something and wait for a decision, and the files withheld.
+
+## Not carried in 18b
+
+- Heratio's visual redaction of regions of an image (`visual-redaction-editor`): it needs the image server phase 14 decided against.
+- Its named-entity recognition and its statistics tables.
+- Its findings kept one by one with their own resolution: here the decision is on the record's latest scan.
+- Scanning the text of a file that has no transcript: optical character recognition is phase 17.
+
+## Evidence (18b)
+
+`tests/Feature/PrivacyScreeningTest.php` covers:
+
+- the scanner and the identity number check
+- a scan of the description, embedded metadata and transcripts, and its coverage
+- a redacted field redacted on the public page, in the API and in the public search entry, the original kept and shown to an editor
+- the patterns
+- the screening gate through scanning, releasing, withholding and clearing by a complete scan
+- refusal to an editor

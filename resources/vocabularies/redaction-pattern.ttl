@@ -1,0 +1,44 @@
+# OpenRiC Workspace - OpenRiC Workspace Redaction Patterns.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What a partial redaction keeps (Heratio's PrivacyRedactionService::applyPattern).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/redaction-pattern/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Redaction Patterns"@en ;
+    dcterms:description "What a partial redaction keeps (Heratio's PrivacyRedactionService::applyPattern)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:email-partial, v:phone-partial, v:id-last4, v:year-only .
+
+v:email-partial a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Email address: first letter"@en, "E-posadres: eerste letter"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's privacy screening, as Heratio's ahg-privacy keeps it."@en ;
+    skos:definition "Keeps the first letter of an email address: j***@***."@en .
+
+v:phone-partial a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Telephone: last four digits"@en, "Telefoon: laaste vier syfers"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's privacy screening, as Heratio's ahg-privacy keeps it."@en ;
+    skos:definition "Keeps the last four digits of a telephone number."@en .
+
+v:id-last4 a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Identity number: last four"@en, "Identiteitsnommer: laaste vier"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's privacy screening, as Heratio's ahg-privacy keeps it."@en ;
+    skos:definition "Keeps the last four characters of an identity number."@en .
+
+v:year-only a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Date: year only"@en, "Datum: slegs die jaar"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's privacy screening, as Heratio's ahg-privacy keeps it."@en ;
+    skos:definition "Keeps the year of a date, such as a date of birth."@en .
