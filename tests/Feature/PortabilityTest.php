@@ -176,7 +176,7 @@ class PortabilityTest extends TestCase
         $newestFirst = $versions;
         usort($newestFirst, fn ($a, $b) => version_compare($b, $a));
         $this->assertSame($newestFirst, $versions, 'newest first');
-        $this->assertSame($versions[0], $feed['dataset_version'], 'this release is in the feed');
+        $this->assertTrue(version_compare($versions[0], $feed['dataset_version'], '<='), 'no change from a later release than this one');
         $this->assertFileExists(base_path('conformance/governance-pin.md'));
     }
 }

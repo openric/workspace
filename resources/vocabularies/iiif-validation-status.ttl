@@ -1,0 +1,37 @@
+# OpenRiC Workspace - OpenRiC Workspace IIIF Validation Outcomes.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# The outcome of a IIIF validation check, after PSIS's iiif_validation_result.status.
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/iiif-validation-status/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace IIIF Validation Outcomes"@en ;
+    dcterms:description "The outcome of a IIIF validation check, after PSIS's iiif_validation_result.status."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:passed, v:warning, v:failed .
+
+v:passed a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Passed"@en, "Geslaag"@af ;
+    skos:scopeNote "Not a RiC-O term: the outcome of a check of a record's IIIF manifest."@en ;
+    skos:definition "The check holds."@en .
+
+v:warning a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Warning"@en, "Waarskuwing"@af ;
+    skos:scopeNote "Not a RiC-O term: the outcome of a check of a record's IIIF manifest."@en ;
+    skos:definition "The manifest is served, but lacks something a viewer or a reader would want."@en .
+
+v:failed a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Failed"@en, "Misluk"@af ;
+    skos:scopeNote "Not a RiC-O term: the outcome of a check of a record's IIIF manifest."@en ;
+    skos:definition "The manifest cannot be made, or would be wrong."@en .

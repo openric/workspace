@@ -48,6 +48,8 @@
                 'reports.usage' => [__('Usage statistics'), $user->mayAnywhere('read', 'description'), 'reports.usage'],
                 'reports.builder.index' => [__('Report builder'), $user->mayAnywhere('read', 'description'), 'reports.builder.*'],
                 'iiif-collections.index' => [__('IIIF collections'), $user->mayAnywhere('publish', 'description'), 'iiif-collections.*'],
+                'iiif-validation.index' => [__('IIIF validation'), $user->mayAnywhere('publish', 'description'), 'iiif-validation.*'],
+                'iiif-workspaces.index' => [__('My viewer layouts'), true, 'iiif-workspaces.*'],
                 ...collect(\App\Http\Controllers\ReportController::TITLES)->mapWithKeys(fn ($title, $list) => ['reports.'.$list => [__($title),
                     \App\Reports\ReportService::mayRead($user, $list), 'reports.'.$list]])->all(),
             ],

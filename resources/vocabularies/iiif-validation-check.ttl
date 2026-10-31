@@ -1,0 +1,79 @@
+# OpenRiC Workspace - OpenRiC Workspace IIIF Validation Checks.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What is checked of a record before its IIIF manifest is relied on, after PSIS's IiifValidationService.
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/iiif-validation-check/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace IIIF Validation Checks"@en ;
+    dcterms:description "What is checked of a record before its IIIF manifest is relied on, after PSIS's IiifValidationService."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:label-present, v:has-canvases, v:files-present, v:dimensions, v:durations, v:thumbnail-present, v:rights-present, v:required-statement, v:published .
+
+v:label-present a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Title present"@en, "Titel teenwoordig"@af ;
+    skos:scopeNote "Not a RiC-O term: a check of a record's IIIF manifest, as PSIS's ahgIiifPlugin IiifValidationService makes it."@en ;
+    skos:definition "The record has an authorised title, which the manifest needs as its label."@en .
+
+v:has-canvases a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Something to show"@en, "Iets om te wys"@af ;
+    skos:scopeNote "Not a RiC-O term: a check of a record's IIIF manifest, as PSIS's ahgIiifPlugin IiifValidationService makes it."@en ;
+    skos:definition "The record has an image a browser shows, or sound or video, that a canvas can paint."@en .
+
+v:files-present a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Files on disk"@en, "Lêers op skyf"@af ;
+    skos:scopeNote "Not a RiC-O term: a check of a record's IIIF manifest, as PSIS's ahgIiifPlugin IiifValidationService makes it."@en ;
+    skos:definition "Every file a canvas would paint is in the file store."@en .
+
+v:dimensions a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Sizes known"@en, "Groottes bekend"@af ;
+    skos:scopeNote "Not a RiC-O term: a check of a record's IIIF manifest, as PSIS's ahgIiifPlugin IiifValidationService makes it."@en ;
+    skos:definition "Every image a canvas would paint has a known width and height."@en .
+
+v:durations a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Lengths known"@en, "Lengtes bekend"@af ;
+    skos:scopeNote "Not a RiC-O term: a check of a record's IIIF manifest, as PSIS's ahgIiifPlugin IiifValidationService makes it."@en ;
+    skos:definition "Every sound or video a canvas would paint has a known duration; without one it is left out of the manifest."@en .
+
+v:thumbnail-present a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Thumbnail"@en, "Duimnael"@af ;
+    skos:scopeNote "Not a RiC-O term: a check of a record's IIIF manifest, as PSIS's ahgIiifPlugin IiifValidationService makes it."@en ;
+    skos:definition "A thumbnail of the first canvas exists."@en .
+
+v:rights-present a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Rights statement"@en, "Regteverklaring"@af ;
+    skos:scopeNote "Not a RiC-O term: a check of a record's IIIF manifest, as PSIS's ahgIiifPlugin IiifValidationService makes it."@en ;
+    skos:definition "A Creative Commons licence or RightsStatements.org statement is in force, for the manifest's rights."@en .
+
+v:required-statement a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Holder named"@en, "Bewaarder genoem"@af ;
+    skos:scopeNote "Not a RiC-O term: a check of a record's IIIF manifest, as PSIS's ahgIiifPlugin IiifValidationService makes it."@en ;
+    skos:definition "A repository holds the record, for the manifest's required statement."@en .
+
+v:published a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Published"@en, "Gepubliseer"@af ;
+    skos:scopeNote "Not a RiC-O term: a check of a record's IIIF manifest, as PSIS's ahgIiifPlugin IiifValidationService makes it."@en ;
+    skos:definition "The public can read the record, so its manifest is served."@en .

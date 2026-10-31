@@ -16,6 +16,7 @@ namespace App\Iiif;
 
 use App\Api\PublicCatalogue;
 use App\Description\InstantiationService;
+use App\Exchange\ExportView;
 use App\Files\FileStore;
 use App\Models\DigitalFile;
 use App\Models\IiifCollection;
@@ -36,6 +37,12 @@ class Presentation
 
     public function __construct(private PublicCatalogue $catalogue) {}
 
+    /** What a visitor may read, as the public catalogue decides it. */
+    public function view(): ExportView
+    {
+        return $this->catalogue->view;
+    }
+
     /** The record's manifest, or null when a visitor may see no image, sound or video of it. */
     public function manifest(RecordResource $unit): ?array
     {
@@ -44,13 +51,15 @@ class Presentation
         $canvases = [];
         $rendering = [];
         $thumbnail = null;
-        foreach ($this->instantiations($unit) as [$instantiation, $files]) {
-            if ($canvas = $this->canvas($id, $instantiation, $files)) {
+        $restricted = false;
+        foreach ($this->instantiations($unit) as [$instantiation, $files, $onRequest]) {
+            if ($canvas = $this->canvas($id, $instantiation, $files, $onRequest)) {
                 $canvases[] = $canvas;
                 $thumbnail ??= $canvas['thumbnail'][0] ?? null;
+                $restricted = $restricted || $onRequest;
             }
             // The file itself, to take away rather than look at, where a visitor may have it.
-            if (($master = $files->get('master')) && ! $this->painted($canvas, $master)) {
+            if (! $onRequest && ($master = $files->get('master')) && ! $this->painted($canvas, $master)) {
                 $rendering[] = ['id' => route('discover.file', $master), 'type' => $this->type($master->mime_type), 'label' => $this->strings([[$master->original_name, 'none']]),
                     'format' => $master->mime_type];
             }
@@ -59,7 +68,10 @@ class Presentation
             return null;
         }
 
-        $manifest = ['@context' => self::CONTEXT, 'id' => $id, 'type' => 'Manifest', 'label' => $this->label($unit)];
+        // Contexts of the services it names first, Presentation last, as Presentation 3 requires (phase 14b).
+        $searchable = app(ContentSearch::class)->searchable($this, $unit);
+        $contexts = [...($restricted ? [Auth::CONTEXT] : []), ...($searchable ? [ContentSearch::CONTEXT] : []), self::CONTEXT];
+        $manifest = ['@context' => count($contexts) === 1 ? self::CONTEXT : $contexts, 'id' => $id, 'type' => 'Manifest', 'label' => $this->label($unit)];
         if ($summary = $this->text($unit, 'scope-and-content')) {
             $manifest['summary'] = $summary;
         }
@@ -94,12 +106,34 @@ class Presentation
         if ($rendering !== []) {
             $manifest['rendering'] = $rendering;
         }
+        if ($searchable) {
+            $manifest['service'] = [['id' => route('iiif.search', $unit->id), 'type' => 'SearchService2',
+                'service' => [['id' => route('iiif.autocomplete', $unit->id), 'type' => 'AutoCompleteService2']]]];
+        }
         $manifest['items'] = $canvases;
 
         return $manifest;
     }
 
-    /** Whether a visitor may see an image, sound or video of the record: whether it has a manifest. */
+    /**
+     * The canvases a visitor may see the text of, each with its instantiation: those whose files the public may
+     * receive (Content Search reads their transcripts; phase 14b).
+     *
+     * @return array<string, Instantiation> canvas id => instantiation
+     */
+    public function openCanvases(RecordResource $unit): array
+    {
+        $out = [];
+        foreach ($this->instantiations($unit) as [$instantiation, $files, $onRequest]) {
+            if (! $onRequest && $this->painting($files) !== null) {
+                $out[route('iiif.manifest', $unit->id).'/canvas/'.$instantiation->id] = $instantiation;
+            }
+        }
+
+        return $out;
+    }
+
+    /** Whether a visitor may see, or ask for, an image, sound or video of the record: whether it has a manifest. */
     public function hasManifest(RecordResource $unit): bool
     {
         foreach ($this->instantiations($unit) as [, $files]) {
@@ -203,9 +237,11 @@ class Presentation
     }
 
     /**
-     * The record's instantiations a visitor may see, in order, each with the files a visitor may receive, by use.
+     * The record's instantiations a visitor may see, in order, each with the files a visitor may receive, by use; and
+     * those available on request, with their files, which a visitor may receive once signed in with the access
+     * (IIIF Auth Flow 2.0; phase 14b).
      *
-     * @return list<array{0: Instantiation, 1: Collection<string, DigitalFile>}>
+     * @return list<array{0: Instantiation, 1: Collection<string, DigitalFile>, 2: bool}> the third: on request
      */
     private function instantiations(RecordResource $unit): array
     {
@@ -219,7 +255,9 @@ class Presentation
             }
             $files = $instantiation->files->filter(fn (DigitalFile $file) => $service->deliverable(null, $file))->keyBy(fn ($file) => $file->use->notation);
             if ($files->isNotEmpty()) {
-                $out[] = [$instantiation, $files];
+                $out[] = [$instantiation, $files, false];
+            } elseif ($instantiation->availability->notation === 'on-request' && $instantiation->files->isNotEmpty()) {
+                $out[] = [$instantiation, $instantiation->files->keyBy(fn ($file) => $file->use->notation), true];
             }
         }
 
@@ -239,7 +277,7 @@ class Presentation
         return null;
     }
 
-    private function canvas(string $manifestId, Instantiation $instantiation, Collection $files): ?array
+    private function canvas(string $manifestId, Instantiation $instantiation, Collection $files, bool $onRequest = false): ?array
     {
         $file = $this->painting($files);
         if ($file === null) {
@@ -248,6 +286,10 @@ class Presentation
         $id = $manifestId.'/canvas/'.$instantiation->id;
         $label = $this->label($instantiation);
         $body = ['id' => route('discover.file', $file), 'type' => $this->type($file->mime_type), 'format' => $file->mime_type];
+        if ($onRequest) {
+            // Shown to who may have it once signed in: the viewer probes, and offers the sign-in (Auth Flow 2.0).
+            $body['service'] = [app(Auth::class)->probeService($file)];
+        }
         $canvas = ['id' => $id, 'type' => 'Canvas', 'label' => $label];
         if ($this->timed($file)) {
             $duration = $this->duration($files);
@@ -267,7 +309,7 @@ class Presentation
             $canvas['width'] = $body['width'] = $width;
             $canvas['height'] = $body['height'] = $height;
         }
-        if ($thumbnail = $files->get('thumbnail')) {
+        if (! $onRequest && $thumbnail = $files->get('thumbnail')) {
             [$w, $h] = $this->size($thumbnail);
             $canvas['thumbnail'] = [array_filter(['id' => route('discover.file', $thumbnail), 'type' => 'Image', 'format' => $thumbnail->mime_type, 'width' => $w, 'height' => $h])];
         }

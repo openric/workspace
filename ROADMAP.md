@@ -276,6 +276,7 @@ On 30 October 2026 Dr Johan Pieterse split the phase, and chose manifests that p
 
 Progress:
 - **v0.0.87** (14a): a IIIF Presentation 3 manifest for each published record with an image, sound or video a visitor may receive, each instantiation a canvas, after PSIS's manifest and Heratio's audio and video canvases; a collection for each record with parts and one for the institution; curated collections after Heratio's; Change Discovery 1.0 from the records' datestamps and the deprecation register; Content State 1.0; Mirador on the record's manifest in the public catalogue; RiC-O naming the manifest; the IIIF-ready publish gate (ADR 0014).
+- **v0.0.88** (14b): Content Search 2.0 over published transcripts, with autocomplete; Authorization Flow 2.0 for files available on request (probe, access and token services; the file shown to who may have it once signed in); the viewer layouts an account saves and opens again; IIIF validation of each record with its history and dashboard, after PSIS's. Phase 14 is done, but for security clearance on the probe (phase 18) and the nginx exception a viewer on another site needs.
 
 **15. Preservation connectors (WS-019).**
 - Copy PREMIS events from `ahg-preservation`: ingest, fixity, migration.

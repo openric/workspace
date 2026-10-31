@@ -236,7 +236,10 @@ class DiscoverController extends Controller
     {
         $file->load('instantiation.record', 'instantiation.availability', 'use');
         $service = app(InstantiationService::class);
-        abort_unless($file->institution_id === $this->catalogue($request)->institution->id && $service->deliverable(null, $file), 404);
+        // The public's files, and a signed-in reader's too: a file on request opens to who may have it, as the IIIF viewer
+        // asks for it once they have signed in (Auth Flow 2.0, phase 14b). Every file is sent private, no-store.
+        abort_unless($file->institution_id === $this->catalogue($request)->institution->id
+            && ($service->deliverable(null, $file) || ($request->user() !== null && $service->deliverable($request->user(), $file))), 404);
         $path = $service->path($file);
         abort_unless(is_file($path), 404);
         // A picture shown in a page is not a download; a file asked for as one, or opened on its own, is.

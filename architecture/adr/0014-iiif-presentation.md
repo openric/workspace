@@ -59,3 +59,52 @@ The presentation-validator's JSON Schema declares no licence, so it is not copie
 - No deep zoom on large images until an image server or static tiles come; the per-file OpenSeadragon viewer is unchanged.
 - Manifests and Change Discovery are made on each request. A large catalogue wants them kept, recorded as `ponytail` in the code.
 - Staff see manifests only as the public does. A staff manifest of drafts would come with Auth Flow 2.0 in 14b.
+
+## Amendment, 31 October 2026: Content Search, Auth Flow 2.0, viewer layouts and validation (14b)
+
+- **Content Search 2.0**, after Heratio's `IiifContentSearchService`.
+  - Searching covers the published transcripts of the canvases a visitor may receive. The Workspace keeps no word positions, so each hit targets its whole canvas, and a contextualizing annotation carries sixty characters either side as a `TextQuoteSelector`.
+  - Autocomplete answers a `TermPage`, as the specification has it; Heratio's answers an AnnotationCollection.
+  - The manifest names the search service only when there is text to search.
+  - The contexts of the services a manifest names come first, and Presentation last.
+- **Authorization Flow 2.0**, after Heratio's `IiifAuthFlow2Service`, with its two departures from the specification put right:
+  - The probe reads the bearer token it is sent.
+  - The token service is a page that posts the token to the viewer's window, and only to a web origin.
+
+  What it covers and how:
+  - An instantiation available on request (phase 7) is a canvas whose painting file carries a probe service. Its thumbnail is not shown.
+  - The probe answers 200 when the account a token stands for may receive the file (`InstantiationService::deliverable`: an approved access request, or the right to read it), and 401 otherwise.
+  - The access service (active profile) signs the reader in and closes itself.
+  - The public file route now serves a signed-in reader the files they may receive. Every file is sent private and no-store.
+  - Tokens last an hour, and only their hash is kept.
+  - Security clearance levels, which Heratio's probe consults, come with phase 18.
+  - The live site's nginx sends `X-Frame-Options: SAMEORIGIN`. The Workspace's own Mirador is same-origin and works, but a viewer on another site cannot load the token page in a frame until nginx makes an exception for `/iiif/auth/token`. That is a server change, left to Dr Johan Pieterse.
+- **Viewer layouts**, after Heratio's `ahg_iiif_workspace`.
+  - A signed-in reader saves the windows open in the viewer (each a manifest of this Workspace and its canvas), then opens, renames, deletes, or chooses a default.
+  - Only this Workspace's manifests and canvases are kept, and each account sees only its own.
+  - The viewer lets a signed-in reader add other manifests.
+- **Validation**, after PSIS's `IiifValidationService`. The checks:
+  - title
+  - something to paint
+  - files in the store
+  - image sizes
+  - sound and video lengths
+  - thumbnail
+  - rights
+  - holder
+  - published
+
+  How it works:
+  - Checks are made of the record as staff see it, so a draft is checked before it is published.
+  - Each run is kept, with checks and outcomes as vocabulary rows.
+  - The dashboard shows each record's latest outcome and recent failures, and one record's runs.
+  - Checking every record with a file runs at once, not as a queued job.
+  - PSIS's image service check is not carried, as there is no image server.
+  - Whoever may publish descriptions may check them.
+
+Evidence: `tests/Feature/IiifServicesTest.php`. It covers:
+
+- Search hits and their context, with the on-request text not searched, and autocomplete.
+- The probe, access and token services, with and without the sign-in, a token honoured and a false one refused, the file served only to who may have it, and no token posted to a non-web origin.
+- A layout saved with a foreign manifest and canvas dropped, set as the default, and opened again, but not by another account.
+- Validation of a published record and a draft, the batch summary and the dashboard.

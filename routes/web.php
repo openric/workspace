@@ -30,8 +30,11 @@ use App\Http\Controllers\EmailController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\IdentifierController;
+use App\Http\Controllers\IiifAuthController;
 use App\Http\Controllers\IiifCollectionController;
 use App\Http\Controllers\IiifController;
+use App\Http\Controllers\IiifValidationController;
+use App\Http\Controllers\IiifWorkspaceController;
 use App\Http\Controllers\ImportController;
 use App\Http\Controllers\InstantiationController;
 use App\Http\Controllers\IriController;
@@ -149,6 +152,12 @@ Route::middleware([ServeDiscovery::class, 'throttle:600,1'])->prefix('iiif')->na
     Route::get('/collections/{collection}', [IiifController::class, 'curated'])->whereUuid('collection')->name('curated');
     Route::get('/discovery/changes', [IiifController::class, 'changes'])->name('changes');
     Route::get('/content-state', [IiifController::class, 'contentState'])->name('content-state');
+    // Content Search 2.0 and Authorization Flow 2.0 (phase 14b).
+    Route::get('/records/{id}/search', [IiifController::class, 'search'])->name('search');
+    Route::get('/records/{id}/autocomplete', [IiifController::class, 'autocomplete'])->name('autocomplete');
+    Route::match(['get', 'options'], '/auth/probe/{file}', [IiifAuthController::class, 'probe'])->whereUuid('file')->name('auth.probe');
+    Route::get('/auth/access', [IiifAuthController::class, 'access'])->name('auth.access');
+    Route::get('/auth/token', [IiifAuthController::class, 'token'])->name('auth.token');
 });
 
 // A built report opened by its share link (roadmap phase 8): no sign-in; the link expires, and only its hash is kept.
@@ -472,6 +481,20 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::get('/reports/quality', [ReportController::class, 'quality'])->name('reports.quality');
     Route::get('/reports/usage', [ReportController::class, 'usage'])->name('reports.usage');
     // The report builder (roadmap phase 8): the controller checks that the report is the account's own or shared, and on a kind it may read.
+    // The viewer layouts an account saves, and IIIF validation (roadmap phase 14b, ADR 0014).
+    Route::prefix('iiif-workspaces')->name('iiif-workspaces.')->group(function () {
+        Route::get('/', [IiifWorkspaceController::class, 'index'])->name('index');
+        Route::post('/', [IiifWorkspaceController::class, 'store'])->name('store');
+        Route::post('/{workspace}', [IiifWorkspaceController::class, 'update'])->whereUuid('workspace')->name('update');
+        Route::post('/{workspace}/delete', [IiifWorkspaceController::class, 'destroy'])->whereUuid('workspace')->name('destroy');
+        Route::get('/{workspace}/open', [IiifWorkspaceController::class, 'open'])->whereUuid('workspace')->name('open');
+    });
+    Route::prefix('iiif-validation')->name('iiif-validation.')->group(function () {
+        Route::get('/', [IiifValidationController::class, 'index'])->name('index');
+        Route::post('/all', [IiifValidationController::class, 'validateAll'])->name('all');
+        Route::get('/records/{record}', [IiifValidationController::class, 'record'])->whereUuid('record')->name('record');
+        Route::post('/records/{record}', [IiifValidationController::class, 'validateRecord'])->whereUuid('record')->name('validate');
+    });
     // Curated IIIF collections (roadmap phase 14a, ADR 0014): who may publish descriptions may curate them.
     Route::prefix('iiif-collections')->name('iiif-collections.')->group(function () {
         Route::get('/', [IiifCollectionController::class, 'index'])->name('index');

@@ -13,9 +13,11 @@ namespace App\Http\Controllers;
 use App\Api\PublicCatalogue;
 use App\Description\DeprecationService;
 use App\Iiif\ChangeDiscovery;
+use App\Iiif\ContentSearch;
 use App\Iiif\ContentState;
 use App\Iiif\Presentation;
 use App\Models\IiifCollection;
+use App\Models\IiifViewerWorkspace;
 use App\Models\RecordResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -49,6 +51,25 @@ class IiifController extends Controller
         return $this->json($this->presentation($request)->curated($collection));
     }
 
+    /** Content Search 2.0: the hits for ?q= in the record's published transcripts (phase 14b). */
+    public function search(Request $request, string $id): JsonResponse
+    {
+        $unit = $this->record($request, $id);
+        $presentation = $this->presentation($request);
+        abort_unless($presentation->hasManifest($unit), 404);
+
+        return $this->json(app(ContentSearch::class)->search($presentation, $unit, (string) $request->query('q', '')), 'application/ld+json');
+    }
+
+    public function autocomplete(Request $request, string $id): JsonResponse
+    {
+        $unit = $this->record($request, $id);
+        $presentation = $this->presentation($request);
+        abort_unless($presentation->hasManifest($unit), 404);
+
+        return $this->json(app(ContentSearch::class)->autocomplete($presentation, $unit, (string) $request->query('q', '')), 'application/ld+json');
+    }
+
     /** Change Discovery: the collection, or one page of it (?page=). */
     public function changes(Request $request): JsonResponse
     {
@@ -77,9 +98,17 @@ class IiifController extends Controller
         abort_unless($presentation->hasManifest($unit), 404);
         $state = $request->filled('iiif-content') ? app(ContentState::class)->decode((string) $request->query('iiif-content')) : null;
         $manifest = route('iiif.manifest', $unit->id);
+        $windows = [array_filter(['manifestId' => $manifest, 'canvasId' => $state && $state['manifest'] === $manifest ? $state['canvas'] : null])];
+        // A layout the account saved opens with all its windows (phase 14b); each is checked again on the way in.
+        $user = $request->user();
+        if ($user && $request->filled('workspace')) {
+            $saved = IiifViewerWorkspace::where(['id' => $request->query('workspace'), 'user_id' => $user->id])->first() ?? abort(404);
+            $windows = IiifWorkspaceController::windows($saved->windows) ?: $windows;
+        }
 
         return view('discover.iiif', ['unit' => $unit, 'view' => $this->catalogue($request)->view, 'institution' => $this->catalogue($request)->institution,
-            'manifest' => $manifest, 'canvas' => $state && $state['manifest'] === $manifest ? $state['canvas'] : null]);
+            'manifest' => $manifest, 'windows' => $windows, 'signedIn' => $user !== null,
+            'default' => $user ? IiifViewerWorkspace::where(['user_id' => $user->id, 'is_default' => true])->first() : null]);
     }
 
     /** A record the public may read; a withdrawn one answers 410 (ADR 0013). */
@@ -104,8 +133,8 @@ class IiifController extends Controller
         return $request->attributes->get('catalogue');
     }
 
-    private function json(array $body): JsonResponse
+    private function json(array $body, string $type = self::MEDIA_TYPE): JsonResponse
     {
-        return response()->json($body, 200, ['Content-Type' => self::MEDIA_TYPE, 'Access-Control-Allow-Origin' => '*'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        return response()->json($body, 200, ['Content-Type' => $type, 'Access-Control-Allow-Origin' => '*'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
     }
 }
