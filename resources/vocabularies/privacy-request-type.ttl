@@ -1,0 +1,58 @@
+# OpenRiC Workspace - OpenRiC Workspace Data Subject Request Types.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What a data subject asks of the institution (POPIA s.23 and s.24; Heratio's privacy_dsar.request_type).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/privacy-request-type/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Data Subject Request Types"@en ;
+    dcterms:description "What a data subject asks of the institution (POPIA s.23 and s.24; Heratio's privacy_dsar.request_type)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:access, v:correction, v:deletion, v:objection, v:restriction, v:portability .
+
+v:access a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Access"@en, "Toegang"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's privacy registers, as Heratio's ahg-privacy keeps it."@en ;
+    skos:definition "Confirmation of what personal information is held, and a copy (POPIA s.23)."@en .
+
+v:correction a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Correction"@en, "Regstelling"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's privacy registers, as Heratio's ahg-privacy keeps it."@en ;
+    skos:definition "Correction of inaccurate or incomplete personal information (POPIA s.24)."@en .
+
+v:deletion a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Deletion or destruction"@en, "Skrapping of vernietiging"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's privacy registers, as Heratio's ahg-privacy keeps it."@en ;
+    skos:definition "Deletion of personal information the institution may no longer keep (POPIA s.24)."@en .
+
+v:objection a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Objection"@en, "Beswaar"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's privacy registers, as Heratio's ahg-privacy keeps it."@en ;
+    skos:definition "Objection to processing (POPIA s.11(3))."@en .
+
+v:restriction a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Restriction"@en, "Beperking"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's privacy registers, as Heratio's ahg-privacy keeps it."@en ;
+    skos:definition "Restriction of processing (POPIA s.14(6))."@en .
+
+v:portability a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Portability"@en, "Oordraagbaarheid"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's privacy registers, as Heratio's ahg-privacy keeps it."@en ;
+    skos:definition "A copy in a form another body can use (GDPR art. 20)."@en .

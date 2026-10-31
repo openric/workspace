@@ -1,0 +1,51 @@
+# OpenRiC Workspace - OpenRiC Workspace Security Compromise Statuses.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Where a security compromise stands (Heratio's privacy_breach.status).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/breach-status/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Security Compromise Statuses"@en ;
+    dcterms:description "Where a security compromise stands (Heratio's privacy_breach.status)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:detected, v:investigating, v:contained, v:resolved, v:closed .
+
+v:detected a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Detected"@en, "Bespeur"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's privacy registers, as Heratio's ahg-privacy keeps it."@en ;
+    skos:definition "Found, not yet investigated."@en .
+
+v:investigating a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Investigating"@en, "Word ondersoek"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's privacy registers, as Heratio's ahg-privacy keeps it."@en ;
+    skos:definition "Being investigated."@en .
+
+v:contained a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Contained"@en, "Ingeperk"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's privacy registers, as Heratio's ahg-privacy keeps it."@en ;
+    skos:definition "Stopped from going further."@en .
+
+v:resolved a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Resolved"@en, "Opgelos"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's privacy registers, as Heratio's ahg-privacy keeps it."@en ;
+    skos:definition "Its effects put right."@en .
+
+v:closed a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Closed"@en, "Gesluit"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's privacy registers, as Heratio's ahg-privacy keeps it."@en ;
+    skos:definition "Closed, its lessons recorded."@en .

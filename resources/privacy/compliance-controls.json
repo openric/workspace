@@ -1,0 +1,143 @@
+{
+  "controls": [
+    {
+      "control_id": "C-PRV-01",
+      "control_name": "Lawful Basis & Purpose Limitation",
+      "category": "privacy",
+      "objective": "Establish and record a lawful basis and a defined purpose for each dataset, limit processing to that purpose.",
+      "recommended_config": "Require a configured lawful_basis per dataset, record a processing-activity (RoPA) entry, enable purpose labels at ingest.",
+      "standards_refs": "ISO/IEC 27701, data-protection regimes",
+      "sort_order": 10
+    },
+    {
+      "control_id": "C-PRV-02",
+      "control_name": "Data Subject Rights Handling",
+      "category": "privacy",
+      "objective": "Provide workflows for access, rectification, erasure, restriction, portability and objection, with SLA tracking.",
+      "recommended_config": "Enable a subject-request workflow with SLA timers, link requests to affected records, record fulfilment evidence.",
+      "standards_refs": "data-protection regimes",
+      "sort_order": 20
+    },
+    {
+      "control_id": "C-PRV-03",
+      "control_name": "Privacy Impact Assessment",
+      "category": "privacy",
+      "objective": "Require a documented risk assessment for large-scale or special-category processing, linked to the pipeline.",
+      "recommended_config": "Require a DPIA for qualifying datasets, link the DPIA to the ingestion pipeline, record residual-risk sign-off.",
+      "standards_refs": "ISO/IEC 29134",
+      "sort_order": 30
+    },
+    {
+      "control_id": "C-RES-02",
+      "control_name": "Data Residency & Transfer Constraint",
+      "category": "residency",
+      "objective": "Constrain storage location and cross-border transfer to lawful regions or adequate safeguards.",
+      "recommended_config": "Set a deployment-region flag, encrypt in transit and at rest, configure a cross-region replication + transfer-safeguard policy.",
+      "standards_refs": "ISO/IEC 27001",
+      "sort_order": 40
+    },
+    {
+      "control_id": "C-ACC-05",
+      "control_name": "Access-to-Information Request Handling",
+      "category": "access",
+      "objective": "Respond to public-access / freedom-of-information requests within the statutory timeline, publish non-exempt records.",
+      "recommended_config": "Provide a request workflow + redaction queue + SLA timers + an audit-proof response export.",
+      "standards_refs": "access-to-information statutes",
+      "sort_order": 50
+    },
+    {
+      "control_id": "C-SEC-03",
+      "control_name": "Special-Category Data Safeguards",
+      "category": "security",
+      "objective": "Tag and minimise special-category data (e.g. health), bind processors contractually, meet breach-notification windows.",
+      "recommended_config": "Apply special-category tagging, require processor agreements, configure breach-notification timers + contacts.",
+      "standards_refs": "ISO/IEC 27001, sectoral health regimes",
+      "sort_order": 60
+    },
+    {
+      "control_id": "C-GOV-01",
+      "control_name": "AI Provenance & Model Governance",
+      "category": "governance",
+      "objective": "Capture machine-readable provenance for every AI-derived assertion, register models with version and evaluation metrics.",
+      "recommended_config": "Record append-only provenance events (model name/version/config/confidence), maintain a model registry with evaluation sets and drift monitoring.",
+      "standards_refs": "ISO/IEC 42001, ISO/IEC 23894, W3C PROV-O",
+      "sort_order": 70
+    },
+    {
+      "control_id": "C-GOV-02",
+      "control_name": "Human-in-the-Loop Review",
+      "category": "governance",
+      "objective": "Require human validation for high-risk actions (disposal, transfer, sensitive access).",
+      "recommended_config": "Drive confidence-threshold review queues, assign reviewer roles, record every review decision.",
+      "standards_refs": "ISO 15489",
+      "sort_order": 80
+    },
+    {
+      "control_id": "C-AUD-01",
+      "control_name": "Tamper-Evident Audit & Chain-of-Custody",
+      "category": "audit",
+      "objective": "Maintain signed, append-only audit logs and exportable chain-of-custody manifests.",
+      "recommended_config": "Use an append-only log store with server-signed entries, support a chain-of-custody export (e.g. METS / bagit).",
+      "standards_refs": "ISO 16363",
+      "sort_order": 90
+    }
+  ],
+  "mappings": [
+    {
+      "regime": "General data-protection regulation",
+      "jurisdiction": "Regional (e.g. EU)",
+      "scope": "Personal data of covered residents",
+      "obligation": "Lawful basis and purpose limitation for processing personal data",
+      "control_id": "C-PRV-01",
+      "recommended_config": "Configure lawful_basis, record RoPA, enable purpose labels"
+    },
+    {
+      "regime": "General data-protection regulation",
+      "jurisdiction": "Regional (e.g. EU)",
+      "scope": "Personal data of covered residents",
+      "obligation": "Data-subject rights (access, erasure, portability, objection)",
+      "control_id": "C-PRV-02",
+      "recommended_config": "Subject-request workflow with SLA tracking"
+    },
+    {
+      "regime": "General data-protection regulation",
+      "jurisdiction": "Regional (e.g. EU)",
+      "scope": "Personal data of covered residents",
+      "obligation": "Impact assessment for large-scale / special-category processing",
+      "control_id": "C-PRV-03",
+      "recommended_config": "Require a DPIA linked to the pipeline"
+    },
+    {
+      "regime": "General data-protection regulation",
+      "jurisdiction": "Regional (e.g. EU)",
+      "scope": "Personal data of covered residents",
+      "obligation": "Cross-border transfer restrictions / adequate safeguards",
+      "control_id": "C-RES-02",
+      "recommended_config": "Region flag, transfer safeguards, encrypted replication"
+    },
+    {
+      "regime": "Access-to-information statute",
+      "jurisdiction": "Configurable",
+      "scope": "Records held by public bodies",
+      "obligation": "Publication / access on request, exemptions, statutory timelines",
+      "control_id": "C-ACC-05",
+      "recommended_config": "Redaction queue, SLA timers, audit-proof export"
+    },
+    {
+      "regime": "Sectoral health-data regime",
+      "jurisdiction": "Configurable",
+      "scope": "Health / special-category data",
+      "obligation": "Special-category handling, processor agreements, breach notification",
+      "control_id": "C-SEC-03",
+      "recommended_config": "Special-category tagging, processor agreements, breach timers"
+    },
+    {
+      "regime": "Sectoral health-data regime",
+      "jurisdiction": "Configurable",
+      "scope": "Health / special-category data",
+      "obligation": "Individual access to held personal/health data",
+      "control_id": "C-PRV-02",
+      "recommended_config": "Subject-request workflow scoped to health records"
+    }
+  ]
+}

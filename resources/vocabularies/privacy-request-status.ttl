@@ -1,0 +1,86 @@
+# OpenRiC Workspace - OpenRiC Workspace Request Statuses.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Where a data subject request, a PAIA request or a complaint stands (Heratio's status columns).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/privacy-request-status/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Request Statuses"@en ;
+    dcterms:description "Where a data subject request, a PAIA request or a complaint stands (Heratio's status columns)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:received, v:verifying, v:in-progress, v:extended, v:granted, v:partly-granted, v:refused, v:transferred, v:completed, v:withdrawn .
+
+v:received a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Received"@en, "Ontvang"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's privacy registers, as Heratio's ahg-privacy keeps it."@en ;
+    skos:definition "Received, not yet started."@en .
+
+v:verifying a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Verifying identity"@en, "Identiteit word bevestig"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's privacy registers, as Heratio's ahg-privacy keeps it."@en ;
+    skos:definition "The requester's identity is being confirmed."@en .
+
+v:in-progress a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "In progress"@en, "Aan die gang"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's privacy registers, as Heratio's ahg-privacy keeps it."@en ;
+    skos:definition "Being handled."@en .
+
+v:extended a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Extended"@en, "Verleng"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's privacy registers, as Heratio's ahg-privacy keeps it."@en ;
+    skos:definition "The period was extended, with notice to the requester (PAIA s.26)."@en .
+
+v:granted a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Granted"@en, "Toegestaan"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's privacy registers, as Heratio's ahg-privacy keeps it."@en ;
+    skos:definition "Granted in full."@en .
+
+v:partly-granted a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Partly granted"@en, "Gedeeltelik toegestaan"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's privacy registers, as Heratio's ahg-privacy keeps it."@en ;
+    skos:definition "Granted in part, the rest refused on grounds given."@en .
+
+v:refused a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Refused"@en, "Geweier"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's privacy registers, as Heratio's ahg-privacy keeps it."@en ;
+    skos:definition "Refused, on grounds given."@en .
+
+v:transferred a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Transferred"@en, "Oorgeplaas"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's privacy registers, as Heratio's ahg-privacy keeps it."@en ;
+    skos:definition "Transferred to the body that holds the record (PAIA s.20)."@en .
+
+v:completed a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Completed"@en, "Voltooi"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's privacy registers, as Heratio's ahg-privacy keeps it."@en ;
+    skos:definition "Done, the outcome given."@en .
+
+v:withdrawn a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Withdrawn"@en, "Teruggetrek"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's privacy registers, as Heratio's ahg-privacy keeps it."@en ;
+    skos:definition "Withdrawn by the requester."@en .

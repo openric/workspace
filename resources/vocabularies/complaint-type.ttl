@@ -1,0 +1,58 @@
+# OpenRiC Workspace - OpenRiC Workspace Complaint Types.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What a privacy complaint is about (Heratio's privacy_complaint.complaint_type).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/complaint-type/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Complaint Types"@en ;
+    dcterms:description "What a privacy complaint is about (Heratio's privacy_complaint.complaint_type)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:processing, v:access, v:correction, v:disclosure, v:marketing, v:other .
+
+v:processing a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Unlawful processing"@en, "Onregmatige verwerking"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's privacy registers, as Heratio's ahg-privacy keeps it."@en ;
+    skos:definition "Personal information processed without a lawful basis."@en .
+
+v:access a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Access refused"@en, "Toegang geweier"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's privacy registers, as Heratio's ahg-privacy keeps it."@en ;
+    skos:definition "A request for access was refused or not answered."@en .
+
+v:correction a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Correction refused"@en, "Regstelling geweier"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's privacy registers, as Heratio's ahg-privacy keeps it."@en ;
+    skos:definition "A correction was refused or not made."@en .
+
+v:disclosure a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Disclosure"@en, "Openbaarmaking"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's privacy registers, as Heratio's ahg-privacy keeps it."@en ;
+    skos:definition "Personal information was disclosed."@en .
+
+v:marketing a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Direct marketing"@en, "Direkte bemarking"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's privacy registers, as Heratio's ahg-privacy keeps it."@en ;
+    skos:definition "Direct marketing without consent (POPIA s.69)."@en .
+
+v:other a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Other"@en, "Ander"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's privacy registers, as Heratio's ahg-privacy keeps it."@en ;
+    skos:definition "Something else."@en .

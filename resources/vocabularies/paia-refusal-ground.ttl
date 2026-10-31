@@ -1,0 +1,93 @@
+# OpenRiC Workspace - OpenRiC Workspace PAIA Grounds of Refusal.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Why a PAIA request is refused (PAIA ss.34 to 45; Heratio's refusal_grounds).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/paia-refusal-ground/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace PAIA Grounds of Refusal"@en ;
+    dcterms:description "Why a PAIA request is refused (PAIA ss.34 to 45; Heratio's refusal_grounds)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:third-party-privacy, v:commercial, v:confidential, v:safety, v:legal-privilege, v:defence-security, v:economic, v:research, v:operations, v:frivolous, v:not-held .
+
+v:third-party-privacy a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Privacy of a third party"@en, "Privaatheid van 'n derde"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's privacy registers, as Heratio's ahg-privacy keeps it."@en ;
+    skos:definition "Unreasonable disclosure of a third party's personal information (s.34)."@en .
+
+v:commercial a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Commercial information"@en, "Kommersiële inligting"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's privacy registers, as Heratio's ahg-privacy keeps it."@en ;
+    skos:definition "Trade secrets or commercial information of a third party (s.36)."@en .
+
+v:confidential a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Confidential information"@en, "Vertroulike inligting"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's privacy registers, as Heratio's ahg-privacy keeps it."@en ;
+    skos:definition "Information supplied in confidence (s.37)."@en .
+
+v:safety a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Safety of persons and property"@en, "Veiligheid"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's privacy registers, as Heratio's ahg-privacy keeps it."@en ;
+    skos:definition "Endangers life, safety or property (s.38)."@en .
+
+v:legal-privilege a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Legal privilege"@en, "Regsprivilegie"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's privacy registers, as Heratio's ahg-privacy keeps it."@en ;
+    skos:definition "Privileged from production in legal proceedings (s.40)."@en .
+
+v:defence-security a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Defence, security and international relations"@en, "Verdediging en sekuriteit"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's privacy registers, as Heratio's ahg-privacy keeps it."@en ;
+    skos:definition "Defence, security or international relations (s.41)."@en .
+
+v:economic a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Economic interests"@en, "Ekonomiese belange"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's privacy registers, as Heratio's ahg-privacy keeps it."@en ;
+    skos:definition "Economic interests of the Republic or commercial activities of a public body (s.42)."@en .
+
+v:research a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Research"@en, "Navorsing"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's privacy registers, as Heratio's ahg-privacy keeps it."@en ;
+    skos:definition "Research of a third party or of the body (s.43)."@en .
+
+v:operations a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Operations of a public body"@en, "Werksaamhede van 'n openbare liggaam"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's privacy registers, as Heratio's ahg-privacy keeps it."@en ;
+    skos:definition "Policy formulation or the effectiveness of a test (s.44)."@en .
+
+v:frivolous a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Frivolous or vexatious"@en, "Beuselagtig of kwelsugtig"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's privacy registers, as Heratio's ahg-privacy keeps it."@en ;
+    skos:definition "Manifestly frivolous or vexatious, or would substantially divert resources (s.45)."@en .
+
+v:not-held a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Record not held"@en, "Rekord nie gehou nie"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's privacy registers, as Heratio's ahg-privacy keeps it."@en ;
+    skos:definition "The record does not exist or cannot be found (s.23)."@en .

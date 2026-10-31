@@ -1,0 +1,58 @@
+# OpenRiC Workspace - OpenRiC Workspace Lawful Bases.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Why processing is lawful (POPIA s.11(1); GDPR art. 6; Heratio's lawful_basis).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/lawful-basis/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Lawful Bases"@en ;
+    dcterms:description "Why processing is lawful (POPIA s.11(1); GDPR art. 6; Heratio's lawful_basis)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:consent, v:contract, v:legal-obligation, v:data-subject-interest, v:public-duty, v:legitimate-interest .
+
+v:consent a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Consent"@en, "Toestemming"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's privacy registers, as Heratio's ahg-privacy keeps it."@en ;
+    skos:definition "The data subject consents (POPIA s.11(1)(a))."@en .
+
+v:contract a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Contract"@en, "Kontrak"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's privacy registers, as Heratio's ahg-privacy keeps it."@en ;
+    skos:definition "Needed for a contract with the data subject (s.11(1)(b))."@en .
+
+v:legal-obligation a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Legal obligation"@en, "Regsverpligting"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's privacy registers, as Heratio's ahg-privacy keeps it."@en ;
+    skos:definition "Required by law (s.11(1)(c))."@en .
+
+v:data-subject-interest a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Data subject's interest"@en, "Belang van die datasubjek"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's privacy registers, as Heratio's ahg-privacy keeps it."@en ;
+    skos:definition "Protects a legitimate interest of the data subject (s.11(1)(d))."@en .
+
+v:public-duty a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Public law duty"@en, "Publiekregtelike plig"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's privacy registers, as Heratio's ahg-privacy keeps it."@en ;
+    skos:definition "Needed for a public law duty of a public body (s.11(1)(e)), such as an archive's mandate."@en .
+
+v:legitimate-interest a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Legitimate interest"@en, "Regmatige belang"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's privacy registers, as Heratio's ahg-privacy keeps it."@en ;
+    skos:definition "Needed for a legitimate interest of the institution or a third party (s.11(1)(f))."@en .

@@ -1,0 +1,44 @@
+# OpenRiC Workspace - OpenRiC Workspace Notification Recipients.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Who was told of a security compromise (POPIA s.22; Heratio's privacy_breach_notification.notification_type).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/notification-recipient/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Notification Recipients"@en ;
+    dcterms:description "Who was told of a security compromise (POPIA s.22; Heratio's privacy_breach_notification.notification_type)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:regulator, v:data-subject, v:internal, v:other .
+
+v:regulator a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Information Regulator"@en, "Inligtingsreguleerder"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's privacy registers, as Heratio's ahg-privacy keeps it."@en ;
+    skos:definition "The regulator (POPIA s.22(1)(a))."@en .
+
+v:data-subject a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Data subjects"@en, "Datasubjekte"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's privacy registers, as Heratio's ahg-privacy keeps it."@en ;
+    skos:definition "The data subjects affected (s.22(1)(b))."@en .
+
+v:internal a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Internal"@en, "Intern"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's privacy registers, as Heratio's ahg-privacy keeps it."@en ;
+    skos:definition "Within the institution."@en .
+
+v:other a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Other"@en, "Ander"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's privacy registers, as Heratio's ahg-privacy keeps it."@en ;
+    skos:definition "Another body, such as the police."@en .

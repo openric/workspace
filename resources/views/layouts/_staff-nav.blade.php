@@ -51,6 +51,7 @@
                 'iiif-validation.index' => [__('IIIF validation'), $user->mayAnywhere('publish', 'description'), 'iiif-validation.*'],
                 'embargoes.index' => [__('Embargoes'), $user->mayAnywhere('update', 'description'), 'embargoes.*'],
                 'retention.index' => [__('Retention and disposal'), $user->mayAnywhere('delete', 'description'), 'retention.*|disposals.*'],
+                'privacy.index' => [__('Privacy'), $user->hasPermission(\App\Support\Vocab::permission('manage-privacy')), 'privacy.*'],
                 'iiif-workspaces.index' => [__('My viewer layouts'), true, 'iiif-workspaces.*'],
                 ...collect(\App\Http\Controllers\ReportController::TITLES)->mapWithKeys(fn ($title, $list) => ['reports.'.$list => [__($title),
                     \App\Reports\ReportService::mayRead($user, $list), 'reports.'.$list]])->all(),

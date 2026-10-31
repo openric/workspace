@@ -44,6 +44,7 @@ use App\Http\Controllers\LocalVocabularyController;
 use App\Http\Controllers\NameController;
 use App\Http\Controllers\PasswordController;
 use App\Http\Controllers\PlaceController;
+use App\Http\Controllers\PrivacyController;
 use App\Http\Controllers\ProposalReviewController;
 use App\Http\Controllers\ProvenanceController;
 use App\Http\Controllers\PublicationController;
@@ -67,6 +68,7 @@ use App\Http\Controllers\WorkflowController;
 use App\Http\Controllers\WorkflowQueueController;
 use App\Http\Middleware\ServeDiscovery;
 use App\Http\Middleware\SetLocale;
+use App\Privacy\Registers;
 use App\Relations\EntityKinds;
 use App\Reports\ReportService;
 use App\Support\Vocab;
@@ -545,6 +547,19 @@ Route::middleware(['auth', 'active'])->group(function () {
 
     // Rights of a unit of description, an instantiation (roadmap phase 2) or an accession (phase 9d), and Local Contexts
     // Labels of the first two; each controller checks update on it.
+    // Privacy: POPIA governance (roadmap phase 18a, ADR 0016).
+    Route::prefix('privacy')->name('privacy.')->group(function () {
+        $registers = implode('|', array_keys(Registers::ALL));
+        Route::get('/', [PrivacyController::class, 'index'])->name('index');
+        Route::get('/controls', [PrivacyController::class, 'controls'])->name('controls');
+        Route::get('/{register}', [PrivacyController::class, 'register'])->where('register', $registers)->name('register');
+        Route::get('/{register}/new', [PrivacyController::class, 'create'])->where('register', $registers)->name('create');
+        Route::post('/{register}', [PrivacyController::class, 'save'])->where('register', $registers)->name('store');
+        Route::get('/{register}/{id}', [PrivacyController::class, 'show'])->where('register', $registers)->whereUuid('id')->name('show');
+        Route::post('/{register}/{id}', [PrivacyController::class, 'save'])->where('register', $registers)->whereUuid('id')->name('update');
+        Route::post('/{register}/{id}/{step}', [PrivacyController::class, 'step'])->where('register', $registers)->whereUuid('id')
+            ->whereIn('step', ['status', 'submit', 'approve', 'reject', 'sign-off', 'withdraw', 'verify', 'notify'])->name('step');
+    });
     // Retention and disposal (roadmap phase 13b, ADR 0015).
     Route::prefix('retention')->name('retention.')->group(function () {
         Route::get('/', [RetentionController::class, 'index'])->name('index');

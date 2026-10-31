@@ -1,0 +1,44 @@
+# OpenRiC Workspace - OpenRiC Workspace PAIA Forms of Access.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# How access to a record is given (PAIA s.29; Heratio's access_form).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/paia-access-form/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace PAIA Forms of Access"@en ;
+    dcterms:description "How access to a record is given (PAIA s.29; Heratio's access_form)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:inspection, v:copy, v:transcription, v:viewing .
+
+v:inspection a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Inspection"@en, "Insae"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's privacy registers, as Heratio's ahg-privacy keeps it."@en ;
+    skos:definition "The record is inspected where it is kept."@en .
+
+v:copy a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Copy"@en, "Afskrif"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's privacy registers, as Heratio's ahg-privacy keeps it."@en ;
+    skos:definition "A printed or digital copy."@en .
+
+v:transcription a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Transcription"@en, "Transkripsie"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's privacy registers, as Heratio's ahg-privacy keeps it."@en ;
+    skos:definition "A transcription of a recording or image."@en .
+
+v:viewing a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Viewing or hearing"@en, "Kyk of luister"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's privacy registers, as Heratio's ahg-privacy keeps it."@en ;
+    skos:definition "The record is viewed or listened to."@en .

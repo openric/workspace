@@ -1,0 +1,86 @@
+[
+  {
+    "code": "popia",
+    "name": "POPIA",
+    "full_name": "Protection of Personal Information Act",
+    "country": "South Africa",
+    "regulator": "Information Regulator",
+    "regulator_url": "https://inforegulator.org.za/",
+    "request_days": 30,
+    "breach_notice_hours": null,
+    "effective_on": "2021-07-01",
+    "position": 1
+  },
+  {
+    "code": "ndpa",
+    "name": "NDPA",
+    "full_name": "Nigeria Data Protection Act",
+    "country": "Nigeria",
+    "regulator": "Nigeria Data Protection Commission",
+    "regulator_url": "https://ndpc.gov.ng/",
+    "request_days": 30,
+    "breach_notice_hours": 72,
+    "effective_on": "2023-06-14",
+    "position": 2
+  },
+  {
+    "code": "kenya_dpa",
+    "name": "Kenya DPA",
+    "full_name": "Data Protection Act 2019",
+    "country": "Kenya",
+    "regulator": "Office of the Data Protection Commissioner",
+    "regulator_url": "https://www.odpc.go.ke/",
+    "request_days": 30,
+    "breach_notice_hours": 72,
+    "effective_on": "2019-11-25",
+    "position": 3
+  },
+  {
+    "code": "gdpr",
+    "name": "GDPR",
+    "full_name": "General Data Protection Regulation",
+    "country": "European Union",
+    "regulator": "European Data Protection Board",
+    "regulator_url": "https://edpb.europa.eu/",
+    "request_days": 30,
+    "breach_notice_hours": 72,
+    "effective_on": "2018-05-25",
+    "position": 4
+  },
+  {
+    "code": "uk_gdpr",
+    "name": "UK GDPR",
+    "full_name": "UK General Data Protection Regulation (Data Protection Act 2018)",
+    "country": "United Kingdom",
+    "regulator": "Information Commissioner's Office",
+    "regulator_url": "https://ico.org.uk/",
+    "request_days": 30,
+    "breach_notice_hours": 72,
+    "effective_on": "2021-01-01",
+    "position": 5
+  },
+  {
+    "code": "pipeda",
+    "name": "PIPEDA",
+    "full_name": "Personal Information Protection and Electronic Documents Act",
+    "country": "Canada",
+    "regulator": "Office of the Privacy Commissioner",
+    "regulator_url": "https://www.priv.gc.ca/",
+    "request_days": 30,
+    "breach_notice_hours": null,
+    "effective_on": "2001-01-01",
+    "position": 6
+  },
+  {
+    "code": "ccpa",
+    "name": "CCPA",
+    "full_name": "California Consumer Privacy Act",
+    "country": "United States",
+    "regulator": "California Attorney General",
+    "regulator_url": "https://oag.ca.gov/privacy/ccpa",
+    "request_days": 45,
+    "breach_notice_hours": null,
+    "effective_on": "2020-01-01",
+    "position": 7
+  }
+]
