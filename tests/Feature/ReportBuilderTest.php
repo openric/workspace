@@ -132,6 +132,15 @@ class ReportBuilderTest extends TestCase
         $this->assertDatabaseMissing('custom_report_sections', ['report_id' => $report->id]);
     }
 
+    public function test_reports_are_filed_by_category_as_heratio_lists_them(): void
+    {
+        $this->actingAs($this->editor)->post('/reports/builder', ['name' => 'Disposal register', 'source' => 'record', 'category' => 'compliance'])->assertRedirect();
+        $this->actingAs($this->editor)->post('/reports/builder', ['name' => 'Everything', 'source' => 'record'])->assertRedirect();
+        $this->assertSame(['compliance', null], [CustomReport::where('name', 'Disposal register')->sole()->category->notation, CustomReport::where('name', 'Everything')->sole()->category_id]);
+        $this->actingAs($this->editor)->get('/reports/builder')->assertOk()->assertSeeInOrder(['Compliance (1)', 'Disposal register', 'General (1)', 'Everything']);
+        $this->actingAs($this->editor)->post('/reports/builder', ['name' => 'Bad', 'source' => 'record', 'category' => 'astrology'])->assertSessionHasErrors();
+    }
+
     public function test_a_report_on_authority_records_counts_by_type(): void
     {
         $this->actingAs($this->editor)->post('/reports/builder', ['template' => ReportTemplate::where('name', 'List of authority records')->value('id'), 'name' => 'People'])->assertRedirect();

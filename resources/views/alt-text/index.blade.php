@@ -8,9 +8,9 @@
     <p>{{ __('Say in words what each image shows, for those who cannot see it (WCAG 2.1, 1.1.1). The text is shown with the image in the catalogue and the viewer; it is a draft until it is published.') }}</p>
     <p><strong>{{ __(':with of :total images have alternative text in :lang (:pct%).', ['with' => $coverage['with'], 'total' => $coverage['total'], 'lang' => $lang, 'pct' => $coverage['pct']]) }}</strong></p>
     <form method="get" action="{{ route('alt-text.index') }}" style="display: flex; gap: .75rem; flex-wrap: wrap; align-items: end">
-        <div><label for="language" style="margin-top: 0">{{ __('Language') }}</label>
+        <div><label for="language" style="margin-top: 0">{{ __('Language') }}</label> @include('description._ric', ['term' => 'xml:lang'])
             <input id="language" name="language" value="{{ $lang }}" size="8" aria-describedby="lang-hint"> <small id="lang-hint">{{ __('A BCP 47 tag, such as en or af') }}</small></div>
-        <div><label for="show" style="margin-top: 0">{{ __('Show') }}</label>
+        <div><label for="show" style="margin-top: 0">{{ __('Show') }}</label> @include('description._ric', ['term' => null])
             <select id="show" name="show" style="font: inherit; padding: .5rem">
                 <option value="missing" @selected($show === 'missing')>{{ __('Images without it') }}</option>
                 <option value="all" @selected($show === 'all')>{{ __('All images') }}</option>
@@ -43,9 +43,9 @@
                         @if($mayUpdate)
                             <form method="post" action="{{ route('alt-text.store', $instantiation) }}">@csrf
                                 <input type="hidden" name="language" value="{{ $lang }}"><input type="hidden" name="show" value="{{ $show }}"><input type="hidden" name="page" value="{{ $worklist->currentPage() }}">
-                                <label for="alt-{{ $instantiation->id }}">{{ __('Alternative text in :lang', ['lang' => $lang]) }}</label>
+                                <label for="alt-{{ $instantiation->id }}">{{ __('Alternative text in :lang', ['lang' => $lang]) }}</label> @include('description._ric', ['term' => \App\Models\Concept::firstWhere('iri', \App\Support\Vocab::element('instantiation-alt-text'))])
                                 <textarea id="alt-{{ $instantiation->id }}" name="alt_text" rows="2" maxlength="{{ $maxAltLen }}" lang="{{ $lang }}" style="width: 100%">{{ $current?->value }}</textarea>
-                                @if($user->may('publish', 'description', $unit))<label style="font-weight: normal"><input type="checkbox" name="publish" value="1"> {{ __('Publish it') }}</label>@endif
+                                @if($user->may('publish', 'description', $unit))<label style="font-weight: normal"><input type="checkbox" name="publish" value="1"> {{ __('Publish it') }}</label> @include('description._ric', ['term' => null])@endif
                                 <button type="submit">{{ __('Save') }}</button>
                             </form>
                         @elseif($current)

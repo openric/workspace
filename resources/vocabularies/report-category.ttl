@@ -1,0 +1,51 @@
+# OpenRiC Workspace - OpenRiC Workspace Report Categories.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What a report is filed under in the list of reports (Heratio's custom_report.category, ahg-reports).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/report-category/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Report Categories"@en ;
+    dcterms:description "What a report is filed under in the list of reports (Heratio's custom_report.category, ahg-reports)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:archives, v:collections, v:heritage, v:compliance, v:general .
+
+v:archives a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Archives"@en, "Argiewe"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's reports, as Heratio's ahg-reports keeps it."@en ;
+    skos:definition "Reports on archival descriptions, accessions and the like."@en .
+
+v:collections a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Collections"@en, "Versamelings"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's reports, as Heratio's ahg-reports keeps it."@en ;
+    skos:definition "Reports on collections and their objects."@en .
+
+v:heritage a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Heritage"@en, "Erfenis"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's reports, as Heratio's ahg-reports keeps it."@en ;
+    skos:definition "Reports on heritage assets."@en .
+
+v:compliance a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Compliance"@en, "Nakoming"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's reports, as Heratio's ahg-reports keeps it."@en ;
+    skos:definition "Reports that show compliance with law, policy or standards."@en .
+
+v:general a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "General"@en, "Algemeen"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's reports, as Heratio's ahg-reports keeps it."@en ;
+    skos:definition "Any other report."@en .

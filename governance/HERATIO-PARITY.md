@@ -527,3 +527,122 @@ Heratio's `donor_agreement` and its child tables, its agreement dashboard, add, 
 | Autocomplete of accessions and records on the form | The relation form's search | Modelled |
 
 : Donor agreement, field by field
+
+### Report builder (`ahg-reports` report-builder)
+
+Added on 31 October 2026, after the form audit of that day.
+
+| Heratio field | Workspace | Status |
+|---|---|---|
+| `name` | Name | Same |
+| `description` | Description | Same |
+| `data_source` | Kind | Renamed |
+| `category` (Archives, Collections, Heritage, Compliance, General), the list grouped by it | Category, a vocabulary row; the list grouped by it, General when none | Same, from v0.0.92 |
+| `visibility` (private, shared, public) | Shared with everyone who may read its kind; a share link, for a number of days, for anyone else | Modelled |
+| Columns, filters, sort and sections, chosen in the browser | Columns from the elements of the kind's standard, filters, sort and sections | Same |
+| Schedule (frequency, day, time, format, recipients) | How often, Day of the week or month, Time, Format, Send to (accounts) | Same |
+| Templates | Templates, and Save as a template | Same |
+| Versions and history | Keep this as a version, noting | Same |
+
+: Report builder, field by field
+
+### IIIF collection (`ahg-iiif-collection`)
+
+Added on 31 October 2026.
+
+| Heratio field | Workspace | Status |
+|---|---|---|
+| `name` | Title | Renamed: IIIF's label |
+| `description` | Summary | Renamed: IIIF's summary |
+| `parent_id` | Inside the collection | Same; never itself or a collection inside it, from v0.0.92 |
+| `attribution` | Attribution | Same |
+| `viewing_hint` | How a viewer shows it | Renamed: IIIF 3's behavior replaces 2's viewingHint |
+| `is_public` | Public | Same |
+| none | Language of the title and summary; Date for a timeline (navDate) | Workspace only: IIIF 3 |
+| `manifest_uri`, `label` (an item from elsewhere) | Another institution's IIIF manifest or collection URI, and its label in the collection | Same |
+| `object_ids[]` (records found by search) | A record's persistent IRI, one at a time | Modelled |
+| `include_children[]` | none: a record with parts is itself a IIIF collection of them | Modelled |
+| Viewer workspaces | Saved viewer layouts | Same, from v0.0.88 |
+
+: IIIF collection, field by field
+
+### Embargo (`ahg-extended-rights` embargo)
+
+Added on 31 October 2026.
+
+| Heratio field | Workspace | Status |
+|---|---|---|
+| `embargo_type` | What it withholds | Renamed |
+| `reason` | Reason | Same |
+| `start_date`, `end_date` | From, until (empty: until lifted) | Renamed |
+| `auto_release` | none: an embargo with a last day ends on it; one without lasts until lifted | Modelled |
+| `reason_note`, `internal_note` | Note (staff only) | Modelled: one note |
+| `embargo_i18n.public_message` | What the public catalogue says while it is in force | Same |
+| `review_date`, `review_interval_months`; the embargoes due for review | Review on, Review every (months); the list's Due for review | Same, from v0.0.92 |
+| `notify_before_days` | Warn this many days before it ends | Renamed |
+| `notify_emails` | none: the warning goes to who imposed it, else to the institution's administrators | Modelled: never to an outside address |
+| `lift_reason` | Reason for lifting it | Same |
+| `embargo_exception` (user, group, IP range, dates) | Exceptions: an account, a role or an IP range, for a time | Same |
+| Expiring embargoes, `days`, `extend_days` | Ending within 30 days; the end date is changed on the embargo | Modelled |
+| Batch embargo (`object_ids`, `embargo_type`, `embargo_end_date`) | And on everything inside it, each its own embargo | Modelled: by the tree, not a list of ids |
+| `object_id` | The record whose page it is on | Modelled |
+
+: Embargo, field by field
+
+### Retention and disposal (`ahg-records-manage`)
+
+Added on 31 October 2026.
+
+| Heratio field | Workspace | Status |
+|---|---|---|
+| `schedule_ref`, `title`, `description` | Reference, Title, Description | Same |
+| `authority`, `jurisdiction` | Disposal authority, Jurisdiction | Same |
+| `effective_date`, `review_date`, `expiry_date` | In effect from, Review on, Expires on | Renamed |
+| Schedule approval and versions | Approved by (name and office); Start a new version | Same |
+| `class_ref`, `title`, `description` | Reference, Title, Description | Same; description and editing a class from v0.0.92 |
+| `retention_period_years`, `retention_period_months` | Years, Months | Same |
+| `retention_trigger`, `disposal_action` | From, Then | Renamed |
+| `citation` | Citation (the clause of the authority) | Same |
+| `review_required` | Review first | Same |
+| `is_active` | Active | Same, from v0.0.92 |
+| `sort_order` | none: classes keep the order they were added in | Modelled |
+| `disposal_confirmation_required` | none: every disposal is approved by someone other than who initiated it, then cleared | Modelled |
+| `disposal_class_id`, `retention_start_date` (assign) | Disposal class; Day of the event it runs from | Same |
+| none | Due on another day, Why | Workspace only |
+| `action_type`, `reason` (initiate) | Action, Reason | Same |
+| `transfer_destination` | Transferred to, asked when the transfer is carried out | Modelled |
+| `comment`, rejection and cancellation `reason` | Reason, at each step | Same |
+| none | Method, Witness (destruction) | Workspace only |
+| `decision`, `decision_notes`, `next_review_due_date` | Decision, Notes, Next review | Same |
+
+: Retention and disposal, field by field
+
+### Privacy registers (`ahg-privacy`)
+
+Added on 31 October 2026.
+
+| Heratio field | Workspace | Status |
+|---|---|---|
+| Officer: `name`, `title`, `email`, `phone`, `jurisdiction`, `registration_number`, `appointed_date`, `is_active` | Name, Office, Email, Telephone, Jurisdiction, Registration with the Regulator, Appointed on, In office | Same |
+| none | Deputy Information Officer, Account | Workspace only |
+| RoPA: `name`, `purpose`, `lawful_basis`, `data_subjects`, `data_categories`, `recipients`, `retention_period`, `security_measures`, `department`, `jurisdiction`, `next_review_date` | The same | Same |
+| `responsible_person`, `assigned_officer_id` | Owner, Information Officer | Renamed |
+| `cross_border_safeguards`, `third_countries` | Transfers across borders (POPIA s.72) | Modelled: one field |
+| `dpia_required` | Impact assessment required | Same |
+| `dpia_completed`, `dpia_date` | none: read from its signed-off impact assessment | Modelled |
+| `status` | Submitted, then approved or rejected by someone else | Modelled |
+| none | Special personal information, children's information | Workspace only: POPIA s.26, s.34 |
+| DPIA: `name`, `processing_activity_id`, `description`, `necessity_proportionality`, `risks_to_subjects`, `measures_to_mitigate`, `residual_risks`, `dpo_opinion`, `dpo_consulted_at` | The same, the officer's opinion and when consulted | Same |
+| `status`, `signoff_note`, `step` | Signed off once its measures are recorded; one form | Modelled |
+| Consent: `subject_name`, `subject_email`, `purpose`, `consent_date`, `consent_method`, `source` | Data subject, Contact, Purpose consented to, Given on, How it was given | Same |
+| `consent_given`, `data_subject_id`, `jurisdiction` | A record is consent given, withdrawn by its step; the data subject by name; the jurisdiction of its processing | Modelled |
+| DSAR: `request_type`, `requestor_*`, `description`, `received_date`, `assigned_to`, `jurisdiction` | What is asked, the requester's details, What the request says, Received on, Handled by, Jurisdiction | Same |
+| `priority`, `notes` | Priority, Notes | Same, from v0.0.92 |
+| PAIA: `paia_section`, `requestor_*`, `description`, `preferred_format`, `received_date`, `fee_status` | Kind of request, the requester's details, Records asked for, Form of access, Received on, the fees and Fees paid | Same |
+| `fee_exemption_requested` | Exemption from fees asked for | Same, from v0.0.92 |
+| Complaint: `complainant_*`, `complaint_type`, `description`, `date_of_incident`, `assigned_to`, `jurisdiction` | The same | Same |
+| Breach: `breach_type`, `severity`, `description`, `detected_date`, `occurred_date`, `data_categories`, `records_affected`, `jurisdiction` | What was affected, Severity, What happened, Detected, Happened, Personal information affected, Data subjects affected, Jurisdiction | Same |
+| `cause` | Cause | Same, from v0.0.92 |
+| GDPR Article 30 export, compliance autopilot, data inventory | none | Not carried (ADR 0016) |
+
+: Privacy registers, field by field

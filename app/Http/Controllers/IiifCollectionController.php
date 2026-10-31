@@ -36,7 +36,8 @@ class IiifCollectionController extends Controller
 
         return view('iiif.show', ['collection' => $collection, 'items' => $collection->items()->with('record', 'memberCollection', 'resourceType')->get(),
             'behaviors' => Concept::choices(CuratedCollections::BEHAVIORS)->get(), 'types' => Concept::choices(CuratedCollections::RESOURCE_TYPES)->get(),
-            'others' => IiifCollection::where('institution_id', $collection->institution_id)->where('id', '!=', $collection->id)->orderBy('label')->get()]);
+            'others' => IiifCollection::where('institution_id', $collection->institution_id)->where('id', '!=', $collection->id)->orderBy('label')->get(),
+            'parents' => app(CuratedCollections::class)->parentChoices($collection)]);
     }
 
     public function save(Request $request, ?IiifCollection $collection = null): RedirectResponse

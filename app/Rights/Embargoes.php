@@ -226,7 +226,10 @@ class Embargoes
 
         return ['type_id' => $type, 'reason_id' => $reason, 'note' => trim((string) ($data['note'] ?? '')) ?: null,
             'public_message' => trim((string) ($data['public_message'] ?? '')) ?: null, 'starts_on' => $starts, 'ends_on' => $ends,
-            'notify_days_before' => ($data['notify_days_before'] ?? '') !== '' && $data['notify_days_before'] !== null ? (int) $data['notify_days_before'] : null];
+            'notify_days_before' => ($data['notify_days_before'] ?? '') !== '' && $data['notify_days_before'] !== null ? (int) $data['notify_days_before'] : null,
+            // Heratio's review date and interval: when the embargo is to be looked at again, and how often.
+            'review_on' => ($data['review_on'] ?? '') ?: null,
+            'review_interval_months' => ($data['review_interval_months'] ?? '') !== '' && $data['review_interval_months'] !== null ? (int) $data['review_interval_months'] : null];
     }
 
     /** @return list<RecordResource> every unit inside it, at any depth */

@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['institution_id', 'reference', 'jurisdiction_id', 'type_id', 'severity_id', 'status_id', 'description', 'detected_at', 'occurred_at', 'contained_at', 'resolved_at', 'subjects_affected', 'categories_affected', 'risk', 'notification_required', 'assigned_to_id', 'created_by_id'])]
+#[Fillable(['institution_id', 'reference', 'jurisdiction_id', 'type_id', 'severity_id', 'status_id', 'description', 'detected_at', 'occurred_at', 'contained_at', 'resolved_at', 'subjects_affected', 'categories_affected', 'risk', 'cause', 'notification_required', 'assigned_to_id', 'created_by_id'])]
 class SecurityCompromise extends Model
 {
     use Audited, HasUuids;

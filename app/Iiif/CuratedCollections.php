@@ -17,6 +17,7 @@ use App\Models\Institution;
 use App\Models\RecordResource;
 use App\Models\User;
 use App\Support\Vocab;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 
@@ -93,6 +94,22 @@ class CuratedCollections
     public function remove(IiifCollectionItem $item, User $actor): void
     {
         DB::transaction(fn () => AuditLog::actingAs($actor, fn () => $item->delete()));
+    }
+
+    /** The collections it may be put inside: not itself, nor one inside it. */
+    public function parentChoices(IiifCollection $collection): Collection
+    {
+        $all = IiifCollection::where('institution_id', $collection->institution_id)->orderBy('label')->get()->keyBy('id');
+
+        return $all->filter(function (IiifCollection $c) use ($all, $collection) {
+            for ($above = $c; $above !== null; $above = $all->get($above->parent_id)) {
+                if ($above->id === $collection->id) {
+                    return false;
+                }
+            }
+
+            return true;
+        })->values();
     }
 
     /** The collection above, of the same institution, never the collection itself or one inside it. */

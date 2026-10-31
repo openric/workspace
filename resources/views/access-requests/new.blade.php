@@ -9,18 +9,18 @@
     @if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif
     <form method="post" action="{{ route('access-requests.store-general') }}">
         @csrf
-        <label for="subject">{{ __('Subject') }}</label>
+        <label for="subject">{{ __('Subject') }}</label> @include('description._ric', ['term' => null])
         <input id="subject" name="subject" required maxlength="255" value="{{ old('subject') }}">
-        <label for="request_type">{{ __('Request type') }}</label>
+        <label for="request_type">{{ __('Request type') }}</label> @include('description._ric', ['term' => null])
         <select id="request_type" name="request_type" required>
             <option value="">{{ __('Choose') }}</option>
             @foreach($types as $t)<option value="{{ $t->notation }}" @selected(old('request_type') === $t->notation)>{{ $t->label($lang) }}</option>@endforeach
         </select>
         <fieldset>
             <legend>{{ __('What do you need access to?') }}</legend>
-            <label><input type="radio" name="scope" value="all" @checked($scope === 'all')> {{ __('Everything') }}</label>
+            <label><input type="radio" name="scope" value="all" @checked($scope === 'all')> {{ __('Everything') }}</label> @include('description._ric', ['term' => null])
             <small>{{ __('All holdings available on request that you may see.') }}</small>
-            <label><input type="radio" name="scope" value="collection" @checked($scope === 'collection')> {{ __('A collection') }}</label>
+            <label><input type="radio" name="scope" value="collection" @checked($scope === 'collection')> {{ __('A collection') }}</label> @include('description._ric', ['term' => null])
             <small>{{ __('One collection and everything catalogued inside it.') }}</small>
             @if($collections->isNotEmpty())
                 <select name="collection" aria-label="{{ __('Collection') }}">
@@ -31,20 +31,20 @@
                 <small>{{ __('No collection-level records were found, so this option has nothing to offer. Request a single item or everything instead.') }}</small>
             @endif
             @if($item)
-                <label><input type="radio" name="scope" value="item" @checked($scope === 'item')> {{ __('A single item') }}: {{ $item->described('title', [app()->getLocale(), 'en']) }}</label>
+                <label><input type="radio" name="scope" value="item" @checked($scope === 'item')> {{ __('A single item') }}: {{ $item->described('title', [app()->getLocale(), 'en']) }}</label> @include('description._ric', ['term' => null])
                 <input type="hidden" name="item" value="{{ $item->id }}">
                 <small>{{ __('One record only - its children are not included.') }}</small>
             @else
                 <small>{{ __('To ask for a single item, open its record and choose Ask for access.') }}</small>
             @endif
         </fieldset>
-        <label for="description">{{ __('Description') }}</label>
+        <label for="description">{{ __('Description') }}</label> @include('description._ric', ['term' => null])
         <small id="description-help">{{ __('What you need and what for, such as the research it serves.') }}</small>
         <textarea id="description" name="description" rows="5" required maxlength="4000" aria-describedby="description-help">{{ old('description') }}</textarea>
-        <label for="justification">{{ __('Justification (optional)') }}</label>
+        <label for="justification">{{ __('Justification (optional)') }}</label> @include('description._ric', ['term' => null])
         <small id="justification-help">{{ __('Anything else the reviewer should know, such as a permission you hold.') }}</small>
         <textarea id="justification" name="justification" rows="3" maxlength="4000" aria-describedby="justification-help">{{ old('justification') }}</textarea>
-        <label for="urgency">{{ __('Urgency') }}</label>
+        <label for="urgency">{{ __('Urgency') }}</label> @include('description._ric', ['term' => null])
         <select id="urgency" name="urgency">
             @foreach($urgencies as $u)<option value="{{ $u->notation }}" @selected(old('urgency', 'normal') === $u->notation)>{{ $u->label($lang) }}: {{ $u->labels->firstWhere('language', 'en')?->definition }}</option>@endforeach
         </select>

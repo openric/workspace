@@ -30,19 +30,22 @@ class EmbargoController extends Controller
     {
         abort_unless($request->user()->mayAnywhere('update', 'description'), 403);
         $institution = $request->user()->institution_id;
-        $show = in_array($request->query('show'), ['in-force', 'ending', 'all'], true) ? $request->query('show') : 'in-force';
+        $show = in_array($request->query('show'), ['in-force', 'ending', 'review', 'all'], true) ? $request->query('show') : 'in-force';
         $embargoes = match ($show) {
             'ending' => $this->embargoes->ending($institution, 30),
+            // Heratio's getEmbargoesForReview: in force, and its review date has come.
+            'review' => Embargo::where('institution_id', $institution)->inForce()->whereNotNull('review_on')->where('review_on', '<=', now(config('workspace.timezone'))->toDateString())
+                ->with('record', 'type', 'reason')->orderBy('review_on')->get(),
             'all' => Embargo::where('institution_id', $institution)->with('record', 'type', 'reason')->orderByDesc('starts_on')->get(),
             default => Embargo::where('institution_id', $institution)->inForce()->with('record', 'type', 'reason')->orderBy('ends_on')->get(),
         };
         if ($request->query('format') === 'csv') {
             return response()->streamDownload(function () use ($embargoes) {
                 $out = fopen('php://output', 'w');
-                fputcsv($out, ['record', 'iri', 'type', 'reason', 'starts_on', 'ends_on', 'in_force', 'lifted_at', 'lift_reason']);
+                fputcsv($out, ['record', 'iri', 'type', 'reason', 'starts_on', 'ends_on', 'in_force', 'lifted_at', 'lift_reason', 'review_on']);
                 foreach ($embargoes as $e) {
                     fputcsv($out, [EntityKinds::label($e->record), $e->record->iri, $e->type->notation, $e->reason?->notation, $e->starts_on->format('Y-m-d'),
-                        $e->ends_on?->format('Y-m-d'), $e->inForce() ? 'yes' : 'no', $e->lifted_at?->toAtomString(), $e->lift_reason]);
+                        $e->ends_on?->format('Y-m-d'), $e->inForce() ? 'yes' : 'no', $e->lifted_at?->toAtomString(), $e->lift_reason, $e->review_on?->format('Y-m-d')]);
                 }
                 fclose($out);
             }, "embargoes-$show.csv", ['Content-Type' => 'text/csv; charset=utf-8']);
@@ -119,7 +122,7 @@ class EmbargoController extends Controller
     {
         return $request->validate(['type' => ['required', 'string'], 'reason' => ['nullable', 'string'], 'note' => ['nullable', 'string', 'max:5000'],
             'public_message' => ['nullable', 'string', 'max:2000'], 'starts_on' => ['nullable', 'date_format:Y-m-d'], 'ends_on' => ['nullable', 'date_format:Y-m-d'],
-            'notify_days_before' => ['nullable', 'integer', 'min:1', 'max:3650']]);
+            'notify_days_before' => ['nullable', 'integer', 'min:1', 'max:3650'], 'review_on' => ['nullable', 'date_format:Y-m-d'], 'review_interval_months' => ['nullable', 'integer', 'min:1', 'max:600']]);
     }
 
     private function may(Request $request, RecordResource $record, ?Embargo $embargo = null): void

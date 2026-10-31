@@ -77,3 +77,7 @@ IPSAS goes with heritage accounting in phase 21. Two-factor sign-in goes with si
 - requests numbered and due by their law, a PAIA extension, and the report's overdue count
 - a compromise's 72-hour deadline under GDPR and its report to the Regulator
 - the jurisdictions and controls, and refusal to an editor
+
+## Amendment (v0.0.92, 31 October 2026)
+
+The form audit of 31 October 2026 found four fields of Heratio's registers 18a had left out: a data subject request's priority (a vocabulary row) and notes, a PAIA request's fee exemption, and a security compromise's cause. They are added to the registers' definitions. Every field of the registers says that RiC-O 1.1 has no term for it.

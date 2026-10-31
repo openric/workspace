@@ -180,6 +180,17 @@ class EmbargoTest extends TestCase
         $this->artisan('workspace:embargoes')->assertSuccessful();
     }
 
+    public function test_an_embargo_is_reviewed_on_its_day_as_heratio_lists_them(): void
+    {
+        $this->impose(['type' => 'full', 'starts_on' => '2026-01-01', 'review_on' => '2026-03-01', 'review_interval_months' => '12']);
+        $embargo = Embargo::sole();
+        $this->assertSame(['2026-03-01', 12], [$embargo->review_on->format('Y-m-d'), $embargo->review_interval_months]);
+        $this->travelTo('2026-02-15');
+        $this->actingAs($this->editor)->get(route('embargoes.index', ['show' => 'review']))->assertOk()->assertSee('None.');
+        $this->travelTo('2026-03-02');
+        $this->actingAs($this->editor)->get(route('embargoes.index', ['show' => 'review']))->assertOk()->assertSee('2026-03-01')->assertDontSee('None.');
+    }
+
     public function test_the_list_statistics_and_csv(): void
     {
         $this->impose(['type' => 'partial', 'reason' => 'donor-restriction', 'ends_on' => CarbonImmutable::now(config('workspace.timezone'))->addDays(10)->toDateString()]);

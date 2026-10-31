@@ -1,7 +1,7 @@
 {{-- OpenRiC Workspace - the steps of a privacy entry: its status, and its register's own steps (roadmap phase 18a). Needs: $entry, $register, $definition, $lang. Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems. SPDX-License-Identifier: AGPL-3.0-or-later --}}
 @php($step = fn (string $s) => route('privacy.step', [$register, $entry->id, $s]))
 @if(isset($definition['status']) && ! in_array($register, ['processing', 'assessments'], true))
-    <form method="post" action="{{ $step('status') }}">@csrf <label for="st">{{ __('Status') }}</label>
+    <form method="post" action="{{ $step('status') }}">@csrf <label for="st">{{ __('Status') }}</label> @include('description._ric', ['term' => null])
         <select id="st" name="status">@foreach(\App\Models\Concept::choices(\App\Support\Vocab::BASE.$definition['status'].'/')->get() as $c)<option value="{{ $c->notation }}" @selected($entry->status->notation === $c->notation)>{{ $c->label($lang) }}</option>@endforeach</select>
         <button type="submit">{{ __('Set') }}</button></form>
 @endif
@@ -33,10 +33,10 @@
         @if($entry->notices->isNotEmpty())<ul>@foreach($entry->notices as $n)<li>{{ $n->recipient->label($lang) }}@if($n->recipient_name) ({{ $n->recipient_name }})@endif, {{ $n->method->label($lang) }}, {{ $n->sent_at->format('Y-m-d H:i') }}</li>@endforeach</ul>@endif
         <details><summary>{{ __('Record a notice') }}</summary>
             <form method="post" action="{{ $step('notify') }}">@csrf
-                <p><label for="nr">{{ __('To') }}</label> <select id="nr" name="recipient">@foreach(\App\Models\Concept::choices(\App\Support\Vocab::BASE.'notification-recipient/')->get() as $c)<option value="{{ $c->notation }}">{{ $c->label($lang) }}</option>@endforeach</select>
-                    <label for="nm">{{ __('How') }}</label> <select id="nm" name="method">@foreach(\App\Models\Concept::choices(\App\Support\Vocab::BASE.'notification-method/')->get() as $c)<option value="{{ $c->notation }}">{{ $c->label($lang) }}</option>@endforeach</select>
-                    <label for="nn">{{ __('Name') }}</label> <input id="nn" name="recipient_name"> <label for="ns">{{ __('Sent') }}</label> <input id="ns" type="datetime-local" name="sent_at"></p>
-                <p><label for="nc">{{ __('What it said') }}</label><br><textarea id="nc" name="content" rows="3" cols="70"></textarea></p>
+                <p><label for="nr">{{ __('To') }}</label> @include('description._ric', ['term' => null]) <select id="nr" name="recipient">@foreach(\App\Models\Concept::choices(\App\Support\Vocab::BASE.'notification-recipient/')->get() as $c)<option value="{{ $c->notation }}">{{ $c->label($lang) }}</option>@endforeach</select>
+                    <label for="nm">{{ __('How') }}</label> @include('description._ric', ['term' => null]) <select id="nm" name="method">@foreach(\App\Models\Concept::choices(\App\Support\Vocab::BASE.'notification-method/')->get() as $c)<option value="{{ $c->notation }}">{{ $c->label($lang) }}</option>@endforeach</select>
+                    <label for="nn">{{ __('Name') }}</label> @include('description._ric', ['term' => null]) <input id="nn" name="recipient_name"> <label for="ns">{{ __('Sent') }}</label> @include('description._ric', ['term' => null]) <input id="ns" type="datetime-local" name="sent_at"></p>
+                <p><label for="nc">{{ __('What it said') }}</label> @include('description._ric', ['term' => null])<br><textarea id="nc" name="content" rows="3" cols="70"></textarea></p>
                 <button type="submit">{{ __('Record') }}</button></form></details>
         @break
 @endswitch

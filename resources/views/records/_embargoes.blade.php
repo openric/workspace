@@ -4,7 +4,7 @@
 @php($types = \App\Models\Concept::choices(\App\Rights\Embargoes::TYPES)->get())
 @php($reasons = \App\Models\Concept::choices(\App\Rights\Embargoes::REASONS)->get())
 <section id="embargoes">
-    <h2>{{ __('Embargoes') }}</h2>
+    <h2>{{ __('Embargoes') }} @include('description._ric', ['term' => null])</h2>
     @error('embargo')<p class="error" role="alert">{{ $message }}</p>@enderror
     @error('exception')<p class="error" role="alert">{{ $message }}</p>@enderror
     @forelse($embargoes as $e)
@@ -25,16 +25,16 @@
             @endif
             @if($canUpdate && $e->lifted_at === null)
                 <details><summary>{{ __('Change, lift or open it') }}</summary>
-                    <form method="post" action="{{ route('records.embargoes.update', [$record, $e]) }}">@csrf @include('records._embargo-fields', ['e' => $e, 'p' => 'e'.$loop->index])<button type="submit">{{ __('Save') }}</button></form>
+                    <form method="post" action="{{ route('records.embargoes.update', [$record, $e]) }}">@csrf @include('records._embargo-fields', ['e' => $e, 'p' => 'embargo'.$loop->index])<button type="submit">{{ __('Save') }}</button></form>
                     <form method="post" action="{{ route('records.embargoes.lift', [$record, $e]) }}">@csrf
-                        <label for="lift-{{ $e->id }}">{{ __('Reason for lifting it') }}</label> <input id="lift-{{ $e->id }}" name="lift_reason" size="40"> <button type="submit">{{ __('Lift now') }}</button></form>
+                        <label for="lift-{{ $e->id }}">{{ __('Reason for lifting it') }}</label> @include('description._ric', ['term' => null]) <input id="lift-{{ $e->id }}" name="lift_reason" size="40"> <button type="submit">{{ __('Lift now') }}</button></form>
                     <form method="post" action="{{ route('records.embargoes.exceptions.add', [$record, $e]) }}">@csrf
                         <p>{{ __('Open it to one account, one role or one IP range (such as the reading room\'s):') }}</p>
-                        <p><label for="xu-{{ $e->id }}">{{ __('Account') }}</label> <select id="xu-{{ $e->id }}" name="user_id"><option value="">-</option>@foreach(\App\Models\User::where('institution_id', $record->institution_id)->whereNull('disabled_at')->orderBy('name')->get() as $u)<option value="{{ $u->id }}">{{ $u->name }}</option>@endforeach</select>
-                            <label for="xr-{{ $e->id }}">{{ __('Role') }}</label> <select id="xr-{{ $e->id }}" name="role_id"><option value="">-</option>@foreach(\App\Models\Role::where('institution_id', $record->institution_id)->get()->sortBy(fn ($r) => $r->name($lang)) as $r)<option value="{{ $r->id }}">{{ $r->name($lang) }}</option>@endforeach</select></p>
-                        <p><label for="xf-{{ $e->id }}">{{ __('IP addresses from') }}</label> <input id="xf-{{ $e->id }}" name="ip_from" size="16"> <label for="xt-{{ $e->id }}">{{ __('to') }}</label> <input id="xt-{{ $e->id }}" name="ip_to" size="16"></p>
-                        <p><label for="xvf-{{ $e->id }}">{{ __('From') }}</label> <input id="xvf-{{ $e->id }}" type="date" name="valid_from"> <label for="xvu-{{ $e->id }}">{{ __('until') }}</label> <input id="xvu-{{ $e->id }}" type="date" name="valid_until">
-                            <label for="xn-{{ $e->id }}">{{ __('Note') }}</label> <input id="xn-{{ $e->id }}" name="note" size="30"></p>
+                        <p><label for="xu-{{ $e->id }}">{{ __('Account') }}</label> @include('description._ric', ['term' => null]) <select id="xu-{{ $e->id }}" name="user_id"><option value="">-</option>@foreach(\App\Models\User::where('institution_id', $record->institution_id)->whereNull('disabled_at')->orderBy('name')->get() as $u)<option value="{{ $u->id }}">{{ $u->name }}</option>@endforeach</select>
+                            <label for="xr-{{ $e->id }}">{{ __('Role') }}</label> @include('description._ric', ['term' => null]) <select id="xr-{{ $e->id }}" name="role_id"><option value="">-</option>@foreach(\App\Models\Role::where('institution_id', $record->institution_id)->get()->sortBy(fn ($r) => $r->name($lang)) as $r)<option value="{{ $r->id }}">{{ $r->name($lang) }}</option>@endforeach</select></p>
+                        <p><label for="xf-{{ $e->id }}">{{ __('IP addresses from') }}</label> @include('description._ric', ['term' => null]) <input id="xf-{{ $e->id }}" name="ip_from" size="16"> <label for="xt-{{ $e->id }}">{{ __('to') }}</label> @include('description._ric', ['term' => null]) <input id="xt-{{ $e->id }}" name="ip_to" size="16"></p>
+                        <p><label for="xvf-{{ $e->id }}">{{ __('From') }}</label> @include('description._ric', ['term' => null]) <input id="xvf-{{ $e->id }}" type="date" name="valid_from"> <label for="xvu-{{ $e->id }}">{{ __('until') }}</label> @include('description._ric', ['term' => null]) <input id="xvu-{{ $e->id }}" type="date" name="valid_until">
+                            <label for="xn-{{ $e->id }}">{{ __('Note') }}</label> @include('description._ric', ['term' => null]) <input id="xn-{{ $e->id }}" name="note" size="30"></p>
                         <button type="submit">{{ __('Add the exception') }}</button></form>
                 </details>
             @endif
@@ -42,8 +42,8 @@
     @empty<p>{{ __('No embargo.') }}</p>@endforelse
     @if($canUpdate)
         <details><summary>{{ __('Impose an embargo') }}</summary>
-            <form method="post" action="{{ route('records.embargoes.store', $record) }}">@csrf @include('records._embargo-fields', ['e' => null, 'p' => 'new'])
-                <p><label><input type="checkbox" name="inside" value="1"> {{ __('And on everything inside it, each its own embargo') }}</label></p>
+            <form method="post" action="{{ route('records.embargoes.store', $record) }}">@csrf @include('records._embargo-fields', ['e' => null, 'p' => 'embargo-new'])
+                <p><label><input type="checkbox" name="inside" value="1"> {{ __('And on everything inside it, each its own embargo') }}</label> @include('description._ric', ['term' => null])</p>
                 <button type="submit">{{ __('Impose') }}</button></form>
         </details>
     @endif

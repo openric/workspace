@@ -4,10 +4,10 @@
 <div style="display: flex; gap: .5rem; flex-wrap: wrap; align-items: end; margin: 0 0 .6rem">
     @if($open)
         <form method="post" action="{{ $action }}" style="display: flex; gap: .4rem; align-items: end">@csrf<input type="hidden" name="status" value="completed">@if($back)<input type="hidden" name="back" value="{{ $back }}">@endif
-            <div><label for="c-{{ $reminder->id }}" style="margin-top: 0">{{ __('Completion note') }}</label><input id="c-{{ $reminder->id }}" name="completion_note" maxlength="2000"></div>
+            <div><label for="c-{{ $reminder->id }}" style="margin-top: 0">{{ __('Completion note') }}</label> @include('description._ric', ['term' => null])<input id="c-{{ $reminder->id }}" name="completion_note" maxlength="2000"></div>
             <button type="submit" style="margin-top: 0">{{ __('Complete') }}</button></form>
         <form method="post" action="{{ $action }}" style="display: flex; gap: .4rem; align-items: end">@csrf<input type="hidden" name="status" value="snoozed">@if($back)<input type="hidden" name="back" value="{{ $back }}">@endif
-            <div><label for="s-{{ $reminder->id }}" style="margin-top: 0">{{ __('Snooze until') }}</label><input id="s-{{ $reminder->id }}" name="snoozed_until" placeholder="YYYY-MM-DD" maxlength="10"></div>
+            <div><label for="s-{{ $reminder->id }}" style="margin-top: 0">{{ __('Snooze until') }}</label> @include('description._ric', ['term' => null])<input id="s-{{ $reminder->id }}" name="snoozed_until" placeholder="YYYY-MM-DD" maxlength="10"></div>
             <button type="submit" style="margin-top: 0">{{ __('Snooze') }}</button></form>
         <form method="post" action="{{ $action }}">@csrf<input type="hidden" name="status" value="cancelled">@if($back)<input type="hidden" name="back" value="{{ $back }}">@endif<button type="submit" style="margin-top: 0">{{ __('Cancel reminder') }}</button></form>
     @else

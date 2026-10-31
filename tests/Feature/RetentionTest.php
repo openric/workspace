@@ -110,6 +110,17 @@ class RetentionTest extends TestCase
         return $this->actingAs($this->people[$who])->post(route('disposals.step', [DisposalAction::sole(), $step]), $data);
     }
 
+    public function test_a_class_is_edited_on_the_draft_schedule_with_its_description_and_whether_it_is_active(): void
+    {
+        $schedule = $this->class->schedule;
+        $this->actingAs($this->people['administrator'])->get(route('retention.schedule', $schedule))->assertOk()->assertSee('Edit 4.2')->assertSee('id="class0-description"', false);
+        $this->actingAs($this->people['administrator'])->post(route('retention.classes.update', [$schedule, $this->class]), ['reference' => '4.2', 'title' => 'Trading licence applications',
+            'description' => 'Applications for trading licences, granted or refused.', 'retention_years' => 10, 'trigger' => 'creation-end', 'action' => 'destroy', 'review_required' => '1', 'is_active' => '0'])
+            ->assertSessionHasNoErrors();
+        $this->assertSame(['Applications for trading licences, granted or refused.', false], [$this->class->fresh()->description, $this->class->fresh()->is_active]);
+        $this->actingAs($this->people['administrator'])->get(route('retention.schedule', $schedule))->assertOk()->assertSee('granted or refused')->assertSee('(inactive)', false);
+    }
+
     public function test_a_class_of_an_approved_schedule_gives_the_due_date_and_records_fall_due_to_review(): void
     {
         $retention = app(RetentionService::class);

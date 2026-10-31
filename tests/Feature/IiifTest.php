@@ -22,6 +22,7 @@ use App\Description\PublicationService;
 use App\Description\RecordService;
 use App\Description\RepositoryService;
 use App\Iiif\ContentState;
+use App\Iiif\CuratedCollections;
 use App\Models\IiifCollection;
 use App\Models\Instantiation;
 use App\Models\Institution;
@@ -182,6 +183,19 @@ class IiifTest extends TestCase
         $translator = app(AccountService::class)->create(Institution::sole(), 'Translator', 'translator@example.org', 'correct horse battery staple');
         app(AccountService::class)->grantTemplateRole($translator, 'translator');
         $this->actingAs($translator)->get(route('iiif-collections.index'))->assertForbidden();
+    }
+
+    public function test_a_collection_is_offered_only_the_collections_it_may_be_put_inside(): void
+    {
+        $make = fn (string $label, ?IiifCollection $parent = null) => IiifCollection::create(['institution_id' => $this->editor->institution_id, 'label' => $label, 'parent_id' => $parent?->id]);
+        $top = $make('Letters');
+        $inside = $make('Marriages', $top);
+        $below = $make('Weddings of 1902', $inside);
+        $beside = $make('Maps');
+
+        $this->assertSame(['Letters', 'Maps'], app(CuratedCollections::class)->parentChoices($inside)->pluck('label')->all(), 'not itself, nor a collection inside it');
+        $this->actingAs($this->editor)->get(route('iiif-collections.show', $inside))->assertOk()
+            ->assertSee('<option value="'.$beside->id.'"', false)->assertDontSee('<option value="'.$below->id.'" ', false);
     }
 
     public function test_change_discovery_lists_each_manifest_and_each_withdrawal(): void

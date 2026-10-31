@@ -89,3 +89,12 @@ Evidence: `tests/Feature/RetentionTest.php`. It covers:
 - Transfer and permanent retention.
 
 Consequences: the due list and reviews are pages, with no daily notice yet. Heratio's AIP on transfer to its own preservation store waits for phase 15 (preservation).
+
+## Amendment (v0.0.92, 31 October 2026)
+
+The form audit of 31 October 2026 found Heratio fields 13a and 13b had left out. Added:
+
+- an embargo's review date and review interval (Heratio's `review_date`, `review_interval_months`), with the embargoes in force whose review date has come listed as Heratio's `getEmbargoesForReview` lists them;
+- a disposal class's description and whether it is active, and a form to edit a class while its schedule is a draft (the route and the service had it; the page did not).
+
+Their fields, and every other field of these forms, say that RiC-O 1.1 has no term for them: embargoes and retention are kept by the Workspace and not exported in RiC-O.

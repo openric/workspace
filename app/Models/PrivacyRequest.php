@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['institution_id', 'reference', 'jurisdiction_id', 'type_id', 'requester_name', 'requester_email', 'requester_phone', 'requester_id_type', 'requester_id_number', 'requester_address', 'details', 'verified_at', 'verified_by_id', 'status_id', 'received_on', 'due_on', 'completed_on', 'assigned_to_id', 'outcome', 'refusal_reason', 'fee', 'fee_paid', 'created_by_id'])]
+#[Fillable(['institution_id', 'reference', 'jurisdiction_id', 'type_id', 'requester_name', 'requester_email', 'requester_phone', 'requester_id_type', 'requester_id_number', 'requester_address', 'details', 'verified_at', 'verified_by_id', 'status_id', 'received_on', 'due_on', 'completed_on', 'assigned_to_id', 'outcome', 'refusal_reason', 'fee', 'fee_paid', 'priority_id', 'notes', 'created_by_id'])]
 class PrivacyRequest extends Model
 {
     use Audited, HasUuids;
@@ -42,6 +42,11 @@ class PrivacyRequest extends Model
     public function status(): BelongsTo
     {
         return $this->belongsTo(Concept::class, 'status_id');
+    }
+
+    public function priority(): BelongsTo
+    {
+        return $this->belongsTo(Concept::class, 'priority_id');
     }
 
     public function assignedTo(): BelongsTo

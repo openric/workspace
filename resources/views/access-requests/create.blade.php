@@ -9,17 +9,17 @@
     @if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif
     <form method="post" action="{{ route('access-requests.store', $instantiation) }}">
         @csrf
-        <label for="reason">{{ __('Reason') }}</label>
+        <label for="reason">{{ __('Reason') }}</label> @include('description._ric', ['term' => null])
         <small id="reason-help">{{ __('What you need the files for, such as the research they serve.') }}</small>
         <textarea id="reason" name="reason" rows="5" required maxlength="4000" aria-describedby="reason-help">{{ old('reason') }}</textarea>
-        <label for="justification">{{ __('Justification (optional)') }}</label>
+        <label for="justification">{{ __('Justification (optional)') }}</label> @include('description._ric', ['term' => null])
         <small id="justification-help">{{ __('Anything else the reviewer should know, such as a permission you hold.') }}</small>
         <textarea id="justification" name="justification" rows="3" maxlength="4000" aria-describedby="justification-help">{{ old('justification') }}</textarea>
-        <label for="urgency">{{ __('Urgency') }}</label>
+        <label for="urgency">{{ __('Urgency') }}</label> @include('description._ric', ['term' => null])
         <select id="urgency" name="urgency">
             @foreach($urgencies as $u)<option value="{{ $u->notation }}" @selected(old('urgency', 'normal') === $u->notation)>{{ $u->label($lang) }}: {{ $u->labels->firstWhere('language', 'en')?->definition }}</option>@endforeach
         </select>
-        <label for="access_type">{{ __('Access type') }}</label>
+        <label for="access_type">{{ __('Access type') }}</label> @include('description._ric', ['term' => null])
         <select id="access_type" name="access_type">
             @foreach($accessTypes as $t)<option value="{{ $t->notation }}" @selected(old('access_type', 'view') === $t->notation)>{{ $t->label($lang) }}</option>@endforeach
         </select>

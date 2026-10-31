@@ -45,40 +45,40 @@
                 <summary>{{ __('Edit the overview') }}</summary>
                 <form method="post" action="{{ route('records.provenance.overview', $record) }}">
                     @csrf
-                    <label for="ov-summary">{{ __('Provenance Statement') }}</label><textarea id="ov-summary" name="summary" rows="4" style="width: 100%; font: inherit">{{ old('summary', $overview?->summary) }}</textarea>
+                    <label for="ov-summary">{{ __('Provenance Statement') }}</label> @include('description._ric', ['term' => null])<textarea id="ov-summary" name="summary" rows="4" style="width: 100%; font: inherit">{{ old('summary', $overview?->summary) }}</textarea>
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 0 1rem">
-                        <div><label for="ov-acquisition_type">{{ __('Acquisition Type') }}</label>{{ $select('acquisition_type', $overview?->acquisitionType?->notation) }}</div>
-                        <div><label for="ov-acquisition_date">{{ __('Acquisition Date') }}</label><input id="ov-acquisition_date" name="acquisition_date" type="date" value="{{ $overview?->acquisition_date?->format('Y-m-d') }}"></div>
-                        <div><label for="ov-acquisition_date_text">{{ __('Date (text)') }}</label><input id="ov-acquisition_date_text" name="acquisition_date_text" maxlength="255" value="{{ $overview?->acquisition_date_text }}" placeholder="{{ __('such as circa 1950') }}"></div>
-                        <div><label for="ov-acquisition_price">{{ __('Price') }}</label><input id="ov-acquisition_price" name="acquisition_price" inputmode="decimal" value="{{ $overview?->acquisition_price }}"></div>
-                        <div><label for="ov-acquisition_currency">{{ __('Currency') }}</label><input id="ov-acquisition_currency" name="acquisition_currency" maxlength="3" value="{{ $overview?->acquisition_currency }}" placeholder="ZAR"></div>
-                        <div><label for="ov-current_status">{{ __('Current Status') }}</label>{{ $select('current_status', $overview?->currentStatus?->notation) }}</div>
-                        <div><label for="ov-custody_type">{{ __('Custody Type') }}</label>{{ $select('custody_type', $overview?->custodyType?->notation) }}</div>
-                        <div><label for="ov-certainty">{{ __('Certainty Level') }}</label>{{ $select('certainty', $overview?->certainty?->notation) }}</div>
-                        <div><label for="ov-research_status">{{ __('Research Status') }}</label>{{ $select('research_status', $overview?->researchStatus?->notation) }}</div>
+                        <div><label for="ov-acquisition_type">{{ __('Acquisition Type') }}</label> @include('description._ric', ['term' => null]){{ $select('acquisition_type', $overview?->acquisitionType?->notation) }}</div>
+                        <div><label for="ov-acquisition_date">{{ __('Acquisition Date') }}</label> @include('description._ric', ['term' => null])<input id="ov-acquisition_date" name="acquisition_date" type="date" value="{{ $overview?->acquisition_date?->format('Y-m-d') }}"></div>
+                        <div><label for="ov-acquisition_date_text">{{ __('Date (text)') }}</label> @include('description._ric', ['term' => null])<input id="ov-acquisition_date_text" name="acquisition_date_text" maxlength="255" value="{{ $overview?->acquisition_date_text }}" placeholder="{{ __('such as circa 1950') }}"></div>
+                        <div><label for="ov-acquisition_price">{{ __('Price') }}</label> @include('description._ric', ['term' => null])<input id="ov-acquisition_price" name="acquisition_price" inputmode="decimal" value="{{ $overview?->acquisition_price }}"></div>
+                        <div><label for="ov-acquisition_currency">{{ __('Currency') }}</label> @include('description._ric', ['term' => null])<input id="ov-acquisition_currency" name="acquisition_currency" maxlength="3" value="{{ $overview?->acquisition_currency }}" placeholder="ZAR"></div>
+                        <div><label for="ov-current_status">{{ __('Current Status') }}</label> @include('description._ric', ['term' => null]){{ $select('current_status', $overview?->currentStatus?->notation) }}</div>
+                        <div><label for="ov-custody_type">{{ __('Custody Type') }}</label> @include('description._ric', ['term' => null]){{ $select('custody_type', $overview?->custodyType?->notation) }}</div>
+                        <div><label for="ov-certainty">{{ __('Certainty Level') }}</label> @include('description._ric', ['term' => null]){{ $select('certainty', $overview?->certainty?->notation) }}</div>
+                        <div><label for="ov-research_status">{{ __('Research Status') }}</label> @include('description._ric', ['term' => null]){{ $select('research_status', $overview?->researchStatus?->notation) }}</div>
                     </div>
-                    <label for="ov-research_notes">{{ __('Research Notes') }}</label><textarea id="ov-research_notes" name="research_notes" rows="2" style="width: 100%; font: inherit">{{ $overview?->research_notes }}</textarea>
+                    <label for="ov-research_notes">{{ __('Research Notes') }}</label> @include('description._ric', ['term' => null])<textarea id="ov-research_notes" name="research_notes" rows="2" style="width: 100%; font: inherit">{{ $overview?->research_notes }}</textarea>
                     @foreach(['has_gaps' => 'There are gaps in the provenance chain', 'is_complete' => 'Research is complete', 'is_public' => 'Display provenance publicly'] as $flag => $text)
                         <input type="hidden" name="{{ $flag }}" value="0">
-                        <label style="font-weight: normal"><input type="checkbox" name="{{ $flag }}" value="1" @checked($overview ? $overview->{$flag} : $flag === 'is_public') style="width: auto"> {{ __($text) }}</label>
+                        <label style="font-weight: normal"><input type="checkbox" name="{{ $flag }}" value="1" @checked($overview ? $overview->{$flag} : $flag === 'is_public') style="width: auto"> {{ __($text) }}</label> @include('description._ric', ['term' => null])
                     @endforeach
-                    <label for="ov-gap_description">{{ __('Gap Description') }}</label><textarea id="ov-gap_description" name="gap_description" rows="2" style="width: 100%; font: inherit">{{ $overview?->gap_description }}</textarea>
+                    <label for="ov-gap_description">{{ __('Gap Description') }}</label> @include('description._ric', ['term' => null])<textarea id="ov-gap_description" name="gap_description" rows="2" style="width: 100%; font: inherit">{{ $overview?->gap_description }}</textarea>
                     <fieldset style="margin-top: 1rem; border: 1px solid var(--line); padding: 0 1rem 1rem">
                         <legend>{{ __('Nazi-era provenance') }}</legend>
                         <input type="hidden" name="nazi_era_checked" value="0">
-                        <label style="font-weight: normal"><input type="checkbox" name="nazi_era_checked" value="1" @checked($overview?->nazi_era_checked) style="width: auto"> {{ __('Nazi-era provenance has been checked') }}</label>
-                        <label for="ov-nazi_era_clear">{{ __('Result') }}</label>
+                        <label style="font-weight: normal"><input type="checkbox" name="nazi_era_checked" value="1" @checked($overview?->nazi_era_checked) style="width: auto"> {{ __('Nazi-era provenance has been checked') }}</label> @include('description._ric', ['term' => null])
+                        <label for="ov-nazi_era_clear">{{ __('Result') }}</label> @include('description._ric', ['term' => null])
                         <select id="ov-nazi_era_clear" name="nazi_era_clear" style="font: inherit; padding: .5rem">
                             <option value="" @selected($overview?->nazi_era_clear === null)>{{ __('Not recorded') }}</option>
                             <option value="1" @selected($overview?->nazi_era_clear === true)>{{ __('Clear') }}</option>
                             <option value="0" @selected($overview?->nazi_era_clear === false)>{{ __('Not clear') }}</option>
                         </select>
-                        <label for="ov-nazi_era_notes">{{ __('Notes') }}</label><textarea id="ov-nazi_era_notes" name="nazi_era_notes" rows="2" style="width: 100%; font: inherit">{{ $overview?->nazi_era_notes }}</textarea>
+                        <label for="ov-nazi_era_notes">{{ __('Notes') }}</label> @include('description._ric', ['term' => null])<textarea id="ov-nazi_era_notes" name="nazi_era_notes" rows="2" style="width: 100%; font: inherit">{{ $overview?->nazi_era_notes }}</textarea>
                     </fieldset>
                     <fieldset style="margin-top: 1rem; border: 1px solid var(--line); padding: 0 1rem 1rem">
                         <legend>{{ __('Cultural property') }}</legend>
-                        <label for="ov-cultural_property_status">{{ __('Status') }}</label>{{ $select('cultural_property_status', $overview?->culturalPropertyStatus?->notation) }}
-                        <label for="ov-cultural_property_notes">{{ __('Notes') }}</label><textarea id="ov-cultural_property_notes" name="cultural_property_notes" rows="2" style="width: 100%; font: inherit">{{ $overview?->cultural_property_notes }}</textarea>
+                        <label for="ov-cultural_property_status">{{ __('Status') }}</label> @include('description._ric', ['term' => null]){{ $select('cultural_property_status', $overview?->culturalPropertyStatus?->notation) }}
+                        <label for="ov-cultural_property_notes">{{ __('Notes') }}</label> @include('description._ric', ['term' => null])<textarea id="ov-cultural_property_notes" name="cultural_property_notes" rows="2" style="width: 100%; font: inherit">{{ $overview?->cultural_property_notes }}</textarea>
                     </fieldset>
                     <button type="submit">{{ __('Save') }}</button>
                 </form>
@@ -164,21 +164,21 @@
                 <summary>{{ __('Add a supporting document') }}</summary>
                 <form method="post" action="{{ route('records.provenance.documents.store', $record) }}" enctype="multipart/form-data">
                     @csrf
-                    <label for="pd-type">{{ __('Document Type') }}</label>
+                    <label for="pd-type">{{ __('Document Type') }}</label> @include('description._ric', ['term' => null])
                     <select id="pd-type" name="document_type" style="font: inherit; padding: .5rem">@foreach($choices['document_type'] as $c)<option value="{{ $c->notation }}" @selected($c->notation === 'other')>{{ $c->label($lang) }}</option>@endforeach</select>
-                    <label for="pd-title">{{ __('Title') }}</label><input id="pd-title" name="title" maxlength="500">
+                    <label for="pd-title">{{ __('Title') }}</label> @include('description._ric', ['term' => null])<input id="pd-title" name="title" maxlength="500">
                     <div style="display: flex; gap: .75rem; flex-wrap: wrap">
-                        <div><label for="pd-date">{{ __('Date') }}</label><input id="pd-date" name="document_date" type="date"></div>
-                        <div><label for="pd-date-text">{{ __('Date (text)') }}</label><input id="pd-date-text" name="document_date_text" maxlength="255"></div>
+                        <div><label for="pd-date">{{ __('Date') }}</label> @include('description._ric', ['term' => null])<input id="pd-date" name="document_date" type="date"></div>
+                        <div><label for="pd-date-text">{{ __('Date (text)') }}</label> @include('description._ric', ['term' => null])<input id="pd-date-text" name="document_date_text" maxlength="255"></div>
                     </div>
-                    <label for="pd-file">{{ __('File Upload') }}</label><input id="pd-file" type="file" name="file">
-                    <label for="pd-url">{{ __('Or External URL') }}</label><input id="pd-url" name="external_url" type="url" maxlength="1000">
-                    <label for="pd-ref">{{ __('Or archive reference') }}</label><input id="pd-ref" name="archive_reference" maxlength="500">
-                    <label for="pd-entry">{{ __('Provenance Entry') }}</label>
+                    <label for="pd-file">{{ __('File Upload') }}</label> @include('description._ric', ['term' => null])<input id="pd-file" type="file" name="file">
+                    <label for="pd-url">{{ __('Or External URL') }}</label> @include('description._ric', ['term' => null])<input id="pd-url" name="external_url" type="url" maxlength="1000">
+                    <label for="pd-ref">{{ __('Or archive reference') }}</label> @include('description._ric', ['term' => null])<input id="pd-ref" name="archive_reference" maxlength="500">
+                    <label for="pd-entry">{{ __('Provenance Entry') }}</label> @include('description._ric', ['term' => null])
                     <select id="pd-entry" name="entry" style="font: inherit; padding: .5rem"><option value="">{{ __('The whole provenance') }}</option>@foreach($steps as $s)<option value="{{ $s->id }}">{{ $s->position }}. {{ $s->owner_name }}</option>@endforeach</select>
-                    <label for="pd-description">{{ __('Description') }}</label><textarea id="pd-description" name="description" rows="2" style="width: 100%; font: inherit"></textarea>
+                    <label for="pd-description">{{ __('Description') }}</label> @include('description._ric', ['term' => null])<textarea id="pd-description" name="description" rows="2" style="width: 100%; font: inherit"></textarea>
                     <input type="hidden" name="is_public" value="0">
-                    <label style="font-weight: normal"><input type="checkbox" name="is_public" value="1" style="width: auto"> {{ __('Public') }}</label>
+                    <label style="font-weight: normal"><input type="checkbox" name="is_public" value="1" style="width: auto"> {{ __('Public') }}</label> @include('description._ric', ['term' => null])
                     <button type="submit">{{ __('Add') }}</button>
                 </form>
             </details>

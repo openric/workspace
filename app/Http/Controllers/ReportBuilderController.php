@@ -43,7 +43,7 @@ class ReportBuilderController extends Controller
         $user = $request->user();
         abort_unless($this->sources($request) !== [], 403);
         $reports = CustomReport::where('institution_id', $user->institution_id)->where(fn ($q) => $q->where('user_id', $user->id)->orWhere('shared', true))
-            ->with('owner', 'status.labels')->orderByDesc('updated_at')->get()->filter(fn ($r) => ReportBuilder::mayUse($user, $r->source))->values();
+            ->with('owner', 'status.labels', 'category')->orderByDesc('updated_at')->get()->filter(fn ($r) => ReportBuilder::mayUse($user, $r->source))->values();
 
         return view('reports.builder.index', ['reports' => $reports, 'sources' => $this->sources($request), 'lists' => app(ReportController::class)->listsFor($user),
             'templates' => $this->templates($request)]);
@@ -53,7 +53,7 @@ class ReportBuilderController extends Controller
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'], 'source' => ['required_without:template', 'nullable', Rule::in(array_keys(ReportBuilder::SOURCES))],
-            'template' => ['nullable', 'uuid'], 'shared' => ['nullable', 'boolean'],
+            'template' => ['nullable', 'uuid'], 'shared' => ['nullable', 'boolean'], 'category' => ['nullable', 'string', 'max:64'],
         ]);
         $template = isset($data['template']) ? $this->templates($request)->firstWhere('id', $data['template']) ?? abort(404) : null;
         try {
@@ -99,7 +99,12 @@ class ReportBuilderController extends Controller
     {
         $this->own($request, $report);
         $data = $request->validate($this->builder->rules($report->source));
-        $report->update(['name' => $data['name'], 'description' => $data['description'] ?? null, 'columns' => array_values($data['columns']),
+        try {
+            $category = $this->builder->category($data['category'] ?? null);
+        } catch (InvalidArgumentException $e) {
+            return back()->withInput()->withErrors(['category' => $e->getMessage()]);
+        }
+        $report->update(['category_id' => $category, 'name' => $data['name'], 'description' => $data['description'] ?? null, 'columns' => array_values($data['columns']),
             'filters' => array_filter($data['filters'] ?? [], fn ($v) => $v !== null && $v !== ''), 'sort' => array_filter($data['sort'] ?? []), 'shared' => (bool) ($data['shared'] ?? false)]);
 
         return redirect()->route('reports.builder.edit', $report)->with('status', __('Report saved.'));

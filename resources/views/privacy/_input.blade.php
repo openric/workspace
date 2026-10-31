@@ -11,9 +11,9 @@
 }))
 <p>
 @if($type === 'bool')
-    <label><input type="hidden" name="{{ $field }}" value="0"><input type="checkbox" name="{{ $field }}" value="1" @checked($current)> {{ __($label) }}</label>
+    <label><input type="hidden" name="{{ $field }}" value="0"><input type="checkbox" name="{{ $field }}" value="1" @checked($current)> {{ __($label) }}</label> @include('description._ric', ['term' => null])
 @else
-    <label for="f-{{ $field }}">{{ __($label) }}@if($required) *@endif</label><br>
+    <label for="f-{{ $field }}">{{ __($label) }}@if($required) *@endif</label> @include('description._ric', ['term' => null])<br>
     @switch($type)
         @case('textarea')<textarea id="f-{{ $field }}" name="{{ $field }}" rows="3" cols="70" @required($required)>{{ $current }}</textarea>@break
         @case('vocab')<select id="f-{{ $field }}" name="{{ $field }}" @required($required)><option value="">-</option>@foreach(\App\Models\Concept::choices(\App\Support\Vocab::BASE.$spec[3].'/')->get() as $c)<option value="{{ $c->notation }}" @selected($current === $c->notation)>{{ $c->label($lang) }}</option>@endforeach</select>@break

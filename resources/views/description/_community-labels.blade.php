@@ -24,7 +24,7 @@
         <summary>{{ __('Apply a Label') }}</summary>
         <form method="post" action="{{ route('community-labels.store', [$kind, $subject->getKey()]) }}">
             @csrf
-            <label for="label-{{ $subject->getKey() }}">{{ __('Label') }}</label>
+            <label for="label-{{ $subject->getKey() }}">{{ __('Label') }}</label> @include('description._ric', ['term' => 'rico:Rule'])
             <select id="label-{{ $subject->getKey() }}" name="label" required>
                 @foreach($service->choices() as $group => $labels)
                     <optgroup label="{{ $labels->first()->broader->label($lang) }}">
@@ -32,22 +32,22 @@
                     </optgroup>
                 @endforeach
             </select>
-            <label for="applied-{{ $subject->getKey() }}">{{ __('Applied by') }}</label>
+            <label for="applied-{{ $subject->getKey() }}">{{ __('Applied by') }}</label> @include('description._ric', ['term' => null])
             <select id="applied-{{ $subject->getKey() }}" name="applied_by">
                 @foreach(\App\Models\Concept::choices(\App\Rights\CommunityLabelService::APPLIERS)->get() as $applier)<option value="{{ $applier->notation }}">{{ $applier->label($lang) }}</option>@endforeach
             </select>
-            <label for="community-{{ $subject->getKey() }}">{{ __('Community') }}</label>
+            <label for="community-{{ $subject->getKey() }}">{{ __('Community') }}</label> @include('description._ric', ['term' => null])
             <select id="community-{{ $subject->getKey() }}" name="community"><option value="">{{ __('Not given') }}</option>
                 @foreach(\App\Models\Agent::where('institution_id', auth()->user()->institution_id)->whereNull('deleted_at')->with('names')->get()->sortBy(fn ($a) => mb_strtolower((string) $a->described('agent-authorised-name', ['en']))) as $agent)
                     <option value="{{ $agent->id }}">{{ $agent->described('agent-authorised-name', $lang) }}</option>
                 @endforeach
             </select>
-            <label for="condition-{{ $subject->getKey() }}">{{ __('Access condition') }}</label>
+            <label for="condition-{{ $subject->getKey() }}">{{ __('Access condition') }}</label> @include('description._ric', ['term' => null])
             <select id="condition-{{ $subject->getKey() }}" name="access_condition"><option value="">{{ __('The Label\'s default') }}</option>
                 @foreach(\App\Models\Concept::choices(\App\Rights\CommunityProtocols::CONDITIONS)->whereNotNull('broader_id')->with('broader')->get() as $c)<option value="{{ $c->notation }}">{{ $c->label($lang) }}@if($c->broader->notation === 'withheld') ({{ __('hidden') }})@endif</option>@endforeach
             </select>
-            <label for="project-{{ $subject->getKey() }}">{{ __('Local Contexts Hub project (optional)') }}</label><input id="project-{{ $subject->getKey() }}" name="project">
-            <label for="label-note-{{ $subject->getKey() }}">{{ __('Note') }}</label><textarea id="label-note-{{ $subject->getKey() }}" name="note" rows="2"></textarea>
+            <label for="project-{{ $subject->getKey() }}">{{ __('Local Contexts Hub project (optional)') }}</label> @include('description._ric', ['term' => null])<input id="project-{{ $subject->getKey() }}" name="project">
+            <label for="label-note-{{ $subject->getKey() }}">{{ __('Note') }}</label> @include('description._ric', ['term' => null])<textarea id="label-note-{{ $subject->getKey() }}" name="note" rows="2"></textarea>
             <button type="submit">{{ __('Apply the Label') }}</button>
         </form>
     </details>

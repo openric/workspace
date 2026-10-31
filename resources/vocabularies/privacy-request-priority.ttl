@@ -1,0 +1,44 @@
+# OpenRiC Workspace - OpenRiC Workspace Data Subject Request Priorities.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# How urgent a data subject request is (Heratio's privacy_dsar.priority).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/privacy-request-priority/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Data Subject Request Priorities"@en ;
+    dcterms:description "How urgent a data subject request is (Heratio's privacy_dsar.priority)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:low, v:normal, v:high, v:urgent .
+
+v:low a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Low"@en, "Laag"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's privacy registers, as Heratio's ahg-privacy keeps it."@en ;
+    skos:definition "Can wait for its turn."@en .
+
+v:normal a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Normal"@en, "Normaal"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's privacy registers, as Heratio's ahg-privacy keeps it."@en ;
+    skos:definition "Answered in its turn, within the time the law gives."@en .
+
+v:high a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "High"@en, "Hoog"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's privacy registers, as Heratio's ahg-privacy keeps it."@en ;
+    skos:definition "Before requests of normal priority."@en .
+
+v:urgent a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Urgent"@en, "Dringend"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's privacy registers, as Heratio's ahg-privacy keeps it."@en ;
+    skos:definition "At once, such as when the time the law gives is nearly up."@en .

@@ -87,16 +87,16 @@
                 <form method="post" action="{{ route('agreements.rows.store', [$agreement, 'rights']) }}">
                     @csrf
                     @foreach(['right' => 'Right', 'permission' => 'Permission'] as $field => $what)
-                        <label for="r-{{ $field }}">{{ __($what) }}</label>
+                        <label for="r-{{ $field }}">{{ __($what) }}</label> @include('description._ric', ['term' => null])
                         <select id="r-{{ $field }}" name="row[{{ $field }}]" style="font: inherit; padding: .5rem">@foreach($choices[$field] as $c)<option value="{{ $c->notation }}">{{ $c->label($lang) }}</option>@endforeach</select>
                     @endforeach
                     @foreach(['applies_to_digital' => 'Applies to digital', 'applies_to_physical' => 'Applies to physical', 'applies_to_metadata' => 'Applies to metadata', 'requires_donor_approval' => 'Requires donor approval', 'requires_fee' => 'Requires a fee'] as $field => $what)
-                        <label style="font-weight: normal"><input type="checkbox" name="row[{{ $field }}]" value="1" @checked(str_starts_with($field, 'applies')) style="width: auto"> {{ __($what) }}</label>
+                        <label style="font-weight: normal"><input type="checkbox" name="row[{{ $field }}]" value="1" @checked(str_starts_with($field, 'applies')) style="width: auto"> {{ __($what) }}</label> @include('description._ric', ['term' => null])
                     @endforeach
-                    <label for="r-starts">{{ __('Start date') }}</label><input id="r-starts" name="row[starts_on]" placeholder="YYYY-MM-DD" maxlength="10">
-                    <label for="r-ends">{{ __('End date') }}</label><input id="r-ends" name="row[ends_on]" placeholder="YYYY-MM-DD" maxlength="10">
+                    <label for="r-starts">{{ __('Start date') }}</label> @include('description._ric', ['term' => null])<input id="r-starts" name="row[starts_on]" placeholder="YYYY-MM-DD" maxlength="10">
+                    <label for="r-ends">{{ __('End date') }}</label> @include('description._ric', ['term' => null])<input id="r-ends" name="row[ends_on]" placeholder="YYYY-MM-DD" maxlength="10">
                     @foreach(['conditions' => 'Conditions', 'fee_structure' => 'Fee structure', 'note' => 'Note'] as $field => $what)
-                        <label for="r-{{ $field }}">{{ __($what) }}</label><textarea id="r-{{ $field }}" name="row[{{ $field }}]" rows="2" style="width: 100%; font: inherit"></textarea>
+                        <label for="r-{{ $field }}">{{ __($what) }}</label> @include('description._ric', ['term' => null])<textarea id="r-{{ $field }}" name="row[{{ $field }}]" rows="2" style="width: 100%; font: inherit"></textarea>
                     @endforeach
                     <button type="submit">{{ __('Add') }}</button>
                 </form>
@@ -123,23 +123,23 @@
                 <summary>{{ __('Add a restriction') }}</summary>
                 <form method="post" action="{{ route('agreements.rows.store', [$agreement, 'restrictions']) }}">
                     @csrf
-                    <label for="x-type">{{ __('Restriction type') }}</label>
+                    <label for="x-type">{{ __('Restriction type') }}</label> @include('description._ric', ['term' => null])
                     <select id="x-type" name="row[restriction_type]" style="font: inherit; padding: .5rem">@foreach($choices['restriction_type'] as $c)<option value="{{ $c->notation }}">{{ $c->label($lang) }}</option>@endforeach</select>
                     @foreach(['applies_to_all' => 'Applies to all of the material', 'auto_release' => 'Released automatically', 'can_be_overridden' => 'May be overridden', 'is_active' => 'In force'] as $field => $what)
-                        <label style="font-weight: normal"><input type="checkbox" name="row[{{ $field }}]" value="1" @checked(in_array($field, ['applies_to_all', 'is_active'], true)) style="width: auto"> {{ __($what) }}</label>
+                        <label style="font-weight: normal"><input type="checkbox" name="row[{{ $field }}]" value="1" @checked(in_array($field, ['applies_to_all', 'is_active'], true)) style="width: auto"> {{ __($what) }}</label> @include('description._ric', ['term' => null])
                     @endforeach
                     @foreach(['starts_on' => 'Start date', 'ends_on' => 'End date', 'release_on' => 'Release date'] as $field => $what)
-                        <label for="x-{{ $field }}">{{ __($what) }}</label><input id="x-{{ $field }}" name="row[{{ $field }}]" placeholder="YYYY-MM-DD" maxlength="10">
+                        <label for="x-{{ $field }}">{{ __($what) }}</label> @include('description._ric', ['term' => null])<input id="x-{{ $field }}" name="row[{{ $field }}]" placeholder="YYYY-MM-DD" maxlength="10">
                     @endforeach
-                    <label for="x-popia">{{ __('POPIA category') }}</label>
+                    <label for="x-popia">{{ __('POPIA category') }}</label> @include('description._ric', ['term' => null])
                     <select id="x-popia" name="row[popia_category]" style="font: inherit; padding: .5rem"><option value="">{{ __('Not set') }}</option>@foreach($choices['popia_category'] as $c)<option value="{{ $c->notation }}">{{ $c->label($lang) }}</option>@endforeach</select>
-                    <label for="x-consent">{{ __('Data subject consent') }}</label>
+                    <label for="x-consent">{{ __('Data subject consent') }}</label> @include('description._ric', ['term' => null])
                     <select id="x-consent" name="row[data_subject_consent]" style="font: inherit; padding: .5rem"><option value="">{{ __('Not known') }}</option><option value="1">{{ __('Yes') }}</option><option value="0">{{ __('No') }}</option></select>
-                    <label for="x-level">{{ __('Security clearance level') }}</label><input id="x-level" name="row[security_clearance_level]" inputmode="numeric" maxlength="1">
-                    <label for="x-authority">{{ __('Override authority') }}</label><input id="x-authority" name="row[override_authority]" maxlength="500">
-                    <label for="x-trigger">{{ __('Release trigger') }}</label><input id="x-trigger" name="row[release_trigger]" maxlength="500">
+                    <label for="x-level">{{ __('Security clearance level') }}</label> @include('description._ric', ['term' => null])<input id="x-level" name="row[security_clearance_level]" inputmode="numeric" maxlength="1">
+                    <label for="x-authority">{{ __('Override authority') }}</label> @include('description._ric', ['term' => null])<input id="x-authority" name="row[override_authority]" maxlength="500">
+                    <label for="x-trigger">{{ __('Release trigger') }}</label> @include('description._ric', ['term' => null])<input id="x-trigger" name="row[release_trigger]" maxlength="500">
                     @foreach(['specific_materials' => 'Specific materials', 'box_list' => 'Box list', 'reason' => 'Reason', 'legal_basis' => 'Legal basis', 'note' => 'Note'] as $field => $what)
-                        <label for="x-{{ $field }}">{{ __($what) }}</label><textarea id="x-{{ $field }}" name="row[{{ $field }}]" rows="2" style="width: 100%; font: inherit"></textarea>
+                        <label for="x-{{ $field }}">{{ __($what) }}</label> @include('description._ric', ['term' => null])<textarea id="x-{{ $field }}" name="row[{{ $field }}]" rows="2" style="width: 100%; font: inherit"></textarea>
                     @endforeach
                     <button type="submit">{{ __('Add') }}</button>
                 </form>
@@ -166,22 +166,22 @@
                 <summary>{{ __('Add a reminder') }}</summary>
                 <form method="post" action="{{ route('agreements.reminders.store', $agreement) }}">
                     @csrf
-                    <label for="m-subject">{{ __('Subject') }}</label><input id="m-subject" name="row[subject]" required maxlength="255">
+                    <label for="m-subject">{{ __('Subject') }}</label> @include('description._ric', ['term' => null])<input id="m-subject" name="row[subject]" required maxlength="255">
                     @foreach(['type' => ['Reminder type', 'reminder_type'], 'priority' => ['Priority', 'priority']] as $field => [$what, $list])
-                        <label for="m-{{ $field }}">{{ __($what) }}</label>
+                        <label for="m-{{ $field }}">{{ __($what) }}</label> @include('description._ric', ['term' => null])
                         <select id="m-{{ $field }}" name="row[{{ $field }}]" style="font: inherit; padding: .5rem">@foreach($choices[$list] as $c)<option value="{{ $c->notation }}" @selected($c->notation === 'normal')>{{ $c->label($lang) }}</option>@endforeach</select>
                     @endforeach
-                    <label for="m-date">{{ __('Reminder date') }}</label><input id="m-date" name="row[remind_on]" required placeholder="YYYY-MM-DD" maxlength="10">
-                    <label for="m-advance">{{ __('Days ahead to send it') }}</label><input id="m-advance" name="row[advance_days]" value="30" inputmode="numeric" maxlength="3">
-                    <label for="m-recurrence">{{ __('Recurrence') }}</label>
+                    <label for="m-date">{{ __('Reminder date') }}</label> @include('description._ric', ['term' => null])<input id="m-date" name="row[remind_on]" required placeholder="YYYY-MM-DD" maxlength="10">
+                    <label for="m-advance">{{ __('Days ahead to send it') }}</label> @include('description._ric', ['term' => null])<input id="m-advance" name="row[advance_days]" value="30" inputmode="numeric" maxlength="3">
+                    <label for="m-recurrence">{{ __('Recurrence') }}</label> @include('description._ric', ['term' => null])
                     <select id="m-recurrence" name="row[recurrence]" style="font: inherit; padding: .5rem"><option value="">{{ __('Once') }}</option>@foreach($choices['recurrence'] as $c)<option value="{{ $c->notation }}">{{ $c->label($lang) }}</option>@endforeach</select>
-                    <label for="m-ends">{{ __('Recurrence ends') }}</label><input id="m-ends" name="row[recurrence_ends_on]" placeholder="YYYY-MM-DD" maxlength="10">
-                    <label style="font-weight: normal"><input type="checkbox" name="row[notify_email]" value="1" checked style="width: auto"> {{ __('Send by email') }}</label>
-                    <label for="m-recipients">{{ __('Send to') }}</label>
+                    <label for="m-ends">{{ __('Recurrence ends') }}</label> @include('description._ric', ['term' => null])<input id="m-ends" name="row[recurrence_ends_on]" placeholder="YYYY-MM-DD" maxlength="10">
+                    <label style="font-weight: normal"><input type="checkbox" name="row[notify_email]" value="1" checked style="width: auto"> {{ __('Send by email') }}</label> @include('description._ric', ['term' => null])
+                    <label for="m-recipients">{{ __('Send to') }}</label> @include('description._ric', ['term' => null])
                     <small id="m-recipients-help">{{ __('Accounts that may read agreements; with none chosen, it goes to you.') }}</small>
                     <select id="m-recipients" name="row[recipients][]" multiple aria-describedby="m-recipients-help" style="font: inherit; padding: .5rem">@foreach($accounts as $a)<option value="{{ $a->id }}">{{ $a->name }}</option>@endforeach</select>
                     @foreach(['description' => 'Description', 'action_required' => 'Action required'] as $field => $what)
-                        <label for="m-{{ $field }}">{{ __($what) }}</label><textarea id="m-{{ $field }}" name="row[{{ $field }}]" rows="2" style="width: 100%; font: inherit"></textarea>
+                        <label for="m-{{ $field }}">{{ __($what) }}</label> @include('description._ric', ['term' => null])<textarea id="m-{{ $field }}" name="row[{{ $field }}]" rows="2" style="width: 100%; font: inherit"></textarea>
                     @endforeach
                     <button type="submit">{{ __('Add') }}</button>
                 </form>
@@ -208,19 +208,19 @@
                 <summary>{{ __('Upload a document') }}</summary>
                 <form method="post" action="{{ route('agreements.documents.store', $agreement) }}" enctype="multipart/form-data">
                     @csrf
-                    <label for="f-file">{{ __('File') }}</label><input id="f-file" type="file" name="file" required>
-                    <label for="f-type">{{ __('Document type') }}</label>
+                    <label for="f-file">{{ __('File') }}</label> @include('description._ric', ['term' => null])<input id="f-file" type="file" name="file" required>
+                    <label for="f-type">{{ __('Document type') }}</label> @include('description._ric', ['term' => null])
                     <select id="f-type" name="document_type" style="font: inherit; padding: .5rem">@foreach($choices['document_type'] as $c)<option value="{{ $c->notation }}">{{ $c->label($lang) }}</option>@endforeach</select>
-                    <label for="f-title">{{ __('Title') }}</label><input id="f-title" name="title" maxlength="255">
-                    <label for="f-date">{{ __('Document date') }}</label><input id="f-date" name="document_date" placeholder="YYYY-MM-DD" maxlength="10">
-                    <label for="f-version">{{ __('Version') }}</label><input id="f-version" name="version" maxlength="50">
-                    <label style="font-weight: normal"><input type="checkbox" name="is_signed" value="1" style="width: auto"> {{ __('Signed') }}</label>
-                    <label for="f-signed">{{ __('Signature date') }}</label><input id="f-signed" name="signed_on" placeholder="YYYY-MM-DD" maxlength="10">
-                    <label for="f-by">{{ __('Signed by') }}</label><input id="f-by" name="signed_by" maxlength="500">
-                    <label style="font-weight: normal"><input type="checkbox" name="is_confidential" value="1" style="width: auto"> {{ __('Confidential: only those who may change the agreement open it') }}</label>
-                    <label for="f-sha">{{ __('SHA-256 you expect (optional)') }}</label><input id="f-sha" name="sha256" maxlength="64">
+                    <label for="f-title">{{ __('Title') }}</label> @include('description._ric', ['term' => null])<input id="f-title" name="title" maxlength="255">
+                    <label for="f-date">{{ __('Document date') }}</label> @include('description._ric', ['term' => null])<input id="f-date" name="document_date" placeholder="YYYY-MM-DD" maxlength="10">
+                    <label for="f-version">{{ __('Version') }}</label> @include('description._ric', ['term' => null])<input id="f-version" name="version" maxlength="50">
+                    <label style="font-weight: normal"><input type="checkbox" name="is_signed" value="1" style="width: auto"> {{ __('Signed') }}</label> @include('description._ric', ['term' => null])
+                    <label for="f-signed">{{ __('Signature date') }}</label> @include('description._ric', ['term' => null])<input id="f-signed" name="signed_on" placeholder="YYYY-MM-DD" maxlength="10">
+                    <label for="f-by">{{ __('Signed by') }}</label> @include('description._ric', ['term' => null])<input id="f-by" name="signed_by" maxlength="500">
+                    <label style="font-weight: normal"><input type="checkbox" name="is_confidential" value="1" style="width: auto"> {{ __('Confidential: only those who may change the agreement open it') }}</label> @include('description._ric', ['term' => null])
+                    <label for="f-sha">{{ __('SHA-256 you expect (optional)') }}</label> @include('description._ric', ['term' => null])<input id="f-sha" name="sha256" maxlength="64">
                     @foreach(['description' => 'Description', 'access_restriction' => 'Access restriction'] as $field => $what)
-                        <label for="f-{{ $field }}">{{ __($what) }}</label><textarea id="f-{{ $field }}" name="{{ $field }}" rows="2" style="width: 100%; font: inherit"></textarea>
+                        <label for="f-{{ $field }}">{{ __($what) }}</label> @include('description._ric', ['term' => null])<textarea id="f-{{ $field }}" name="{{ $field }}" rows="2" style="width: 100%; font: inherit"></textarea>
                     @endforeach
                     <button type="submit">{{ __('Upload') }}</button>
                 </form>

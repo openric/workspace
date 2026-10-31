@@ -59,15 +59,15 @@
                 <summary>{{ __('Assert or dispute this relation') }}</summary>
                 <form method="post" action="{{ route('relations.assert', [$kind, $subject->getKey(), $relation]) }}">
                     @csrf
-                    <fieldset style="border: 0; padding: 0"><legend>{{ __('Does the relation hold?') }}</legend>
+                    <fieldset style="border: 0; padding: 0"><legend>{{ __('Does the relation hold?') }} @include('description._ric', ['term' => 'openricx:assertionStatus'])</legend>
                         <label><input type="radio" name="holds" value="yes" checked> {{ __('Yes, I assert it') }}</label>
                         <label><input type="radio" name="holds" value="no"> {{ __('No, I dispute it') }}</label>
                     </fieldset>
-                    <label for="{{ $section }}a{{ $loop->index }}-basis">{{ __('On what basis (optional)') }}</label>
+                    <label for="{{ $section }}a{{ $loop->index }}-basis">{{ __('On what basis (optional)') }}</label> @include('description._ric', ['term' => null])
                     <textarea id="{{ $section }}a{{ $loop->index }}-basis" name="basis" rows="2" style="width: 100%; font: inherit; box-sizing: border-box"></textarea>
-                    <label for="{{ $section }}a{{ $loop->index }}-language">{{ __('Language of the basis (BCP 47)') }}</label>
+                    <label for="{{ $section }}a{{ $loop->index }}-language">{{ __('Language of the basis (BCP 47)') }}</label> @include('description._ric', ['term' => 'xml:lang'])
                     <input id="{{ $section }}a{{ $loop->index }}-language" name="basis_language" maxlength="35" placeholder="en">
-                    <label for="{{ $section }}a{{ $loop->index }}-supersedes">{{ __('Supersedes (optional)') }}</label>
+                    <label for="{{ $section }}a{{ $loop->index }}-supersedes">{{ __('Supersedes (optional)') }}</label> @include('description._ric', ['term' => null])
                     <select id="{{ $section }}a{{ $loop->index }}-supersedes" name="supersedes" style="font: inherit; padding: .5rem">
                         <option value="">{{ __('Nothing; it stands beside the others') }}</option>
                         @foreach($relation->currentAssertions() as $assertion)<option value="{{ $assertion->id }}">{{ $assertion->asserter() }}, {{ $assertion->asserted_at->format('Y-m-d H:i') }}</option>@endforeach

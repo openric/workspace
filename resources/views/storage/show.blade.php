@@ -18,13 +18,13 @@
         <h2>{{ __('Move') }}</h2>
         <form method="post" action="{{ route('containers.move', $container) }}" style="display: flex; gap: .75rem; flex-wrap: wrap; align-items: end">
             @csrf
-            <div><label for="move-place" style="margin-top: 0">{{ __('To') }}</label>
+            <div><label for="move-place" style="margin-top: 0">{{ __('To') }}</label> @include('description._ric', ['term' => 'rico:hasOrHadLocation'])
                 <select id="move-place" name="place" style="font: inherit; padding: .5rem">
                     <option value="">{{ __('Out of storage') }}</option>
                     @foreach($places as $p)<option value="{{ $p->id }}" @selected($place?->id === $p->id)>{{ $p->path }}</option>@endforeach
                 </select></div>
-            <div><label for="move-day" style="margin-top: 0">{{ __('On') }}</label><input id="move-day" name="day" type="date" value="{{ now()->toDateString() }}" max="{{ now()->toDateString() }}"></div>
-            <div><label for="move-note" style="margin-top: 0">{{ __('Why (optional)') }}</label><input id="move-note" name="note" maxlength="2000"></div>
+            <div><label for="move-day" style="margin-top: 0">{{ __('On') }}</label> @include('description._ric', ['term' => 'rico:hasBeginningDate'])<input id="move-day" name="day" type="date" value="{{ now()->toDateString() }}" max="{{ now()->toDateString() }}"></div>
+            <div><label for="move-note" style="margin-top: 0">{{ __('Why (optional)') }}</label> @include('description._ric', ['term' => null])<input id="move-note" name="note" maxlength="2000"></div>
             <button type="submit" style="margin-top: 0">{{ __('Move') }}</button>
         </form>
         @if($places->isEmpty())<p><small>{{ __('There are no storage places yet: make them under') }} <a href="{{ route('storage.places') }}">{{ __('Physical storage') }}</a>.</small></p>@endif

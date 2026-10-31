@@ -19,19 +19,19 @@
     <form method="post" action="{{ route('publication.update', [$kind, $entity->getKey()]) }}">
         @csrf
         <fieldset style="border: 0; padding: 0"><legend><strong>{{ __('What to do') }}</strong></legend>
-            @if($mayReview)<label><input type="radio" name="action" value="review"> {{ __('Mark drafts as reviewed') }}</label>@endif
+            @if($mayReview)<label><input type="radio" name="action" value="review"> {{ __('Mark drafts as reviewed') }}</label> @include('description._ric', ['term' => null])@endif
             @if($mayPublish)
-                <label><input type="radio" name="action" value="publish" checked> {{ __('Publish drafts, reviewed and withdrawn values') }}</label>
-                <label><input type="radio" name="action" value="withdraw"> {{ __('Withdraw what is published') }}</label>
+                <label><input type="radio" name="action" value="publish" checked> {{ __('Publish drafts, reviewed and withdrawn values') }}</label> @include('description._ric', ['term' => null])
+                <label><input type="radio" name="action" value="withdraw"> {{ __('Withdraw what is published') }}</label> @include('description._ric', ['term' => null])
             @endif
         </fieldset>
-        <label for="language">{{ __('In one language only (BCP 47), or leave empty for every language') }}</label>
+        <label for="language">{{ __('In one language only (BCP 47), or leave empty for every language') }}</label> @include('description._ric', ['term' => null])
         <input id="language" name="language" maxlength="35" style="max-width: 8rem">
         @if($inside > 0)
-            <label><input type="checkbox" name="inside" value="1"> {{ __($inside === 1 ? 'And the :count unit of description inside it' : 'And the :count units of description inside it', ['count' => $inside]) }}</label>
+            <label><input type="checkbox" name="inside" value="1"> {{ __($inside === 1 ? 'And the :count unit of description inside it' : 'And the :count units of description inside it', ['count' => $inside]) }}</label> @include('description._ric', ['term' => null])
         @endif
         @if($entity instanceof \App\Models\RecordResource && app(\App\Description\WorkflowService::class)->manages(auth()->user()))
-            <label><input type="checkbox" name="force" value="1"> {{ __('Publish even where a publish gate blocks it (recorded in the audit log)') }}</label>
+            <label><input type="checkbox" name="force" value="1"> {{ __('Publish even where a publish gate blocks it (recorded in the audit log)') }}</label> @include('description._ric', ['term' => null])
         @endif
         <button type="submit">{{ __('Apply') }}</button>
     </form>

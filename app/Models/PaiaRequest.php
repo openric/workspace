@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['institution_id', 'reference', 'kind_id', 'requester_name', 'requester_email', 'requester_phone', 'requester_id_number', 'requester_address', 'record_description', 'access_form_id', 'status_id', 'refusal_ground_id', 'outcome', 'fee_request', 'fee_deposit', 'fee_access', 'fee_paid', 'received_on', 'due_on', 'completed_on', 'assigned_to_id', 'created_by_id'])]
+#[Fillable(['institution_id', 'reference', 'kind_id', 'requester_name', 'requester_email', 'requester_phone', 'requester_id_number', 'requester_address', 'record_description', 'access_form_id', 'status_id', 'refusal_ground_id', 'outcome', 'fee_request', 'fee_deposit', 'fee_access', 'fee_paid', 'fee_exemption_requested', 'received_on', 'due_on', 'completed_on', 'assigned_to_id', 'created_by_id'])]
 class PaiaRequest extends Model
 {
     use Audited, HasUuids;
@@ -21,7 +21,7 @@ class PaiaRequest extends Model
 
     protected function casts(): array
     {
-        return ['fee_paid' => 'boolean', 'received_on' => 'immutable_date', 'due_on' => 'immutable_date', 'completed_on' => 'immutable_date'];
+        return ['fee_paid' => 'boolean', 'fee_exemption_requested' => 'boolean', 'received_on' => 'immutable_date', 'due_on' => 'immutable_date', 'completed_on' => 'immutable_date'];
     }
 
     public function kind(): BelongsTo

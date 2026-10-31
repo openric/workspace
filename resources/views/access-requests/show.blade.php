@@ -32,15 +32,15 @@
         <h2>{{ __('Review') }}</h2>
         <form method="post" action="{{ route('access-requests.approve', $r) }}">
             @csrf
-            <label for="days">{{ __('Days of access') }}</label>
+            <label for="days">{{ __('Days of access') }}</label> @include('description._ric', ['term' => null])
             <input id="days" name="days" type="number" min="1" max="{{ $maxDays }}" required value="{{ old('days', $days) }}">
-            <label for="approve-notes">{{ __('Note to the requester (optional)') }}</label>
+            <label for="approve-notes">{{ __('Note to the requester (optional)') }}</label> @include('description._ric', ['term' => null])
             <textarea id="approve-notes" name="notes" rows="3" maxlength="4000"></textarea>
             <button type="submit">{{ __('Approve') }}</button>
         </form>
         <form method="post" action="{{ route('access-requests.deny', $r) }}">
             @csrf
-            <label for="deny-notes">{{ __('Why it is refused') }}</label>
+            <label for="deny-notes">{{ __('Why it is refused') }}</label> @include('description._ric', ['term' => null])
             <textarea id="deny-notes" name="notes" rows="3" maxlength="4000" required></textarea>
             <button type="submit">{{ __('Refuse') }}</button>
         </form>

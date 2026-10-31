@@ -70,6 +70,8 @@ final class ReportBuilder
 
     public const STATUSES = Vocab::BASE.'report-status/';
 
+    public const CATEGORIES = Vocab::BASE.'report-category/';
+
     public const SECTION_TYPES = Vocab::BASE.'report-section-type/';
 
     public function __construct(private ReportService $reports) {}
@@ -117,6 +119,7 @@ final class ReportBuilder
             'filters.from' => ['nullable', 'date_format:Y-m-d'], 'filters.to' => ['nullable', 'date_format:Y-m-d'], 'filters.of' => ['nullable', 'in:created,updated'],
             'filters.published' => ['nullable', 'in:yes,no'], 'filters.level' => ['nullable', 'uuid'], 'filters.type' => ['nullable', 'uuid'], 'filters.repository' => ['nullable', 'uuid'],
             'sort.by' => ['nullable', 'in:name,created,updated'], 'sort.direction' => ['nullable', 'in:asc,desc'], 'shared' => ['nullable', 'boolean'],
+            'category' => ['nullable', 'string', 'max:64'],
         ];
     }
 
@@ -134,6 +137,7 @@ final class ReportBuilder
                 'institution_id' => $user->institution_id, 'user_id' => $user->id, 'name' => $data['name'], 'description' => $data['description'] ?? $template?->description,
                 'source' => $source, 'columns' => $structure['columns'] ?? ['name', 'published'], 'filters' => $structure['filters'] ?? [], 'sort' => $structure['sort'] ?? ['by' => 'name'],
                 'status_id' => $this->status('draft'), 'shared' => (bool) ($data['shared'] ?? false), 'template_id' => $template?->id,
+                'category_id' => $this->category($data['category'] ?? null),
             ]);
             foreach ($structure['sections'] ?? [['type' => 'summary', 'title' => __('Summary')], ['type' => 'table', 'title' => __(self::SOURCE_TITLES[$source])]] as $i => $section) {
                 $this->addSection($report, $section['type'], $section + ['position' => $i]);
@@ -293,6 +297,12 @@ final class ReportBuilder
 
         return $entities->countBy(fn ($e) => $value($e) !== '' ? $value($e) : __('None'))->sortDesc()
             ->map(fn ($n, $label) => [(string) $label, (string) $n])->values()->all();
+    }
+
+    /** A report's category (Heratio's custom_report.category), a vocabulary row; none is General in the list. */
+    public function category(?string $notation): ?string
+    {
+        return $notation ? (Concept::where('iri', self::CATEGORIES.$notation)->value('id') ?? throw new InvalidArgumentException(__('Choose a category from the list.'))) : null;
     }
 
     private function status(string $notation): string

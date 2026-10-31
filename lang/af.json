@@ -2895,5 +2895,13 @@
     "Processing entries are reviewed on time": "Verwerkingsinskrywings word betyds hersien",
     "Data subject requests are answered in time (POPIA s.23, s.24)": "Versoeke van datasubjekte word betyds beantwoord (WBPI a.23, a.24)",
     "PAIA requests are answered in time (PAIA ss.25, 56)": "WBTI-versoeke word betyds beantwoord (WBTI a.25, 56)",
-    "Every security compromise that must be reported has been reported to the Regulator (POPIA s.22)": "Elke sekuriteitskompromie wat aangemeld moet word, is by die Reguleerder aangemeld (WBPI a.22)"
+    "Every security compromise that must be reported has been reported to the Regulator (POPIA s.22)": "Elke sekuriteitskompromie wat aangemeld moet word, is by die Reguleerder aangemeld (WBPI a.22)",
+    "Start date qualifier": "Kwalifiseerder van die begindatum",
+    "End date qualifier": "Kwalifiseerder van die einddatum",
+    "Edit :class": "Wysig :class",
+    "Exemption from fees asked for": "Vrystelling van fooie gevra",
+    "Cause": "Oorsaak",
+    "Review every (months)": "Hersien elke (maande)",
+    "Due for review": "Moet hersien word",
+    "Choose a category from the list.": "Kies 'n kategorie uit die lys."
 }

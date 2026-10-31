@@ -12,23 +12,22 @@
     <h2>{{ __('Disposal classes') }}</h2>
     @if($schedule->classes->isEmpty())<p>{{ __('None yet.') }}</p>@else
     <table><thead><tr><th scope="col">{{ __('Reference') }}</th><th scope="col">{{ __('Title') }}</th><th scope="col">{{ __('Kept for') }}</th><th scope="col">{{ __('From') }}</th><th scope="col">{{ __('Then') }}</th><th scope="col">{{ __('Review first') }}</th></tr></thead>
-        <tbody>@foreach($schedule->classes as $c)<tr><td>{{ $c->reference }}</td><td>{{ $c->title }}@unless($c->is_active) ({{ __('inactive') }})@endunless</td>
+        <tbody>@foreach($schedule->classes as $c)<tr><td>{{ $c->reference }}</td><td>{{ $c->title }}@unless($c->is_active) ({{ __('inactive') }})@endunless @if($c->description)<br><small>{{ $c->description }}</small>@endif</td>
             <td>{{ collect([$c->retention_years ? trans_choice(':count year|:count years', $c->retention_years, ['count' => $c->retention_years]) : null, $c->retention_months ? trans_choice(':count month|:count months', $c->retention_months, ['count' => $c->retention_months]) : null])->filter()->join(', ') ?: '-' }}</td>
             <td>{{ $c->trigger->label($lang) }}</td><td>{{ $c->action->label($lang) }}</td><td>{{ $c->review_required ? __('Yes') : __('No') }}</td></tr>@endforeach</tbody></table>@endif
     @if($manages)
         @if($schedule->status->notation === 'draft')
             <details><summary>{{ __('Add a disposal class') }}</summary>
-                <form method="post" action="{{ route('retention.classes.store', $schedule) }}">@csrf
-                    <p><label for="c-ref">{{ __('Reference') }}</label> <input id="c-ref" name="reference" required maxlength="100"> <label for="c-title">{{ __('Title') }}</label> <input id="c-title" name="title" required size="40"></p>
-                    <p><label for="c-y">{{ __('Years') }}</label> <input id="c-y" type="number" min="0" name="retention_years" style="width: 5rem"> <label for="c-m">{{ __('Months') }}</label> <input id="c-m" type="number" min="0" name="retention_months" style="width: 5rem">
-                        <label for="c-t">{{ __('From') }}</label> <select id="c-t" name="trigger">@foreach($triggers as $t)<option value="{{ $t->notation }}">{{ $t->label($lang) }}</option>@endforeach</select>
-                        <label for="c-a">{{ __('Then') }}</label> <select id="c-a" name="action">@foreach($actions as $a)<option value="{{ $a->notation }}">{{ $a->label($lang) }}</option>@endforeach</select>
-                        <label><input type="hidden" name="review_required" value="0"><input type="checkbox" name="review_required" value="1" checked> {{ __('Review first') }}</label></p>
-                    <p><label for="c-cit">{{ __('Citation (the clause of the authority)') }}</label> <input id="c-cit" name="citation" size="50"></p>
+                <form method="post" action="{{ route('retention.classes.store', $schedule) }}">@csrf @include('retention._class-fields', ['c' => null, 'p' => 'class-new'])
                     <button type="submit">{{ __('Add') }}</button></form></details>
+            @foreach($schedule->classes as $c)
+                <details><summary>{{ __('Edit :class', ['class' => $c->reference]) }}</summary>
+                    <form method="post" action="{{ route('retention.classes.update', [$schedule, $c]) }}">@csrf @include('retention._class-fields', ['c' => $c, 'p' => 'class'.$loop->index])
+                        <button type="submit">{{ __('Save') }}</button></form></details>
+            @endforeach
             <details><summary>{{ __('Edit the schedule') }}</summary>
                 <form method="post" action="{{ route('retention.schedules.update', $schedule) }}">@csrf @include('retention._schedule-fields', ['s' => $schedule])<button type="submit">{{ __('Save') }}</button></form></details>
-            <form method="post" action="{{ route('retention.schedules.approve', $schedule) }}">@csrf <label for="ab">{{ __('Approved by (name and office)') }}</label> <input id="ab" name="approved_by" required size="40"> <button type="submit">{{ __('Approve') }}</button></form>
+            <form method="post" action="{{ route('retention.schedules.approve', $schedule) }}">@csrf <label for="ab">{{ __('Approved by (name and office)') }}</label> @include('description._ric', ['term' => null]) <input id="ab" name="approved_by" required size="40"> <button type="submit">{{ __('Approve') }}</button></form>
         @elseif($schedule->status->notation === 'approved')
             <form method="post" action="{{ route('retention.schedules.version', $schedule) }}">@csrf<button type="submit">{{ __('Start a new version') }}</button></form>
         @endif

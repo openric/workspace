@@ -105,10 +105,12 @@ class PrivacyTest extends TestCase
 
     public function test_requests_are_numbered_and_due_by_their_law(): void
     {
-        $this->add('requests', ['jurisdiction_id' => 'popia', 'type_id' => 'access', 'requester_name' => 'Mr P. de Wet', 'received_on' => '2026-10-01'])->assertSessionHasNoErrors();
+        $this->add('requests', ['jurisdiction_id' => 'popia', 'type_id' => 'access', 'requester_name' => 'Mr P. de Wet', 'received_on' => '2026-10-01', 'priority_id' => 'high',
+            'notes' => 'Asked by telephone first.'])->assertSessionHasNoErrors();
         $this->add('requests', ['jurisdiction_id' => 'ccpa', 'type_id' => 'deletion', 'requester_name' => 'Ms Lee', 'received_on' => '2026-10-01'])->assertSessionHasNoErrors();
         [$first, $second] = PrivacyRequest::orderBy('reference')->get()->all();
         $this->assertMatchesRegularExpression('/^DSR-\d{4}-0001$/', $first->reference);
+        $this->assertSame(['high', 'Asked by telephone first.'], [$first->priority->notation, $first->notes], 'the fields of Heratio\'s privacy_dsar the form audit found missing');
         $this->assertSame(['received', '2026-10-31', '2026-11-15'], [$first->status->notation, $first->due_on->format('Y-m-d'), $second->due_on->format('Y-m-d')], 'POPIA 30 days, CCPA 45');
         $this->step('requests', $first, 'verify')->assertSessionHasNoErrors();
         $this->step('requests', $first, 'status', ['status' => 'completed'])->assertSessionHasNoErrors();
@@ -117,8 +119,10 @@ class PrivacyTest extends TestCase
         $this->assertSame('1 overdue', collect(app(PrivacyService::class)->report($this->institution))->firstWhere('check', 'Data subject requests are answered in time (POPIA s.23, s.24)')['detail'],
             'the open one is late, the completed one is not');
 
-        $this->add('paia', ['kind_id' => 'public-body', 'requester_name' => 'A journalist', 'record_description' => 'Council minutes of 1990', 'received_on' => '2026-10-01'])->assertSessionHasNoErrors();
+        $this->add('paia', ['kind_id' => 'public-body', 'requester_name' => 'A journalist', 'record_description' => 'Council minutes of 1990', 'received_on' => '2026-10-01',
+            'fee_exemption_requested' => '1'])->assertSessionHasNoErrors();
         $paia = PaiaRequest::sole();
+        $this->assertTrue($paia->fee_exemption_requested);
         $this->assertSame('2026-10-31', $paia->due_on->format('Y-m-d'));
         $this->step('paia', $paia, 'status', ['status' => 'extended'])->assertSessionHasNoErrors();
         $this->assertSame('2026-11-30', $paia->fresh()->due_on->format('Y-m-d'), 'extended once by 30 days (PAIA s.26)');
@@ -127,8 +131,9 @@ class PrivacyTest extends TestCase
     public function test_a_security_compromise_is_reported_to_the_regulator(): void
     {
         $this->add('compromises', ['jurisdiction_id' => 'gdpr', 'type_id' => 'confidentiality', 'severity_id' => 'high', 'description' => 'A box of registration forms was lost in transit.',
-            'detected_at' => '2026-10-20T09:00', 'notification_required' => '1'])->assertSessionHasNoErrors();
+            'detected_at' => '2026-10-20T09:00', 'notification_required' => '1', 'cause' => 'Sent by an ordinary courier.'])->assertSessionHasNoErrors();
         $compromise = SecurityCompromise::sole();
+        $this->assertSame('Sent by an ordinary courier.', $compromise->cause);
         $this->assertSame(['detected', '2026-10-23 09:00'], [$compromise->status->notation, app(PrivacyService::class)->regulatorNotice($compromise)['deadline']->format('Y-m-d H:i')]);
         $this->assertFalse(collect(app(PrivacyService::class)->report($this->institution))->firstWhere('check', 'Every security compromise that must be reported has been reported to the Regulator (POPIA s.22)')['ok']);
         $this->step('compromises', $compromise, 'notify', ['recipient' => 'regulator', 'method' => 'portal', 'content' => 'Reported on the portal.'])->assertSessionHasNoErrors();

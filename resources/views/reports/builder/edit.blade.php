@@ -12,6 +12,7 @@
         @csrf
         <p><label>{{ __('Name') }} <input name="name" required maxlength="255" value="{{ old('name', $report->name) }}"></label></p>
         <p><label>{{ __('Description') }}<br><textarea name="description" rows="3" maxlength="5000">{{ old('description', $report->description) }}</textarea></label></p>
+        <p><label>{{ __('Category') }} <select name="category">@foreach(\App\Models\Concept::choices(\App\Reports\ReportBuilder::CATEGORIES)->get() as $c)<option value="{{ $c->notation }}" @selected(old('category', $report->category?->notation ?? 'general') === $c->notation)>{{ $c->label(\App\Support\Vocab::languages()) }}</option>@endforeach</select></label></p>
 
         <fieldset><legend>{{ __('Columns') }}</legend>
             <p class="meta">{{ __('The columns of its tables, in this order; the elements are those of its standard.') }}</p>

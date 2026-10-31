@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['institution_id', 'user_id', 'name', 'description', 'source', 'columns', 'filters', 'sort', 'status_id', 'shared', 'template_id'])]
+#[Fillable(['institution_id', 'user_id', 'name', 'description', 'source', 'columns', 'filters', 'sort', 'status_id', 'shared', 'template_id', 'category_id'])]
 class CustomReport extends Model
 {
     use Audited, HasUuids;
@@ -26,6 +26,11 @@ class CustomReport extends Model
     public function owner(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(Concept::class, 'category_id');
     }
 
     public function status(): BelongsTo

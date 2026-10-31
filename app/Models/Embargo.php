@@ -17,7 +17,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable(['institution_id', 'record_resource_id', 'type_id', 'reason_id', 'note', 'public_message', 'starts_on', 'ends_on', 'notify_days_before', 'warned_on',
-    'ended_notice_at', 'lifted_at', 'lifted_by_id', 'lift_reason', 'created_by_id'])]
+    'ended_notice_at', 'lifted_at', 'lifted_by_id', 'lift_reason', 'review_on', 'review_interval_months', 'created_by_id'])]
 class Embargo extends Model
 {
     use Audited, HasUuids;
@@ -27,7 +27,7 @@ class Embargo extends Model
     protected function casts(): array
     {
         return ['starts_on' => 'immutable_date', 'ends_on' => 'immutable_date', 'warned_on' => 'immutable_date', 'ended_notice_at' => 'immutable_datetime',
-            'lifted_at' => 'immutable_datetime', 'notify_days_before' => 'integer'];
+            'lifted_at' => 'immutable_datetime', 'notify_days_before' => 'integer', 'review_on' => 'immutable_date', 'review_interval_months' => 'integer'];
     }
 
     /** In force on a day: begun, not ended, not lifted. */

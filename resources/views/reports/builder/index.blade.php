@@ -8,15 +8,22 @@
     @if(session('status'))<p role="status">{{ session('status') }}</p>@endif
     <p>{{ __('Build a report on one kind of entity: choose its columns from the elements of its standard, filter and sort it, and arrange it in sections. It downloads as CSV, XLSX, PDF or Word.') }}</p>
 
+    @php($categories = \App\Models\Concept::choices(\App\Reports\ReportBuilder::CATEGORIES)->get())
     <h2>{{ __('Reports') }}</h2>
     @if($reports->isEmpty())<p>{{ __('None.') }}</p>@else
+    {{-- Grouped by category, as Heratio's list is; a report with none is General. --}}
+    @foreach($categories as $category)
+        @php($filed = $reports->filter(fn ($r) => ($r->category?->notation ?? 'general') === $category->notation))
+        @continue($filed->isEmpty())
+        <h3>{{ $category->label($lang) }} ({{ $filed->count() }})</h3>
         <table><thead><tr><th>{{ __('Name') }}</th><th>{{ __('Kind') }}</th><th>{{ __('Status') }}</th><th>{{ __('Owner') }}</th><th>{{ __('Updated') }}</th></tr></thead><tbody>
-            @foreach($reports as $report)
+            @foreach($filed as $report)
                 <tr><td><a href="{{ route('reports.builder.show', $report) }}">{{ $report->name }}</a>@if($report->shared) <span class="meta">{{ __('shared') }}</span>@endif</td>
                     <td>{{ __(\App\Reports\ReportBuilder::SOURCE_TITLES[$report->source] ?? $report->source) }}</td><td>{{ $report->status->label($lang) }}</td>
                     <td>{{ $report->owner->name }}</td><td>{{ $report->updated_at->format('Y-m-d H:i') }}</td></tr>
             @endforeach
         </tbody></table>
+    @endforeach
     @endif
 
     <h2>{{ __('New report') }}</h2>
@@ -27,6 +34,7 @@
         <p><label>{{ __('Kind') }} <select name="source">
             @foreach($sources as $kind => $title)<option value="{{ $kind }}" @selected(old('source') === $kind)>{{ $title }}</option>@endforeach
         </select></label></p>
+        <p><label>{{ __('Category') }} <select name="category">@foreach($categories as $c)<option value="{{ $c->notation }}" @selected(old('category', 'general') === $c->notation)>{{ $c->label($lang) }}</option>@endforeach</select></label></p>
         <p><label><input type="checkbox" name="shared" value="1"> {{ __('Shared with everyone who may read its kind') }}</label></p>
         <button type="submit">{{ __('Create') }}</button>
     </form>

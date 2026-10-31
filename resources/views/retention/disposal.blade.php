@@ -39,13 +39,13 @@
             @if($disposal->action->notation === 'destroy')
                 @if($mayDestroy)
                     <p><strong>{{ __('Destroying erases its files for good and removes its description from every list; the certificate keeps what was destroyed.') }}</strong></p>
-                    <p><label for="m">{{ __('Method') }}</label> <input id="m" name="method" size="40" value="{{ __('Secure erasure from the file store') }}"> <label for="w">{{ __('Witness') }}</label> <input id="w" name="witness" size="25"></p>
+                    <p><label for="m">{{ __('Method') }}</label> @include('description._ric', ['term' => null]) <input id="m" name="method" size="40" value="{{ __('Secure erasure from the file store') }}"> <label for="w">{{ __('Witness') }}</label> @include('description._ric', ['term' => null]) <input id="w" name="witness" size="25"></p>
                     <button type="submit" style="background: var(--error)">{{ __('Destroy') }}</button>
                 @else<p>{{ __('Only who administers the institution destroys records.') }}</p>@endif
             @elseif($disposal->action->notation === 'transfer')
-                <label for="dest">{{ __('Transferred to') }}</label> <input id="dest" name="destination" required size="40"> <button type="submit">{{ __('Record the transfer') }}</button>
+                <label for="dest">{{ __('Transferred to') }}</label> @include('description._ric', ['term' => null]) <input id="dest" name="destination" required size="40"> <button type="submit">{{ __('Record the transfer') }}</button>
             @else
-                <label for="rr">{{ __('Reason') }}</label> <input id="rr" name="comment" size="40"> <button type="submit">{{ __('Retain permanently') }}</button>
+                <label for="rr">{{ __('Reason') }}</label> @include('description._ric', ['term' => null]) <input id="rr" name="comment" size="40"> <button type="submit">{{ __('Retain permanently') }}</button>
             @endif
         </form>
     @endif

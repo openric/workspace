@@ -69,15 +69,15 @@
             <summary>{{ __('Add a match') }}</summary>
             <form method="post" action="{{ route('concepts.matches.store', $concept) }}">
                 @csrf
-                <label for="m-type">{{ __('How it matches') }}</label>
+                <label for="m-type">{{ __('How it matches') }}</label> @include('description._ric', ['term' => 'skos:mappingRelation'])
                 <select id="m-type" name="type" style="font: inherit; padding: .5rem">
                     @foreach($matchTypes as $type)<option value="{{ $type->notation }}">{{ $type->label(\App\Support\Vocab::languages()) }}</option>@endforeach
                 </select>
-                <label for="m-iri">{{ __('IRI of the concept elsewhere (for example in LCSH, AAT or Wikidata)') }}</label>
+                <label for="m-iri">{{ __('IRI of the concept elsewhere (for example in LCSH, AAT or Wikidata)') }}</label> @include('description._ric', ['term' => null])
                 <input id="m-iri" name="iri" type="url" required maxlength="2048" placeholder="https://id.loc.gov/authorities/subjects/sh85007034">
-                <label for="m-label">{{ __('Its label (optional)') }}</label>
+                <label for="m-label">{{ __('Its label (optional)') }}</label> @include('description._ric', ['term' => null])
                 <input id="m-label" name="target_label" maxlength="1024">
-                <label for="m-scheme">{{ __('Its vocabulary (optional, such as LCSH)') }}</label>
+                <label for="m-scheme">{{ __('Its vocabulary (optional, such as LCSH)') }}</label> @include('description._ric', ['term' => null])
                 <input id="m-scheme" name="target_scheme" maxlength="255">
                 <button type="submit">{{ __('Add match') }}</button>
             </form>
@@ -100,21 +100,21 @@
             <form method="post" action="{{ route('concepts.protocol', $concept) }}">
                 @csrf
                 <small>{{ __('Traditional Knowledge or Biocultural Label and access condition. Withholding conditions hide the term, and every unit of description tagged with it, from the public and from accounts that may not change them.') }}</small>
-                <label for="p-condition">{{ __('Access condition') }}</label>
+                <label for="p-condition">{{ __('Access condition') }}</label> @include('description._ric', ['term' => null])
                 <select id="p-condition" name="access_condition" style="font: inherit; padding: .5rem">
                     @foreach($conditions as $c)<option value="{{ $c->notation }}" @selected(($protocol?->accessCondition->notation ?? 'open') === $c->notation)>{{ $c->label($lang) }}@if($c->broader->notation === 'withheld') ({{ __('hidden') }})@endif</option>@endforeach
                 </select>
-                <label for="p-label">{{ __('Label') }}</label>
+                <label for="p-label">{{ __('Label') }}</label> @include('description._ric', ['term' => null])
                 <select id="p-label" name="label" style="font: inherit; padding: .5rem">
                     <option value="">{{ __('None') }}</option>
                     @foreach($labelChoices as $group => $labels)<optgroup label="{{ strtoupper($group) }}">@foreach($labels as $l)<option value="{{ $l->notation }}" @selected($protocol?->label?->notation === $l->notation)>{{ $l->label($lang) }}</option>@endforeach</optgroup>@endforeach
                 </select>
-                <label for="p-community">{{ __('Owning community') }}</label>
+                <label for="p-community">{{ __('Owning community') }}</label> @include('description._ric', ['term' => null])
                 <select id="p-community" name="community" style="font: inherit; padding: .5rem">
                     <option value="">{{ __('None') }}</option>
                     @foreach($communities as $a)<option value="{{ $a->id }}" @selected($protocol?->community_id === $a->id)>{{ $a->described('agent-authorised-name', [app()->getLocale(), 'en']) }}</option>@endforeach
                 </select>
-                <label for="p-region">{{ __('Region') }}</label>
+                <label for="p-region">{{ __('Region') }}</label> @include('description._ric', ['term' => null])
                 <input id="p-region" name="region" maxlength="255" placeholder="southern_africa" value="{{ $protocol?->region }}">
                 <button type="submit">{{ __('Save') }}</button>
             </form>
@@ -139,15 +139,15 @@
                 <form method="post" action="{{ route('concepts.relation-type', $concept) }}">
                     @csrf
                     <small>{{ __('It connects what the bundled type connects, takes its agent role, and is exported as that type. A symmetric type reads the same both ways.') }}</small>
-                    <label for="rt-base">{{ __('Narrows') }}</label>
+                    <label for="rt-base">{{ __('Narrows') }}</label> @include('description._ric', ['term' => null])
                     <select id="rt-base" name="base" style="font: inherit; padding: .5rem">
                         @foreach($narrowable as $key => $type)<option value="{{ $key }}" @selected(($relationType['kind'] ?? null) === $key)>{{ \App\Relations\RelationTypes::phrase($type, true) }} / {{ \App\Relations\RelationTypes::phrase($type, false) }}</option>@endforeach
                     </select>
-                    <label for="rt-language">{{ __('Language') }}</label>
+                    <label for="rt-language">{{ __('Language') }}</label> @include('description._ric', ['term' => null])
                     <input id="rt-language" name="language" maxlength="35" required value="{{ app()->getLocale() }}">
-                    <label for="rt-forward">{{ __('How it reads') }}</label>
+                    <label for="rt-forward">{{ __('How it reads') }}</label> @include('description._ric', ['term' => null])
                     <input id="rt-forward" name="forward" maxlength="255" required placeholder="{{ __('is the godparent of') }}" value="{{ $relationType['phrases'][app()->getLocale()]['forward'] ?? '' }}">
-                    <label for="rt-inverse">{{ __('Converse term') }}</label>
+                    <label for="rt-inverse">{{ __('Converse term') }}</label> @include('description._ric', ['term' => null])
                     <input id="rt-inverse" name="inverse" maxlength="255" placeholder="{{ __('is the godchild of') }}" value="{{ $relationType['phrases'][app()->getLocale()]['inverse'] ?? '' }}">
                     <button type="submit">{{ __('Save') }}</button>
                 </form>
@@ -171,7 +171,7 @@
         <h2>{{ __('Move') }}</h2>
         <form method="post" action="{{ route('concepts.move', $concept) }}" style="display: flex; gap: .5rem; align-items: end">
             @csrf
-            <div><label for="vocabulary" style="margin-top: 0">{{ __('Move it, and every concept below it, to') }}</label>
+            <div><label for="vocabulary" style="margin-top: 0">{{ __('Move it, and every concept below it, to') }}</label> @include('description._ric', ['term' => null])
                 <select id="vocabulary" name="vocabulary" style="font: inherit; padding: .5rem">
                     @foreach($otherVocabularies as $other)<option value="{{ $other->id }}">{{ $other->title }}</option>@endforeach
                 </select></div>
@@ -189,7 +189,7 @@
             <form method="post" action="{{ route('concepts.merge', $concept) }}">
                 @csrf
                 <p>{{ __('For a duplicate: its narrower concepts, the units of description and places that use it, its related concepts and matches move to the concept kept; its labels become alternative labels there; it is deprecated and points to the one kept.') }}</p>
-                <label for="into">{{ __('Merge into') }}</label>
+                <label for="into">{{ __('Merge into') }}</label> @include('description._ric', ['term' => null])
                 <select id="into" name="into" style="font: inherit; padding: .5rem">
                     @foreach($siblings as $sibling)<option value="{{ $sibling->id }}">{{ $sibling->anyLabel(['en']) }}</option>@endforeach
                 </select>

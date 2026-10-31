@@ -83,5 +83,17 @@ class RicTermsTest extends TestCase
             ->assertDontSee('rico:scopeAndContent'); // not described, so not shown; the edit page shows its term
         $this->actingAs($editor)->get("/repositories/{$repository->id}")->assertOk()->assertSee('rico:CorporateBody')->assertSee('rico:AgentName');
         $this->actingAs($editor)->get("/repositories/{$repository->id}/edit")->assertOk()->assertSee('not in RiC-O');
+
+        // The forms of the later phases too (the form audit of 31 October 2026): a field the Workspace keeps outside
+        // RiC-O says so, one that is exported names its term, and no two forms of a page share a field's id.
+        $page = $this->actingAs($editor)->get("/records/{$fonds->id}")->assertOk()->getContent();
+        $this->assertSame(1, substr_count($page, 'id="new-type"'), 'the date form only; the embargo form has its own ids');
+        $this->assertStringContainsString('id="embargo-new-type"', $page);
+        $this->actingAs($editor)->get("/records/{$fonds->id}/provenance")->assertOk()->assertSee('rico:dateQualifier')->assertSee('aria-label="Start date qualifier"', false)
+            ->assertSee('rico:name');
+        $admin = app(AccountService::class)->create($institution, 'Admin', 'admin@example.org', 'correct horse battery staple');
+        app(AccountService::class)->grantTemplateRole($admin, 'administrator');
+        $this->actingAs($admin)->get(route('privacy.create', 'requests'))->assertOk()->assertSee('not in RiC-O');
+        $this->actingAs($admin)->get(route('retention.index'))->assertOk()->assertSee('not in RiC-O');
     }
 }

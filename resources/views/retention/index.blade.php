@@ -24,9 +24,9 @@
     @foreach($reviews as $r)
         <section style="border-top: 1px solid var(--line); padding: .3rem 0"><p><a href="{{ route('records.show', $r->record) }}#retention">{{ \App\Relations\EntityKinds::label($r->record) }}</a> · {{ __('due :date', ['date' => $r->due_on->format('Y-m-d')]) }}@if($r->assignedTo) · {{ $r->assignedTo->name }}@endif</p>
             <form method="post" action="{{ route('retention.reviews.decide', $r) }}">@csrf
-                <label for="d-{{ $r->id }}">{{ __('Decision') }}</label> <select id="d-{{ $r->id }}" name="decision">@foreach(\App\Models\Concept::choices(\App\Support\Vocab::BASE.'review-decision/')->get() as $d)<option value="{{ $d->notation }}">{{ $d->label($lang) }}</option>@endforeach</select>
-                <label for="n-{{ $r->id }}">{{ __('Next review (to keep for now)') }}</label> <input id="n-{{ $r->id }}" type="date" name="next_due_on">
-                <label for="dn-{{ $r->id }}">{{ __('Notes') }}</label> <input id="dn-{{ $r->id }}" name="decision_notes" size="30"> <button type="submit">{{ __('Decide') }}</button></form></section>
+                <label for="d-{{ $r->id }}">{{ __('Decision') }}</label> @include('description._ric', ['term' => null]) <select id="d-{{ $r->id }}" name="decision">@foreach(\App\Models\Concept::choices(\App\Support\Vocab::BASE.'review-decision/')->get() as $d)<option value="{{ $d->notation }}">{{ $d->label($lang) }}</option>@endforeach</select>
+                <label for="n-{{ $r->id }}">{{ __('Next review (to keep for now)') }}</label> @include('description._ric', ['term' => null]) <input id="n-{{ $r->id }}" type="date" name="next_due_on">
+                <label for="dn-{{ $r->id }}">{{ __('Notes') }}</label> @include('description._ric', ['term' => null]) <input id="dn-{{ $r->id }}" name="decision_notes" size="30"> <button type="submit">{{ __('Decide') }}</button></form></section>
     @endforeach @endif
     <h2>{{ __('Disposals') }}</h2>
     <p>@foreach($counts as $status => $n){{ \App\Models\Concept::where('iri', \App\Support\Vocab::BASE.'disposal-status/'.$status)->first()?->label($lang) }}: {{ $n }}@if(! $loop->last) · @endif @endforeach</p>

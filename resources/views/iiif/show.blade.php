@@ -20,10 +20,10 @@
     @endforeach</ol>@endif
     <h2>{{ __('Add an item') }}</h2>
     <form method="post" action="{{ route('iiif-collections.items.add', $collection) }}">@csrf
-        <p><label for="target">{{ __('A record\'s persistent IRI, or another institution\'s IIIF manifest or collection URI') }}</label><br><input id="target" name="target" type="url" size="70" value="{{ old('target') }}">
-            <label for="type">{{ __('An outside URI is a') }}</label> <select id="type" name="type">@foreach($types as $t)<option value="{{ $t->notation }}">{{ $t->label(\App\Support\Vocab::languages()) }}</option>@endforeach</select></p>
-        @if($others->isNotEmpty())<p><label for="member">{{ __('Or another curated collection') }}</label> <select id="member" name="member"><option value="">-</option>@foreach($others as $o)<option value="{{ $o->id }}">{{ $o->label }}</option>@endforeach</select></p>@endif
-        <p><label for="item-label">{{ __('Label in the collection (optional)') }}</label> <input id="item-label" name="label" maxlength="500" size="40"></p>
+        <p><label for="target">{{ __('A record\'s persistent IRI, or another institution\'s IIIF manifest or collection URI') }}</label> @include('description._ric', ['term' => null])<br><input id="target" name="target" type="url" size="70" value="{{ old('target') }}">
+            <label for="type">{{ __('An outside URI is a') }}</label> @include('description._ric', ['term' => null]) <select id="type" name="type">@foreach($types as $t)<option value="{{ $t->notation }}">{{ $t->label(\App\Support\Vocab::languages()) }}</option>@endforeach</select></p>
+        @if($others->isNotEmpty())<p><label for="member">{{ __('Or another curated collection') }}</label> @include('description._ric', ['term' => null]) <select id="member" name="member"><option value="">-</option>@foreach($others as $o)<option value="{{ $o->id }}">{{ $o->label }}</option>@endforeach</select></p>@endif
+        <p><label for="item-label">{{ __('Label in the collection (optional)') }}</label> @include('description._ric', ['term' => null]) <input id="item-label" name="label" maxlength="500" size="40"></p>
         <button type="submit">{{ __('Add') }}</button>
     </form>
     <h2>{{ __('Edit') }}</h2>
