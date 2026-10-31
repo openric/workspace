@@ -1,0 +1,72 @@
+# OpenRiC Workspace - OpenRiC Workspace Disposal Statuses.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Where a disposal stands in its workflow (Heratio's rm_disposal_action.status).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/disposal-status/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Disposal Statuses"@en ;
+    dcterms:description "Where a disposal stands in its workflow (Heratio's rm_disposal_action.status)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:pending, v:recommended, v:approved, v:cleared, v:executed, v:retained, v:rejected, v:cancelled .
+
+v:pending a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Initiated"@en, "Begin"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the retention schedule, as Heratio's ahg-records-manage keeps it."@en ;
+    skos:definition "Proposed, waiting for a recommendation or approval."@en .
+
+v:recommended a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Recommended"@en, "Aanbeveel"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the retention schedule, as Heratio's ahg-records-manage keeps it."@en ;
+    skos:definition "Recommended by a second person."@en .
+
+v:approved a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Approved"@en, "Goedgekeur"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the retention schedule, as Heratio's ahg-records-manage keeps it."@en ;
+    skos:definition "Approved by someone other than who initiated it."@en .
+
+v:cleared a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Legally cleared"@en, "Regtens goedgekeur"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the retention schedule, as Heratio's ahg-records-manage keeps it."@en ;
+    skos:definition "Cleared of any legal hold by someone other than who approved it."@en .
+
+v:executed a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Carried out"@en, "Uitgevoer"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the retention schedule, as Heratio's ahg-records-manage keeps it."@en ;
+    skos:definition "Carried out by someone other than who approved or cleared it."@en .
+
+v:retained a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Retained"@en, "Behou"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the retention schedule, as Heratio's ahg-records-manage keeps it."@en ;
+    skos:definition "Decided to keep the record permanently."@en .
+
+v:rejected a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Rejected"@en, "Afgekeur"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the retention schedule, as Heratio's ahg-records-manage keeps it."@en ;
+    skos:definition "Refused, with the reason."@en .
+
+v:cancelled a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Cancelled"@en, "Gekanselleer"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the retention schedule, as Heratio's ahg-records-manage keeps it."@en ;
+    skos:definition "Withdrawn before approval, with the reason."@en .

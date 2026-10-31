@@ -64,8 +64,10 @@ final class ReportDelivery
     public function schedule(CustomReport $report, array $data, User $by, ?ReportSchedule $schedule = null): ReportSchedule
     {
         $frequency = Concept::choices(self::FREQUENCIES)->where('notation', $data['frequency'])->first() ?? throw new InvalidArgumentException(__('Choose how often.'));
-        $recipients = User::where('institution_id', $report->institution_id)->whereIn('id', $data['recipients'] ?? [])->get()
-            ->filter(fn (User $u) => ! $u->isDisabled() && ReportBuilder::mayUse($u, $report->source));
+        // In the order given: the database answers in no order of its own.
+        $given = array_values(array_unique($data['recipients'] ?? []));
+        $recipients = User::where('institution_id', $report->institution_id)->whereIn('id', $given)->get()
+            ->filter(fn (User $u) => ! $u->isDisabled() && ReportBuilder::mayUse($u, $report->source))->sortBy(fn (User $u) => array_search($u->id, $given, true));
         if ($recipients->isEmpty()) {
             throw new InvalidArgumentException(__('Choose who receives it: accounts that may read :source.', ['source' => __(ReportBuilder::SOURCE_TITLES[$report->source])]));
         }

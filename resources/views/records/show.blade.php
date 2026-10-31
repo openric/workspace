@@ -74,6 +74,7 @@
     </section>
     @include('description._rights', ['subject' => $record, 'kind' => 'records', 'canUpdate' => $canUpdate])
     @include('records._embargoes', ['record' => $record, 'canUpdate' => $canUpdate])
+    @if(auth()->user()->may('delete', 'description', $record))@include('records._retention', ['record' => $record])@endif
     @include('description._community-labels', ['subject' => $record, 'kind' => 'records', 'canUpdate' => $canUpdate])
     @include('description._relations', ['subject' => $record, 'kind' => 'records', 'relations' => $relations, 'canUpdate' => $canUpdate])
     @include('description._relations', ['subject' => $record, 'kind' => 'records', 'relations' => $relations, 'canUpdate' => $canUpdate,

@@ -1,0 +1,44 @@
+# OpenRiC Workspace - OpenRiC Workspace Retention Triggers.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# From when a disposal class's retention period runs (Heratio's rm_disposal_class.retention_trigger).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/retention-trigger/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Retention Triggers"@en ;
+    dcterms:description "From when a disposal class's retention period runs (Heratio's rm_disposal_class.retention_trigger)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:creation-end, v:accumulation-end, v:assignment, v:event .
+
+v:creation-end a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "End of creation"@en, "Einde van skepping"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the retention schedule, as Heratio's ahg-records-manage keeps it."@en ;
+    skos:definition "The last day of the record's dates of creation."@en .
+
+v:accumulation-end a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "End of accumulation"@en, "Einde van akkumulasie"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the retention schedule, as Heratio's ahg-records-manage keeps it."@en ;
+    skos:definition "The last day of the record's dates of accumulation."@en .
+
+v:assignment a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Assignment"@en, "Toewysing"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the retention schedule, as Heratio's ahg-records-manage keeps it."@en ;
+    skos:definition "The day the class was given to the record."@en .
+
+v:event a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "An event"@en, "'n Gebeurtenis"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the retention schedule, as Heratio's ahg-records-manage keeps it."@en ;
+    skos:definition "A day given by hand when the class is given, such as the closing of a file or the end of a contract."@en .

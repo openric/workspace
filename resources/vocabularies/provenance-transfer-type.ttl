@@ -13,7 +13,7 @@ v: a skos:ConceptScheme ;
     dcterms:title "OpenRiC Workspace Provenance Transfer Types"@en ;
     dcterms:description "How a provenance step passed the material on (Heratio's provenance_entry.transfer_type, in its groups)."@en ;
     dcterms:issued "2026-10-29"^^xsd:date ;
-    skos:hasTopConcept v:sale, v:purchase, v:auction, v:gift, v:donation, v:bequest, v:inheritance, v:descent, v:transfer, v:exchange, v:loan-out, v:loan-return, v:deposit, v:withdrawal, v:creation, v:commission, v:discovery, v:excavation, v:found, v:theft, v:recovery, v:confiscation, v:restitution, v:repatriation, v:accessioning, v:deaccessioning, v:unknown, v:other .
+    skos:hasTopConcept v:sale, v:purchase, v:auction, v:gift, v:donation, v:bequest, v:inheritance, v:descent, v:transfer, v:exchange, v:loan-out, v:loan-return, v:deposit, v:withdrawal, v:creation, v:commission, v:discovery, v:excavation, v:found, v:theft, v:recovery, v:confiscation, v:restitution, v:repatriation, v:accessioning, v:deaccessioning, v:unknown, v:other, v:destruction .
 
 v:sale a skos:Concept ;
     skos:inScheme v: ;
@@ -210,3 +210,10 @@ v:other a skos:Concept ;
     skos:prefLabel "Other"@en, "Ander"@af ;
     skos:scopeNote "Exported as the rico:ActivityType of the provenance step, a rico:Activity that affects the record (rico:affectsOrAffected). Heratio's group: Other."@en ;
     skos:definition "Other: other."@en .
+
+v:destruction a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Destruction"@en, "Vernietiging"@af ;
+    skos:scopeNote "A rico:Activity affecting the record: its destruction under a disposal (roadmap phase 13b)."@en ;
+    skos:definition "The record was destroyed under a disposal authority; its certificate of destruction is the document."@en .

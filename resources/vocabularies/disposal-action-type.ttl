@@ -1,0 +1,44 @@
+# OpenRiC Workspace - OpenRiC Workspace Disposal Actions.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What a disposal class or a disposal does with a record when its retention ends (Heratio's disposal_action and action_type).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/disposal-action-type/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Disposal Actions"@en ;
+    dcterms:description "What a disposal class or a disposal does with a record when its retention ends (Heratio's disposal_action and action_type)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:destroy, v:transfer, v:retain, v:review .
+
+v:destroy a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Destroy"@en, "Vernietig"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the retention schedule, as Heratio's ahg-records-manage keeps it."@en ;
+    skos:definition "Its files are erased and a certificate of destruction issued; its description is kept as evidence."@en .
+
+v:transfer a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Transfer"@en, "Oordrag"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the retention schedule, as Heratio's ahg-records-manage keeps it."@en ;
+    skos:definition "It is handed to another archive or body, named in the disposal."@en .
+
+v:retain a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Retain permanently"@en, "Behou permanent"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the retention schedule, as Heratio's ahg-records-manage keeps it."@en ;
+    skos:definition "It is kept for good: it has archival value."@en .
+
+v:review a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Review"@en, "Hersien"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the retention schedule, as Heratio's ahg-records-manage keeps it."@en ;
+    skos:definition "Someone looks at it again and decides."@en .

@@ -53,6 +53,7 @@ use App\Http\Controllers\RelationController;
 use App\Http\Controllers\ReportBuilderController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RepositoryController;
+use App\Http\Controllers\RetentionController;
 use App\Http\Controllers\RightsAdminController;
 use App\Http\Controllers\RightsController;
 use App\Http\Controllers\RoleController;
@@ -544,6 +545,27 @@ Route::middleware(['auth', 'active'])->group(function () {
 
     // Rights of a unit of description, an instantiation (roadmap phase 2) or an accession (phase 9d), and Local Contexts
     // Labels of the first two; each controller checks update on it.
+    // Retention and disposal (roadmap phase 13b, ADR 0015).
+    Route::prefix('retention')->name('retention.')->group(function () {
+        Route::get('/', [RetentionController::class, 'index'])->name('index');
+        Route::post('/schedules', [RetentionController::class, 'saveSchedule'])->name('schedules.store');
+        Route::get('/schedules/{schedule}', [RetentionController::class, 'schedule'])->whereUuid('schedule')->name('schedule');
+        Route::post('/schedules/{schedule}', [RetentionController::class, 'saveSchedule'])->whereUuid('schedule')->name('schedules.update');
+        Route::post('/schedules/{schedule}/approve', [RetentionController::class, 'approveSchedule'])->whereUuid('schedule')->name('schedules.approve');
+        Route::post('/schedules/{schedule}/version', [RetentionController::class, 'newVersion'])->whereUuid('schedule')->name('schedules.version');
+        Route::post('/schedules/{schedule}/classes', [RetentionController::class, 'saveClass'])->whereUuid('schedule')->name('classes.store');
+        Route::post('/schedules/{schedule}/classes/{class}', [RetentionController::class, 'saveClass'])->whereUuid(['schedule', 'class'])->name('classes.update');
+        Route::post('/reviews/{review}', [RetentionController::class, 'decide'])->whereUuid('review')->name('reviews.decide');
+        Route::get('/certificates/{certificate}', [RetentionController::class, 'certificate'])->whereUuid('certificate')->name('certificate');
+    });
+    Route::prefix('records/{record}/retention')->name('records.retention.')->whereUuid('record')->group(function () {
+        Route::post('/', [RetentionController::class, 'assign'])->name('assign');
+        Route::post('/reviews', [RetentionController::class, 'scheduleReview'])->name('review');
+        Route::post('/disposals', [RetentionController::class, 'initiate'])->name('initiate');
+    });
+    Route::get('/disposals/{disposal}', [RetentionController::class, 'disposal'])->whereUuid('disposal')->name('disposals.show');
+    Route::post('/disposals/{disposal}/{step}', [RetentionController::class, 'step'])->whereUuid('disposal')
+        ->whereIn('step', ['recommend', 'approve', 'clear', 'reject', 'cancel', 'execute', 'verify'])->name('disposals.step');
     // Embargoes on units of description (roadmap phase 13a, ADR 0015).
     Route::get('/embargoes', [EmbargoController::class, 'index'])->name('embargoes.index');
     Route::prefix('records/{record}/embargoes')->name('records.embargoes.')->whereUuid(['record', 'embargo', 'exception'])->group(function () {

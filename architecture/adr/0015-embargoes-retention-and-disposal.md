@@ -56,3 +56,36 @@ On 31 October 2026 Dr Johan Pieterse chose:
 
 - Each check of a record looks its embargo up, so a long list makes as many queries; a large catalogue wants it kept with the record.
 - 13b brings retention and disposal, under this ADR.
+
+## Amendment, 31 October 2026: retention and disposal (13b)
+
+- **Retention schedules, disposal classes, assignments, reviews.** These follow Heratio's `rm_retention_schedule`, `rm_disposal_class`, `rm_record_disposal_class` and `rm_review_schedule`. Status, trigger, action and decision are vocabulary rows (`retention-schedule-status`, `retention-trigger`, `disposal-action-type`, `review-decision`).
+  - **Schedules.** A schedule is issued under its authority (a NARSSA standing disposal authority, say). It is drafted, given classes, and approved by the name and office of who approved it. A new version copies its classes and supersedes the old one once approved.
+  - **Assignment and due date.** Only a class of an approved schedule is given to a record, one class per record. The retention runs from the class's trigger: the end of the record's dates of creation or accumulation, the day of assignment, or a day given for an event such as a file's closing. The due date is that day plus the class's years and months, unless another date is given with its reason.
+  - **Due list.** A record whose due date has passed, and that is not already in a disposal or a review, is listed as due.
+  - **Reviews.** A review decides to keep the record for now (with the next review's date), to retain it permanently, or to start its disposal to destroy or transfer, as Heratio's `complete` does.
+  - **Not carried.** Heratio's retention policies of `ahg-integrity`, which queue records by ingest date, are not carried: the class is the policy.
+- **The disposal workflow.** This follows Heratio's `rm_disposal_action`. A disposal is initiated, may be recommended, and is approved, cleared and carried out.
+  - **Separation of duties.** Heratio's rule (#1374) is kept in the service and again by the database: no one approves their own disposal, clears what they approved, or carries out what they approved or cleared.
+  - **Who takes part.** Who may delete a record takes part in its disposal. Only who administers the institution destroys a record, as Heratio keeps destruction to administrators.
+  - **Legal holds.** The Workspace keeps no legal holds of its own, so clearing is the clearer's word that none applies.
+- **Destroying.** A destroyed record keeps its description as evidence, as Dr Johan Pieterse chose.
+  - **Records with parts.** A record with units inside it is not destroyed until they are disposed of.
+  - **The certificate.** A certificate, numbered DC-YYYY-NNNNN as Heratio numbers them, keeps the record's title, reference code and IRI, the authority, the class, the method and witness, who approved and who carried it out, each file's name, use, size and SHA-256, and a checksum of them all.
+  - **Custody history.** The destruction is a step of the record's custody history, a `rico:Activity` affecting it, with a new destruction type in `provenance-transfer-type`.
+  - **Deletion.** The record's instantiations are marked deleted and the record is deleted as any record is, so it leaves every list and its IRI answers 410 with the certificate's number (ADR 0013).
+  - **Erasing the files.** The files are then erased, after the certificate is kept. A file another record still uses is kept and marked so on the certificate, because files are stored once by checksum.
+  - **Verification.** This is Heratio's `verifyDestruction`: the certificate, its number and checksum, the files gone, the record deleted, and the destruction in the audit log.
+- **Transfer and retention.** A transfer is recorded with its destination as a step of the custody history, and the record stays described. Permanent retention ends the record's retention, so it never falls due again.
+
+Evidence: `tests/Feature/RetentionTest.php`. It covers:
+
+- The schedule's approval and the due date from the end of creation.
+- An override refused without its reason.
+- The due list and the review that starts a disposal.
+- Four accounts through the workflow, with every forbidden pairing refused.
+- Destruction: the certificate, the files erased but for the one another record uses, the custody step, 410 with the certificate's number, and a verification that passes.
+- The refusals: a record with parts, and a non-administrator destroying.
+- Transfer and permanent retention.
+
+Consequences: the due list and reviews are pages, with no daily notice yet. Heratio's AIP on transfer to its own preservation store waits for phase 15 (preservation).

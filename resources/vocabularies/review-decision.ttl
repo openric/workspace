@@ -1,0 +1,44 @@
+# OpenRiC Workspace - OpenRiC Workspace Review Decisions.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What a retention review decided (Heratio's rm_review_schedule.decision).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/review-decision/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Review Decisions"@en ;
+    dcterms:description "What a retention review decided (Heratio's rm_review_schedule.decision)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:retain, v:retain-permanently, v:dispose, v:transfer .
+
+v:retain a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Keep for now"@en, "Hou vir eers"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the retention schedule, as Heratio's ahg-records-manage keeps it."@en ;
+    skos:definition "Keep it and review it again on the next date."@en .
+
+v:retain-permanently a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Retain permanently"@en, "Behou permanent"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the retention schedule, as Heratio's ahg-records-manage keeps it."@en ;
+    skos:definition "It has archival value: keep it for good."@en .
+
+v:dispose a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Dispose"@en, "Beskik"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the retention schedule, as Heratio's ahg-records-manage keeps it."@en ;
+    skos:definition "Start its disposal: destruction."@en .
+
+v:transfer a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Transfer"@en, "Oordrag"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the retention schedule, as Heratio's ahg-records-manage keeps it."@en ;
+    skos:definition "Start its disposal: transfer."@en .

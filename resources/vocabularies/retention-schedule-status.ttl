@@ -1,0 +1,37 @@
+# OpenRiC Workspace - OpenRiC Workspace Retention Schedule Statuses.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Where a retention schedule stands (Heratio's rm_retention_schedule.status).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/retention-schedule-status/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Retention Schedule Statuses"@en ;
+    dcterms:description "Where a retention schedule stands (Heratio's rm_retention_schedule.status)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:draft, v:approved, v:superseded .
+
+v:draft a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Draft"@en, "Konsep"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the retention schedule, as Heratio's ahg-records-manage keeps it."@en ;
+    skos:definition "Being written; its classes are not yet applied."@en .
+
+v:approved a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Approved"@en, "Goedgekeur"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the retention schedule, as Heratio's ahg-records-manage keeps it."@en ;
+    skos:definition "Approved under its authority; its classes are applied."@en .
+
+v:superseded a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Superseded"@en, "Vervang"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the retention schedule, as Heratio's ahg-records-manage keeps it."@en ;
+    skos:definition "Replaced by a later version; records keep the class they were given until reassigned."@en .
