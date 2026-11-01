@@ -2,7 +2,7 @@
 
 **Status: in development.** Laravel 13 on PHP 8.3, with PostgreSQL 16 ([ADR 0002](architecture/adr/0002-laravel-and-postgresql.md)). Nothing here is released.
 
-OpenRiC Workspace will be an archival management application for archives starting a new digital environment, built natively on the International Council on Archives' Records in Contexts (RiC-CM 1.0, RiC-O 1.1). An archivist will describe and arrange holdings, link records to the people, organisations, activities and places around them, record the evidence for each of those links, attach digital files, publish what may be published, and export it all through the [OpenRiC specification](https://openric.org).
+OpenRiC Workspace will be an archival management application for archives starting a new digital environment, built natively on the International Council on Archives' Records in Contexts (RiC-CM 1.0.1, RiC-O 1.1; see [governance/RIC-CM-1.0.1-ASSESSMENT.md](governance/RIC-CM-1.0.1-ASSESSMENT.md)). An archivist will describe and arrange holdings, link records to the people, organisations, activities and places around them, record the evidence for each of those links, attach digital files, publish what may be published, and export it all through the [OpenRiC specification](https://openric.org).
 
 This repository holds the application and its governance:
 

@@ -64,3 +64,28 @@ jobs:
         run: php artisan test
         env:
           SHACL_REQUIRED: '1'
+
+  # Roadmap phase 23 (hardening): known vulnerabilities in the locked dependencies, secrets anywhere in the history,
+  # and a software bill of materials kept with every run, so each release tag has its own.
+  security:
+    name: Dependencies, secrets and SBOM
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+      - name: Known vulnerabilities (composer audit)
+        run: composer audit --locked --no-interaction
+      - name: Secrets in the history (gitleaks)
+        run: |
+          curl -sSfL https://github.com/gitleaks/gitleaks/releases/download/v8.21.2/gitleaks_8.21.2_linux_x64.tar.gz | tar -xz gitleaks
+          ./gitleaks detect --source . --no-banner --redact
+      - name: Software bill of materials (CycloneDX)
+        uses: anchore/sbom-action@v0.17.2
+        with:
+          format: cyclonedx-json
+          artifact-name: sbom.cdx.json

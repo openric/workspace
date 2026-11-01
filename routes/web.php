@@ -882,26 +882,29 @@ Route::middleware(['auth', 'active'])->group(function () {
             ->whereIn('step', ['status', 'submit', 'approve', 'reject', 'sign-off', 'withdraw', 'verify', 'notify'])->name('step');
     });
     // Retention and disposal (roadmap phase 13b, ADR 0015).
-    Route::prefix('retention')->name('retention.')->group(function () {
-        Route::get('/', [RetentionController::class, 'index'])->name('index');
-        Route::post('/schedules', [RetentionController::class, 'saveSchedule'])->name('schedules.store');
-        Route::get('/schedules/{schedule}', [RetentionController::class, 'schedule'])->whereUuid('schedule')->name('schedule');
-        Route::post('/schedules/{schedule}', [RetentionController::class, 'saveSchedule'])->whereUuid('schedule')->name('schedules.update');
-        Route::post('/schedules/{schedule}/approve', [RetentionController::class, 'approveSchedule'])->whereUuid('schedule')->name('schedules.approve');
-        Route::post('/schedules/{schedule}/version', [RetentionController::class, 'newVersion'])->whereUuid('schedule')->name('schedules.version');
-        Route::post('/schedules/{schedule}/classes', [RetentionController::class, 'saveClass'])->whereUuid('schedule')->name('classes.store');
-        Route::post('/schedules/{schedule}/classes/{class}', [RetentionController::class, 'saveClass'])->whereUuid(['schedule', 'class'])->name('classes.update');
-        Route::post('/reviews/{review}', [RetentionController::class, 'decide'])->whereUuid('review')->name('reviews.decide');
-        Route::get('/certificates/{certificate}', [RetentionController::class, 'certificate'])->whereUuid('certificate')->name('certificate');
+    // Who may delete a description takes part in retention and disposal (ADR 0015), as Heratio keeps it to staff (phase 23).
+    Route::middleware('access:delete,description')->group(function () {
+        Route::prefix('retention')->name('retention.')->group(function () {
+            Route::get('/', [RetentionController::class, 'index'])->name('index');
+            Route::post('/schedules', [RetentionController::class, 'saveSchedule'])->name('schedules.store');
+            Route::get('/schedules/{schedule}', [RetentionController::class, 'schedule'])->whereUuid('schedule')->name('schedule');
+            Route::post('/schedules/{schedule}', [RetentionController::class, 'saveSchedule'])->whereUuid('schedule')->name('schedules.update');
+            Route::post('/schedules/{schedule}/approve', [RetentionController::class, 'approveSchedule'])->whereUuid('schedule')->name('schedules.approve');
+            Route::post('/schedules/{schedule}/version', [RetentionController::class, 'newVersion'])->whereUuid('schedule')->name('schedules.version');
+            Route::post('/schedules/{schedule}/classes', [RetentionController::class, 'saveClass'])->whereUuid('schedule')->name('classes.store');
+            Route::post('/schedules/{schedule}/classes/{class}', [RetentionController::class, 'saveClass'])->whereUuid(['schedule', 'class'])->name('classes.update');
+            Route::post('/reviews/{review}', [RetentionController::class, 'decide'])->whereUuid('review')->name('reviews.decide');
+            Route::get('/certificates/{certificate}', [RetentionController::class, 'certificate'])->whereUuid('certificate')->name('certificate');
+        });
+        Route::prefix('records/{record}/retention')->name('records.retention.')->whereUuid('record')->group(function () {
+            Route::post('/', [RetentionController::class, 'assign'])->name('assign');
+            Route::post('/reviews', [RetentionController::class, 'scheduleReview'])->name('review');
+            Route::post('/disposals', [RetentionController::class, 'initiate'])->name('initiate');
+        });
+        Route::get('/disposals/{disposal}', [RetentionController::class, 'disposal'])->whereUuid('disposal')->name('disposals.show');
+        Route::post('/disposals/{disposal}/{step}', [RetentionController::class, 'step'])->whereUuid('disposal')
+            ->whereIn('step', ['recommend', 'approve', 'clear', 'reject', 'cancel', 'execute', 'verify'])->name('disposals.step');
     });
-    Route::prefix('records/{record}/retention')->name('records.retention.')->whereUuid('record')->group(function () {
-        Route::post('/', [RetentionController::class, 'assign'])->name('assign');
-        Route::post('/reviews', [RetentionController::class, 'scheduleReview'])->name('review');
-        Route::post('/disposals', [RetentionController::class, 'initiate'])->name('initiate');
-    });
-    Route::get('/disposals/{disposal}', [RetentionController::class, 'disposal'])->whereUuid('disposal')->name('disposals.show');
-    Route::post('/disposals/{disposal}/{step}', [RetentionController::class, 'step'])->whereUuid('disposal')
-        ->whereIn('step', ['recommend', 'approve', 'clear', 'reject', 'cancel', 'execute', 'verify'])->name('disposals.step');
     // A record scanned for personal information, its fields redacted for the public, its files released or withheld
     // (roadmap phase 18b, ADR 0016).
     Route::prefix('records/{record}/privacy')->name('records.privacy.')->whereUuid(['record', 'redaction'])->group(function () {

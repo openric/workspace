@@ -169,6 +169,10 @@ return [
     // uses the running daemon); empty, files are kept as not scanned.
     'max_upload_megabytes' => (int) env('WORKSPACE_MAX_UPLOAD_MB', 60),
     'object_store' => env('WORKSPACE_OBJECT_STORE'),
+
+    // Checks of workspace:preflight an installation waives, comma-separated (roadmap phase 23): a demonstration
+    // instance that sends no mail waives "mail". A waived check is still shown when deploying.
+    'preflight_waive' => env('WORKSPACE_PREFLIGHT_WAIVE', ''),
     'virus_scanner' => env('WORKSPACE_VIRUS_SCANNER', 'clamdscan'),
 
     // A copy of AtoM's uploads folder (the one holding r/), from which an import of

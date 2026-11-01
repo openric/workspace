@@ -27,3 +27,9 @@ Security classification, clearances, compartments and watermarks sit in the same
 ## Consequences
 
 Every screen asks the access service, with the record in hand, instead of a fixed permission. Existing installations are migrated: their three roles become institution roles with equivalent permissions, and their members stay members. Public discovery does not exist yet; the Public role's permissions take effect when it does. Permissions on agents and functions are added with those modules, by adding a record kind and its actions.
+
+## Amendment, 1 November 2026: unpublished authority records
+
+The access matrix of roadmap phase 23 found that any signed-in account of an institution reads its unpublished authority records, activities and places on the staff pages, because the public role, which every account inherits, reads authority records, and authority records have no view-draft action as descriptions do. Dr Johan Pieterse decided on 1 November 2026 that this stays: an authority record is shared reference work within the institution, not a draft description. The public catalogue still shows only published authority records. The access matrix lists these pages among what any account reads.
+
+An account never acts on another institution's objects, whatever its roles allow: the access service refuses a subject of another institution before it looks at permissions (found and fixed by the same matrix).

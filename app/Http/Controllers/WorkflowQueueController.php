@@ -157,14 +157,15 @@ class WorkflowQueueController extends Controller
     /** Heratio's diagram of a workflow, and of a task's place in it. */
     public function diagram(Request $request, Workflow $workflow): View
     {
-        abort_unless($workflow->institution_id === $request->user()->institution_id, 404);
+        abort_unless($workflow->institution_id === $request->user()->institution_id && $request->user()->mayAnywhere('update', 'description'), 404);
 
         return view('workflow.diagram', ['workflow' => $workflow->load('steps.stepType.labels', 'steps.action.labels', 'steps.requiredRole'), 'task' => null]);
     }
 
     public function taskDiagram(Request $request, WorkflowTask $task): View
     {
-        abort_unless($task->institution_id === $request->user()->institution_id, 404);
+        $workflows = app(WorkflowService::class);
+        abort_unless($workflows->mayWork($task, $request->user()) || $workflows->eligible($task, $request->user()), 404);
         $done = WorkflowTask::where(['workflow_id' => $task->workflow_id, 'subject_table' => $task->subject_table, 'subject_id' => $task->subject_id])
             ->whereHas('decision', fn ($q) => $q->where('notation', 'approved'))->pluck('step_id')->all();
 

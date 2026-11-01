@@ -61,6 +61,7 @@ class StudioController extends Controller
     public function writingStep(Request $request, ResearchProject $project, string $step, ?string $id = null): RedirectResponse
     {
         $user = $request->user();
+        abort_if($id === null && $step !== 'doc', 404);
         $doc = $id && in_array($step, ['doc', 'section', 'version'], true) ? ResearchWritingDoc::where(['id' => $id, 'project_id' => $project->id])->firstOrFail() : null;
         $section = $id && in_array($step, ['update-section', 'pull', 'remove-section'], true) ? ResearchWritingSection::whereIn('doc_id', $project->writingDocs()->select('id'))->findOrFail($id) : null;
         $data = $request->validate(['title' => ['nullable', 'string', 'max:500'], 'doc_type' => ['nullable', 'string', 'max:64'], 'status' => ['nullable', 'string', 'max:64'],

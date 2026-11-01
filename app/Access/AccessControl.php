@@ -59,7 +59,12 @@ final class AccessControl
         if ($account?->isDisabled()) {
             return false;
         }
-        $institutionId = $account?->institution_id ?? $subject?->getAttribute('institution_id') ?? $institution?->id;
+        // An account acts only within its own institution, whatever its roles there allow (found by the access matrix, phase 23).
+        $subjectInstitution = $subject?->getAttribute('institution_id');
+        if ($account && $subjectInstitution !== null && $subjectInstitution !== $account->institution_id) {
+            return false;
+        }
+        $institutionId = $account?->institution_id ?? $subjectInstitution ?? $institution?->id;
         $actionId = $this->conceptId(Vocab::permission($action));
         $kindId = $this->conceptId(Vocab::kind($kind));
         if ($institutionId === null || $actionId === null || $kindId === null) {

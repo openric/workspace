@@ -98,6 +98,8 @@ artisan workspace:vocabulary:import --bundled
 # Every audit row is signed (ADR 0004): without the key no change can be recorded.
 artisan workspace:audit:create-key --if-missing
 artisan optimize
+# An unsafe production configuration stops the release here, before the site comes back (roadmap phase 23).
+artisan workspace:preflight
 artisan up
 trap - ERR
 
@@ -107,5 +109,11 @@ for path in /sign-in /vocab/permission/; do
   [[ $code == 200 ]] || fail "$path answered $code after deploying $TAG; roll back with deploy/deploy.sh $PREVIOUS"
   echo "$path 200"
 done
+# Files that must never be served.
+for path in /.env /composer.json /composer.lock /storage/logs/laravel.log /vendor/autoload.php /artisan; do
+  code=$(curl -s -o /dev/null -w '%{http_code}' "$URL$path")
+  [[ $code == 403 || $code == 404 ]] || fail "$path answered $code after deploying $TAG; it must not be served"
+done
+echo "private files refused"
 artisan workspace:audit:verify
 echo "Deployed $TAG (was $PREVIOUS)."

@@ -57,6 +57,7 @@ class FieldAlerts
     /** Heratio's seedWatchesFromBibliography: watch every DOI of the project's bibliographies. @return int how many are new */
     public function fromBibliographies(User $user, ResearchProject $project): int
     {
+        $this->projects->must($user, $project, 'contributor');
         $n = 0;
         $entries = BibliographyEntry::whereIn('bibliography_id', Bibliography::where('project_id', $project->id)->select('id'))->whereNotNull('doi')->get();
         foreach ($entries as $entry) {

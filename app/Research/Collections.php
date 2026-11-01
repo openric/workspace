@@ -96,6 +96,7 @@ class Collections
     /** Add records by their persistent IRIs, one a line. @return int how many were added */
     public function import(User $user, ResearchCollection $collection, string $content): int
     {
+        $this->mustOwn($user, $collection);
         $added = 0;
         foreach (preg_split('/\R/', $content) as $line) {
             $iri = trim(str_getcsv($line)[0] ?? '');

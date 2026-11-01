@@ -80,6 +80,8 @@ class WorkflowController extends Controller
     {
         $user = $request->user();
         $this->own($request, $task);
+        // Who works it, submitted it, may claim it or manages workflows (found by the access matrix, phase 23).
+        abort_unless($this->workflows->mayWork($task, $user) || $this->workflows->eligible($task, $user), 404);
         $task->load('queue', 'workflow', 'step.stepType.labels', 'step.action.labels', 'status.labels', 'priority.labels', 'decision.labels', 'assignedTo', 'submittedBy', 'decisionBy',
             'history.action.labels', 'history.performedBy', 'history.toStatus.labels', 'history.fromStatus.labels');
         $subject = $task->subject();
