@@ -23,7 +23,7 @@ class PreflightTest extends TestCase
         $this->app->useEnvironmentPath(dirname($key));
         $this->app['env'] = 'production';
         config(['app.debug' => false, 'app.url' => 'https://archives.example.org', 'session.secure' => true, 'mail.default' => 'smtp',
-            'logging.default' => 'single', 'logging.channels.single.level' => 'info', 'workspace.audit_signing_key' => $key,
+            'logging.default' => 'stack', 'logging.channels.stack' => ['driver' => 'stack', 'channels' => ['single']], 'logging.channels.single.level' => 'info', 'workspace.audit_signing_key' => $key,
             'workspace.object_store' => sys_get_temp_dir().'/objects', 'workspace.preflight_waive' => '']);
     }
 
@@ -38,6 +38,9 @@ class PreflightTest extends TestCase
         $this->safe();
         config(['app.debug' => true, 'mail.default' => 'log', 'workspace.object_store' => public_path('objects')]);
         $this->artisan('workspace:preflight')->expectsOutputToContain('3 of 10 checks failed: debug, mail, object-store.')->assertFailed();
+        // A stack logs at the levels of the channels it holds.
+        config(['app.debug' => false, 'mail.default' => 'smtp', 'workspace.object_store' => sys_get_temp_dir().'/objects', 'logging.channels.single.level' => 'debug']);
+        $this->artisan('workspace:preflight')->expectsOutputToContain('1 of 10 checks failed: log.')->assertFailed();
     }
 
     public function test_a_waived_check_is_shown_and_does_not_stop_the_release(): void

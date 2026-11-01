@@ -30,7 +30,7 @@ class Preflight extends Command
             'https' => ['APP_URL is https', $https],
             'cookies' => ['session cookies are sent over https only', ! $https || config('session.secure') !== false],
             'mail' => ['mail is sent, not logged or kept in memory', ! in_array(config('mail.default'), ['log', 'array'], true)],
-            'log' => ['the log level is not debug', config('logging.channels.'.config('logging.default').'.level', 'debug') !== 'debug'],
+            'log' => ['the log level is not debug', ! in_array('debug', $this->levels((string) config('logging.default')), true)],
             'env-file' => ['.env is not readable by everyone', ! is_file($env) || (fileperms($env) & 0o004) === 0],
             'signing-key' => ['the audit signing key exists and is not readable by everyone', is_file($key) && (fileperms($key) & 0o004) === 0],
             'object-store' => ['the object store is outside the public directory', ! str_starts_with($store.'/', public_path().'/')],
@@ -52,5 +52,16 @@ class Preflight extends Command
         $this->info('The configuration passed'.($waived ? ', with '.implode(', ', $waived).' waived' : '').'.');
 
         return self::SUCCESS;
+    }
+
+    /** The levels a log channel writes at: a stack writes at those of the channels it holds. */
+    private function levels(string $channel): array
+    {
+        $config = config("logging.channels.$channel", []);
+        if (($config['driver'] ?? null) === 'stack') {
+            return array_merge(...array_map(fn ($c) => $this->levels((string) $c), (array) ($config['channels'] ?? [])) ?: [[]]);
+        }
+
+        return [$config['level'] ?? 'debug'];
     }
 }
