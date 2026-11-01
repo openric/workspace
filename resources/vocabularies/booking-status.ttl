@@ -1,0 +1,51 @@
+# OpenRiC Workspace - OpenRiC Workspace Booking Statuses.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Where a reading room booking stands (Heratio's research_booking.status).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/booking-status/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Booking Statuses"@en ;
+    dcterms:description "Where a reading room booking stands (Heratio's research_booking.status)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:pending, v:confirmed, v:cancelled, v:completed, v:no-show .
+
+v:pending a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Pending"@en, "Hangende"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's reading room, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "Asked for, not yet confirmed."@en .
+
+v:confirmed a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Confirmed"@en, "Bevestig"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's reading room, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "Confirmed by staff; checked in when the researcher arrives."@en .
+
+v:cancelled a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Cancelled"@en, "Gekanselleer"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's reading room, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "Cancelled, with the reason."@en .
+
+v:completed a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Completed"@en, "Voltooi"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's reading room, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "The researcher has checked out."@en .
+
+v:no-show a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "No show"@en, "Nie opgedaag nie"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's reading room, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "The researcher did not come."@en .

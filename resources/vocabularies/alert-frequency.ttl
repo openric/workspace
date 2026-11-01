@@ -1,0 +1,37 @@
+# OpenRiC Workspace - OpenRiC Workspace Alert Frequencies.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# How often a saved search is run for new results (Heratio's research_saved_search.alert_frequency).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/alert-frequency/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Alert Frequencies"@en ;
+    dcterms:description "How often a saved search is run for new results (Heratio's research_saved_search.alert_frequency)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:daily, v:weekly, v:monthly .
+
+v:daily a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Daily"@en, "Daagliks"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "Every day."@en .
+
+v:weekly a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Weekly"@en, "Weekliks"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "Every week."@en .
+
+v:monthly a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Monthly"@en, "Maandeliks"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "Every month."@en .

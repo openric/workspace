@@ -1,0 +1,51 @@
+# OpenRiC Workspace - OpenRiC Workspace Researcher Submission Review Actions.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What a step of a submission's review did (Heratio's researcher_submission_review.action).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/submission-review-action/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Researcher Submission Review Actions"@en ;
+    dcterms:description "What a step of a submission's review did (Heratio's researcher_submission_review.action)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:comment, v:return, v:approve, v:reject, v:publish .
+
+v:comment a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Comment"@en, "Kommentaar"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-researcher-manage keeps it."@en ;
+    skos:definition "A remark, or the submission sent."@en .
+
+v:return a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Returned"@en, "Teruggestuur"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-researcher-manage keeps it."@en ;
+    skos:definition "Sent back to the researcher to change."@en .
+
+v:approve a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Approved"@en, "Goedgekeur"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-researcher-manage keeps it."@en ;
+    skos:definition "Approved, to be published."@en .
+
+v:reject a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Rejected"@en, "Afgekeur"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-researcher-manage keeps it."@en ;
+    skos:definition "Not to be published."@en .
+
+v:publish a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Published"@en, "Gepubliseer"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-researcher-manage keeps it."@en ;
+    skos:definition "Its descriptions put in the catalogue."@en .

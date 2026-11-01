@@ -1,0 +1,44 @@
+# OpenRiC Workspace - OpenRiC Workspace Material Locations.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Where a requested item is now (Heratio's research_material_request.location_current).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/material-location/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Material Locations"@en ;
+    dcterms:description "Where a requested item is now (Heratio's research_material_request.location_current)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:storage, v:transit, v:reading-room, v:returned .
+
+v:storage a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "In storage"@en, "In bewaring"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's reading room, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "In its place in storage."@en .
+
+v:transit a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "In transit"@en, "Onderweg"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's reading room, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "On its way to or from the reading room."@en .
+
+v:reading-room a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "In the reading room"@en, "In die leeskamer"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's reading room, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "In the reading room."@en .
+
+v:returned a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Returned"@en, "Terugbesorg"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's reading room, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "Back in storage."@en .

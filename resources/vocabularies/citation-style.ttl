@@ -1,0 +1,58 @@
+# OpenRiC Workspace - OpenRiC Workspace Citation Styles.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# How a bibliography is written out (Heratio's citation styles and its CitationService).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/citation-style/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Citation Styles"@en ;
+    dcterms:description "How a bibliography is written out (Heratio's citation styles and its CitationService)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:chicago, v:apa, v:mla, v:harvard, v:turabian, v:isadg .
+
+v:chicago a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Chicago (17th edition)"@en, "Chicago (17de uitgawe)"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "Chicago Manual of Style, notes and bibliography."@en .
+
+v:apa a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "APA (7th edition)"@en, "APA (7de uitgawe)"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "American Psychological Association."@en .
+
+v:mla a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "MLA (9th edition)"@en, "MLA (9de uitgawe)"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "Modern Language Association."@en .
+
+v:harvard a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Harvard"@en, "Harvard"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "Harvard referencing."@en .
+
+v:turabian a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Turabian"@en, "Turabian"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "Turabian, notes and bibliography."@en .
+
+v:isadg a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "ISAD(G) reference"@en, "ISAD(G)-verwysing"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "Repository, reference code, title, dates and extent, as ISAD(G) has them."@en .

@@ -1,0 +1,51 @@
+# OpenRiC Workspace - OpenRiC Workspace Equipment Conditions.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# The state of a piece of equipment (Heratio's research_equipment.condition_status).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/equipment-condition/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Equipment Conditions"@en ;
+    dcterms:description "The state of a piece of equipment (Heratio's research_equipment.condition_status)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:excellent, v:good, v:fair, v:needs-repair, v:out-of-service .
+
+v:excellent a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Excellent"@en, "Uitstekend"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's reading room, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "As new."@en .
+
+v:good a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Good"@en, "Goed"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's reading room, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "Works well."@en .
+
+v:fair a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Fair"@en, "Redelik"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's reading room, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "Works, with wear."@en .
+
+v:needs-repair a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Needs repair"@en, "Moet herstel word"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's reading room, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "Works badly; to be repaired."@en .
+
+v:out-of-service a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Out of service"@en, "Buite werking"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's reading room, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "Cannot be used."@en .

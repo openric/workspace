@@ -1,0 +1,58 @@
+# OpenRiC Workspace - OpenRiC Workspace Annotation Selector Types.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# How an annotation points into its record, as the W3C Web Annotation model has it (Heratio's research_annotation_target.selector_type).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/selector-type/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Annotation Selector Types"@en ;
+    dcterms:description "How an annotation points into its record, as the W3C Web Annotation model has it (Heratio's research_annotation_target.selector_type)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:text-quote, v:fragment, v:svg, v:point, v:range, v:time .
+
+v:text-quote a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Text quote"@en, "Teksaanhaling"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "A TextQuoteSelector: the words quoted, with what comes before and after."@en .
+
+v:fragment a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Fragment"@en, "Fragment"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "A FragmentSelector: a region of an image, as x, y, width and height."@en .
+
+v:svg a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "SVG shape"@en, "SVG-vorm"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "An SvgSelector: a shape drawn on an image."@en .
+
+v:point a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Point"@en, "Punt"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "A PointSelector: one point on an image."@en .
+
+v:range a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Range"@en, "Reeks"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "A RangeSelector: from one place in the text to another."@en .
+
+v:time a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Time"@en, "Tyd"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "A FragmentSelector of time: from one moment of a recording to another."@en .

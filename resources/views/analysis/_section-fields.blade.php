@@ -1,0 +1,7 @@
+{{-- OpenRiC Workspace - a report section's fields (roadmap phase 19i). Needs $s (or null), $x, $sectionTypes, $bibliographies, $collections. Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems. SPDX-License-Identifier: AGPL-3.0-or-later --}}
+@php($lang = \App\Support\Vocab::languages())
+<label for="{{ $x }}-type">{{ __('Kind') }}</label> <select id="{{ $x }}-type" name="section_type">@foreach($sectionTypes as $c)<option value="{{ $c->notation }}" @selected(($s?->sectionType->notation ?? 'text') === $c->notation)>{{ $c->label($lang) }}</option>@endforeach</select>
+<label for="{{ $x }}-title">{{ __('Title') }}</label> <input id="{{ $x }}-title" name="title" size="40" value="{{ $s?->title }}"><br>
+<label for="{{ $x }}-content">{{ __('Text') }}</label><br><textarea id="{{ $x }}-content" name="content" rows="5" cols="80">{{ $s?->content }}</textarea><br>
+<label for="{{ $x }}-bib">{{ __('Bibliography') }}</label> <select id="{{ $x }}-bib" name="bibliography_id"><option value="">{{ __('None') }}</option>@foreach($bibliographies as $b)<option value="{{ $b->id }}" @selected($s?->bibliography_id === $b->id)>{{ $b->name }}</option>@endforeach</select>
+<label for="{{ $x }}-coll">{{ __('Collection') }}</label> <select id="{{ $x }}-coll" name="collection_id"><option value="">{{ __('None') }}</option>@foreach($collections as $c)<option value="{{ $c->id }}" @selected($s?->collection_id === $c->id)>{{ $c->name }}</option>@endforeach</select><br>

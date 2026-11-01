@@ -1,0 +1,37 @@
+# OpenRiC Workspace - OpenRiC Workspace Annotation Visibilities.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Who may read a researcher's annotation (Heratio's research_annotation.visibility).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/annotation-visibility/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Annotation Visibilities"@en ;
+    dcterms:description "Who may read a researcher's annotation (Heratio's research_annotation.visibility)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:private, v:shared, v:public .
+
+v:private a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Private"@en, "Privaat"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "Only the researcher who wrote it."@en .
+
+v:shared a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Shared"@en, "Gedeel"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "The researcher and the members of the research workspaces they belong to."@en .
+
+v:public a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Public"@en, "Openbaar"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "Every signed-in account of the institution."@en .

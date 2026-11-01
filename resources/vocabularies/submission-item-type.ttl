@@ -1,0 +1,44 @@
+# OpenRiC Workspace - OpenRiC Workspace Researcher Submission Item Types.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What an item of a researcher's submission is (Heratio's researcher_submission_item.item_type).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/submission-item-type/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Researcher Submission Item Types"@en ;
+    dcterms:description "What an item of a researcher's submission is (Heratio's researcher_submission_item.item_type)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:description, v:note, v:repository, v:creator .
+
+v:description a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Description"@en, "Beskrywing"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-researcher-manage keeps it."@en ;
+    skos:definition "A new description of records, made when the submission is published."@en .
+
+v:note a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Note"@en, "Nota"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-researcher-manage keeps it."@en ;
+    skos:definition "A note on a record already in the catalogue."@en .
+
+v:repository a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Repository"@en, "Bewaarplek"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-researcher-manage keeps it."@en ;
+    skos:definition "A new repository."@en .
+
+v:creator a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Creator"@en, "Skepper"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-researcher-manage keeps it."@en ;
+    skos:definition "A new authority record of a creator."@en .

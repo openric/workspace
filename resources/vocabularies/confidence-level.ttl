@@ -1,0 +1,44 @@
+# OpenRiC Workspace - OpenRiC Workspace Confidence Levels.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# How sure the researcher is of a claim (Heratio's research_claim_meta.confidence_level).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/confidence-level/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Confidence Levels"@en ;
+    dcterms:description "How sure the researcher is of a claim (Heratio's research_claim_meta.confidence_level)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:high, v:medium, v:low, v:tentative .
+
+v:high a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "High"@en, "Hoog"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "0.70 to 1."@en .
+
+v:medium a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Medium"@en, "Middelmatig"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "0.40 to 0.79."@en .
+
+v:low a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Low"@en, "Laag"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "0.10 to 0.49."@en .
+
+v:tentative a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Tentative"@en, "Voorlopig"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "Up to 0.29."@en .

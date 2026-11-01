@@ -14,7 +14,7 @@ v: a skos:ConceptScheme ;
     dcterms:title "OpenRiC Workspace Permissions"@en ;
     dcterms:description "Actions a role or an account may be granted or denied, on a kind of record, at the scope of everything, one repository or one record. Anything not granted is denied, and a denial wins over a grant at the same scope (ADR 0005)."@en ;
     dcterms:issued "2026-10-19"^^xsd:date ;
-    skos:hasTopConcept v:manage-institution, v:manage-accounts, v:view-audit-log, v:describe, v:review, v:publish, v:manage-roles, v:manage-workflows, v:manage-privacy, v:read, v:create, v:update, v:delete, v:view-draft, v:read-master, v:read-reference, v:read-thumbnail, v:translate, v:review-proposals, v:review-access-requests .
+    skos:hasTopConcept v:manage-institution, v:manage-accounts, v:view-audit-log, v:describe, v:review, v:publish, v:manage-roles, v:manage-workflows, v:manage-privacy, v:manage-shop, v:manage-reading-room, v:review-submissions, v:read, v:create, v:update, v:delete, v:view-draft, v:read-master, v:read-reference, v:read-thumbnail, v:translate, v:review-proposals, v:review-access-requests .
 
 v:manage-institution a skos:Concept ;
     skos:inScheme v: ;
@@ -76,6 +76,27 @@ v:manage-privacy a skos:Concept ;
     skos:prefLabel "Manage privacy"@en, "Bestuur privaatheid"@af ;
     skos:scopeNote "Administrative; Heratio's privacy administration (ahg-privacy): the Information Officer's work."@en ;
     skos:definition "Keep the privacy registers: Information Officers, processing, impact assessments, consent, requests, complaints and security compromises."@en .
+
+v:manage-shop a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Manage shop"@en, "Bestuur winkel"@af ;
+    skos:scopeNote "Administrative; Heratio's e-commerce administration (ahg-cart, admin only)."@en ;
+    skos:definition "Set up the shop, its products and prices and PayFast, and handle its orders."@en .
+
+v:manage-reading-room a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Manage the reading room"@en, "Bestuur die leeskamer"@af ;
+    skos:scopeNote "Administrative; Heratio's research administration (ahg-research, research staff)."@en ;
+    skos:definition "Approve researchers, run the reading rooms, their seats, bookings, walk-ins, equipment, retrieval and custody of what is asked for."@en .
+
+v:review-submissions a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Review researcher submissions"@en, "Hersien navorserinsendings"@af ;
+    skos:scopeNote "Administrative; Heratio's researcher submissions (ahg-researcher-manage)."@en ;
+    skos:definition "Review what researchers submit: comment, return, approve or reject it, and publish what is approved into the catalogue."@en .
 
 v:read a skos:Concept ;
     skos:inScheme v: ;

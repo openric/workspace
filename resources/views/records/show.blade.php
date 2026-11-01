@@ -35,6 +35,8 @@
     @endif
     <h1>{{ $record->described('title', ['en']) }}</h1>
     @include('clipboard._button', ['type' => 'records', 'id' => $record->id])
+    @include('favourites._button', ['entity' => $record])
+    <a href="{{ route('cite', $record->id) }}" class="no-print" style="font-size: .85rem">{{ __('Cite') }}</a>
     @if(session('status'))<p role="status">{{ session('status') }}</p>@endif
     @if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif
     <p>{{ $record->level->label(\App\Support\Vocab::languages()) }} @include('description._ric', ['term' => \App\Relations\EntityKinds::ricClass($record)])@if($record->referenceCode()), {{ $record->referenceCode() }}@endif{{ __('. Held by') }} <a href="{{ route('repositories.show', $record->repository) }}">{{ $record->repository->described('authorised-name', ['en']) }}</a>.<br>
@@ -75,6 +77,7 @@
     @include('description._rights', ['subject' => $record, 'kind' => 'records', 'canUpdate' => $canUpdate])
     @include('records._embargoes', ['record' => $record, 'canUpdate' => $canUpdate])
     @if(auth()->user()->hasPermission(\App\Support\Vocab::permission('manage-privacy')))@include('records._privacy', ['record' => $record])@endif
+    @if(app(\App\Research\ShareLinks::class)->mayIssue(auth()->user(), $record))@include('records._share-links', ['record' => $record])@endif
     @if(auth()->user()->may('delete', 'description', $record))@include('records._retention', ['record' => $record])@endif
     @include('description._community-labels', ['subject' => $record, 'kind' => 'records', 'canUpdate' => $canUpdate])
     @include('description._relations', ['subject' => $record, 'kind' => 'records', 'relations' => $relations, 'canUpdate' => $canUpdate])

@@ -17,6 +17,7 @@ use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\AgentController;
 use App\Http\Controllers\AgreementController;
 use App\Http\Controllers\AltTextController;
+use App\Http\Controllers\AnalysisController;
 use App\Http\Controllers\ApiKeyController;
 use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\ClipboardController;
@@ -29,6 +30,8 @@ use App\Http\Controllers\EmailBounceController;
 use App\Http\Controllers\EmailController;
 use App\Http\Controllers\EmbargoController;
 use App\Http\Controllers\ExportController;
+use App\Http\Controllers\FavouritesController;
+use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\IdentifierController;
 use App\Http\Controllers\IiifAuthController;
@@ -40,21 +43,29 @@ use App\Http\Controllers\ImportController;
 use App\Http\Controllers\InstantiationController;
 use App\Http\Controllers\IriController;
 use App\Http\Controllers\JobsController;
+use App\Http\Controllers\JournalController;
 use App\Http\Controllers\LocalVocabularyController;
 use App\Http\Controllers\NameController;
 use App\Http\Controllers\PasswordController;
 use App\Http\Controllers\PlaceController;
 use App\Http\Controllers\PrivacyController;
 use App\Http\Controllers\PrivacyScreeningController;
+use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProposalReviewController;
 use App\Http\Controllers\ProvenanceController;
 use App\Http\Controllers\PublicationController;
+use App\Http\Controllers\ReadingRoomController;
+use App\Http\Controllers\ReasoningController;
 use App\Http\Controllers\RecordController;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\RelationController;
 use App\Http\Controllers\ReportBuilderController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RepositoryController;
+use App\Http\Controllers\ResearcherController;
+use App\Http\Controllers\ResearchNotesController;
+use App\Http\Controllers\ResearchToolsController;
+use App\Http\Controllers\ResearchWorkspaceController;
 use App\Http\Controllers\RetentionController;
 use App\Http\Controllers\RightsAdminController;
 use App\Http\Controllers\RightsController;
@@ -62,7 +73,11 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\ShareLinkController;
+use App\Http\Controllers\ShopController;
 use App\Http\Controllers\StorageController;
+use App\Http\Controllers\StudioController;
+use App\Http\Controllers\SubmissionController;
 use App\Http\Controllers\VocabularyController;
 use App\Http\Controllers\WatermarkController;
 use App\Http\Controllers\WorkflowController;
@@ -72,6 +87,7 @@ use App\Http\Middleware\SetLocale;
 use App\Privacy\Registers;
 use App\Relations\EntityKinds;
 use App\Reports\ReportService;
+use App\Research\ProjectExport;
 use App\Support\Vocab;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Http\Request;
@@ -171,6 +187,35 @@ Route::get('/shared/reports/{token}', [ReportBuilderController::class, 'shared']
 // The mail provider's bounce and complaint webhook (roadmap phase 7; Heratio's): public, HMAC-signed, so no session or CSRF token.
 Route::post('/webhooks/email/bounce', [EmailBounceController::class, 'receive'])->withoutMiddleware(PreventRequestForgery::class)
     ->middleware('throttle:120,1')->name('email.bounce');
+
+// The cart (roadmap phase 19a, ADR 0017): for anyone; a visitor's is kept by session. PayFast's notification comes from
+// PayFast, so it carries no CSRF token (bootstrap/app.php); it is trusted only once verified (App\Research\Shop).
+Route::middleware('throttle:120,1')->prefix('cart')->name('shop.cart')->whereUuid(['record', 'item'])->group(function () {
+    Route::get('/', [ShopController::class, 'cart']);
+    Route::post('/add/{record}', [ShopController::class, 'add'])->name('.add');
+    Route::post('/items/{item}', [ShopController::class, 'change'])->name('.change');
+    Route::post('/items/{item}/remove', [ShopController::class, 'remove'])->name('.remove');
+    Route::post('/clear', [ShopController::class, 'clear'])->name('.clear');
+});
+Route::post('/shop/payfast/notify', [ShopController::class, 'notify'])->middleware('throttle:60,1')->name('shop.payfast.notify');
+// Citing a record, and a bibliography opened by its link (roadmap phase 19c, ADR 0017): for anyone.
+Route::get('/cite/{record}', [ResearchToolsController::class, 'cite'])->middleware('throttle:120,1')->whereUuid('record')->name('cite');
+Route::get('/bibliographies/shared/{token}', [ResearchToolsController::class, 'sharedBibliography'])->middleware('throttle:60,1')->where('token', '[A-Za-z0-9]{48}')->name('research.bibliographies.shared');
+// Feedback on the catalogue or a record (roadmap phase 19a, ADR 0017): for anyone, rate limited.
+Route::get('/feedback', [FeedbackController::class, 'create'])->name('feedback.create');
+Route::post('/feedback', [FeedbackController::class, 'store'])->middleware('throttle:5,1')->name('feedback.store');
+Route::get('/feedback/thanks', [FeedbackController::class, 'thanks'])->name('feedback.thanks');
+// A record opened by a share link (roadmap phase 19a, ADR 0017): for anyone holding it.
+Route::middleware('throttle:60,1')->prefix('shared')->name('share-links.')->where(['token' => '[A-Za-z0-9]{48}'])->group(function () {
+    Route::get('/{token}', [ShareLinkController::class, 'open'])->name('open');
+    Route::get('/{token}/files/{file}', [ShareLinkController::class, 'file'])->whereUuid('file')->name('file');
+});
+// A folder of favourites opened by its link (roadmap phase 19a): for anyone holding it.
+Route::get('/favourites/shared/{token}', [FavouritesController::class, 'shared'])->middleware('throttle:60,1')->where('token', '[A-Za-z0-9]{48}')->name('favourites.shared');
+// A researcher's collection opened by its link (roadmap phase 19d): for anyone holding it.
+Route::get('/collections/shared/{token}', [ResearchNotesController::class, 'sharedCollection'])->middleware('throttle:60,1')->where('token', '[A-Za-z0-9]{48}')->name('research.collections.shared');
+// A research project's summary opened by its link (roadmap phase 19f): for anyone holding it.
+Route::get('/projects/shared/{token}', [ProjectController::class, 'shared'])->middleware('throttle:60,1')->where('token', '[A-Za-z0-9]{48}')->name('research.projects.shared');
 
 Route::middleware('guest')->group(function () {
     Route::get('/sign-in', [SessionController::class, 'create'])->name('sign-in');
@@ -460,6 +505,277 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::get('/access-requests/new', [AccessRequestController::class, 'newRequest'])->name('access-requests.new');
     Route::post('/access-requests', [AccessRequestController::class, 'storeGeneral'])->name('access-requests.store-general');
     Route::get('/access-requests/mine', [AccessRequestController::class, 'mine'])->name('access-requests.mine');
+    // Checkout, one's orders and downloads; the orders and settings of the shop for who may manage it (phase 19a).
+    Route::get('/cart/checkout', [ShopController::class, 'checkoutForm'])->name('shop.checkout');
+    Route::post('/cart/checkout', [ShopController::class, 'checkout'])->name('shop.checkout.store');
+    Route::prefix('shop')->name('shop.')->whereUuid(['order', 'type', 'file'])->group(function () {
+        Route::get('/my-orders', [ShopController::class, 'myOrders'])->name('orders.mine');
+        Route::get('/orders', [ShopController::class, 'orders'])->name('orders');
+        Route::get('/orders/{order}', [ShopController::class, 'order'])->name('orders.show');
+        Route::post('/orders/{order}/pay', [ShopController::class, 'pay'])->name('orders.pay');
+        Route::post('/orders/{order}/status', [ShopController::class, 'setStatus'])->name('orders.status');
+        Route::get('/download/{token}/{file}', [ShopController::class, 'download'])->where('token', '[0-9a-f]{64}')->name('download');
+        Route::get('/settings', [ShopController::class, 'settings'])->name('settings');
+        Route::post('/settings', [ShopController::class, 'saveSettings'])->name('settings.save');
+        Route::post('/settings/products', [ShopController::class, 'saveProduct'])->name('settings.products.store');
+        Route::post('/settings/products/{type}', [ShopController::class, 'saveProduct'])->name('settings.products.update');
+    });
+    // A researcher's own pages (roadmap phase 19b, ADR 0017): registration, booking the reading room, requests.
+    Route::prefix('research')->name('research.')->whereUuid(['booking', 'material', 'equipment', 'file'])->group(function () {
+        Route::get('/', [ResearcherController::class, 'profile'])->name('profile');
+        Route::post('/register', [ResearcherController::class, 'register'])->name('register');
+        Route::post('/profile', [ResearcherController::class, 'update'])->name('profile.update');
+        Route::post('/renew', [ResearcherController::class, 'renew'])->name('renew');
+        Route::get('/book', [ResearcherController::class, 'bookForm'])->name('book');
+        Route::post('/book', [ResearcherController::class, 'book'])->name('book.store');
+        Route::get('/bookings/{booking}', [ResearcherController::class, 'booking'])->name('bookings.show');
+        Route::post('/bookings/{booking}/cancel', [ResearcherController::class, 'cancel'])->name('bookings.cancel');
+        Route::post('/bookings/{booking}/records', [ResearcherController::class, 'addRecord'])->name('bookings.records');
+        Route::post('/requests/{material}/messages', [ResearcherController::class, 'write'])->name('requests.write');
+        Route::post('/equipment/{equipment}/book', [ResearcherController::class, 'bookEquipment'])->name('equipment.book');
+        Route::get('/files/{file}', [ResearcherController::class, 'file'])->name('files.show');
+    });
+    // Reproductions, bibliographies and saved searches (roadmap phase 19c, ADR 0017).
+    Route::prefix('research')->name('research.')->whereUuid(['reproduction', 'item', 'bibliography', 'entry', 'search'])->group(function () {
+        Route::get('/reproductions', [ResearchToolsController::class, 'reproductions'])->name('reproductions.index');
+        Route::post('/reproductions', [ResearchToolsController::class, 'createReproduction'])->name('reproductions.store');
+        Route::get('/reproductions/{reproduction}', [ResearchToolsController::class, 'reproduction'])->name('reproductions.show');
+        Route::post('/reproductions/{reproduction}/{step}', [ResearchToolsController::class, 'reproductionStep'])->whereIn('step', ['item', 'submit', 'status', 'payment', 'handle'])->name('reproductions.step');
+        Route::post('/reproduction-items/{item}/{step}', [ResearchToolsController::class, 'reproductionItem'])->whereIn('step', ['remove', 'finish'])->name('reproductions.item');
+        Route::get('/reproduction-files/{token}', [ResearchToolsController::class, 'reproductionDownload'])->where('token', '[0-9a-f]{64}')->name('reproductions.download');
+        Route::get('/bibliographies', [ResearchToolsController::class, 'bibliographies'])->name('bibliographies.index');
+        Route::post('/bibliographies', [ResearchToolsController::class, 'saveBibliography'])->name('bibliographies.store');
+        Route::get('/bibliographies/{bibliography}', [ResearchToolsController::class, 'bibliography'])->name('bibliographies.show');
+        Route::post('/bibliographies/{bibliography}', [ResearchToolsController::class, 'saveBibliography'])->name('bibliographies.update');
+        Route::post('/bibliographies/{bibliography}/{step}', [ResearchToolsController::class, 'bibliographyStep'])->whereIn('step', ['entry', 'record', 'import', 'share', 'delete'])->name('bibliographies.step');
+        Route::get('/bibliographies/{bibliography}/export/{format}', [ResearchToolsController::class, 'exportBibliography'])->name('bibliographies.export');
+        Route::post('/bibliography-entries/{entry}/{step}', [ResearchToolsController::class, 'entryStep'])->whereIn('step', ['update', 'remove'])->name('bibliographies.entry');
+        Route::post('/favourites-to-bibliography', [ResearchToolsController::class, 'favouritesToBibliography'])->name('bibliographies.from-favourites');
+        Route::get('/searches', [ResearchToolsController::class, 'searches'])->name('searches.index');
+        Route::post('/searches', [ResearchToolsController::class, 'saveSearch'])->name('searches.store');
+        Route::post('/searches/{search}', [ResearchToolsController::class, 'saveSearch'])->name('searches.update');
+        Route::match(['get', 'post'], '/searches/{search}/{step}', [ResearchToolsController::class, 'searchStep'])->whereIn('step', ['run', 'snapshot', 'diff', 'delete'])->name('searches.step');
+    });
+    // A researcher's own working pages (roadmap phase 19d, ADR 0017): collections, annotations, notebooks, the diary, research workspaces.
+    Route::prefix('research')->name('research.')->whereUuid(['collection', 'item', 'annotation', 'notebook', 'entry', 'workspace', 'member', 'resource', 'file', 'id'])->group(function () {
+        Route::get('/collections', [ResearchNotesController::class, 'collections'])->name('collections.index');
+        Route::post('/collections', [ResearchNotesController::class, 'saveCollection'])->name('collections.store');
+        Route::get('/collections/{collection}', [ResearchNotesController::class, 'collection'])->name('collections.show');
+        Route::post('/collections/{collection}', [ResearchNotesController::class, 'saveCollection'])->name('collections.update');
+        Route::get('/collections/{collection}/finding-aid', [ResearchNotesController::class, 'findingAid'])->name('collections.finding-aid');
+        Route::post('/collections/{collection}/{step}', [ResearchNotesController::class, 'collectionStep'])->whereIn('step', ['link', 'import', 'share', 'delete'])->name('collections.step');
+        Route::post('/collection-items/{item}/{step}', [ResearchNotesController::class, 'collectionItem'])->whereIn('step', ['update', 'remove'])->name('collections.item');
+        Route::post('/add-to-collection/{kind}/{id}', [ResearchNotesController::class, 'addToCollection'])->name('collections.add');
+        Route::post('/favourites-to-collection', [ResearchNotesController::class, 'favouritesToCollection'])->name('collections.from-favourites');
+        Route::get('/annotations', [ResearchNotesController::class, 'annotations'])->name('annotations.index');
+        Route::post('/annotations/{annotation}/delete', [ResearchNotesController::class, 'deleteAnnotation'])->name('annotations.delete');
+        Route::get('/annotate/{kind}/{id}', [ResearchNotesController::class, 'studio'])->name('studio');
+        Route::post('/annotate/{kind}/{id}', [ResearchNotesController::class, 'saveAnnotation'])->name('studio.save');
+        Route::get('/annotate/{kind}/{id}/annotations.json', [ResearchNotesController::class, 'annotationPage'])->name('studio.page');
+        Route::get('/notebooks', [ResearchNotesController::class, 'notebooks'])->name('notebooks.index');
+        Route::post('/notebooks', [ResearchNotesController::class, 'saveNotebook'])->name('notebooks.store');
+        Route::get('/notebooks/{notebook}', [ResearchNotesController::class, 'notebook'])->name('notebooks.show');
+        Route::post('/notebooks/{notebook}', [ResearchNotesController::class, 'saveNotebook'])->name('notebooks.update');
+        Route::post('/notebooks/{notebook}/{step}', [ResearchNotesController::class, 'notebookStep'])->whereIn('step', ['item', 'delete'])->name('notebooks.step');
+        Route::post('/notebook-items/{item}/{step}', [ResearchNotesController::class, 'notebookItem'])->whereIn('step', ['update', 'remove'])->name('notebooks.item');
+        Route::get('/diary', [ResearchNotesController::class, 'diary'])->name('diary.index');
+        Route::post('/diary', [ResearchNotesController::class, 'saveDiaryEntry'])->name('diary.store');
+        Route::post('/diary/{entry}', [ResearchNotesController::class, 'saveDiaryEntry'])->name('diary.update');
+        Route::post('/diary/{entry}/delete', [ResearchNotesController::class, 'deleteDiaryEntry'])->name('diary.delete');
+        Route::get('/workspaces', [ResearchWorkspaceController::class, 'index'])->name('workspaces.index');
+        Route::post('/workspaces', [ResearchWorkspaceController::class, 'store'])->name('workspaces.store');
+        Route::get('/workspaces/{workspace}', [ResearchWorkspaceController::class, 'show'])->name('workspaces.show');
+        Route::post('/workspaces/{workspace}/{step}', [ResearchWorkspaceController::class, 'step'])->whereIn('step', ['update', 'invite', 'resource', 'file', 'delete'])->name('workspaces.step');
+        Route::post('/workspace-members/{member}/{step}', [ResearchWorkspaceController::class, 'member'])->whereIn('step', ['accept', 'decline', 'remove', 'role'])->name('workspaces.member');
+        Route::get('/workspace-resources/{resource}', [ResearchWorkspaceController::class, 'resource'])->name('workspaces.resource');
+        Route::post('/workspace-resources/{resource}/remove', [ResearchWorkspaceController::class, 'removeResource'])->name('workspaces.resource.remove');
+        Route::get('/workspace-files/{file}', [ResearchWorkspaceController::class, 'file'])->name('workspaces.file');
+        Route::post('/workspace-files/{file}/remove', [ResearchWorkspaceController::class, 'removeFile'])->name('workspaces.file.remove');
+    });
+    // Researcher submissions and their review (roadmap phase 19e, ADR 0017).
+    Route::prefix('research/submissions')->name('research.submissions.')->whereUuid(['submission', 'item', 'file'])->group(function () {
+        Route::get('/', [SubmissionController::class, 'index'])->name('index');
+        Route::post('/', [SubmissionController::class, 'store'])->name('store');
+        Route::post('/from-collection', [SubmissionController::class, 'fromCollection'])->name('from-collection');
+        Route::post('/import', [SubmissionController::class, 'import'])->name('import');
+        Route::get('/review', [SubmissionController::class, 'pending'])->name('pending');
+        Route::get('/{submission}', [SubmissionController::class, 'show'])->name('show');
+        Route::post('/{submission}', [SubmissionController::class, 'update'])->name('update');
+        Route::post('/{submission}/items', [SubmissionController::class, 'saveItem'])->name('items.store');
+        Route::post('/{submission}/items/{item}', [SubmissionController::class, 'saveItem'])->name('items.update');
+        Route::post('/{submission}/review/{action}', [SubmissionController::class, 'review'])->whereIn('action', ['take', 'comment', 'return', 'approve', 'reject'])->name('review');
+        Route::post('/{submission}/publish', [SubmissionController::class, 'publish'])->name('publish');
+        Route::post('/{submission}/{step}', [SubmissionController::class, 'step'])->whereIn('step', ['submit', 'delete'])->name('step');
+        Route::post('/items/{item}/{step}', [SubmissionController::class, 'itemStep'])->whereIn('step', ['remove', 'file'])->name('item');
+        Route::get('/files/{file}', [SubmissionController::class, 'file'])->name('files.show');
+        Route::post('/files/{file}/remove', [SubmissionController::class, 'removeFile'])->name('files.remove');
+    });
+    // Research projects and working together on them (roadmap phase 19f, ADR 0017).
+    Route::prefix('research')->name('research.')->whereUuid(['project', 'member', 'resource', 'milestone', 'output', 'item', 'notebook', 'discussion', 'comment', 'id'])->group(function () {
+        Route::get('/projects', [ProjectController::class, 'index'])->name('projects.index');
+        Route::post('/projects', [ProjectController::class, 'store'])->name('projects.store');
+        Route::get('/projects/{project}', [ProjectController::class, 'show'])->name('projects.show');
+        Route::post('/projects/{project}/milestones/{milestone?}', [ProjectController::class, 'milestone'])->name('projects.milestones');
+        Route::post('/projects/{project}/team/{member?}', [ProjectController::class, 'team'])->name('projects.team');
+        Route::post('/projects/{project}/outputs/{output?}', [ProjectController::class, 'output'])->name('projects.outputs');
+        Route::get('/projects/{project}/export/{format}', [ProjectController::class, 'export'])->whereIn('format', array_keys(ProjectExport::FORMATS))->name('projects.export');
+        Route::post('/projects/{project}/evidence-comments', [ProjectController::class, 'evidenceComment'])->name('projects.evidence-comments');
+        Route::get('/projects/{project}/poll', [ProjectController::class, 'poll'])->name('projects.poll');
+        Route::post('/projects/{project}/{step}', [ProjectController::class, 'step'])->whereIn('step', ['update', 'invite', 'resource', 'clip', 'share', 'delete'])->name('projects.step');
+        Route::post('/project-members/{member}/{step}', [ProjectController::class, 'member'])->whereIn('step', ['accept', 'decline', 'remove', 'role'])->name('projects.member');
+        Route::get('/project-resources/{resource}', [ProjectController::class, 'resource'])->name('projects.resource');
+        Route::post('/project-resources/{resource}/remove', [ProjectController::class, 'removeResource'])->name('projects.resource.remove');
+        Route::post('/project-parts/{kind}/{id}/remove', [ProjectController::class, 'remove'])->whereIn('kind', ['milestones', 'team', 'outputs'])->name('projects.part.remove');
+        Route::post('/project-clipboard/{item}/{step}', [ProjectController::class, 'clipboard'])->whereIn('step', ['pin', 'notes', 'remove'])->name('projects.clipboard');
+        Route::post('/evidence-comments/{comment}/resolve', [ProjectController::class, 'resolveEvidenceComment'])->name('projects.evidence-comments.resolve');
+        Route::post('/assign/{kind}/{id}', [ProjectController::class, 'assign'])->whereIn('kind', ['collection', 'annotation', 'diary', 'bibliography', 'submission', 'workspace-file', 'search', 'booking'])->name('projects.assign');
+        Route::post('/notebooks/{notebook}/promote', [ProjectController::class, 'promote'])->name('notebooks.promote');
+        Route::post('/favourites-to-project', [ProjectController::class, 'favouritesToProject'])->name('projects.from-favourites');
+        Route::post('/discuss/{home}/{id}', [ProjectController::class, 'discuss'])->whereIn('home', ['projects', 'workspaces'])->name('discussions.store');
+        Route::post('/discussions/{discussion}/{step}', [ProjectController::class, 'discussion'])->whereIn('step', ['update', 'pin', 'resolve', 'delete'])->name('discussions.step');
+        Route::post('/comment/{kind}/{id}', [ProjectController::class, 'comment'])->whereIn('kind', ['annotation', 'diary', 'collection', 'report', 'report-section'])->name('comments.store');
+        Route::post('/comments/{comment}/{step}', [ProjectController::class, 'commentStep'])->whereIn('step', ['resolve', 'delete'])->name('comments.step');
+    });
+    // The reasoning of a research project (roadmap phase 19i, ADR 0017): claims, the knowledge graph, hypotheses, contradictions,
+    // the decision log, research memory and analysis results.
+    Route::prefix('research')->name('research.reasoning.')->whereUuid(['project', 'claim', 'evidence', 'hypothesis', 'finding', 'decision', 'item', 'result', 'link', 'code'])->group(function () {
+        Route::get('/projects/{project}/claims', [ReasoningController::class, 'claims'])->name('claims');
+        Route::post('/projects/{project}/claims', [ReasoningController::class, 'saveClaim'])->name('claims.store');
+        Route::post('/projects/{project}/claims/review', [ReasoningController::class, 'review'])->name('claims.review');
+        Route::get('/projects/{project}/claims/{claim}', [ReasoningController::class, 'claim'])->name('claim');
+        Route::post('/projects/{project}/claims/{claim}', [ReasoningController::class, 'saveClaim'])->name('claims.update');
+        Route::post('/projects/{project}/claims/{claim}/{step}', [ReasoningController::class, 'claimStep'])->whereIn('step', ['status', 'evidence', 'delete'])->name('claims.step');
+        Route::post('/claim-evidence/{evidence}/remove', [ReasoningController::class, 'detach'])->name('evidence.remove');
+        Route::get('/projects/{project}/graph', [ReasoningController::class, 'graph'])->name('graph');
+        Route::get('/projects/{project}/hypotheses', [ReasoningController::class, 'hypotheses'])->name('hypotheses');
+        Route::post('/projects/{project}/hypotheses/{hypothesis?}', [ReasoningController::class, 'saveHypothesis'])->name('hypotheses.save');
+        Route::post('/hypotheses/{hypothesis}/{step}', [ReasoningController::class, 'hypothesisStep'])->whereIn('step', ['evidence', 'delete'])->name('hypotheses.step');
+        Route::post('/hypothesis-evidence/{evidence}/remove', [ReasoningController::class, 'detachHypothesis'])->name('hypotheses.evidence.remove');
+        Route::get('/projects/{project}/contradictions', [ReasoningController::class, 'contradictions'])->name('contradictions');
+        Route::post('/projects/{project}/contradictions/scan', [ReasoningController::class, 'scan'])->name('contradictions.scan');
+        Route::post('/contradictions/{finding}/{status}', [ReasoningController::class, 'finding'])->whereIn('status', ['open', 'dismissed', 'resolved'])->name('contradictions.status');
+        Route::get('/projects/{project}/decisions', [ReasoningController::class, 'decisions'])->name('decisions');
+        Route::post('/projects/{project}/decisions/{decision?}', [ReasoningController::class, 'saveDecision'])->name('decisions.save');
+        Route::post('/decisions/{decision}/delete', [ReasoningController::class, 'deleteDecision'])->name('decisions.delete');
+        Route::get('/memory', [ReasoningController::class, 'memory'])->name('memory');
+        Route::post('/memory/{item?}', [ReasoningController::class, 'saveMemory'])->name('memory.save');
+        Route::post('/memory-step/{step}/{item?}', [ReasoningController::class, 'memoryStep'])->whereIn('step', ['delete', 'accept'])->name('memory.step');
+        Route::get('/projects/{project}/analysis', [ReasoningController::class, 'analysis'])->name('analysis');
+        Route::post('/projects/{project}/analysis/{result?}', [ReasoningController::class, 'saveResult'])->name('analysis.save');
+        Route::match(['get', 'post'], '/analysis-results/{result}/{step}', [ReasoningController::class, 'resultStep'])->whereIn('step', ['claim', 'delete', 'artifact'])->name('analysis.step');
+        Route::post('/analysis-claims/{link}/remove', [ReasoningController::class, 'unlink'])->name('analysis.unlink');
+        Route::post('/projects/{project}/codes/{code?}', [ReasoningController::class, 'code'])->name('analysis.code');
+    });
+    // The analysis of research (roadmap phase 19i, ADR 0017): snapshots, timeline, map, field alerts, the RiC bridge, source
+    // assessments, entity resolution, searches across fonds, research reports and the use of the research services.
+    Route::prefix('research')->name('research.')->whereUuid(['project', 'snapshot', 'id', 'resolution', 'report', 'section', 'review', 'record'])->group(function () {
+        Route::get('/projects/{project}/snapshots', [AnalysisController::class, 'snapshots'])->name('analysis.snapshots');
+        Route::post('/projects/{project}/snapshots/{step}/{snapshot?}', [AnalysisController::class, 'snapshotStep'])->whereIn('step', ['take', 'retake', 'freeze', 'archive', 'delete'])->name('analysis.snapshots.step');
+        Route::get('/snapshots/{snapshot}', [AnalysisController::class, 'snapshot'])->name('analysis.snapshot');
+        Route::get('/projects/{project}/timeline', [AnalysisController::class, 'timeline'])->name('analysis.timeline');
+        Route::get('/projects/{project}/map', [AnalysisController::class, 'map'])->name('analysis.map');
+        Route::post('/projects/{project}/plot/{kind}/{id?}', [AnalysisController::class, 'plot'])->whereIn('kind', ['events', 'points', 'from-collection'])->name('analysis.plot');
+        Route::get('/projects/{project}/field-alerts', [AnalysisController::class, 'alerts'])->name('analysis.alerts');
+        Route::post('/projects/{project}/field-alerts/{step}', [AnalysisController::class, 'alertStep'])->whereIn('step', ['scan', 'seed', 'watch', 'unwatch', 'read'])->name('analysis.alerts.step');
+        Route::post('/projects/{project}/describe-in-catalogue', [AnalysisController::class, 'describe'])->name('analysis.describe');
+        Route::get('/assess/{record}', [AnalysisController::class, 'assessment'])->name('assess');
+        Route::post('/assess/{record}', [AnalysisController::class, 'assess'])->name('assess.store');
+        Route::get('/entity-resolution', [AnalysisController::class, 'resolutions'])->name('resolutions');
+        Route::post('/entity-resolution/{step}/{resolution?}', [AnalysisController::class, 'resolution'])->whereIn('step', ['propose', 'accept', 'reject', 'withdraw'])->name('resolutions.step');
+        Route::get('/across-fonds', [AnalysisController::class, 'across'])->name('across');
+        Route::get('/reports', [AnalysisController::class, 'reports'])->name('reports.index');
+        Route::post('/reports', [AnalysisController::class, 'createReport'])->name('reports.store');
+        Route::get('/reports/{report}', [AnalysisController::class, 'report'])->name('reports.show');
+        Route::post('/reports/{report}/{step}', [AnalysisController::class, 'reportStep'])->whereIn('step', ['update', 'section', 'fill', 'review', 'delete'])->name('reports.step');
+        Route::post('/report-sections/{section}/{step}', [AnalysisController::class, 'sectionStep'])->whereIn('step', ['update', 'up', 'down', 'remove'])->name('reports.section');
+        Route::post('/peer-reviews/{review}/{step}', [AnalysisController::class, 'peerReview'])->whereIn('step', ['accept', 'decline', 'complete'])->name('reports.peer-review');
+        Route::get('/analytics', [AnalysisController::class, 'analytics'])->name('analytics');
+    });
+    // The studios of a research project (roadmap phase 19g, ADR 0017), its time machine, and research journals.
+    Route::prefix('research')->name('research.')->whereUuid(['project', 'doc', 'id', 'comment', 'submission', 'protocol', 'argumentStep', 'journal'])->group(function () {
+        Route::get('/projects/{project}/writing', [StudioController::class, 'writing'])->name('studios.writing');
+        Route::post('/projects/{project}/writing/{step}/{id?}', [StudioController::class, 'writingStep'])->whereIn('step', ['doc', 'section', 'version', 'update-section', 'pull', 'remove-section'])->name('studios.writing.step');
+        Route::get('/writing/{doc}', [StudioController::class, 'doc'])->name('studios.doc');
+        Route::get('/projects/{project}/review', [StudioController::class, 'review'])->name('studios.review');
+        Route::post('/projects/{project}/review/{comment?}', [StudioController::class, 'reviewStep'])->name('studios.review.step');
+        Route::get('/projects/{project}/publication', [StudioController::class, 'publication'])->name('studios.publication');
+        Route::post('/projects/{project}/publication/{step}/{submission?}', [StudioController::class, 'publicationStep'])->whereIn('step', ['save', 'move', 'requirement', 'tick', 'unrequire', 'response', 'unrespond', 'delete'])->name('studios.publication.step');
+        Route::get('/projects/{project}/method', [StudioController::class, 'method'])->name('studios.method');
+        Route::post('/projects/{project}/method/{protocol?}', [StudioController::class, 'saveProtocol'])->name('studios.method.save');
+        Route::get('/projects/{project}/question', [StudioController::class, 'question'])->name('studios.question');
+        Route::post('/projects/{project}/question', [StudioController::class, 'saveBrief'])->name('studios.question.save');
+        Route::get('/projects/{project}/argument', [StudioController::class, 'argument'])->name('studios.argument');
+        Route::post('/projects/{project}/argument/{step}/{argumentStep?}', [StudioController::class, 'argumentStep'])->whereIn('step', ['save', 'add', 'update', 'up', 'down', 'remove'])->name('studios.argument.step');
+        Route::get('/projects/{project}/triage', [StudioController::class, 'triage'])->name('studios.triage');
+        Route::post('/projects/{project}/triage', [StudioController::class, 'saveTriage'])->name('studios.triage.save');
+        Route::get('/projects/{project}/time-machine', [StudioController::class, 'timeMachine'])->name('studios.time-machine');
+        Route::get('/journals', [JournalController::class, 'index'])->name('journals.index');
+        Route::post('/journals', [JournalController::class, 'store'])->name('journals.store');
+        Route::get('/journals/directory', [JournalController::class, 'directory'])->name('journals.directory');
+        Route::post('/journals/directory/{journal?}', [JournalController::class, 'saveTarget'])->name('journals.directory.save');
+        Route::get('/journals/{journal}', [JournalController::class, 'show'])->name('journals.show');
+        Route::post('/journals/{journal}/{step}/{id?}', [JournalController::class, 'step'])->whereIn('step', ['update', 'issue', 'article', 'delete'])->name('journals.step');
+        Route::post('/journal-parts/{kind}/{id}/remove', [JournalController::class, 'remove'])->whereIn('kind', ['issues', 'articles'])->name('journals.remove');
+    });
+    // Running the reading room (roadmap phase 19b): for who may manage it.
+    Route::prefix('reading-room')->name('reading-room.')->whereUuid(['researcher', 'booking', 'room', 'visitor', 'material', 'queue', 'seat', 'schedule', 'equipment', 'type'])->group(function () {
+        Route::get('/researchers', [ReadingRoomController::class, 'researchers'])->name('researchers');
+        Route::get('/researchers/{researcher}', [ReadingRoomController::class, 'researcher'])->name('researchers.show');
+        Route::post('/researchers/{researcher}/verify', [ReadingRoomController::class, 'verify'])->name('researchers.verify');
+        Route::post('/researchers/{researcher}/{step}', [ReadingRoomController::class, 'decide'])->whereIn('step', ['approve', 'reject', 'suspend'])->name('researchers.decide');
+        Route::get('/desk', [ReadingRoomController::class, 'desk'])->name('desk');
+        Route::post('/bookings/{booking}/{step}', [ReadingRoomController::class, 'bookingStep'])->whereIn('step', ['confirm', 'check-in', 'check-out', 'no-show', 'seat'])->name('bookings.step');
+        Route::post('/rooms/{room}/walk-ins', [ReadingRoomController::class, 'walkIn'])->name('walk-ins.store');
+        Route::post('/walk-ins/{visitor}/leave', [ReadingRoomController::class, 'walkOut'])->name('walk-ins.leave');
+        Route::post('/requests/{material}/{step}', [ReadingRoomController::class, 'materialStep'])->whereIn('step', ['status', 'approve', 'handle', 'handoff', 'verify-return'])->name('requests.step');
+        Route::get('/queues', [ReadingRoomController::class, 'queues'])->name('queues');
+        Route::post('/queues', [ReadingRoomController::class, 'saveQueue'])->name('queues.store');
+        Route::post('/queues/{queue}', [ReadingRoomController::class, 'saveQueue'])->name('queues.update');
+        Route::get('/slips', [ReadingRoomController::class, 'slips'])->name('slips');
+        Route::get('/rooms', [ReadingRoomController::class, 'rooms'])->name('rooms');
+        Route::get('/rooms/new', [ReadingRoomController::class, 'room'])->name('rooms.create');
+        Route::post('/rooms', [ReadingRoomController::class, 'saveRoom'])->name('rooms.store');
+        Route::get('/rooms/{room}', [ReadingRoomController::class, 'room'])->name('rooms.edit');
+        Route::post('/rooms/{room}', [ReadingRoomController::class, 'saveRoom'])->name('rooms.update');
+        Route::post('/rooms/{room}/seats', [ReadingRoomController::class, 'addSeats'])->name('seats.store');
+        Route::post('/seats/{seat}/toggle', [ReadingRoomController::class, 'toggleSeat'])->name('seats.toggle');
+        Route::post('/rooms/{room}/schedules', [ReadingRoomController::class, 'saveSchedule'])->name('schedules.store');
+        Route::post('/schedules/{schedule}/remove', [ReadingRoomController::class, 'removeSchedule'])->name('schedules.remove');
+        Route::post('/rooms/{room}/equipment', [ReadingRoomController::class, 'saveEquipment'])->name('equipment.store');
+        Route::post('/rooms/{room}/equipment/{equipment}', [ReadingRoomController::class, 'saveEquipment'])->name('equipment.update');
+        Route::post('/equipment/{equipment}/maintenance', [ReadingRoomController::class, 'maintain'])->name('equipment.maintain');
+        Route::post('/equipment-bookings/{booking}/{step}', [ReadingRoomController::class, 'equipmentStep'])->whereIn('step', ['check-out', 'return', 'cancel', 'no-show'])->name('equipment-bookings.step');
+        Route::get('/types', [ReadingRoomController::class, 'types'])->name('types');
+        Route::post('/types', [ReadingRoomController::class, 'saveType'])->name('types.store');
+        Route::post('/types/{type}', [ReadingRoomController::class, 'saveType'])->name('types.update');
+    });
+    // Feedback received (roadmap phase 19a): for staff who may change descriptions.
+    Route::prefix('feedback-received')->name('feedback.')->whereUuid('feedback')->group(function () {
+        Route::get('/', [FeedbackController::class, 'index'])->name('index');
+        Route::get('/{feedback}', [FeedbackController::class, 'show'])->name('show');
+        Route::post('/{feedback}', [FeedbackController::class, 'update'])->name('update');
+        Route::post('/{feedback}/delete', [FeedbackController::class, 'destroy'])->name('destroy');
+    });
+    // Share links (roadmap phase 19a, ADR 0017): issued on a record's page by who may change it.
+    Route::get('/share-links', [ShareLinkController::class, 'index'])->name('share-links.index');
+    Route::post('/share-links/{link}/revoke', [ShareLinkController::class, 'revoke'])->whereUuid('link')->name('share-links.revoke');
+    Route::post('/records/{record}/share-links', [ShareLinkController::class, 'issue'])->whereUuid('record')->name('records.share-links.issue');
+    // Favourites and their folders (roadmap phase 19a, ADR 0017): every signed-in account keeps its own.
+    Route::prefix('favourites')->name('favourites.')->whereUuid(['favourite', 'folder', 'id'])->group(function () {
+        Route::get('/', [FavouritesController::class, 'index'])->name('index');
+        Route::post('/toggle/{kind}/{id}', [FavouritesController::class, 'toggle'])->name('toggle');
+        Route::post('/links', [FavouritesController::class, 'addLink'])->name('links.store');
+        Route::post('/bulk', [FavouritesController::class, 'bulk'])->name('bulk');
+        Route::post('/clear', [FavouritesController::class, 'clear'])->name('clear');
+        Route::post('/import', [FavouritesController::class, 'import'])->name('import');
+        Route::get('/export/{format}', [FavouritesController::class, 'export'])->name('export');
+        Route::post('/{favourite}/notes', [FavouritesController::class, 'notes'])->name('notes');
+        Route::post('/folders', [FavouritesController::class, 'saveFolder'])->name('folders.store');
+        Route::post('/folders/{folder}', [FavouritesController::class, 'saveFolder'])->name('folders.update');
+        Route::post('/folders/{folder}/delete', [FavouritesController::class, 'deleteFolder'])->name('folders.delete');
+        Route::post('/folders/{folder}/share', [FavouritesController::class, 'share'])->name('folders.share');
+        Route::post('/folders/{folder}/unshare', [FavouritesController::class, 'unshare'])->name('folders.unshare');
+    });
     Route::get('/access-requests/{accessRequest}', [AccessRequestController::class, 'show'])->whereUuid('accessRequest')->name('access-requests.show');
     Route::post('/access-requests/{accessRequest}/approve', [AccessRequestController::class, 'approve'])->whereUuid('accessRequest')->name('access-requests.approve');
     Route::post('/access-requests/{accessRequest}/deny', [AccessRequestController::class, 'deny'])->whereUuid('accessRequest')->name('access-requests.deny');

@@ -14,6 +14,7 @@
     <h1 lang="{{ $nameLanguage }}">{{ $name }}</h1>
     @if($entity instanceof \App\Models\Repository && $entity->theme_content)<div class="theme-content">{!! \Illuminate\Support\Str::markdown($entity->theme_content, ['html_input' => 'strip', 'allow_unsafe_links' => false]) !!}</div>@endif
     @if(in_array($kind, ['agent', 'repository'], true))@include('clipboard._button', ['type' => $kind === 'agent' ? 'agents' : 'repositories', 'id' => $entity->getKey()])@endif
+    @include('favourites._button', ['entity' => $entity])
     <p class="meta">{{ ucfirst(__(\App\Relations\EntityKinds::noun($entity))) }} @include('description._ric', ['term' => \App\Relations\EntityKinds::ricClass($entity)])
         @if($entity instanceof \App\Models\Activity && $entity->activityType) · {{ $entity->activityType->anyLabel(\App\Support\Vocab::languages()) }} @include('description._ric', ['term' => 'rico:hasActivityType'])@endif
         @if($entity instanceof \App\Models\Place && $entity->placeType) · {{ $entity->placeType->anyLabel(\App\Support\Vocab::languages()) }}@endif

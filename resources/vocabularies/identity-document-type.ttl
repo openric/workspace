@@ -1,0 +1,51 @@
+# OpenRiC Workspace - OpenRiC Workspace Identity Documents.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# The document a researcher's identity is checked against (Heratio's id_type).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/identity-document-type/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Identity Documents"@en ;
+    dcterms:description "The document a researcher's identity is checked against (Heratio's id_type)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:passport, v:national-id, v:drivers-licence, v:student-card, v:other .
+
+v:passport a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Passport"@en, "Paspoort"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's reading room, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "A passport."@en .
+
+v:national-id a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "National identity document"@en, "Nasionale identiteitsdokument"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's reading room, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "A national identity document or card."@en .
+
+v:drivers-licence a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Driver's licence"@en, "Rybewys"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's reading room, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "A driver's licence."@en .
+
+v:student-card a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Student card"@en, "Studentekaart"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's reading room, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "A student card."@en .
+
+v:other a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Other"@en, "Ander"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's reading room, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "Another document."@en .

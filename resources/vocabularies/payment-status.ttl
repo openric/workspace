@@ -1,0 +1,51 @@
+# OpenRiC Workspace - OpenRiC Workspace Payment Statuses.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Where a payment of an order stands (Heratio's ahg_payment.status).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/payment-status/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Payment Statuses"@en ;
+    dcterms:description "Where a payment of an order stands (Heratio's ahg_payment.status)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:pending, v:processing, v:completed, v:failed, v:refunded .
+
+v:pending a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Pending"@en, "Hangende"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio keeps it."@en ;
+    skos:definition "Started, not yet confirmed."@en .
+
+v:processing a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Processing"@en, "Word verwerk"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio keeps it."@en ;
+    skos:definition "Being processed by the gateway."@en .
+
+v:completed a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Completed"@en, "Voltooi"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio keeps it."@en ;
+    skos:definition "Confirmed by the gateway and checked."@en .
+
+v:failed a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Failed"@en, "Misluk"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio keeps it."@en ;
+    skos:definition "Refused, or a notification that could not be trusted."@en .
+
+v:refunded a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Refunded"@en, "Terugbetaal"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio keeps it."@en ;
+    skos:definition "Returned to the payer."@en .

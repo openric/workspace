@@ -1,0 +1,58 @@
+# OpenRiC Workspace - OpenRiC Workspace Share Link Events.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What happened when a share link was used (Heratio's information_object_share_access.action).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/share-link-event/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Share Link Events"@en ;
+    dcterms:description "What happened when a share link was used (Heratio's information_object_share_access.action)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:view, v:download, v:denied-expired, v:denied-revoked, v:denied-quota, v:auto-expired .
+
+v:view a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Viewed"@en, "Bekyk"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio keeps it."@en ;
+    skos:definition "The record was opened."@en .
+
+v:download a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Downloaded"@en, "Afgelaai"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio keeps it."@en ;
+    skos:definition "A file was received."@en .
+
+v:denied-expired a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Refused: expired"@en, "Geweier: verval"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio keeps it."@en ;
+    skos:definition "The link had expired."@en .
+
+v:denied-revoked a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Refused: revoked"@en, "Geweier: herroep"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio keeps it."@en ;
+    skos:definition "The link had been revoked."@en .
+
+v:denied-quota a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Refused: used up"@en, "Geweier: opgebruik"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio keeps it."@en ;
+    skos:definition "The link had been used as often as it may."@en .
+
+v:auto-expired a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Expired"@en, "Verval"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio keeps it."@en ;
+    skos:definition "Marked expired by the daily run."@en .

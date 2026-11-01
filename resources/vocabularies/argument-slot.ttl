@@ -1,0 +1,79 @@
+# OpenRiC Workspace - OpenRiC Workspace Argument Steps.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# The nine steps of an argument (Heratio's ArgumentBuilderService::SLOTS).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/argument-slot/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Argument Steps"@en ;
+    dcterms:description "The nine steps of an argument (Heratio's ArgumentBuilderService::SLOTS)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:problem, v:gap, v:frame, v:method, v:evidence, v:analysis, v:counterargument, v:contribution, v:implication .
+
+v:problem a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Problem"@en, "Probleem"@af ;
+    skos:scopeNote "Not a RiC-O term: a step of an argument, as Heratio's argument builder names it."@en ;
+    skos:definition "The situation or puzzle the work addresses."@en .
+
+v:gap a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Gap"@en, "Leemte"@af ;
+    skos:scopeNote "Not a RiC-O term: a step of an argument, as Heratio's argument builder names it."@en ;
+    skos:definition "What is missing or unresolved in current knowledge."@en .
+
+v:frame a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Frame"@en, "Raamwerk"@af ;
+    skos:scopeNote "Not a RiC-O term: a step of an argument, as Heratio's argument builder names it."@en ;
+    skos:definition "The theoretical or conceptual lens applied."@en .
+
+v:method a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Method"@en, "Metode"@af ;
+    skos:scopeNote "Not a RiC-O term: a step of an argument, as Heratio's argument builder names it."@en ;
+    skos:definition "How the claim is established or tested."@en .
+
+v:evidence a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Evidence"@en, "Bewyse"@af ;
+    skos:scopeNote "Not a RiC-O term: a step of an argument, as Heratio's argument builder names it."@en ;
+    skos:definition "The core supported finding the case rests on."@en .
+
+v:analysis a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Analysis"@en, "Ontleding"@af ;
+    skos:scopeNote "Not a RiC-O term: a step of an argument, as Heratio's argument builder names it."@en ;
+    skos:definition "What the evidence means once interpreted."@en .
+
+v:counterargument a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Counterargument"@en, "Teenargument"@af ;
+    skos:scopeNote "Not a RiC-O term: a step of an argument, as Heratio's argument builder names it."@en ;
+    skos:definition "The strongest objection and the response to it."@en .
+
+v:contribution a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Contribution"@en, "Bydrae"@af ;
+    skos:scopeNote "Not a RiC-O term: a step of an argument, as Heratio's argument builder names it."@en ;
+    skos:definition "What this adds that did not exist before."@en .
+
+v:implication a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Implication"@en, "Implikasie"@af ;
+    skos:scopeNote "Not a RiC-O term: a step of an argument, as Heratio's argument builder names it."@en ;
+    skos:definition "Why it matters: consequences and next steps."@en .

@@ -1,0 +1,136 @@
+[
+    {
+        "title": "South African Journal of Libraries and Information Science",
+        "publisher": "LIASA",
+        "subject_scope": "Library and information science: collections, services, information behaviour, knowledge management, archives and records.",
+        "article_types": "research, review",
+        "accreditation": "DHET, Scopus, DOAJ, Sabinet",
+        "reference_style": "Harvard",
+        "peer_review": "double-blind",
+        "open_access": 1,
+        "languages": "English",
+        "notes": "Verify current author guidelines and word limits on the journal site."
+    },
+    {
+        "title": "Mousaion: South African Journal of Information Studies",
+        "publisher": "Unisa Press",
+        "subject_scope": "Information studies, library science, archival and records studies, knowledge organisation.",
+        "article_types": "research, review",
+        "accreditation": "DHET, IBSS, Scopus, Sabinet",
+        "reference_style": "Harvard",
+        "peer_review": "double-blind",
+        "open_access": 0,
+        "languages": "English"
+    },
+    {
+        "title": "Innovation: Journal of Appropriate Librarianship and Information Work in Southern Africa",
+        "publisher": "University of KwaZulu-Natal",
+        "subject_scope": "Librarianship and information work in Southern Africa; practice-oriented LIS research.",
+        "article_types": "research, practice",
+        "accreditation": "DHET, Sabinet",
+        "reference_style": "Harvard",
+        "peer_review": "double-blind",
+        "open_access": 0,
+        "languages": "English"
+    },
+    {
+        "title": "Journal of the South African Society of Archivists",
+        "publisher": "South African Society of Archivists",
+        "subject_scope": "Archives, records management, recordkeeping, preservation and access in Southern Africa.",
+        "article_types": "research, review",
+        "accreditation": "DHET, Sabinet",
+        "reference_style": "Harvard",
+        "peer_review": "double-blind",
+        "open_access": 1,
+        "languages": "English"
+    },
+    {
+        "title": "ESARBICA Journal",
+        "publisher": "Eastern and Southern Africa Regional Branch of the ICA",
+        "subject_scope": "Archives and records management across Eastern and Southern Africa.",
+        "article_types": "research",
+        "accreditation": "DHET, Sabinet",
+        "reference_style": "Harvard",
+        "peer_review": "double-blind",
+        "open_access": 1,
+        "languages": "English"
+    },
+    {
+        "title": "South African Journal of Cultural History",
+        "publisher": "South African Society for Cultural History",
+        "subject_scope": "Cultural history, material culture, heritage, museums and built environment.",
+        "article_types": "research",
+        "accreditation": "DHET, Sabinet",
+        "reference_style": "Harvard",
+        "peer_review": "double-blind",
+        "open_access": 0,
+        "languages": "English, Afrikaans"
+    },
+    {
+        "title": "Historia",
+        "publisher": "Historical Association of South Africa",
+        "subject_scope": "Historical studies with a focus on South and Southern Africa.",
+        "article_types": "research, review",
+        "accreditation": "DHET, Scopus, Sabinet",
+        "reference_style": "Chicago",
+        "peer_review": "double-blind",
+        "open_access": 1,
+        "languages": "English, Afrikaans"
+    },
+    {
+        "title": "South African Journal of Science",
+        "publisher": "Academy of Science of South Africa (ASSAf)",
+        "subject_scope": "Multidisciplinary science, including digital humanities and heritage science.",
+        "article_types": "research, review, commentary",
+        "accreditation": "DHET, Scopus, Web of Science, DOAJ",
+        "reference_style": "Vancouver",
+        "peer_review": "single-blind",
+        "open_access": 1,
+        "languages": "English"
+    },
+    {
+        "title": "South African Journal of Information Management",
+        "publisher": "AOSIS",
+        "subject_scope": "Information and knowledge management, information systems, digital information services.",
+        "article_types": "research, review",
+        "accreditation": "DHET, Scopus, DOAJ",
+        "reference_style": "Harvard",
+        "peer_review": "double-blind",
+        "open_access": 1,
+        "apc_amount": "APC applies",
+        "languages": "English"
+    },
+    {
+        "title": "South African Computer Journal",
+        "publisher": "South African Institute of Computer Scientists and Information Technologists",
+        "subject_scope": "Computer science and information technology, including digital curation and data management.",
+        "article_types": "research",
+        "accreditation": "DHET, Scopus, DOAJ",
+        "reference_style": "IEEE",
+        "peer_review": "double-blind",
+        "open_access": 1,
+        "languages": "English"
+    },
+    {
+        "title": "Education as Change",
+        "publisher": "Unisa Press",
+        "subject_scope": "Education research, teaching and learning, information literacy.",
+        "article_types": "research",
+        "accreditation": "DHET, Scopus, DOAJ",
+        "reference_style": "APA",
+        "peer_review": "double-blind",
+        "open_access": 1,
+        "languages": "English"
+    },
+    {
+        "title": "Literator: Journal of Literary Criticism, Comparative Linguistics and Literary Studies",
+        "publisher": "AOSIS",
+        "subject_scope": "Literary studies, comparative linguistics, language and literature in Southern Africa.",
+        "article_types": "research",
+        "accreditation": "DHET, Scopus, DOAJ",
+        "reference_style": "Harvard",
+        "peer_review": "double-blind",
+        "open_access": 1,
+        "languages": "English, Afrikaans"
+    }
+]

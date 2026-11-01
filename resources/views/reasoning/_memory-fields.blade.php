@@ -1,0 +1,8 @@
+{{-- OpenRiC Workspace - a research memory item's fields (Heratio's research_memory_item; roadmap phase 19i). Needs $m (or null), $x, $kinds, $statuses, $projects, $project. Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems. SPDX-License-Identifier: AGPL-3.0-or-later --}}
+@php($lang = \App\Support\Vocab::languages())
+<label for="{{ $x }}-title">{{ __('Title') }}</label> <input id="{{ $x }}-title" name="title" required size="50" value="{{ $m?->title }}">
+<label for="{{ $x }}-kind">{{ __('Kind') }}</label> <select id="{{ $x }}-kind" name="kind">@foreach($kinds as $k)<option value="{{ $k->notation }}" @selected(($m?->kind->notation ?? 'other') === $k->notation)>{{ $k->label($lang) }}</option>@endforeach</select>
+<label for="{{ $x }}-status">{{ __('Status') }}</label> <select id="{{ $x }}-status" name="status">@foreach($statuses as $k)<option value="{{ $k->notation }}" @selected(($m?->status->notation ?? 'open') === $k->notation)>{{ $k->label($lang) }}</option>@endforeach</select><br>
+<label for="{{ $x }}-project">{{ __('Project') }}</label> <select id="{{ $x }}-project" name="project_id"><option value="">{{ __('None') }}</option>@foreach($projects as $p)<option value="{{ $p->id }}" @selected(($m?->project_id ?? $project?->id) === $p->id)>{{ $p->title }}</option>@endforeach</select>
+<label for="{{ $x }}-src">{{ __('Source') }}</label> <input id="{{ $x }}-src" name="source_ref" size="30" value="{{ $m?->source_ref }}"><br>
+<label for="{{ $x }}-body">{{ __('Text') }}</label><br><textarea id="{{ $x }}-body" name="body" rows="2" cols="80">{{ $m?->body }}</textarea><br>

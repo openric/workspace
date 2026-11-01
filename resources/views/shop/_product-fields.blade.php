@@ -1,0 +1,8 @@
+{{-- OpenRiC Workspace - the fields of a product type and its price (Heratio's ahg_product_type and ahg_product_pricing). Needs $t (or null), $p, $uses. Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems. SPDX-License-Identifier: AGPL-3.0-or-later --}}
+<p><label for="{{ $p }}-name">{{ __('Name') }}</label> <input id="{{ $p }}-name" name="name" required maxlength="255" size="40" value="{{ $t?->name }}">
+    <label for="{{ $p }}-price">{{ __('Price') }}</label> <input id="{{ $p }}-price" name="price" type="number" step="0.01" min="0" required value="{{ $t?->prices->first()?->price ?? 0 }}" style="width: 8rem"></p>
+<p><label for="{{ $p }}-description">{{ __('Description') }}</label> <input id="{{ $p }}-description" name="description" size="60" value="{{ $t?->description }}"></p>
+<p><label><input type="hidden" name="is_digital" value="0"><input type="checkbox" name="is_digital" value="1" @checked($t?->is_digital ?? true)> {{ __('Digital') }}</label>
+    <label for="{{ $p }}-use">{{ __('Delivers the file') }}</label> <select id="{{ $p }}-use" name="delivers_use"><option value="">{{ __('No file (such as a licence)') }}</option>@foreach($uses as $u)<option value="{{ $u->notation }}" @selected($t?->delivers_use === $u->notation)>{{ $u->label(\App\Support\Vocab::languages()) }}</option>@endforeach</select>
+    <label><input type="hidden" name="requires_shipping" value="0"><input type="checkbox" name="requires_shipping" value="1" @checked($t?->requires_shipping)> {{ __('Needs shipping') }}</label>
+    <label><input type="hidden" name="is_active" value="0"><input type="checkbox" name="is_active" value="1" @checked($t?->is_active ?? true)> {{ __('Active') }}</label></p>

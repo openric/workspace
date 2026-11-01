@@ -1,0 +1,51 @@
+# OpenRiC Workspace - OpenRiC Workspace Researcher Statuses.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Where a researcher's registration stands (Heratio's research_researcher.status).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/researcher-status/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Researcher Statuses"@en ;
+    dcterms:description "Where a researcher's registration stands (Heratio's research_researcher.status)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:pending, v:approved, v:suspended, v:expired, v:rejected .
+
+v:pending a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Pending"@en, "Hangende"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's reading room, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "Registered, waiting for approval."@en .
+
+v:approved a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Approved"@en, "Goedgekeur"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's reading room, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "May book the reading room until the registration expires."@en .
+
+v:suspended a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Suspended"@en, "Opgeskort"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's reading room, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "May not book for now."@en .
+
+v:expired a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Expired"@en, "Verval"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's reading room, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "The registration has expired; it can be renewed."@en .
+
+v:rejected a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Rejected"@en, "Afgekeur"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's reading room, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "Not approved, with the reason; the researcher may register again."@en .

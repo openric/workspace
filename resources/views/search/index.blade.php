@@ -59,4 +59,9 @@
             </div>
         </div>
     @endif
+    @if($query !== '')
+        <details style="margin-top: 1rem"><summary>{{ __('Save this search') }}</summary>
+            <form method="post" action="{{ route('research.searches.store') }}">@csrf @include('research._search-fields', ['s' => null, 'p' => 'save', 'query' => $query, 'filters' => $filters])<button type="submit">{{ __('Save') }}</button></form>
+        </details>
+    @endif
 @endsection

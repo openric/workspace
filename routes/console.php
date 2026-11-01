@@ -5,6 +5,10 @@ use App\Description\AgreementService;
 use App\Description\WorkflowSlaService;
 use App\Reports\ReportDelivery;
 use App\Reports\UsageService;
+use App\Research\FieldAlerts;
+use App\Research\Researchers;
+use App\Research\SavedSearches;
+use App\Research\ShareLinks;
 use App\Rights\Embargoes;
 use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Inspiring;
@@ -68,3 +72,24 @@ Artisan::command('workspace:embargoes', function (Embargoes $embargoes) {
     $this->info("Warned of {$counts['warned']} embargoes ending; told of {$counts['ended']} ended.");
 })->purpose('Warn before an embargo ends, and give notice once one has ended');
 Schedule::command('workspace:embargoes')->dailyAt('06:40')->timezone(config('workspace.timezone'))->withoutOverlapping();
+
+// Share links (roadmap phase 19a, ADR 0017; Heratio's share-link prune): note the links that have expired, and delete
+// links ended a year ago and log rows older than 180 days.
+Artisan::command('workspace:share-links:prune', function (ShareLinks $links) {
+    $done = $links->prune();
+    $this->info("{$done['expired']} expired, {$done['links_deleted']} links and {$done['events_deleted']} log rows deleted.");
+})->purpose('Note expired share links and delete old ones');
+Artisan::command('workspace:researchers', function (Researchers $researchers) {
+    $done = $researchers->process();
+    $this->info("Warned {$done['warned']} researchers of their registration ending; {$done['expired']} expired.");
+})->purpose('Warn researchers before their registration ends, and end it when it has');
+Schedule::command('workspace:researchers')->dailyAt('06:50')->timezone(config('workspace.timezone'))->withoutOverlapping();
+Artisan::command('workspace:saved-search-alerts', function (SavedSearches $searches) {
+    $this->info($searches->alert().' owners told of new results.');
+})->purpose('Run the saved searches whose alert has come, and tell their owners of new results');
+Schedule::command('workspace:saved-search-alerts')->dailyAt('05:40')->timezone(config('workspace.timezone'))->withoutOverlapping();
+Artisan::command('workspace:field-alerts', function (FieldAlerts $alerts) {
+    $this->info($alerts->scanAll().' field alerts raised.');
+})->purpose('Ask Crossref and OpenAlex about the works research projects cite: retractions, updates and new citing works');
+Schedule::command('workspace:field-alerts')->dailyAt('04:10')->timezone(config('workspace.timezone'))->withoutOverlapping();
+Schedule::command('workspace:share-links:prune')->dailyAt('03:20')->timezone(config('workspace.timezone'))->withoutOverlapping();

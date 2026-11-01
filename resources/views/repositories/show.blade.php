@@ -5,6 +5,7 @@
     <p><a href="{{ route('repositories.index') }}">{{ __('All repositories') }}</a></p>
     <h1>{{ $repository->described('authorised-name', [app()->getLocale(), 'en']) }}</h1>
     @include('clipboard._button', ['type' => 'repositories', 'id' => $repository->id])
+    @include('favourites._button', ['entity' => $repository])
     <p>{{ __('Repository') }} @include('description._ric', ['term' => 'rico:CorporateBody'])</p>
     @if(session('status'))<p role="status">{{ session('status') }}</p>@endif
     @if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif

@@ -1,4 +1,5 @@
 {{-- OpenRiC Workspace - the public catalogue's page layout (WS-009). Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems. SPDX-License-Identifier: AGPL-3.0-or-later --}}
+@php($institution ??= \App\Support\HostInstitution::for(request()) ?? abort(404))
 <!doctype html>
 <html lang="{{ app()->getLocale() }}">
 <head>
@@ -40,7 +41,7 @@
         <label for="site-q" style="margin: 0; position: absolute; left: -999px">{{ __('Search the catalogue') }}</label>
         <input id="site-q" name="q" value="{{ request('q') }}" placeholder="{{ __('Search the catalogue') }}" style="max-width: 16rem">
         <button type="submit" style="margin: 0">{{ __('Search') }}</button>
-        @guest<a href="{{ route('clipboard.index') }}" style="white-space: nowrap">{{ __('Clipboard') }} ({{ app(\App\Clipboard\ClipboardService::class)->count() }})</a><a href="{{ route('sign-in') }}" style="white-space: nowrap">{{ __('Log in') }}</a>@endguest
+        @guest<a href="{{ route('clipboard.index') }}" style="white-space: nowrap">{{ __('Clipboard') }} ({{ app(\App\Clipboard\ClipboardService::class)->count() }})</a><a href="{{ route('shop.cart') }}" style="white-space: nowrap">{{ __('Cart') }} ({{ app(\App\Research\Shop::class)->count(null) }})</a><a href="{{ route('sign-in') }}" style="white-space: nowrap">{{ __('Log in') }}</a>@endguest
     </form>
     @include('layouts._account')
     @include('layouts._language')

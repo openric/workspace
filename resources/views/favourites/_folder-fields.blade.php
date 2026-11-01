@@ -1,0 +1,4 @@
+{{-- OpenRiC Workspace - the fields of a folder of favourites (Heratio's folder create and edit). Needs $f (or null), $p (an id prefix), $folders. Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems. SPDX-License-Identifier: AGPL-3.0-or-later --}}
+<p><label for="{{ $p }}-name">{{ __('Name') }}</label> <input id="{{ $p }}-name" name="name" required maxlength="255" value="{{ $f?->name }}">
+    <label for="{{ $p }}-parent">{{ __('Inside the folder') }}</label> <select id="{{ $p }}-parent" name="parent_id"><option value="">-</option>@foreach($folders->reject(fn ($o) => $o->id === $f?->id) as $o)<option value="{{ $o->id }}" @selected($f?->parent_id === $o->id)>{{ $o->name }}</option>@endforeach</select></p>
+<p><label for="{{ $p }}-description">{{ __('Description') }}</label><br><textarea id="{{ $p }}-description" name="description" rows="2" cols="60">{{ $f?->description }}</textarea></p>

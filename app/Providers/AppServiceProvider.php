@@ -15,8 +15,10 @@ use App\Models\RecordRedaction;
 use App\Models\RicDate;
 use App\Models\User;
 use App\Privacy\Redaction;
+use App\Research\Shop;
 use App\Search\SearchIndex;
 use App\Support\Vocab;
+use Illuminate\Auth\Events\Login;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Mail\Events\MessageSending;
@@ -51,6 +53,9 @@ class AppServiceProvider extends ServiceProvider
         RecordRedaction::saved(fn ($model) => SearchIndex::mark('record_resources', (string) $model->record_resource_id));
         RecordRedaction::deleted(fn ($model) => SearchIndex::mark('record_resources', (string) $model->record_resource_id));
         $this->app->terminating(fn () => app(SearchIndex::class)->flush());
+        // A visitor's cart joins the account's on signing in (Heratio's mergeGuestCart; phase 19a).
+        Event::listen(Login::class, fn (Login $login) => $login->user instanceof User && session()->has('cart_key')
+            ? app(Shop::class)->merge($login->user, session('cart_key')) : null);
 
         // Every message sent is logged (roadmap phase 7; Heratio's EventServiceProvider wiring of EmailAuditListener).
         Event::listen(MessageSending::class, [EmailAuditListener::class, 'handleMessageSending']);

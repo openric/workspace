@@ -41,6 +41,10 @@
     @php([$title, $titleLanguage] = $view->valueWithLanguage($unit, 'title') ?? ['', 'en'])
     <h1 lang="{{ $titleLanguage }}">{{ $title }}</h1>
     @include('clipboard._button', ['type' => 'records', 'id' => $unit->id])
+    @include('favourites._button', ['entity' => $unit])
+    @include('shop._add', ['unit' => $unit])
+    <a href="{{ route('cite', $unit->id) }}" class="no-print" style="font-size: .85rem">{{ __('Cite') }}</a>
+    <a href="{{ route('feedback.create', ['record' => $unit->id]) }}" class="no-print" style="font-size: .85rem">{{ __('Feedback on this record') }}</a>
     <p class="meta">{{ $unit->level->label(\App\Support\Vocab::languages()) }} @include('description._ric', ['term' => \App\Relations\EntityKinds::ricClass($unit)])
         @if($unit->referenceCode()) · {{ $unit->referenceCode() }}@endif
         @if($unit->repository && $view->readable($unit->repository)) · {{ __('Held by') }} <a href="{{ route('discover.repository', $unit->repository->id) }}">{{ $view->label($unit->repository) }}</a>@endif</p>

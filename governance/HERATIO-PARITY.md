@@ -31,7 +31,7 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-biblio-bf` | 3060 | out: GLAM sector | Planned | 21 | none |  |
 | `ahg-biblio-frbr` | 2006 | out: GLAM sector | Planned | 21 | none |  |
 | `ahg-c2pa` | 17272 | V0.1 candidate | Planned | 22 | `ahgC2paPlugin` |  |
-| `ahg-cart` | 2166 | later: V1.0+ | Planned | 19 | `ahgCartPlugin` |  |
+| `ahg-cart` | 2166 | later: V1.0+ | Covered | 19a | `ahgCartPlugin` | The cart, the shop with PayFast, orders and paid downloads; with the shop closed, requests to publish (ADR 0017). Not Stripe, which Heratio never charges with |
 | `ahg-cdpa` | 2774 | later: jurisdiction | Planned | 18e | `ahgCDPAPlugin` | Zimbabwe, chosen for 18e by Dr Johan Pieterse |
 | `ahg-condition` | 1690 | later: V1.0+ | Planned | 21 | `ahgConditionPlugin` |  |
 | `ahg-core` | 60173 | V0.1 candidate | Covered |  | `ahgAccessibilityPlugin`, `ahgCorePlugin` | Framework, not a function: the Workspace has its own (Laravel, PostgreSQL); its alternative text for images, with the worklist, is the instantiation's alternative-text element (v0.0.64) |
@@ -50,9 +50,9 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-exhibition` | 26806 | out: GLAM sector | Planned | 21 | `ahgExhibitionPlugin` |  |
 | `ahg-export` | 1256 | V0.1 candidate | Covered |  | `ahgExportPlugin` | EAD, Dublin Core, MODS, CSV and RiC-O export |
 | `ahg-extended-rights` | 7869 | V0.1 candidate | Partial | 13 | `ahgExtendedRightsPlugin` | Rights statements, licences, grants, batch rights and the rights report (v0.0.57 to v0.0.59); embargoes of records and their files, with exceptions, notices and the list from v0.0.89 (13a, ADR 0015); retention and disposal in 13b |
-| `ahg-favorites` | 2634 | later: V1.0+ | Planned | 19 | `ahgFavoritesPlugin` |  |
+| `ahg-favorites` | 2634 | later: V1.0+ | Covered | 19a | `ahgFavoritesPlugin` | Favourites of any entity, folders shared by a link, nine export formats, import by IRI (ADR 0017); sending to collections (with notes), projects (as their records) and bibliographies |
 | `ahg-federation` | 15815 | later: V1.0+ | Planned | 16 | `ahgFederationPlugin` |  |
-| `ahg-feedback` | 879 | later: V1.0+ | Planned | 19 | `ahgFeedbackPlugin` |  |
+| `ahg-feedback` | 879 | later: V1.0+ | Covered | 19a | `ahgFeedbackPlugin` | Feedback from anyone on the catalogue or a record, handled by staff (ADR 0017) |
 | `ahg-forms` | 2541 | V0.1 candidate | Planned | 22 | `ahgFormsPlugin` |  |
 | `ahg-ftp-upload` | 2301 | later: V1.0+ | Planned | 22 | `ahgFtpPlugin` |  |
 | `ahg-function-manage` | 2606 | V0.1 candidate | Covered |  | `ahgFunctionManagePlugin` | Activities with ISDF elements |
@@ -104,8 +104,8 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-reports` | 13861 | later: V1.0+ | Done | 8 | `ahgReportBuilderPlugin`, `ahgReportsPlugin` | Reports (overview, data quality, and six lists with filters and CSV), the authority completeness dashboard and the rights report; the report builder (saved reports, columns from the standards, sections, templates, export as CSV, XLSX, PDF and Word); the accession and donor reports come with phase 9; schedules with email, an archive of the files made, expiring share links and versions; not its comments, attachments, links, widgets, data snapshots or cover page |
 | `ahg-repository-manage` | 4578 | V0.1 candidate | Covered |  | `ahgRepositoryManagePlugin` | Repositories with ISDIAH elements and contact points |
 | `ahg-request-publish` | 1876 | V0.1 candidate | Partial | 10 | `ahgRequestToPublishPlugin` | Review and publish of each value; requests in phase 10 |
-| `ahg-research` | 79899 | V0.1 candidate | Planned | 19 | `ahgResearchPlugin` | Decision first |
-| `ahg-researcher-manage` | 3111 | V0.1 candidate | Partial | 19 | `ahgResearcherPlugin` | Registration requests. The package itself is researcher submissions (descriptions and files drafted by researchers for staff review), not a register of researchers, so it moved to phase 19 |
+| `ahg-research` | 79899 | V0.1 candidate | Partial | 19a to 19j | `ahgResearchPlugin` | All of it, decided by Dr Johan Pieterse on 31 October 2026 (ADR 0017); 19a to 19g and 19i in v0.0.95, 19h and 19j parked on 1 November 2026; its AI parts in phase 17 |
+| `ahg-researcher-manage` | 3111 | V0.1 candidate | Covered | 19e | `ahgResearcherPlugin` | Registration requests. The package itself is researcher submissions (descriptions and files drafted by researchers for staff review), not a register of researchers, so it moved to phase 19 |
 | `ahg-resourcesync` | 926 | later: V1.0+ | Planned | 16 | `ahgResourceSyncPlugin` |  |
 | `ahg-ric` | 28399 | V0.1 candidate | Partial | 11, 17 | `ahgRicExplorerPlugin` | RiC-native model, RiC-O export, assertions with provenance (ADR 0006); the Governance deprecation register and Portability (RiC-O import, round trip, DCAT/VoID, change feed) from v0.0.86 (11b, ADR 0013); not yet Inferred-Provenance export or Graph-Grounding (`RicProvenanceService`, `GraphGroundingService`, phase 17) |
 | `ahg-ric-manage` | 1464 | V0.1 candidate | Covered |  | `ahgRicManagePlugin` | Relations, their types, roles and assertions |
@@ -116,7 +116,7 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-security-clearance` | 9206 | later: jurisdiction | Planned | 18c, 12 | `ahgSecurityClearancePlugin` | Clearance in 18c; two-factor sign-in with single sign-on in phase 12 |
 | `ahg-semantic-search` | 29749 | out: AI (V2+) | Planned | 17 (last) | `ahgSemanticSearchPlugin` |  |
 | `ahg-settings` | 16789 | V0.1 candidate | Covered |  | `ahgSettingsPlugin` | Institution settings, written fresh |
-| `ahg-share-link` | 2659 | later: V1.0+ | Planned | 19 | `ahgTimeLimitedShareLinkPlugin` |  |
+| `ahg-share-link` | 2659 | later: V1.0+ | Covered | 19a | `ahgTimeLimitedShareLinkPlugin` | Share links that never open more than their issuer may read, with their log and prune (ADR 0017); clearance with 18c |
 | `ahg-sharepoint` | 6045 | later: V1.0+ | Planned | 22 | `ahgSharePointPlugin` |  |
 | `ahg-spectrum` | 12393 | out: GLAM sector | Planned | 21 | `ahgSpectrumPlugin` |  |
 | `ahg-static-page` | 695 | later: V1.0+ | Planned | 20 | `ahgStaticPagePlugin` |  |
@@ -663,3 +663,265 @@ Added on 31 October 2026 with 18b.
 | Visual redaction of image regions | none | Not carried (ADR 0016): needs an image server |
 
 : Privacy in the catalogue, field by field
+
+### Favourites (`ahg-favorites`)
+
+Added with 19a.
+
+| Heratio field | Workspace | Status |
+|---|---|---|
+| `archival_description_id`, `object_type` (record, actor, repository, accession, donor, rights holder, term, function, physical object, research objects) | Any entity of the Workspace | Changed: favourites are of catalogue entities; research is gathered in collections and projects |
+| `archival_description`, `slug`, `reference_code` | Read from the entity as its owner may read it | Modelled |
+| `url` (custom link) | Web address and title | Same |
+| `notes` | Notes | Same |
+| `folder_id` | Folder | Same |
+| `completed_at`, `last_viewed_at` | Last viewed | Modelled: no "completed" flag on a favourite |
+| `favorites_folder.name`, `description`, `parent_id` | Name, Description, Inside the folder | Same |
+| `color`, `icon`, `sort_order` | none: the look is not carried; folders by position and name | Modelled |
+| `visibility` (private, shared, public) | Private, Shared (link), Public, vocabulary rows | Same |
+| `share_token`, `share_expires_at` | A link shown once, kept as a hash; For this many days | Same |
+| `favorites_share` (via, token, expires, accessed, access count) | The folder's link, its visits and last visit | Modelled: one link a folder |
+| Export: CSV, JSON, BibTeX, RIS, EAD, PDF, print | The same, and EndNote XML and CSL-JSON | Same |
+| Import (slugs) | Import (persistent IRIs) | Modelled |
+| Send to collection, project, bibliography | From the favourites list, to one's collections, projects and bibliographies | Same |
+
+: Favourites, field by field
+
+### Cart and shop (`ahg-cart`)
+
+Added with 19a.
+
+| Heratio field | Workspace | Status |
+|---|---|---|
+| `cart.user_id`, `session_id`, `archival_description_id`, `product_type_id`, `quantity`, `notes` | The cart, an account's or a visitor's | Same |
+| `cart.unit_price`, `completed_at` | The price from the product type; a checked-out cart is emptied | Modelled |
+| `ahg_ecommerce_settings` (`is_enabled`, `currency`, `vat_rate`, `vat_number`, `terms_conditions`) | Shop settings | Same |
+| `payfast_merchant_id`, `payfast_merchant_key`, `payfast_passphrase`, `payfast_sandbox` | PayFast, the key and passphrase encrypted | Same |
+| `stripe_*` | none | Not carried: Heratio never charges with Stripe |
+| `admin_notification_email`, `confirmation_email_template` | none: orders are listed for who manages the shop, and the buyer's page shows the order | Modelled: never to an outside address |
+| `ahg_product_type` (`name`, `description`, `is_digital`, `requires_shipping`, `is_active`, `sort_order`) and its nine rows | Products, seeded with the nine | Same |
+| none | Delivers the file (master, reference or thumbnail) | Workspace only |
+| `ahg_product_pricing` (`repository_id`, `product_type_id`, `price`, `price_includes_vat`, `is_active`) | Price, the institution's or a repository's | Same |
+| `ahg_order` (`order_number`, `status`, `subtotal`, `vat_amount`, `total`, `currency`, customer, billing and shipping address, `notes`, `paid_at`, `completed_at`, `cancelled_at`) | Orders, ORD-YYYYMMDD-NNNN, statuses as vocabulary rows | Same |
+| `ahg_order_item` (record, product, `quantity`, `unit_price`, `line_total`) | Order lines | Same |
+| `download_url`, `download_expires_at`, `download_count`, `ahg_download_token` | Downloads of a paid item, for some days and times | Same, kept as hashes |
+| `ahg_payment` and `ahg_payment_notifications` | Payments, each notification kept with why it was refused | Same |
+| Request to publish (`request_to_publish`: name, surname, email, institution, planned use, motivation, need by) | An access request to publish, from the account | Modelled |
+| Guest checkout | none: checkout needs an account | Modelled |
+
+: Cart and shop, field by field
+
+### Feedback (`ahg-feedback`)
+
+Added with 19a.
+
+| Heratio field | Workspace | Status |
+|---|---|---|
+| `feed_name`, `feed_surname`, `feed_phone`, `feed_email`, `feed_relationship` | Name, Surname, Telephone, Email, Relationship to the record | Same |
+| `feed_type_id` (general, bug report, feature request, content correction, compliment) | Type, vocabulary rows | Same |
+| `parent_id` (the record's slug) | The record | Same |
+| `name` (subject), `remarks` | Subject, Remarks | Same |
+| `status`, `completed_at` | Status (pending, completed), Completed | Same |
+| `admin_notes` | Staff notes | Same |
+
+: Feedback, field by field
+
+### Share links (`ahg-share-link`)
+
+Added with 19a.
+
+| Heratio field | Workspace | Status |
+|---|---|---|
+| `information_object_id`, `issued_by` | The record, Issued by | Same |
+| `token` | A link shown once, kept as a hash | Modelled |
+| `recipient_email`, `recipient_note` | Recipient, Note | Same |
+| `expires_at`, `max_access`, `access_count` | Until, At most this many uses, Uses | Same |
+| `revoked_at`, `revoked_by`, `revoke_reason` | Revoked, by whom, why | Same |
+| `classification_level_at_issuance` | none | With security clearance (18c) |
+| `issuer_download_at_issuance` | Its files may be received, decided again at every use | Modelled |
+| `information_object_share_access` (`accessed_at`, `ip_address`, `user_agent`, `action`) | Events, vocabulary rows | Same |
+| Settings: default and maximum expiry, retention of links and log | 14 and 90 days (365 for an administrator); a year and 180 days | Same |
+
+: Share links, field by field
+
+### Researchers and the reading room (`ahg-research`)
+
+Added with 19b.
+
+| Heratio field | Workspace | Status |
+|---|---|---|
+| `research_researcher` (`title`, `first_name`, `last_name`, `email`, `phone`, `affiliation_type`, `institution`, `department`, `position`, `student_id`, `research_interests`, `current_project`, `orcid_id`, `researcher_id_wos`, `scopus_id`, `isni`, `researcher_type_id`, `id_type`, `id_number`) | The same; the email is the account's; affiliation and identity document as vocabulary rows | Same |
+| `id_verified`, `id_verified_by`, `id_verified_at` | Identity verified, by whom, when | Same |
+| `status`, `rejection_reason`, `approved_by`, `approved_at`, `expires_at`, `renewal_reminder_sent` | Status (vocabulary rows), reason, approval, until, warned | Same |
+| `photo_path`, `card_number`, `card_barcode`, `card_issued_at` | Photograph, reader's card number | Same; the card number is its barcode |
+| `institution_id`, `timezone`, `preferred_language` | The account's institution and interface language | Modelled |
+| `api_key`, `api_key_expires_at` | The Workspace's API keys | Modelled |
+| `orcid_verified`, `orcid_access_token` and the other ORCID tokens | none yet | With ORCID in 19h |
+| `research_researcher_audit` | The audit log | Modelled |
+| `research_researcher_type` (all its fields) | Kinds of researcher | Same |
+| `research_verification` (`verification_type`, `document_type`, `document_reference`, `document_path`, `verification_data`, `status`, `verified_by`, `verified_at`, `expires_at`, `rejection_reason`, `notes`) | Checks of identity and affiliation; `verification_data` as notes | Same |
+| `research_reading_room` (all its fields, `floor_plan_path` included) | Reading rooms, and the repository each serves | Same |
+| `research_reading_room_seat` (`seat_number`, `seat_label`, `seat_type`, `has_power`, `has_lamp`, `has_computer`, `has_magnifier`, `zone`, `notes`, `is_active`, `sort_order`) | Seats | Same |
+| `position_x`, `position_y` (a visual seat map) | none | Not carried: the look is not carried |
+| `research_booking` (all its fields) | Bookings | Same |
+| `research_seat_assignment` | Seat assignments | Same |
+| `research_material_request` (all its fields but triage) | Requests for records | Same |
+| `triage_status`, `triage_by`, `triage_at` | none | Not carried: nothing in Heratio sets them |
+| `research_request_queue` (all its fields) | Retrieval queues | Same; `color` and `icon` not carried (the look) |
+| `research_request_status_history`, `research_request_correspondence` | The status log, messages and staff notes | Same |
+| `research_retrieval_schedule` | Retrieval runs | Same |
+| `research_walk_in_visitor` (all its fields) | Walk-ins | Same |
+| `research_equipment`, `research_equipment_booking`, `research_equipment_maintenance` | Equipment, its bookings and maintenance | Same |
+| `research_custody_handoff` (all its fields but `spectrum_movement_id`) | Custody hand-overs | Same; Spectrum movements are not part of the Workspace |
+
+: Researchers and the reading room, field by field
+
+### Reproductions, bibliographies, citations and saved searches (`ahg-research`)
+
+Added with 19c.
+
+| Heratio field | Workspace | Status |
+|---|---|---|
+| `research_reproduction_request` (`reference_number`, `purpose`, `intended_use`, `publication_details`, `status`, `estimated_cost`, `final_cost`, `currency`, `payment_reference`, `payment_date`, `payment_method`, `invoice_number`, `invoice_date`, `delivery_method`, `delivery_address`, `delivery_email`, `completed_at`, `processed_by`, `notes`, `admin_notes`, `sla_due_date`, `assigned_to`, `closed_at`, `closed_by`, `closure_reason`) | The same; statuses and delivery as vocabulary rows | Same |
+| `triage_status`, `triage_by`, `triage_at`, `triage_notes` | none | Not carried: nothing in Heratio sets them |
+| `research_reproduction_item` (all its fields; `object_id` and `digital_object_id`) | Copies: the record and, when chosen, its file | Same |
+| `research_reproduction_file` (`file_name`, `file_path`, `file_size`, `mime_type`, `checksum`, `download_count`, `download_expires_at`, `download_token`) | Files kept by checksum; the token kept as a hash | Same |
+| Reproduction pricing (`config('research.reproduction_pricing')` over Heratio's defaults) | Prices of the institution, seeded with Heratio's | Same |
+| `research_bibliography` (`name`, `description`, `citation_style`, `is_public`, `share_token`) | The same; the link kept as a hash | Same |
+| `research_bibliography_entry` (all its fields) | Entries | Same |
+| `research_citation_log` (`object_id`, `citation_style`, `citation_text`) | The record and format cited | Modelled: the text is made again on demand |
+| `research_saved_search` (`name`, `description`, `search_query`, `search_filters`, `result_snapshot_json`, `last_result_count`, `total_results_at_save`, `alert_enabled`, `alert_frequency`, `last_alert_at`, `new_results_count`, `is_public`) | The same | Same |
+| `query_ast_json`, `search_type`, `facets`, `citation_id` | The words and filters of the Workspace's search | Modelled |
+| `research_search_alert_log` | The alert log | Same; Heratio never writes it |
+| `research_print_template` (call slips, paging slips, receipts, badges, labels) | The call slip page | With document templates in 19j |
+
+: Reproductions, bibliographies, citations and saved searches, field by field
+
+### Collections, annotations, notebooks, the research diary and research workspaces (`ahg-research`)
+
+Added with 19d.
+
+| Heratio field | Workspace | Status |
+|---|---|---|
+| `research_collection` (`name`, `description`, `is_public`, `share_token`) | Collections; the link kept as a hash | Same |
+| `research_collection_item` (`object_id`, `object_type`, `external_uri`, `tags`, `reference_code`, `notes`, `sort_order`) | Items: any entity of the Workspace, or an outside address with its title | Same |
+| `research_collection_item.culture` | The interface language shows the entity's labels | Modelled |
+| Finding aid of a collection (`getCollectionFindingAidData`) | The finding aid page, to print | Same |
+| `research_annotation` (`object_id`, `entity_type`, `collection_id`, `digital_object_id`, `annotation_type`, `title`, `content`, `canvas_id`, `tags`, `visibility`) | Annotations of any entity; the copy of the record and its IIIF canvas | Same |
+| `research_annotation.content_format` (text, html) | Plain text | Changed: content is shown as text, never as HTML |
+| `research_annotation.target_selector`, `research_annotation_target` (`source_type`, `source_id`, `selector_type`, `selector_json`, `source_url`) | One W3C selector of the annotation, with its kind as a vocabulary row and its source | Same |
+| `research_annotation.iiif_annotation_id` | The annotation's address in its W3C AnnotationPage | Modelled |
+| `research_annotation.is_private` | The annotation's visibility | Modelled: Heratio keeps both; `visibility` says it all |
+| Evidence viewer (a record's notes and the tags of its annotations) | The annotation studio's list and tags | Same |
+| `research_notebook` (`title`, `summary`, `cover_object_id`, `sort_order`) | Notebooks; the cover a record | Same |
+| `research_notebook_item` (`item_type`, `title`, `body`, `source_object_id`, `saved_search_id`, `ai_output_payload`, `pinned`, `sort_order`) | Items: notes, records, saved searches | Same; AI output written in phase 17 |
+| `research_journal_entry` (`entry_date`, `title`, `content`, `entry_type`, `time_spent_minutes`, `tags`, `is_private`, `related_entity_type`, `related_entity_id`) | The research diary | Same; the Workspace writes the automatic kinds, which Heratio never writes |
+| `research_journal_entry.content_format` (text, html) | Plain text | Changed: as annotations |
+| `research_workspace` (`owner_id`, `name`, `description`, `visibility`, `settings`) | Research workspaces | Same |
+| `research_workspace.share_token` | none | Changed: one joins by invitation |
+| `research_workspace_member` (`role`, `invited_by`, `invited_at`, `accepted_at`, `status`) | Members and invitations | Same |
+| `research_workspace_resource` (`resource_type`, `resource_id`, `external_url`, `title`, `description`, `added_by`, `sort_order`, `added_at`) | Resources | Same |
+| `research_workspace_file` (`file_name`, `file_path`, `file_size`, `mime_type`, `checksum`, `checksum_type`) | Files kept with the other research files, by SHA-256 | Same |
+
+: Collections, annotations, notebooks, the research diary and research workspaces, field by field
+
+### Researcher submissions (`ahg-researcher-manage`)
+
+Added with 19e. Heratio's package is completed from PSIS's `ahgResearcherPlugin`.
+
+| Heratio field | Workspace | Status |
+|---|---|---|
+| `researcher_submission` (`researcher_id`, `user_id`, `title`, `description`, `repository_id`, `parent_object_id`, `source_type`, `source_file`, `include_images`, `status`, `total_items`, `total_files`, `total_file_size`, `return_comment`, `reject_comment`, `published_at`, `submitted_at`) | Submissions; the record to go under by IRI; the exchange file kept as a research file | Same |
+| `researcher_submission.workflow_task_id` | The submission's own review steps and its reviewer | Modelled: the Workspace's workflows move catalogue entities |
+| `researcher_submission_item` (`parent_item_id`, `item_type`, `title`, `identifier`, `level_of_description`, `scope_and_content`, `extent_and_medium`, `date_display`, `date_start`, `date_end`, `creators`, `subjects`, `places`, `genres`, `access_conditions`, `reproduction_conditions`, `notes`, `repository_name`, `repository_address`, `repository_contact`, `sort_order`) | Items; the level a vocabulary row | Same |
+| `researcher_submission_item.reference_object_id`, `reference_slug` | The note's record | Same |
+| `researcher_submission_item.published_object_id` | What it became: a record, an authority record or a repository | Same |
+| `researcher_submission_file` (`original_name`, `stored_name`, `stored_path`, `mime_type`, `file_size`, `checksum`, `caption`, `sort_order`) | Files kept with the other research files, by SHA-256 | Same |
+| `researcher_submission_file.published_do_id` | The instantiation made of it | Same |
+| `researcher_submission_review` (`reviewer_id`, `action`, `comment`) | The submission's history | Same |
+| Publishing (PSIS's PublishService) | Through the import, with a dry run | Changed: the import writes the records |
+
+: Researcher submissions, field by field
+
+### Research projects and working together (`ahg-research`)
+
+Added with 19f.
+
+| Heratio field | Workspace | Status |
+|---|---|---|
+| `research_project` (`owner_id`, `title`, `description`, `project_type`, `institution`, `supervisor`, `funding_source`, `grant_number`, `ethics_approval`, `start_date`, `expected_end_date`, `actual_end_date`, `status`, `visibility`, `share_token`, `metadata`) | Projects; `institution` kept as the researcher's institution as written; the link kept as a hash | Same |
+| `research_project_collaborator` (`role`, `invited_by`, `invited_at`, `accepted_at`, `status`, `notes`) | Collaborators | Same |
+| `research_project_collaborator.permissions` | The role | Modelled: Heratio never reads it |
+| `research_project_resource` (`resource_type`, `resource_id`, `object_id`, `external_url`, `link_type`, `link_metadata`, `title`, `description`, `notes`, `tags`, `added_by`, `sort_order`, `added_at`) | Resources; a document kept as a research file | Same |
+| `research_project_milestone` (`title`, `description`, `due_date`, `completed_at`, `completed_by`, `status`, `sort_order`) and `research_milestone` (`milestone_type`, `description`, `due_date`, `completed_date`, `status`, `progress_pct`, `deliverable`, `owner_id`, `created_by`) | One table of milestones with the fields of both | Same |
+| `research_team_member` (`person_name`, `role`, `affiliation`, `email`, `orcid`, `is_lead`, `contribution_note`, `start_date`, `end_date`, `status`, `created_by`) | The team; the ORCID iD's check digit verified | Same |
+| `research_output` (`output_type`, `title`, `authors`, `venue`, `identifier_type`, `identifier`, `identifier_url`, `output_date`, `status`, `notes`, `created_by`) | Outputs | Same; `dmp_id` with 19h |
+| `research_activity_log` (`activity_type`, `entity_type`, `entity_id`, `entity_title`, `details`) for a project | The project's activity log | Same |
+| `research_activity_log.session_id`, `ip_address`, `user_agent` | The Workspace's audit log | Modelled |
+| `research_discussion` (`workspace_id`, `project_id`, `parent_id`, `researcher_id`, `subject`, `content`, `is_pinned`, `is_resolved`, `resolved_by`, `resolved_at`) | Discussions | Same |
+| `research_evidence_comment` (`collection_id`, `item_id`, `project_id`, `author_id`, `parent_comment_id`, `body`, `status`, `resolved_by`, `resolved_at`) | Comments on the evidence | Same |
+| `research_collaboration_presence` (`project_id`, `researcher_id`, `cursor_target`, `user_color`, `last_seen_at`) | Who is looking | Same |
+| `research_collaboration_session` | none | Not carried: Heratio's realtime service never writes it |
+| `research_comment` (`entity_type`, `entity_id`, `parent_id`, `content`, `is_resolved`, `resolved_by`, `resolved_at`) | Comments on annotations, diary entries and collections | Same; reports with 19i |
+| `research_clipboard_project` (`project_id`, `object_id`, `is_pinned`, `notes`) | The clipboard | Same |
+| `research_export_log` (`format`, `exported_by`, `exported_at`) | The export log | Same |
+| `research_institutional_share`, `research_external_collaborator`, `research_institution` | none | Not carried: nothing in Heratio writes or reads them |
+| `project_id` on collections, annotations, journal entries, bibliographies, submissions and workspace files | The project they are in | Same |
+| `research_notebook.promoted_to_project_id`, `promoted_at` | The project a notebook was promoted to | Same |
+
+: Research projects and working together, field by field
+
+### The reasoning and analysis of a research project (`ahg-research`)
+
+Added with 19i.
+
+| Heratio field | Workspace | Status |
+|---|---|---|
+| `research_assertion` (`researcher_id`, `project_id`, `subject_type`, `subject_id`, `subject_label`, `predicate`, `object_value`, `object_type`, `object_id`, `object_label`, `assertion_type`, `status`, `confidence`, `version`) | Claims | Same |
+| `research_claim_meta` (`evidence_type`, `confidence_level`, `provenance_kind`, `supporting_sources`, `opposing_sources`, `quotations`, `method_theory_link`, `researcher_notes`, `unresolved_weaknesses`, `ethical_concerns`) | The claim's own fields | Same: one table, not two |
+| `research_assertion_evidence` (`source_type`, `source_id`, `selector_json`, `relationship`, `note`, `added_by`) | Evidence | Same |
+| `research_hypothesis` (`statement`, `status`, `evidence_count`, `tags`) and `research_hypothesis_evidence` (`source_type`, `source_id`, `relationship`, `confidence`, `note`, `added_by`) | Hypotheses and their evidence | Same |
+| `research_contradiction` (`claim_a_id`, `claim_b_id`, `kind`, `signature`, `detail`, `severity`, `status`, `source`) | Contradictions | Same |
+| `research_decision_log` (`decision_type`, `summary`, `reason`, `related_ref`, `decided_by`, `decided_at`) | The decision log | Same |
+| `research_memory_item` (`researcher_id`, `project_id`, `kind`, `title`, `body`, `source_ref`, `status`, `created_by`) | Research memory | Same |
+| `research_analysis_result` (`result_type`, `title`, `source_data_ref`, `source_data_version`, `method`, `code_ref`, `generated_at`, `researcher_decision`, `artifact_path`, `created_by`), `research_analysis_result_claim` (`assertion_id`, `relationship`, `note`), `research_analysis_code` (`kind`, `label`, `body`) | Analysis results, their claims, theme tags and memos; the file kept as a research file | Same |
+| `research_snapshot` (`title`, `description`, `hash_sha256`, `query_state_json`, `rights_state_json`, `metadata_json`, `item_count`, `status`, `frozen_at`, `citation_id`) and `research_snapshot_item` (`object_id`, `object_type`, `culture`, `slug`, `metadata_version_json`, `rights_snapshot_json`, `sort_order`) | Snapshots, filled with the project's records | Same; the record's IRI for its slug |
+| `research_timeline_event` (`label`, `description`, `date_start`, `date_end`, `date_type`, `source_type`, `source_id`, `position`, `color`) | The timeline | Same |
+| `research_map_point` (`label`, `description`, `latitude`, `longitude`, `place_name`, `date_valid_from`, `date_valid_to`, `source_type`, `source_id`) | The map | Same |
+| `research_source_assessment` (`object_id`, `source_type`, `source_form`, `completeness`, `trust_score`, `rationale`, `bias_context`, `assessed_at`) | Source assessments | Same |
+| `research_entity_resolution` (`entity_a_type`, `entity_a_id`, `entity_b_type`, `entity_b_id`, `confidence`, `match_method`, `status`, `resolver_id`, `resolved_at`, `notes`, `evidence_json`, `proposer_id`) | Entity resolution | Same |
+| `research_entity_resolution.relationship_type` | One entity, as proposed | Modelled: only sameAs is ever written |
+| `research_cross_fonds_query` (`query_text`, `fonds_ids`, `results_count`, `elapsed_ms`) | The log of searches across fonds | Same |
+| `research_field_watch` (`doi`, `title`, `source_ref`, `added_by`, `last_checked_at`) and `research_field_alert` (`alert_type`, `title`, `detail`, `url`, `is_read`, `detected_at`) | Field alerts | Same |
+| `research_report` (`title`, `template_type`, `description`, `status`, `metadata`), `research_report_section` (`section_type`, `title`, `content`, `bibliography_id`, `collection_id`, `settings`, `sort_order`), `research_report_template` (`name`, `code`, `description`, `sections_config`, `is_system`) | Reports, sections and templates | Same; content plain text |
+| `research_peer_review` (`requested_by`, `reviewer_id`, `status`, `feedback`, `rating`, `requested_at`, `completed_at`) | Peer reviews | Same |
+| `research_ric_map` | What describes a project or output in the catalogue | Same |
+| `research_statistics_daily` | Counted from the services' tables | Modelled |
+| `research_validation_queue`, `research_extraction_job`, `research_extraction_result`, `research_quality_metric` | none yet | With the AI services of phase 17 |
+| `research_collaboration_session` | none | Not carried: never written |
+
+: The reasoning and analysis of a research project, field by field
+
+### The studios and research journals (`ahg-research`)
+
+Added with 19g.
+
+| Heratio field | Workspace | Status |
+|---|---|---|
+| `research_writing_doc` (`title`, `doc_type`, `status`, `created_by`), `research_writing_section` (`heading`, `body`, `sort_order`), `research_writing_version` (`version_no`, `snapshot`, `note`, `created_by`) | The writing studio | Same |
+| `research_review_comment` (`assertion_id`, `thread_id`, `author_id`, `body`, `resolved`) | The review studio | Same |
+| `research_review_run` (`persona`, `model`, `summary`, `findings`) | none yet | With the AI services of phase 17 |
+| `research_submission` (`venue_ref`, `venue_name`, `status`, `manuscript_title`, `submitted_at`, `decision_at`, `doi`, `repository_url`, `notes`), `research_submission_requirement` (`label`, `met`, `note`, `sort_order`), `research_submission_response` (`reviewer_label`, `point`, `response`, `revision_note`) | The publication studio | Same |
+| `research_method_template` (`code`, `name`, `discipline`, `description`, `guidance`, `is_active`, `sort_order`) and `research_method_protocol` (`template_code`, `title`, `fields`, `status`) | The method studio; Heratio's eleven templates | Same |
+| `research_question_brief` (`current_version`, `status`) and `research_question_brief_version` (its ten fields, `change_reason`) | The question builder | Same |
+| `research_argument` (`title`, `central_thesis`) and `research_argument_step` (`slot`, `assertion_id`, `note`, `sort_order`) | The argument builder | Same |
+| `research_source_triage` (`source_type`, `source_id`, `triage_category`, `read_status`, `notes`, `updated_by`) | Source triage | Same |
+| `research_source_triage.ai_preview`, `ai_preview_at` | none yet | With the AI services of phase 17 |
+| `research_journal` (`kind`, `title`, `subtitle`, `issn`, `eissn`, `publisher`, `description`, `aims_scope`, `editor_name`, `editor_email`, `target_journal_id`, `cover_object_id`, `doi`, `status`) | Research journals | Same |
+| `research_journal_issue` (`volume`, `number`, `title`, `issue_date`, `description`, `status`, `sort_order`) | Issues | Same |
+| `research_journal_article` (`issue_id`, `title`, `authors`, `abstract`, `keywords`, `body_markdown`, `reference_style`, `target_journal_id`, `doi`, `word_count`, `status`, `sort_order`) | Articles | Same |
+| `research_journal_article.body_html` | Made from the Markdown when shown | Modelled |
+| `research_target_journal` (all its fields) | The directory; Heratio's DHET starter list | Same |
+
+: The studios and research journals, field by field
+

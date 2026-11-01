@@ -1,0 +1,51 @@
+# OpenRiC Workspace - OpenRiC Workspace Feedback Types.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What feedback is about (Heratio's feedback types).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/feedback-type/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Feedback Types"@en ;
+    dcterms:description "What feedback is about (Heratio's feedback types)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:general, v:bug, v:feature, v:correction, v:compliment .
+
+v:general a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "General feedback"@en, "Algemene terugvoer"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio keeps it."@en ;
+    skos:definition "About the catalogue or the institution."@en .
+
+v:bug a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Bug report"@en, "Foutverslag"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio keeps it."@en ;
+    skos:definition "Something does not work."@en .
+
+v:feature a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Feature request"@en, "Versoek vir 'n funksie"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio keeps it."@en ;
+    skos:definition "Something the catalogue could do."@en .
+
+v:correction a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Content correction"@en, "Inhoudsregstelling"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio keeps it."@en ;
+    skos:definition "A description says something wrong."@en .
+
+v:compliment a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Compliment"@en, "Kompliment"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio keeps it."@en ;
+    skos:definition "Thanks or praise."@en .

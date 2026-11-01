@@ -1,0 +1,48 @@
+<?php
+
+// OpenRiC Workspace - a piece of evidence for or against a hypothesis (roadmap phase 19i, ADR 0017).
+// Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
+namespace App\Models;
+
+use App\Audit\Audited;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+#[Fillable(['hypothesis_id', 'source_type_id', 'source_id', 'relationship_id', 'confidence', 'note', 'added_by_id', 'created_at'])]
+class ResearchHypothesisEvidence extends Model
+{
+    use Audited, HasUuids;
+
+    protected $table = 'research_hypothesis_evidence';
+
+    public $timestamps = false;
+
+    protected function casts(): array
+    {
+        return ['confidence' => 'float', 'created_at' => 'datetime'];
+    }
+
+    public function hypothesis(): BelongsTo
+    {
+        return $this->belongsTo(ResearchHypothesis::class);
+    }
+
+    public function sourceType(): BelongsTo
+    {
+        return $this->belongsTo(Concept::class);
+    }
+
+    public function relationship(): BelongsTo
+    {
+        return $this->belongsTo(Concept::class);
+    }
+
+    public function addedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'added_by_id');
+    }
+}

@@ -56,6 +56,21 @@
                 ...collect(\App\Http\Controllers\ReportController::TITLES)->mapWithKeys(fn ($title, $list) => ['reports.'.$list => [__($title),
                     \App\Reports\ReportService::mayRead($user, $list), 'reports.'.$list]])->all(),
             ],
+            // Research services (roadmap phase 19).
+            'Research' => [
+                'reading-room.desk' => [__('Reading room desk'), $may('manage-reading-room'), 'reading-room.desk|research.bookings.*'],
+                'reading-room.researchers' => [__('Researchers'), $may('manage-reading-room'), 'reading-room.researchers*'],
+                'reading-room.queues' => [__('Retrieval queues'), $may('manage-reading-room'), 'reading-room.queues*|reading-room.slips'],
+                'research.reproductions.index' => [__('Reproductions'), $may('manage-reading-room'), 'research.reproductions.*'],
+                'reading-room.rooms' => [__('Reading rooms'), $may('manage-reading-room'), 'reading-room.rooms*'],
+                'reading-room.types' => [__('Kinds of researcher'), $may('manage-reading-room'), 'reading-room.types*'],
+                'research.submissions.pending' => [__('Submissions to review'), $may('review-submissions'), 'research.submissions.pending'],
+                'research.analytics' => [__('Research analytics'), $may('manage-reading-room'), 'research.analytics'],
+                'feedback.index' => [__('Feedback received'), $user->mayAnywhere('update', 'description'), 'feedback.*'],
+                'share-links.index' => [__('Share links'), $user->mayAnywhere('update', 'description'), 'share-links.*'],
+                'shop.orders' => [__('Orders'), $may('manage-shop'), 'shop.orders*'],
+                'shop.settings' => [__('Shop settings'), $may('manage-shop'), 'shop.settings*'],
+            ],
             'Admin' => [
                 'accounts.index' => [__('Users'), $may('manage-accounts'), 'accounts.*'],
                 'email.index' => [__('Email'), $may('manage-accounts'), 'email.*'],
@@ -73,6 +88,7 @@
             'Workflow' => '<path d="M4 6h6v4H4zM14 14h6v4h-6z"/><path d="M7 10v4a2 2 0 0 0 2 2h5"/>',
             'Import and export' => '<path d="M7 4v13M3 13l4 4 4-4"/><path d="M17 20V7M13 11l4-4 4 4"/>',
             'Reports' => '<path d="M4 20V10M10 20V4M16 20v-7M2 20h20"/>',
+            'Research' => '<path d="M2 5c3-1.5 7-1.5 10 1 3-2.5 7-2.5 10-1v14c-3-1.5-7-1.5-10 1-3-2.5-7-2.5-10-1z"/><path d="M12 6v14"/>',
             'Admin' => '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/>',
             'Public catalogue' => '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3.5 3.5 3.5 14.5 0 18M12 3c-3.5 3.5-3.5 14.5 0 18"/>',
         ];

@@ -1,0 +1,74 @@
+[
+  {
+    "name": "Digital Download - Low Resolution",
+    "description": "Web-quality image (72dpi, max 1200px)",
+    "is_digital": true,
+    "requires_shipping": false,
+    "delivers_use": "reference",
+    "price": 50.0
+  },
+  {
+    "name": "Digital Download - High Resolution",
+    "description": "Print-quality image (300dpi, full resolution)",
+    "is_digital": true,
+    "requires_shipping": false,
+    "delivers_use": "master",
+    "price": 150.0
+  },
+  {
+    "name": "Digital Download - TIFF Master",
+    "description": "Archival quality TIFF file",
+    "is_digital": true,
+    "requires_shipping": false,
+    "delivers_use": "master",
+    "price": 350.0
+  },
+  {
+    "name": "Print - A4",
+    "description": "Professional print on archival paper (A4)",
+    "is_digital": false,
+    "requires_shipping": true,
+    "delivers_use": null,
+    "price": 250.0
+  },
+  {
+    "name": "Print - A3",
+    "description": "Professional print on archival paper (A3)",
+    "is_digital": false,
+    "requires_shipping": true,
+    "delivers_use": null,
+    "price": 400.0
+  },
+  {
+    "name": "Print - A2",
+    "description": "Professional print on archival paper (A2)",
+    "is_digital": false,
+    "requires_shipping": true,
+    "delivers_use": null,
+    "price": 600.0
+  },
+  {
+    "name": "Publication License - Non-Commercial",
+    "description": "License for non-commercial publication",
+    "is_digital": true,
+    "requires_shipping": false,
+    "delivers_use": null,
+    "price": 500.0
+  },
+  {
+    "name": "Publication License - Commercial",
+    "description": "License for commercial publication",
+    "is_digital": true,
+    "requires_shipping": false,
+    "delivers_use": null,
+    "price": 1500.0
+  },
+  {
+    "name": "Research Use Only",
+    "description": "Free for academic research (watermarked)",
+    "is_digital": true,
+    "requires_shipping": false,
+    "delivers_use": "reference",
+    "price": 0.0
+  }
+]

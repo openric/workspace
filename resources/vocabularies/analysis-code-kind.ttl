@@ -1,0 +1,30 @@
+# OpenRiC Workspace - OpenRiC Workspace Analysis Code Kinds.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What a code of a project's analysis is (Heratio's research_analysis_code.kind).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/analysis-code-kind/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Analysis Code Kinds"@en ;
+    dcterms:description "What a code of a project's analysis is (Heratio's research_analysis_code.kind)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:theme-tag, v:memo .
+
+v:theme-tag a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Theme tag"@en, "Tema-etiket"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "A theme to code by."@en .
+
+v:memo a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Memo"@en, "Memo"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "A memo."@en .

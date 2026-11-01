@@ -1,0 +1,51 @@
+# OpenRiC Workspace - OpenRiC Workspace Contradiction Kinds.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What a contradiction the engine found is (Heratio's research_contradiction.kind).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/contradiction-kind/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Contradiction Kinds"@en ;
+    dcterms:description "What a contradiction the engine found is (Heratio's research_contradiction.kind)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:opposing-status, v:shared-source-conflict, v:confidence-drop, v:definition-drift, v:ai-flagged .
+
+v:opposing-status a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Opposing status"@en, "Teenoorgestelde status"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "Two claims on one topic hold opposite positions."@en .
+
+v:shared-source-conflict a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Shared source conflict"@en, "Botsing oor gedeelde bron"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "One source supports one claim and refutes another."@en .
+
+v:confidence-drop a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Confidence drop"@en, "Daling in sekerheid"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "A claim's confidence does not match its status or level."@en .
+
+v:definition-drift a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Definition drift"@en, "Definisieverskuiwing"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "A term carries two meanings."@en .
+
+v:ai-flagged a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "AI flagged"@en, "KI-gemerk"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "Flagged by the AI services of phase 17."@en .
