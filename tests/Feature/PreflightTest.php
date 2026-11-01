@@ -17,6 +17,10 @@ class PreflightTest extends TestCase
         @mkdir(dirname($key), 0o755, true);
         file_put_contents($key, 'test');
         chmod($key, 0o600);
+        // The environment file read is a private one, whatever mode the checkout's .env has (CI copies .env.example).
+        file_put_contents($env = dirname($key).'/.env', "APP_ENV=production\n");
+        chmod($env, 0o600);
+        $this->app->useEnvironmentPath(dirname($key));
         $this->app['env'] = 'production';
         config(['app.debug' => false, 'app.url' => 'https://archives.example.org', 'session.secure' => true, 'mail.default' => 'smtp',
             'logging.default' => 'single', 'logging.channels.single.level' => 'info', 'workspace.audit_signing_key' => $key,

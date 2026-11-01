@@ -19,7 +19,7 @@ class Preflight extends Command
 
     public function handle(): int
     {
-        $env = base_path('.env');
+        $env = app()->environmentFilePath();
         $store = rtrim(config('workspace.object_store') ?: storage_path('app/objects'), '/');
         $https = str_starts_with((string) config('app.url'), 'https://');
         $key = (string) config('workspace.audit_signing_key');
