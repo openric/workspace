@@ -117,6 +117,18 @@ class RecordResource extends Model
         return $this->hasMany(self::class, 'parent_id')->whereNull('deleted_at')->orderBy('position');
     }
 
+    /** The record sets it is also in, besides its parent: its proxies there (rico:Proxy; roadmap phase 24). */
+    public function memberships(): HasMany
+    {
+        return $this->hasMany(RecordMembership::class, 'record_resource_id')->whereNull('deleted_at')->orderBy('created_at');
+    }
+
+    /** The units also in this record set, besides those it holds: their proxies here, in this set's order. */
+    public function memberProxies(): HasMany
+    {
+        return $this->hasMany(RecordMembership::class, 'record_set_id')->whereNull('deleted_at')->orderBy('position')->orderBy('created_at');
+    }
+
     /** Ancestors from the top down, not including this one. */
     public function ancestors(): array
     {

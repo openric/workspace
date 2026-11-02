@@ -1,0 +1,166 @@
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# OpenRiC SHACL shapes — profile: provenance-event
+# ================================================
+# Tightened Activity shapes. RiC-O 1.1 has only the parent class
+# rico:Activity; OpenRiC distinguishes event kinds via rico:hasActivityType
+# IRIs from <https://openric.org/vocab/activity-type/{production,
+# accumulation,custody,transfer,publication,reproduction}>. Authority &
+# Context accepts any rico:Activity with name + date. Provenance & Event
+# promotes cross-entity links (results, participants) from Warnings to
+# Violations on production- and accumulation-typed Activities, so that a
+# conformant response tells a consumer *who did what to which record,
+# when* — the full event model.
+#
+# Shapes in this file:
+#   - StrictProductionShape    — rico:Activity with hasActivityType=production
+#                                MUST carry a result + a participant + a date
+#   - StrictAccumulationShape  — rico:Activity with hasActivityType=accumulation
+#                                MUST carry a result + a date
+#   - StrictActivityShape      — every rico:Activity MUST carry a date
+#   - ParticipantTypeShape     — hasOrHadParticipant target MUST be an Agent subclass
+#   - ResultTypeShape          — resultsOrResultedIn target MUST be a RecordSet or Record
+#
+# These shapes TARGET the same classes as authority-context's softer
+# shapes. SHACL semantics: all applicable shapes accumulate, and the
+# strictest constraint wins. Implementations claiming provenance-event
+# are de facto also claiming authority-context's Activity rules (a
+# superset is not automatically declared — you still list both profile
+# ids in openric_conformance.profiles if you meet both).
+#
+# Usage:
+#   pyshacl -s always-on.shacl.ttl -s provenance-event.shacl.ttl \
+#           -d activity-response.jsonld -f human
+
+@prefix sh:   <http://www.w3.org/ns/shacl#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix rico: <https://www.ica.org/standards/RiC/ontology#> .
+@prefix :     <https://openric.org/shapes#> .
+
+
+# ----------------------------------------------------------------------------
+# Strict Activity subclass shapes
+# ----------------------------------------------------------------------------
+
+:StrictProductionShape a sh:NodeShape ;
+    sh:target [
+        a sh:SPARQLTarget ;
+        sh:prefixes <https://openric.org/shapes#> ;
+        sh:select """
+            PREFIX rico: <https://www.ica.org/standards/RiC/ontology#>
+            SELECT ?this WHERE {
+                ?this a rico:Activity ;
+                      rico:hasActivityType <https://openric.org/vocab/activity-type/production> .
+            }
+        """ ;
+    ] ;
+    sh:name "Production (Strict — Provenance & Event)" ;
+    sh:description "A Production event MUST carry: at least one resulting record, at least one participant (creator), and an associated date. These are Violations — a Production without them erases the provenance the profile exists to expose." ;
+
+    sh:property [
+        sh:path rico:resultsOrResultedIn ;
+        sh:minCount 1 ;
+        sh:message "Production-typed rico:Activity MUST have at least one rico:resultsOrResultedIn (the record it produced)"
+    ] ;
+
+    sh:property [
+        sh:path rico:hasOrHadParticipant ;
+        sh:minCount 1 ;
+        sh:message "Production-typed rico:Activity MUST have at least one rico:hasOrHadParticipant (the creator agent)"
+    ] ;
+
+    sh:property [
+        sh:path rico:isAssociatedWithDate ;
+        sh:minCount 1 ;
+        sh:message "Production-typed rico:Activity MUST have an associated date"
+    ] .
+
+
+:StrictAccumulationShape a sh:NodeShape ;
+    sh:target [
+        a sh:SPARQLTarget ;
+        sh:prefixes <https://openric.org/shapes#> ;
+        sh:select """
+            PREFIX rico: <https://www.ica.org/standards/RiC/ontology#>
+            SELECT ?this WHERE {
+                ?this a rico:Activity ;
+                      rico:hasActivityType <https://openric.org/vocab/activity-type/accumulation> .
+            }
+        """ ;
+    ] ;
+    sh:name "Accumulation (Strict — Provenance & Event)" ;
+    sh:description "An Accumulation event MUST carry at least one resulting record and an associated date. hasOrHadParticipant is STRONGLY RECOMMENDED (Warning) — the accumulating agent — but not all historical accumulations have a named agent, so this stays soft." ;
+
+    sh:property [
+        sh:path rico:resultsOrResultedIn ;
+        sh:minCount 1 ;
+        sh:message "Accumulation-typed rico:Activity MUST have at least one rico:resultsOrResultedIn"
+    ] ;
+
+    sh:property [
+        sh:path rico:isAssociatedWithDate ;
+        sh:minCount 1 ;
+        sh:message "Accumulation-typed rico:Activity MUST have an associated date"
+    ] ;
+
+    sh:property [
+        sh:path rico:hasOrHadParticipant ;
+        sh:severity sh:Warning ;
+        sh:message "Accumulation-typed rico:Activity SHOULD name the accumulating agent via rico:hasOrHadParticipant"
+    ] .
+
+
+:StrictActivityShape a sh:NodeShape ;
+    sh:targetClass rico:Activity ;
+    sh:name "Activity (Strict — Provenance & Event)" ;
+    sh:description "Generic rico:Activity (custody transfer, publication, reproduction, unknown event) MUST carry a date. resultsOrResultedIn / hasOrHadParticipant stay soft here — many custody events lack one or both." ;
+
+    sh:property [
+        sh:path rico:isAssociatedWithDate ;
+        sh:minCount 1 ;
+        sh:message "rico:Activity MUST have an associated date"
+    ] ;
+
+    sh:property [
+        sh:path rico:hasActivityType ;
+        sh:severity sh:Warning ;
+        sh:message "rico:Activity SHOULD carry an activity type so consumers can dispatch on custody / publication / reproduction etc."
+    ] .
+
+
+# ----------------------------------------------------------------------------
+# Target-type shapes — applied wherever the predicate appears
+# ----------------------------------------------------------------------------
+
+:ParticipantTypeShape a sh:NodeShape ;
+    sh:targetSubjectsOf rico:hasOrHadParticipant ;
+    sh:name "Participant Type Check" ;
+    sh:description "A hasOrHadParticipant target must be an Agent subclass. Linking to a Place or a Thing silently drops provenance." ;
+
+    sh:property [
+        sh:path rico:hasOrHadParticipant ;
+        sh:or (
+            [ sh:class rico:Person ]
+            [ sh:class rico:CorporateBody ]
+            [ sh:class rico:Family ]
+            [ sh:class rico:Agent ]
+        ) ;
+        sh:message "rico:hasOrHadParticipant target MUST be a Person, CorporateBody, Family, or Agent"
+    ] .
+
+
+:ResultTypeShape a sh:NodeShape ;
+    sh:targetSubjectsOf rico:resultsOrResultedIn ;
+    sh:name "Result Type Check" ;
+    sh:description "A resultsOrResultedIn target must be a Record or RecordSet. Linking to an Agent or Place is a mapping error — that is a different predicate (tookPlaceAt, hasOrHadParticipant)." ;
+
+    sh:property [
+        sh:path rico:resultsOrResultedIn ;
+        sh:or (
+            [ sh:class rico:RecordSet ]
+            [ sh:class rico:Record ]
+            [ sh:class rico:RecordPart ]
+        ) ;
+        sh:message "rico:resultsOrResultedIn target MUST be a RecordSet, Record, or RecordPart"
+    ] .

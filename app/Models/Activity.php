@@ -15,7 +15,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['institution_id', 'iri', 'activity_type_id', 'description_identifier', 'description_status_id', 'description_detail_id'])]
+#[Fillable(['institution_id', 'iri', 'activity_type_id', 'description_identifier', 'description_status_id', 'description_detail_id', 'is_function'])]
 class Activity extends Model
 {
     use Audited, Describable, HasDates, HasIdentifiers, HasUuids;
@@ -28,7 +28,7 @@ class Activity extends Model
 
     protected function casts(): array
     {
-        return ['deleted_at' => 'immutable_datetime'];
+        return ['deleted_at' => 'immutable_datetime', 'is_function' => 'boolean'];
     }
 
     /** rico:hasActivityType */

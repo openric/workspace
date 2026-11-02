@@ -53,6 +53,14 @@ class JsonLd
     /** The Authority & Context schema gives a rule's type as a string; RiC-O makes it a rico:RuleType, so in a rule's document the string is its IRI. */
     private const RULE_TYPE_AS_IRI = ['rico:hasOrHadRuleType' => ['@type' => '@id']];
 
+    /** The same for an instantiation's carrier type (Digital Object Linkage 3.1; RiC-O rico:CarrierType). */
+    private const CARRIER_TYPE_AS_IRI = ['rico:hasCarrierType' => ['@type' => '@id']];
+
+    /** An instantiation's values written as literals (Digital Object Linkage 3.1). */
+    private const INSTANTIATION_TEXT = ['instantiation-description' => 'openricx:description', 'instantiation-production-technique' => 'rico:productionTechnique',
+        'instantiation-physical-characteristics' => 'rico:physicalCharacteristicsNote', 'instantiation-quality' => 'rico:qualityOfRepresentationNote',
+        'instantiation-conditions-of-access' => 'rico:conditionsOfAccess'];
+
     /** ISAD(G) elements written as literals (mapping 7.1), by notation. */
     public const RECORD_TEXT = [
         'scope-and-content' => 'rico:scopeAndContent', 'archival-history' => 'rico:history', 'arrangement' => 'rico:structure',
@@ -131,12 +139,28 @@ class JsonLd
         if ($creators !== []) {
             $out['rico:hasCreator'] = $creators;
         }
-        if ($unit->parent && $this->view->readable($unit->parent)) {
-            $out['rico:isOrWasIncludedIn'] = $this->stub($unit->parent);
+        // Its carriers (Digital Object Linkage, roadmap phase 24), by IRI: each is described at its own address.
+        $carriers = $unit->instantiations->filter(fn ($i) => $this->view->readable($i))->map(fn ($i) => ['@id' => $i->iri])->values()->all();
+        if ($carriers !== []) {
+            $out['rico:hasOrHadInstantiation'] = $carriers;
+        }
+        // Where it is arranged, then each record set it is also in (rico:Proxy; roadmap phase 24).
+        $in = array_filter([$unit->parent && $this->view->readable($unit->parent) ? $this->stub($unit->parent) : null,
+            ...$unit->memberships->filter(fn ($m) => $this->view->readable($m->recordSet))->map(fn ($m) => $this->stub($m->recordSet))->all()]);
+        if ($in !== []) {
+            $out['rico:isOrWasIncludedIn'] = count($in) === 1 ? reset($in) : array_values($in);
         }
         $children = $unit->children->filter(fn ($c) => $this->view->readable($c))->map(fn ($c) => $this->stub($c))->values()->all();
+        $proxies = $unit->memberProxies->filter(fn ($m) => $this->view->readable($m->record))->values();
+        $children = [...$children, ...$proxies->map(fn ($m) => $this->stub($m->record))->all()];
         if ($children !== []) {
             $out['rico:includesOrIncluded'] = $children;
+        }
+        // The units also in it, each by its proxy here, in this record set's order.
+        if ($proxies->isNotEmpty()) {
+            $out['rico:includesProxy'] = $proxies->map(fn ($m, $i) => array_filter(['@id' => $m->iri, '@type' => 'rico:Proxy',
+                'rico:proxyFor' => ['@id' => $m->record->iri], 'rico:proxyIn' => ['@id' => $unit->iri],
+                'rico:proxyDirectlyPrecedesProxyInSequence' => isset($proxies[$i + 1]) ? ['@id' => $proxies[$i + 1]->iri] : null]))->all();
         }
         $out += $this->relations($unit, ['rico:hasCreator', 'rico:hasOrHadHolder']);
         // Its images, sound and video as a IIIF manifest, for the public (ADR 0014): RiC describes, IIIF presents.
@@ -295,7 +319,11 @@ class JsonLd
         return $out + $this->dates($rule->dates) + $this->relations($rule);
     }
 
-    /** An activity (Authority & Context 3.4): its name, description, type, dates and who and what it involved. */
+    /**
+     * An activity (Authority & Context 3.4; Provenance & Event 3.1): its name, description, type, dates and who and what
+     * it involved. Provenance & Event checks the class of what it resulted in and who took part, so those are stubs
+     * with their class and names; who performed it took part in it, so is named a participant too.
+     */
     public function activity(Activity $activity, bool $withContext = true): array
     {
         $out = $this->head($activity, $withContext);
@@ -310,8 +338,69 @@ class JsonLd
         if ($dates = $this->dates($activity->dates)['openricx:hasDateRangeSet'] ?? null) {
             $out['rico:isAssociatedWithDate'] = $dates;
         }
+        $out += $this->relations($activity, [], ['rico:resultsOrResultedIn', 'rico:hasOrHadParticipant', 'rico:isOrWasPerformedBy']);
+        if (isset($out['rico:isOrWasPerformedBy'])) {
+            $out['rico:hasOrHadParticipant'] = collect([...($out['rico:hasOrHadParticipant'] ?? []), ...$out['rico:isOrWasPerformedBy']])->unique('@id')->values()->all();
+        }
 
-        return $out + $this->relations($activity);
+        return $out;
+    }
+
+    /**
+     * An instantiation (Digital Object Linkage 3.1): its title, identifier, carrier type, the master file's MIME type,
+     * size and SHA-256, what its values say, the unit it carries and its relations, such as what it was derived from.
+     */
+    public function instantiation(Instantiation $instantiation, bool $withContext = true): array
+    {
+        $out = $this->head($instantiation, $withContext);
+        if ($withContext) {
+            $out['@context'] += self::CARRIER_TYPE_AS_IRI;
+        }
+        $out += $this->strings('rico:title', $instantiation->namesOfType('authorised'));
+        $file = $instantiation->files->firstWhere(fn ($f) => $f->use?->notation === 'master') ?? $instantiation->files->first();
+        if ($file?->original_name) {
+            $out['rico:identifier'] = $file->original_name;
+        }
+        foreach (self::INSTANTIATION_TEXT as $notation => $property) {
+            if ($value = $this->text($instantiation, $notation)) {
+                $out[$property] = $value;
+            }
+        }
+        if ($instantiation->carrierType) {
+            $out['rico:hasCarrierType'] = $withContext ? $instantiation->carrierType->iri : ['@id' => $instantiation->carrierType->iri];
+            $out['openric:localType'] = (string) $instantiation->carrierType->notation;
+        }
+        if ($file) {
+            $out += array_filter(['openricx:hasMimeType' => $file->mime_type,
+                'rico:hasExtent' => $file->size_bytes !== null ? ['@id' => $instantiation->iri.'#extent', '@type' => 'rico:InstantiationExtent', 'rico:quantity' => (int) $file->size_bytes,
+                    'rico:hasUnitOfMeasurement' => ['@id' => $instantiation->iri.'#bytes', '@type' => 'rico:UnitOfMeasurement', 'rico:name' => 'bytes']] : null,
+                'openricx:technicalCharacteristics' => $file->sha256 ? 'Checksum (sha256): '.$file->sha256 : null]);
+        }
+        if ($instantiation->availability) {
+            $out['rico:conditionsOfAccess'] ??= (string) $instantiation->availability->anyLabel(['en']);
+        }
+        if ($instantiation->record && $this->view->readable($instantiation->record)) {
+            $out['rico:isOrWasInstantiationOf'] = $this->stub($instantiation->record);
+        }
+
+        return $out + $this->dates($instantiation->dates) + $this->relations($instantiation);
+    }
+
+    /** An activity described as an ISDF function (Digital Object Linkage 3.2): its name, history and classification. */
+    public function function(Activity $function, bool $withContext = true): array
+    {
+        $out = [...($withContext ? ['@context' => self::CONTEXT] : []), '@id' => $function->iri, '@type' => 'openricx:Function'];
+        $out += $this->strings('rico:name', $function->namesOfType('authorised'));
+        foreach (['activity-history' => 'rico:history', 'activity-classification' => 'rico:classification', 'activity-description' => 'openricx:description'] as $notation => $property) {
+            if ($value = $this->text($function, $notation)) {
+                $out[$property] = $value;
+            }
+        }
+        if ($function->activityType) {
+            $out['openric:localType'] = (string) $function->activityType->notation;
+        }
+
+        return $out + $this->relations($function);
     }
 
     /**
@@ -335,18 +424,18 @@ class JsonLd
 
     /**
      * Every relation of the entity the reader may follow, by its RiC-O property (relation_types.ric_property from its
-     * source, ric_inverse from its target; mapping section 8): relations that stand (accepted
-     * or disputed), to entities the reader may read. Instantiations are left to the Digital Object Linkage profile,
-     * which the Workspace does not declare. $already names the properties the caller writes itself. Each other end is its
-     * IRI only.
+     * source, ric_inverse from its target; mapping section 8): relations that stand (accepted or disputed), to entities
+     * the reader may read. $already names the properties the caller writes itself; the other end is its IRI, or, for the
+     * properties in $typed, a stub with its class and names.
      *
      * @param  list<string>  $already
+     * @param  list<string>  $typed
      */
-    private function relations(Model $entity, array $already = []): array
+    private function relations(Model $entity, array $already = [], array $typed = []): array
     {
         $out = [];
         foreach (app(RelationService::class)->of($entity) as $relation) {
-            if (! in_array($relation->standing(), ['accepted', 'disputed'], true) || $relation->other instanceof Instantiation || ! $this->view->readable($relation->other)) {
+            if (! in_array($relation->standing(), ['accepted', 'disputed'], true) || ! $this->view->readable($relation->other)) {
                 continue;
             }
             $type = RelationTypes::of($relation);
@@ -358,7 +447,7 @@ class JsonLd
             // entity wherever documents are merged, and a class without the name its shape requires fails that shape. A
             // property the caller writes itself is not written twice, but its qualified node still is.
             if (! in_array($property, $already, true)) {
-                $out[$property][$relation->other->getAttribute('iri')] = ['@id' => $relation->other->getAttribute('iri')];
+                $out[$property][$relation->other->getAttribute('iri')] = in_array($property, $typed, true) ? $this->stub($relation->other) : ['@id' => $relation->other->getAttribute('iri')];
             }
             if ($relation->fromSource && ($node = $this->qualified($entity, $relation, $type)) !== null) {
                 $out['rico:thingIsSourceOfRelation'][$relation->iri] = $node;
@@ -461,9 +550,12 @@ class JsonLd
     public function stub(Model $entity): array
     {
         // A unit's name is its title (RiC-O 1.1; the OpenRiC shapes require rico:title of a rico:Record).
-        $name = $entity instanceof RecordResource || $entity instanceof Rule ? 'rico:title' : 'rico:name';
+        $name = $entity instanceof RecordResource || $entity instanceof Rule || $entity instanceof Instantiation ? 'rico:title' : 'rico:name';
+        // The same language-tagged names as its own description (roadmap phase 24): a plain string here would be a
+        // second literal for the same entity wherever documents are merged, and break its one-title shapes.
+        $names = method_exists($entity, 'namesOfType') ? $this->strings($name, $entity->namesOfType('authorised'))[$name] ?? null : null;
 
-        return array_filter(['@id' => $entity->getAttribute('iri'), '@type' => $this->type($entity), $name => $this->view->label($entity)], fn ($v) => $v !== null);
+        return array_filter(['@id' => $entity->getAttribute('iri'), '@type' => $this->type($entity), $name => $names ?? $this->view->label($entity)], fn ($v) => $v !== null);
     }
 
     /** The RiC-O class: a unit's level, an agent's type (with rico:Agent where its own class is not one Core Discovery names), a repository's rico:CorporateBody. */

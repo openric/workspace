@@ -37,6 +37,11 @@ Route::middleware([ServeRicApi::class, 'throttle:600,1', AuthenticateApiKey::cla
     Route::get('/rules/{key}', [DiscoveryController::class, 'rule'])->name('api.rule');
     Route::get('/activities', [DiscoveryController::class, 'activities'])->name('api.activities');
     Route::get('/activities/{key}', [DiscoveryController::class, 'activity'])->name('api.activity');
+    // Digital Object Linkage (0.7.0), roadmap phase 24.
+    Route::get('/instantiations', [DiscoveryController::class, 'instantiations'])->name('api.instantiations');
+    Route::get('/instantiations/{key}', [DiscoveryController::class, 'instantiation'])->name('api.instantiation');
+    Route::get('/functions', [DiscoveryController::class, 'functions'])->name('api.functions');
+    Route::get('/functions/{key}', [DiscoveryController::class, 'function'])->name('api.function');
     Route::get('/graph', [GraphController::class, 'graph'])->name('api.graph');
     Route::get('/relations', [GraphController::class, 'relations'])->name('api.relations');
     Route::get('/relations-for/{id}', [GraphController::class, 'relationsFor'])->whereUuid('id')->name('api.relations-for');

@@ -85,6 +85,17 @@ class Graph
             if ($entity->parent && $this->view->readable($entity->parent)) {
                 $found[] = [$entity->parent, 'is or was included in', 'rico:isOrWasIncludedIn', true];
             }
+            // The record sets it is also in, and the units also in it (rico:Proxy; roadmap phase 24).
+            foreach ($entity->memberships()->with('recordSet.names.state', 'recordSet.level.labels')->get() as $membership) {
+                if ($this->view->readable($membership->recordSet)) {
+                    $found[] = [$membership->recordSet, 'is or was included in', 'rico:isOrWasIncludedIn', true];
+                }
+            }
+            foreach ($entity->memberProxies()->with('record.names.state', 'record.level.labels')->get() as $membership) {
+                if ($this->view->readable($membership->record)) {
+                    $found[] = [$membership->record, 'is or was included in', 'rico:isOrWasIncludedIn', false];
+                }
+            }
             if ($entity->repository && $this->view->readable($entity->repository)) {
                 $found[] = [$entity->repository, 'is or was held by', 'rico:hasOrHadHolder', true];
             }

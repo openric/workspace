@@ -17,6 +17,7 @@ use App\Accounts\AccountService;
 use App\Description\ActivityService;
 use App\Description\AgentService;
 use App\Description\DateService;
+use App\Description\InstantiationService;
 use App\Description\PlaceService;
 use App\Description\PublicationService;
 use App\Description\RecordService;
@@ -27,6 +28,7 @@ use App\Models\Activity;
 use App\Models\Concept;
 use App\Models\Institution;
 use App\Models\Rule;
+use App\Models\User;
 use App\Relations\RelationService;
 use App\Support\Vocab;
 use App\Vocabulary\SkosImporter;
@@ -104,7 +106,7 @@ class GraphProfilesTest extends TestCase
         $this->assertContains('authority-context', array_column($service, 'id'));
 
         $place = $this->valid($this->getJson(self::API.'/places/'.$this->e['town']->id)->assertOk(), 'place');
-        $this->assertSame(['@id' => $this->e['province']->iri, '@type' => 'rico:Place', 'rico:name' => 'Cape Province'], $place['rico:isOrWasPartOf']);
+        $this->assertSame(['@id' => $this->e['province']->iri, '@type' => 'rico:Place', 'rico:name' => ['@value' => 'Cape Province', '@language' => 'en']], $place['rico:isOrWasPartOf']);
         $this->assertSame([['@id' => $this->e['meetings']->iri]], $place['rico:isPlaceAssociatedWith']);
 
         $rule = $this->valid($this->getJson(self::API.'/rules/'.$this->e['ordinance']->id)->assertOk(), 'rule');
@@ -115,8 +117,10 @@ class GraphProfilesTest extends TestCase
 
         $activity = $this->valid($this->getJson(self::API.'/activities/'.$this->e['meetings']->id)->assertOk(), 'activity');
         $this->assertSame(['@id' => Activity::TYPES.'production'], $activity['rico:hasActivityType']);
-        $this->assertSame([['@id' => $this->e['minutes']->iri]], $activity['rico:resultsOrResultedIn']);
-        $this->assertSame([['@id' => $this->e['council']->iri]], $activity['rico:isOrWasPerformedBy']);
+        // What it resulted in and who took part are stubs with their class (Provenance & Event); the performer takes part too.
+        $this->assertSame([[$this->e['minutes']->iri, 'rico:RecordSet']], array_map(fn ($s) => [$s['@id'], $s['@type']], $activity['rico:resultsOrResultedIn']));
+        $this->assertSame([$this->e['council']->iri], array_column($activity['rico:isOrWasPerformedBy'], '@id'));
+        $this->assertSame([$this->e['council']->iri], array_column($activity['rico:hasOrHadParticipant'], '@id'));
         $this->assertSame('1939', $activity['rico:isAssociatedWithDate'][0]['rico:beginningDate']['@value']);
 
         foreach (['places' => 2, 'rules' => 1, 'activities' => 1] as $list => $total) {
@@ -156,5 +160,38 @@ class GraphProfilesTest extends TestCase
         $places = $this->valid($this->getJson(self::API.'/hierarchy/'.$this->e['province']->id)->assertOk(), 'hierarchy', true);
         $this->assertSame([null, ['Riverside'], 'Place'], [$places['parent'], array_column($places['children'], 'name'), $places['class']]);
         $this->getJson(self::API.'/hierarchy/'.$this->e['draft']->id)->assertNotFound();
+    }
+
+    public function test_instantiations_and_functions_are_served_as_the_digital_object_linkage_profile_shapes_them(): void
+    {
+        $image = new \Imagick;
+        $image->newImage(60, 40, new \ImagickPixel('#d8c9a3'));
+        $image->setImageFormat('png');
+        $path = tempnam(sys_get_temp_dir(), 'scan');
+        file_put_contents($path, $image->getImageBlob());
+        config(['workspace.object_store' => sys_get_temp_dir().'/workspace-objects-'.bin2hex(random_bytes(6))]);
+        $editor = User::where('email', 'editor@example.org')->sole();
+        $instantiations = app(InstantiationService::class);
+        $scan = $instantiations->upload($this->e['minutes'], $path, 'minutes-1939.png', 'en', 'Scan of the minutes', null, 'online', $editor);
+        $paper = $instantiations->create($this->e['minutes'], 'The minute book on paper', 'en', 'paper', 'on-request', $editor);
+        app(RelationService::class)->create($paper, 'derivation', $scan, [], $editor);
+        app(PublicationService::class)->apply($this->e['minutes'], 'publish', null, false, $editor);
+        app(ActivityService::class)->updateFunction($this->e['meetings'], true, $editor);
+
+        $doc = $this->valid($this->getJson(self::API.'/instantiations/'.$scan->id)->assertOk(), 'instantiation');
+        $this->assertSame(['minutes-1939.png', 'image/png', 'bytes'], [$doc['rico:identifier'], $doc['openricx:hasMimeType'], $doc['rico:hasExtent']['rico:hasUnitOfMeasurement']['rico:name']]);
+        $this->assertStringStartsWith('Checksum (sha256): ', $doc['openricx:technicalCharacteristics']);
+        $this->assertSame($this->e['minutes']->iri, $doc['rico:isOrWasInstantiationOf']['@id']);
+        $this->assertSame([['@id' => $paper->iri]], $doc['rico:isOrWasDerivedFromInstantiation']);
+        $this->assertSame(Vocab::BASE.'carrier-type/paper', $this->getJson(self::API.'/instantiations/'.$paper->id)->json('rico:hasCarrierType'));
+        $this->assertEqualsCanonicalizing([['@id' => $scan->iri], ['@id' => $paper->iri]], $this->getJson(self::API.'/records/'.$this->e['minutes']->id)->json('rico:hasOrHadInstantiation'));
+        $this->assertSame(2, $this->valid($this->getJson(self::API.'/instantiations')->assertOk(), 'list')['openric:total']);
+
+        // A function is served as one, and no longer as a dated event.
+        $function = $this->getJson(self::API.'/functions/'.$this->e['meetings']->id)->assertOk()->json();
+        $this->assertSame(['openricx:Function', 'Council meetings'], [$function['@type'], $function['rico:name'][0]['@value'] ?? $function['rico:name']['@value']]);
+        $this->assertSame(1, $this->valid($this->getJson(self::API.'/functions')->assertOk(), 'list')['openric:total']);
+        $this->getJson(self::API.'/activities/'.$this->e['meetings']->id)->assertNotFound();
+        $this->assertSame(0, $this->getJson(self::API.'/activities')->json('openric:total'));
     }
 }

@@ -1,5 +1,6 @@
 {{-- OpenRiC Workspace - the fields of a description, by area. Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems. SPDX-License-Identifier: AGPL-3.0-or-later --}}
 {{-- Needs $subject, $standard and $language. --}}
+@include('description._compatibility', ['standard' => $standard])
 @foreach(\App\Description\Elements::byArea($standard) as $area => $elements)
     <fieldset style="margin-top: 1.5rem; border: 1px solid var(--line); padding: 0 1rem 1rem">
         <legend><strong>{{ $area }}</strong></legend>

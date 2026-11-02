@@ -93,6 +93,42 @@
     @endif
     @include('description._dates', ['subject' => $record, 'kind' => 'records', 'heading' => 'Dates (3.1.3)', 'canUpdate' => $canUpdate, 'choices' => $dateChoices])
 
+    {{-- In record sets besides its parent, each a rico:Proxy with its own place there (roadmap phase 24). --}}
+    <h2>{{ __('Also in') }} @include('description._ric', ['term' => 'rico:isOrWasIncludedIn'])</h2>
+    @forelse($record->memberships()->with('recordSet')->get() as $membership)
+        <div><a href="{{ route('records.show', $membership->recordSet) }}">{{ $membership->recordSet->described('title', ['en']) }}</a>
+            <small>{{ __('as') }} <code>{{ $membership->iri }}</code></small>
+            @if(auth()->user()->may('update', 'description', $membership->recordSet))
+                <form method="post" action="{{ route('records.memberships.step', [$membership, 'remove']) }}" style="display: inline">@csrf<button type="submit">{{ __('Take out') }}</button></form>
+            @endif
+        </div>
+    @empty
+        <p>{{ __('Only where it is arranged, under the unit above it.') }}</p>
+    @endforelse
+    @if($canUpdate)
+        <form method="post" action="{{ route('records.memberships.store', $record) }}">
+            @csrf
+            <label for="record_set">{{ __('Put it in another record set as well') }}</label> @include('description._ric', ['term' => 'rico:Proxy'])
+            <input id="record_set" name="record_set" required value="{{ old('record_set') }}" aria-describedby="record-set-help">
+            <small id="record-set-help">{{ __('The reference code, IRI or identifier of the record set. Its reference code, holder and what it inherits still come from where it is arranged.') }}</small>
+            @error('record_set')<p class="error" role="alert">{{ $message }}</p>@enderror
+            <button type="submit">{{ __('Add') }}</button>
+        </form>
+    @endif
+
+    @if($record->memberProxies()->exists())
+        <h2>{{ __('Also included here') }} @include('description._ric', ['term' => 'rico:includesOrIncluded'])</h2>
+        @foreach($record->memberProxies()->with('record.level')->get() as $proxy)
+            <div><a href="{{ route('records.show', $proxy->record) }}">{{ $proxy->record->described('title', ['en']) }}</a> ({{ $proxy->record->level->label(\App\Support\Vocab::languages()) }})
+                @if(auth()->user()->may('update', 'description', $record))
+                    <form method="post" action="{{ route('records.memberships.step', [$proxy, 'up']) }}" style="display: inline">@csrf<button type="submit" aria-label="{{ __('Move :name up', ['name' => $proxy->record->described('title', ['en'])]) }}">{{ __('Up') }}</button></form>
+                    <form method="post" action="{{ route('records.memberships.step', [$proxy, 'down']) }}" style="display: inline">@csrf<button type="submit" aria-label="{{ __('Move :name down', ['name' => $proxy->record->described('title', ['en'])]) }}">{{ __('Down') }}</button></form>
+                    <form method="post" action="{{ route('records.memberships.step', [$proxy, 'remove']) }}" style="display: inline">@csrf<button type="submit">{{ __('Take out') }}</button></form>
+                @endif
+            </div>
+        @endforeach
+    @endif
+
     <h2>{{ __('Units inside') }}</h2>
     @forelse($record->children as $child)
         <div>

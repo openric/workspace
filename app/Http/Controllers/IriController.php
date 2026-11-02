@@ -20,6 +20,7 @@ use App\Models\Concept;
 use App\Models\Instantiation;
 use App\Models\Place;
 use App\Models\ProvenanceEntry;
+use App\Models\RecordMembership;
 use App\Models\RecordResource;
 use App\Models\Repository;
 use App\Models\Rule;
@@ -37,12 +38,14 @@ class IriController extends Controller
         Rule::IRI_SEGMENT => [Rule::class, 'rules.show', 'api.rule'],
         Place::IRI_SEGMENT => [Place::class, 'places.show', 'api.place'],
         Concept::IRI_SEGMENT => [Concept::class, 'concepts.show', null],
-        Instantiation::IRI_SEGMENT => [Instantiation::class, 'instantiations.show', null],
+        Instantiation::IRI_SEGMENT => [Instantiation::class, 'instantiations.show', 'api.instantiation'],
         // Staff only: the page asks for the accession permissions.
         Accession::IRI_SEGMENT => [Accession::class, 'accessions.show', null],
         Agreement::IRI_SEGMENT => [Agreement::class, 'agreements.show', null],
         // A step of a provenance chain: its record's provenance page, at the step.
         ProvenanceEntry::IRI_SEGMENT => [ProvenanceEntry::class, 'records.provenance', null],
+        // A unit's proxy in a record set besides its parent: the record set it stands in (roadmap phase 24).
+        RecordMembership::IRI_SEGMENT => [RecordMembership::class, 'records.show', 'api.record'],
     ];
 
     public function resolve(Request $request, string $segment, string $id): RedirectResponse
@@ -51,6 +54,17 @@ class IriController extends Controller
         $entity = $class::where('iri', $request->url())->first() ?? $class::find($id) ?? abort(404);
         abort_unless($entity->getAttribute('iri') !== null && str_ends_with($entity->getAttribute('iri'), "/$segment/$id"), 404);
         $browser = in_array($request->getPreferredFormat(), ['html', null], true) && ! str_contains((string) $request->header('Accept'), 'json');
+        // A proxy stands for a unit in a record set: the record set it stands in.
+        if ($entity instanceof RecordMembership) {
+            abort_if($entity->deleted_at !== null, 410);
+
+            return redirect($browser ? ($request->user() !== null ? route('records.show', $entity->record_set_id) : route('discover.record', $entity->record_set_id))
+                : route('api.record', $entity->record_set_id), 303)->header('Vary', 'Accept');
+        }
+        // An activity described as a function is served as one (Digital Object Linkage; roadmap phase 24).
+        if ($entity instanceof Activity && $entity->is_function) {
+            $api = 'api.function';
+        }
         // A browser: the page for someone signed in, else the public page; a client asking for data: the JSON-LD.
         $target = match (true) {
             $browser && $request->user() !== null, $api === null && ! $browser => route($page, $entity),

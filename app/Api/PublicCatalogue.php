@@ -15,6 +15,7 @@ namespace App\Api;
 use App\Exchange\ExportView;
 use App\Models\Activity;
 use App\Models\Agent;
+use App\Models\Instantiation;
 use App\Models\Institution;
 use App\Models\Name;
 use App\Models\Place;
@@ -30,7 +31,7 @@ use Illuminate\Support\Facades\DB;
 
 class PublicCatalogue
 {
-    public const KINDS = ['records' => RecordResource::class, 'agents' => Agent::class, 'repositories' => Repository::class, 'places' => Place::class, 'activities' => Activity::class, 'rules' => Rule::class];
+    public const KINDS = ['records' => RecordResource::class, 'agents' => Agent::class, 'repositories' => Repository::class, 'places' => Place::class, 'activities' => Activity::class, 'rules' => Rule::class, 'instantiations' => Instantiation::class];
 
     public const WITH = ['names.nameType', 'names.state', 'descriptionValues.element', 'descriptionValues.state', 'identifiers.identifierType', 'dates.property', 'dates.dateType'];
 

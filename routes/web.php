@@ -57,6 +57,7 @@ use App\Http\Controllers\PublicationController;
 use App\Http\Controllers\ReadingRoomController;
 use App\Http\Controllers\ReasoningController;
 use App\Http\Controllers\RecordController;
+use App\Http\Controllers\RecordMembershipController;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\RelationController;
 use App\Http\Controllers\ReportBuilderController;
@@ -121,7 +122,7 @@ Route::get('/branding/logo', [SettingsController::class, 'logo'])->name('brandin
 Route::get('/api/iiif/workspace', fn () => response()->json(['data' => []]))->name('iiif.workspaces');
 
 // Persistent IRIs resolve, for anyone: the controller sends a page only to those signed in.
-Route::get('/{segment}/{id}', [IriController::class, 'resolve'])->where(['segment' => 'record|agent|repository|activity|place|concept|instantiation|accession|agreement|provenance|rule', 'id' => '[0-9a-f-]{36}'])->name('iri');
+Route::get('/{segment}/{id}', [IriController::class, 'resolve'])->where(['segment' => 'record|agent|repository|activity|place|concept|instantiation|accession|agreement|provenance|rule|proxy', 'id' => '[0-9a-f-]{36}'])->name('iri');
 
 // The clipboard (Heratio's): for anyone; it holds only what the reader may see.
 Route::prefix('clipboard')->name('clipboard.')->middleware('throttle:120,1')->group(function () {
@@ -273,6 +274,9 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/{record}/move', [RecordController::class, 'moveForm'])->name('move-form');
         Route::post('/{record}/move', [RecordController::class, 'move'])->name('move');
         Route::post('/{record}/reorder', [RecordController::class, 'reorder'])->name('reorder');
+        // In record sets besides its parent (rico:Proxy; roadmap phase 24).
+        Route::post('/{record}/memberships', [RecordMembershipController::class, 'store'])->name('memberships.store');
+        Route::post('/memberships/{membership}/{step}', [RecordMembershipController::class, 'step'])->whereUuid('membership')->whereIn('step', ['up', 'down', 'remove'])->name('memberships.step');
         Route::get('/{record}/tree', [RecordController::class, 'tree'])->name('tree');
         Route::get('/{record}/tree-branch', [RecordController::class, 'treeChildren'])->name('tree-branch');
         Route::get('/{record}/inventory', [RecordController::class, 'inventory'])->name('inventory');

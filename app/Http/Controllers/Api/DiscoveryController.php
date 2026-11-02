@@ -36,11 +36,13 @@ class DiscoveryController extends Controller
     /** The profiles this service declares, with the versions it implements. */
     public const PROFILES = [['id' => 'core-discovery', 'version' => '0.7.0', 'conformance' => 'full'], ['id' => 'export-only', 'version' => '0.10.0', 'conformance' => 'full'],
         ['id' => 'portability', 'version' => '0.43.0', 'conformance' => 'full'], ['id' => 'governance', 'version' => '0.45.0', 'conformance' => 'full'],
-        ['id' => 'authority-context', 'version' => '0.4.0', 'conformance' => 'full'], ['id' => 'graph-traversal', 'version' => '0.6.0', 'conformance' => 'full']];
+        ['id' => 'authority-context', 'version' => '0.4.0', 'conformance' => 'full'], ['id' => 'graph-traversal', 'version' => '0.6.0', 'conformance' => 'full'],
+        ['id' => 'digital-object-linkage', 'version' => '0.7.0', 'conformance' => 'full'], ['id' => 'provenance-event', 'version' => '0.8.0', 'conformance' => 'full']];
 
     /** The list type of each list. */
     private const LISTS = ['records' => 'openricx:RecordList', 'agents' => 'openricx:AgentList', 'repositories' => 'openricx:RepositoryList',
-        'places' => 'openricx:PlaceList', 'rules' => 'openricx:RuleList', 'activities' => 'openricx:ActivityList'];
+        'places' => 'openricx:PlaceList', 'rules' => 'openricx:RuleList', 'activities' => 'openricx:ActivityList',
+        'instantiations' => 'openricx:InstantiationList', 'functions' => 'openricx:FunctionList'];
 
     /** What a record needs loaded for its JSON-LD. */
     public const RECORD_WITH = ['level.labels', 'repository.names.nameType', 'repository.names.state', 'parent.names.state', 'children.names.state'];
@@ -250,16 +252,45 @@ class DiscoveryController extends Controller
         return $rule ? $this->json($this->jsonLd($request)->rule($rule)) : $this->missing($request, 'Rule', $key);
     }
 
+    /** Activities that are events; one described as an ISDF function is served at /functions instead (roadmap phase 24). */
     public function activities(Request $request): JsonResponse
     {
-        return $this->list($request, 'activities', fn ($a) => $this->contextStub($request, $a, $a->activityType?->notation));
+        return $this->list($request, 'activities', fn ($a) => $this->contextStub($request, $a, $a->activityType?->notation), fn ($a) => ! $a->is_function);
     }
 
     public function activity(Request $request, string $key): JsonResponse|Response
     {
         $activity = $this->catalogue($request)->find('activities', $key, ['activityType']);
 
-        return $activity ? $this->json($this->jsonLd($request)->activity($activity)) : $this->missing($request, 'Activity', $key);
+        return $activity && ! $activity->is_function ? $this->json($this->jsonLd($request)->activity($activity)) : $this->missing($request, 'Activity', $key);
+    }
+
+    // The Digital Object Linkage profile (0.7.0): instantiations and functions (roadmap phase 24).
+
+    public function instantiations(Request $request): JsonResponse
+    {
+        return $this->list($request, 'instantiations', fn ($i) => array_filter(['@id' => $i->iri, '@type' => 'rico:Instantiation',
+            'rico:title' => $this->view($request)->label($i), 'openric:localType' => $i->carrierType?->notation]));
+    }
+
+    public function instantiation(Request $request, string $key): JsonResponse|Response
+    {
+        $instantiation = $this->catalogue($request)->find('instantiations', $key, ['carrierType', 'availability', 'files.use', 'record.names.state']);
+
+        return $instantiation ? $this->json($this->jsonLd($request)->instantiation($instantiation)) : $this->missing($request, 'Instantiation', $key);
+    }
+
+    public function functions(Request $request): JsonResponse
+    {
+        return $this->list($request, 'activities', fn ($a) => array_filter(['@id' => $a->iri, '@type' => 'openricx:Function', 'rico:name' => $this->view($request)->label($a),
+            'openric:localType' => $a->activityType?->notation]), fn ($a) => $a->is_function, 'functions');
+    }
+
+    public function function(Request $request, string $key): JsonResponse|Response
+    {
+        $function = $this->catalogue($request)->find('activities', $key, ['activityType']);
+
+        return $function && $function->is_function ? $this->json($this->jsonLd($request)->function($function)) : $this->missing($request, 'Function', $key);
     }
 
     /** A list item of the profile (3.5): @id, @type, rico:name and the local type; a rule's stub also has its title. */
@@ -302,7 +333,7 @@ class DiscoveryController extends Controller
     }
 
     /** A list envelope (Core Discovery 3.3): page and limit, the total of what the public may read, links to the pages either side. */
-    protected function list(Request $request, string $kind, callable $item): JsonResponse
+    protected function list(Request $request, string $kind, callable $item, ?callable $only = null, ?string $type = null): JsonResponse
     {
         $page = $this->bounded($request, 'page', 1, PHP_INT_MAX);
         $limit = $this->bounded($request, 'limit', 50, 200);
@@ -310,9 +341,12 @@ class DiscoveryController extends Controller
             return Problem::response($request, 400, 'page is a whole number from 1, and limit one from 1 to 200.');
         }
         $all = $this->catalogue($request)->visible($kind, trim((string) $request->query('q', '')));
+        if ($only) {
+            $all = $all->filter($only)->values();
+        }
         $link = fn (int $to) => $request->url().'?'.http_build_query([...$request->query(), 'page' => $to, 'limit' => $limit]);
 
-        return $this->json(['@context' => JsonLd::CONTEXT, '@type' => self::LISTS[$kind], 'openric:total' => $all->count(), 'openric:page' => $page,
+        return $this->json(['@context' => JsonLd::CONTEXT, '@type' => self::LISTS[$type ?? $kind], 'openric:total' => $all->count(), 'openric:page' => $page,
             'openric:limit' => $limit, 'openric:next' => $page * $limit < $all->count() ? $link($page + 1) : null, 'openric:prev' => $page > 1 ? $link($page - 1) : null,
             'openric:items' => $all->slice(($page - 1) * $limit, $limit)->map($item)->values()->all()]);
     }
@@ -323,7 +357,8 @@ class DiscoveryController extends Controller
      */
     protected function missing(Request $request, string $what, string $key, string $format = 'jsonld'): JsonResponse|Response
     {
-        $table = ['Record' => 'record_resources', 'Agent' => 'agents', 'Repository' => 'repositories', 'Place' => 'places', 'Rule' => 'rules', 'Activity' => 'activities'][$what];
+        $table = ['Record' => 'record_resources', 'Agent' => 'agents', 'Repository' => 'repositories', 'Place' => 'places', 'Rule' => 'rules', 'Activity' => 'activities',
+            'Function' => 'activities', 'Instantiation' => 'instantiations'][$what];
         $deprecation = preg_match('/^[0-9a-f-]{36}$/', $key) ? app(DeprecationService::class)->known($this->institution($request), $table, $key) : null;
         if ($deprecation === null) {
             return Problem::response($request, 404, "$what with key '$key' does not exist.");

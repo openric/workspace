@@ -6,6 +6,8 @@
     @php $withTree = $tree['ancestors'] !== [] || $tree['children'] !== []; @endphp
     @if($withTree)<div class="with-tree"><aside class="tree-aside">@include('records._tree', ['tree' => $tree, 'branch' => 'discover.record.tree'])</aside><div class="with-tree-main">@endif
     @if($ancestors)<nav aria-label="{{ __('Hierarchy') }}" class="meta">@foreach($ancestors as $above)<a href="{{ route('discover.record', $above->id) }}">{{ $view->label($above) }}</a> / @endforeach</nav>@endif
+    @php($alsoIn = $unit->memberships()->with('recordSet')->get()->filter(fn ($m) => $view->readable($m->recordSet)))
+    @if($alsoIn->isNotEmpty())<p class="meta">{{ __('Also in') }}: @foreach($alsoIn as $m)<a href="{{ route('discover.record', $m->record_set_id) }}">{{ $view->label($m->recordSet) }}</a>@if(! $loop->last), @endif @endforeach</p>@endif
     {{-- The images first, as AtoM shows the digital object above the description. --}}
     {{-- Heratio's imageflow: the pictures of the units inside, each opening its unit. --}}
     @if($childThumbnails->isNotEmpty())

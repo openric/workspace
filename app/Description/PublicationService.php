@@ -14,14 +14,17 @@
 namespace App\Description;
 
 use App\Audit\AuditLog;
+use App\Models\Activity;
 use App\Models\Concept;
 use App\Models\DescriptionValue;
 use App\Models\Instantiation;
 use App\Models\Name;
 use App\Models\RecordResource;
 use App\Models\User;
+use App\Relations\RelationService;
 use App\Support\Vocab;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 
@@ -41,6 +44,9 @@ class PublicationService
     public function apply(Model $entity, string $action, ?string $language = null, bool $inside = false, ?User $actor = null): int
     {
         [$from, $to] = self::ACTIONS[$action] ?? throw new InvalidArgumentException("$action is not a publication action");
+        if ($action === 'publish' && $entity instanceof Activity) {
+            $this->mustBeProvenance($entity);
+        }
         $fromIds = Concept::whereIn('iri', array_map(fn ($s) => Vocab::valueState($s), $from))->pluck('id');
         $toId = Concept::where('iri', Vocab::valueState($to))->value('id');
         $ids = [$entity->getKey()];
@@ -68,6 +74,33 @@ class PublicationService
 
             return $changed;
         }));
+    }
+
+    /**
+     * The Provenance & Event profile (roadmap phase 24) holds what the public reads of an event to this: it has a date;
+     * a production also names what it resulted in and who took part (or performed it); an accumulation what it resulted
+     * in. An activity described as a function is not an event, and is not held to it.
+     */
+    private function mustBeProvenance(Activity $activity): void
+    {
+        if ($activity->is_function) {
+            return;
+        }
+        $missing = [];
+        if ($activity->dates()->doesntExist()) {
+            $missing[] = __('a date');
+        }
+        $type = $activity->activityType?->iri;
+        $has = fn (array $types) => app(RelationService::class)->of($activity)->contains(fn ($r) => in_array($r->kind(), $types, true));
+        if (in_array($type, [Activity::TYPES.'production', Activity::TYPES.'accumulation'], true) && ! $has(['result'])) {
+            $missing[] = __('what it resulted in');
+        }
+        if ($type === Activity::TYPES.'production' && ! $has(['participation', 'performance'])) {
+            $missing[] = __('who took part in it or performed it');
+        }
+        if ($missing !== []) {
+            throw new InvalidArgumentException(__('Before an activity is published it needs :what, so the public can follow its provenance.', ['what' => Arr::join($missing, ', ', __(' and '))]));
+        }
     }
 
     /** @return array<string, array<string, int>> language => state notation => how many values and names */

@@ -97,7 +97,7 @@ class PublicRightsTest extends TestCase
         $this->assertSame(['rico:Rule', 'https://workspace.openric.org/vocab/rights-basis/copyright', 'http://rightsstatements.org/vocab/InC-EDU/1.0/'],
             [$rules[0]['@type'], $rules[0]['rico:hasOrHadRuleType']['@id'], $rules[0]['rico:isAssociatedWithRule'][0]['@id']]);
         $this->assertSame('https://localcontexts.org/label/tk-attribution/', $rules[1]['@id']);
-        $this->assertSame('Riverside Photographic Society', $json->json('rico:hasOrHadIntellectualPropertyRightsHolder.0.rico:name'));
+        $this->assertSame('Riverside Photographic Society', $json->json('rico:hasOrHadIntellectualPropertyRightsHolder.0.rico:name.@value'));
         $this->assertStringContainsString('<http://rightsstatements.org/vocab/InC-EDU/1.0/>', $this->get(self::SITE."/api/ric/v1/records/{$this->record->id}/export?format=ttl")->getContent());
 
         $files = $this->getJson(self::SITE."/api/ric/v1/records/{$this->record->id}/files")->assertOk();

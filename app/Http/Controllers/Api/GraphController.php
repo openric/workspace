@@ -28,7 +28,8 @@ use Illuminate\Support\Collection;
 class GraphController extends DiscoveryController
 {
     /** The IRI segments /graph accepts, and the catalogue each is found in. */
-    private const SEGMENTS = ['record' => 'records', 'agent' => 'agents', 'repository' => 'repositories', 'place' => 'places', 'activity' => 'activities', 'rule' => 'rules'];
+    private const SEGMENTS = ['record' => 'records', 'agent' => 'agents', 'repository' => 'repositories', 'place' => 'places', 'activity' => 'activities', 'rule' => 'rules',
+        'instantiation' => 'instantiations'];
 
     public function graph(Request $request): JsonResponse
     {

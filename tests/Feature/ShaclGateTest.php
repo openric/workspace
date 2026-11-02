@@ -18,6 +18,7 @@ use App\Description\ActivityService;
 use App\Description\AgentService;
 use App\Description\ContactPointService;
 use App\Description\DateService;
+use App\Description\InstantiationService;
 use App\Description\PlaceService;
 use App\Description\PublicationService;
 use App\Description\RecordService;
@@ -41,7 +42,7 @@ class ShaclGateTest extends TestCase
 
     private const API = '/api/ric/v1';
 
-    private const SHAPES = ['openric', 'always-on', 'core-discovery', 'export-only', 'authority-context'];
+    private const SHAPES = ['openric', 'always-on', 'core-discovery', 'export-only', 'authority-context', 'digital-object-linkage', 'provenance-event'];
 
     public function test_every_kind_of_published_ric_o_conforms_to_the_pinned_shapes(): void
     {
@@ -82,8 +83,12 @@ class ShaclGateTest extends TestCase
         $relations->create($meetings, 'performance', $council, [], $editor);
         $relations->create($meetings, 'result', $fonds, [], $editor);
         $relations->create($town, 'place', $meetings, [], $editor);
+        // Digital Object Linkage (roadmap phase 24): a carrier on paper, and a function.
+        $paper = app(InstantiationService::class)->create($item, 'The minute book on paper', 'en', 'paper', 'on-request', $editor);
+        $keeping = app(ActivityService::class)->create($institution, 'Keeping the council minutes', 'en');
+        app(ActivityService::class)->updateFunction($keeping, true, $editor);
         $gone = $records->create($institution, self::LEVEL.'fonds', 'Withdrawn fonds', 'en', null, $holder, 'W');
-        foreach ([$holder, $council, $person, $fonds, $item, $gone, $town, $mandate, $meetings] as $entity) {
+        foreach ([$holder, $council, $person, $fonds, $item, $gone, $town, $mandate, $meetings, $keeping] as $entity) {
             app(PublicationService::class)->apply($entity, 'publish', null, false, $editor);
         }
         $this->actingAs($editor)->post("/records/{$gone->id}/delete", ['reason' => 'Withdrawn.', 'replaced_by' => $fonds->iri])->assertRedirect();
@@ -100,6 +105,8 @@ class ShaclGateTest extends TestCase
             'place' => $this->get(self::API."/places/{$town->id}")->assertOk()->getContent(),
             'mandate' => $this->get(self::API."/rules/{$mandate->id}")->assertOk()->getContent(),
             'activity' => $this->get(self::API."/activities/{$meetings->id}")->assertOk()->getContent(),
+            'instantiation' => $this->get(self::API."/instantiations/{$paper->id}")->assertOk()->getContent(),
+            'function' => $this->get(self::API."/functions/{$keeping->id}")->assertOk()->getContent(),
         ];
         foreach ($documents as $what => $json) {
             $data = tempnam(sys_get_temp_dir(), 'shacl').'.jsonld';

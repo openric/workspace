@@ -25,6 +25,7 @@ use App\Description\InstantiationService;
 use App\Description\NameService;
 use App\Description\PlaceService;
 use App\Description\PublicationService;
+use App\Description\RecordMemberships;
 use App\Description\RecordService;
 use App\Description\RepositoryService;
 use App\Description\RuleService;
@@ -189,6 +190,7 @@ class AccessMatrixTest extends TestCase
         $make('rule', fn () => app(RuleService::class)->create($institution, 'Local Government Ordinance 17 of 1939', 'en'));
         $make('accession', fn () => app(AccessionService::class)->create($institution, '2026-014', 'Papers of the Botha family', 'en', $admin));
         $make('agreement', fn () => app(AgreementService::class)->create($institution, 'DA-1', 'deed-of-deposit', 'Deposit agreement', 'en', $admin));
+        $make('membership', fn () => app(RecordMemberships::class)->add($letter, app(RecordService::class)->create($institution, self::LEVEL.'fonds', 'Bridge files', 'en', null, $holder, 'BF'), $admin));
         $make('relation', fn () => app(RelationService::class)->create($fonds, 'creation', $this->objects['Agent'], [], $admin));
         $make('contact point', fn () => app(ContactPointService::class)->save($holder, ['contact_person' => 'Reading room', 'email' => 'room@example.org'], null, $admin));
         $make('vocabulary', fn () => [$scheme = app(ConceptService::class)->createScheme($institution, 'subject', 'Local subjects', 'en', null, $admin),

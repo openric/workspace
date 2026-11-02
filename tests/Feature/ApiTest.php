@@ -104,7 +104,8 @@ class ApiTest extends TestCase
         $this->assertSame(['spec_version' => '0.56.0', 'profiles' => [['id' => 'core-discovery', 'version' => '0.7.0', 'conformance' => 'full'],
             ['id' => 'export-only', 'version' => '0.10.0', 'conformance' => 'full'], ['id' => 'portability', 'version' => '0.43.0', 'conformance' => 'full'],
             ['id' => 'governance', 'version' => '0.45.0', 'conformance' => 'full'], ['id' => 'authority-context', 'version' => '0.4.0', 'conformance' => 'full'],
-            ['id' => 'graph-traversal', 'version' => '0.6.0', 'conformance' => 'full']]], $service['openric_conformance']);
+            ['id' => 'graph-traversal', 'version' => '0.6.0', 'conformance' => 'full'], ['id' => 'digital-object-linkage', 'version' => '0.7.0', 'conformance' => 'full'],
+            ['id' => 'provenance-event', 'version' => '0.8.0', 'conformance' => 'full']]], $service['openric_conformance']);
         $this->assertSame(trim(file_get_contents(base_path('VERSION'))), $service['version']);
         $this->get(self::API.'/health')->assertOk()->assertExactJson(['status' => 'ok']);
         $vocabulary = $this->valid($this->get(self::API.'/vocabulary')->assertOk(), 'vocabulary');
@@ -126,14 +127,14 @@ class ApiTest extends TestCase
             'rico:endDate' => ['@value' => '1950-06', '@type' => 'xsd:gYearMonth'], 'rico:normalizedDateValue' => '1902/1950-06',
             'rico:expressedDate' => ['@value' => '1902 to 1950', '@language' => 'en'], 'rico:hasDateType' => ['@id' => 'https://openric.org/vocab/date-type/creation']],
             $record['openricx:hasDateRangeSet'][0]);
-        $this->assertSame(['@id' => $this->holder->iri, '@type' => 'rico:CorporateBody', 'rico:name' => 'Riverside Archives'], $record['rico:hasOrHadHolder']);
-        $this->assertSame([['@id' => $this->council->iri, '@type' => 'rico:CorporateBody', 'rico:name' => 'Riverside Parish Council']], $record['rico:hasCreator'], 'an embargoed creator stays out');
+        // A stub carries the names of the entity's own description, language-tagged as there (roadmap phase 24).
+        $this->assertSame(['@id' => $this->holder->iri, '@type' => 'rico:CorporateBody', 'rico:name' => ['@value' => 'Riverside Archives', '@language' => 'en']], $record['rico:hasOrHadHolder']);
+        $this->assertSame([['@id' => $this->council->iri, '@type' => 'rico:CorporateBody', 'rico:name' => ['@value' => 'Riverside Parish Council', '@language' => 'en']]], $record['rico:hasCreator'], 'an embargoed creator stays out');
         $this->assertSame([$this->series->iri], array_column($record['rico:includesOrIncluded'], '@id'), 'an unpublished unit inside stays out');
-        foreach (['rico:hasOrHadSubject', 'rico:isOrWasSubjectOf', 'rico:hasOrHadInstantiation', 'rico:hasOrganicProvenance'] as $forbidden) {
-            $this->assertArrayNotHasKey($forbidden, $record, "$forbidden needs a profile the service does not declare");
-        }
-        $this->assertSame(['@id' => $this->fonds->iri, '@type' => 'rico:RecordSet', 'rico:title' => 'Riverside Parish Council records'],
-            $this->getJson(self::API."/records/{$this->series->id}")->json('rico:isOrWasIncludedIn'));
+        // Subjects and instantiations come with Graph Traversal and Digital Object Linkage, now declared; organic provenance is not written.
+        $this->assertArrayNotHasKey('rico:hasOrganicProvenance', $record);
+        $this->assertSame(['@id' => $this->fonds->iri, '@type' => 'rico:RecordSet', 'rico:title' => [['@value' => 'Riverside Parish Council records', '@language' => 'en'],
+            ['@value' => 'Rekords van die Riverside-gemeenteraad', '@language' => 'af']]], $this->getJson(self::API."/records/{$this->series->id}")->json('rico:isOrWasIncludedIn'));
     }
 
     public function test_agents_and_repositories(): void

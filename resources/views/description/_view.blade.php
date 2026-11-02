@@ -10,6 +10,7 @@
         ->filter(fn ($pair) => $pair[1]->isNotEmpty()))
         ->filter(fn ($shown) => $shown->isNotEmpty());
 @endphp
+@include('description._compatibility', ['standard' => $standard])
 @forelse($areas as $area => $shown)
     <details class="area" open>
         <summary><h2>{{ $area }}</h2> <span class="meta">{{ __(':shown of :count described', ['shown' => $shown->count(), 'count' => count($all[$area])]) }}</span></summary>

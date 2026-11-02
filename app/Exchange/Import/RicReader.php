@@ -48,6 +48,9 @@ class RicReader
     /** What an entry already reads itself, so these are not read again as relations. */
     private const OWN = ['rico:hasCreator', 'rico:hasOrHadHolder', 'rico:isOrWasIncludedIn', 'rico:includesOrIncluded', 'rico:isOrWasPartOf'];
 
+    /** @var array<string, array<string, int>> a unit's IRI => the record sets it is also in, each with its place there (from rico:Proxy) */
+    private array $proxied = [];
+
     /** @var array<string, list<array{0: string, 1: string}>> a RiC-O property's IRI => the relation types and the end the entry is */
     private array $properties = [];
 
@@ -97,6 +100,7 @@ class RicReader
         }
 
         $this->properties = $this->relationProperties();
+        $this->proxied = $this->proxies();
         $repositories = $agents = $units = $contexts = [];
         foreach ($this->graph->resources() as $node) {
             $classes = $this->classes($node);
@@ -183,8 +187,21 @@ class RicReader
             }
             $draft->creators[] = ['name' => (string) $this->first($creator, 'rico:name', false), 'type' => $type, 'iri' => $this->iri($creator), 'relation' => 'creation', 'history' => null];
         }
-        if ($parent = $this->resource($node, 'rico:isOrWasIncludedIn')) {
+        // Where it is arranged: the record set holding no proxy for it; each other is a membership (roadmap phase 24).
+        $sets = $this->resources($node, 'rico:isOrWasIncludedIn');
+        $proxied = $this->proxied[$node->getUri()] ?? [];
+        $parent = collect($sets)->first(fn (Resource $set) => ! isset($proxied[$set->getUri()]));
+        if ($parent) {
             isset($units[$parent->getUri()]) ? $draft->parentKey = $parent->getUri() : $draft->parentIri = $this->iri($parent);
+        }
+        foreach ($sets as $set) {
+            if ($set !== $parent) {
+                $draft->memberships[] = ['iri' => $set->getUri(), 'position' => $proxied[$set->getUri()] ?? null];
+            }
+        }
+        // A record set's proxies were read with every unit.
+        foreach ($this->resources($node, 'rico:includesProxy') as $proxy) {
+            $this->nodes[$proxy->getUri()] = true;
         }
         // The units inside say which unit they are in.
         $this->resources($node, 'rico:includesOrIncluded');
@@ -340,7 +357,42 @@ class RicReader
             }
         }
 
-        return $relations;
+        // An activity names who performed it as a participant too (Provenance & Event): that is the same relation, read once.
+        $performers = collect($relations)->filter(fn ($r) => in_array('performance', $r['types'], true))->pluck('iri')->all();
+
+        return array_values(array_filter($relations, fn ($r) => ! (in_array('participation', $r['types'], true) && in_array($r['iri'], $performers, true))));
+    }
+
+    /** @return array<string, array<string, int>> each unit the graph's proxies stand for, the record sets they stand in, and the place in each, from its sequence */
+    private function proxies(): array
+    {
+        $found = $next = [];
+        foreach ($this->graph->allOfType('<'.self::RICO.'Proxy>') as $proxy) {
+            $for = $proxy->getResource('<'.self::RICO.'proxyFor>')?->getUri();
+            $in = $proxy->getResource('<'.self::RICO.'proxyIn>')?->getUri();
+            $this->nodes[$proxy->getUri()] = true;
+            if ($for !== null && $in !== null) {
+                $found[$proxy->getUri()] = [$for, $in];
+                $next[$proxy->getUri()] = $proxy->getResource('<'.self::RICO.'proxyDirectlyPrecedesProxyInSequence>')?->getUri();
+            }
+        }
+        // The first of each set's sequence is the one no other proxy precedes; the rest follow it.
+        $preceded = array_flip(array_filter($next));
+        $places = [];
+        foreach (array_keys($found) as $start) {
+            if (isset($preceded[$start])) {
+                continue;
+            }
+            for ([$at, $place] = [$start, 1]; $at !== null && isset($found[$at]) && ! isset($places[$at]); [$at, $place] = [$next[$at] ?? null, $place + 1]) {
+                $places[$at] = $place;
+            }
+        }
+        $out = [];
+        foreach ($found as $proxy => [$for, $in]) {
+            $out[$for][$in] = $places[$proxy] ?? 0;
+        }
+
+        return $out;
     }
 
     /** @return array<string, list<array{0: string, 1: string}>> every bundled relation type's property and inverse, by full IRI */

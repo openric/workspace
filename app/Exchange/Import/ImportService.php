@@ -32,6 +32,7 @@ use App\Description\Elements;
 use App\Description\IdentifierService;
 use App\Description\InstantiationService;
 use App\Description\PlaceService;
+use App\Description\RecordMemberships;
 use App\Description\RecordService;
 use App\Description\RepositoryService;
 use App\Description\RuleService;
@@ -401,7 +402,7 @@ class ImportService
         $this->control($draft, $unit);
         $this->unitDates($draft, $unit);
         $this->links($draft, $unit, $language);
-        if ($draft->relations !== []) {
+        if ($draft->relations !== [] || $draft->memberships !== []) {
             $this->deferred[] = [$draft, $unit];
         }
         foreach ($draft->files as $file) {
@@ -1142,6 +1143,21 @@ class ImportService
                 $parent = $this->byIriAnywhere($draft->parentIri);
                 $parent instanceof Place ? $this->places->move($entity, $parent, $this->user)
                     : $this->report->issue($draft->location, 'part of', $draft->parentIri, 'no place here has this IRI; left where it is', 'left-out');
+            }
+        }
+        // The record sets a unit is also in, besides where it is arranged (roadmap phase 24).
+        foreach ($this->deferred as [$draft, $entity]) {
+            foreach ($draft instanceof UnitDraft ? $draft->memberships : [] as $membership) {
+                $set = $this->byIriAnywhere($membership['iri']);
+                if (! $set instanceof RecordResource) {
+                    $this->report->issue($draft->location, 'also in', $membership['iri'], 'no record set here has this IRI; not linked', 'left-out');
+                } elseif ($set->id !== $entity->parent_id && ! $entity->memberships()->where('record_set_id', $set->id)->exists()) {
+                    try {
+                        app(RecordMemberships::class)->add($entity, $set, $this->user, $membership['position'] ?: null);
+                    } catch (InvalidArgumentException $e) {
+                        $this->report->issue($draft->location, 'also in', $membership['iri'], $e->getMessage().'; not linked', 'left-out');
+                    }
+                }
             }
         }
         // A relation is in the file from both its ends, its dates, certainty and evidence only from its source: link

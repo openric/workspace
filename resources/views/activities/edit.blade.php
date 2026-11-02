@@ -11,6 +11,7 @@
         <label for="language">{{ __('Language of these values (BCP 47)') }}</label> @include('description._ric', ['term' => 'xml:lang'])
         <input id="language" name="language" required value="{{ old('language', $language) }}">
         @include('activities._type-field', ['types' => $types, 'current' => $activity->activity_type_id])
+        <p><label><input type="checkbox" name="is_function" value="1" @checked(old('is_function', $activity->is_function))> {{ __('Described as a function (ISDF): a recurring business function, not an event') }}</label> @include('description._ric', ['term' => 'openricx:Function'])</p>
         @include('description._fields', ['subject' => $activity, 'standard' => \App\Description\Elements::ACTIVITY, 'language' => $language])
         <h2>{{ __('Control') }} (ISDF 5.4)</h2>
         <label for="description_identifier">{{ __('Description identifier') }} (5.4.1)</label> @include('description._ric', ['term' => null])

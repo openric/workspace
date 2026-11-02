@@ -74,6 +74,9 @@ final class UnitDraft
     /** @var list<array{uri: string, sha256: ?string}> files AtoM kept for the unit, to fetch on import */
     public array $files = [];
 
+    /** The record sets it is also in, besides where it is arranged, by IRI, with its place in each (roadmap phase 24). */
+    public array $memberships = [];
+
     /** Relations by their RiC-O property, as EntityDraft::$relations (roadmap phase 23b). */
     public array $relations = [];
 

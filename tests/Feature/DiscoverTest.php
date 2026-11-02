@@ -10,6 +10,7 @@ use App\Access\RoleService;
 use App\Accounts\AccountService;
 use App\Description\ActivityService;
 use App\Description\AgentService;
+use App\Description\DateService;
 use App\Description\IdentifierService;
 use App\Description\InstantiationService;
 use App\Description\PlaceService;
@@ -79,6 +80,9 @@ class DiscoverTest extends TestCase
         $this->wedding = app(ActivityService::class)->create($institution, 'Marriage of Johanna Engelbrecht and Pieter de Wet', 'en',
             Concept::where('iri', Activity::TYPES.'production')->value('id'));
         $relations->create($this->wedding, 'participation', $this->clerk, ['role' => 'witness'], $this->editor);
+        // Published, a production names its date and what it resulted in (Provenance & Event, roadmap phase 24).
+        app(DateService::class)->add($this->wedding, ['property' => 'associated', 'normalized' => '1902-05-03']);
+        $relations->create($this->wedding, 'result', $this->item, [], $this->editor);
         $relations->create($this->item, 'documentation', $this->wedding, [], $this->editor);
         $relations->create($this->item, 'creation', $this->clerk, [], $this->editor);
         $place = app(PlaceService::class)->create($institution, 'Riverside', 'en');

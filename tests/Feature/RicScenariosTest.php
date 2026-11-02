@@ -165,6 +165,7 @@ class RicScenariosTest extends TestCase
         $relations->create($minutes, 'performance', $clerk, [], $this->editor);
         $relations->create($minutes, 'result', $fonds, [], $this->editor);
         $dates->add($board, ['property' => 'existence', 'normalized' => '1902/1939']);
+        $dates->add($minutes, ['property' => 'beginning', 'normalized' => '1902']);
         $this->publish($this->holder, $board, $council, $clerk, $botha, $smit, $fonds, $ordinance, $minutes);
 
         $report = $this->importElsewhere($this->exported($this->holder, $board, $council, $clerk, $botha, $smit, $fonds, $ordinance, $minutes));
@@ -269,6 +270,7 @@ class RicScenariosTest extends TestCase
         $photo = $records->create($this->river, Vocab::BASE.'level-of-description/item', 'Photograph of the railway bridge', 'en', $fonds, null, '7');
         $report = $records->create($this->river, Vocab::BASE.'level-of-description/item', 'Engineer\'s report on the bridge', 'en', null, $this->holder, 'ER1');
         $opening = app(ActivityService::class)->create($this->river, 'Opening of the railway bridge', 'en');
+        app(DateService::class)->add($opening, ['property' => 'associated', 'normalized' => '1904-03-12']);
         $photographer = app(AgentService::class)->create($this->river, 'person', 'Lategan, Hendrik', 'en');
         $bridge = app(PlaceService::class)->create($this->river, 'Riverside railway bridge', 'en');
         $relations->create($photo, 'documentation', $opening, [], $this->editor);
@@ -286,6 +288,9 @@ class RicScenariosTest extends TestCase
         }
         $this->assertSame($fonds->id, $this->getJson(self::API.'/hierarchy/'.$photo->id)->json('parent.id'));
         $this->getJson(self::API.'/records?q=railway')->assertOk()->assertJsonPath('openric:total', 1);
+        // The ISAD(G) layout is labelled for what it is: a compatibility view of the RiC description (design review section 14).
+        $this->actingAs($this->editor)->get(route('records.show', $photo))->assertOk()->assertSee('Compatibility view')->assertSee('ISAD(G)');
+        $this->actingAs($this->editor)->get(route('records.edit', $photo))->assertOk()->assertSee('Compatibility view');
     }
 
     public function test_s5_an_exchange_keeps_identifiers_inverses_languages_and_evidence_and_lists_what_it_cannot_carry(): void
@@ -364,5 +369,46 @@ class RicScenariosTest extends TestCase
             ['premises', 'Old Town Hall, Church Street', 'from', '1960', '1985'],
             ['premises', 'Riverside Civic Centre', 'from', '1985', null],
         ], $this->relationsThere($this->there(Repository::class, 'Riverside Archives')));
+    }
+
+    public function test_design_e_one_record_in_two_record_sets_keeps_both_memberships_and_each_order(): void
+    {
+        $records = app(RecordService::class);
+        $series = fn (string $title, string $code) => $records->create($this->river, Vocab::BASE.'level-of-description/series', $title, 'en', null, $this->holder, $code);
+        $minutes = $series('Council minutes', 'CM');
+        $bridge = $series('Railway bridge papers', 'RB');
+        $photo = $records->create($this->river, Vocab::BASE.'level-of-description/item', 'Photograph of the railway bridge', 'en', $minutes, null, '7');
+        $plan = $records->create($this->river, Vocab::BASE.'level-of-description/item', 'Plan of the railway bridge', 'en', $minutes, null, '8');
+
+        // Made from the unit's page: in the bridge papers as well, after the plan.
+        $this->actingAs($this->editor)->post(route('records.memberships.store', $plan), ['record_set' => $bridge->iri])->assertSessionHasNoErrors();
+        $this->actingAs($this->editor)->post(route('records.memberships.store', $photo), ['record_set' => $bridge->iri])->assertSessionHasNoErrors();
+        $this->actingAs($this->editor)->post(route('records.memberships.store', $photo), ['record_set' => $minutes->iri])->assertSessionHasErrors('record_set');
+        $this->actingAs($this->editor)->post(route('records.memberships.store', $minutes), ['record_set' => $photo->iri])->assertSessionHasErrors('record_set');
+        $proxy = $photo->memberships()->sole();
+        $this->actingAs($this->editor)->post(route('records.memberships.step', [$proxy, 'up']))->assertSessionHasNoErrors();
+        $this->assertSame(['Photograph of the railway bridge', 'Plan of the railway bridge'], $bridge->memberProxies()->get()->map(fn ($m) => $m->record->described('title', ['en']))->all());
+        $this->actingAs($this->editor)->get(route('records.show', $photo))->assertOk()->assertSee('Railway bridge papers')->assertSee($proxy->iri);
+        // Its reference code and what it inherits still come from where it is arranged.
+        $this->assertSame($minutes->id, $photo->fresh()->parent_id);
+        $this->publish($this->holder, $minutes, $bridge, $photo, $plan);
+
+        $doc = $this->getJson(self::API.'/records/'.$photo->id)->assertOk()->json();
+        $this->assertEqualsCanonicalizing([$minutes->iri, $bridge->iri], array_column($doc['rico:isOrWasIncludedIn'], '@id'));
+        $set = $this->getJson(self::API.'/records/'.$bridge->id)->assertOk()->json();
+        $this->assertSame([$photo->iri, $plan->iri], array_map(fn ($p) => $p['rico:proxyFor']['@id'], $set['rico:includesProxy']));
+        $this->assertSame($set['rico:includesProxy'][1]['@id'], $set['rico:includesProxy'][0]['rico:proxyDirectlyPrecedesProxyInSequence']['@id']);
+        $this->get($proxy->iri, ['Accept' => 'application/ld+json'])->assertRedirect(route('api.record', $bridge->id));
+
+        $this->importElsewhere($this->exported($this->holder, $minutes, $bridge, $photo, $plan));
+        $photoThere = $this->there(RecordResource::class, 'Photograph of the railway bridge');
+        $this->assertSame('Council minutes', EntityKinds::label($photoThere->parent));
+        $bridgeThere = $this->there(RecordResource::class, 'Railway bridge papers');
+        $this->assertSame(['Photograph of the railway bridge', 'Plan of the railway bridge'], $bridgeThere->memberProxies()->get()->map(fn ($m) => EntityKinds::label($m->record))->all());
+
+        // Taken out: its proxy's IRI says it is gone, not that it never was.
+        $this->actingAs($this->editor)->post(route('records.memberships.step', [$proxy, 'remove']))->assertSessionHasNoErrors();
+        $this->assertSame(0, $photo->memberships()->count());
+        $this->get($proxy->iri, ['Accept' => 'application/ld+json'])->assertStatus(410);
     }
 }

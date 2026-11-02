@@ -61,6 +61,14 @@ class ActivityService
         ])));
     }
 
+    /** Whether it is described as an ISDF function (openricx:Function), served at /functions (roadmap phase 24). */
+    public function updateFunction(Activity $activity, bool $isFunction, ?User $actor = null): void
+    {
+        if ($activity->is_function !== $isFunction) {
+            DB::transaction(fn () => AuditLog::actingAs($actor, fn () => $activity->update(['is_function' => $isFunction])));
+        }
+    }
+
     public function updateType(Activity $activity, ?string $typeId, ?User $actor = null): void
     {
         $type = $this->type($activity->institution_id, $typeId);

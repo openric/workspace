@@ -114,6 +114,7 @@ class ActivityController extends Controller
         try {
             DB::transaction(function () use ($activity, $data, $values, $request) {
                 $this->activities->updateType($activity, $data['type'] ?? null, $request->user());
+                $this->activities->updateFunction($activity, $request->boolean('is_function'), $request->user());
                 $this->activities->updateControl($activity, $data['description_identifier'] ?? null, $data['description_status'] ?? null, $data['description_detail'] ?? null, $request->user());
                 $this->activities->describe($activity, $values, $data['language'], $request->user());
             });
