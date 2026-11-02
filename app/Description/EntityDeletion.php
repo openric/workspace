@@ -22,6 +22,7 @@ use App\Models\RelationEvidence;
 use App\Models\Repository;
 use App\Models\User;
 use App\Relations\RelationService;
+use App\Retention\Declarations;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
@@ -33,6 +34,11 @@ class EntityDeletion
     /** @return list<string> why the entity cannot be deleted yet, in words; empty if it can */
     public function blockers(Model $entity): array
     {
+        // A declared record, and what carries it, goes only by its disposal (phase 13c).
+        $declared = $entity instanceof RecordResource ? $entity : ($entity instanceof Instantiation ? $entity->record : null);
+        if ($declared && Declarations::locked($declared)) {
+            return [__('It is declared a record; only its disposal, once cleared, may remove it.')];
+        }
         $count = match (true) {
             $entity instanceof RecordResource => [RecordResource::where('parent_id', $entity->id)->whereNull('deleted_at')->count(), 'unit of description inside it', 'units of description inside it'],
             $entity instanceof Repository => [RecordResource::where('repository_id', $entity->id)->whereNull('deleted_at')->count(), 'unit of description it holds', 'units of description it holds'],

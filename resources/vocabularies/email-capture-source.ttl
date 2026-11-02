@@ -1,0 +1,30 @@
+# OpenRiC Workspace - OpenRiC Workspace E-mail Capture Sources.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# How an e-mail came to be captured (Heratio's rm_email_capture_source).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/email-capture-source/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace E-mail Capture Sources"@en ;
+    dcterms:description "How an e-mail came to be captured (Heratio's rm_email_capture_source)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:eml-upload, v:msg-upload .
+
+v:eml-upload a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "EML file upload"@en, "EML-lêer opgelaai"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the captured e-mail, as Heratio's ahg-records-manage keeps it."@en ;
+    skos:definition "An .eml file uploaded."@en .
+
+v:msg-upload a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "MSG file upload"@en, "MSG-lêer opgelaai"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the captured e-mail, as Heratio's ahg-records-manage keeps it."@en ;
+    skos:definition "An Outlook .msg file uploaded."@en .

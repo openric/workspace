@@ -152,4 +152,10 @@ class RecordResource extends Model
 
         return $ids;
     }
+
+    /** Its place in the file plan (roadmap phase 13c). */
+    public function filePlanPlacement(): HasOne
+    {
+        return $this->hasOne(FilePlanPlacement::class, 'record_resource_id');
+    }
 }

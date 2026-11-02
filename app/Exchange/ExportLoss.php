@@ -63,6 +63,11 @@ class ExportLoss
             }
         }
 
+        // Its place in the file plan travels only as the function or activity it documents (roadmap phase 13c).
+        if (($node = $unit->filePlanPlacement?->node) && $absent($node->code)) {
+            $missing[] = ['kind' => 'file plan', 'what' => 'Place in the file plan', 'value' => $node->code.' '.$node->title];
+        }
+
         return $missing;
     }
 

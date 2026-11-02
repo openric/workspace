@@ -1,0 +1,29 @@
+Received: from mail.parish.example.org by mx.example.org; Thu, 1 Oct 2026 09:01:00 +0200
+Message-ID: <minutes-1902@parish.example.org>
+Date: Thu, 1 Oct 2026 09:00:00 +0200
+From: "Parish Clerk" <clerk@parish.example.org>
+To: Treasurer <treasurer@parish.example.org>
+Subject: =?UTF-8?B?TWludXRlcyBvZiB0aGUgYnJpZGdlIGNvbW1pdHRlZSwgT2N0b2Jlcg==?=
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="outer"
+
+--outer
+Content-Type: multipart/alternative; boundary="inner"
+
+--inner
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+The committee agreed to repair the bridge. Caf=C3=A9 costs excluded.
+--inner
+Content-Type: text/html; charset=utf-8
+
+<p>The committee agreed to repair the bridge.</p>
+--inner--
+--outer
+Content-Type: application/pdf; name="minutes.pdf"
+Content-Disposition: attachment; filename="minutes.pdf"
+Content-Transfer-Encoding: base64
+
+JVBERi0xLjQKJcOkw7zDtsOfCg==
+--outer--

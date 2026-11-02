@@ -1,0 +1,37 @@
+# OpenRiC Workspace - OpenRiC Workspace Classification Rule Uses.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# When a classification rule is tried (Heratio's rm_classification_rule.apply_on).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/classification-apply-on/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Classification Rule Uses"@en ;
+    dcterms:description "When a classification rule is tried (Heratio's rm_classification_rule.apply_on)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:declare, v:capture, v:both .
+
+v:declare a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "On declaration"@en, "By verklaring"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the records management of the institution, as Heratio's ahg-records-manage keeps it."@en ;
+    skos:definition "When a record is declared."@en .
+
+v:capture a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "On capture"@en, "By vaslegging"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the records management of the institution, as Heratio's ahg-records-manage keeps it."@en ;
+    skos:definition "When an e-mail is captured."@en .
+
+v:both a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Both"@en, "Albei"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the records management of the institution, as Heratio's ahg-records-manage keeps it."@en ;
+    skos:definition "On declaration and on capture."@en .

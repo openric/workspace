@@ -76,7 +76,12 @@ use App\Research\Sources;
 use App\Research\Studios;
 use App\Research\Submissions;
 use App\Research\Teaching;
+use App\Retention\ClassificationRules;
+use App\Retention\Compliance;
+use App\Retention\Declarations;
 use App\Retention\DisposalService;
+use App\Retention\EmailCaptures;
+use App\Retention\FilePlan;
 use App\Retention\RetentionService;
 use App\Rights\Embargoes;
 use App\Rights\RightsService;
@@ -86,6 +91,7 @@ use App\Vocabulary\SkosImporter;
 use Illuminate\Contracts\Routing\UrlRoutable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Routing\Route;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
@@ -318,6 +324,12 @@ class AccessMatrixTest extends TestCase
             app(Impact::class)->record($admin, $project(), ['title' => 'Cited in a report']),
             ResearchDoi::create(['project_id' => $project()->id, 'doi' => '10.80000/matrix', 'state_id' => Concept::where('iri', Vocab::BASE.'doi-state/draft')->value('id'),
                 'url' => 'https://example.org/doi', 'metadata' => [], 'test' => true])]);
+        // Phase 13c: the file plan, rules, captured e-mail, declarations, vital records and compliance.
+        $make('records management', fn () => [$node = app(FilePlan::class)->save($admin, ['code' => 'PC', 'title' => 'Parish council']),
+            app(ClassificationRules::class)->save($admin, ['name' => 'Bridges', 'rule_type' => 'folder-path', 'match_pattern' => 'bridge', 'file_plan_node_id' => $node->id, 'is_active' => 1]),
+            app(EmailCaptures::class)->capture($admin, UploadedFile::fake()->createWithContent('minutes.eml', file_get_contents(base_path('tests/Fixtures/mail/minutes.eml')))),
+            app(Declarations::class)->request($admin, $fonds), app(Declarations::class)->flagVital($admin, $fonds, 'Proves ownership', 365),
+            app(Compliance::class)->create($admin, ['framework' => 'iso-30300', 'reference' => 'CA-1', 'title' => 'Annual'])]);
         // Phase 19j: lectures, training, notices, the inbox, documents, print templates, quotas and rights policies.
         $make('teaching', fn () => [$lecture = app(Teaching::class)->saveLecture($admin, ['title' => 'Minutes', 'institutional' => 1]),
             $course = app(Teaching::class)->saveCourse($admin, ['title' => 'Beginners', 'institutional' => 1]),

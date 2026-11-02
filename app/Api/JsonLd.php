@@ -144,6 +144,11 @@ class JsonLd
         if ($carriers !== []) {
             $out['rico:hasOrHadInstantiation'] = $carriers;
         }
+        // Its place in the file plan, when that node is a function or activity of the institution (roadmap phase 13c).
+        $documents = $unit->filePlanPlacement?->node?->activity;
+        if ($documents && $documents->deleted_at === null && $this->view->readable($documents)) {
+            $out['rico:documents'] = collect([...(array) ($out['rico:documents'] ?? []), $this->stub($documents)])->unique('@id')->values()->all();
+        }
         // Where it is arranged, then each record set it is also in (rico:Proxy; roadmap phase 24).
         $in = array_filter([$unit->parent && $this->view->readable($unit->parent) ? $this->stub($unit->parent) : null,
             ...$unit->memberships->filter(fn ($m) => $this->view->readable($m->recordSet))->map(fn ($m) => $this->stub($m->recordSet))->all()]);

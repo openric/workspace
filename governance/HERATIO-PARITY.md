@@ -100,7 +100,7 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-provenance-ai` | 2662 | out: AI (V2+) | Planned | 17 (last) | none |  |
 | `ahg-rad-manage` | 1233 | V0.1 candidate | Covered |  | `ahgRadManagePlugin`, `sfRadPlugin` | RAD display standard, from v0.0.76 |
 | `ahg-rdm` | 2739 | later: V1.0+ | Planned | 22 | `ahgRdmPlugin` |  |
-| `ahg-records-manage` | 10687 | later: V1.0+ | Partial | 13b, later | `ahgRecordsManagePlugin` | Retention schedules, disposal classes, reviews, the disposal workflow and destruction certificates from v0.0.90 (13b, ADR 0015); file plans, email capture, classification rules, declaration, vital records and compliance in a later phase (Dr Johan Pieterse, 31 October 2026) |
+| `ahg-records-manage` | 10687 | later: V1.0+ | Covered | 13b, 13c | `ahgRecordsManagePlugin` | Retention schedules, disposal classes, reviews, the disposal workflow and destruction certificates from v0.0.90 (13b, ADR 0015); file plans and their imports, e-mail capture, classification rules, declaration, vital records and compliance assessments from v0.0.100 (13c, Dr Johan Pieterse's choices 1A and 2A of 2 November 2026); IMAP polling not yet |
 | `ahg-reports` | 13861 | later: V1.0+ | Done | 8 | `ahgReportBuilderPlugin`, `ahgReportsPlugin` | Reports (overview, data quality, and six lists with filters and CSV), the authority completeness dashboard and the rights report; the report builder (saved reports, columns from the standards, sections, templates, export as CSV, XLSX, PDF and Word); the accession and donor reports come with phase 9; schedules with email, an archive of the files made, expiring share links and versions; not its comments, attachments, links, widgets, data snapshots or cover page |
 | `ahg-repository-manage` | 4578 | V0.1 candidate | Covered |  | `ahgRepositoryManagePlugin` | Repositories with ISDIAH elements and contact points |
 | `ahg-request-publish` | 1876 | V0.1 candidate | Partial | 10 | `ahgRequestToPublishPlugin` | Review and publish of each value; requests in phase 10 |
@@ -616,6 +616,24 @@ Added on 31 October 2026.
 | `decision`, `decision_notes`, `next_review_due_date` | Decision, Notes, Next review | Same |
 
 : Retention and disposal, field by field
+
+### Records management (`ahg-records-manage`)
+
+Added with 13c.
+
+| Heratio field | Workspace | Status |
+|---|---|---|
+| `rm_fileplan_node` (`parent_id`, `function_object_id`, `node_type`, `code`, `title`, `description`, `disposal_class_id`, `retention_period`, `disposal_action`, `status`, `source_department`, `source_agency_code`, `import_session_id`) | File plan nodes | Same; `function_object_id` is a function or activity of the Workspace; the nested set is not kept, the tree is read from the parents |
+| A node's records, by disposal class or identifier prefix | `file_plan_placements`, one node a record | Changed: placed explicitly (Dr Johan Pieterse, 2 November 2026) |
+| `rm_fileplan_import_session` (`source_type`, `source_filename`, `department`, `agency_code`, `status`, `total_nodes`, `imported_nodes`, `linked_records`, `errors_json`, `column_mapping_json`) | File plan imports | Same; a folder listing is uploaded, not read from the server |
+| `rm_email_capture` (`message_id`, `from_address`, `to_addresses`, `cc_addresses`, `subject`, `sent_at`, `received_at`, `body_text`, `body_html`, `attachment_count`, `eml_storage_path`, `information_object_id`, `fileplan_node_id`, `disposal_class_id`, `capture_source`, `status`) | Captured e-mail | Same, with the attachments listed and the original kept in the object store with its checksum; IMAP and SMTP drop sources not yet |
+| `rm_classification_rule` (`name`, `description`, `rule_type`, `match_pattern`, `fileplan_node_id`, `disposal_class_id`, `priority`, `is_active`, `apply_on`) and `rm_classification_log` | Classification rules and their log | Same |
+| `record_declaration` (`status`, `declared_by`, `declared_at`, `workflow_task_id`, `notes`) | Declarations | Same; a declared record cannot be deleted outside its disposal |
+| `vital_record` (`reason`, `review_cycle_days`, `next_review_date`, `last_reviewed_at`, `last_reviewed_by`, `is_active`) | Vital records | Same |
+| `rm_compliance_assessment` (`framework`, `assessment_ref`, `title`, `scope`, `period_start`, `period_end`, `score_total`, `score_max`, `findings_json`, `recommendations_json`, `status`, `signed_off_by`, `signed_off_at`) | Compliance assessments | Same; the checks read the institution's data |
+| `rm_compliance_assessment.report_pdf_path` | The assessment's page, to print | Not kept as a file |
+
+: Records management, field by field
 
 ### Privacy registers (`ahg-privacy`)
 

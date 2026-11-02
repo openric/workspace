@@ -4,8 +4,7 @@
 @section('content')
     @php($lang = \App\Support\Vocab::languages())
     <h1>{{ __('Retention and disposal') }}</h1>
-    @if(session('status'))<p role="status">{{ session('status') }}</p>@endif
-    @if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif
+    @include('records-management._nav')
     <h2>{{ __('Retention schedules') }}</h2>
     @if($schedules->isEmpty())<p>{{ __('None yet.') }}</p>@else
     <table><thead><tr><th scope="col">{{ __('Reference') }}</th><th scope="col">{{ __('Title') }}</th><th scope="col">{{ __('Authority') }}</th><th scope="col">{{ __('Status') }}</th><th scope="col">{{ __('Classes') }}</th></tr></thead>

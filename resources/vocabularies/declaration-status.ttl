@@ -1,0 +1,37 @@
+# OpenRiC Workspace - OpenRiC Workspace Record Declaration Statuses.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Where the declaration of a record stands (Heratio's record_declaration.status).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/declaration-status/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Record Declaration Statuses"@en ;
+    dcterms:description "Where the declaration of a record stands (Heratio's record_declaration.status)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:pending-approval, v:declared, v:rejected .
+
+v:pending-approval a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Pending approval"@en, "Wag op goedkeuring"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the records management of the institution, as Heratio's ahg-records-manage keeps it."@en ;
+    skos:definition "Declared, awaiting a records manager."@en .
+
+v:declared a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Declared"@en, "Verklaar"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the records management of the institution, as Heratio's ahg-records-manage keeps it."@en ;
+    skos:definition "A record: its files and description may not be deleted outside disposal."@en .
+
+v:rejected a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Rejected"@en, "Afgekeur"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the records management of the institution, as Heratio's ahg-records-manage keeps it."@en ;
+    skos:definition "Not accepted as a record."@en .

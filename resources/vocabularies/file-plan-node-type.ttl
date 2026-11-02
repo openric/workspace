@@ -1,0 +1,51 @@
+# OpenRiC Workspace - OpenRiC Workspace File Plan Node Types.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What a node of a file plan is (Heratio's rm_node_type).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/file-plan-node-type/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace File Plan Node Types"@en ;
+    dcterms:description "What a node of a file plan is (Heratio's rm_node_type)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:function, v:activity, v:series, v:subseries, v:class .
+
+v:function a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Function"@en, "Funksie"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the file plan, as Heratio's ahg-records-manage keeps it."@en ;
+    skos:definition "A function of the institution."@en .
+
+v:activity a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Activity"@en, "Aktiwiteit"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the file plan, as Heratio's ahg-records-manage keeps it."@en ;
+    skos:definition "An activity within a function."@en .
+
+v:series a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Series"@en, "Reeks"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the file plan, as Heratio's ahg-records-manage keeps it."@en ;
+    skos:definition "A series of records."@en .
+
+v:subseries a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Sub-series"@en, "Subreeks"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the file plan, as Heratio's ahg-records-manage keeps it."@en ;
+    skos:definition "A series within a series."@en .
+
+v:class a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Class"@en, "Klas"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the file plan, as Heratio's ahg-records-manage keeps it."@en ;
+    skos:definition "A class of records."@en .

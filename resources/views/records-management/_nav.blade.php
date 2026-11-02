@@ -1,0 +1,4 @@
+{{-- OpenRiC Workspace - the records management pages (roadmap phase 13c). Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems. SPDX-License-Identifier: AGPL-3.0-or-later --}}
+<p class="no-print">@foreach(['retention.index' => 'Retention and disposal', 'records-management.file-plan' => 'File plan', 'records-management.rules' => 'Classification rules', 'records-management.emails' => 'Captured e-mail', 'records-management.declarations' => 'Declarations and vital records', 'records-management.compliance' => 'Compliance'] as $r => $l)<a href="{{ route($r) }}" @if(request()->routeIs($r)) aria-current="page" @endif>{{ __($l) }}</a>@if(! $loop->last) · @endif @endforeach</p>
+@if(session('status'))<p role="status">{{ session('status') }}</p>@endif
+@if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif

@@ -1,0 +1,58 @@
+# OpenRiC Workspace - OpenRiC Workspace Compliance Frameworks.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# The standard a records management compliance assessment checks against (Heratio's rm_compliance_framework).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/compliance-framework/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Compliance Frameworks"@en ;
+    dcterms:description "The standard a records management compliance assessment checks against (Heratio's rm_compliance_framework)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:iso-15489, v:iso-16175, v:moreq2010, v:dod-5015-2, v:iso-30300, v:iso-23081 .
+
+v:iso-15489 a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "ISO 15489 (Records management)"@en, "ISO 15489 (Rekordbestuur)"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the records management of the institution, as Heratio's ahg-records-manage keeps it."@en ;
+    skos:definition "ISO 15489-1:2016, records management concepts and principles."@en .
+
+v:iso-16175 a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "ISO 16175 (ERM principles)"@en, "ISO 16175 (ERB-beginsels)"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the records management of the institution, as Heratio's ahg-records-manage keeps it."@en ;
+    skos:definition "ISO 16175, records in digital systems."@en .
+
+v:moreq2010 a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "MoReq2010"@en, "MoReq2010"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the records management of the institution, as Heratio's ahg-records-manage keeps it."@en ;
+    skos:definition "The DLM Forum's Modular Requirements for Records Systems."@en .
+
+v:dod-5015-2 a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "DoD 5015.2"@en, "DoD 5015.2"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the records management of the institution, as Heratio's ahg-records-manage keeps it."@en ;
+    skos:definition "The US Department of Defense records management standard."@en .
+
+v:iso-30300 a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "ISO 30300 (MSR)"@en, "ISO 30300 (BSR)"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the records management of the institution, as Heratio's ahg-records-manage keeps it."@en ;
+    skos:definition "Management systems for records."@en .
+
+v:iso-23081 a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "ISO 23081 (Metadata for records)"@en, "ISO 23081 (Metadata vir rekords)"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the records management of the institution, as Heratio's ahg-records-manage keeps it."@en ;
+    skos:definition "Metadata for managing records."@en .

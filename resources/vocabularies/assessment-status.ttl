@@ -1,0 +1,30 @@
+# OpenRiC Workspace - OpenRiC Workspace Compliance Assessment Statuses.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Where a compliance assessment stands (Heratio's rm_compliance_assessment.status).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/assessment-status/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Compliance Assessment Statuses"@en ;
+    dcterms:description "Where a compliance assessment stands (Heratio's rm_compliance_assessment.status)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:in-progress, v:finalised .
+
+v:in-progress a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "In progress"@en, "Aan die gang"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the records management of the institution, as Heratio's ahg-records-manage keeps it."@en ;
+    skos:definition "Being assessed."@en .
+
+v:finalised a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Finalised"@en, "Afgehandel"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the records management of the institution, as Heratio's ahg-records-manage keeps it."@en ;
+    skos:definition "Signed off; it no longer changes."@en .

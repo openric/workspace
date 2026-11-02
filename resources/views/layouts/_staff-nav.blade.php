@@ -51,7 +51,7 @@
                 'iiif-collections.index' => [__('IIIF collections'), $user->mayAnywhere('publish', 'description'), 'iiif-collections.*'],
                 'iiif-validation.index' => [__('IIIF validation'), $user->mayAnywhere('publish', 'description'), 'iiif-validation.*'],
                 'embargoes.index' => [__('Embargoes'), $user->mayAnywhere('update', 'description'), 'embargoes.*'],
-                'retention.index' => [__('Retention and disposal'), $user->mayAnywhere('delete', 'description'), 'retention.*|disposals.*'],
+                'retention.index' => [__('Records management'), $user->mayAnywhere('delete', 'description'), 'retention.*|disposals.*|records-management.*'],
                 'privacy.index' => [__('Privacy'), $user->hasPermission(\App\Support\Vocab::permission('manage-privacy')), 'privacy.*'],
                 'iiif-workspaces.index' => [__('My viewer layouts'), true, 'iiif-workspaces.*'],
                 ...collect(\App\Http\Controllers\ReportController::TITLES)->mapWithKeys(fn ($title, $list) => ['reports.'.$list => [__($title),

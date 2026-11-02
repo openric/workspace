@@ -1,0 +1,58 @@
+# OpenRiC Workspace - OpenRiC Workspace Classification Rule Types.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What a classification rule matches (Heratio's rm_classification_rule_type).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/classification-rule-type/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Classification Rule Types"@en ;
+    dcterms:description "What a classification rule matches (Heratio's rm_classification_rule_type)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:folder-path, v:repository, v:tag, v:mime-type, v:metadata, v:department .
+
+v:folder-path a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Folder path"@en, "Gidspad"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the records management of the institution, as Heratio's ahg-records-manage keeps it."@en ;
+    skos:definition "A pattern matched against the titles of the record's parents."@en .
+
+v:repository a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Repository"@en, "Bewaarplek"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the records management of the institution, as Heratio's ahg-records-manage keeps it."@en ;
+    skos:definition "The repository that holds the record."@en .
+
+v:tag a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Subject"@en, "Onderwerp"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the records management of the institution, as Heratio's ahg-records-manage keeps it."@en ;
+    skos:definition "One of the record's subjects."@en .
+
+v:mime-type a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "File type"@en, "Lêertipe"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the records management of the institution, as Heratio's ahg-records-manage keeps it."@en ;
+    skos:definition "A pattern matched against the type of the record's files."@en .
+
+v:metadata a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Field value"@en, "Veldwaarde"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the records management of the institution, as Heratio's ahg-records-manage keeps it."@en ;
+    skos:definition "A field of the record with a given value, as field=value."@en .
+
+v:department a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Department"@en, "Departement"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the records management of the institution, as Heratio's ahg-records-manage keeps it."@en ;
+    skos:definition "The department named on a captured e-mail or import."@en .

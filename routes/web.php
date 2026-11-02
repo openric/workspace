@@ -58,6 +58,7 @@ use App\Http\Controllers\ReadingRoomController;
 use App\Http\Controllers\ReasoningController;
 use App\Http\Controllers\RecordController;
 use App\Http\Controllers\RecordMembershipController;
+use App\Http\Controllers\RecordsManagementController;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\RelationController;
 use App\Http\Controllers\ReportBuilderController;
@@ -982,6 +983,32 @@ Route::middleware(['auth', 'active'])->group(function () {
             Route::post('/reviews', [RetentionController::class, 'scheduleReview'])->name('review');
             Route::post('/disposals', [RetentionController::class, 'initiate'])->name('initiate');
         });
+        // Records management beyond retention and disposal (roadmap phase 13c, ADR 0015).
+        Route::prefix('records-management')->name('records-management.')->whereUuid(['node', 'rule', 'email', 'declaration', 'vital', 'assessment'])->group(function () {
+            Route::get('/file-plan', [RecordsManagementController::class, 'filePlan'])->name('file-plan');
+            Route::post('/file-plan', [RecordsManagementController::class, 'saveNode'])->name('nodes.store');
+            Route::post('/file-plan/import', [RecordsManagementController::class, 'import'])->name('import');
+            Route::get('/file-plan/{node}', [RecordsManagementController::class, 'node'])->name('node');
+            Route::post('/file-plan/{node}', [RecordsManagementController::class, 'saveNode'])->name('nodes.update');
+            Route::post('/file-plan/{node}/remove', [RecordsManagementController::class, 'removeNode'])->name('nodes.remove');
+            Route::get('/rules', [RecordsManagementController::class, 'rules'])->name('rules');
+            Route::post('/rules/classify', [RecordsManagementController::class, 'classifyAll'])->name('rules.classify');
+            Route::post('/rules/{rule?}', [RecordsManagementController::class, 'saveRule'])->name('rules.save');
+            Route::get('/emails', [RecordsManagementController::class, 'emails'])->name('emails');
+            Route::post('/emails', [RecordsManagementController::class, 'capture'])->name('emails.capture');
+            Route::get('/emails/{email}', [RecordsManagementController::class, 'email'])->name('email');
+            Route::get('/emails/{email}/original', [RecordsManagementController::class, 'original'])->name('email.original');
+            Route::post('/emails/{email}/{step}', [RecordsManagementController::class, 'emailStep'])->whereIn('step', ['classify', 'declare'])->name('email.step');
+            Route::get('/declarations', [RecordsManagementController::class, 'declarations'])->name('declarations');
+            Route::post('/declarations/{declaration}/{step}', [RecordsManagementController::class, 'declarationStep'])->whereIn('step', ['approve', 'reject'])->name('declarations.step');
+            Route::post('/vital/{vital}/{step}', [RecordsManagementController::class, 'vitalStep'])->whereIn('step', ['review', 'unflag'])->name('vital.step');
+            Route::get('/compliance', [RecordsManagementController::class, 'assessments'])->name('compliance');
+            Route::post('/compliance', [RecordsManagementController::class, 'createAssessment'])->name('compliance.store');
+            Route::get('/compliance/{assessment}', [RecordsManagementController::class, 'assessment'])->name('assessment');
+            Route::post('/compliance/{assessment}/{step}', [RecordsManagementController::class, 'assessmentStep'])->whereIn('step', ['run', 'sign-off'])->name('assessment.step');
+        });
+        Route::post('/records/{record}/records-management/{step}', [RecordsManagementController::class, 'recordStep'])->whereUuid('record')
+            ->whereIn('step', ['place', 'unplace', 'classify', 'declare', 'vital'])->name('records.records-management');
         Route::get('/disposals/{disposal}', [RetentionController::class, 'disposal'])->whereUuid('disposal')->name('disposals.show');
         Route::post('/disposals/{disposal}/{step}', [RetentionController::class, 'step'])->whereUuid('disposal')
             ->whereIn('step', ['recommend', 'approve', 'clear', 'reject', 'cancel', 'execute', 'verify'])->name('disposals.step');

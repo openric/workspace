@@ -1,0 +1,37 @@
+# OpenRiC Workspace - OpenRiC Workspace E-mail Capture Statuses.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Where a captured e-mail stands (Heratio's rm_email_capture.status).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/email-capture-status/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace E-mail Capture Statuses"@en ;
+    dcterms:description "Where a captured e-mail stands (Heratio's rm_email_capture.status)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:captured, v:classified, v:declared .
+
+v:captured a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Captured"@en, "Vasgelê"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the captured e-mail, as Heratio's ahg-records-manage keeps it."@en ;
+    skos:definition "Captured, not yet classified."@en .
+
+v:classified a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Classified"@en, "Geklassifiseer"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the captured e-mail, as Heratio's ahg-records-manage keeps it."@en ;
+    skos:definition "Placed in the file plan."@en .
+
+v:declared a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Declared"@en, "Verklaar"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the captured e-mail, as Heratio's ahg-records-manage keeps it."@en ;
+    skos:definition "Made a record."@en .
