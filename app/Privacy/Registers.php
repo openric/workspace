@@ -12,7 +12,10 @@
 
 namespace App\Privacy;
 
+use App\Audit\AuditLog;
+use App\Models\Concept;
 use App\Models\ConsentRecord;
+use App\Models\ControllerLicence;
 use App\Models\ImpactAssessment;
 use App\Models\PaiaRequest;
 use App\Models\PrivacyComplaint;
@@ -20,6 +23,7 @@ use App\Models\PrivacyOfficer;
 use App\Models\PrivacyRequest;
 use App\Models\ProcessingActivity;
 use App\Models\SecurityCompromise;
+use App\Support\Vocab;
 
 final class Registers
 {
@@ -31,6 +35,8 @@ final class Registers
                 'email' => ['text', 'Email'], 'phone' => ['text', 'Telephone'], 'user_id' => ['user', 'Account'],
                 'jurisdiction_id' => ['jurisdiction', 'Jurisdiction', 'required'], 'registration_number' => ['text', 'Registration with the Regulator (POPIA s.55)'],
                 'appointed_on' => ['date', 'Appointed on'], 'is_active' => ['bool', 'In office'],
+                'qualifications' => ['textarea', 'Qualifications'], 'certificate_number' => ['text', 'Certificate of a Data Protection Officer (CDPA)'],
+                'term_ends_on' => ['date', 'Term ends on'], 'form_dp2_on' => ['date', 'Form DP2 lodged with POTRAZ on (CDPA)'], 'form_dp2_reference' => ['text', 'Form DP2 reference'],
             ],
             'list' => ['name', 'title', 'is_deputy', 'registration_number', 'is_active'],
         ],
@@ -111,10 +117,31 @@ final class Registers
             ],
             'list' => ['reference', 'type_id', 'severity_id', 'status_id', 'detected_at'],
         ],
+        'licences' => [
+            'model' => ControllerLicence::class, 'pack' => 'cdpa', 'title' => 'Data controller licences', 'one' => 'Data controller licence', 'label' => 'licence_number', 'prefix' => 'LIC', 'status' => 'licence-status', 'start' => 'active',
+            'fields' => [
+                'jurisdiction_id' => ['jurisdiction', 'Jurisdiction', 'required'], 'licence_number' => ['text', 'Licence number', 'required'], 'tier_id' => ['vocab', 'Tier', 'required', 'cdpa-licence-tier'],
+                'organisation_name' => ['text', 'Licensed organisation', 'required'], 'registered_on' => ['date', 'Registered on', 'required'], 'issued_on' => ['date', 'Issued on', 'required'],
+                'expires_on' => ['date', 'Expires on', 'required'], 'regulator_reference' => ['text', 'The authority\'s reference'], 'data_subjects_count' => ['number', 'Data subjects (estimated)'],
+                'notes' => ['textarea', 'Notes'],
+            ],
+            'list' => ['reference', 'licence_number', 'tier_id', 'status_id', 'expires_on'],
+        ],
     ];
 
     public static function get(string $register): array
     {
         return self::ALL[$register] ?? abort(404);
+    }
+
+    /** The daily run: a data controller licence in force or awaiting renewal expires the day after it ends (Heratio's ahg-cdpa expiry check). */
+    public static function expireLicences(): int
+    {
+        $expired = Concept::where('iri', Vocab::BASE.'licence-status/expired')->value('id');
+        $due = ControllerLicence::whereHas('status', fn ($q) => $q->whereIn('iri', [Vocab::BASE.'licence-status/active', Vocab::BASE.'licence-status/pending-renewal']))
+            ->where('expires_on', '<', now(config('workspace.timezone'))->toDateString())->get();
+        $due->each(fn ($l) => AuditLog::actingAs(null, fn () => $l->update(['status_id' => $expired])));
+
+        return $due->count();
     }
 }

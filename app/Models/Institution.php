@@ -7,10 +7,12 @@
 namespace App\Models;
 
 use App\Audit\Audited;
+use App\Support\Vocab;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable(['name', 'base_iri', 'header_title', 'logo_path', 'logo_mime', 'catalogue_introduction', 'catalogue_credits', 'registration_open', 'interface_languages',
@@ -50,5 +52,16 @@ class Institution extends Model
     public function users(): HasMany
     {
         return $this->hasMany(User::class);
+    }
+
+    /** The jurisdiction packs switched on in its settings (roadmap phase 18). */
+    public function jurisdictionPacks(): BelongsToMany
+    {
+        return $this->belongsToMany(Concept::class, 'institution_jurisdiction_packs', 'institution_id', 'pack_id');
+    }
+
+    public function usesPack(string $notation): bool
+    {
+        return $this->jurisdictionPacks->contains('iri', Vocab::BASE.'jurisdiction-pack/'.$notation);
     }
 }

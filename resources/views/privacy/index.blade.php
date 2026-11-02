@@ -8,7 +8,7 @@
     <table><thead><tr><th scope="col">{{ __('Check') }}</th><th scope="col">{{ __('Holds') }}</th><th scope="col">{{ __('Details') }}</th></tr></thead>
         <tbody>@foreach($report as $r)<tr><td>{{ __($r['check']) }}</td><td>{{ $r['ok'] ? __('Yes') : __('No') }}</td><td>{{ $r['detail'] }}</td></tr>@endforeach</tbody></table>
     <h2>{{ __('Registers') }}</h2>
-    <ul>@foreach(\App\Privacy\Registers::ALL as $key => $d)<li><a href="{{ route('privacy.register', $key) }}">{{ __($d['title']) }}</a> ({{ $counts[$key] }})</li>@endforeach
+    <ul>@foreach(\App\Privacy\Registers::ALL as $key => $d)@continue(($d['pack'] ?? null) && ! $institution->usesPack($d['pack']))<li><a href="{{ route('privacy.register', $key) }}">{{ __($d['title']) }}</a> ({{ $counts[$key] }})</li>@endforeach
         <li><a href="{{ route('privacy.screening') }}">{{ __('Personal information in the catalogue: scans, redaction and file screening') }}</a></li>
         <li><a href="{{ route('privacy.controls') }}">{{ __('Jurisdictions and compliance controls') }}</a></li></ul>
 @endsection

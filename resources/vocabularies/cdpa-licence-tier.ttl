@@ -1,0 +1,44 @@
+# OpenRiC Workspace - OpenRiC Workspace CDPA Licence Tiers.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# The tier of a data controller's licence by the number of data subjects (Heratio's cdpa_controller_license.tier).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/cdpa-licence-tier/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace CDPA Licence Tiers"@en ;
+    dcterms:description "The tier of a data controller's licence by the number of data subjects (Heratio's cdpa_controller_license.tier)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:tier-1, v:tier-2, v:tier-3, v:tier-4 .
+
+v:tier-1 a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Tier 1 (50 to 1,000)"@en, "Vlak 1 (50 tot 1 000)"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the Cyber and Data Protection Act [Chapter 12:07] of Zimbabwe, as Heratio's ahg-cdpa keeps it."@en ;
+    skos:definition "50 to 1,000 data subjects."@en .
+
+v:tier-2 a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Tier 2 (1,001 to 10,000)"@en, "Vlak 2 (1 001 tot 10 000)"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the Cyber and Data Protection Act [Chapter 12:07] of Zimbabwe, as Heratio's ahg-cdpa keeps it."@en ;
+    skos:definition "1,001 to 10,000 data subjects."@en .
+
+v:tier-3 a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Tier 3 (10,001 to 500,000)"@en, "Vlak 3 (10 001 tot 500 000)"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the Cyber and Data Protection Act [Chapter 12:07] of Zimbabwe, as Heratio's ahg-cdpa keeps it."@en ;
+    skos:definition "10,001 to 500,000 data subjects."@en .
+
+v:tier-4 a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Tier 4 (more than 500,000)"@en, "Vlak 4 (meer as 500 000)"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the Cyber and Data Protection Act [Chapter 12:07] of Zimbabwe, as Heratio's ahg-cdpa keeps it."@en ;
+    skos:definition "More than 500,000 data subjects."@en .

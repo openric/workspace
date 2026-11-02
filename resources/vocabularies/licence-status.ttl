@@ -1,0 +1,44 @@
+# OpenRiC Workspace - OpenRiC Workspace Licence Statuses.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Where a data controller's licence stands (Heratio's cdpa_controller_license.status).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/licence-status/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Licence Statuses"@en ;
+    dcterms:description "Where a data controller's licence stands (Heratio's cdpa_controller_license.status)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:active, v:pending-renewal, v:suspended, v:expired .
+
+v:active a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Active"@en, "Aktief"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the Cyber and Data Protection Act [Chapter 12:07] of Zimbabwe, as Heratio's ahg-cdpa keeps it."@en ;
+    skos:definition "In force."@en .
+
+v:pending-renewal a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Pending renewal"@en, "Wag op hernuwing"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the Cyber and Data Protection Act [Chapter 12:07] of Zimbabwe, as Heratio's ahg-cdpa keeps it."@en ;
+    skos:definition "Applied to renew."@en .
+
+v:suspended a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Suspended"@en, "Opgeskort"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the Cyber and Data Protection Act [Chapter 12:07] of Zimbabwe, as Heratio's ahg-cdpa keeps it."@en ;
+    skos:definition "Suspended by the authority."@en .
+
+v:expired a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Expired"@en, "Verval"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the Cyber and Data Protection Act [Chapter 12:07] of Zimbabwe, as Heratio's ahg-cdpa keeps it."@en ;
+    skos:definition "Ended."@en .

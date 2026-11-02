@@ -3,6 +3,9 @@
 use App\AccessRequests\AccessRequestService;
 use App\Description\AgreementService;
 use App\Description\WorkflowSlaService;
+use App\Jurisdiction\ExportPermits;
+use App\Jurisdiction\Naz;
+use App\Privacy\Registers;
 use App\Reports\ReportDelivery;
 use App\Reports\UsageService;
 use App\Research\FieldAlerts;
@@ -11,6 +14,7 @@ use App\Research\Notifications;
 use App\Research\Researchers;
 use App\Research\SavedSearches;
 use App\Research\ShareLinks;
+use App\Rights\Clearances;
 use App\Rights\Embargoes;
 use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Inspiring;
@@ -98,6 +102,14 @@ Artisan::command('workspace:research-impact', function (Impact $impact) {
     $this->info($impact->scanAll().' signs of impact found.');
 })->purpose('Ask OpenAlex and Crossref Event Data who cites, mentions or reuses the published outputs of research projects');
 Schedule::command('workspace:research-impact')->dailyAt('04:30')->timezone(config('workspace.timezone'))->withoutOverlapping();
+Artisan::command('workspace:declassify', function (Clearances $clearances) {
+    $this->info($clearances->declassifyDue().' records declassified.');
+})->purpose('Declassify the records whose declassification date has come, and record the clearances that have ended');
+Schedule::command('workspace:declassify')->dailyAt('00:20')->timezone(config('workspace.timezone'))->withoutOverlapping();
+Artisan::command('workspace:jurisdiction-daily', function (ExportPermits $permits, Naz $naz) {
+    $this->info($permits->expireOverdue().' export permits expired, '.$naz->advancePermits().' National Archives of Zimbabwe research permits moved on, '.Registers::expireLicences().' data controller licences expired.');
+})->purpose('Expire export permits and data controller licences whose period has ended, and start or end research permits of the National Archives of Zimbabwe');
+Schedule::command('workspace:jurisdiction-daily')->dailyAt('00:25')->timezone(config('workspace.timezone'))->withoutOverlapping();
 Artisan::command('workspace:research-digests', function (Notifications $notifications) {
     $this->info($notifications->digests().' digests of research notices sent.');
 })->purpose('Mail each researcher the notices held for their hourly, daily or weekly digest');

@@ -1,0 +1,44 @@
+# OpenRiC Workspace - OpenRiC Workspace NAZ Access Restrictions.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Who may read a series of records (Heratio's naz_records_schedule.access_restriction).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/naz-access-restriction/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace NAZ Access Restrictions"@en ;
+    dcterms:description "Who may read a series of records (Heratio's naz_records_schedule.access_restriction)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:open, v:restricted, v:confidential, v:secret .
+
+v:open a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Open"@en, "Oop"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the records of the National Archives of Zimbabwe Act [Chapter 25:06], as Heratio's ahg-naz keeps it."@en ;
+    skos:definition "Anyone."@en .
+
+v:restricted a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Restricted"@en, "Beperk"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the records of the National Archives of Zimbabwe Act [Chapter 25:06], as Heratio's ahg-naz keeps it."@en ;
+    skos:definition "With permission."@en .
+
+v:confidential a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Confidential"@en, "Vertroulik"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the records of the National Archives of Zimbabwe Act [Chapter 25:06], as Heratio's ahg-naz keeps it."@en ;
+    skos:definition "Confidential."@en .
+
+v:secret a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Secret"@en, "Geheim"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the records of the National Archives of Zimbabwe Act [Chapter 25:06], as Heratio's ahg-naz keeps it."@en ;
+    skos:definition "Secret."@en .

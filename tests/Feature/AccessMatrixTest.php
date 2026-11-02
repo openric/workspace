@@ -32,6 +32,8 @@ use App\Description\RuleService;
 use App\Description\WorkflowService;
 use App\Description\WorkflowSlaService;
 use App\Iiif\CuratedCollections;
+use App\Jurisdiction\ExportPermits;
+use App\Jurisdiction\NarssaTransfers;
 use App\Models\Concept;
 use App\Models\Container;
 use App\Models\Feedback;
@@ -330,6 +332,14 @@ class AccessMatrixTest extends TestCase
             app(EmailCaptures::class)->capture($admin, UploadedFile::fake()->createWithContent('minutes.eml', file_get_contents(base_path('tests/Fixtures/mail/minutes.eml')))),
             app(Declarations::class)->request($admin, $fonds), app(Declarations::class)->flagVital($admin, $fonds, 'Proves ownership', 365),
             app(Compliance::class)->create($admin, ['framework' => 'iso-30300', 'reference' => 'CA-1', 'title' => 'Annual'])]);
+        // Phase 18d: a NARSSA transfer, an export permit and its document.
+        $make('jurisdiction', function () use ($admin, $letter, $institution) {
+            $institution->jurisdictionPacks()->attach(Concept::choices(Vocab::BASE.'jurisdiction-pack/')->pluck('id'));
+            $permit = app(ExportPermits::class)->save($admin, ['purpose' => 'Loan', 'record_iris' => $letter->iri]);
+            app(ExportPermits::class)->addDocument($admin, $permit, UploadedFile::fake()->createWithContent('application.pdf', "%PDF-1.4\n"), null);
+
+            return [app(NarssaTransfers::class)->build($admin, [$letter]), $permit, $permit->documents()->sole()];
+        });
         // Phase 19j: lectures, training, notices, the inbox, documents, print templates, quotas and rights policies.
         $make('teaching', fn () => [$lecture = app(Teaching::class)->saveLecture($admin, ['title' => 'Minutes', 'institutional' => 1]),
             $course = app(Teaching::class)->saveCourse($admin, ['title' => 'Beginners', 'institutional' => 1]),

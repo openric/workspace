@@ -117,3 +117,33 @@ The form audit of 31 October 2026 found four fields of Heratio's registers 18a h
 - the patterns
 - the screening gate through scanning, releasing, withholding and clearing by a complete scan
 - refusal to an editor
+
+## Amendment of 2 November 2026: security clearance (18c)
+
+Dr Johan Pieterse chose 1A: clearance is checked in the one read check, beside embargoes, community protocols and file screening, so every surface that reads a record (the record pages, search, the API, JSON-LD, OAI-PMH, IIIF, exports, the shop and file delivery) answers the same.
+
+- **Levels and compartments** after Heratio's `security_classification` and `security_compartment`: Heratio's six levels are seeded per institution and can be changed; a compartment names the lowest level that may hold it.
+- **Clearances.** An account is cleared to one level, with compartments, until a date or without one. Nobody clears themselves. Every grant, change, revocation and ending is kept in the clearance history.
+- **Classified records.** Only someone cleared to the level classifies a record, with a justification where the level asks for one. A classification holds for what is inside the record unless it says otherwise; the nearest classified ancestor decides. A record has a review date and a declassification date, and the daily run declassifies or downgrades it.
+- **Reading.** A classified record, its files and its search hits reach only an account cleared to its level with all its compartments. The public never reads one. A level that forbids downloads keeps master files back from the cleared reader too.
+- **Access above one's clearance** is asked for on a record, granted for a number of hours or denied by an administrator, and can be revoked.
+
+Not carried in 18c: Heratio's watermark log (watermarks are phase 14's), its own retention and compliance logs (phases 13b and 13c), and two-factor sign-in (phase 12).
+
+## Amendment of 2 November 2026: the South African and Zimbabwean packs (18d, 18e)
+
+Dr Johan Pieterse chose 2A: NARSSA, NAZ and the CDPA now; of PSIS's SAHRA plugin, only the export permits of the National Heritage Resources Act's section 32, since its archaeology, palaeontology, structures and burial permits are not an archive's work; NMMZ goes to phase 21 with the heritage objects it registers.
+
+- **Packs chosen in the settings.** Each pack (NARSSA transfers, export permits, the National Archives of Zimbabwe, the CDPA) is a row of a vocabulary, and an institution switches it on or off in its settings, as this ADR's context asked. A pack switched off has no menu entry and its pages answer 404; what it holds is kept. For the CDPA, the licence register and the CDPA as a jurisdiction to choose disappear. Asked for by Dr Johan Pieterse on 2 November 2026.
+- **NARSSA transfers** after Heratio's `ahg-narssa`: records, or every approved transfer disposal not yet transferred, packaged as a tar.gz with each record's description as EAD3 and its master files, a manifest and a METS file with a SHA-256 for each record. The package is kept in the object store with its own SHA-256. Transmitted, then accepted with the receipt's reference, or returned. Changed: Heratio wrote the package with a shell `tar` command; here PHP's own archive classes write it, and reference copies never go in.
+- **Export permits** after PSIS's `SahraPermitService`: an application names the records to be exported by IRI, where they go, the country and the period. It is approved within the institution by someone other than the applicant who may change every record it covers (PSIS's supervisor endorsement), lodged with SAHRA or a provincial authority, and issued with the permit number and conditions, or declined. An issued permit expires when its period ends, is revoked, or is closed when the records are back. Its documents are kept in the object store.
+- **The National Archives of Zimbabwe** after Heratio's `ahg-naz`: a closure period or a protection is kept as an embargo on the record (and on what is inside it if asked), so the existing read check enforces it; a ministerial closure needs the order's reference and a protection a reason. Research permits are approved by someone other than who entered them and become active and expire by the daily run. Records schedules and transfers are kept with Heratio's fields; a schedule may name a disposal class of the institution's own retention schedule.
+- **The Cyber and Data Protection Act** after Heratio's `ahg-cdpa`: a jurisdiction of the 18a privacy registers (POTRAZ, 30 days to answer a request, 72 hours to notify a breach), rather than a second set of registers; data controller licences are a new register, expired by the daily run; the Data Protection Officer gains qualifications, certificate number, term and form DP2.
+
+Not carried in 18d and 18e: Heratio's NAZ transfer items (a transfer's description and quantities stand for them), a licence's certificate file and its renewal reminder.
+
+## Evidence (18c, 18d, 18e)
+
+- `tests/Feature/SecurityClearanceTest.php`: levels, compartments, clearances, classification with inheritance, the read check on every surface, access above one's clearance, declassification.
+- `tests/Feature/JurisdictionPacksTest.php`: packs switched on in the settings and refused when off; a NARSSA package's contents and checksums and its workflow; an export permit from draft to issued, expired and closed, with its documents; a NAZ closure kept from the public and released, research permits, schedules and transfers; a CDPA licence expiring.
+- `tests/Feature/AccessMatrixTest.php`: every new address refused to another institution and to an account with no role.

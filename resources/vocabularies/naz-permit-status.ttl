@@ -1,0 +1,58 @@
+# OpenRiC Workspace - OpenRiC Workspace NAZ Research Permit Statuses.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Where a research permit stands (Heratio's naz_research_permit.status).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/naz-permit-status/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace NAZ Research Permit Statuses"@en ;
+    dcterms:description "Where a research permit stands (Heratio's naz_research_permit.status)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:pending, v:approved, v:rejected, v:active, v:expired, v:revoked .
+
+v:pending a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Pending"@en, "Hangende"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the records of the National Archives of Zimbabwe Act [Chapter 25:06], as Heratio's ahg-naz keeps it."@en ;
+    skos:definition "Waiting for approval."@en .
+
+v:approved a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Approved"@en, "Goedgekeur"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the records of the National Archives of Zimbabwe Act [Chapter 25:06], as Heratio's ahg-naz keeps it."@en ;
+    skos:definition "Approved, not yet begun."@en .
+
+v:rejected a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Rejected"@en, "Afgekeur"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the records of the National Archives of Zimbabwe Act [Chapter 25:06], as Heratio's ahg-naz keeps it."@en ;
+    skos:definition "Not approved."@en .
+
+v:active a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Active"@en, "Aktief"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the records of the National Archives of Zimbabwe Act [Chapter 25:06], as Heratio's ahg-naz keeps it."@en ;
+    skos:definition "In force."@en .
+
+v:expired a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Expired"@en, "Verval"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the records of the National Archives of Zimbabwe Act [Chapter 25:06], as Heratio's ahg-naz keeps it."@en ;
+    skos:definition "Its period has ended."@en .
+
+v:revoked a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Revoked"@en, "Herroep"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the records of the National Archives of Zimbabwe Act [Chapter 25:06], as Heratio's ahg-naz keeps it."@en ;
+    skos:definition "Withdrawn."@en .

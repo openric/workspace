@@ -21,6 +21,7 @@
                     <li><a href="{{ route('research.diary.index') }}" @if(request()->routeIs('research.diary.*')) aria-current="page" @endif>{{ __('Research diary') }}</a></li>
                     <li><a href="{{ route('research.workspaces.index') }}" @if(request()->routeIs('research.workspaces.*')) aria-current="page" @endif>{{ __('Research workspaces') }}</a></li>
                     <li><a href="{{ route('research.projects.index') }}" @if(request()->routeIs('research.projects.*')) aria-current="page" @endif>{{ __('Research projects') }}</a></li>
+                    <li><a href="{{ route('clearance.request') }}" @if(request()->routeIs('clearance.request')) aria-current="page" @endif>{{ __('Access to a classified record') }}</a></li>
                     <li><a href="{{ route('research.notifications') }}" @if(request()->routeIs('research.notifications*')) aria-current="page" @endif>{{ __('Notices') }}@php($unread = \App\Research\Notifications::unread(auth()->user()))@if($unread) ({{ $unread }})@endif</a></li>
                     <li><a href="{{ route('research.inbox') }}" @if(request()->routeIs('research.inbox*')) aria-current="page" @endif>{{ __('Inbox') }}</a></li>
                     <li><a href="{{ route('research.teaching') }}" @if(request()->routeIs('research.teaching', 'research.lectures.*', 'research.courses.*')) aria-current="page" @endif>{{ __('Lectures and training') }}</a></li>

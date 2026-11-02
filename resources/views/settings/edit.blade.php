@@ -46,6 +46,13 @@
             @endforeach
         </select>
         <small id="languages-help">{{ __('Hold Ctrl (Cmd on a Mac) to choose more than one.') }}</small>
+        <h2>{{ __('Jurisdiction packs') }}</h2>
+        <p><small>{{ __('The work a national archive or heritage law asks of the institution. A pack switched off leaves the menus; what it holds is kept.') }}</small></p>
+        @php($packs = old('jurisdiction_packs', $institution->jurisdictionPacks->pluck('notation')->all()))
+        <input type="hidden" name="jurisdiction_packs[]" value="">
+        @foreach(\App\Models\Concept::choices(\App\Support\Vocab::BASE.'jurisdiction-pack/')->get() as $pack)
+            <label style="font-weight: normal"><input type="checkbox" name="jurisdiction_packs[]" value="{{ $pack->notation }}" style="width: auto" @checked(in_array($pack->notation, $packs, true))> {{ $pack->label(\App\Support\Vocab::languages()) }}</label>
+        @endforeach
         <p><small>{{ __('The persistent IRIs of records are built from :iri, which is set at installation and does not change.', ['iri' => $institution->base_iri]) }}</small></p>
         <button type="submit">{{ __('Save settings') }}</button>
     </form>

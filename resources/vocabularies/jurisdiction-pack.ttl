@@ -1,0 +1,44 @@
+# OpenRiC Workspace - OpenRiC Workspace Jurisdiction Packs.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# The jurisdiction packs an institution may switch on in its settings: the work a national archive or heritage law asks of it (roadmap phase 18).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/jurisdiction-pack/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Jurisdiction Packs"@en ;
+    dcterms:description "The jurisdiction packs an institution may switch on in its settings: the work a national archive or heritage law asks of it (roadmap phase 18)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:narssa, v:export-permits, v:naz, v:cdpa .
+
+v:narssa a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Transfers to the National Archives and Records Service of South Africa"@en, "Oordragte aan die Nasionale Argief- en Rekorddiens van Suid-Afrika"@af ;
+    skos:scopeNote "Not a RiC-O term: which of the Workspace's jurisdiction packs an institution uses, chosen in its settings."@en ;
+    skos:definition "Packages records for transfer to the National Archives of South Africa."@en .
+
+v:export-permits a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Export permits (National Heritage Resources Act, s.32)"@en, "Uitvoerpermitte (Wet op Nasionale Erfenishulpbronne, a.32)"@af ;
+    skos:scopeNote "Not a RiC-O term: which of the Workspace's jurisdiction packs an institution uses, chosen in its settings."@en ;
+    skos:definition "Applications to SAHRA or a provincial authority to export heritage objects from South Africa."@en .
+
+v:naz a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "National Archives of Zimbabwe"@en, "Nasionale Argief van Zimbabwe"@af ;
+    skos:scopeNote "Not a RiC-O term: which of the Workspace's jurisdiction packs an institution uses, chosen in its settings."@en ;
+    skos:definition "Closure periods, protected records, research permits, records schedules and transfers under the National Archives of Zimbabwe Act."@en .
+
+v:cdpa a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Cyber and Data Protection Act (Zimbabwe)"@en, "Wet op Kuber- en Databeskerming (Zimbabwe)"@af ;
+    skos:scopeNote "Not a RiC-O term: which of the Workspace's jurisdiction packs an institution uses, chosen in its settings."@en ;
+    skos:definition "The Act as a jurisdiction of the privacy registers, with its data controller licences."@en .

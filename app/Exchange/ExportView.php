@@ -29,6 +29,7 @@ use App\Models\User;
 use App\Privacy\Redaction;
 use App\Relations\EntityKinds;
 use App\Relations\RelationService;
+use App\Rights\Clearances;
 use App\Rights\CommunityProtocols;
 use App\Rights\Embargoes;
 use App\Support\Vocab;
@@ -221,6 +222,10 @@ class ExportView
         }
         // Nor a record under a full embargo (phase 13a, ADR 0015).
         if ($entity instanceof RecordResource && ! app(Embargoes::class)->allows(null, $entity, 'record')) {
+            return false;
+        }
+        // Nor a classified record (phase 18c, ADR 0016).
+        if ($entity instanceof RecordResource && ! app(Clearances::class)->allows(null, $entity)) {
             return false;
         }
         // Nor a term or record a community protocol withholds (Heratio's TermProtocolGate).

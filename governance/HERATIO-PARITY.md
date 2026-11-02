@@ -32,7 +32,7 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-biblio-frbr` | 2006 | out: GLAM sector | Planned | 21 | none |  |
 | `ahg-c2pa` | 17272 | V0.1 candidate | Planned | 22 | `ahgC2paPlugin` |  |
 | `ahg-cart` | 2166 | later: V1.0+ | Covered | 19a | `ahgCartPlugin` | The cart, the shop with PayFast, orders and paid downloads; with the shop closed, requests to publish (ADR 0017). Not Stripe, which Heratio never charges with |
-| `ahg-cdpa` | 2774 | later: jurisdiction | Planned | 18e | `ahgCDPAPlugin` | Zimbabwe, chosen for 18e by Dr Johan Pieterse |
+| `ahg-cdpa` | 2774 | later: jurisdiction | Covered | 18e | `ahgCDPAPlugin` | The Cyber and Data Protection Act as a jurisdiction of the privacy registers, with data controller licences and the Data Protection Officer's certificate and form DP2, from v0.0.101 (ADR 0016); a pack switched on in the settings |
 | `ahg-condition` | 1690 | later: V1.0+ | Planned | 21 | `ahgConditionPlugin` |  |
 | `ahg-core` | 60173 | V0.1 candidate | Covered |  | `ahgAccessibilityPlugin`, `ahgCorePlugin` | Framework, not a function: the Workspace has its own (Laravel, PostgreSQL); its alternative text for images, with the worklist, is the instantiation's alternative-text element (v0.0.64) |
 | `ahg-custom-fields` | 1338 | V0.1 candidate | Planned | 22 | `ahgCustomFieldsPlugin` | As description elements in local vocabularies |
@@ -64,7 +64,7 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-help` | 5771 | later: V1.0+ | Planned | 20 | `ahgHelpPlugin` |  |
 | `ahg-heritage-manage` | 12679 | V0.1 candidate | Planned | 21 | `ahgHeritagePlugin`, `ahgHeritageAccountingPlugin` | Heritage asset register and heritage accounting, with the museum domain |
 | `ahg-icip` | 6793 | later: jurisdiction | Partial | 18 | `ahgICIPPlugin` | Traditional Knowledge and Biocultural labels (v0.0.59); the rest of ICIP in phase 18 |
-| `ahg-iiif-collection` | 8745 | out: GLAM sector | Partial | 14 | `ahgIiifPlugin` | Presentation 3 manifests (PSIS's manifest, Heratio's audio and video canvases), fonds collections, curated collections, Change Discovery, Content State, the Mirador viewer and the IIIF-ready gate from v0.0.87 (14a, ADR 0014); Content Search 2.0, Auth Flow 2.0, saved viewer layouts and validation from v0.0.88 (14b); clearance levels on the probe in phase 18; NER annotations in phase 17, 3D reports in phase 21 |
+| `ahg-iiif-collection` | 8745 | out: GLAM sector | Partial | 14 | `ahgIiifPlugin` | Presentation 3 manifests (PSIS's manifest, Heratio's audio and video canvases), fonds collections, curated collections, Change Discovery, Content State, the Mirador viewer and the IIIF-ready gate from v0.0.87 (14a, ADR 0014); Content Search 2.0, Auth Flow 2.0, saved viewer layouts and validation from v0.0.88 (14b); clearance levels on the probe from v0.0.101 (18c); NER annotations in phase 17, 3D reports in phase 21 |
 | `ahg-image-ar` | 896 | out: GLAM sector | Planned | 21 | `ahgImageArPlugin` |  |
 | `ahg-inference-receipts` | 1569 | out: AI (V2+) | Partial | 17 (last) | none | Its signing code is copied for the audit chain |
 | `ahg-information-object-manage` | 47506 | V0.1 candidate | Covered | 9 | `ahgInformationObjectManagePlugin`, `ahgProvenancePlugin` | Records and record sets: ISAD(G), hierarchy, levels, instantiations, publication; provenance and custody history from v0.0.81 (9e) |
@@ -87,9 +87,9 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-mods-manage` | 956 | out: GLAM sector | Covered |  | `ahgModsManagePlugin`, `sfModsPlugin` | MODS export, and the MODS display standard from v0.0.76 |
 | `ahg-multi-tenant` | 2626 | later: V1.0+ | Covered |  | `ahgMultiTenantPlugin` | An institution per host, isolated by design; compare with PSIS ahgMultiTenantPlugin, which has more screens |
 | `ahg-museum` | 7661 | out: GLAM sector | Planned | 21 | `ahgMuseumPlugin` |  |
-| `ahg-narssa` | 581 | later: jurisdiction | Planned | 18d | `ahgNARSSAPlugin` | With PSIS's SAHRA permits |
-| `ahg-naz` | 3600 | later: jurisdiction | Planned | 18e | `ahgNAZPlugin` | Zimbabwe, chosen for 18e by Dr Johan Pieterse |
-| `ahg-nmmz` | 2666 | later: jurisdiction | Planned | 18e | `ahgNMMZPlugin` | Zimbabwe, chosen for 18e by Dr Johan Pieterse |
+| `ahg-narssa` | 581 | later: jurisdiction | Covered | 18d | `ahgNARSSAPlugin` | Transfers packaged as EAD3, master files, a manifest and METS, from records or approved transfer disposals, from v0.0.101 (ADR 0016); with PSIS's SAHRA export permits; a pack switched on in the settings |
+| `ahg-naz` | 3600 | later: jurisdiction | Covered | 18e | `ahgNAZPlugin` | Closure periods and protected records kept as embargoes, research permits, records schedules and transfers, from v0.0.101 (ADR 0016); a pack switched on in the settings |
+| `ahg-nmmz` | 2666 | later: jurisdiction | Planned | 21 | `ahgNMMZPlugin` | Moved to phase 21 with the heritage objects it registers, by Dr Johan Pieterse on 2 November 2026 |
 | `ahg-oai` | 1847 | V0.1 candidate | Covered |  | `arOaiPlugin` | OAI-PMH, Export-Only profile |
 | `ahg-observability` | 1903 | later: V1.0+ | Planned | 12 | `ahgObservabilityPlugin` |  |
 | `ahg-ocfl` | 3106 | later: V1.0+ | Planned | 15 | `ahgOcflPlugin` |  |
@@ -113,7 +113,7 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-rights-holder-manage` | 5215 | V0.1 candidate | Covered |  | `ahgRightsHolderManagePlugin` | Rights holders are agents, linked by rico:hasOrHadIntellectualPropertyRightsHolder (v0.0.57) |
 | `ahg-scan` | 7065 | later: V1.0+ | Planned | 22 | `ahgScanPlugin` |  |
 | `ahg-search` | 7659 | V0.1 candidate | Partial | 17 | `ahgSearchPlugin` | Full-text search with facets, staff search and statistics (v0.0.60, v0.0.61, ADR 0009); search by meaning in phase 17 |
-| `ahg-security-clearance` | 9206 | later: jurisdiction | Planned | 18c, 12 | `ahgSecurityClearancePlugin` | Clearance in 18c; two-factor sign-in with single sign-on in phase 12 |
+| `ahg-security-clearance` | 9206 | later: jurisdiction | Partial | 18c, 12 | `ahgSecurityClearancePlugin` | Levels, compartments, clearances, classified records with inheritance and declassification, requests for access, all in the one read check, from v0.0.101 (ADR 0016); two-factor sign-in in phase 12 |
 | `ahg-semantic-search` | 29749 | out: AI (V2+) | Planned | 17 (last) | `ahgSemanticSearchPlugin` |  |
 | `ahg-settings` | 16789 | V0.1 candidate | Covered |  | `ahgSettingsPlugin` | Institution settings, written fresh |
 | `ahg-share-link` | 2659 | later: V1.0+ | Covered | 19a | `ahgTimeLimitedShareLinkPlugin` | Share links that never open more than their issuer may read, with their log and prune (ADR 0017); clearance with 18c |
@@ -142,7 +142,7 @@ Checked on 27 October 2026 against PSIS (`archive/plugins`, 143 plugins: 124 of 
 | PSIS plugin | What it does | Where it goes |
 |---|---|---|
 | `ahgEmailDeliveryPlugin` | Bounce capture, suppression list, a gate before each send | Done in v0.0.65 from Heratio's `app/` (`EmailBounceController`, `EmailSuppressionGate`, `EmailAuditListener`), with a screen for sent mail and held addresses |
-| `ahgSAHRAPlugin` | SAHRA heritage permits under the National Heritage Resources Act | Phase 18 |
+| `ahgSAHRAPlugin` | SAHRA heritage permits under the National Heritage Resources Act | Section 32 export permits from v0.0.101 (18d); its archaeology, palaeontology, structures and burial permits are not an archive's work |
 | `ahgSiteRecordPlugin` | Archaeological, heritage and rock art site records, locality shown by role | Phase 21 |
 | `ahgRegistryPlugin` | The AHG community hub and registry | Out of scope: a separate product |
 | `ahgUiOverridesPlugin` | Overrides of AtoM module actions | Not needed: specific to AtoM |
@@ -333,7 +333,7 @@ Asked for by Dr Johan Pieterse on 28 October 2026: each Workspace screen has a p
 | `scope_collection_id` (a whole collection) | A collection, chosen from the records at a collection level, with what is inside it | Same, from v0.0.74 |
 | `request_type`, `subject`, `description` | Request type (a concept), Subject, Description (kept as the reason, as Heratio does) | Same, from v0.0.74 |
 | `access_type` (request-object form, never kept by Heratio) | Access type, a concept, kept | Same, from v0.0.74 |
-| `requested_classification_id` (security clearance) | none | Phase 18 |
+| `requested_classification_id` (security clearance) | none: a classified record is classified on its own page | Modelled, from v0.0.101 |
 
 : Access request, field by field
 
@@ -443,7 +443,7 @@ Heratio's workflow screens and WorkflowService; PSIS's ahgWorkflowPlugin where H
 | `spectrum_procedure` | none | Phase 21 |
 | `ahg_workflow_step`: `name`, `description`, `step_order`, `step_type`, `action_required` | Name, Description, the order (Move up, Move down), Step type, Action required | Same, from v0.0.82 |
 | `required_role_id`, `allowed_group_ids`, `allowed_user_ids` | Required role, Roles that may take it, Accounts that may take it | Same, from v0.0.82; groups are roles |
-| `required_clearance_level` | Required clearance level | Modelled: kept, applied with phase 18 |
+| `required_clearance_level` | Required clearance level | Modelled: kept; records are classified with 18c, from v0.0.101 |
 | `pool_enabled`, `auto_assign_user_id`, `escalation_days`, `escalation_user_id`, `notification_template`, `instructions`, `checklist`, `is_optional`, `is_active` | The same; the escalation days set the due date, and the escalation account is told when a task breaches | Same, from v0.0.82 and v0.0.84 |
 | `ahg_workflow_task`: `status`, `priority`, `submitted_by`, `assigned_to`, `claimed_at`, `due_date` | The same | Same, from v0.0.82 |
 | `decision`, `decision_comment`, `decision_at`, `decision_by`, `checklist_completed`, `previous_task_id`, `retry_count`, `metadata` | The same | Same, from v0.0.82 |
@@ -681,6 +681,86 @@ Added on 31 October 2026 with 18b.
 | Visual redaction of image regions | none | Not carried (ADR 0016): needs an image server |
 
 : Privacy in the catalogue, field by field
+
+### Security clearance (`ahg-security-clearance`)
+
+Added on 2 November 2026 with 18c.
+
+| Heratio field | Workspace | Status |
+|---|---|---|
+| `security_classification`: `code`, `level`, `name`, `description`, `requires_justification`, `requires_approval`, `max_session_hours`, `watermark_required`, `download_allowed`, `print_allowed`, `copy_allowed`, `active` | The same, per institution, Heratio's six seeded | Same, from v0.0.101 |
+| `color`, `icon`, `watermark_image` | Colour; no icon or watermark image | Modelled: the look is not carried |
+| `security_compartment`: `code`, `name`, `description`, `min_clearance_id`, `requires_need_to_know`, `requires_briefing`, `active` | The same | Same |
+| `user_security_clearance`: `user_id`, `classification_id`, `granted_by`, `granted_at`, `expires_at`, `notes` | Account, Level, granted by, when, Until, Notes; nobody clears themselves | Same |
+| `user_security_clearance_log`, `security_clearance_history` | Clearance history: granted, changed, revoked, ended | Same |
+| `object_security_classification`: `classification_id`, `classified_by`, `classified_at`, `review_date`, `declassify_date`, `declassify_to_id`, `reason`, `handling_instructions`, `inherit_to_children`, `justification`, `active` | Level, by, on, Review, Declassify on, to, Reason, Handling, Inside it too, Justification; only by someone cleared to the level | Same, from v0.0.101 |
+| `security_access_request`, `security_access_grant` | Requests for access above one's clearance, granted for hours or denied, and revoked | Same |
+| `security_declassification_schedule` | The record's declassification date, run daily | Modelled: one date on the classification |
+| `security_access_log`, `security_audit_log` | The audit log | Modelled |
+| `security_watermark_log`, `security_retention_schedule`, `security_compliance_log` | none | Not carried: watermarks are phase 14's, retention phase 13b's, compliance 13c's |
+| `ahg_mfa_policy`, `ahg_otp_*`, `ahg_webauthn_credential`, `user_totp_secret` | none | Phase 12 |
+
+: Security clearance, field by field
+
+### Transfers to the National Archives (`ahg-narssa`)
+
+Added on 2 November 2026 with 18d.
+
+| Heratio field | Workspace | Status |
+|---|---|---|
+| `narssa_transfer`: `transfer_reference`, `title`, `description`, `schedule_codes`, `initiated_by`, `item_count`, `total_size_bytes`, `package_path`, `status`, `transmitted_at`, `accepted_at`, `narssa_receipt_reference`, `notes` | Reference (NARSSA-YYYY-NNN), Title, Description, disposal classes, by, records, bytes, the package with its SHA-256, Status, Transmitted, Accepted, Receipt, Notes | Same, from v0.0.101 |
+| `narssa_transfer_item`: `information_object_id`, `disposal_action_id`, `archival_reference`, `title_snapshot`, `schedule_code`, `digital_object_count`, `digital_object_bytes` | Record, its disposal, Reference code, Title, Disposal class, files, bytes, and a SHA-256 for each | Same |
+| The package written with a shell `tar` | Written by PHP's own archive classes; master files only | Changed |
+
+: Transfers to the National Archives, field by field
+
+### Export permits (PSIS's `ahgSAHRAPlugin`, NHRA s.32)
+
+Added on 2 November 2026 with 18d.
+
+| PSIS field | Workspace | Status |
+|---|---|---|
+| `application_ref`, `sahra_permit_number`, `issuing_authority` | Application (SAHRA-APP-YYYY-NNNN), Permit number, Issuing authority | Same, from v0.0.101 |
+| `applicant_user_id`, `applicant_name`, `applicant_email`, `institution` | The applicant's account | Modelled |
+| `supervisor_user_id`, `supervisor_decision_date`, `supervisor_notes` | Approved by (someone other than the applicant, who may change every record), when, Notes | Same |
+| `project_title`, `project_description` | Purpose, Description | Renamed |
+| `linked_object_id` | The records to be exported, by IRI, any number | Changed |
+| none | Destination institution, Country (ISO code) | Workspace only |
+| `start_date`, `end_date`, `conditions`, `fee_amount`, `fee_paid`, `fee_receipt` | The same | Same |
+| `sahra_submitted_date`, `sahra_reference`, `sahra_decision_date`, `sahra_notes` | Lodged, The authority's reference, Decided, The authority's notes | Same |
+| `status` | Draft, Pending approval, Approved, Returned, Lodged, Issued, Declined, Revoked, Expired, Closed: vocabulary rows | Same |
+| `sahra_permit_document`: `doc_type`, `original_name`, `mime_type`, `size_bytes`, `uploaded_by` | What it is, the file, kept in the object store with its SHA-256 | Same |
+| `nhra_section`, `site_name`, `site_location`, `province`, `sahra_permit_area`, `sahra_permit_report`, `sahra_reviewer` | none | Not carried: archaeology, palaeontology, structures and burial permits (choice 2A) |
+
+: Export permits, field by field
+
+### The National Archives of Zimbabwe (`ahg-naz`) and the Cyber and Data Protection Act (`ahg-cdpa`)
+
+Added on 2 November 2026 with 18e.
+
+| Heratio field | Workspace | Status |
+|---|---|---|
+| `naz_closure_period`: `closure_type`, `closure_reason`, `start_date`, `end_date`, `years`, `authority_reference`, `review_date` | Type, Reason, From, to, Years, Authority reference, Review; kept as an embargo on the record, and on what is inside it if asked | Modelled, from v0.0.101 |
+| `status`, `release_notes`, `released_by`, `released_at` | Released: the embargo lifted, with who, when and why | Modelled |
+| `naz_protected_record`: `protection_type`, `protection_reason`, `authority_reference`, `protection_start`, `protection_end`, `review_date`, `status`, `lifted_by`, `lifted_date`, `lifted_reason` | Type, Reason, Authority reference, From, to, Review; lifted as its embargo is | Modelled |
+| `naz_research_permit`: `permit_number`, `researcher_id`, `permit_type`, `research_topic`, `research_purpose`, `start_date`, `end_date`, `fee_amount`, `fee_currency`, `fee_paid`, `fee_receipt`, `payment_date`, `approved_by`, `approved_date`, `status`, `rejection_reason`, `restrictions` | The same; approved by someone other than who entered it; active and expired by the daily run | Same |
+| `collections_access` | Repositories it opens | Renamed |
+| `naz_researcher` | The Workspace's researchers (phase 19b) | Modelled |
+| `naz_research_visit` | Reading room bookings (phase 19b) | Modelled |
+| `naz_records_schedule`: `schedule_number`, `agency_name`, `agency_code`, `record_series`, `description`, `disposal_action`, `legal_authority`, `access_restriction`, `approved_by`, `approval_date`, `effective_date`, `review_date`, `status`, `notes` | The same | Same |
+| `retention_period_active`, `retention_period_semi`, `classification` | Years active, Years semi-active, Records class | Renamed |
+| none | A disposal class of the institution's own schedule | Workspace only |
+| `naz_transfer`: `transfer_number`, `transferring_agency`, `agency_contact`, `agency_email`, `agency_phone`, `schedule_id`, `transfer_type`, `description`, `date_range_start`, `date_range_end`, `quantity_linear_metres`, `quantity_boxes`, `quantity_items`, `contains_restricted`, `restriction_details`, `accession_number`, `proposed_date`, `actual_date`, `received_by`, `status`, `rejection_reason`, `location_assigned`, `notes` | The same | Same |
+| `naz_transfer_item` (series, dates, quantity, format, condition, restriction, the record) | none | Not carried in 18e: the transfer's description and quantities stand for its items |
+| `naz_config`, `naz_audit_log` | The settings; the audit log | Modelled |
+| `cdpa_controller_license`: `license_number`, `tier`, `organization_name`, `registration_date`, `issue_date`, `expiry_date`, `potraz_ref`, `data_subjects_count`, `status`, `notes` | A privacy register: Licence number, Tier, Licensed organisation, Registered on, Issued on, Expires on, The authority's reference, Data subjects, Status, Notes; expired by the daily run | Same |
+| `certificate_path`, `renewal_reminder_sent` | none: no certificate file, no renewal reminder (the column is kept) | Not carried in 18e |
+| `cdpa_dpo`: `qualifications`, `hit_cert_number`, `term_end_date`, `form_dp2_submitted`, `form_dp2_date`, `form_dp2_ref` | The officer's Qualifications, Certificate number, Term ends on, Form DP2 on, its reference | Same |
+| `cdpa_data_subject_request`, `cdpa_processing_activity`, `cdpa_dpia`, `cdpa_consent`, `cdpa_breach` | The privacy registers, under the CDPA jurisdiction (30 days to answer, 72 hours to notify POTRAZ) | Modelled: one set of registers for every jurisdiction |
+| `cdpa_config`, `cdpa_audit_log` | The jurisdiction's row; the audit log | Modelled |
+| none | Each pack switched on or off in the settings | Workspace only |
+
+: The National Archives of Zimbabwe and the CDPA, field by field
 
 ### Favourites (`ahg-favorites`)
 

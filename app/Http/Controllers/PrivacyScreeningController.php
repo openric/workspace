@@ -140,6 +140,6 @@ class PrivacyScreeningController extends Controller
     /** The jurisdictions a scan may look for, and a decision be grounded on. */
     public static function jurisdictions()
     {
-        return PrivacyJurisdiction::where('is_active', true)->orderBy('position')->get();
+        return PrivacyJurisdiction::where('is_active', true)->orderBy('position')->get()->reject(fn ($j) => $j->code === 'cdpa' && ! auth()->user()?->institution?->usesPack('cdpa'))->values();
     }
 }

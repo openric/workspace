@@ -1,0 +1,65 @@
+# OpenRiC Workspace - OpenRiC Workspace NAZ Transfer Statuses.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Where a transfer to the National Archives stands (Heratio's naz_transfer.status).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/naz-transfer-status/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace NAZ Transfer Statuses"@en ;
+    dcterms:description "Where a transfer to the National Archives stands (Heratio's naz_transfer.status)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:proposed, v:scheduled, v:in-transit, v:received, v:accessioned, v:rejected, v:cancelled .
+
+v:proposed a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Proposed"@en, "Voorgestel"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the records of the National Archives of Zimbabwe Act [Chapter 25:06], as Heratio's ahg-naz keeps it."@en ;
+    skos:definition "Proposed by the agency."@en .
+
+v:scheduled a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Scheduled"@en, "Geskeduleer"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the records of the National Archives of Zimbabwe Act [Chapter 25:06], as Heratio's ahg-naz keeps it."@en ;
+    skos:definition "A date is set."@en .
+
+v:in-transit a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "In transit"@en, "Onderweg"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the records of the National Archives of Zimbabwe Act [Chapter 25:06], as Heratio's ahg-naz keeps it."@en ;
+    skos:definition "On its way."@en .
+
+v:received a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Received"@en, "Ontvang"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the records of the National Archives of Zimbabwe Act [Chapter 25:06], as Heratio's ahg-naz keeps it."@en ;
+    skos:definition "Received by the National Archives."@en .
+
+v:accessioned a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Accessioned"@en, "Opgeneem"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the records of the National Archives of Zimbabwe Act [Chapter 25:06], as Heratio's ahg-naz keeps it."@en ;
+    skos:definition "Given its accession number."@en .
+
+v:rejected a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Rejected"@en, "Afgekeur"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the records of the National Archives of Zimbabwe Act [Chapter 25:06], as Heratio's ahg-naz keeps it."@en ;
+    skos:definition "Not accepted."@en .
+
+v:cancelled a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Cancelled"@en, "Gekanselleer"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the records of the National Archives of Zimbabwe Act [Chapter 25:06], as Heratio's ahg-naz keeps it."@en ;
+    skos:definition "Not going ahead."@en .

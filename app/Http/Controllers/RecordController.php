@@ -24,6 +24,7 @@ use App\Models\RecordWatermark;
 use App\Models\Repository;
 use App\Models\User;
 use App\Relations\RelationService;
+use App\Rights\Clearances;
 use App\Rights\CommunityProtocols;
 use App\Rights\Embargoes;
 use App\Support\Vocab;
@@ -77,7 +78,7 @@ class RecordController extends Controller
             ->paginate(50)->withQueryString();
         // Permissions can be set on a single unit, so the page shows only what the account may read.
         $units->setCollection($units->getCollection()->filter(fn (RecordResource $r) => $user->may('read', 'description', $r) && app(CommunityProtocols::class)->allows($user, $r, 'description')
-            && app(Embargoes::class)->allows($user, $r, 'record'))->values());
+            && app(Embargoes::class)->allows($user, $r, 'record') && app(Clearances::class)->allows($user, $r))->values());
 
         return view('records.index', ['units' => $units, 'query' => $query, 'filters' => $filters, 'levels' => $this->levels($request),
             'repositories' => $this->repositories($request)]);
@@ -371,6 +372,8 @@ class RecordController extends Controller
         abort_unless(app(CommunityProtocols::class)->allows($request->user(), $record, 'description'), 404);
         // Nor one under a full embargo, unless an exception opens it (phase 13a, ADR 0015).
         abort_unless(app(Embargoes::class)->allows($request->user(), $record, 'record'), 404);
+        // Nor a classified one, to who is not cleared to it (phase 18c, ADR 0016).
+        abort_unless(app(Clearances::class)->allows($request->user(), $record), 404);
     }
 
     /** Writing a language: update, or translate in one of the account's translation languages (ADR 0005). */

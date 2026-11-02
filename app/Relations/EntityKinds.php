@@ -23,6 +23,7 @@ use App\Models\RecordResource;
 use App\Models\Repository;
 use App\Models\Rule;
 use App\Models\User;
+use App\Rights\Clearances;
 use App\Rights\CommunityProtocols;
 use App\Rights\Embargoes;
 use Illuminate\Database\Eloquent\Builder;
@@ -163,6 +164,10 @@ final class EntityKinds
         }
         // A record under a full embargo, for who may not change it and has no exception (phase 13a, ADR 0015).
         if ($entity instanceof RecordResource && ! app(Embargoes::class)->allows($user, $entity, 'record')) {
+            return false;
+        }
+        // A classified record, to who is not cleared to it (phase 18c, ADR 0016).
+        if ($entity instanceof RecordResource && ! app(Clearances::class)->allows($user, $entity)) {
             return false;
         }
         // A community protocol withholds the term or record from who may not change it (Heratio's TermProtocolGate).

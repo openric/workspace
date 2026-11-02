@@ -57,7 +57,7 @@ class PrivacyService
             $values[$field] = match ($type) {
                 'bool' => (bool) $raw,
                 'vocab' => $raw ? self::concept($spec[3], $raw)->id : null,
-                'jurisdiction' => $raw ? PrivacyJurisdiction::where('code', $raw)->value('id') ?? throw new InvalidArgumentException(__('Choose a jurisdiction.')) : null,
+                'jurisdiction' => $raw ? PrivacyJurisdiction::where('code', $raw)->when($raw === 'cdpa' && ! $institution->usesPack('cdpa'), fn ($q) => $q->whereRaw('false'))->value('id') ?? throw new InvalidArgumentException(__('Choose a jurisdiction.')) : null,
                 'user' => $raw ? User::where(['id' => $raw, 'institution_id' => $institution->id])->value('id') ?? throw new InvalidArgumentException(__('Choose an account of the institution.')) : null,
                 'officer' => $raw ? PrivacyOfficer::where(['id' => $raw, 'institution_id' => $institution->id])->value('id') : null,
                 'processing' => $raw ? ProcessingActivity::where(['id' => $raw, 'institution_id' => $institution->id])->value('id') : null,

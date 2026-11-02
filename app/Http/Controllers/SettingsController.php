@@ -1,6 +1,7 @@
 <?php
 
-// OpenRiC Workspace - institution settings: its name, the header text, the logo, and the public catalogue's introduction and credits.
+// OpenRiC Workspace - institution settings: its name, the header text, the logo, the public catalogue's introduction and
+// credits, and the jurisdiction packs it uses.
 // Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
 // SPDX-License-Identifier: AGPL-3.0-or-later
 //
@@ -12,8 +13,10 @@
 namespace App\Http\Controllers;
 
 use App\Audit\AuditLog;
+use App\Models\Concept;
 use App\Models\Institution;
 use App\Support\InterfaceLanguages;
+use App\Support\Vocab;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -44,6 +47,8 @@ class SettingsController extends Controller
             'remove_logo' => ['nullable', 'boolean'],
             'interface_languages' => ['nullable', 'array'],
             'interface_languages.*' => ['string', Rule::in(InterfaceLanguages::available())],
+            'jurisdiction_packs' => ['nullable', 'array'],
+            'jurisdiction_packs.*' => ['nullable', 'string', 'max:64'],
         ]);
         $institution = $request->user()->institution;
         $disk = Storage::disk('local');
@@ -64,7 +69,10 @@ class SettingsController extends Controller
             $changes['logo_mime'] = null;
         }
         try {
-            DB::transaction(fn () => AuditLog::actingAs($request->user(), fn () => $institution->update($changes)));
+            DB::transaction(fn () => AuditLog::actingAs($request->user(), function () use ($institution, $changes, $data) {
+                $institution->update($changes);
+                $this->choosePacks($institution, $data['jurisdiction_packs'] ?? []);
+            }));
         } catch (\Throwable $e) {
             if (isset($changes['logo_path'])) {
                 $disk->delete($changes['logo_path']);
@@ -77,6 +85,18 @@ class SettingsController extends Controller
         }
 
         return redirect()->route('settings.edit')->with('status', __('Settings saved.'));
+    }
+
+    /** Switch the jurisdiction packs on or off (roadmap phase 18); a pack switched off keeps what it holds. */
+    private function choosePacks(Institution $institution, array $notations): void
+    {
+        $before = $institution->jurisdictionPacks->pluck('notation')->sort()->values()->all();
+        $ids = Concept::choices(Vocab::BASE.'jurisdiction-pack/')->get()->whereIn('notation', $notations)->pluck('id')->all();
+        $institution->jurisdictionPacks()->sync($ids);
+        $after = $institution->load('jurisdictionPacks')->jurisdictionPacks->pluck('notation')->sort()->values()->all();
+        if ($before !== $after) {
+            AuditLog::record(Vocab::action('update'), $institution, ['jurisdiction_packs' => $before], ['jurisdiction_packs' => $after]);
+        }
     }
 
     /** Public: the sign-in page shows the logo too. */

@@ -1,0 +1,37 @@
+# OpenRiC Workspace - OpenRiC Workspace Clearance Request Priorities.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# How urgent a request for access to a classified record is (Heratio's security_access_request.priority).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/clearance-request-priority/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Clearance Request Priorities"@en ;
+    dcterms:description "How urgent a request for access to a classified record is (Heratio's security_access_request.priority)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:normal, v:urgent, v:immediate .
+
+v:normal a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Normal"@en, "Normaal"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's security clearance, as Heratio's ahg-security-clearance keeps it."@en ;
+    skos:definition "In the usual course."@en .
+
+v:urgent a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Urgent"@en, "Dringend"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's security clearance, as Heratio's ahg-security-clearance keeps it."@en ;
+    skos:definition "Needed soon."@en .
+
+v:immediate a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Immediate"@en, "Onmiddellik"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's security clearance, as Heratio's ahg-security-clearance keeps it."@en ;
+    skos:definition "Needed now."@en .

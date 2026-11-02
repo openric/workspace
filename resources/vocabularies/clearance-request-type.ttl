@@ -1,0 +1,30 @@
+# OpenRiC Workspace - OpenRiC Workspace Clearance Request Types.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What an account asks to do with a classified record above its clearance (Heratio's security_access_request.request_type).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/clearance-request-type/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Clearance Request Types"@en ;
+    dcterms:description "What an account asks to do with a classified record above its clearance (Heratio's security_access_request.request_type)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:view, v:download .
+
+v:view a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "View"@en, "Bekyk"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's security clearance, as Heratio's ahg-security-clearance keeps it."@en ;
+    skos:definition "Read the record and see its files."@en .
+
+v:download a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Download"@en, "Aflaai"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's security clearance, as Heratio's ahg-security-clearance keeps it."@en ;
+    skos:definition "Download its files too."@en .

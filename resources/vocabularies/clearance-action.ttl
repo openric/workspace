@@ -1,0 +1,58 @@
+# OpenRiC Workspace - OpenRiC Workspace Clearance Actions.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What happened to an account's security clearance (Heratio's security_clearance_history.action).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/clearance-action/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Clearance Actions"@en ;
+    dcterms:description "What happened to an account's security clearance (Heratio's security_clearance_history.action)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:granted, v:upgraded, v:downgraded, v:renewed, v:revoked, v:expired .
+
+v:granted a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Granted"@en, "Toegeken"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's security clearance, as Heratio's ahg-security-clearance keeps it."@en ;
+    skos:definition "A clearance was given."@en .
+
+v:upgraded a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Upgraded"@en, "Opgegradeer"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's security clearance, as Heratio's ahg-security-clearance keeps it."@en ;
+    skos:definition "Raised to a higher level."@en .
+
+v:downgraded a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Downgraded"@en, "Afgegradeer"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's security clearance, as Heratio's ahg-security-clearance keeps it."@en ;
+    skos:definition "Lowered to a lower level."@en .
+
+v:renewed a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Renewed"@en, "Hernu"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's security clearance, as Heratio's ahg-security-clearance keeps it."@en ;
+    skos:definition "Given again at the same level."@en .
+
+v:revoked a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Revoked"@en, "Herroep"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's security clearance, as Heratio's ahg-security-clearance keeps it."@en ;
+    skos:definition "Taken away."@en .
+
+v:expired a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Expired"@en, "Verval"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's security clearance, as Heratio's ahg-security-clearance keeps it."@en ;
+    skos:definition "Ended by its date."@en .

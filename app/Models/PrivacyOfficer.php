@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['institution_id', 'user_id', 'name', 'title', 'email', 'phone', 'jurisdiction_id', 'registration_number', 'is_deputy', 'appointed_on', 'is_active'])]
+#[Fillable(['institution_id', 'user_id', 'name', 'title', 'email', 'phone', 'jurisdiction_id', 'registration_number', 'is_deputy', 'appointed_on', 'is_active', 'qualifications', 'certificate_number', 'term_ends_on', 'form_dp2_on', 'form_dp2_reference'])]
 class PrivacyOfficer extends Model
 {
     use Audited, HasUuids;
@@ -21,7 +21,7 @@ class PrivacyOfficer extends Model
 
     protected function casts(): array
     {
-        return ['is_deputy' => 'boolean', 'appointed_on' => 'immutable_date', 'is_active' => 'boolean'];
+        return ['is_deputy' => 'boolean', 'appointed_on' => 'immutable_date', 'is_active' => 'boolean', 'term_ends_on' => 'immutable_date', 'form_dp2_on' => 'immutable_date'];
     }
 
     public function user(): BelongsTo

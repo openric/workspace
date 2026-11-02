@@ -25,7 +25,10 @@ return [
         'writing-doc-type.ttl', 'writing-status.ttl', 'publication-status.ttl', 'protocol-status.ttl', 'brief-status.ttl', 'argument-slot.ttl', 'triage-category.ttl', 'read-status.ttl', 'journal-kind.ttl', 'journal-status.ttl', 'issue-status.ttl', 'article-status.ttl', 'target-journal-status.ttl',
         'funder-type.ttl', 'funding-status.ttl', 'currency.ttl', 'grant-template.ttl', 'grant-draft-status.ttl', 'grant-call-status.ttl', 'dmp-template.ttl', 'dmp-status.ttl', 'ethics-approval-type.ttl', 'ethics-status.ttl', 'consent-basis.ttl', 'data-sensitivity.ttl', 'doi-state.ttl', 'impact-signal-type.ttl',
         'lecture-type.ttl', 'lecture-status.ttl', 'lecture-media-type.ttl', 'lecture-resource-type.ttl', 'course-status.ttl', 'enrolment-status.ttl', 'quota-scope.ttl', 'quota-period.ttl', 'notification-type.ttl', 'digest-frequency.ttl', 'odrl-policy-type.ttl', 'odrl-action.ttl', 'document-type.ttl', 'print-template-type.ttl', 'inbox-kind.ttl', 'inbox-origin.ttl', 'inbox-status.ttl',
-        'file-plan-node-type.ttl', 'file-plan-status.ttl', 'file-plan-import-source.ttl', 'file-plan-import-status.ttl', 'email-capture-source.ttl', 'email-capture-status.ttl', 'classification-rule-type.ttl', 'classification-apply-on.ttl', 'declaration-status.ttl', 'compliance-framework.ttl', 'assessment-status.ttl'],
+        'file-plan-node-type.ttl', 'file-plan-status.ttl', 'file-plan-import-source.ttl', 'file-plan-import-status.ttl', 'email-capture-source.ttl', 'email-capture-status.ttl', 'classification-rule-type.ttl', 'classification-apply-on.ttl', 'declaration-status.ttl', 'compliance-framework.ttl', 'assessment-status.ttl',
+        'clearance-action.ttl', 'clearance-request-type.ttl', 'clearance-request-status.ttl', 'clearance-request-priority.ttl',
+        'narssa-transfer-status.ttl', 'export-permit-status.ttl',
+        'naz-closure-type.ttl', 'naz-protection-type.ttl', 'naz-permit-type.ttl', 'naz-permit-status.ttl', 'naz-schedule-status.ttl', 'naz-records-class.ttl', 'naz-access-restriction.ttl', 'naz-transfer-type.ttl', 'naz-transfer-status.ttl', 'cdpa-licence-tier.ttl', 'licence-status.ttl', 'jurisdiction-pack.ttl'],
 
     // API keys (ADR 0007, Heratio's ApiKeyService): what an account must hold, anywhere, for a key it
     // owns to carry each scope (api-scope vocabulary), as [action, kind] pairs of which any one will do.

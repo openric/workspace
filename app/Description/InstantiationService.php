@@ -31,6 +31,7 @@ use App\Models\Institution;
 use App\Models\RecordResource;
 use App\Models\User;
 use App\Privacy\Screening;
+use App\Rights\Clearances;
 use App\Rights\CommunityProtocols;
 use App\Rights\Embargoes;
 use App\Support\Vocab;
@@ -217,6 +218,10 @@ class InstantiationService
         }
         // An embargo withholds the files its type says, an approved access request or not (phase 13a, ADR 0015).
         if (! app(Embargoes::class)->allows($user, $unit, $file->use->notation)) {
+            return false;
+        }
+        // A classified record's files reach only who is cleared to it; its master only where its level allows downloads (phase 18c, ADR 0016).
+        if (! app(Clearances::class)->allows($user, $unit, $file->use->notation === 'master' ? 'download' : 'read')) {
             return false;
         }
         // Where screening is required, the files wait until the record is screened and cleared (phase 18b, ADR 0016).

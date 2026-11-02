@@ -20,6 +20,7 @@ use App\Http\Controllers\AltTextController;
 use App\Http\Controllers\AnalysisController;
 use App\Http\Controllers\ApiKeyController;
 use App\Http\Controllers\AuditLogController;
+use App\Http\Controllers\ClearanceController;
 use App\Http\Controllers\ClipboardController;
 use App\Http\Controllers\CommunityLabelController;
 use App\Http\Controllers\ConceptController;
@@ -44,6 +45,7 @@ use App\Http\Controllers\InstantiationController;
 use App\Http\Controllers\IriController;
 use App\Http\Controllers\JobsController;
 use App\Http\Controllers\JournalController;
+use App\Http\Controllers\JurisdictionController;
 use App\Http\Controllers\LocalVocabularyController;
 use App\Http\Controllers\NameController;
 use App\Http\Controllers\PasswordController;
@@ -983,6 +985,8 @@ Route::middleware(['auth', 'active'])->group(function () {
             Route::post('/reviews', [RetentionController::class, 'scheduleReview'])->name('review');
             Route::post('/disposals', [RetentionController::class, 'initiate'])->name('initiate');
         });
+        // Classifying and declassifying a record (roadmap phase 18c, ADR 0016).
+        Route::post('/records/{record}/classification', [ClearanceController::class, 'classify'])->whereUuid('record')->name('records.classification');
         // Records management beyond retention and disposal (roadmap phase 13c, ADR 0015).
         Route::prefix('records-management')->name('records-management.')->whereUuid(['node', 'rule', 'email', 'declaration', 'vital', 'assessment'])->group(function () {
             Route::get('/file-plan', [RecordsManagementController::class, 'filePlan'])->name('file-plan');
@@ -1009,6 +1013,23 @@ Route::middleware(['auth', 'active'])->group(function () {
         });
         Route::post('/records/{record}/records-management/{step}', [RecordsManagementController::class, 'recordStep'])->whereUuid('record')
             ->whereIn('step', ['place', 'unplace', 'classify', 'declare', 'vital'])->name('records.records-management');
+        // The jurisdiction packs (roadmap phases 18d and 18e, ADR 0016): NARSSA transfers, NHRA s.32 export permits, the National Archives of Zimbabwe.
+        Route::prefix('jurisdiction')->name('jurisdiction.')->whereUuid(['transfer', 'permit', 'document', 'id'])->group(function () {
+            Route::get('/narssa', [JurisdictionController::class, 'narssa'])->name('narssa');
+            Route::post('/narssa', [JurisdictionController::class, 'narssaBuild'])->name('narssa.build');
+            Route::get('/narssa/{transfer}/package', [JurisdictionController::class, 'narssaPackage'])->name('narssa.package');
+            Route::post('/narssa/{transfer}/{step}', [JurisdictionController::class, 'narssaStep'])->whereIn('step', ['transmitted', 'accepted', 'returned'])->name('narssa.step');
+            Route::get('/export-permits', [JurisdictionController::class, 'permits'])->name('permits');
+            Route::post('/export-permits', [JurisdictionController::class, 'savePermit'])->name('permits.store');
+            Route::get('/export-permits/{permit}', [JurisdictionController::class, 'permit'])->name('permit');
+            Route::post('/export-permits/{permit}', [JurisdictionController::class, 'savePermit'])->name('permits.update');
+            Route::get('/export-permits/documents/{document}', [JurisdictionController::class, 'permitDocument'])->name('permits.document');
+            Route::post('/export-permits/{permit}/{step}', [JurisdictionController::class, 'permitStep'])
+                ->whereIn('step', ['submit-for-approval', 'approve', 'return', 'lodge', 'issued', 'declined', 'revoke', 'close', 'cancel', 'document'])->name('permits.step');
+            Route::get('/naz', [JurisdictionController::class, 'naz'])->name('naz');
+            Route::post('/naz/{step}/{id?}', [JurisdictionController::class, 'nazStep'])
+                ->whereIn('step', ['restrict', 'release', 'permit', 'approve', 'reject', 'revoke', 'schedule', 'transfer'])->name('naz.step');
+        });
         Route::get('/disposals/{disposal}', [RetentionController::class, 'disposal'])->whereUuid('disposal')->name('disposals.show');
         Route::post('/disposals/{disposal}/{step}', [RetentionController::class, 'step'])->whereUuid('disposal')
             ->whereIn('step', ['recommend', 'approve', 'clear', 'reject', 'cancel', 'execute', 'verify'])->name('disposals.step');
@@ -1021,6 +1042,11 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::post('/redactions/{redaction}/remove', [PrivacyScreeningController::class, 'unredact'])->name('unredact');
         Route::post('/files', [PrivacyScreeningController::class, 'decide'])->name('files');
     });
+    // Security clearance (roadmap phase 18c, ADR 0016): what the institution keeps, and requests for access above one's clearance.
+    Route::get('/clearance', [ClearanceController::class, 'index'])->name('clearance.index');
+    Route::post('/clearance/{step}/{id?}', [ClearanceController::class, 'step'])->whereIn('step', ['level', 'compartment', 'grant', 'revoke', 'approve', 'deny', 'revoke-grant'])->whereUuid('id')->name('clearance.step');
+    Route::get('/clearance-requests', [ClearanceController::class, 'requestForm'])->name('clearance.request');
+    Route::post('/clearance-requests', [ClearanceController::class, 'submitRequest'])->name('clearance.request.submit');
     // Embargoes on units of description (roadmap phase 13a, ADR 0015).
     Route::get('/embargoes', [EmbargoController::class, 'index'])->name('embargoes.index');
     Route::prefix('records/{record}/embargoes')->name('records.embargoes.')->whereUuid(['record', 'embargo', 'exception'])->group(function () {

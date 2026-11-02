@@ -35,6 +35,7 @@ use App\Models\ShopSettings;
 use App\Models\User;
 use App\Privacy\Screening;
 use App\Relations\EntityKinds;
+use App\Rights\Clearances;
 use App\Rights\CommunityProtocols;
 use App\Rights\Embargoes;
 use App\Support\Vocab;
@@ -366,7 +367,7 @@ class Shop
         $file = DigitalFile::with('instantiation', 'use')->find($fileId);
         $use = $download->item->productType->delivers_use;
         if (! $unit || ! $file || $file->instantiation->record_resource_id !== $unit->id || $file->use->notation !== $use || $unit->deleted_at !== null
-            || ! app(Embargoes::class)->allows($user, $unit, $use) || app(Screening::class)->withholds($user, $unit) || ! app(CommunityProtocols::class)->allows($user, $unit, 'description')) {
+            || ! app(Embargoes::class)->allows($user, $unit, $use) || ! app(Clearances::class)->allows($user, $unit, 'download') || app(Screening::class)->withholds($user, $unit) || ! app(CommunityProtocols::class)->allows($user, $unit, 'description')) {
             return null;
         }
         $download->update(['download_count' => $download->download_count + 1, 'last_downloaded_at' => now()]);

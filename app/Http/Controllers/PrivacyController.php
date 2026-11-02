@@ -103,8 +103,12 @@ class PrivacyController extends Controller
     private function authorise(Request $request): Institution
     {
         abort_unless($request->user()->hasPermission(Vocab::permission('manage-privacy')), 403);
+        $institution = Institution::findOrFail($request->user()->institution_id);
+        // A register of a jurisdiction pack (the CDPA's licences) answers only where the pack is switched on.
+        $pack = Registers::ALL[$request->route('register')]['pack'] ?? null;
+        abort_if($pack && ! $institution->usesPack($pack), 404);
 
-        return Institution::findOrFail($request->user()->institution_id);
+        return $institution;
     }
 
     private function entry(Request $request, string $register, string $id): Model
