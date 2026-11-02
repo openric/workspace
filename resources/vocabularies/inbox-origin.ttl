@@ -1,0 +1,44 @@
+# OpenRiC Workspace - OpenRiC Workspace Inbox Origins.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Where an inbox item came from (Heratio's InboxService::ORIGINS).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/inbox-origin/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Inbox Origins"@en ;
+    dcterms:description "Where an inbox item came from (Heratio's InboxService::ORIGINS)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:web, v:email-in, v:clipper, v:mobile .
+
+v:web a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Web"@en, "Web"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "The Workspace."@en .
+
+v:email-in a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "E-mail in"@en, "Inkomende e-pos"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "Mailed in."@en .
+
+v:clipper a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Web clipper"@en, "Webknipper"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "A web clipper."@en .
+
+v:mobile a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Mobile"@en, "Selfoon"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "A phone."@en .

@@ -1,0 +1,51 @@
+# OpenRiC Workspace - OpenRiC Workspace Grant Templates.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# The outline a grant application follows (Heratio's grant_funder_template). Each template's sections are rows of research_template_sections.
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/grant-template/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Grant Templates"@en ;
+    dcterms:description "The outline a grant application follows (Heratio's grant_funder_template). Each template's sections are rows of research_template_sections."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:generic, v:nrf, v:erc, v:nih, v:wellcome .
+
+v:generic a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Generic"@en, "Generies"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "Jurisdiction-neutral."@en .
+
+v:nrf a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "NRF-style (research foundation)"@en, "NNS-styl (navorsingstigting)"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "After a national research foundation."@en .
+
+v:erc a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "ERC-style (frontier research)"@en, "ERC-styl (grensnavorsing)"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "After the European Research Council."@en .
+
+v:nih a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "NIH-style (health research)"@en, "NIH-styl (gesondheidsnavorsing)"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "After the US National Institutes of Health."@en .
+
+v:wellcome a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Wellcome-style (discovery and health)"@en, "Wellcome-styl (ontdekking en gesondheid)"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "After the Wellcome Trust."@en .

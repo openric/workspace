@@ -32,6 +32,8 @@ The phase is built in parts, each finished whole, and released together:
 
 Amended on 1 November 2026: 19a to 19g and 19i are released together in v0.0.95; 19h and 19j are parked, and phase 23 (hardening and acceptance) comes first, as Dr Johan Pieterse decided after two external reviews (ROADMAP.md). The parity register keeps their rows as "With 19h" and "With 19j".
 
+Amended on 2 November 2026: Dr Johan Pieterse unparked 19h and 19j after phase 24; they are built together and released as v0.0.99. Heratio's offline sync (`ResearchOfflineService`, `OfflineSyncService`) builds on its portable export, so it goes with the offline catalogue, phase 11c, which stays parked.
+
 The AI parts of `ahg-research` (the copilot, AI disclosure and AI decisions) go to phase 17 with the Workspace's other AI, which is deferred to the end; AI runs only through the gateway.
 
 Research data is a researcher's own working data, not catalogue description. So its forms carry no RiC term (ADR 0006, option C), except where a record's own data is kept, as on share links.
@@ -212,6 +214,29 @@ Research data is a researcher's own working data, not catalogue description. So 
 - **The directory of target journals** (ResearchTargetJournalService), moved here from 19h as journals and the publication studio need it: the journals researchers aim at, kept by who runs the research services, with Heratio's starter list of South African journals accredited by the DHET.
 - **The project's export** carries the research brief, claims, decision log, argument, method protocols and the exporter's research memory, as Heratio's does.
 
+## Decision (19h)
+
+- **Funding** (Heratio's `ResearchFundingService`): a grant or award of a project, its funder and kind of funder, award reference, amount and currency (ISO 4217, a vocabulary), status, period, notes and the data management plan it requires. Totals are kept per currency and never added across currencies, counting only what is awarded, active or completed; a record is active now when it says so, or is awarded and today falls in its period. Amounts are added as whole cents, so totals are exact.
+- **Grant applications** (`GrantEngineService`): an application starts from a template (generic, NRF, ERC, NIH and Wellcome styles, from Heratio's seed), its sections rows of `research_template_sections`, not code. It is written section by section, beside what the project already holds: its description, research brief, method protocols, milestones, team, outputs, ethics approvals and data plans. Heratio's drafting of a section by a language model goes to phase 17. A researcher keeps the funding calls they watch, theirs alone.
+- **Data management plans** (`DmpService`): a plan starts from the RDA and Science Europe common sections, is answered section by section, and is exported as an RDA DMP Common Standard document (maDMP), every section's answer kept in an extension so the export loses nothing. Changed: the plan's ethical issues, and whether it holds personal or sensitive data, come from the project's ethics approvals instead of "unknown"; its funding comes from the project's funding records.
+- **Ethics approvals** (`ResearchEthicsService`): committee, reference, decision and expiry, consent basis, data sensitivity, notes, the plan it covers. An approval expires soon within 60 days of its expiry, unless it was rejected or not required.
+- **Compliance** (Heratio's compliance dashboard): read from the project's own records, not from milestones named for ethics as in Heratio: approvals and their expiry, plans and how complete they are, funding that names no plan, published outputs without an identifier, team members without an ORCID iD, and whether the last replication pack is older than the project's last change.
+- **Impact** (`ImpactTrackingService`): for each published output with a DOI, OpenAlex's citation count (one row, brought up to date) and up to 25 citing works, and Crossref Event Data's mentions, a DataCite, dataset or supplement link counting as reuse; each sign raised once; signs recorded by hand. From the project's page and nightly (`workspace:research-impact`). A failed lookup is logged, not silently dropped.
+- **Replication pack** (`ReplicationPackService`, `roCrate`, `reproducibilityPack`, made one): a ZIP that is an RO-Crate 1.1, its `ro-crate-metadata.json` describing every file, the team as authors with their ORCID iDs: method protocols, analysis results with provenance and claims, the decision log (JSON and CSV), claims with evidence, where the data and code are (not the files, as Heratio withholds them), the project export and its sources; what the project has none of is named as omitted. Each build is logged with its SHA-256. No licence is asserted: that is the researcher's to choose.
+- **DOIs**: Heratio's `mintDoi` made up a DOI under 10.5281, Zenodo's prefix. Here a DOI is registered through DataCite's REST API with the institution's own repository account and prefix, test or production, for the project or one of its outputs; it starts as a draft or is made findable at once, and a draft is made findable later. Its metadata (DataCite 4): creators from the team with ORCID iDs, title, the institution as publisher, year, resource type from the output's type. It resolves to its own landing page in the Workspace (`/doi/{id}`), so it keeps resolving when a share link is withdrawn. Only a public project's DOI may be registered, since registering publishes.
+- **ORCID** (`OrcidService`): the institution registers one member API client; Heratio kept a client per researcher. A researcher links their iD by signing in at ORCID (authenticate, read-limited, activities/update); the state is checked against the session and the iD written to their profile, proven, not typed. Their works are read from ORCID, and a project output is added to their record as a work. Tokens and secrets are encrypted and never written to the audit log.
+
+## Decision (19j)
+
+- **Lectures** (`ResearchLectureService`): the institution's, kept by who runs the research services, or a researcher's own; sections in Markdown (any HTML escaped) with media linked, not embedded, so a reader's address goes to no other site; resources; a cover record by its IRI. A published lecture opens to every signed-in account of the institution.
+- **Training** (`ResearchTrainingService`): courses of modules, each perhaps a curriculum lecture, and one multiple-choice assessment. A learner enrols in a published course, or is enrolled by name; marks modules done; the best score is kept; a pass with every module done completes the course and issues one certificate. Changed: Heratio's certificate number was an MD5 of the enrolment and score, and the right answers went to the learner's browser; here the number is the year and random characters, checked on a public page (`/certificates/{number}`), and the answers stay on the server.
+- **Quotas** (`ResearchQuotaService`): limits on downloads (monthly or all time) and on bytes kept in research workspaces, for everyone, a kind of researcher, a researcher or a project, the narrowest that sets a limit winning; a warning past the soft mark, a refusal at the limit. Counted: project exports, replication packs and research workspace files, as Heratio counts them, in a log of their own rather than Heratio's activity log.
+- **Notices** (`research_notification`, `research_notification_preference`): Heratio showed notices and kept preferences but wrote none and read none. Here every research notice, which was mail alone, is kept in the Workspace and mailed as its reader prefers for its kind: shown or not, mailed or not, at once or gathered hourly, daily or weekly into one digest (`workspace:research-digests`), or never.
+- **Inbox** (`InboxService`): notes, clippings, photos and files captured as they come, the researcher's own, sorted later into a project, marked sorted, archived or brought back.
+- **Research documents** (`ResearchDocumentTemplatesController`): templates name their fields; Heratio kept templates and filled in nothing; here a researcher fills one in as a document of theirs and prints it.
+- **Print templates** (`research_print_template`, which Heratio kept without code): call slips, paging slips, receipts, badges and labels, as text with placeholders, page size, orientation, margin and copies; the reading room's call slips use the default call slip template. Changed: Heratio's template was HTML and CSS run as markup; here its text is escaped when printed.
+- **Rights policies** (`OdrlService`, `OdrlPolicyMiddleware`): ODRL permissions, prohibitions and obligations on a record, for an action, within constraints (named accounts, a period, a most number of uses); a prohibition that holds denies, else a permission that holds allows, else, with permissions none of which hold, it is denied; refusals and counted uses are kept as decisions. Changed: Heratio checked them on a record's page and print; here they guard the record's files in the public catalogue (use, and reproduce when downloaded) and only ever narrow what access, embargoes and rights allow. Who may change the record is not held by them.
+
 ## Evidence (19a)
 
 `tests/Feature/ResearchServicesTest.php` covers:
@@ -292,4 +317,27 @@ Research data is a researcher's own working data, not catalogue description. So 
 - a document with a claim and a work pulled in, a version kept, given out as Markdown; review comments in a thread, resolved, refused to a non-member; venues suggested; a manuscript moved only as allowed, dated, with a reviewer's point; source triage filtered
 - the time machine and the export with the brief and claims
 - the DHET starter list added by staff only, twice without doubling; the directory filtered; a manuscript journal with an issue and an article checked against its target and shown with its HTML escaped, hidden from others
+
+## Evidence (19h)
+
+`tests/Feature/ResearchFundingTest.php` covers:
+
+- funding in rand and dollars, totalled per currency with only what is awarded, one active now; amounts with spaces and commas; a period ending before it starts and a non-number refused; nothing shown to someone not on the project
+- an NRF-style application with its eleven sections, written beside the project's description and milestones, two of eleven written; funding calls the researcher's own
+- a data plan answered and exported as a maDMP with its language, ethics, personal data, contact, funder and every section; an approval expiring soon, then expired, and the compliance view saying so
+- OpenAlex and Crossref answering for a published DOI, four signs raised once, a policy citation by hand, the citation count from OpenAlex; a replication pack that is an RO-Crate with the team's ORCID iD and the decision log, its SHA-256 logged, and compliance current
+- ORCID settings kept encrypted and out of the audit log; a forged state refused; the sign-in linking the iD, works read, an output added as a work with its token
+- a DOI refused for a private project and without DataCite, registered as a draft with its metadata, the output's identifier become the DOI, refused twice, made findable, and its public landing page
+
+## Evidence (19j)
+
+`tests/Feature/ResearchDeskTest.php` covers:
+
+- a lecture with Markdown and its script escaped, hidden while a draft; a course, its assessment refused with one option, enrolment refused while a draft; the answers not in the page; a fail, a pass without the module done and no certificate, then a pass with it and one certificate, checked publicly
+- quotas: the researcher's limit over everyone's, the third export refused, the count starting again next month; a storage limit refusing an upload
+- an invitation kept as a notice and mailed at once, opened and read; daily digests held, one digest sent, not again within the day
+- a rights policy for one account with two uses, a prohibition on reproduction, the public and another account refused, who may change the record not held by them, decisions shown
+- a document template's fields, a required field refused, a document filled in and hidden from others; a print template's code and default, its text escaped; the inbox capturing a clipping and sorting it into a project
+
+`tests/Feature/AccessMatrixTest.php` builds every object of 19h and 19j and finds none answering another institution, or an account with no role.
 

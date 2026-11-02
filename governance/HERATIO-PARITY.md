@@ -104,7 +104,7 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-reports` | 13861 | later: V1.0+ | Done | 8 | `ahgReportBuilderPlugin`, `ahgReportsPlugin` | Reports (overview, data quality, and six lists with filters and CSV), the authority completeness dashboard and the rights report; the report builder (saved reports, columns from the standards, sections, templates, export as CSV, XLSX, PDF and Word); the accession and donor reports come with phase 9; schedules with email, an archive of the files made, expiring share links and versions; not its comments, attachments, links, widgets, data snapshots or cover page |
 | `ahg-repository-manage` | 4578 | V0.1 candidate | Covered |  | `ahgRepositoryManagePlugin` | Repositories with ISDIAH elements and contact points |
 | `ahg-request-publish` | 1876 | V0.1 candidate | Partial | 10 | `ahgRequestToPublishPlugin` | Review and publish of each value; requests in phase 10 |
-| `ahg-research` | 79899 | V0.1 candidate | Partial | 19a to 19j | `ahgResearchPlugin` | All of it, decided by Dr Johan Pieterse on 31 October 2026 (ADR 0017); 19a to 19g and 19i in v0.0.95, 19h and 19j parked on 1 November 2026; its AI parts in phase 17 |
+| `ahg-research` | 79899 | V0.1 candidate | Partial | 19a to 19j | `ahgResearchPlugin` | All of it, decided by Dr Johan Pieterse on 31 October 2026 (ADR 0017); 19a to 19g and 19i in v0.0.95, 19h and 19j in v0.0.99 (offline sync with 11c); parked on 1 November 2026; its AI parts in phase 17 |
 | `ahg-researcher-manage` | 3111 | V0.1 candidate | Covered | 19e | `ahgResearcherPlugin` | Registration requests. The package itself is researcher submissions (descriptions and files drafted by researchers for staff review), not a register of researchers, so it moved to phase 19 |
 | `ahg-resourcesync` | 926 | later: V1.0+ | Planned | 16 | `ahgResourceSyncPlugin` |  |
 | `ahg-ric` | 28399 | V0.1 candidate | Partial | 11, 17, 23, 24 | `ahgRicExplorerPlugin` | RiC-native model, RiC-O export, assertions with provenance (ADR 0006); the Governance deprecation register and Portability (RiC-O import, round trip, DCAT/VoID, change feed) from v0.0.86 (11b, ADR 0013); rules and mandates as entities after Heratio's `ric_rule`, every relation in RiC-O, Authority & Context and Graph Traversal, from v0.0.97 (23b, ADR 0018); several parents as proxies, functions, Digital Object Linkage and Provenance & Event from v0.0.98 (24, ADR 0019); not yet Inferred-Provenance export or Graph-Grounding (`RicProvenanceService`, `GraphGroundingService`, phase 17) |
@@ -756,7 +756,7 @@ Added with 19b.
 | `photo_path`, `card_number`, `card_barcode`, `card_issued_at` | Photograph, reader's card number | Same; the card number is its barcode |
 | `institution_id`, `timezone`, `preferred_language` | The account's institution and interface language | Modelled |
 | `api_key`, `api_key_expires_at` | The Workspace's API keys | Modelled |
-| `orcid_verified`, `orcid_access_token` and the other ORCID tokens | none yet | With ORCID in 19h |
+| `orcid_verified`, `orcid_access_token` and the other ORCID tokens | `researcher_orcid_links` (the iD proven by signing in at ORCID, tokens encrypted) | 19h, v0.0.99 |
 | `research_researcher_audit` | The audit log | Modelled |
 | `research_researcher_type` (all its fields) | Kinds of researcher | Same |
 | `research_verification` (`verification_type`, `document_type`, `document_reference`, `document_path`, `verification_data`, `status`, `verified_by`, `verified_at`, `expires_at`, `rejection_reason`, `notes`) | Checks of identity and affiliation; `verification_data` as notes | Same |
@@ -793,7 +793,7 @@ Added with 19c.
 | `research_saved_search` (`name`, `description`, `search_query`, `search_filters`, `result_snapshot_json`, `last_result_count`, `total_results_at_save`, `alert_enabled`, `alert_frequency`, `last_alert_at`, `new_results_count`, `is_public`) | The same | Same |
 | `query_ast_json`, `search_type`, `facets`, `citation_id` | The words and filters of the Workspace's search | Modelled |
 | `research_search_alert_log` | The alert log | Same; Heratio never writes it |
-| `research_print_template` (call slips, paging slips, receipts, badges, labels) | The call slip page | With document templates in 19j |
+| `research_print_template` (call slips, paging slips, receipts, badges, labels) | Print templates; the call slip page uses the default | 19j, v0.0.99: text with placeholders, escaped, not HTML run as markup |
 
 : Reproductions, bibliographies, citations and saved searches, field by field
 
@@ -855,7 +855,7 @@ Added with 19f.
 | `research_project_resource` (`resource_type`, `resource_id`, `object_id`, `external_url`, `link_type`, `link_metadata`, `title`, `description`, `notes`, `tags`, `added_by`, `sort_order`, `added_at`) | Resources; a document kept as a research file | Same |
 | `research_project_milestone` (`title`, `description`, `due_date`, `completed_at`, `completed_by`, `status`, `sort_order`) and `research_milestone` (`milestone_type`, `description`, `due_date`, `completed_date`, `status`, `progress_pct`, `deliverable`, `owner_id`, `created_by`) | One table of milestones with the fields of both | Same |
 | `research_team_member` (`person_name`, `role`, `affiliation`, `email`, `orcid`, `is_lead`, `contribution_note`, `start_date`, `end_date`, `status`, `created_by`) | The team; the ORCID iD's check digit verified | Same |
-| `research_output` (`output_type`, `title`, `authors`, `venue`, `identifier_type`, `identifier`, `identifier_url`, `output_date`, `status`, `notes`, `created_by`) | Outputs | Same; `dmp_id` with 19h |
+| `research_output` (`output_type`, `title`, `authors`, `venue`, `identifier_type`, `identifier`, `identifier_url`, `output_date`, `status`, `notes`, `created_by`) | Outputs | Same; a plan is tied to funding and ethics approvals instead (19h) |
 | `research_activity_log` (`activity_type`, `entity_type`, `entity_id`, `entity_title`, `details`) for a project | The project's activity log | Same |
 | `research_activity_log.session_id`, `ip_address`, `user_agent` | The Workspace's audit log | Modelled |
 | `research_discussion` (`workspace_id`, `project_id`, `parent_id`, `researcher_id`, `subject`, `content`, `is_pinned`, `is_resolved`, `resolved_by`, `resolved_at`) | Discussions | Same |
@@ -924,4 +924,46 @@ Added with 19g.
 | `research_target_journal` (all its fields) | The directory; Heratio's DHET starter list | Same |
 
 : The studios and research journals, field by field
+
+### Funding, plans, ethics, impact, DOIs and ORCID (`ahg-research`)
+
+Added with 19h.
+
+| Heratio field | Workspace | Status |
+|---|---|---|
+| `research_funding` (`title`, `funder_name`, `funder_type`, `award_reference`, `amount`, `currency`, `status`, `start_date`, `end_date`, `notes`, `dmp_id`, `owner_id`, `created_by`) | Funding | Same; funder type, currency and status are vocabularies |
+| `research_grant_draft` (`funder_template`, `title`, `status`, `created_by`) and `research_grant_section` (`section_key`, `label`, `body`, `sort_order`) | Grant applications | Same; each section keeps its hint |
+| Grant templates (Heratio's dropdown metadata) and `DmpService::MADMP_SECTIONS` | `research_template_sections` | Rows, not code |
+| `research_grant_call` (`funder`, `title`, `url`, `deadline`, `status`, `notes`, `project_id`) | Funding calls | Same |
+| `GrantEngineService::draftSection` | none yet | With the AI services of phase 17 |
+| `research_dmp` (`title`, `status`, `funder`, `funder_template`, `language`, `contact_name`, `contact_email`, `owner_id`) and `research_dmp_section` | Data management plans | Same; exported as maDMP |
+| `research_ethics` (`title`, `approval_type`, `reference_number`, `committee_name`, `status`, `decision_date`, `expiry_date`, `consent_basis`, `data_sensitivity`, `notes`, `dmp_id`) | Ethics approvals | Same |
+| `research_impact_signal` (`submission_id`, `doi`, `signal_type`, `title`, `detail`, `url`, `source`, `detected_at`) | Signs of impact | Same; `output_id` for Heratio's `submission_id` |
+| `research_replication_log` (`built_by`, `built_at`) | Replication builds | Same, with the pack's SHA-256, size and what it holds |
+| `research_project.doi`, `doi_minted_at` | `research_dois`, one for the project and one an output | Registered at DataCite, not made up |
+| `researcher_orcid_link` (`orcid_id`, the tokens, `scope`, `expires_at`, `last_synced_at`, `last_works_count`) | `researcher_orcid_links` | Same; the works themselves kept |
+
+: Funding, plans, ethics, impact, DOIs and ORCID, field by field
+
+### Lectures, training, quotas, notices and the rest (`ahg-research`)
+
+Added with 19j.
+
+| Heratio field | Workspace | Status |
+|---|---|---|
+| `research_lecture` (`researcher_id`, `type`, `title`, `subtitle`, `summary`, `speaker_name`, `speaker_affiliation`, `scheduled_at`, `location`, `duration_minutes`, `recording_url`, `slides_url`, `curriculum_ref`, `cover_object_id`, `status`, `sort_order`) | Lectures | Same; the cover is a record by its IRI |
+| `research_lecture_section` (`heading`, `body_markdown`, `media_url`, `media_type`, `sort_order`) and `research_lecture_resource` (`label`, `url`, `resource_type`, `sort_order`) | Sections and resources | Same; `body_html` made when shown |
+| `training_course` (`title`, `description`, `audience`, `language`, `pass_mark`, `status`, `sort_order`), `training_module` (`title`, `lecture_id`, `body_markdown`, `sort_order`) | Courses and modules | Same |
+| `training_assessment` (`title`, `pass_mark`, `questions_json`) | The assessment | Same; the right answers stay on the server |
+| `training_enrolment` (`user_id`, `learner_name`, `learner_email`, `status`, `score`, `enrolled_at`, `completed_at`), `training_progress`, `training_certificate` (`certificate_no`, `score`, `issued_at`) | Enrolments, progress, certificates | Same; the certificate number is not guessable |
+| `research_quota_policy` (`scope`, `scope_key`, `period`, `max_downloads`, `max_storage_bytes`, `soft_warn_pct`, `is_active`, `notes`) | Research quotas | Same |
+| Downloads in `research_activity_log` | `research_downloads` | A log of their own |
+| `research_notification` (`type`, `title`, `message`, `link`, `is_read`, `read_at`) and `research_notification_preference` (`notification_type`, `email_enabled`, `in_app_enabled`, `digest_frequency`) | Notices | Same; written and read, which Heratio did not |
+| `research_inbox_item` (kind, origin, status, title, body, source address, attachment, project) | The inbox | Same |
+| `research_document_template` (`name`, `document_type`, `description`, `fields_json`) | Document templates, and the documents filled in from them | Same; Heratio filled in nothing |
+| `research_print_template` (`name`, `code`, `template_type`, `description`, `template_html`, `css_styles`, `page_size`, `orientation`, margins, `copies_default`, `variables`, `is_default`, `is_active`) | Print templates | Text with placeholders instead of HTML and CSS; one margin |
+| `research_rights_policy` (`target_type`, `target_id`, `policy_type`, `action_type`, `constraints_json`, `policy_json`) and `research_access_decision` | Rights policies on records, and decisions | Records only (Heratio's other targets had no check); guarding the record's files |
+| `research_offline_sync_log`, `researcher_offline_sync_targets` | none yet | With the offline catalogue, phase 11c (parked) |
+
+: Lectures, training, quotas, notices and the rest, field by field
 

@@ -1,0 +1,51 @@
+# OpenRiC Workspace - OpenRiC Workspace Impact Signal Types.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What kind of sign of impact a published output has had (Heratio's ImpactTrackingService::TYPES).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/impact-signal-type/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Impact Signal Types"@en ;
+    dcterms:description "What kind of sign of impact a published output has had (Heratio's ImpactTrackingService::TYPES)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:citation, v:mention, v:dataset-reuse, v:policy, v:other .
+
+v:citation a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Citation"@en, "Sitering"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "A work cites it."@en .
+
+v:mention a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Mention"@en, "Vermelding"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "It is mentioned, as in news, a blog or social media."@en .
+
+v:dataset-reuse a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Dataset reuse"@en, "Hergebruik van datastel"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "Its data is reused."@en .
+
+v:policy a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Policy citation"@en, "Beleidsitering"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "A policy document cites it."@en .
+
+v:other a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Other"@en, "Ander"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "Some other sign."@en .

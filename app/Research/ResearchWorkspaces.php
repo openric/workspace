@@ -223,6 +223,7 @@ class ResearchWorkspaces
     public function addFile(User $actor, ResearchWorkspace $workspace, UploadedFile $upload): ResearchWorkspaceFile
     {
         $this->must($actor, $workspace, 'contributor');
+        app(Quotas::class)->check($actor, 'storage', null, (int) $upload->getSize());
 
         return DB::transaction(fn () => AuditLog::actingAs($actor, fn () => $workspace->files()->create(['file_id' => $this->files->keep($upload, $workspace->institution_id, $actor)->id,
             'added_by_id' => $actor->id, 'created_at' => now()])));

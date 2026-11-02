@@ -1,0 +1,163 @@
+# OpenRiC Workspace - OpenRiC Workspace Currencies.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# The currency of an amount, by its ISO 4217 code (Heratio's research_currency).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/currency/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Currencies"@en ;
+    dcterms:description "The currency of an amount, by its ISO 4217 code (Heratio's research_currency)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:ZAR, v:USD, v:EUR, v:GBP, v:AUD, v:CAD, v:JPY, v:CHF, v:CNY, v:INR, v:BRL, v:NZD, v:SEK, v:NOK, v:SGD, v:KES, v:NGN, v:AED, v:BWP, v:NAD, v:ZWG .
+
+v:ZAR a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "ZAR - South African Rand"@en, "ZAR - Suid-Afrikaanse rand"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "South African Rand."@en .
+
+v:USD a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "USD - US Dollar"@en, "USD - Amerikaanse dollar"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "US Dollar."@en .
+
+v:EUR a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "EUR - Euro"@en, "EUR - Euro"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "Euro."@en .
+
+v:GBP a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "GBP - Pound Sterling"@en, "GBP - Britse pond"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "Pound Sterling."@en .
+
+v:AUD a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "AUD - Australian Dollar"@en, "AUD - Australiese dollar"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "Australian Dollar."@en .
+
+v:CAD a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "CAD - Canadian Dollar"@en, "CAD - Kanadese dollar"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "Canadian Dollar."@en .
+
+v:JPY a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "JPY - Japanese Yen"@en, "JPY - Japannese jen"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "Japanese Yen."@en .
+
+v:CHF a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "CHF - Swiss Franc"@en, "CHF - Switserse frank"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "Swiss Franc."@en .
+
+v:CNY a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "CNY - Chinese Yuan"@en, "CNY - Chinese joean"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "Chinese Yuan."@en .
+
+v:INR a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "INR - Indian Rupee"@en, "INR - Indiese roepee"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "Indian Rupee."@en .
+
+v:BRL a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "BRL - Brazilian Real"@en, "BRL - Brasiliaanse real"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "Brazilian Real."@en .
+
+v:NZD a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "NZD - New Zealand Dollar"@en, "NZD - Nieu-Seelandse dollar"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "New Zealand Dollar."@en .
+
+v:SEK a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "SEK - Swedish Krona"@en, "SEK - Sweedse kroon"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "Swedish Krona."@en .
+
+v:NOK a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "NOK - Norwegian Krone"@en, "NOK - Noorse kroon"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "Norwegian Krone."@en .
+
+v:SGD a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "SGD - Singapore Dollar"@en, "SGD - Singapoer-dollar"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "Singapore Dollar."@en .
+
+v:KES a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "KES - Kenyan Shilling"@en, "KES - Keniaanse sjieling"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "Kenyan Shilling."@en .
+
+v:NGN a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "NGN - Nigerian Naira"@en, "NGN - Nigeriese naira"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "Nigerian Naira."@en .
+
+v:AED a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "AED - UAE Dirham"@en, "AED - VAE-dirham"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "UAE Dirham."@en .
+
+v:BWP a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "BWP - Botswana Pula"@en, "BWP - Botswana-pula"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "Botswana Pula."@en .
+
+v:NAD a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "NAD - Namibian Dollar"@en, "NAD - Namibiese dollar"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "Namibian Dollar."@en .
+
+v:ZWG a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "ZWG - Zimbabwe Gold"@en, "ZWG - Zimbabwe-goud"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "Zimbabwe Gold."@en .

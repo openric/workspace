@@ -1,0 +1,58 @@
+# OpenRiC Workspace - OpenRiC Workspace ODRL Actions.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What a rights policy is about (ODRL's actions, as Heratio's research rights policies name them).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/odrl-action/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace ODRL Actions"@en ;
+    dcterms:description "What a rights policy is about (ODRL's actions, as Heratio's research rights policies name them)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:use, v:reproduce, v:distribute, v:modify, v:archive, v:display .
+
+v:use a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Use"@en, "Gebruik"@af ;
+    skos:scopeNote "Not a RiC-O term: an ODRL 2.2 term (https://www.w3.org/TR/odrl-model/), as Heratio's ahg-research uses it for research rights policies."@en ;
+    skos:definition "Open and view."@en .
+
+v:reproduce a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Reproduce"@en, "Reproduseer"@af ;
+    skos:scopeNote "Not a RiC-O term: an ODRL 2.2 term (https://www.w3.org/TR/odrl-model/), as Heratio's ahg-research uses it for research rights policies."@en ;
+    skos:definition "Print or copy."@en .
+
+v:distribute a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Distribute"@en, "Versprei"@af ;
+    skos:scopeNote "Not a RiC-O term: an ODRL 2.2 term (https://www.w3.org/TR/odrl-model/), as Heratio's ahg-research uses it for research rights policies."@en ;
+    skos:definition "Pass on to others."@en .
+
+v:modify a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Modify"@en, "Wysig"@af ;
+    skos:scopeNote "Not a RiC-O term: an ODRL 2.2 term (https://www.w3.org/TR/odrl-model/), as Heratio's ahg-research uses it for research rights policies."@en ;
+    skos:definition "Change."@en .
+
+v:archive a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Archive"@en, "Argiveer"@af ;
+    skos:scopeNote "Not a RiC-O term: an ODRL 2.2 term (https://www.w3.org/TR/odrl-model/), as Heratio's ahg-research uses it for research rights policies."@en ;
+    skos:definition "Keep a copy."@en .
+
+v:display a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Display"@en, "Vertoon"@af ;
+    skos:scopeNote "Not a RiC-O term: an ODRL 2.2 term (https://www.w3.org/TR/odrl-model/), as Heratio's ahg-research uses it for research rights policies."@en ;
+    skos:definition "Show to others."@en .

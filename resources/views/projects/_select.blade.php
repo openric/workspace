@@ -1,0 +1,2 @@
+{{-- OpenRiC Workspace - a choice from a vocabulary. Needs $id, $name, $choices, $current, $default. Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems. SPDX-License-Identifier: AGPL-3.0-or-later --}}
+<select id="{{ $id }}" name="{{ $name }}">@foreach($choices as $c)<option value="{{ $c->notation }}" @selected(($current ?? $default) === $c->notation)>{{ $c->label(\App\Support\Vocab::languages()) }}</option>@endforeach</select>

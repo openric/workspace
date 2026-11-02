@@ -1,0 +1,13 @@
+{{-- OpenRiC Workspace - a funding record's fields (Heratio's research_funding; roadmap phase 19h). Needs $f (or null), $x, $funderTypes, $statuses, $currencies, $plans. Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems. SPDX-License-Identifier: AGPL-3.0-or-later --}}
+@php($lang = \App\Support\Vocab::languages())
+<label for="{{ $x }}-title">{{ __('Title') }}</label> <input id="{{ $x }}-title" name="title" required size="40" value="{{ old('title', $f?->title) }}">
+<label for="{{ $x }}-funder">{{ __('Funder') }}</label> <input id="{{ $x }}-funder" name="funder_name" required size="30" value="{{ old('funder_name', $f?->funder_name) }}">
+<label for="{{ $x }}-type">{{ __('Kind of funder') }}</label> <select id="{{ $x }}-type" name="funder_type">@foreach($funderTypes as $c)<option value="{{ $c->notation }}" @selected(($f?->funderType->notation ?? 'other') === $c->notation)>{{ $c->label($lang) }}</option>@endforeach</select><br>
+<label for="{{ $x }}-ref">{{ __('Award reference') }}</label> <input id="{{ $x }}-ref" name="award_reference" size="20" value="{{ $f?->award_reference }}">
+<label for="{{ $x }}-amount">{{ __('Amount') }}</label> <input id="{{ $x }}-amount" name="amount" inputmode="decimal" size="14" value="{{ $f?->amount }}">
+<label for="{{ $x }}-currency">{{ __('Currency') }}</label> <select id="{{ $x }}-currency" name="currency">@foreach($currencies as $c)<option value="{{ $c->notation }}" @selected(($f?->currency->notation ?? config('workspace.currency', 'ZAR')) === $c->notation)>{{ $c->label($lang) }}</option>@endforeach</select>
+<label for="{{ $x }}-status">{{ __('Status') }}</label> <select id="{{ $x }}-status" name="status">@foreach($statuses as $c)<option value="{{ $c->notation }}" @selected(($f?->status->notation ?? 'applied') === $c->notation)>{{ $c->label($lang) }}</option>@endforeach</select><br>
+<label for="{{ $x }}-start">{{ __('From') }}</label> <input id="{{ $x }}-start" name="start_date" type="date" value="{{ $f?->start_date?->toDateString() }}">
+<label for="{{ $x }}-end">{{ __('To') }}</label> <input id="{{ $x }}-end" name="end_date" type="date" value="{{ $f?->end_date?->toDateString() }}">
+<label for="{{ $x }}-dmp">{{ __('Data management plan it requires') }}</label> <select id="{{ $x }}-dmp" name="dmp_id"><option value="">{{ __('None') }}</option>@foreach($plans as $p)<option value="{{ $p->id }}" @selected($f?->dmp_id === $p->id)>{{ $p->title }}</option>@endforeach</select><br>
+<label for="{{ $x }}-notes">{{ __('Notes') }}</label><br><textarea id="{{ $x }}-notes" name="notes" rows="2" cols="70">{{ $f?->notes }}</textarea><br>

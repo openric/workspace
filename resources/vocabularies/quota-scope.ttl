@@ -1,0 +1,44 @@
+# OpenRiC Workspace - OpenRiC Workspace Quota Scopes.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Whom a research quota applies to (Heratio's quota_scope). A narrower scope wins: researcher, project, kind of researcher, everyone.
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/quota-scope/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Quota Scopes"@en ;
+    dcterms:description "Whom a research quota applies to (Heratio's quota_scope). A narrower scope wins: researcher, project, kind of researcher, everyone."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:global, v:role, v:user, v:project .
+
+v:global a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Everyone"@en, "Almal"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "Every researcher of the institution."@en .
+
+v:role a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Kind of researcher"@en, "Soort navorser"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "Researchers of one kind."@en .
+
+v:user a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Researcher"@en, "Navorser"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "One researcher."@en .
+
+v:project a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Project"@en, "Projek"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "One research project."@en .

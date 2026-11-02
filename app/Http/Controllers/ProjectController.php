@@ -45,6 +45,7 @@ use App\Research\Collaboration;
 use App\Research\Collections;
 use App\Research\ProjectExport;
 use App\Research\Projects;
+use App\Research\Quotas;
 use App\Research\ResearchFiles;
 use App\Support\Vocab;
 use Illuminate\Http\JsonResponse;
@@ -221,12 +222,17 @@ class ProjectController extends Controller
         return $this->attempt(fn () => $this->projects->clipStep($request->user(), $item, $step, $request->input('notes')), __('Saved.'));
     }
 
-    public function export(Request $request, ResearchProject $project, string $format): Response
+    public function export(Request $request, ResearchProject $project, string $format): Response|RedirectResponse
     {
         try {
             [$body, $name, $mime] = app(ProjectExport::class)->export($request->user(), $project, $format);
         } catch (InvalidArgumentException) {
             abort(404);
+        }
+        try {
+            app(Quotas::class)->download($request->user(), $project, $project, __('Project export (:format)', ['format' => $format]));
+        } catch (InvalidArgumentException $e) {
+            return back()->withErrors(['research' => $e->getMessage()]);
         }
 
         return response($body, 200, ['Content-Type' => $mime, 'Content-Disposition' => 'attachment; filename="'.$name.'"']);

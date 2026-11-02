@@ -235,7 +235,7 @@ class Researchers
     {
         $researcher->loadMissing('user');
         if ($researcher->user && $researcher->user->disabled_at === null) {
-            $this->outbox->send($researcher->user, new ResearchMail($researcher->user, $subject, $replace, $lines, route('research.profile'), 'Open your researcher page'));
+            $this->outbox->send($researcher->user, new ResearchMail($researcher->user, $subject, $replace, $lines, route('research.profile'), 'Open your researcher page', 'reminder'));
         }
     }
 }

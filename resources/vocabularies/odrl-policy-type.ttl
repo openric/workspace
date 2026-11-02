@@ -1,0 +1,37 @@
+# OpenRiC Workspace - OpenRiC Workspace ODRL Rule Types.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Whether a rights policy permits, prohibits or obliges (ODRL's Permission, Prohibition and Duty).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/odrl-policy-type/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace ODRL Rule Types"@en ;
+    dcterms:description "Whether a rights policy permits, prohibits or obliges (ODRL's Permission, Prohibition and Duty)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:permission, v:prohibition, v:obligation .
+
+v:permission a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Permission"@en, "Toestemming"@af ;
+    skos:scopeNote "Not a RiC-O term: an ODRL 2.2 term (https://www.w3.org/TR/odrl-model/), as Heratio's ahg-research uses it for research rights policies."@en ;
+    skos:definition "Allows the action, under its constraints."@en .
+
+v:prohibition a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Prohibition"@en, "Verbod"@af ;
+    skos:scopeNote "Not a RiC-O term: an ODRL 2.2 term (https://www.w3.org/TR/odrl-model/), as Heratio's ahg-research uses it for research rights policies."@en ;
+    skos:definition "Forbids the action, under its constraints."@en .
+
+v:obligation a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Obligation"@en, "Verpligting"@af ;
+    skos:scopeNote "Not a RiC-O term: an ODRL 2.2 term (https://www.w3.org/TR/odrl-model/), as Heratio's ahg-research uses it for research rights policies."@en ;
+    skos:definition "A duty that comes with the record."@en .

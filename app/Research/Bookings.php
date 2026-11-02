@@ -405,7 +405,7 @@ class Bookings
     {
         $user = $booking->researcher->user;
         if ($user && $user->disabled_at === null) {
-            $this->outbox->send($user, new ResearchMail($user, $subject, ['date' => $booking->booking_date->format('j F Y')], $lines, route('research.bookings.show', $booking), 'Open your booking'));
+            $this->outbox->send($user, new ResearchMail($user, $subject, ['date' => $booking->booking_date->format('j F Y')], $lines, route('research.bookings.show', $booking), 'Open your booking', 'booking'));
         }
     }
 

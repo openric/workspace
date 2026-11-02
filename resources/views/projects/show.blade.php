@@ -18,6 +18,7 @@
     <p class="no-print">@foreach(['research.reasoning.claims' => 'Claims', 'research.reasoning.graph' => 'Knowledge graph', 'research.reasoning.hypotheses' => 'Hypotheses', 'research.reasoning.contradictions' => 'Contradictions', 'research.reasoning.decisions' => 'Decision log', 'research.reasoning.analysis' => 'Analysis results'] as $r => $l)<a href="{{ route($r, $project) }}">{{ __($l) }}</a> · @endforeach</p>
     <p class="no-print">@foreach(['research.studios.question' => 'Question builder', 'research.studios.method' => 'Method studio', 'research.studios.triage' => 'Source triage', 'research.studios.argument' => 'Argument builder', 'research.studios.writing' => 'Writing studio', 'research.studios.review' => 'Review studio', 'research.studios.publication' => 'Publication studio', 'research.studios.time-machine' => 'Time machine'] as $r => $l)<a href="{{ route($r, $project) }}">{{ __($l) }}</a> · @endforeach</p>
     <p class="no-print">@foreach(['research.analysis.snapshots' => 'Snapshots', 'research.analysis.timeline' => 'Timeline', 'research.analysis.map' => 'Map', 'research.analysis.alerts' => 'Field alerts'] as $r => $l)<a href="{{ route($r, $project) }}">{{ __($l) }}</a> · @endforeach</p>
+    <p class="no-print">@foreach(['research.funding' => 'Funding and grants', 'research.projects.plans' => 'Data management plans', 'research.ethics' => 'Ethics approvals', 'research.impact' => 'Impact', 'research.compliance' => 'Compliance'] as $r => $l)<a href="{{ route($r, $project) }}">{{ __($l) }}</a> · @endforeach</p>
     <p class="no-print">{{ __('Export') }}: @foreach($formats as $f => $l)<a href="{{ route('research.projects.export', [$project, $f]) }}">{{ __($l) }}</a>@if(! $loop->last), @endif @endforeach</p>
     <p id="pj-presence" class="meta" aria-live="polite"></p>
 
@@ -91,6 +92,7 @@
                 @if($o->authors) · {{ $o->authors }}@endif @if($o->venue) · <em>{{ $o->venue }}</em>@endif @if($o->output_date) · {{ $o->output_date->format('j M Y') }}@endif
                 @if($o->identifier) · {{ $o->identifierType?->label($lang) }} {{ $o->identifier }}@endif</p>
             @if($o->notes)<p style="white-space: pre-wrap">{{ $o->notes }}</p>@endif
+            @if($level >= 2 && $url)<form method="post" action="{{ route('research.orcid.push', $o) }}" style="display: inline">@csrf<button type="submit">{{ __('Add to my ORCID record') }}</button></form>@endif
             @if($level >= 2)<details><summary>{{ __('Change') }}</summary><form method="post" action="{{ route('research.projects.outputs', [$project, $o]) }}">@csrf @include('projects._output-fields', ['o' => $o, 'x' => 'po'.$loop->index])<button type="submit">{{ __('Save') }}</button></form>
                 @if($may($o->created_by_id))<form method="post" action="{{ route('research.projects.part.remove', ['outputs', $o->id]) }}">@csrf<button type="submit">{{ __('Remove') }}</button></form>@endif</details>@endif
         </section>

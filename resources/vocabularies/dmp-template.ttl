@@ -1,0 +1,51 @@
+# OpenRiC Workspace - OpenRiC Workspace Data Management Plan Templates.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# The outline a data management plan follows (Heratio's dmp_funder_template). Each template's sections are rows of research_template_sections.
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/dmp-template/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Data Management Plan Templates"@en ;
+    dcterms:description "The outline a data management plan follows (Heratio's dmp_funder_template). Each template's sections are rows of research_template_sections."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:generic, v:horizon-europe, v:nsf, v:wellcome, v:nrf .
+
+v:generic a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Generic"@en, "Generies"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "The RDA and Science Europe common sections, jurisdiction-neutral."@en .
+
+v:horizon-europe a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Horizon Europe"@en, "Horizon Europe"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "For the European Commission."@en .
+
+v:nsf a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "NSF"@en, "NSF"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "For the US National Science Foundation."@en .
+
+v:wellcome a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Wellcome"@en, "Wellcome"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "For the Wellcome Trust."@en .
+
+v:nrf a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "NRF"@en, "NNS"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "For the National Research Foundation of South Africa."@en .

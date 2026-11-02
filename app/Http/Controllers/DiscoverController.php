@@ -29,6 +29,7 @@ use App\Models\Repository;
 use App\Relations\EntityKinds;
 use App\Relations\RelationService;
 use App\Reports\UsageService;
+use App\Research\RightsPolicies;
 use App\Rights\Embargoes;
 use App\Search\SearchIndex;
 use App\Search\SearchService;
@@ -247,6 +248,9 @@ class DiscoverController extends Controller
         // asks for it once they have signed in (Auth Flow 2.0, phase 14b). Every file is sent private, no-store.
         abort_unless($file->institution_id === $this->catalogue($request)->institution->id
             && ($service->deliverable(null, $file) || ($request->user() !== null && $service->deliverable($request->user(), $file))), 404);
+        // The record's rights policies for researchers may narrow that further (phase 19j).
+        [$permitted, $why] = app(RightsPolicies::class)->evaluate($request->user(), $file->instantiation->record, $request->boolean('download') ? 'reproduce' : 'use');
+        abort_unless($permitted, 403, $why);
         $path = $service->path($file);
         abort_unless(is_file($path), 404);
         // A picture shown in a page is not a download; a file asked for as one, or opened on its own, is.

@@ -29,5 +29,18 @@
         <details><summary>{{ __('My details') }}</summary>
             <form method="post" action="{{ route('research.profile.update') }}" enctype="multipart/form-data">@csrf @include('research._fields', ['r' => $researcher])<button type="submit">{{ __('Save') }}</button></form>
         </details>
+        <h2>{{ __('ORCID') }}</h2>
+        @if($orcidLink)
+            <p>{{ __('Linked to :orcid by signing in at ORCID on :date.', ['orcid' => $orcidLink->orcid, 'date' => $orcidLink->linked_at->format('j F Y')]) }} <a href="https://orcid.org/{{ $orcidLink->orcid }}" rel="noopener noreferrer">https://orcid.org/{{ $orcidLink->orcid }}</a></p>
+            <form method="post" action="{{ route('research.orcid.step', 'pull') }}" style="display: inline">@csrf<button type="submit">{{ __('Read my works from ORCID') }}</button></form>
+            <form method="post" action="{{ route('research.orcid.step', 'unlink') }}" style="display: inline">@csrf<button type="submit">{{ __('Unlink') }}</button></form>
+            @if($orcidLink->works)<p class="meta">{{ __('Works on ORCID, read :date', ['date' => $orcidLink->works_pulled_at?->format('j F Y')]) }}</p>
+                <ul>@foreach($orcidLink->works as $w)<li>{{ $w['title'] }}@if($w['year']) ({{ $w['year'] }})@endif @if($w['doi']) <a href="https://doi.org/{{ $w['doi'] }}" rel="noopener noreferrer">{{ $w['doi'] }}</a>@endif</li>@endforeach</ul>@endif
+        @elseif($orcidReady)
+            <form method="post" action="{{ route('research.orcid.step', 'link') }}">@csrf<button type="submit">{{ __('Link my ORCID iD by signing in at ORCID') }}</button></form>
+        @else
+            <p>{{ __('ORCID is not set up yet. Ask the institution to set it up under the research settings.') }}</p>
+        @endif
+        <p><a href="{{ route('research.calls') }}">{{ __('Funding calls you watch') }}</a></p>
     @endif
 @endsection

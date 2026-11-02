@@ -22,6 +22,7 @@ use App\Research\Bibliographies;
 use App\Research\Collaboration;
 use App\Research\Collections;
 use App\Research\Projects;
+use App\Research\Quotas;
 use App\Research\ResearchFiles;
 use App\Research\ResearchWorkspaces;
 use Illuminate\Http\RedirectResponse;
@@ -123,12 +124,17 @@ class ResearchWorkspaceController extends Controller
         };
     }
 
-    public function file(Request $request, ResearchWorkspaceFile $file): Response
+    public function file(Request $request, ResearchWorkspaceFile $file): Response|RedirectResponse
     {
         try {
             $kept = $this->workspaces->file($request->user(), $file);
         } catch (InvalidArgumentException) {
             abort(404);
+        }
+        try {
+            app(Quotas::class)->download($request->user(), $file->project, $file, $kept->original_name);
+        } catch (InvalidArgumentException $e) {
+            return back()->withErrors(['research' => $e->getMessage()]);
         }
 
         return app(ResearchFiles::class)->respond($kept, true);

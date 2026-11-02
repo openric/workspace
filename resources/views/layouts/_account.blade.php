@@ -21,6 +21,11 @@
                     <li><a href="{{ route('research.diary.index') }}" @if(request()->routeIs('research.diary.*')) aria-current="page" @endif>{{ __('Research diary') }}</a></li>
                     <li><a href="{{ route('research.workspaces.index') }}" @if(request()->routeIs('research.workspaces.*')) aria-current="page" @endif>{{ __('Research workspaces') }}</a></li>
                     <li><a href="{{ route('research.projects.index') }}" @if(request()->routeIs('research.projects.*')) aria-current="page" @endif>{{ __('Research projects') }}</a></li>
+                    <li><a href="{{ route('research.notifications') }}" @if(request()->routeIs('research.notifications*')) aria-current="page" @endif>{{ __('Notices') }}@php($unread = \App\Research\Notifications::unread(auth()->user()))@if($unread) ({{ $unread }})@endif</a></li>
+                    <li><a href="{{ route('research.inbox') }}" @if(request()->routeIs('research.inbox*')) aria-current="page" @endif>{{ __('Inbox') }}</a></li>
+                    <li><a href="{{ route('research.teaching') }}" @if(request()->routeIs('research.teaching', 'research.lectures.*', 'research.courses.*')) aria-current="page" @endif>{{ __('Lectures and training') }}</a></li>
+                    <li><a href="{{ route('research.documents') }}" @if(request()->routeIs('research.documents*')) aria-current="page" @endif>{{ __('Research documents') }}</a></li>
+                    <li><a href="{{ route('research.calls') }}" @if(request()->routeIs('research.calls')) aria-current="page" @endif>{{ __('Funding calls') }}</a></li>
                     <li><a href="{{ route('research.journals.index') }}" @if(request()->routeIs('research.journals.*')) aria-current="page" @endif>{{ __('Research journals') }}</a></li>
                     <li><a href="{{ route('research.reports.index') }}" @if(request()->routeIs('research.reports.*')) aria-current="page" @endif>{{ __('Research reports') }}</a></li>
                     <li><a href="{{ route('research.across') }}" @if(request()->routeIs('research.across')) aria-current="page" @endif>{{ __('Search across fonds') }}</a></li>

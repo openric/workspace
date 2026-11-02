@@ -1,0 +1,51 @@
+# OpenRiC Workspace - OpenRiC Workspace Consent Bases.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# On what grounds personal information is processed (Heratio's research_consent_basis).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/consent-basis/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Consent Bases"@en ;
+    dcterms:description "On what grounds personal information is processed (Heratio's research_consent_basis)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:informed-consent, v:legitimate-interest, v:public-task, v:anonymised, v:not-applicable .
+
+v:informed-consent a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Informed consent"@en, "Ingeligte toestemming"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "The people concerned agreed."@en .
+
+v:legitimate-interest a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Legitimate interest"@en, "Regmatige belang"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "A legitimate interest."@en .
+
+v:public-task a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Public task"@en, "Openbare taak"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "A task in the public interest."@en .
+
+v:anonymised a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Anonymised data"@en, "Geanonimiseerde data"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "The data names no one."@en .
+
+v:not-applicable a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Not applicable"@en, "Nie van toepassing nie"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "No personal information."@en .

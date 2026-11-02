@@ -7,11 +7,13 @@
 // Heratio's AccessRequestService::trySend, for every message: the suppression gate
 // first, so an address that bounced or complained is not written to again, and a
 // mailer that fails is logged, never thrown, so it cannot undo what the message tells
-// of. A disabled account gets no mail.
+// of. A disabled account gets no mail. A research notice goes through the researcher's notices first (phase 19j),
+// which keep it in the Workspace and mail it now, later in a digest, or not, as the researcher prefers.
 
 namespace App\Mail;
 
 use App\Models\User;
+use App\Research\Notifications;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Throwable;
@@ -19,6 +21,12 @@ use Throwable;
 class Outbox
 {
     public function send(User $to, WorkspaceMail $mail): bool
+    {
+        return $mail instanceof ResearchMail ? app(Notifications::class)->deliver($to, $mail) : $this->mail($to, $mail);
+    }
+
+    /** Mail it now, past the suppression gate. */
+    public function mail(User $to, WorkspaceMail $mail): bool
     {
         if ($to->isDisabled() || ! EmailSuppressionGate::canSend($to->email, $mail::class, null, $to->institution_id)) {
             return false;

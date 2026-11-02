@@ -1,0 +1,5 @@
+{{-- OpenRiC Workspace - the head of a page of a research project's funding, plans, ethics, impact or compliance (roadmap phase 19h). Needs $project. Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems. SPDX-License-Identifier: AGPL-3.0-or-later --}}
+<p><a href="{{ route('research.projects.show', $project) }}">{{ $project->title }}</a> · @foreach(['research.funding' => 'Funding and grants', 'research.projects.plans' => 'Data management plans', 'research.ethics' => 'Ethics approvals', 'research.impact' => 'Impact', 'research.compliance' => 'Compliance'] as $r => $l)<a href="{{ route($r, $project) }}" @if(request()->routeIs($r)) aria-current="page" @endif>{{ __($l) }}</a>@if(! $loop->last) · @endif @endforeach</p>
+@if(session('status'))<p role="status">{{ session('status') }}</p>@endif
+@error('research')<p class="error" role="alert">{{ $message }}</p>@enderror
+@if($errors->any() && ! $errors->has('research'))<p class="error" role="alert">{{ $errors->first() }}</p>@endif

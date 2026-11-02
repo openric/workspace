@@ -24,6 +24,7 @@ use App\Models\ResearcherType;
 use App\Models\RetrievalSchedule;
 use App\Models\WalkInVisitor;
 use App\Research\Bookings;
+use App\Research\DocumentTemplates;
 use App\Research\Researchers;
 use App\Research\ResearchFiles;
 use App\Research\Retrieval;
@@ -187,7 +188,7 @@ class ReadingRoomController extends Controller
             ->with('booking.researcher', 'booking.room', 'record', 'priority')->get();
         $this->retrieval->printSlips($request->user(), $requests);
 
-        return view('reading-room.slips', ['requests' => $requests]);
+        return view('reading-room.slips', ['requests' => $requests, 'template' => app(DocumentTemplates::class)->default($institution, 'call-slip')]);
     }
 
     // Rooms, seats, retrieval runs and equipment (Heratio's rooms, seats and equipment pages).

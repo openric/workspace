@@ -6,6 +6,8 @@ use App\Description\WorkflowSlaService;
 use App\Reports\ReportDelivery;
 use App\Reports\UsageService;
 use App\Research\FieldAlerts;
+use App\Research\Impact;
+use App\Research\Notifications;
 use App\Research\Researchers;
 use App\Research\SavedSearches;
 use App\Research\ShareLinks;
@@ -92,4 +94,12 @@ Artisan::command('workspace:field-alerts', function (FieldAlerts $alerts) {
     $this->info($alerts->scanAll().' field alerts raised.');
 })->purpose('Ask Crossref and OpenAlex about the works research projects cite: retractions, updates and new citing works');
 Schedule::command('workspace:field-alerts')->dailyAt('04:10')->timezone(config('workspace.timezone'))->withoutOverlapping();
+Artisan::command('workspace:research-impact', function (Impact $impact) {
+    $this->info($impact->scanAll().' signs of impact found.');
+})->purpose('Ask OpenAlex and Crossref Event Data who cites, mentions or reuses the published outputs of research projects');
+Schedule::command('workspace:research-impact')->dailyAt('04:30')->timezone(config('workspace.timezone'))->withoutOverlapping();
+Artisan::command('workspace:research-digests', function (Notifications $notifications) {
+    $this->info($notifications->digests().' digests of research notices sent.');
+})->purpose('Mail each researcher the notices held for their hourly, daily or weekly digest');
+Schedule::command('workspace:research-digests')->hourly()->withoutOverlapping();
 Schedule::command('workspace:share-links:prune')->dailyAt('03:20')->timezone(config('workspace.timezone'))->withoutOverlapping();

@@ -17,9 +17,11 @@ use App\Models\ReadingRoom;
 use App\Models\ReadingRoomBooking;
 use App\Models\ReadingRoomEquipment;
 use App\Models\RecordResource;
+use App\Models\ResearcherOrcidLink;
 use App\Models\ResearcherType;
 use App\Models\ResearchFile;
 use App\Research\Bookings;
+use App\Research\Orcid;
 use App\Research\Researchers;
 use App\Research\ResearchFiles;
 use App\Research\Retrieval;
@@ -41,7 +43,8 @@ class ResearcherController extends Controller
         return view('research.profile', ['researcher' => $researcher, 'active' => $this->researchers->active($researcher),
             'bookings' => $researcher ? $researcher->bookings()->with('room', 'status')->orderByDesc('booking_date')->get() : collect(),
             'types' => ResearcherType::where(['institution_id' => $request->user()->institution_id, 'is_active' => true])->orderBy('position')->get(),
-            'affiliations' => Concept::choices(Vocab::BASE.'researcher-affiliation/')->get(), 'idTypes' => Concept::choices(Vocab::BASE.'identity-document-type/')->get()]);
+            'affiliations' => Concept::choices(Vocab::BASE.'researcher-affiliation/')->get(), 'idTypes' => Concept::choices(Vocab::BASE.'identity-document-type/')->get(),
+            'orcidLink' => $researcher ? ResearcherOrcidLink::where('researcher_id', $researcher->id)->first() : null, 'orcidReady' => (bool) app(Orcid::class)->settings($request->user())]);
     }
 
     public function register(Request $request): RedirectResponse

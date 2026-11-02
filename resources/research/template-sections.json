@@ -1,0 +1,581 @@
+{
+ "grant-template": {
+  "generic": [
+   {
+    "key": "summary",
+    "label": "Project summary / abstract",
+    "hint": "A short, plain-language overview of what you will do and why it matters."
+   },
+   {
+    "key": "background",
+    "label": "Background and rationale",
+    "hint": "The problem, the gap in current knowledge, and why now."
+   },
+   {
+    "key": "aims",
+    "label": "Aims and objectives",
+    "hint": "The specific, measurable goals of the project."
+   },
+   {
+    "key": "methodology",
+    "label": "Methodology / approach",
+    "hint": "How you will do the work, drawn from your method protocol."
+   },
+   {
+    "key": "outputs",
+    "label": "Expected outputs and outcomes",
+    "hint": "What the project will produce and the change it will create."
+   },
+   {
+    "key": "impact",
+    "label": "Significance and impact",
+    "hint": "Who benefits and how the field or society is advanced."
+   },
+   {
+    "key": "workplan",
+    "label": "Work plan and timeline",
+    "hint": "Phases, milestones and the schedule."
+   },
+   {
+    "key": "budget",
+    "label": "Budget justification",
+    "hint": "What you are requesting and why each item is needed."
+   },
+   {
+    "key": "team",
+    "label": "Team and capability",
+    "hint": "Who is involved and why they can deliver this."
+   },
+   {
+    "key": "ethics",
+    "label": "Ethics and data management",
+    "hint": "Consent, privacy, retention and responsible-research considerations, jurisdiction-neutral."
+   }
+  ],
+  "nrf": [
+   {
+    "key": "summary",
+    "label": "Lay summary",
+    "hint": "Accessible summary for a non-specialist review panel."
+   },
+   {
+    "key": "background",
+    "label": "Background and problem statement",
+    "hint": "Context and the research problem."
+   },
+   {
+    "key": "questions",
+    "label": "Research questions and hypotheses",
+    "hint": "Drawn from your question brief."
+   },
+   {
+    "key": "aims",
+    "label": "Aims and objectives",
+    "hint": "Specific objectives."
+   },
+   {
+    "key": "methodology",
+    "label": "Research design and methods",
+    "hint": "From your method protocol."
+   },
+   {
+    "key": "outputs",
+    "label": "Anticipated outputs",
+    "hint": "Publications, datasets, artefacts, training."
+   },
+   {
+    "key": "impact",
+    "label": "Expected impact and contribution to knowledge",
+    "hint": "Scholarly and broader impact."
+   },
+   {
+    "key": "capacity",
+    "label": "Human capacity development",
+    "hint": "Students trained, skills transferred."
+   },
+   {
+    "key": "workplan",
+    "label": "Work plan and milestones",
+    "hint": "Timeline and deliverables."
+   },
+   {
+    "key": "budget",
+    "label": "Budget and justification",
+    "hint": "Costs and rationale."
+   },
+   {
+    "key": "ethics",
+    "label": "Ethics and risk",
+    "hint": "Approvals, consent, data management."
+   }
+  ],
+  "erc": [
+   {
+    "key": "summary",
+    "label": "Extended synopsis",
+    "hint": "The big idea and why it is high-risk / high-gain."
+   },
+   {
+    "key": "ambition",
+    "label": "Ground-breaking nature and ambition",
+    "hint": "What makes this beyond the state of the art."
+   },
+   {
+    "key": "objectives",
+    "label": "Objectives",
+    "hint": "The scientific objectives."
+   },
+   {
+    "key": "methodology",
+    "label": "Methodology",
+    "hint": "From your method protocol; feasibility of the approach."
+   },
+   {
+    "key": "outputs",
+    "label": "Expected outcomes",
+    "hint": "What success looks like."
+   },
+   {
+    "key": "impact",
+    "label": "Impact and significance",
+    "hint": "Advance to the field."
+   },
+   {
+    "key": "feasibility",
+    "label": "Feasibility and risk management",
+    "hint": "Why it can be done and how risks are handled."
+   },
+   {
+    "key": "resources",
+    "label": "Resources and budget",
+    "hint": "What is needed and why."
+   },
+   {
+    "key": "team",
+    "label": "Principal investigator and team",
+    "hint": "Track record and capability."
+   },
+   {
+    "key": "ethics",
+    "label": "Ethics and research integrity",
+    "hint": "Responsible research, jurisdiction-neutral."
+   }
+  ],
+  "nih": [
+   {
+    "key": "summary",
+    "label": "Specific aims",
+    "hint": "The aims page: the goals and what each aim will establish."
+   },
+   {
+    "key": "significance",
+    "label": "Significance",
+    "hint": "Importance of the problem and the gap addressed."
+   },
+   {
+    "key": "innovation",
+    "label": "Innovation",
+    "hint": "How the project challenges or shifts current practice."
+   },
+   {
+    "key": "approach",
+    "label": "Approach",
+    "hint": "Design, methods and analyses, from your method protocol."
+   },
+   {
+    "key": "outputs",
+    "label": "Expected outcomes",
+    "hint": "What the work will yield."
+   },
+   {
+    "key": "impact",
+    "label": "Impact",
+    "hint": "Effect on the field and on health / society."
+   },
+   {
+    "key": "workplan",
+    "label": "Timeline and milestones",
+    "hint": "Schedule and deliverables."
+   },
+   {
+    "key": "budget",
+    "label": "Budget and justification",
+    "hint": "Costs and rationale."
+   },
+   {
+    "key": "team",
+    "label": "Investigators and environment",
+    "hint": "Team and institutional setting."
+   },
+   {
+    "key": "ethics",
+    "label": "Human subjects, data and rigour",
+    "hint": "Protections, rigour and reproducibility, jurisdiction-neutral."
+   }
+  ],
+  "wellcome": [
+   {
+    "key": "summary",
+    "label": "Vision and summary",
+    "hint": "The discovery question and why it matters."
+   },
+   {
+    "key": "background",
+    "label": "Background and context",
+    "hint": "Where the field is and the gap."
+   },
+   {
+    "key": "aims",
+    "label": "Research aims",
+    "hint": "What you intend to discover or build."
+   },
+   {
+    "key": "approach",
+    "label": "Research approach",
+    "hint": "Methods and rationale, from your method protocol."
+   },
+   {
+    "key": "outputs",
+    "label": "Outputs and open research",
+    "hint": "Outputs and your open-research / data-sharing plan."
+   },
+   {
+    "key": "impact",
+    "label": "Significance and impact",
+    "hint": "Advance to knowledge and to people."
+   },
+   {
+    "key": "workplan",
+    "label": "Plan and milestones",
+    "hint": "Timeline and deliverables."
+   },
+   {
+    "key": "budget",
+    "label": "Resources requested",
+    "hint": "What is needed and why."
+   },
+   {
+    "key": "team",
+    "label": "Team and track record",
+    "hint": "Capability to deliver."
+   },
+   {
+    "key": "ethics",
+    "label": "Research integrity and data management",
+    "hint": "Responsible research, jurisdiction-neutral."
+   }
+  ]
+ },
+ "dmp-template": {
+  "generic": [
+   {
+    "key": "data-description",
+    "label": "Data description and collection",
+    "hint": "What data will you collect, generate or reuse? Types, formats, volumes and how the data is produced."
+   },
+   {
+    "key": "documentation",
+    "label": "Documentation and data quality",
+    "hint": "What metadata, README files and standards describe the data so others can understand it? How is quality assured?"
+   },
+   {
+    "key": "findable",
+    "label": "FAIR - Findable",
+    "hint": "Will datasets carry persistent identifiers (e.g. DOIs) and rich metadata, indexed in a searchable resource?"
+   },
+   {
+    "key": "accessible",
+    "label": "FAIR - Accessible",
+    "hint": "How and under what conditions will the data be accessed? Open, restricted or closed, and through which protocol or repository?"
+   },
+   {
+    "key": "interoperable",
+    "label": "FAIR - Interoperable",
+    "hint": "Which open, standard formats, vocabularies and ontologies make the data combinable with other datasets?"
+   },
+   {
+    "key": "reusable",
+    "label": "FAIR - Reusable",
+    "hint": "Which licence and provenance information allow others to reuse the data? How long will it remain reusable?"
+   },
+   {
+    "key": "storage-backup",
+    "label": "Storage and backup during the project",
+    "hint": "Where is the data stored and backed up during the project, and how is security and recovery handled?"
+   },
+   {
+    "key": "preservation",
+    "label": "Preservation and retention",
+    "hint": "Which data will be preserved long term, in which repository, and for how long (the retention period)?"
+   },
+   {
+    "key": "sharing-access",
+    "label": "Data sharing and access control",
+    "hint": "How and when will data be shared? Any embargo, access controls, or reasons some data cannot be shared."
+   },
+   {
+    "key": "ethics-legal",
+    "label": "Ethics, legal and privacy",
+    "hint": "Consent, personal-data protection, sensitive data, intellectual-property and any jurisdictional obligations."
+   },
+   {
+    "key": "responsibilities",
+    "label": "Responsibilities and resources",
+    "hint": "Who is responsible for data management, and what resources (people, skills, infrastructure) are needed?"
+   },
+   {
+    "key": "costs",
+    "label": "Costs",
+    "hint": "What are the anticipated data-management costs (storage, curation, repository fees) and how are they covered?"
+   }
+  ],
+  "horizon-europe": [
+   {
+    "key": "data-description",
+    "label": "Data description and collection",
+    "hint": "What data will you collect, generate or reuse? Types, formats, volumes and how the data is produced."
+   },
+   {
+    "key": "documentation",
+    "label": "Documentation and data quality",
+    "hint": "What metadata, README files and standards describe the data so others can understand it? How is quality assured?"
+   },
+   {
+    "key": "findable",
+    "label": "FAIR - Findable",
+    "hint": "Will datasets carry persistent identifiers (e.g. DOIs) and rich metadata, indexed in a searchable resource?"
+   },
+   {
+    "key": "accessible",
+    "label": "FAIR - Accessible",
+    "hint": "How and under what conditions will the data be accessed? Open, restricted or closed, and through which protocol or repository?"
+   },
+   {
+    "key": "interoperable",
+    "label": "FAIR - Interoperable",
+    "hint": "Which open, standard formats, vocabularies and ontologies make the data combinable with other datasets?"
+   },
+   {
+    "key": "reusable",
+    "label": "FAIR - Reusable",
+    "hint": "Which licence and provenance information allow others to reuse the data? How long will it remain reusable?"
+   },
+   {
+    "key": "storage-backup",
+    "label": "Storage and backup during the project",
+    "hint": "Where is the data stored and backed up during the project, and how is security and recovery handled?"
+   },
+   {
+    "key": "preservation",
+    "label": "Preservation and retention",
+    "hint": "Which data will be preserved long term, in which repository, and for how long (the retention period)?"
+   },
+   {
+    "key": "sharing-access",
+    "label": "Data sharing and access control",
+    "hint": "How and when will data be shared? Any embargo, access controls, or reasons some data cannot be shared."
+   },
+   {
+    "key": "ethics-legal",
+    "label": "Ethics, legal and privacy",
+    "hint": "Consent, personal-data protection, sensitive data, intellectual-property and any jurisdictional obligations."
+   },
+   {
+    "key": "responsibilities",
+    "label": "Responsibilities and resources",
+    "hint": "Who is responsible for data management, and what resources (people, skills, infrastructure) are needed?"
+   },
+   {
+    "key": "costs",
+    "label": "Costs",
+    "hint": "What are the anticipated data-management costs (storage, curation, repository fees) and how are they covered?"
+   }
+  ],
+  "nsf": [
+   {
+    "key": "data-description",
+    "label": "Data description and collection",
+    "hint": "What data will you collect, generate or reuse? Types, formats, volumes and how the data is produced."
+   },
+   {
+    "key": "documentation",
+    "label": "Documentation and data quality",
+    "hint": "What metadata, README files and standards describe the data so others can understand it? How is quality assured?"
+   },
+   {
+    "key": "findable",
+    "label": "FAIR - Findable",
+    "hint": "Will datasets carry persistent identifiers (e.g. DOIs) and rich metadata, indexed in a searchable resource?"
+   },
+   {
+    "key": "accessible",
+    "label": "FAIR - Accessible",
+    "hint": "How and under what conditions will the data be accessed? Open, restricted or closed, and through which protocol or repository?"
+   },
+   {
+    "key": "interoperable",
+    "label": "FAIR - Interoperable",
+    "hint": "Which open, standard formats, vocabularies and ontologies make the data combinable with other datasets?"
+   },
+   {
+    "key": "reusable",
+    "label": "FAIR - Reusable",
+    "hint": "Which licence and provenance information allow others to reuse the data? How long will it remain reusable?"
+   },
+   {
+    "key": "storage-backup",
+    "label": "Storage and backup during the project",
+    "hint": "Where is the data stored and backed up during the project, and how is security and recovery handled?"
+   },
+   {
+    "key": "preservation",
+    "label": "Preservation and retention",
+    "hint": "Which data will be preserved long term, in which repository, and for how long (the retention period)?"
+   },
+   {
+    "key": "sharing-access",
+    "label": "Data sharing and access control",
+    "hint": "How and when will data be shared? Any embargo, access controls, or reasons some data cannot be shared."
+   },
+   {
+    "key": "ethics-legal",
+    "label": "Ethics, legal and privacy",
+    "hint": "Consent, personal-data protection, sensitive data, intellectual-property and any jurisdictional obligations."
+   },
+   {
+    "key": "responsibilities",
+    "label": "Responsibilities and resources",
+    "hint": "Who is responsible for data management, and what resources (people, skills, infrastructure) are needed?"
+   },
+   {
+    "key": "costs",
+    "label": "Costs",
+    "hint": "What are the anticipated data-management costs (storage, curation, repository fees) and how are they covered?"
+   }
+  ],
+  "wellcome": [
+   {
+    "key": "data-description",
+    "label": "Data description and collection",
+    "hint": "What data will you collect, generate or reuse? Types, formats, volumes and how the data is produced."
+   },
+   {
+    "key": "documentation",
+    "label": "Documentation and data quality",
+    "hint": "What metadata, README files and standards describe the data so others can understand it? How is quality assured?"
+   },
+   {
+    "key": "findable",
+    "label": "FAIR - Findable",
+    "hint": "Will datasets carry persistent identifiers (e.g. DOIs) and rich metadata, indexed in a searchable resource?"
+   },
+   {
+    "key": "accessible",
+    "label": "FAIR - Accessible",
+    "hint": "How and under what conditions will the data be accessed? Open, restricted or closed, and through which protocol or repository?"
+   },
+   {
+    "key": "interoperable",
+    "label": "FAIR - Interoperable",
+    "hint": "Which open, standard formats, vocabularies and ontologies make the data combinable with other datasets?"
+   },
+   {
+    "key": "reusable",
+    "label": "FAIR - Reusable",
+    "hint": "Which licence and provenance information allow others to reuse the data? How long will it remain reusable?"
+   },
+   {
+    "key": "storage-backup",
+    "label": "Storage and backup during the project",
+    "hint": "Where is the data stored and backed up during the project, and how is security and recovery handled?"
+   },
+   {
+    "key": "preservation",
+    "label": "Preservation and retention",
+    "hint": "Which data will be preserved long term, in which repository, and for how long (the retention period)?"
+   },
+   {
+    "key": "sharing-access",
+    "label": "Data sharing and access control",
+    "hint": "How and when will data be shared? Any embargo, access controls, or reasons some data cannot be shared."
+   },
+   {
+    "key": "ethics-legal",
+    "label": "Ethics, legal and privacy",
+    "hint": "Consent, personal-data protection, sensitive data, intellectual-property and any jurisdictional obligations."
+   },
+   {
+    "key": "responsibilities",
+    "label": "Responsibilities and resources",
+    "hint": "Who is responsible for data management, and what resources (people, skills, infrastructure) are needed?"
+   },
+   {
+    "key": "costs",
+    "label": "Costs",
+    "hint": "What are the anticipated data-management costs (storage, curation, repository fees) and how are they covered?"
+   }
+  ],
+  "nrf": [
+   {
+    "key": "data-description",
+    "label": "Data description and collection",
+    "hint": "What data will you collect, generate or reuse? Types, formats, volumes and how the data is produced."
+   },
+   {
+    "key": "documentation",
+    "label": "Documentation and data quality",
+    "hint": "What metadata, README files and standards describe the data so others can understand it? How is quality assured?"
+   },
+   {
+    "key": "findable",
+    "label": "FAIR - Findable",
+    "hint": "Will datasets carry persistent identifiers (e.g. DOIs) and rich metadata, indexed in a searchable resource?"
+   },
+   {
+    "key": "accessible",
+    "label": "FAIR - Accessible",
+    "hint": "How and under what conditions will the data be accessed? Open, restricted or closed, and through which protocol or repository?"
+   },
+   {
+    "key": "interoperable",
+    "label": "FAIR - Interoperable",
+    "hint": "Which open, standard formats, vocabularies and ontologies make the data combinable with other datasets?"
+   },
+   {
+    "key": "reusable",
+    "label": "FAIR - Reusable",
+    "hint": "Which licence and provenance information allow others to reuse the data? How long will it remain reusable?"
+   },
+   {
+    "key": "storage-backup",
+    "label": "Storage and backup during the project",
+    "hint": "Where is the data stored and backed up during the project, and how is security and recovery handled?"
+   },
+   {
+    "key": "preservation",
+    "label": "Preservation and retention",
+    "hint": "Which data will be preserved long term, in which repository, and for how long (the retention period)?"
+   },
+   {
+    "key": "sharing-access",
+    "label": "Data sharing and access control",
+    "hint": "How and when will data be shared? Any embargo, access controls, or reasons some data cannot be shared."
+   },
+   {
+    "key": "ethics-legal",
+    "label": "Ethics, legal and privacy",
+    "hint": "Consent, personal-data protection, sensitive data, intellectual-property and any jurisdictional obligations."
+   },
+   {
+    "key": "responsibilities",
+    "label": "Responsibilities and resources",
+    "hint": "Who is responsible for data management, and what resources (people, skills, infrastructure) are needed?"
+   },
+   {
+    "key": "costs",
+    "label": "Costs",
+    "hint": "What are the anticipated data-management costs (storage, curation, repository fees) and how are they covered?"
+   }
+  ]
+ }
+}

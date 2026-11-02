@@ -1,0 +1,44 @@
+# OpenRiC Workspace - OpenRiC Workspace Data Sensitivity.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# How sensitive the information of a research project is (Heratio's research_data_sensitivity).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/data-sensitivity/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Data Sensitivity"@en ;
+    dcterms:description "How sensitive the information of a research project is (Heratio's research_data_sensitivity)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:none, v:personal, v:special-category, v:restricted .
+
+v:none a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "None"@en, "Geen"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "Not sensitive."@en .
+
+v:personal a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Personal"@en, "Persoonlik"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "Personal information."@en .
+
+v:special-category a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Special category"@en, "Spesiale kategorie"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "Special personal information, such as health or beliefs."@en .
+
+v:restricted a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Restricted"@en, "Beperk"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "Restricted by law or agreement."@en .

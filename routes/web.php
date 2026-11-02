@@ -63,7 +63,9 @@ use App\Http\Controllers\RelationController;
 use App\Http\Controllers\ReportBuilderController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RepositoryController;
+use App\Http\Controllers\ResearchDeskController;
 use App\Http\Controllers\ResearcherController;
+use App\Http\Controllers\ResearchFundingController;
 use App\Http\Controllers\ResearchNotesController;
 use App\Http\Controllers\ResearchToolsController;
 use App\Http\Controllers\ResearchWorkspaceController;
@@ -80,6 +82,7 @@ use App\Http\Controllers\ShopController;
 use App\Http\Controllers\StorageController;
 use App\Http\Controllers\StudioController;
 use App\Http\Controllers\SubmissionController;
+use App\Http\Controllers\TeachingController;
 use App\Http\Controllers\VocabularyController;
 use App\Http\Controllers\WatermarkController;
 use App\Http\Controllers\WorkflowController;
@@ -219,6 +222,10 @@ Route::get('/favourites/shared/{token}', [FavouritesController::class, 'shared']
 Route::get('/collections/shared/{token}', [ResearchNotesController::class, 'sharedCollection'])->middleware('throttle:60,1')->where('token', '[A-Za-z0-9]{48}')->name('research.collections.shared');
 // A research project's summary opened by its link (roadmap phase 19f): for anyone holding it.
 Route::get('/projects/shared/{token}', [ProjectController::class, 'shared'])->middleware('throttle:60,1')->where('token', '[A-Za-z0-9]{48}')->name('research.projects.shared');
+// A training certificate, checked by its number, public so whoever is shown one can check it (roadmap phase 19j).
+Route::get('/certificates/{number}', [TeachingController::class, 'certificate'])->middleware('throttle:60,1')->where('number', 'CERT-[0-9]{4}-[A-Za-z0-9]{8}')->name('research.certificates.show');
+// A DOI's landing page, public as a DOI must resolve (roadmap phase 19h, ADR 0017).
+Route::get('/doi/{doi}', [ResearchFundingController::class, 'landing'])->middleware('throttle:60,1')->whereUuid('doi')->name('research.dois.landing');
 
 Route::middleware('guest')->group(function () {
     Route::get('/sign-in', [SessionController::class, 'create'])->name('sign-in');
@@ -652,6 +659,63 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::post('/discussions/{discussion}/{step}', [ProjectController::class, 'discussion'])->whereIn('step', ['update', 'pin', 'resolve', 'delete'])->name('discussions.step');
         Route::post('/comment/{kind}/{id}', [ProjectController::class, 'comment'])->whereIn('kind', ['annotation', 'diary', 'collection', 'report', 'report-section'])->name('comments.store');
         Route::post('/comments/{comment}/{step}', [ProjectController::class, 'commentStep'])->whereIn('step', ['resolve', 'delete'])->name('comments.step');
+    });
+    // Funding, grant applications, data management plans, ethics, impact, compliance, replication packs, DOIs and ORCID (roadmap phase 19h, ADR 0017).
+    Route::prefix('research')->name('research.')->whereUuid(['project', 'funding', 'draft', 'plan', 'approval', 'doi', 'call', 'output', 'id'])->group(function () {
+        Route::get('/projects/{project}/funding', [ResearchFundingController::class, 'funding'])->name('funding');
+        Route::post('/projects/{project}/funding/{funding?}', [ResearchFundingController::class, 'saveFunding'])->name('funding.save');
+        Route::post('/projects/{project}/grants', [ResearchFundingController::class, 'startGrant'])->name('grants.store');
+        Route::get('/grants/{draft}', [ResearchFundingController::class, 'grant'])->name('grants.show');
+        Route::post('/grants/{draft}', [ResearchFundingController::class, 'saveGrant'])->name('grants.save');
+        Route::get('/projects/{project}/plans', [ResearchFundingController::class, 'plans'])->name('projects.plans');
+        Route::post('/projects/{project}/plans', [ResearchFundingController::class, 'startPlan'])->name('projects.plans.store');
+        Route::get('/projects/{project}/plans/{plan}', [ResearchFundingController::class, 'plan'])->name('projects.plans.show');
+        Route::post('/projects/{project}/plans/{plan}', [ResearchFundingController::class, 'savePlan'])->name('projects.plans.save');
+        Route::get('/projects/{project}/ethics', [ResearchFundingController::class, 'ethics'])->name('ethics');
+        Route::post('/projects/{project}/ethics/{approval?}', [ResearchFundingController::class, 'saveEthics'])->name('ethics.save');
+        Route::get('/projects/{project}/impact', [ResearchFundingController::class, 'impact'])->name('impact');
+        Route::post('/projects/{project}/impact/{step}', [ResearchFundingController::class, 'impactStep'])->whereIn('step', ['scan', 'record'])->name('impact.step');
+        Route::get('/projects/{project}/compliance', [ResearchFundingController::class, 'compliance'])->name('compliance');
+        Route::post('/projects/{project}/replication-pack', [ResearchFundingController::class, 'replication'])->name('replication');
+        Route::post('/projects/{project}/dois', [ResearchFundingController::class, 'registerDoi'])->name('dois.store');
+        Route::post('/dois/{doi}/publish', [ResearchFundingController::class, 'publishDoi'])->name('dois.publish');
+        Route::post('/funding-parts/{kind}/{id}/remove', [ResearchFundingController::class, 'remove'])->whereIn('kind', ['funding', 'grants', 'plans', 'ethics', 'impact'])->name('funding.part.remove');
+        Route::get('/calls', [ResearchFundingController::class, 'calls'])->name('calls');
+        Route::post('/calls/{call?}', [ResearchFundingController::class, 'saveCall'])->name('calls.save');
+        Route::post('/calls/{call}/remove', [ResearchFundingController::class, 'removeCall'])->name('calls.remove');
+        Route::post('/orcid/{step}', [ResearchFundingController::class, 'orcidStep'])->whereIn('step', ['link', 'unlink', 'pull'])->name('orcid.step');
+        Route::get('/orcid/callback', [ResearchFundingController::class, 'orcidCallback'])->name('orcid.callback');
+        Route::post('/outputs/{output}/orcid', [ResearchFundingController::class, 'orcidPush'])->name('orcid.push');
+        Route::get('/settings/services', [ResearchFundingController::class, 'settings'])->name('services.settings');
+        Route::post('/settings/services', [ResearchFundingController::class, 'saveSettings'])->name('services.settings.update');
+    });
+    // Lectures, training, notices, the inbox, research documents, print templates, quotas and rights policies (roadmap phase 19j, ADR 0017).
+    Route::prefix('research')->name('research.')->whereUuid(['lecture', 'course', 'enrolment', 'notice', 'item', 'template', 'document', 'policy', 'record', 'id'])->group(function () {
+        Route::get('/teaching', [TeachingController::class, 'index'])->name('teaching');
+        Route::post('/lectures/{lecture?}', [TeachingController::class, 'saveLecture'])->name('lectures.save');
+        Route::get('/lectures/{lecture}', [TeachingController::class, 'lecture'])->name('lectures.show');
+        Route::post('/lectures/{lecture}/{step}/{id?}', [TeachingController::class, 'lectureStep'])->whereIn('step', ['section', 'resource', 'remove-section', 'remove-resource', 'delete'])->name('lectures.step');
+        Route::post('/courses/{course?}', [TeachingController::class, 'saveCourse'])->name('courses.save');
+        Route::get('/courses/{course}', [TeachingController::class, 'course'])->name('courses.show');
+        Route::post('/courses/{course}/{step}/{id?}', [TeachingController::class, 'courseStep'])->whereIn('step', ['module', 'assessment', 'enrol', 'enrol-learner', 'remove-module', 'remove-enrolment', 'delete'])->name('courses.step');
+        Route::post('/enrolments/{enrolment}/{step}/{id?}', [TeachingController::class, 'enrolmentStep'])->whereIn('step', ['done', 'undo', 'submit'])->name('enrolments.step');
+        Route::get('/notifications', [ResearchDeskController::class, 'notices'])->name('notifications');
+        Route::get('/notifications/{notice}', [ResearchDeskController::class, 'openNotice'])->name('notifications.open');
+        Route::post('/notifications/preferences', [ResearchDeskController::class, 'preferences'])->name('notifications.preferences');
+        Route::post('/notifications/read/{notice?}', [ResearchDeskController::class, 'read'])->name('notifications.read');
+        Route::get('/inbox', [ResearchDeskController::class, 'inbox'])->name('inbox');
+        Route::post('/inbox', [ResearchDeskController::class, 'capture'])->name('inbox.capture');
+        Route::post('/inbox/{item}/{step}', [ResearchDeskController::class, 'inboxStep'])->whereIn('step', ['sort', 'project', 'archive', 'restore', 'delete'])->name('inbox.step');
+        Route::get('/documents', [ResearchDeskController::class, 'documents'])->name('documents');
+        Route::post('/document-templates/{template?}', [ResearchDeskController::class, 'saveTemplate'])->name('documents.templates.save');
+        Route::get('/documents/{template}/{document?}', [ResearchDeskController::class, 'document'])->name('documents.edit');
+        Route::post('/documents/{template}/{document?}', [ResearchDeskController::class, 'saveDocument'])->name('documents.save');
+        Route::get('/print-templates', [ResearchDeskController::class, 'printTemplates'])->name('print-templates');
+        Route::post('/print-templates/{template?}', [ResearchDeskController::class, 'savePrintTemplate'])->name('print-templates.save');
+        Route::get('/quotas', [ResearchDeskController::class, 'quotas'])->name('quotas');
+        Route::post('/quotas/{policy?}', [ResearchDeskController::class, 'saveQuota'])->name('quotas.save');
+        Route::get('/records/{record}/rights-policies', [ResearchDeskController::class, 'rights'])->name('rights-policies');
+        Route::post('/records/{record}/rights-policies/{policy?}', [ResearchDeskController::class, 'saveRights'])->name('rights-policies.save');
     });
     // The reasoning of a research project (roadmap phase 19i, ADR 0017): claims, the knowledge graph, hypotheses, contradictions,
     // the decision log, research memory and analysis results.

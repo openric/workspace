@@ -190,4 +190,41 @@ class ResearchProject extends Model
     {
         return $this->hasOne(ResearchArgument::class, 'project_id');
     }
+
+    // Funding, grant applications, data management plans, ethics, impact, replication packs and DOIs (roadmap phase 19h).
+
+    public function funding(): HasMany
+    {
+        return $this->hasMany(ResearchFunding::class, 'project_id')->orderByRaw('start_date desc nulls last')->orderBy('title');
+    }
+
+    public function grantDrafts(): HasMany
+    {
+        return $this->hasMany(ResearchGrantDraft::class, 'project_id')->orderByDesc('updated_at');
+    }
+
+    public function dmps(): HasMany
+    {
+        return $this->hasMany(ResearchDmp::class, 'project_id')->orderByDesc('updated_at');
+    }
+
+    public function ethicsApprovals(): HasMany
+    {
+        return $this->hasMany(ResearchEthicsApproval::class, 'project_id')->orderByRaw('expiry_date nulls last')->orderBy('title');
+    }
+
+    public function impactSignals(): HasMany
+    {
+        return $this->hasMany(ResearchImpactSignal::class, 'project_id')->orderByDesc('detected_at');
+    }
+
+    public function replicationBuilds(): HasMany
+    {
+        return $this->hasMany(ResearchReplicationBuild::class, 'project_id')->orderByDesc('built_at');
+    }
+
+    public function dois(): HasMany
+    {
+        return $this->hasMany(ResearchDoi::class, 'project_id')->orderByDesc('created_at');
+    }
 }

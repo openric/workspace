@@ -15,13 +15,21 @@ use Illuminate\Mail\Mailables\Envelope;
 
 class ResearchMail extends WorkspaceMail
 {
+    /** The kind of notice each subject is (notification-type vocabulary). */
+    private const KINDS = ['A comment on your research' => 'comment', 'An invitation to the research project :name' => 'invitation', 'An invitation to the research workspace :name' => 'invitation',
+        'A request to review :title' => 'collaboration', 'A review of :title' => 'reply', 'New results for your saved search :name' => 'alert',
+        'Your reproduction request :reference is :status' => 'alert', 'Your submission :title' => 'alert'];
+
     /**
      * @param  string  $subject  an interface string, translated in the recipient's language
      * @param  list<string>  $lines  interface strings, each with its replacements as [string, replacements]
+     * @param  ?string  $kind  the notification-type it is (phase 19j); by its subject when not given
      */
-    public function __construct(User $recipient, public string $subjectLine, public array $subjectReplace, public array $lines, public ?string $link = null, public ?string $linkText = null)
+    public function __construct(User $recipient, public string $subjectLine, public array $subjectReplace, public array $lines, public ?string $link = null, public ?string $linkText = null,
+        public ?string $kind = null)
     {
         parent::__construct($recipient);
+        $this->kind ??= self::KINDS[$subjectLine] ?? 'system';
     }
 
     public function envelope(): Envelope

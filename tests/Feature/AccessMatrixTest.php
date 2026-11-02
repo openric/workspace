@@ -38,8 +38,10 @@ use App\Models\Feedback;
 use App\Models\Institution;
 use App\Models\ReadingRoom;
 use App\Models\ReadingRoomSeat;
+use App\Models\ResearchDoi;
 use App\Models\Researcher;
 use App\Models\ResearcherType;
+use App\Models\ResearchNotification;
 use App\Models\RetrievalSchedule;
 use App\Models\User;
 use App\Proposals\ProposalService;
@@ -50,22 +52,30 @@ use App\Research\Bibliographies;
 use App\Research\Claims;
 use App\Research\Collaboration;
 use App\Research\Collections;
+use App\Research\DataPlans;
 use App\Research\Diary;
+use App\Research\DocumentTemplates;
 use App\Research\Favourites;
+use App\Research\Funding;
+use App\Research\Impact;
+use App\Research\Inbox;
 use App\Research\Journals;
 use App\Research\Notebooks;
 use App\Research\ProjectAnalysis;
 use App\Research\ProjectReasoning;
 use App\Research\Projects;
+use App\Research\Quotas;
 use App\Research\Reports;
 use App\Research\Reproductions;
 use App\Research\Researchers;
 use App\Research\ResearchWorkspaces;
+use App\Research\RightsPolicies;
 use App\Research\SavedSearches;
 use App\Research\ShareLinks;
 use App\Research\Sources;
 use App\Research\Studios;
 use App\Research\Submissions;
+use App\Research\Teaching;
 use App\Retention\DisposalService;
 use App\Retention\RetentionService;
 use App\Rights\Embargoes;
@@ -100,7 +110,8 @@ class AccessMatrixTest extends TestCase
         'diary' => 'ResearchDiaryEntry', 'collection' => 'ResearchCollection', 'report' => 'ResearchReport', 'report-section' => 'ResearchReportSection',
         'bibliography' => 'Bibliography', 'submission' => 'ResearcherSubmission', 'workspace-file' => 'ResearchWorkspaceFile', 'search' => 'SavedSearch',
         'booking' => 'ReadingRoomBooking', 'issues' => 'ResearchJournalIssue', 'articles' => 'ResearchJournalArticle', 'events' => 'ResearchTimelineEvent',
-        'points' => 'ResearchMapPoint', 'from-collection' => 'ResearchCollection'];
+        'points' => 'ResearchMapPoint', 'from-collection' => 'ResearchCollection', 'funding' => 'ResearchFunding', 'grants' => 'ResearchGrantDraft', 'plans' => 'ResearchDmp',
+        'ethics' => 'ResearchEthicsApproval', 'impact' => 'ResearchImpactSignal'];
 
     /**
      * What any account of the institution reads, whatever its roles. The public role, which every account inherits,
@@ -300,6 +311,22 @@ class AccessMatrixTest extends TestCase
         $make('workspace parts', fn () => [app(ResearchWorkspaces::class)->addResource($admin, $this->objects['ResearchWorkspace'], ['resource_type' => 'link', 'title' => 'Notes', 'external_url' => 'https://example.org'])]);
         $make('access request', fn () => app(AccessRequestService::class)->createGeneralRequest($admin, ['scope' => 'item', 'request_type' => 'research', 'subject' => 'Restricted minutes', 'description' => 'Research'], $letter));
         $make('iiif parts', fn () => app(CuratedCollections::class)->add($this->objects['IiifCollection'], ['target' => $letter->iri], $admin));
+        // Phase 19h: funding, grant applications and calls, plans, ethics, impact and DOIs.
+        $make('funding', fn () => [$plan = app(DataPlans::class)->createPlan($admin, $project(), ['title' => 'Data plan']),
+            app(Funding::class)->save($admin, $project(), ['title' => 'Bursary', 'funder_name' => 'NRF', 'dmp_id' => $plan->id]), app(Funding::class)->startDraft($admin, $project(), 'generic'),
+            app(Funding::class)->saveCall($admin, ['funder' => 'NRF', 'title' => 'Thuthuka']), app(DataPlans::class)->saveApproval($admin, $project(), ['title' => 'Interviews']),
+            app(Impact::class)->record($admin, $project(), ['title' => 'Cited in a report']),
+            ResearchDoi::create(['project_id' => $project()->id, 'doi' => '10.80000/matrix', 'state_id' => Concept::where('iri', Vocab::BASE.'doi-state/draft')->value('id'),
+                'url' => 'https://example.org/doi', 'metadata' => [], 'test' => true])]);
+        // Phase 19j: lectures, training, notices, the inbox, documents, print templates, quotas and rights policies.
+        $make('teaching', fn () => [$lecture = app(Teaching::class)->saveLecture($admin, ['title' => 'Minutes', 'institutional' => 1]),
+            $course = app(Teaching::class)->saveCourse($admin, ['title' => 'Beginners', 'institutional' => 1]),
+            app(Teaching::class)->saveModule($admin, $course, ['title' => 'Minutes', 'lecture_id' => $lecture->id]), app(Teaching::class)->enrol($admin, $course, ['learner_name' => 'Anna Botha'])]);
+        $make('desk', fn () => [ResearchNotification::create(['user_id' => $admin->id, 'type_id' => Concept::where('iri', Vocab::BASE.'notification-type/system')->value('id'), 'title' => 'Hello', 'created_at' => now()]),
+            app(Inbox::class)->capture($admin, ['body' => 'An idea']), $template = app(DocumentTemplates::class)->saveTemplate($admin, ['name' => 'Consent', 'fields' => 'Name | text']),
+            app(DocumentTemplates::class)->saveDocument($admin, $template, ['values' => ['name' => 'Anna']]),
+            app(DocumentTemplates::class)->savePrintTemplate($admin, ['name' => 'Slip', 'code' => 'slip', 'body' => '{record}', 'is_active' => 1]),
+            app(Quotas::class)->save($admin, ['scope' => 'global', 'max_downloads' => 100, 'is_active' => 1]), app(RightsPolicies::class)->save($admin, $letter, ['policy_type' => 'prohibition', 'action' => 'distribute'])]);
     }
 
     public function test_another_institutions_administrator_is_refused_every_object_by_its_address(): void

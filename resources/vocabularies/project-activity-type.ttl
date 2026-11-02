@@ -13,7 +13,7 @@ v: a skos:ConceptScheme ;
     dcterms:title "OpenRiC Workspace Research Project Activity Types"@en ;
     dcterms:description "What was done on a research project, for its activity log (Heratio's research_activity_log.activity_type)."@en ;
     dcterms:issued "2026-10-31"^^xsd:date ;
-    skos:hasTopConcept v:create, v:update, v:share, v:collect, v:remove, v:milestone, v:output, v:team, v:discuss, v:clipboard-add, v:export .
+    skos:hasTopConcept v:create, v:update, v:share, v:collect, v:remove, v:milestone, v:output, v:team, v:discuss, v:clipboard-add, v:export, v:funding, v:grant, v:dmp, v:ethics, v:impact, v:replication, v:doi .
 
 v:create a skos:Concept ;
     skos:inScheme v: ;
@@ -91,3 +91,52 @@ v:export a skos:Concept ;
     skos:prefLabel "Exported"@en, "Uitgevoer"@af ;
     skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
     skos:definition "The project exported."@en .
+
+v:funding a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Funding recorded"@en, "Befondsing aangeteken"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "A grant or award recorded or changed."@en .
+
+v:grant a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Grant application"@en, "Toelaagaansoek"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "A grant application started or changed."@en .
+
+v:dmp a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Data management plan"@en, "Databestuursplan"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "A data management plan started or changed."@en .
+
+v:ethics a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Ethics approval"@en, "Etiekgoedkeuring"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "An ethics approval recorded or changed."@en .
+
+v:impact a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Impact scanned"@en, "Impak nagegaan"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "Signs of impact looked for."@en .
+
+v:replication a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Replication pack built"@en, "Replikasiepakket gebou"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "A replication pack built."@en .
+
+v:doi a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "DOI registered"@en, "DOI geregistreer"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's research services, as Heratio's ahg-research keeps it."@en ;
+    skos:definition "A DOI registered at DataCite."@en .

@@ -1,0 +1,12 @@
+{{-- OpenRiC Workspace - a print template's fields (roadmap phase 19j). Needs $t (or null), $x, $types. Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems. SPDX-License-Identifier: AGPL-3.0-or-later --}}
+<label for="{{ $x }}-name">{{ __('Name') }}</label> <input id="{{ $x }}-name" name="name" required size="30" value="{{ $t?->name }}">
+<label for="{{ $x }}-code">{{ __('Code') }}</label> <input id="{{ $x }}-code" name="code" required size="15" value="{{ $t?->code }}">
+<label for="{{ $x }}-type">{{ __('Kind') }}</label> @include('projects._select', ['id' => $x.'-type', 'name' => 'template_type', 'choices' => $types, 'current' => $t?->templateType->notation, 'default' => 'call-slip'])<br>
+<label for="{{ $x }}-size">{{ __('Page') }}</label> <select id="{{ $x }}-size" name="page_size">@foreach(['A4', 'A5', 'A6', 'Letter'] as $s)<option @selected(($t?->page_size ?? 'A4') === $s)>{{ $s }}</option>@endforeach</select>
+<select name="orientation" aria-label="{{ __('Orientation') }}">@foreach(['portrait', 'landscape'] as $o)<option value="{{ $o }}" @selected(($t?->orientation ?? 'portrait') === $o)>{{ __($o) }}</option>@endforeach</select>
+<label for="{{ $x }}-margin">{{ __('Margin (mm)') }}</label> <input id="{{ $x }}-margin" name="margin_mm" type="number" min="0" max="50" style="width: 4rem" value="{{ $t?->margin_mm ?? 10 }}">
+<label for="{{ $x }}-copies">{{ __('Copies') }}</label> <input id="{{ $x }}-copies" name="copies_default" type="number" min="1" max="10" style="width: 4rem" value="{{ $t?->copies_default ?? 1 }}">
+<input type="hidden" name="is_default" value="0"><label><input type="checkbox" name="is_default" value="1" @checked($t?->is_default)> {{ __('Default for its kind') }}</label>
+<input type="hidden" name="is_active" value="0"><label><input type="checkbox" name="is_active" value="1" @checked($t?->is_active ?? true)> {{ __('In use') }}</label><br>
+<label for="{{ $x }}-desc">{{ __('Description') }}</label> <input id="{{ $x }}-desc" name="description" size="60" value="{{ $t?->description }}"><br>
+<label for="{{ $x }}-body">{{ __('Text') }}</label><br><textarea id="{{ $x }}-body" name="body" rows="8" cols="80" required>{{ $t?->body }}</textarea><br>
