@@ -69,6 +69,9 @@ class Watermark
         if ($type === 'custom') {
             $path = $institution->watermark_image_path;
             if (! $path || ! Storage::disk('local')->exists($path)) {
+                // Never in silence: copies made now carry no mark (as PSIS found of its watermark images, 2 November 2026).
+                Log::warning('the custom watermark image is missing; copies are made without a watermark', ['institution' => $institution->id, 'path' => $path]);
+
                 return null;
             }
             $image = Storage::disk('local')->path($path);

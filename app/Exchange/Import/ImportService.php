@@ -34,6 +34,7 @@ use App\Description\InstantiationService;
 use App\Description\PlaceService;
 use App\Description\RecordService;
 use App\Description\RepositoryService;
+use App\Description\RuleService;
 use App\Description\StorageService;
 use App\Exchange\Ead;
 use App\Models\Activity;
@@ -44,6 +45,7 @@ use App\Models\Container;
 use App\Models\DigitalFile;
 use App\Models\Identifier;
 use App\Models\Import;
+use App\Models\Instantiation;
 use App\Models\Institution;
 use App\Models\Name;
 use App\Models\Place;
@@ -51,6 +53,7 @@ use App\Models\RecordResource;
 use App\Models\Relation;
 use App\Models\Repository;
 use App\Models\RicDate;
+use App\Models\Rule;
 use App\Models\User;
 use App\Relations\EntityKinds;
 use App\Relations\RelationService;
@@ -77,7 +80,8 @@ class ImportService
         'eac-cpf' => 'agents', 'eac-f' => 'activities', 'ric-o' => 'record_resources'];
 
     /** The permission kind that governs each table's entries. */
-    private const PERMISSIONS = ['record_resources' => 'description', 'agents' => 'authority', 'repositories' => 'repository', 'activities' => 'authority'];
+    private const PERMISSIONS = ['record_resources' => 'description', 'agents' => 'authority', 'repositories' => 'repository', 'activities' => 'authority',
+        'rules' => 'authority', 'places' => 'vocabulary'];
 
     private const LEVELS = Vocab::BASE.'level-of-description/';
 
@@ -105,6 +109,14 @@ class ImportService
 
     /** Entries imported in one transaction; see run(). */
     private const PART = 20;
+
+    /**
+     * Entries of a RiC-O file whose relations wait until every entry is written (roadmap phase 23b): an entry may name
+     * one later in the file, from either end.
+     *
+     * @var list<array{0: UnitDraft|EntityDraft, 1: Model}>
+     */
+    private array $deferred = [];
 
     public function __construct(private RecordService $records, private IdentifierService $identifiers, private DateService $dates,
         private RelationService $relations, private AgentService $agents, private PlaceService $places, private ConceptService $concepts,
@@ -145,7 +157,7 @@ class ImportService
         $this->user = $import->user;
         $this->institution = Institution::findOrFail($import->institution_id);
         $this->report = new Report;
-        $this->byKey = $this->failed = $this->resolved = $this->parents = [];
+        $this->byKey = $this->failed = $this->resolved = $this->parents = $this->deferred = [];
         $this->commit = $commit;
         try {
             $drafts = match ($import->format) {
@@ -207,6 +219,12 @@ class ImportService
                 }
                 $this->resolved = [];
             }
+        }
+        if ($commit && $this->deferred !== []) {
+            DB::transaction(fn () => AuditLog::actingAs($this->user, fn () => $this->linkDeferred()));
+        } elseif ($this->deferred !== []) {
+            $this->report->issue('whole file', 'relations', (string) array_sum(array_map(fn ($d) => count($d[0]->relations), $this->deferred)),
+                'relations between the entries are linked when the import is committed, once every entry exists', 'note');
         }
         if (! $commit) {
             // Rolled back: units created in a dry run do not exist.
@@ -275,7 +293,9 @@ class ImportService
                 $draft instanceof UnitDraft => $this->write($draft),
                 $draft->table === 'repositories' => $this->repository($draft),
                 $draft->table === 'agents' || in_array($this->import->format, ['authority-csv', 'eac-cpf'], true) => $this->authority($draft),
-                $this->import->format === 'eac-f' => $this->activity($draft),
+                $draft->table === 'activities' || $this->import->format === 'eac-f' => $this->activity($draft),
+                $draft->table === 'rules' => $this->rule($draft),
+                $draft->table === 'places' => $this->placeEntry($draft),
                 default => $this->repository($draft),
             }));
         } catch (InvalidArgumentException|QueryException|RuntimeException $e) {
@@ -381,6 +401,9 @@ class ImportService
         $this->control($draft, $unit);
         $this->unitDates($draft, $unit);
         $this->links($draft, $unit, $language);
+        if ($draft->relations !== []) {
+            $this->deferred[] = [$draft, $unit];
+        }
         foreach ($draft->files as $file) {
             $this->file($draft, $unit, $file['uri'], $file['sha256'], $language);
         }
@@ -607,6 +630,28 @@ class ImportService
                 }
             }
         }
+        // The dates a name was used, on the name of that text and language (roadmap phase 23b).
+        foreach ($draft->nameDates as $dated) {
+            $name = Name::where(['subject_table' => $entity->getTable(), 'subject_id' => $entity->getKey(), 'value' => $dated['value']])
+                ->when($dated['language'], fn ($q) => $q->where('language', $dated['language']))->first();
+            foreach (['used-from' => $dated['from'], 'used-to' => $dated['to']] as $property => $value) {
+                if ($name === null || $value === null || $name->dates()->whereHas('property', fn ($q) => $q->where('notation', $property))->exists()) {
+                    continue;
+                }
+                try {
+                    $this->dates->add($name, ['property' => $property, 'normalized' => $value], $this->user);
+                } catch (InvalidArgumentException $e) {
+                    $this->report->issue($draft->location, 'name dates', $dated['value'].': '.$value, $e->getMessage().'; left out', 'left-out');
+                }
+            }
+        }
+        if ($this->import->format === 'ric-o') {
+            if ($draft->relations !== [] || $draft->parentIri !== null) {
+                $this->deferred[] = [$draft, $entity];
+            }
+
+            return;
+        }
         foreach ($draft->relations as $relation) {
             $other = $relation['iri'] === null ? null : $this->byIriAnywhere($relation['iri']);
             $type = str_starts_with($relation['type'], Vocab::BASE.'relation-type/') ? substr($relation['type'], strlen(Vocab::BASE.'relation-type/')) : $relation['type'];
@@ -635,8 +680,9 @@ class ImportService
     /** Any entity of the institution a relation may reach, with the persistent IRI. */
     private function byIriAnywhere(string $iri): ?Model
     {
-        foreach ([Agent::class, Repository::class, RecordResource::class, Activity::class, Place::class] as $class) {
-            if ($found = $this->byIri($class, $iri)) {
+        foreach ([Agent::class, Repository::class, RecordResource::class, Activity::class, Place::class, Rule::class, Instantiation::class] as $class) {
+            // By its IRI here, or by the key it was imported under from this source (a file from another system keeps its own IRIs).
+            if ($found = $this->byIri($class, $iri) ?? $this->keyed($class, $iri)) {
                 return $found;
             }
         }
@@ -683,6 +729,7 @@ class ImportService
                 $this->contacts->save($repository, [...$fields, 'is_primary' => true], $contact, $this->user);
             }
         }
+        $this->extras($draft, $repository, $draft->language($this->import->language));
         $this->key($draft->key, $repository);
 
         return $repository;
@@ -1009,16 +1056,182 @@ class ImportService
         }
     }
 
-    private function relate(UnitDraft|EntityDraft $draft, Model $source, string $type, Model $target, array $fields = []): void
+    /** A rule or mandate (rico:Rule; roadmap phase 23b), as activity() makes an activity. */
+    private function rule(EntityDraft $draft): Rule
+    {
+        $rules = app(RuleService::class);
+        $rule = $this->byIri(Rule::class, $draft->iri) ?? $this->keyed(Rule::class, $draft->key) ?? $this->byName(Rule::class, 'rules', $draft);
+        $language = $draft->language($this->import->language);
+        $type = $draft->typeIri === null ? null : Concept::where('iri', $draft->typeIri)->value('id');
+        if ($draft->typeIri !== null && $type === null) {
+            $this->report->issue($draft->location, 'rule type', $draft->typeIri, 'not a rule type the Workspace knows; left out', 'left-out');
+        }
+        if ($rule === null) {
+            if (! $this->user->may('create', 'authority')) {
+                throw new InvalidArgumentException(__('you may not create rules'));
+            }
+            $name = $draft->title() ?? throw new InvalidArgumentException(__('it has no authorised name, and a new rule needs one'));
+            $rule = $rules->create($this->institution, $name, $language, $type, $this->user);
+            $rule->wasRecentlyCreated = true;
+        } else {
+            if (! $this->user->may('update', 'authority', $rule)) {
+                throw new InvalidArgumentException('it matches '.$rule->iri.', which you may not update');
+            }
+            $rule->wasRecentlyCreated = false;
+            if ($type !== null && $type !== $rule->rule_type_id) {
+                $rules->updateType($rule, $type, $this->user);
+            }
+        }
+        if ($draft->authorityIri !== null && $draft->authorityIri !== $rule->authority_iri) {
+            $rules->updateAuthority($rule, $draft->authorityIri, $this->user);
+        }
+        $this->describeEntity($rule, Elements::RULE, $draft, 'rule-name');
+        if ($draft->identifier !== null && $draft->identifier !== $rule->identifier) {
+            $this->identifiers->setLocal($rule, $draft->identifier, $this->user);
+        }
+        $this->extras($draft, $rule, $language);
+        $this->key($draft->key, $rule);
+
+        return $rule;
+    }
+
+    /** A place (rico:Place; roadmap phase 23b): its names, values, type and coordinates; the place it lies in is set once every entry exists. */
+    private function placeEntry(EntityDraft $draft): Place
+    {
+        $place = $this->byIri(Place::class, $draft->iri) ?? $this->keyed(Place::class, $draft->key) ?? $this->byName(Place::class, 'places', $draft);
+        $language = $draft->language($this->import->language);
+        $type = $draft->typeIri === null ? null : Concept::where('iri', $draft->typeIri)->value('id');
+        if ($place === null) {
+            if (! $this->user->may('create', 'vocabulary')) {
+                throw new InvalidArgumentException(__('you may not create places'));
+            }
+            $name = $draft->title() ?? throw new InvalidArgumentException(__('it has no authorised name, and a new place needs one'));
+            $place = $this->places->create($this->institution, $name, $language, null, $this->user);
+            $place->wasRecentlyCreated = true;
+        } else {
+            if (! $this->user->may('update', 'vocabulary', $place)) {
+                throw new InvalidArgumentException('it matches '.$place->iri.', which you may not update');
+            }
+            $place->wasRecentlyCreated = false;
+        }
+        [$latitude, $longitude, $altitude] = [$draft->coordinates['latitude'] ?? null, $draft->coordinates['longitude'] ?? null, $draft->coordinates['altitude'] ?? null];
+        if (($type !== null && $type !== $place->place_type_id) || ($latitude !== null && (float) $latitude !== (float) $place->latitude)
+            || ($altitude !== null && (float) $altitude !== (float) $place->altitude)) {
+            try {
+                $this->places->updateFacts($place, $type ?? $place->place_type_id, $latitude ?? $place->latitude, $longitude ?? $place->longitude, $altitude ?? $place->altitude, $this->user);
+            } catch (InvalidArgumentException $e) {
+                $this->report->issue($draft->location, 'place', $draft->typeIri ?? $latitude, $e->getMessage().'; left out', 'left-out');
+            }
+        }
+        $this->describeEntity($place, Elements::PLACE, $draft, 'place-name');
+        $this->extras($draft, $place, $language);
+        $this->key($draft->key, $place);
+
+        return $place;
+    }
+
+    /**
+     * The relations of a RiC-O file's entries, once every entry is written: each to an entity here by its IRI or by the
+     * key it was imported under, as the first relation type its property may be whose pair the two ends fit, with its
+     * dates, certainty, role and evidence. A relation met from both ends is made once. What cannot be linked is listed.
+     */
+    private function linkDeferred(): void
+    {
+        foreach ($this->deferred as [$draft, $entity]) {
+            if ($draft instanceof EntityDraft && $draft->parentIri !== null && $entity instanceof Place && $entity->parent_id === null) {
+                $parent = $this->byIriAnywhere($draft->parentIri);
+                $parent instanceof Place ? $this->places->move($entity, $parent, $this->user)
+                    : $this->report->issue($draft->location, 'part of', $draft->parentIri, 'no place here has this IRI; left where it is', 'left-out');
+            }
+        }
+        // A relation is in the file from both its ends, its dates, certainty and evidence only from its source: link
+        // those first, so the bare mention from the other end finds it made and adds nothing.
+        $all = collect($this->deferred)->flatMap(fn ($d) => array_map(fn ($r) => [$d[0], $d[1], $r], $d[0]->relations))
+            ->sortBy(fn ($x) => ($x[2]['from'] ?? $x[2]['to'] ?? $x[2]['certainty'] ?? $x[2]['role'] ?? null) !== null || ($x[2]['evidence'] ?? []) !== [] ? 0 : 1);
+        foreach ($all as [$draft, $entity, $relation]) {
+            $other = $relation['iri'] === null ? null : $this->byIriAnywhere($relation['iri']);
+            if ($other === null) {
+                $this->report->issue($draft->location, 'relation', $relation['iri'], 'nothing here has this IRI; not linked', 'left-out');
+
+                continue;
+            }
+            [$source, $target] = $relation['end'] === 'target' ? [$other, $entity] : [$entity, $other];
+            $kinds = [EntityKinds::of($source), EntityKinds::of($target)];
+            $type = collect($relation['types'] ?? [$relation['type']])->first(fn ($t) => collect(RelationTypes::get($t, $this->institution->id)['pairs'] ?? [])
+                ->contains(fn ($pair) => $this->fits($pair[0], $source, $kinds[0]) && $this->fits($pair[1], $target, $kinds[1])));
+            if ($type === null) {
+                $this->report->issue($draft->location, 'relation', $relation['iri'], 'no relation type the Workspace knows connects a '.$kinds[0].' to a '.$kinds[1].' this way; not linked', 'left-out');
+
+                continue;
+            }
+            $certainty = $relation['certainty'] ?? null;
+            if ($certainty !== null && ! Concept::where('iri', Vocab::BASE.'relation-certainty/'.$certainty)->exists()) {
+                $this->report->issue($draft->location, 'certainty', $certainty, $certainty === 'disputed'
+                    ? 'the source disputes this relation: linked, for review here' : 'not a certainty the Workspace knows; linked without it', 'note');
+                $certainty = null;
+            }
+            $fields = array_filter(['from' => $relation['from'] ?? null, 'to' => $relation['to'] ?? null, 'certainty' => $certainty, 'role' => $relation['role'] ?? null]);
+            // Made already, by the entry's own reading (a unit's creators) or from its other end: what this adds is added to it.
+            $made = $this->relate($draft, $source, $type, $target, $fields) ?? $this->qualify($source, $type, $target, $fields);
+            foreach ($made ? $relation['evidence'] ?? [] : [] as $iri) {
+                $record = $this->byIri(RecordResource::class, $iri) ?? $this->keyed(RecordResource::class, $iri);
+                if ($record === null) {
+                    $this->report->issue($draft->location, 'evidence', $iri, 'no unit of description here has this IRI; not kept as evidence', 'left-out');
+                } elseif (! $made->evidence()->where('record_resource_id', $record->id)->exists()) {
+                    $this->relations->addEvidence($made, $record, $this->user);
+                }
+            }
+
+        }
+        $this->deferred = [];
+    }
+
+    /** The relation already made between the two, with the dates, certainty and role the file adds to it, keeping the rest. */
+    private function qualify(Model $source, string $type, Model $target, array $fields): ?Relation
+    {
+        $relation = Relation::where(['source_table' => $source->getTable(), 'source_id' => $source->getKey(), 'target_table' => $target->getTable(), 'target_id' => $target->getKey()])
+            ->whereHas('relationType', fn ($q) => $q->where('iri', Vocab::BASE.'relation-type/'.$type))->with('role', 'state', 'certainty', 'dates.property')->first();
+        if ($relation === null || $fields === []) {
+            return $relation;
+        }
+        $keep = array_filter(['role' => $relation->role?->notation, 'state' => $relation->state?->notation, 'certainty' => $relation->certainty?->notation,
+            'source_of_information' => $relation->source_of_information, 'description' => $relation->description, 'language' => $relation->language,
+            'from' => $relation->datedAs('beginning')?->normalized_value, 'to' => $relation->datedAs('end')?->normalized_value]);
+        $this->relations->update($relation, $fields + $keep, $this->user);
+
+        return $relation;
+    }
+
+    /**
+     * Whether the entity is of the kind a relation type's pair names: a kind, a kind with agent types after a colon, or a
+     * group of them (config workspace.relation_kind_groups: "agent", "person", "group", "position").
+     */
+    private function fits(string $kind, Model $entity, ?string $entityKind): bool
+    {
+        foreach (config('workspace.relation_kind_groups')[$kind] ?? [$kind] as $member) {
+            [$base, $types] = explode(':', $member, 2) + [1 => null];
+            if ($base === $entityKind && ($types === null || ($entity instanceof Agent && in_array($entity->agentType?->notation, explode('|', $types), true)))) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function relate(UnitDraft|EntityDraft $draft, Model $source, string $type, Model $target, array $fields = []): ?Relation
     {
         if ($this->related($source, $type, $target)) {
-            return;
+            return null;
         }
         try {
-            $this->relations->create($source, $type, $target, $fields, null, ['origin' => 'import', 'label' => $this->import->source]);
+            $relation = $this->relations->create($source, $type, $target, $fields, null, ['origin' => 'import', 'label' => $this->import->source]);
             $this->report->counts['relations']++;
+
+            return $relation;
         } catch (InvalidArgumentException $e) {
             $this->report->issue($draft->location, $type, EntityKinds::label($target), $e->getMessage().'; not linked', 'left-out');
+
+            return null;
         }
     }
 

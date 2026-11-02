@@ -234,4 +234,20 @@ class ExportTest extends TestCase
         $this->assertStringNotContainsString('Riverside Parish Council records', $csv);
         $this->actingAs($this->editor)->get("/records/{$this->fonds->id}/export")->assertOk()->assertSee('Download EAD3')->assertSee('Include draft records');
     }
+
+    public function test_each_format_says_what_of_the_unit_it_does_not_carry(): void
+    {
+        $report = $this->actingAs($this->editor)->getJson(route('records.export.loss', [$this->fonds, 'language' => 'en']))->assertOk()->json();
+        $this->assertSame(['ead', 'ead3', 'csv', 'dc', 'mods', 'ric-o'], array_keys($report['left_out']));
+        $lost = fn (string $format) => collect($report['left_out'][$format])->map(fn ($i) => $i['what'])->sort()->values()->all();
+        // A finding aid in English leaves out the Afrikaans; its paragraphs are read through their markup.
+        $this->assertSame(['Authorised form of name (af)', 'Scope and content (af)'], $lost('ead'));
+        // Simple Dublin Core has no place for the rules followed; RiC-O 1.1 none for the language of the material as a note.
+        $this->assertContains('Rules or conventions (en)', $lost('dc'));
+        $this->assertContains('Language/scripts of material (en)', $lost('ric-o'));
+        foreach ($report['left_out'] as $format => $items) {
+            $this->assertNotContains('Riverside Parish Council records', array_column($items, 'value'), "$format carries the title");
+        }
+        $this->actingAs($this->editor)->get(route('records.export', $this->fonds))->assertOk()->assertSee('of this unit');
+    }
 }

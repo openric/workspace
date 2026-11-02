@@ -1,0 +1,46 @@
+# OpenRiC Rule-Type Vocabulary
+# ============================
+# SKOS ConceptScheme of rule-type concepts referenced from
+# rico:hasOrHadRuleType on rico:Rule instances.
+#
+# See spec/mapping.html §9 (Access, security, and privacy extensions) for usage.
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix rico:    <https://www.ica.org/standards/RiC/ontology#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix rt:      <https://openric.org/vocab/rule-type/> .
+
+rt: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Rule-Type Vocabulary"@en ;
+    dcterms:description "SKOS ConceptScheme of rule-type concepts referenced from rico:hasOrHadRuleType on rico:Rule instances. Used to classify rules by their function — laws, mandates, access restrictions, security classifications, and the like."@en ;
+    dcterms:issued "2026-04-25"^^xsd:date ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
+    skos:hasTopConcept rt:law, rt:regulation, rt:mandate, rt:policy, rt:custom,
+                       rt:access-restriction, rt:security-classification, rt:access-rule .
+
+rt:law                     a skos:Concept ; skos:inScheme rt: ; skos:topConceptOf rt: ;
+    skos:prefLabel "Law"@en ;
+    skos:definition "Statutory law — primary legislation enacted by a sovereign legislature."@en .
+rt:regulation              a skos:Concept ; skos:inScheme rt: ; skos:topConceptOf rt: ;
+    skos:prefLabel "Regulation"@en ;
+    skos:definition "Regulatory instrument — secondary or delegated legislation, executive order, statutory instrument."@en .
+rt:mandate                 a skos:Concept ; skos:inScheme rt: ; skos:topConceptOf rt: ;
+    skos:prefLabel "Mandate"@en ;
+    skos:definition "Authority delegation or institutional mandate — what an Agent is authorised to do."@en .
+rt:policy                  a skos:Concept ; skos:inScheme rt: ; skos:topConceptOf rt: ;
+    skos:prefLabel "Policy"@en ;
+    skos:definition "Internal policy or procedural rule, typically institutional rather than statutory."@en .
+rt:custom                  a skos:Concept ; skos:inScheme rt: ; skos:topConceptOf rt: ;
+    skos:prefLabel "Custom"@en ;
+    skos:definition "Customary practice or convention with normative effect."@en .
+
+rt:access-restriction      a skos:Concept ; skos:inScheme rt: ; skos:topConceptOf rt: ;
+    skos:prefLabel "Access Restriction"@en ;
+    skos:definition "A scoped restriction on access to records — by time period, role, purpose, or jurisdiction."@en .
+rt:security-classification a skos:Concept ; skos:inScheme rt: ; skos:topConceptOf rt: ;
+    skos:prefLabel "Security Classification"@en ;
+    skos:definition "A formal security classification (e.g. 'Confidential', 'Restricted', 'Top Secret')."@en .
+rt:access-rule             a skos:Concept ; skos:inScheme rt: ; skos:topConceptOf rt: ;
+    skos:prefLabel "Access Rule"@en ;
+    skos:definition "A general access-governance rule — used when the more specific access-restriction or security-classification kinds do not fit."@en .

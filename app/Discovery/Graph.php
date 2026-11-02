@@ -78,7 +78,8 @@ class Graph
                 continue;
             }
             $type = RelationTypes::of($relation);
-            $found[] = [$relation->other, $type['forward'] ?? $relation->relationType->label(['en']), $relation->ricTerm(), $relation->fromSource];
+            // The edge runs from the relation's source to its target, so it is named by the property from the source (Graph Traversal 3.1).
+            $found[] = [$relation->other, $type['forward'] ?? $relation->relationType->label(['en']), $type['ric_property'] ?? $relation->ricTerm(), $relation->fromSource];
         }
         if ($entity instanceof RecordResource) {
             if ($entity->parent && $this->view->readable($entity->parent)) {

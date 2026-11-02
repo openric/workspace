@@ -44,7 +44,7 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 class DiscoverController extends Controller
 {
     /** The description standard each kind of page shows. */
-    private const STANDARDS = ['agent' => Elements::ISAAR_CPF, 'repository' => Elements::ISDIAH, 'place' => Elements::PLACE, 'activity' => Elements::ACTIVITY];
+    private const STANDARDS = ['agent' => Elements::ISAAR_CPF, 'repository' => Elements::ISDIAH, 'place' => Elements::PLACE, 'activity' => Elements::ACTIVITY, 'rule' => Elements::RULE];
 
     /** What a search finds, by catalogue key, and what the results call it. */
     private const FOUND = ['records' => 'Archival descriptions', 'agents' => 'People, families and organisations', 'activities' => 'Activities', 'places' => 'Places', 'repositories' => 'Repositories'];
@@ -221,6 +221,11 @@ class DiscoverController extends Controller
         return $this->entity($request, 'activity', $id, ['activityType.labels', 'activityType.vocabulary']);
     }
 
+    public function rule(Request $request, string $id): View
+    {
+        return $this->entity($request, 'rule', $id, ['ruleType.labels', 'ruleType.vocabulary']);
+    }
+
     /** The relationship graph around an entity, one or two steps out, drawn and as a list. */
     public function graph(Request $request, string $kind, string $id): View
     {
@@ -255,7 +260,7 @@ class DiscoverController extends Controller
     private function entity(Request $request, string $kind, string $id, array $with, array $more = []): View
     {
         $catalogue = $this->catalogue($request);
-        $entity = $catalogue->find(Links::CATALOGUE[$kind], $id, $with) ?? $this->gone($catalogue, ['agent' => 'agents', 'repository' => 'repositories', 'place' => 'places', 'activity' => 'activities'][$kind] ?? null, $id);
+        $entity = $catalogue->find(Links::CATALOGUE[$kind], $id, $with) ?? $this->gone($catalogue, ['agent' => 'agents', 'repository' => 'repositories', 'place' => 'places', 'activity' => 'activities', 'rule' => 'rules'][$kind] ?? null, $id);
         app(UsageService::class)->record($request, $catalogue->institution, 'view', $entity);
 
         return view('discover.entity', ['entity' => $entity, 'kind' => $kind, 'standard' => $entity instanceof RecordResource ? $entity->standard() : self::STANDARDS[$kind], 'view' => $catalogue->view,

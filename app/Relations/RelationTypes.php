@@ -42,7 +42,7 @@ final class RelationTypes
      *
      * @return array<string, array{key: string, concept_id: string, iri: string, kind: string, local: bool, base_concept_id: ?string,
      *     deprecated: bool, pairs: list<array{0: string, 1: string}>, symmetric: bool, role: bool, schemes: list<string>,
-     *     access_point: bool, own_section: bool, record_set_term: ?string, phrases: array<string, array{forward: string, inverse: string}>,
+     *     access_point: bool, own_section: bool, record_set_term: ?string, ric_class: ?string, ric_property: ?string, ric_inverse: ?string, phrases: array<string, array{forward: string, inverse: string}>,
      *     forward: string, inverse: string}>
      */
     public static function all(?string $institutionId): array
@@ -72,6 +72,7 @@ final class RelationTypes
                 'pairs' => ($pairs[$t->concept_id] ?? collect())->map(fn ($p) => [$p->source_kind, $p->target_kind])->values()->all(),
                 'symmetric' => (bool) $t->self_reciprocal, 'role' => (bool) $t->role, 'schemes' => ($schemes[$t->concept_id] ?? collect())->pluck('notation')->all(),
                 'access_point' => (bool) $t->access_point, 'own_section' => (bool) $t->own_section, 'record_set_term' => $t->record_set_term,
+                'ric_class' => $t->ric_class, 'ric_property' => $t->ric_property, 'ric_inverse' => $t->ric_inverse,
                 'phrases' => $words, 'forward' => $words['en']['forward'] ?? (string) $t->notation, 'inverse' => $words['en']['inverse'] ?? (string) $t->notation];
         }
         $local = $rows->whereNotNull('institution_id')->groupBy('base_id');

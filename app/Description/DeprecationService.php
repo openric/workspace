@@ -21,7 +21,7 @@ use Illuminate\Database\Eloquent\Model;
 class DeprecationService
 {
     /** The kinds whose IRIs the public reads (the API's and the public catalogue's); the others have no register entry. */
-    public const TABLES = ['record_resources', 'agents', 'repositories', 'activities', 'places'];
+    public const TABLES = ['record_resources', 'agents', 'repositories', 'activities', 'places', 'rules'];
 
     /** Record that an entity is going, before it goes: call it in the same transaction, while the public can still read it. */
     public function record(Model $entity, ?string $reason, ?Model $successor, ?User $actor): ?Deprecation

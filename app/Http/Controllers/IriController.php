@@ -22,6 +22,7 @@ use App\Models\Place;
 use App\Models\ProvenanceEntry;
 use App\Models\RecordResource;
 use App\Models\Repository;
+use App\Models\Rule;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
@@ -32,8 +33,9 @@ class IriController extends Controller
         RecordResource::IRI_SEGMENT => [RecordResource::class, 'records.show', 'api.record'],
         Agent::IRI_SEGMENT => [Agent::class, 'agents.show', 'api.agent'],
         Repository::IRI_SEGMENT => [Repository::class, 'repositories.show', 'api.repository'],
-        Activity::IRI_SEGMENT => [Activity::class, 'activities.show', null],
-        Place::IRI_SEGMENT => [Place::class, 'places.show', null],
+        Activity::IRI_SEGMENT => [Activity::class, 'activities.show', 'api.activity'],
+        Rule::IRI_SEGMENT => [Rule::class, 'rules.show', 'api.rule'],
+        Place::IRI_SEGMENT => [Place::class, 'places.show', 'api.place'],
         Concept::IRI_SEGMENT => [Concept::class, 'concepts.show', null],
         Instantiation::IRI_SEGMENT => [Instantiation::class, 'instantiations.show', null],
         // Staff only: the page asks for the accession permissions.

@@ -27,6 +27,7 @@ use App\Description\PlaceService;
 use App\Description\PublicationService;
 use App\Description\RecordService;
 use App\Description\RepositoryService;
+use App\Description\RuleService;
 use App\Description\WorkflowService;
 use App\Description\WorkflowSlaService;
 use App\Iiif\CuratedCollections;
@@ -91,7 +92,7 @@ class AccessMatrixTest extends TestCase
     private const LEVEL = Vocab::BASE.'level-of-description/';
 
     /** What a {kind} in an address names. */
-    private const KINDS = ['records' => 'RecordResource', 'repositories' => 'Repository', 'places' => 'Place', 'agents' => 'Agent', 'activities' => 'Activity',
+    private const KINDS = ['records' => 'RecordResource', 'repositories' => 'Repository', 'places' => 'Place', 'agents' => 'Agent', 'activities' => 'Activity', 'rules' => 'Rule',
         'instantiations' => 'Instantiation', 'containers' => 'Container', 'accessions' => 'Accession', 'agreements' => 'Agreement',
         'record' => 'RecordResource', 'agent' => 'Agent', 'repository' => 'Repository', 'place' => 'Place', 'activity' => 'Activity', 'concepts' => 'Concept',
         'milestones' => 'ResearchProjectMilestone', 'team' => 'ResearchProjectTeamMember', 'outputs' => 'ResearchProjectOutput', 'annotation' => 'ResearchAnnotation',
@@ -108,7 +109,7 @@ class AccessMatrixTest extends TestCase
     private const ANY_ACCOUNT_READS = ['repositories.show', 'records.show', 'records.tree', 'records.tree-branch', 'records.inventory', 'records.finding-aid',
         'records.print', 'records.export', 'records.publish-readiness', 'records.provenance', 'records.provenance.csv', 'instantiations.show',
         'agents.show', 'agents.print', 'agents.eac', 'activities.show', 'activities.eac', 'places.show',
-        'vocabularies.show', 'vocabularies.export', 'concepts.show'];
+        'vocabularies.show', 'vocabularies.export', 'concepts.show', 'records.export.loss', 'rules.show'];
 
     private string $store;
 
@@ -185,6 +186,7 @@ class AccessMatrixTest extends TestCase
         $make('agent', fn () => app(AgentService::class)->create($institution, 'person', 'Botha, Anna', 'en'));
         $make('place', fn () => app(PlaceService::class)->create($institution, 'Riverside', 'en'));
         $make('activity', fn () => app(ActivityService::class)->create($institution, 'Council meetings', 'en'));
+        $make('rule', fn () => app(RuleService::class)->create($institution, 'Local Government Ordinance 17 of 1939', 'en'));
         $make('accession', fn () => app(AccessionService::class)->create($institution, '2026-014', 'Papers of the Botha family', 'en', $admin));
         $make('agreement', fn () => app(AgreementService::class)->create($institution, 'DA-1', 'deed-of-deposit', 'Deposit agreement', 'en', $admin));
         $make('relation', fn () => app(RelationService::class)->create($fonds, 'creation', $this->objects['Agent'], [], $admin));

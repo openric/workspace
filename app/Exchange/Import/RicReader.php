@@ -15,6 +15,7 @@
 namespace App\Exchange\Import;
 
 use App\Api\JsonLd;
+use App\Relations\RelationTypes;
 use DateTimeInterface;
 use EasyRdf\Graph;
 use EasyRdf\Literal;
@@ -38,7 +39,17 @@ class RicReader
     private const RECORDS = ['RecordSet', 'Record', 'RecordPart'];
 
     /** RiC-O agent classes and the agent type (notation) each is; rico:Agent alone says nothing more. */
-    private const AGENTS = ['Person' => 'person', 'Family' => 'family', 'CorporateBody' => 'corporate-body', 'Agent' => null];
+    private const AGENTS = ['Person' => 'person', 'Family' => 'family', 'CorporateBody' => 'corporate-body', 'Position' => 'position', 'Mechanism' => 'mechanism', 'Agent' => null];
+
+    /** The context entities of the Authority & Context profile (roadmap phase 23b): RiC-O class => [table, name element]. */
+    private const CONTEXTS = ['Place' => ['places', 'place-name'], 'Rule' => ['rules', 'rule-name'], 'Mandate' => ['rules', 'rule-name'],
+        'Activity' => ['activities', 'activity-name'], 'Production' => ['activities', 'activity-name'], 'Accumulation' => ['activities', 'activity-name']];
+
+    /** What an entry already reads itself, so these are not read again as relations. */
+    private const OWN = ['rico:hasCreator', 'rico:hasOrHadHolder', 'rico:isOrWasIncludedIn', 'rico:includesOrIncluded', 'rico:isOrWasPartOf'];
+
+    /** @var array<string, list<array{0: string, 1: string}>> a RiC-O property's IRI => the relation types and the end the entry is */
+    private array $properties = [];
 
     /** Properties only a repository is written with (ISDIAH), which tell a repository from a corporate body. */
     private const REPOSITORY_ONLY = ['contact', 'openingHours', 'accessibility', 'hasOrHadPolicy'];
@@ -51,6 +62,9 @@ class RicReader
     private const RECORD_DATES = ['creation' => 'creation', 'accumulation' => 'accumulation', 'descriptive' => 'modification'];
 
     private Report $report;
+
+    /** The entry being read, for what end() finds on it. */
+    private ?EntityDraft $draft = null;
 
     private Graph $graph;
 
@@ -82,7 +96,8 @@ class RicReader
             }
         }
 
-        $repositories = $agents = $units = [];
+        $this->properties = $this->relationProperties();
+        $repositories = $agents = $units = $contexts = [];
         foreach ($this->graph->resources() as $node) {
             $classes = $this->classes($node);
             if ($classes === [] || (isset($pointedAt[$node->getUri()]) && $this->onlyNamed($node))) {
@@ -90,17 +105,20 @@ class RicReader
             }
             if (array_intersect($classes, self::RECORDS) !== []) {
                 $units[$node->getUri()] = $node;
+            } elseif (($context = array_values(array_intersect($classes, array_keys(self::CONTEXTS)))) !== []) {
+                $contexts[] = $this->context($node, $context[0]);
             } elseif (array_intersect($classes, array_keys(self::AGENTS)) !== []) {
-                $repository = isset($holders[$node->getUri()]) || array_filter(self::REPOSITORY_ONLY, fn ($p) => $node->hasProperty('<'.self::X.$p.'>'));
+                $repository = isset($holders[$node->getUri()]) || array_filter(self::REPOSITORY_ONLY, fn ($p) => $node->hasProperty('<'.self::X.$p.'>'))
+                    || (string) $node->getLiteral('<https://openric.org/ns/v1#localType>') === 'repository';
                 $repository ? $repositories[] = $this->repository($node) : $agents[] = $this->agent($node, $classes);
             }
         }
-        $drafts = [...$repositories, ...$agents, ...$this->inOrder(array_map(fn (Resource $n) => $this->unit($n, $units), $units))];
+        $drafts = [...$repositories, ...$agents, ...$contexts, ...$this->inOrder(array_map(fn (Resource $n) => $this->unit($n, $units), $units))];
 
         // A described node that no entry read and nothing points at: a class the import has no place for.
         foreach ($this->graph->resources() as $node) {
             if (! isset($this->nodes[$node->getUri()]) && ! isset($pointedAt[$node->getUri()]) && ($classes = $this->classes($node)) !== []) {
-                $this->report->issue($node->getUri(), 'rico:'.$classes[0], $this->label($node), 'not read: the Workspace imports records, authority records and repositories', 'left-out');
+                $this->report->issue($node->getUri(), 'rico:'.$classes[0], $this->label($node), 'not read: the Workspace imports records, authority records, repositories, places, rules and activities', 'left-out');
             }
         }
 
@@ -140,6 +158,9 @@ class RicReader
         $draft->identifier = $this->first($node, 'rico:identifier');
         if ($type = $this->resource($node, 'rico:hasRecordSetType')) {
             $draft->level = $type->getUri();
+        } elseif (($local = $this->first($node, 'openric:localType')) !== null && preg_match('/^[a-z0-9-]+$/', $local)) {
+            // A record's level, as JsonLd writes it: a level of description of the Workspace's vocabulary.
+            $draft->level = 'https://workspace.openric.org/vocab/level-of-description/'.$local;
         }
         if ($extent = $this->resource($node, 'rico:hasExtent')) {
             $this->nodes[$extent->getUri()] = true;
@@ -167,6 +188,7 @@ class RicReader
         }
         // The units inside say which unit they are in.
         $this->resources($node, 'rico:includesOrIncluded');
+        $draft->relations = $this->relationsOf($node);
         $this->end($node, $draft->location);
 
         return $draft;
@@ -193,6 +215,7 @@ class RicReader
                 $draft->dates[] = ['property' => 'existence', 'normalized' => $range['normalized'], 'expressed' => $range['expressed']];
             }
         }
+        $draft->relations = $this->relationsOf($node);
         $this->end($node, $draft->location);
 
         return $draft;
@@ -201,6 +224,7 @@ class RicReader
     private function repository(Resource $node): EntityDraft
     {
         $draft = $this->entity($node, 'repositories', 'authorised-name');
+        $this->first($node, 'openric:localType');
         $this->strings($node, 'rico:name', fn ($lang, $text) => $this->name($draft, $lang, 'authorised-name', $text));
         $this->strings($node, 'openricx:alternativeForm', fn ($lang, $text) => $this->name($draft, $lang, 'parallel-name', $text));
         $this->strings($node, 'openricx:otherName', fn ($lang, $text) => $this->name($draft, $lang, 'other-name', $text));
@@ -215,14 +239,128 @@ class RicReader
                 }
             }
         }
+        $draft->relations = $this->relationsOf($node);
         $this->end($node, $draft->location);
 
         return $draft;
     }
 
+    /** A place, rule or activity (Authority & Context 3.1 to 3.4), as JsonLd writes them. */
+    private function context(Resource $node, string $class): EntityDraft
+    {
+        [$table, $nameElement] = self::CONTEXTS[$class];
+        $draft = $this->entity($node, $table, $nameElement);
+        $prefix = substr($nameElement, 0, -strlen('-name'));
+        $this->strings($node, 'rico:name', fn ($lang, $text) => $this->name($draft, $lang, $nameElement, $text));
+        if ($table === 'rules') {
+            $this->strings($node, 'rico:title', fn ($lang, $text) => $draft->values[$lang][$nameElement] ?? $this->name($draft, $lang, $nameElement, $text));
+            $this->strings($node, 'dcterms:source', fn ($lang, $text) => $draft->value($lang, 'rule-sources', $text));
+            // A link, or the string a rule's own context makes one, which a harvester's merged graph keeps as a literal.
+            $draft->typeIri = $this->resource($node, 'rico:hasOrHadRuleType')?->getUri() ?? $this->first($node, 'rico:hasOrHadRuleType');
+            $draft->authorityIri = $this->resource($node, 'owl:sameAs')?->getUri();
+        }
+        // The description, which a place also writes as rico:generalDescription (the same text).
+        $this->strings($node, 'openricx:description', fn ($lang, $text) => $draft->value($lang, $prefix.'-description', $text));
+        $this->strings($node, 'rico:generalDescription', fn ($lang, $text) => $draft->values[$lang][$prefix.'-description'] ?? $draft->value($lang, $prefix.'-description', $text));
+        if ($table === 'activities') {
+            $draft->typeIri = $this->resource($node, 'rico:hasActivityType')?->getUri();
+        }
+        if ($table === 'places') {
+            $this->strings($node, 'openricx:alternativeForm', fn ($lang, $text) => $this->name($draft, $lang, 'place-parallel-name', $text));
+            $this->strings($node, 'openricx:otherName', fn ($lang, $text) => $this->name($draft, $lang, 'place-other-name', $text));
+            // Its location in words; the profile's openricx:streetAddress repeats it.
+            $this->strings($node, 'rico:location', fn ($lang, $text) => $draft->value($lang, 'place-location', $text));
+            $this->first($node, 'openricx:streetAddress');
+            $draft->typeIri = $this->resource($node, 'rico:hasOrHadPlaceType')?->getUri();
+            // The coordinates node, which has the altitude too; the profile's flat latitude and longitude repeat it.
+            $coordinates = $this->resource($node, 'rico:hasOrHadCoordinates');
+            foreach (['latitude', 'longitude', 'altitude'] as $axis) {
+                $flat = $axis === 'altitude' ? null : $this->first($node, 'rico:'.$axis);
+                $draft->coordinates[$axis] = ($coordinates ? $this->first($coordinates, 'rico:'.$axis, false) : null) ?? $flat;
+            }
+            if ($coordinates) {
+                $this->nodes[$coordinates->getUri()] = true;
+            }
+            $draft->parentIri = $this->resource($node, 'rico:isOrWasPartOf')?->getUri();
+        }
+        // The local type repeats the type's notation.
+        $this->first($node, 'openric:localType');
+        foreach ([...$this->ranges($node), ...$this->ranges($node, 'rico:isAssociatedWithDate')] as $range) {
+            $draft->dates[] = ['property' => $range['beginning'] !== null && $range['end'] === null ? 'beginning' : 'associated', 'normalized' => $range['normalized'], 'expressed' => $range['expressed']];
+        }
+        $draft->relations = $this->relationsOf($node);
+        $this->end($node, $draft->location);
+
+        return $draft;
+    }
+
+    /**
+     * The entry's relations: each property of the relation types' mapping (relation_types.ric_property from the source,
+     * ric_inverse from the target), with what its qualified node (rico:thingIsSourceOfRelation) adds: dates, certainty,
+     * evidence and the agent's role.
+     */
+    private function relationsOf(Resource $node): array
+    {
+        $qualified = [];
+        foreach ($this->resources($node, 'rico:thingIsSourceOfRelation') as $relation) {
+            $this->nodes[$relation->getUri()] = true;
+            $target = $relation->getResource('<'.self::RICO.'relationHasTarget>')?->getUri();
+            if ($target === null) {
+                continue;
+            }
+            $range = $this->ranges($relation)[0] ?? null;
+            [$from, $to] = $range === null ? [null, null] : ($range['beginning'] !== null || $range['end'] !== null ? [$range['beginning'], $range['end']]
+                : (str_contains((string) $range['normalized'], '/') ? explode('/', (string) $range['normalized'], 2) : [$range['normalized'], null]));
+            $role = $relation->getResource('<'.self::X.'relationHasAgentRole>')?->getUri();
+            $qualified[$target][] = ['class' => $this->classes($relation)[0] ?? 'Relation', 'from' => $from === '..' ? null : $from, 'to' => $to === '..' ? null : $to,
+                'certainty' => ($c = $relation->getLiteral('<'.self::RICO.'relationCertainty>')) ? $this->lexical($c) : null,
+                'evidence' => array_map(fn ($r) => $r->getUri(), $relation->allResources('<'.self::RICO.'isEvidencedBy>')),
+                'role' => $role !== null ? basename($role) : null];
+        }
+        $relations = [];
+        foreach ($node->propertyUris() as $property) {
+            if (! isset($this->properties[$property])) {
+                continue;
+            }
+            // What the entry reads itself (a unit's creators) comes again here only to bring its qualified node.
+            if (in_array($this->short($property), self::OWN, true)) {
+                $q = array_filter($node->allResources('<'.$property.'>'), fn ($o) => isset($qualified[$o->getUri()]));
+                if ($q === []) {
+                    continue;
+                }
+            }
+            $this->read[$property] = true;
+            foreach ($node->allResources('<'.$property.'>') as $other) {
+                $ends = $this->properties[$property];
+                $q = $qualified[$other->getUri()] ?? [];
+                $match = collect($q)->first(fn ($x) => collect($ends)->contains(fn ($e) => RelationTypes::get($e[0], null)['ric_class'] === 'rico:'.$x['class'])) ?? ($q[0] ?? []);
+                $relations[] = ['types' => array_map(fn ($e) => $e[0], $ends), 'end' => $ends[0][1], 'iri' => $other->getUri(), 'label' => '',
+                    'from' => $match['from'] ?? null, 'to' => $match['to'] ?? null, 'description' => null, 'certainty' => $match['certainty'] ?? null,
+                    'evidence' => $match['evidence'] ?? [], 'role' => $match['role'] ?? null];
+            }
+        }
+
+        return $relations;
+    }
+
+    /** @return array<string, list<array{0: string, 1: string}>> every bundled relation type's property and inverse, by full IRI */
+    private function relationProperties(): array
+    {
+        $map = [];
+        foreach (RelationTypes::all(null) as $key => $type) {
+            foreach (['source' => $type['ric_property'] ?? null, 'target' => $type['ric_inverse'] ?? null] as $end => $term) {
+                if ($term !== null && ! ($end === 'target' && $term === $type['ric_property'])) {
+                    $map[trim($this->expand($term), '<>')][] = [$key, $end];
+                }
+            }
+        }
+
+        return $map;
+    }
+
     private function entity(Resource $node, string $table, string $nameElement): EntityDraft
     {
-        $draft = new EntityDraft;
+        $draft = $this->draft = new EntityDraft;
         $this->begin($node);
         $draft->table = $table;
         $draft->nameElement = $nameElement;
@@ -247,10 +385,10 @@ class RicReader
      *
      * @return list<array{type: ?string, normalized: ?string, beginning: ?string, end: ?string, expressed: ?string, language: ?string}>
      */
-    private function ranges(Resource $node): array
+    private function ranges(Resource $node, string $property = 'openricx:hasDateRangeSet'): array
     {
         $ranges = [];
-        foreach ($this->resources($node, 'openricx:hasDateRangeSet') as $range) {
+        foreach ($this->resources($node, $property) as $range) {
             $this->nodes[$range->getUri()] = true;
             [$beginning, $end] = [$this->first($range, 'rico:beginningDate', false), $this->first($range, 'rico:endDate', false)];
             $normalized = $this->first($range, 'rico:normalizedDateValue', false)
@@ -318,6 +456,19 @@ class RicReader
     /** List each property of the entry no one read, once per property. */
     private function end(Resource $node, string $location): void
     {
+        // A name as its own appellation repeats a name the shorthand properties gave (rico:name and the like), and adds
+        // the dates it was used, kept on the draft for the import to put on the name it makes.
+        foreach (['rico:hasOrHadAgentName', 'rico:hasOrHadPlaceName'] as $property) {
+            foreach ($this->resources($node, $property) as $name) {
+                $this->nodes[$name->getUri()] = true;
+                $text = $name->getLiteral('<'.self::RICO.'textualValue>');
+                [$from, $to] = [$name->getLiteral('<'.self::RICO.'usedFromDate>'), $name->getLiteral('<'.self::RICO.'usedToDate>')];
+                if ($text !== null && ($from !== null || $to !== null) && $this->draft !== null) {
+                    $this->draft->nameDates[] = ['value' => $this->lexical($text), 'language' => $text->getLang(),
+                        'from' => $from ? $this->lexical($from) : null, 'to' => $to ? $this->lexical($to) : null];
+                }
+            }
+        }
         foreach ($node->propertyUris() as $property) {
             if (! isset($this->read[$property])) {
                 $value = $node->get('<'.$property.'>');

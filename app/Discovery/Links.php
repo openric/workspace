@@ -12,10 +12,10 @@ use Illuminate\Database\Eloquent\Model;
 final class Links
 {
     /** kind => its public route; a concept has no public page yet. */
-    public const PAGES = ['record' => 'discover.record', 'agent' => 'discover.agent', 'repository' => 'discover.repository', 'place' => 'discover.place', 'activity' => 'discover.activity'];
+    public const PAGES = ['record' => 'discover.record', 'agent' => 'discover.agent', 'repository' => 'discover.repository', 'place' => 'discover.place', 'activity' => 'discover.activity', 'rule' => 'discover.rule'];
 
     /** kind => its PublicCatalogue key. */
-    public const CATALOGUE = ['record' => 'records', 'agent' => 'agents', 'repository' => 'repositories', 'place' => 'places', 'activity' => 'activities'];
+    public const CATALOGUE = ['record' => 'records', 'agent' => 'agents', 'repository' => 'repositories', 'place' => 'places', 'activity' => 'activities', 'rule' => 'rules'];
 
     public static function page(Model $entity): ?string
     {

@@ -40,6 +40,9 @@ final class Elements
     /** A donor agreement (a rico:Record): Heratio's fields, which no standard numbers. */
     public const AGREEMENT = 'agreement';
 
+    /** A rule or mandate (rico:Rule): no ICA description standard covers it (roadmap phase 23b). */
+    public const RULE = 'rule';
+
     /** The elements of an archival description that DACS, RAD or MODS have and ISAD(G) does not. */
     public const OTHER_STANDARDS = 'other-standards';
 

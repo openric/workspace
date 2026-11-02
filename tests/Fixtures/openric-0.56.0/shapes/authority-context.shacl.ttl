@@ -1,0 +1,167 @@
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# OpenRiC SHACL shapes — profile: authority-context
+# =================================================
+# Shapes for the contextual entities that qualify records: Places, Rules,
+# and Activities (production / accumulation / generic — RiC-O 1.1 has only
+# one Activity class; kind is carried in rico:hasActivityType).
+#
+# Shapes in this file:
+#   - ProductionShape       — rico:Activity with hasActivityType=production
+#   - AccumulationShape     — rico:Activity with hasActivityType=accumulation
+#   - ActivityShape         — every rico:Activity (generic baseline)
+#   - PlaceShape            — rico:Place
+#   - PlaceNameShape        — structured rico:hasOrHadPlaceName values
+#   - RuleShape             — rico:Rule (mandates, legislation, policies)
+#
+# Usage:
+#   pyshacl -s always-on.shacl.ttl -s authority-context.shacl.ttl \
+#           -d data.jsonld -f human
+
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix sh:   <http://www.w3.org/ns/shacl#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix rico: <https://www.ica.org/standards/RiC/ontology#> .
+@prefix openricx: <https://openric.org/ns/ext/v1#> .
+@prefix :     <https://openric.org/shapes#> .
+
+
+# ----------------------------------------------------------------------------
+# Activity shapes
+# ----------------------------------------------------------------------------
+
+:ProductionShape a sh:NodeShape ;
+    sh:target [
+        a sh:SPARQLTarget ;
+        sh:prefixes <https://openric.org/shapes#> ;
+        sh:select """
+            PREFIX rico: <https://www.ica.org/standards/RiC/ontology#>
+            SELECT ?this WHERE {
+                ?this a rico:Activity ;
+                      rico:hasActivityType <https://openric.org/vocab/activity-type/production> .
+            }
+        """ ;
+    ] ;
+    sh:name "Production Activity Validation" ;
+
+    # rico:resultsOrResultedIn is recommended but not required at v0.1 —
+    # many implementations emit the back-link from the Record instead, or
+    # leave cross-entity links to full-graph validation (see
+    # profile: graph-traversal).
+    sh:property [
+        sh:path rico:resultsOrResultedIn ;
+        sh:severity sh:Warning ;
+        sh:message "Production should result in at least one record"
+    ] ;
+
+    sh:property [
+        sh:path rico:hasOrHadParticipant ;
+        sh:severity sh:Warning ;
+        sh:message "Production should have at least one participant (creator)"
+    ] ;
+
+    sh:property [
+        sh:path rico:isAssociatedWithDate ;
+        sh:severity sh:Warning ;
+        sh:message "Production should have an associated date"
+    ] .
+
+
+:AccumulationShape a sh:NodeShape ;
+    sh:target [
+        a sh:SPARQLTarget ;
+        sh:prefixes <https://openric.org/shapes#> ;
+        sh:select """
+            PREFIX rico: <https://www.ica.org/standards/RiC/ontology#>
+            SELECT ?this WHERE {
+                ?this a rico:Activity ;
+                      rico:hasActivityType <https://openric.org/vocab/activity-type/accumulation> .
+            }
+        """ ;
+    ] ;
+    sh:name "Accumulation Activity Validation" ;
+
+    sh:property [
+        sh:path rico:resultsOrResultedIn ;
+        sh:severity sh:Warning ;
+        sh:message "Accumulation should result in at least one record"
+    ] .
+
+
+:ActivityShape a sh:NodeShape ;
+    sh:targetClass rico:Activity ;
+    sh:name "General Activity Validation" ;
+
+    sh:property [
+        sh:path rico:hasActivityType ;
+        sh:maxCount 1 ;
+        sh:severity sh:Info ;
+        sh:message "Activity should have an activity type"
+    ] .
+
+
+# ----------------------------------------------------------------------------
+# Place shapes
+# ----------------------------------------------------------------------------
+
+:PlaceShape a sh:NodeShape ;
+    sh:targetClass rico:Place ;
+    sh:name "Place Validation" ;
+
+    # Accept either rico:name (shorthand) OR rico:hasOrHadPlaceName (canonical).
+    sh:or (
+        [ sh:property [ sh:path rico:name ; sh:minCount 1 ] ]
+        [ sh:property [ sh:path rico:hasOrHadPlaceName ; sh:minCount 1 ] ]
+    ) ;
+
+    sh:property [
+        sh:path rico:hasOrHadPlaceName ;
+        sh:node :PlaceNameShape ;
+        sh:severity sh:Info ;
+        sh:message "When present, rico:hasOrHadPlaceName must be properly structured"
+    ] .
+
+
+:PlaceNameShape a sh:NodeShape ;
+    sh:property [
+        sh:path rico:textualValue ;
+        sh:minCount 1 ;
+        sh:or ( [ sh:datatype xsd:string ] [ sh:datatype rdf:langString ] ) ;
+        sh:minLength 1 ;
+        sh:message "PlaceName must have a textual value"
+    ] .
+
+
+# ----------------------------------------------------------------------------
+# Rule shape
+# ----------------------------------------------------------------------------
+
+:RuleShape a sh:NodeShape ;
+    sh:targetClass rico:Rule ;
+    sh:name "Rule (Mandate / Legislation / Policy) Validation" ;
+
+    sh:property [
+        sh:path rico:title ;
+        sh:minCount 1 ;
+        sh:or ( [ sh:datatype xsd:string ] [ sh:datatype rdf:langString ] ) ;
+        sh:minLength 1 ;
+        sh:message "Rule must have a title"
+    ] ;
+
+    sh:property [
+        sh:path rico:hasOrHadRuleType ;
+        sh:severity sh:Warning ;
+        sh:message "Rule should have a rule type"
+    ] ;
+
+    sh:property [
+        sh:path openricx:jurisdiction ;
+        sh:severity sh:Info ;
+        sh:message "Rule should specify the jurisdiction it applies to"
+    ] ;
+
+    sh:or (
+        [ sh:property [ sh:path openricx:descriptiveNote ; sh:minCount 1 ] ]
+        [ sh:property [ sh:path rico:hasOrHadRuleType ; sh:minCount 1 ] ]
+    ) .

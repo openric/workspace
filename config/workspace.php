@@ -61,6 +61,7 @@ return [
         'relation' => ['beginning', 'end', 'relation'],
         'place' => ['existence', 'associated'],
         'activity' => ['associated', 'beginning', 'end'],
+        'rule' => ['associated', 'beginning', 'end'],
         'instantiation' => ['creation', 'associated'],
         'container' => ['existence', 'associated'],
         // An accession: the date it was accessioned, and the dates of the material received (CAAIS 3.1).
@@ -120,6 +121,9 @@ return [
         'activity-name' => 'authorised',
         'activity-parallel-name' => 'parallel',
         'activity-other-name' => 'other',
+        'rule-name' => 'authorised',
+        'rule-parallel-name' => 'parallel',
+        'rule-other-name' => 'other',
         'alternate-title' => 'other',
         'instantiation-title' => 'authorised',
         'container-name' => 'authorised',

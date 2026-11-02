@@ -22,6 +22,7 @@ use App\Models\Agent;
 use App\Models\Import;
 use App\Models\Institution;
 use App\Models\Name;
+use App\Models\Place;
 use App\Models\RecordResource;
 use App\Models\Relation;
 use App\Models\Repository;
@@ -142,15 +143,21 @@ class PortabilityTest extends TestCase
     {
         $graph = <<<'TTL'
             @prefix rico: <https://www.ica.org/standards/RiC/ontology#> .
-            <https://elsewhere.example.org/record/1> a rico:Record ; rico:title "A letter"@en ; rico:identifier "L1" ;
+            @prefix openric: <https://openric.org/ns/v1#> .
+            <https://elsewhere.example.org/record/1> a rico:Record ; rico:title "A letter"@en ; rico:identifier "L1" ; openric:localType "item" ;
                 rico:hasDocumentaryFormType <https://elsewhere.example.org/form/letter> ;
                 rico:hasOrHadSubject <https://elsewhere.example.org/place/1> .
             <https://elsewhere.example.org/place/2> a rico:Place ; rico:name "Riverside" .
             TTL;
-        $import = $this->upload($graph, 'letter.ttl', false);
-        $issues = collect($import->report['issues'])->where('kind', 'left-out');
-        $this->assertEqualsCanonicalizing(['rico:hasDocumentaryFormType', 'rico:hasOrHadSubject', 'rico:Place'], $issues->pluck('field')->all(), 'listed, not lost silently');
+        // A dry run writes nothing, and says the relations wait for the commit, when every entry exists (roadmap phase 23b).
+        $dry = $this->upload($graph, 'letter.ttl', false);
         $this->assertSame(0, RecordResource::where('id', '!=', $this->fonds->id)->whereNull('parent_id')->count(), 'a dry run writes nothing');
+        $this->assertContains('relations', collect($dry->report['issues'])->where('kind', 'note')->pluck('field')->all());
+        // Committed: the place is read as a place; a relation to what is nowhere here is listed, not lost silently.
+        $import = $this->upload($graph, 'letter2.ttl');
+        $this->assertEqualsCanonicalizing(['https://elsewhere.example.org/form/letter', 'https://elsewhere.example.org/place/1'],
+            collect($import->report['issues'])->where('kind', 'left-out')->where('field', 'relation')->pluck('value')->all(), 'listed, not lost silently');
+        $this->assertSame(1, Place::whereHas('names', fn ($q) => $q->where('value', 'Riverside'))->count());
         $this->actingAs($this->editor)->post('/imports', ['file' => UploadedFile::fake()->createWithContent('bad.ttl', '<not turtle'), 'format' => 'ric-o', 'language' => 'en',
             'repository' => $this->holder->id]);
         $this->assertSame('rejected', collect(Import::where('file_name', 'bad.ttl')->sole()->report['issues'])->first()['kind'] ?? null, 'a file that is not RDF is refused whole');

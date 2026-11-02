@@ -13,6 +13,7 @@
                 'records.index' => [__('Archival descriptions'), $user->mayAnywhere('read', 'description'), 'records.*|!records.export-all'],
                 'agents.index' => [__('Authority records'), $user->mayAnywhere('read', 'authority'), 'agents.*|!agents.duplicates'],
                 'activities.index' => [__('Activities'), $user->mayAnywhere('read', 'authority'), 'activities.*'],
+                'rules.index' => [__('Rules and mandates'), $user->mayAnywhere('read', 'authority'), 'rules.*'],
                 'places.index' => [__('Places'), true, 'places.*'],
                 'repositories.index' => [__('Repositories'), $user->mayAnywhere('read', 'repository'), 'repositories.*'],
             ],

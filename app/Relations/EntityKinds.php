@@ -21,6 +21,7 @@ use App\Models\Instantiation;
 use App\Models\Place;
 use App\Models\RecordResource;
 use App\Models\Repository;
+use App\Models\Rule;
 use App\Models\User;
 use App\Rights\CommunityProtocols;
 use App\Rights\Embargoes;
@@ -47,6 +48,8 @@ final class EntityKinds
             'route' => 'places.show', 'index' => 'places.index', 'label' => 'place-name', 'with' => ['names.nameType', 'descriptionValues.element', 'identifiers.identifierType', 'parent.names.nameType'], 'noun' => 'place', 'ric_class' => 'rico:Place', 'ric_name' => 'rico:PlaceName'],
         'activity' => ['class' => Activity::class, 'segment' => 'activities', 'permission' => 'authority', 'readable' => true,
             'route' => 'activities.show', 'index' => 'activities.index', 'label' => 'activity-name', 'with' => ['names.nameType', 'descriptionValues.element', 'identifiers.identifierType', 'activityType.labels'], 'noun' => 'activity', 'ric_class' => 'rico:Activity', 'ric_name' => 'rico:Name'],
+        'rule' => ['class' => Rule::class, 'segment' => 'rules', 'permission' => 'authority', 'readable' => true,
+            'route' => 'rules.show', 'index' => 'rules.index', 'label' => 'rule-name', 'with' => ['names.nameType', 'descriptionValues.element', 'identifiers.identifierType', 'ruleType.labels'], 'noun' => 'rule', 'ric_class' => 'rico:Rule', 'ric_name' => 'rico:Name'],
         'instantiation' => ['class' => Instantiation::class, 'segment' => 'instantiations', 'permission' => 'description', 'readable' => true,
             'route' => 'instantiations.show', 'index' => null, 'label' => 'instantiation-title', 'with' => ['names.nameType', 'descriptionValues.element', 'identifiers.identifierType'], 'noun' => 'instantiation', 'ric_class' => 'rico:Instantiation', 'ric_name' => 'rico:Title'],
         'container' => ['class' => Container::class, 'segment' => 'containers', 'permission' => 'storage', 'readable' => true,
@@ -200,6 +203,7 @@ final class EntityKinds
             // An institution's own level may name no class: every unit is at least a rico:RecordResource.
             $entity instanceof RecordResource => $entity->level?->ricTerm() ?? 'rico:RecordResource',
             $entity instanceof Agent => $entity->agentType?->ricTerm(),
+            $entity instanceof Rule => $entity->isMandate() ? 'rico:Mandate' : 'rico:Rule',
             default => self::KINDS[self::of($entity)]['ric_class'],
         };
     }

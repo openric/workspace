@@ -13,7 +13,7 @@ v: a skos:ConceptScheme ;
     dcterms:title "OpenRiC Workspace Concept Scheme Kinds"@en ;
     dcterms:description "The kinds of vocabulary an institution keeps for its access points and types."@en ;
     dcterms:issued "2026-10-20"^^xsd:date ;
-    skos:hasTopConcept v:subject, v:occupation-type, v:place-type, v:documentary-form-type, v:legal-status, v:activity-type, v:container-type, v:storage-place-type, v:level-of-description, v:relation-type .
+    skos:hasTopConcept v:subject, v:occupation-type, v:place-type, v:documentary-form-type, v:legal-status, v:activity-type, v:container-type, v:storage-place-type, v:level-of-description, v:relation-type, v:rule-type .
 
 v:subject a skos:Concept ;
     skos:inScheme v: ;
@@ -84,3 +84,10 @@ v:relation-type a skos:Concept ;
     skos:prefLabel "Relation types"@en ;
     skos:scopeNote "The institution's own relation types, as AtoM's and Heratio's relation type taxonomies allow, each narrowing a bundled relation type (relation-type vocabulary) with its own wording and converse term. A relation of a local type connects what its bundled type connects and is exported as that type's rico:Relation subclass and shortcut properties, with its own IRI as the relation's type."@en ;
     skos:definition "Kinds of relation an institution uses that the bundled list does not have, such as is the godparent of under guardianship."@en .
+
+v:rule-type a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Rule types"@en ;
+    skos:scopeNote "Concepts exported as rico:RuleType; a rule is linked to one by rico:hasOrHadRuleType. The institution's own kinds of rule, such as a municipal by-law, beside the OpenRiC rule-type vocabulary (law, regulation, mandate, policy, custom)."@en ;
+    skos:definition "Kinds of rule, such as by-law or standing order."@en .

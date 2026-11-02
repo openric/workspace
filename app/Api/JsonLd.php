@@ -1,6 +1,6 @@
 <?php
 
-// OpenRiC Workspace - units of description, agents and repositories as OpenRiC JSON-LD (RiC-O 1.1).
+// OpenRiC Workspace - units of description, agents, repositories, places, rules and activities as OpenRiC JSON-LD (RiC-O 1.1).
 // Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
 // SPDX-License-Identifier: AGPL-3.0-or-later
 //
@@ -10,20 +10,30 @@
 // endpoints and a date-type concept, holders and creators as stubs with their
 // persistent IRIs. What may be said is decided by ExportView, which for the
 // API is the public: published values of entities the Public role may read.
-// Predicates the profile forbids without other claims (subjects,
-// instantiations, organic provenance) are never written.
+// Every relation the reader may follow is written by its RiC-O property
+// (mapping section 8), which Core Discovery allows for subjects once Graph
+// Traversal is declared (roadmap phase 23b); instantiations, which need the
+// Digital Object Linkage profile, and organic provenance, which needs
+// Provenance & Event, are never written.
 
 namespace App\Api;
 
 use App\Exchange\ExportView;
 use App\Iiif\Presentation;
+use App\Models\Activity;
 use App\Models\Agent;
+use App\Models\Instantiation;
 use App\Models\Institution;
+use App\Models\Place;
 use App\Models\ProvenanceEntry;
 use App\Models\RecordResource;
+use App\Models\Relation;
 use App\Models\Repository;
 use App\Models\RicDate;
+use App\Models\Rule;
 use App\Relations\EntityKinds;
+use App\Relations\RelationService;
+use App\Relations\RelationTypes;
 use App\Rights\PublicRights;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
@@ -36,7 +46,12 @@ class JsonLd
         'openricx' => 'https://openric.org/ns/ext/v1#',
         'xsd' => 'http://www.w3.org/2001/XMLSchema#',
         'rdfs' => 'http://www.w3.org/2000/01/rdf-schema#',
+        'owl' => 'http://www.w3.org/2002/07/owl#',
+        'dcterms' => 'http://purl.org/dc/terms/',
     ];
+
+    /** The Authority & Context schema gives a rule's type as a string; RiC-O makes it a rico:RuleType, so in a rule's document the string is its IRI. */
+    private const RULE_TYPE_AS_IRI = ['rico:hasOrHadRuleType' => ['@type' => '@id']];
 
     /** ISAD(G) elements written as literals (mapping 7.1), by notation. */
     public const RECORD_TEXT = [
@@ -53,6 +68,13 @@ class JsonLd
     ];
 
     /** ISDIAH elements written as literals (mapping 7.4). */
+    /** ISDIAH elements RiC-O 1.1 has no property of their own for, written as notes, as their scope notes say. */
+    public const REPOSITORY_NOTES = ['buildings', 'holdings', 'finding-aids', 'research-services', 'reproduction-services', 'public-areas'];
+
+    /** ISDIAH control and AtoM access point elements written as general description, as their scope notes say. */
+    public const REPOSITORY_GENERAL = ['description-sources', 'maintenance-notes', 'repository-institution-identifier', 'repository-languages', 'repository-scripts',
+        'geographic-subregion', 'thematic-area'];
+
     public const REPOSITORY_TEXT = [
         'history' => 'rico:history', 'geocultural-context' => 'openricx:generalContext', 'mandates' => 'rico:authorizingMandate',
         'administrative-structure' => 'openricx:hasInternalStructure', 'records-policies' => 'openricx:hasOrHadPolicy', 'opening-times' => 'openricx:openingHours',
@@ -74,6 +96,10 @@ class JsonLd
         $out += $this->strings('rico:title', $unit->namesOfType('authorised'));
         if (str_ends_with($out['@type'], 'RecordSet')) {
             $out['rico:hasRecordSetType'] = ['@id' => $unit->level->iri, 'rdfs:label' => (string) $unit->level->label(['en', 'und'])];
+        } elseif ($unit->level) {
+            // RiC-O gives only a record set a type; a record's level (item) goes as the implementation's own type, so it
+            // can be made again elsewhere (gap assessment scenario S5).
+            $out['openric:localType'] = (string) $unit->level->notation;
         }
         if ($extent = $this->text($unit, 'extent')) {
             // Its own node, so the text goes on rico:textualValue: the spec's schema puts it on rico:hasExtentType, an object property in RiC-O 1.1.
@@ -112,6 +138,7 @@ class JsonLd
         if ($children !== []) {
             $out['rico:includesOrIncluded'] = $children;
         }
+        $out += $this->relations($unit, ['rico:hasCreator', 'rico:hasOrHadHolder']);
         // Its images, sound and video as a IIIF manifest, for the public (ADR 0014): RiC describes, IIIF presents.
         if ($this->view->user === null && (new Presentation(new PublicCatalogue(Institution::findOrFail($unit->institution_id))))->hasManifest($unit)) {
             $out['rdfs:seeAlso'] = ['@id' => route('iiif.manifest', $unit->id)];
@@ -147,14 +174,19 @@ class JsonLd
         if ($ranges !== []) {
             $out['openricx:hasDateRangeSet'] = $ranges;
         }
+        if ($names = $this->appellations($agent, 'rico:AgentName')) {
+            $out['rico:hasOrHadAgentName'] = $names;
+        }
 
-        return $out;
+        return $out + $this->relations($agent);
     }
 
     public function repository(Repository $repository, bool $withContext = true): array
     {
         $out = $this->head($repository, $withContext);
         $out += $this->strings('rico:name', $repository->namesOfType('authorised'));
+        // A repository is a rico:CorporateBody; this says it is one that holds records here, so it is read back as one.
+        $out['openric:localType'] = 'repository';
         $out += $this->strings('openricx:alternativeForm', $repository->namesOfType('parallel'));
         $out += $this->strings('openricx:otherName', $repository->namesOfType('other'));
         if ($repository->identifier) {
@@ -165,6 +197,20 @@ class JsonLd
                 $out[$property] = $value;
             }
         }
+        foreach (['rico:note' => self::REPOSITORY_NOTES, 'rico:generalDescription' => self::REPOSITORY_GENERAL] as $property => $notations) {
+            $values = collect($notations)->map(fn ($n) => $this->text($repository, $n))->filter()->flatMap(fn ($v) => isset($v['@value']) ? [$v] : $v)->values()->all();
+            if ($values !== []) {
+                $out[$property] = count($values) === 1 ? $values[0] : $values;
+            }
+        }
+        if ($repository->repositoryType) {
+            $out['rico:hasOrHadCorporateBodyType'] = ['@id' => $repository->repositoryType->iri];
+        }
+        $out += $this->dates($repository->dates);
+        if ($names = $this->appellations($repository, 'rico:AgentName')) {
+            $out['rico:hasOrHadAgentName'] = $names;
+        }
+        // Who to contact and when it is open are the Workspace's own (openricx:), not RiC-O.
         $contact = $repository->contactPoints->sortByDesc('is_primary')->first();
         if ($contact) {
             $out['openricx:contact'] = array_filter(['@type' => 'openricx:ContactPoint', 'openricx:streetAddress' => $contact->street_address,
@@ -172,13 +218,184 @@ class JsonLd
                 'openricx:telephone' => $contact->telephone, 'openricx:email' => $contact->email], fn ($v) => $v !== null && $v !== '');
         }
 
-        return $out;
+        return $out + $this->relations($repository);
     }
 
     /**
      * A record with the authorities it reaches in one hop, each described in full (Export-Only 3.2): the record first,
      * then its holding repository and its creators.
      */
+    /**
+     * A place (Authority & Context 3.1; RiC-CM 1.0.1 section 4.8): its names, description, identifiers, location, type,
+     * coordinates, the place it lies in, its dates and relations. RiC-O 1.1 puts latitude, longitude and altitude on a
+     * rico:Coordinates node; the profile's schema puts latitude and longitude on the place, so both are written.
+     * History is not: RiC-O 1.1 gives rico:history to agents only.
+     */
+    public function place(Place $place, bool $withContext = true): array
+    {
+        $out = $this->head($place, $withContext);
+        $out += $this->strings('rico:name', $place->namesOfType('authorised'));
+        $out += $this->strings('openricx:alternativeForm', $place->namesOfType('parallel'));
+        $out += $this->strings('openricx:otherName', $place->namesOfType('other'));
+        if ($names = $this->appellations($place, 'rico:PlaceName')) {
+            $out['rico:hasOrHadPlaceName'] = $names;
+        }
+        if ($place->identifier) {
+            $out['rico:identifier'] = $place->identifier;
+        }
+        if ($description = $this->text($place, 'place-description')) {
+            $out += ['rico:generalDescription' => $description, 'openricx:description' => $description];
+        }
+        if ($location = $this->text($place, 'place-location')) {
+            $out += ['rico:location' => $location, 'openricx:streetAddress' => (string) ($location[0]['@value'] ?? $location['@value'] ?? '')];
+        }
+        if ($place->placeType) {
+            $out['rico:hasOrHadPlaceType'] = ['@id' => $place->placeType->iri];
+            $out['openric:localType'] = (string) $place->placeType->notation;
+        }
+        if ($place->latitude !== null && $place->longitude !== null) {
+            $out += ['rico:latitude' => (float) $place->latitude, 'rico:longitude' => (float) $place->longitude];
+            $out['rico:hasOrHadCoordinates'] = array_filter(['@id' => $place->iri.'#coordinates', '@type' => 'rico:Coordinates', 'rico:latitude' => (float) $place->latitude,
+                'rico:longitude' => (float) $place->longitude, 'rico:altitude' => $place->altitude !== null ? (float) $place->altitude : null], fn ($v) => $v !== null);
+        }
+        if ($place->parent && $this->view->readable($place->parent)) {
+            $out['rico:isOrWasPartOf'] = $this->stub($place->parent);
+        }
+
+        return $out + $this->dates($place->dates) + $this->relations($place);
+    }
+
+    /**
+     * A rule or mandate (Authority & Context 3.3): its title, what it says, where it is published, its type, the same
+     * rule elsewhere and its dates. A mandate is typed both, so the Rule shape still applies to it.
+     */
+    public function rule(Rule $rule, bool $withContext = true): array
+    {
+        $out = $this->head($rule, $withContext);
+        if ($withContext) {
+            $out['@context'] += self::RULE_TYPE_AS_IRI;
+        }
+        $names = $this->strings('rico:title', $rule->namesOfType('authorised'));
+        $out += $names + ($names ? ['rico:name' => $names['rico:title']] : []);
+        if ($description = $this->text($rule, 'rule-description')) {
+            $out['openricx:description'] = $description;
+        }
+        if ($sources = $this->text($rule, 'rule-sources')) {
+            $out['dcterms:source'] = $sources;
+        }
+        if ($rule->ruleType) {
+            // A string the rule's own context makes an IRI; without that context, the link written out.
+            $out['rico:hasOrHadRuleType'] = $withContext ? $rule->ruleType->iri : ['@id' => $rule->ruleType->iri];
+            $out['openric:localType'] = (string) $rule->ruleType->notation;
+        }
+        if ($rule->authority_iri) {
+            $out['owl:sameAs'] = $rule->authority_iri;
+        }
+
+        return $out + $this->dates($rule->dates) + $this->relations($rule);
+    }
+
+    /** An activity (Authority & Context 3.4): its name, description, type, dates and who and what it involved. */
+    public function activity(Activity $activity, bool $withContext = true): array
+    {
+        $out = $this->head($activity, $withContext);
+        $out += $this->strings('rico:name', $activity->namesOfType('authorised'));
+        if ($description = $this->text($activity, 'activity-description')) {
+            $out['openricx:description'] = $description;
+        }
+        if ($activity->activityType) {
+            $out['rico:hasActivityType'] = ['@id' => $activity->activityType->iri];
+            $out['openric:localType'] = (string) $activity->activityType->notation;
+        }
+        if ($dates = $this->dates($activity->dates)['openricx:hasDateRangeSet'] ?? null) {
+            $out['rico:isAssociatedWithDate'] = $dates;
+        }
+
+        return $out + $this->relations($activity);
+    }
+
+    /**
+     * Each published name as its own RiC-O appellation (RiC-CM 1.0.1 RiC-E07, Name): its text in its language and the
+     * dates it was used (rico:usedFromDate, rico:usedToDate), so a place's or a body's names over time survive export,
+     * as the design review of 2 November 2026 asks (URS-005, URS-006). The shorthand properties above still give the
+     * names by type, as the profiles' schemas expect.
+     */
+    private function appellations(Model $entity, string $class): array
+    {
+        return $entity->names->filter(fn ($n) => $this->view->visible($n))->sortBy(fn ($n) => [! $n->is_original, $n->language])->values()
+            ->map(function ($name) use ($entity, $class) {
+                $dated = fn (string $property) => $name->dates->first(fn ($d) => $d->property?->notation === $property);
+                [$from, $to] = [$dated('used-from'), $dated('used-to')];
+
+                return array_filter(['@id' => $entity->getAttribute('iri').'#name-'.$name->id, '@type' => $class,
+                    'rico:textualValue' => ['@value' => $name->value, '@language' => $name->language],
+                    'rico:usedFromDate' => $from ? $this->literal($from, true) : null, 'rico:usedToDate' => $to ? $this->literal($to, false) : null]);
+            })->all();
+    }
+
+    /**
+     * Every relation of the entity the reader may follow, by its RiC-O property (relation_types.ric_property from its
+     * source, ric_inverse from its target; mapping section 8): relations that stand (accepted
+     * or disputed), to entities the reader may read. Instantiations are left to the Digital Object Linkage profile,
+     * which the Workspace does not declare. $already names the properties the caller writes itself. Each other end is its
+     * IRI only.
+     *
+     * @param  list<string>  $already
+     */
+    private function relations(Model $entity, array $already = []): array
+    {
+        $out = [];
+        foreach (app(RelationService::class)->of($entity) as $relation) {
+            if (! in_array($relation->standing(), ['accepted', 'disputed'], true) || $relation->other instanceof Instantiation || ! $this->view->readable($relation->other)) {
+                continue;
+            }
+            $type = RelationTypes::of($relation);
+            $property = $relation->fromSource ? $type['ric_property'] ?? null : $type['ric_inverse'] ?? null;
+            if ($property === null) {
+                continue;
+            }
+            // Its IRI only, which dereferences to its description: a name here would be a second literal for the same
+            // entity wherever documents are merged, and a class without the name its shape requires fails that shape. A
+            // property the caller writes itself is not written twice, but its qualified node still is.
+            if (! in_array($property, $already, true)) {
+                $out[$property][$relation->other->getAttribute('iri')] = ['@id' => $relation->other->getAttribute('iri')];
+            }
+            if ($relation->fromSource && ($node = $this->qualified($entity, $relation, $type)) !== null) {
+                $out['rico:thingIsSourceOfRelation'][$relation->iri] = $node;
+            }
+        }
+
+        return array_map('array_values', $out);
+    }
+
+    /**
+     * The relation as its own node (mapping section 8: "when date-scoping, certainty, or provenance are required"),
+     * written from its source only: its class, both ends, its dates, certainty, the published units that are its
+     * evidence and the agent's role. Null when it carries none of these, as the property alone then says it all.
+     */
+    private function qualified(Model $source, Relation $relation, array $type): ?array
+    {
+        $evidence = $relation->evidence->filter(fn ($e) => $e->record && $this->view->readable($e->record))->map(fn ($e) => ['@id' => $e->record->iri])->values()->all();
+        // Its beginning and end as one range (rico:beginningDate, rico:endDate), or the span it was given as one date.
+        $span = $relation->datedAs('relation');
+        [$begin, $end] = [$relation->datedAs('beginning'), $relation->datedAs('end')];
+        $range = $begin || $end ? array_filter(['@type' => 'openricx:DateRange', 'rico:beginningDate' => $begin ? $this->literal($begin, true) : null,
+            'rico:endDate' => $end ? $this->literal($end, false) : null]) : ($span ? ($this->dates(collect([$span]))['openricx:hasDateRangeSet'][0] ?? null) : null);
+        $qualifiers = array_filter([
+            'openricx:hasDateRangeSet' => $range ? [$range] : null,
+            // A relation whose assertions disagree is disputed, not flattened into a fact (gap assessment scenario S3).
+            'rico:relationCertainty' => $relation->standing() === 'disputed' ? 'disputed' : $relation->certainty?->notation,
+            'rico:isEvidencedBy' => $evidence ?: null,
+            'openricx:relationHasAgentRole' => $relation->role ? ['@id' => $relation->role->iri] : null,
+        ]);
+        if ($qualifiers === []) {
+            return null;
+        }
+
+        return ['@id' => $relation->iri, '@type' => $type['ric_class'] ?? 'rico:Relation', 'rico:relationHasSource' => ['@id' => $source->getAttribute('iri')],
+            'rico:relationHasTarget' => ['@id' => $relation->other->getAttribute('iri')]] + $qualifiers;
+    }
+
     public function dump(RecordResource $unit): array
     {
         $graph = [$this->record($unit, false)];
@@ -244,7 +461,7 @@ class JsonLd
     public function stub(Model $entity): array
     {
         // A unit's name is its title (RiC-O 1.1; the OpenRiC shapes require rico:title of a rico:Record).
-        $name = $entity instanceof RecordResource ? 'rico:title' : 'rico:name';
+        $name = $entity instanceof RecordResource || $entity instanceof Rule ? 'rico:title' : 'rico:name';
 
         return array_filter(['@id' => $entity->getAttribute('iri'), '@type' => $this->type($entity), $name => $this->view->label($entity)], fn ($v) => $v !== null);
     }
@@ -254,7 +471,12 @@ class JsonLd
     {
         $class = (string) EntityKinds::ricClass($entity);
 
-        return $entity instanceof Agent && ! in_array($class, ['rico:Person', 'rico:Family', 'rico:CorporateBody'], true) ? [$class, 'rico:Agent'] : $class;
+        return match (true) {
+            $entity instanceof Agent && ! in_array($class, ['rico:Person', 'rico:Family', 'rico:CorporateBody'], true) => [$class, 'rico:Agent'],
+            // A mandate is a rico:Rule too, said outright, as SHACL infers no subclass: the Rule shape applies to it.
+            $class === 'rico:Mandate' => ['rico:Rule', 'rico:Mandate'],
+            default => $class,
+        };
     }
 
     private function head(Model $entity, bool $withContext): array

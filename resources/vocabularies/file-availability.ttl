@@ -13,7 +13,7 @@ v: a skos:ConceptScheme ;
     dcterms:title "OpenRiC Workspace File Availability"@en ;
     dcterms:description "Whether the files of an instantiation are delivered."@en ;
     dcterms:issued "2026-10-20"^^xsd:date ;
-    skos:hasTopConcept v:online, v:on-request, v:withdrawn .
+    skos:hasTopConcept v:online, v:on-request, v:withdrawn, v:lost .
 
 v:online a skos:Concept ;
     skos:inScheme v: ;
@@ -35,3 +35,10 @@ v:withdrawn a skos:Concept ;
     skos:prefLabel "Withdrawn"@en ;
     skos:scopeNote "No file is delivered, to anyone, until the availability changes. Exported as rico:conditionsOfAccess."@en ;
     skos:definition "Not delivered to anyone."@en .
+
+v:lost a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Lost"@en ;
+    skos:scopeNote "The carrier is lost or missing; its description is kept as the evidence that it existed, as the RiC standards gap assessment of 1 November 2026 asked (scenario S2). No file is delivered. Exported as rico:conditionsOfAccess."@en ;
+    skos:definition "The carrier is lost or missing; its description is kept."@en .

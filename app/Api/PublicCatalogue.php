@@ -20,6 +20,7 @@ use App\Models\Name;
 use App\Models\Place;
 use App\Models\RecordResource;
 use App\Models\Repository;
+use App\Models\Rule;
 use App\Support\Vocab;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
@@ -29,7 +30,7 @@ use Illuminate\Support\Facades\DB;
 
 class PublicCatalogue
 {
-    public const KINDS = ['records' => RecordResource::class, 'agents' => Agent::class, 'repositories' => Repository::class, 'places' => Place::class, 'activities' => Activity::class];
+    public const KINDS = ['records' => RecordResource::class, 'agents' => Agent::class, 'repositories' => Repository::class, 'places' => Place::class, 'activities' => Activity::class, 'rules' => Rule::class];
 
     public const WITH = ['names.nameType', 'names.state', 'descriptionValues.element', 'descriptionValues.state', 'identifiers.identifierType', 'dates.property', 'dates.dateType'];
 
@@ -59,7 +60,10 @@ class PublicCatalogue
         return $class::where('institution_id', $this->institution->id)->whereNull('deleted_at')
             ->whereIn('id', (clone $published)->select('subject_id'))
             ->when($query !== '', fn (Builder $q) => $q->where(fn ($q) => $q
-                ->whereIn('id', (clone $published)->where('value', 'ilike', $like)->select('subject_id'))
+                // Any published name finds it, not only the authorised one: a place's or a body's other and former names
+                // are names in their own right (RiC-CM 1.0.1 Name; design review of 2 November 2026, scenario A).
+                ->whereIn('id', Name::where('subject_table', $table)->whereHas('state', fn ($q) => $q->where('iri', Vocab::valueState('published')))
+                    ->where('value', 'ilike', $like)->select('subject_id'))
                 ->when(! $prefix, fn ($q) => $q->orWhereIn('id', DB::table('identifiers')->where('subject_table', $table)->where('value', 'ilike', $like)->select('subject_id')))))
             ->with([...self::WITH, ...$with])->get()
             ->filter(fn ($entity) => $this->view->readable($entity))

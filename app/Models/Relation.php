@@ -116,7 +116,8 @@ class Relation extends Model
             return $recordSetTerm;
         }
 
-        return ($type['local'] ?? false) ? Concept::with('labels')->find($type['base_concept_id'])?->ricTerm() : $this->relationType->ricTerm();
+        // Its Relation subclass, or, where RiC-O 1.1 has none for it (rico:Relation), the property it is.
+        return ($type['ric_class'] ?? 'rico:Relation') !== 'rico:Relation' ? $type['ric_class'] : ($type['ric_property'] ?? null);
     }
 
     public function datedAs(string $property): ?RicDate

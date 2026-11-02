@@ -52,7 +52,7 @@ class RelationTypeTest extends TestCase
     {
         $types = RelationTypes::all(null);
         // The 44 the configuration held, the two accessions brought (material-creator, accrual) and the three agreements brought (covers, partly-covers, refers-to).
-        $this->assertCount(49, $types);
+        $this->assertCount(53, $types, 'the 49 of v0.0.75 and derivation, mandate, regulation and premises (phase 23b)');
         $this->assertSame([['record', 'agent'], ['agreement', 'agent']], $types['creation']['pairs']);
         $this->assertTrue($types['creation']['role']);
         $this->assertSame(['subject'], $types['subject']['schemes']);

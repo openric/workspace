@@ -57,11 +57,26 @@ final class EntityDraft
      * Relations to entities the file names by IRI: the relation type's IRI or notation, the other end's IRI and label,
      * which end this entity is (source or target; null when the file does not say), dates (EDTF) and a note.
      *
-     * @var list<array{type: string, iri: ?string, label: string, end: ?string, from: ?string, to: ?string, description: ?string}>
+     * From RiC-O (roadmap phase 23b) the type is the relation types its property may be ($types, the import choosing the one
+     * whose pair fits), with the relation's certainty, evidence (units by IRI) and agent role when the file gives them.
+     *
+     * @var list<array{type?: string, types?: list<string>, iri: ?string, label: string, end: ?string, from: ?string, to: ?string, description: ?string, certainty?: ?string, evidence?: list<string>, role?: ?string}>
      */
     public array $relations = [];
 
-    /** The activity type's IRI, for an activity. */
+    /** The dates its names were used (rico:usedFromDate, rico:usedToDate), by the name's text and language. */
+    public array $nameDates = [];
+
+    /** A rule as an authority elsewhere publishes it (owl:sameAs). */
+    public ?string $authorityIri = null;
+
+    /** A place's latitude and longitude, as written. */
+    public array $coordinates = [];
+
+    /** The place a place lies in, by IRI (rico:isOrWasPartOf). */
+    public ?string $parentIri = null;
+
+    /** The activity type's IRI, for an activity; the rule type's, for a rule. */
     public ?string $typeIri = null;
 
     /** The table the entry becomes, when a format holds more than one kind (RiC-O): agents or repositories. */

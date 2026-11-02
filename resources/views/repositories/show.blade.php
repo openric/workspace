@@ -24,6 +24,8 @@
     @include('description._relations', ['subject' => $repository, 'kind' => 'repositories', 'relations' => $relations, 'canUpdate' => $canUpdate,
         'heading' => 'Place access points', 'types' => ['place'], 'section' => 'pl', 'add' => 'place|target', 'addLabel' => 'Add a place'])
     @include('description._relations', ['subject' => $repository, 'kind' => 'repositories', 'relations' => $relations, 'canUpdate' => $canUpdate,
+        'heading' => 'Premises', 'types' => ['premises'], 'section' => 'pr', 'add' => 'premises|source', 'addLabel' => 'Add a place it is or was at, with when'])
+    @include('description._relations', ['subject' => $repository, 'kind' => 'repositories', 'relations' => $relations, 'canUpdate' => $canUpdate,
         'heading' => 'Units of description about it', 'types' => ['subject'], 'section' => 'su', 'add' => 'subject|target', 'addLabel' => 'Add a unit of description about it'])
     @include('description._dates', ['subject' => $repository, 'kind' => 'repositories', 'heading' => 'Dates', 'canUpdate' => $canUpdate, 'choices' => $dateChoices])
 

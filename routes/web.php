@@ -70,6 +70,7 @@ use App\Http\Controllers\RetentionController;
 use App\Http\Controllers\RightsAdminController;
 use App\Http\Controllers\RightsController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\RuleController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\SettingsController;
@@ -120,7 +121,7 @@ Route::get('/branding/logo', [SettingsController::class, 'logo'])->name('brandin
 Route::get('/api/iiif/workspace', fn () => response()->json(['data' => []]))->name('iiif.workspaces');
 
 // Persistent IRIs resolve, for anyone: the controller sends a page only to those signed in.
-Route::get('/{segment}/{id}', [IriController::class, 'resolve'])->where(['segment' => 'record|agent|repository|activity|place|concept|instantiation|accession|agreement|provenance', 'id' => '[0-9a-f-]{36}'])->name('iri');
+Route::get('/{segment}/{id}', [IriController::class, 'resolve'])->where(['segment' => 'record|agent|repository|activity|place|concept|instantiation|accession|agreement|provenance|rule', 'id' => '[0-9a-f-]{36}'])->name('iri');
 
 // The clipboard (Heratio's): for anyone; it holds only what the reader may see.
 Route::prefix('clipboard')->name('clipboard.')->middleware('throttle:120,1')->group(function () {
@@ -160,7 +161,8 @@ Route::middleware(ServeDiscovery::class)->prefix('discover')->name('discover.')-
     Route::get('/repositories/{id}/theme/{part}', [DiscoverController::class, 'repositoryImage'])->whereIn('part', ['banner', 'logo'])->name('repository.image');
     Route::get('/places/{id}', [DiscoverController::class, 'place'])->name('place');
     Route::get('/activities/{id}', [DiscoverController::class, 'activity'])->name('activity');
-    Route::get('/graph/{kind}/{id}', [DiscoverController::class, 'graph'])->where('kind', 'records|agents|repositories|places|activities')->name('graph');
+    Route::get('/rules/{id}', [DiscoverController::class, 'rule'])->name('rule');
+    Route::get('/graph/{kind}/{id}', [DiscoverController::class, 'graph'])->where('kind', 'records|agents|repositories|places|activities|rules')->name('graph');
     Route::get('/files/{file}', [DiscoverController::class, 'file'])->name('file');
     Route::get('/records/{id}/iiif', [IiifController::class, 'viewer'])->name('iiif');
 });
@@ -278,6 +280,8 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/{record}/print', [RecordController::class, 'findingAid'])->name('print');
         Route::post('/{record}/calculate-dates', [RecordController::class, 'calculateDates'])->name('calculate-dates');
         Route::get('/{record}/export', [ExportController::class, 'form'])->name('export');
+        // What each format leaves out of the unit (roadmap phase 23b).
+        Route::get('/{record}/export/left-out.json', [ExportController::class, 'loss'])->name('export.loss');
         Route::get('/{record}/export/{format}', [ExportController::class, 'download'])->where('format', 'ead|ead3|csv|dc|mods')->name('export.download');
         // Provenance and custody history (roadmap phase 9e; Heratio's provenance); the controller checks update to change it.
         Route::get('/{record}/publish-readiness', [WorkflowQueueController::class, 'readiness'])->name('publish-readiness');
@@ -311,6 +315,15 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/{activity}/edit', [ActivityController::class, 'edit'])->name('edit');
         Route::get('/{activity}/eac-f', [ActivityController::class, 'eac'])->name('eac');
         Route::post('/{activity}', [ActivityController::class, 'update'])->name('update');
+    });
+    // Rules and mandates (rico:Rule, rico:Mandate; roadmap phase 23b); the controller checks the authority permissions.
+    Route::middleware('access:read,authority')->prefix('rules')->name('rules.')->group(function () {
+        Route::get('/', [RuleController::class, 'index'])->name('index');
+        Route::get('/new', [RuleController::class, 'create'])->name('create');
+        Route::post('/', [RuleController::class, 'store'])->name('store');
+        Route::get('/{rule}', [RuleController::class, 'show'])->name('show');
+        Route::get('/{rule}/edit', [RuleController::class, 'edit'])->name('edit');
+        Route::post('/{rule}', [RuleController::class, 'update'])->name('update');
     });
 
     // Accessions (Heratio's ahg-accession-manage, roadmap phase 9a): staff only, under the accession permissions.
@@ -490,7 +503,7 @@ Route::middleware(['auth', 'active'])->group(function () {
     // Dates, names and identifiers of any described entity (ADR 0006); each controller checks update on the entity.
     // A concept has labels instead (ConceptController).
     foreach (['dates' => [DateController::class, 'date'], 'names' => [NameController::class, 'name'], 'identifiers' => [IdentifierController::class, 'identifier']] as $part => [$controller, $parameter]) {
-        Route::prefix("{kind}/{id}/$part")->where(['kind' => 'records|repositories|places|agents|activities|instantiations|containers|accessions|agreements', 'id' => '[0-9a-f-]{36}', $parameter => '[0-9a-f-]{36}'])->name("$part.")
+        Route::prefix("{kind}/{id}/$part")->where(['kind' => 'records|repositories|places|agents|activities|instantiations|containers|accessions|agreements|rules', 'id' => '[0-9a-f-]{36}', $parameter => '[0-9a-f-]{36}'])->name("$part.")
             ->group(function () use ($controller, $parameter) {
                 Route::post('/', [$controller, 'store'])->name('store');
                 Route::post("/{{$parameter}}", [$controller, 'update'])->name('update');
@@ -971,15 +984,15 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::post('{kind}/{id}/workflow', [WorkflowController::class, 'start'])->where(['kind' => 'records|agents|repositories|accessions', 'id' => '[0-9a-f-]{36}'])->name('workflow.start');
 
     // Delete a unit of description, a repository or a place, after confirming (EntityDeletion).
-    Route::get('{kind}/{id}/delete', [DeletionController::class, 'confirm'])->where(['kind' => 'records|repositories|places|agents|activities|instantiations|containers|accessions|agreements', 'id' => '[0-9a-f-]{36}'])->name('deletion.confirm');
-    Route::post('{kind}/{id}/delete', [DeletionController::class, 'destroy'])->where(['kind' => 'records|repositories|places|agents|activities|instantiations|containers|accessions|agreements', 'id' => '[0-9a-f-]{36}'])->name('deletion.destroy');
+    Route::get('{kind}/{id}/delete', [DeletionController::class, 'confirm'])->where(['kind' => 'records|repositories|places|agents|activities|instantiations|containers|accessions|agreements|rules', 'id' => '[0-9a-f-]{36}'])->name('deletion.confirm');
+    Route::post('{kind}/{id}/delete', [DeletionController::class, 'destroy'])->where(['kind' => 'records|repositories|places|agents|activities|instantiations|containers|accessions|agreements|rules', 'id' => '[0-9a-f-]{36}'])->name('deletion.destroy');
 
     // The modification history of an entity and its parts, from the audit log.
-    Route::get('{kind}/{id}/history', [HistoryController::class, 'show'])->where(['kind' => 'records|repositories|places|agents|activities|instantiations|containers|concepts|accessions|agreements', 'id' => '[0-9a-f-]{36}'])->name('history');
+    Route::get('{kind}/{id}/history', [HistoryController::class, 'show'])->where(['kind' => 'records|repositories|places|agents|activities|instantiations|containers|concepts|accessions|agreements|rules', 'id' => '[0-9a-f-]{36}'])->name('history');
 
     // Review, publish and withdraw an entity's description (PublicationService).
-    Route::get('{kind}/{id}/publication', [PublicationController::class, 'edit'])->where(['kind' => 'records|repositories|places|agents|activities|instantiations', 'id' => '[0-9a-f-]{36}'])->name('publication.edit');
-    Route::post('{kind}/{id}/publication', [PublicationController::class, 'update'])->where(['kind' => 'records|repositories|places|agents|activities|instantiations', 'id' => '[0-9a-f-]{36}'])->name('publication.update');
+    Route::get('{kind}/{id}/publication', [PublicationController::class, 'edit'])->where(['kind' => 'records|repositories|places|agents|activities|instantiations|rules', 'id' => '[0-9a-f-]{36}'])->name('publication.edit');
+    Route::post('{kind}/{id}/publication', [PublicationController::class, 'update'])->where(['kind' => 'records|repositories|places|agents|activities|instantiations|rules', 'id' => '[0-9a-f-]{36}'])->name('publication.update');
 
     // Relations of any described entity, their assertions and evidence (ADR 0006, WS-006).
     Route::prefix('{kind}/{id}/relations')->where(['kind' => EntityKinds::segments(), 'id' => '[0-9a-f-]{36}', 'relation' => '[0-9a-f-]{36}',

@@ -35,10 +35,12 @@ class DiscoveryController extends Controller
 {
     /** The profiles this service declares, with the versions it implements. */
     public const PROFILES = [['id' => 'core-discovery', 'version' => '0.7.0', 'conformance' => 'full'], ['id' => 'export-only', 'version' => '0.10.0', 'conformance' => 'full'],
-        ['id' => 'portability', 'version' => '0.43.0', 'conformance' => 'full'], ['id' => 'governance', 'version' => '0.45.0', 'conformance' => 'full']];
+        ['id' => 'portability', 'version' => '0.43.0', 'conformance' => 'full'], ['id' => 'governance', 'version' => '0.45.0', 'conformance' => 'full'],
+        ['id' => 'authority-context', 'version' => '0.4.0', 'conformance' => 'full'], ['id' => 'graph-traversal', 'version' => '0.6.0', 'conformance' => 'full']];
 
     /** The list type of each list. */
-    private const LISTS = ['records' => 'openricx:RecordList', 'agents' => 'openricx:AgentList', 'repositories' => 'openricx:RepositoryList'];
+    private const LISTS = ['records' => 'openricx:RecordList', 'agents' => 'openricx:AgentList', 'repositories' => 'openricx:RepositoryList',
+        'places' => 'openricx:PlaceList', 'rules' => 'openricx:RuleList', 'activities' => 'openricx:ActivityList'];
 
     /** What a record needs loaded for its JSON-LD. */
     public const RECORD_WITH = ['level.labels', 'repository.names.nameType', 'repository.names.state', 'parent.names.state', 'children.names.state'];
@@ -222,6 +224,52 @@ class DiscoveryController extends Controller
     }
 
     /** Names that start with the query, of records, agents and repositories: id, label and type (autocomplete.schema.json). */
+    // The Authority & Context profile (0.4.0): places, rules and activities, as lists of stubs and one by one (roadmap phase 23b).
+
+    public function places(Request $request): JsonResponse
+    {
+        return $this->list($request, 'places', fn ($p) => $this->contextStub($request, $p, $p->placeType?->notation));
+    }
+
+    public function place(Request $request, string $key): JsonResponse|Response
+    {
+        $place = $this->catalogue($request)->find('places', $key, ['placeType', 'parent.names.state']);
+
+        return $place ? $this->json($this->jsonLd($request)->place($place)) : $this->missing($request, 'Place', $key);
+    }
+
+    public function rules(Request $request): JsonResponse
+    {
+        return $this->list($request, 'rules', fn ($r) => $this->contextStub($request, $r, $r->ruleType?->notation));
+    }
+
+    public function rule(Request $request, string $key): JsonResponse|Response
+    {
+        $rule = $this->catalogue($request)->find('rules', $key, ['ruleType']);
+
+        return $rule ? $this->json($this->jsonLd($request)->rule($rule)) : $this->missing($request, 'Rule', $key);
+    }
+
+    public function activities(Request $request): JsonResponse
+    {
+        return $this->list($request, 'activities', fn ($a) => $this->contextStub($request, $a, $a->activityType?->notation));
+    }
+
+    public function activity(Request $request, string $key): JsonResponse|Response
+    {
+        $activity = $this->catalogue($request)->find('activities', $key, ['activityType']);
+
+        return $activity ? $this->json($this->jsonLd($request)->activity($activity)) : $this->missing($request, 'Activity', $key);
+    }
+
+    /** A list item of the profile (3.5): @id, @type, rico:name and the local type; a rule's stub also has its title. */
+    private function contextStub(Request $request, Model $entity, ?string $localType): array
+    {
+        $stub = $this->jsonLd($request)->stub($entity);
+
+        return $stub + array_filter(['rico:name' => $stub['rico:title'] ?? null, 'openric:localType' => $localType]);
+    }
+
     public function autocomplete(Request $request): JsonResponse
     {
         $query = trim((string) $request->query('q', ''));
@@ -254,7 +302,7 @@ class DiscoveryController extends Controller
     }
 
     /** A list envelope (Core Discovery 3.3): page and limit, the total of what the public may read, links to the pages either side. */
-    private function list(Request $request, string $kind, callable $item): JsonResponse
+    protected function list(Request $request, string $kind, callable $item): JsonResponse
     {
         $page = $this->bounded($request, 'page', 1, PHP_INT_MAX);
         $limit = $this->bounded($request, 'limit', 50, 200);
@@ -273,9 +321,9 @@ class DiscoveryController extends Controller
      * Not here: 410 Gone with the deprecated entity, when the public could read it before it was deleted or merged, in
      * the format asked for (Governance profile 4, ADR 0013); else 404.
      */
-    private function missing(Request $request, string $what, string $key, string $format = 'jsonld'): JsonResponse|Response
+    protected function missing(Request $request, string $what, string $key, string $format = 'jsonld'): JsonResponse|Response
     {
-        $table = ['Record' => 'record_resources', 'Agent' => 'agents', 'Repository' => 'repositories'][$what];
+        $table = ['Record' => 'record_resources', 'Agent' => 'agents', 'Repository' => 'repositories', 'Place' => 'places', 'Rule' => 'rules', 'Activity' => 'activities'][$what];
         $deprecation = preg_match('/^[0-9a-f-]{36}$/', $key) ? app(DeprecationService::class)->known($this->institution($request), $table, $key) : null;
         if ($deprecation === null) {
             return Problem::response($request, 404, "$what with key '$key' does not exist.");
@@ -290,7 +338,7 @@ class DiscoveryController extends Controller
     }
 
     /** A whole-number query parameter within bounds, its default when absent, or null when it is not one. */
-    private function bounded(Request $request, string $name, int $default, int $max): ?int
+    protected function bounded(Request $request, string $name, int $default, int $max): ?int
     {
         $value = $request->query($name);
         if ($value === null || $value === '') {
@@ -300,27 +348,27 @@ class DiscoveryController extends Controller
         return ctype_digit((string) $value) && (int) $value >= 1 && (int) $value <= $max ? (int) $value : null;
     }
 
-    private function institution(Request $request): Institution
+    protected function institution(Request $request): Institution
     {
         return $request->attributes->get('institution');
     }
 
-    private function catalogue(Request $request): PublicCatalogue
+    protected function catalogue(Request $request): PublicCatalogue
     {
         return $request->attributes->get('catalogue') ?? tap(new PublicCatalogue($this->institution($request)), fn ($c) => $request->attributes->set('catalogue', $c));
     }
 
-    private function view(Request $request): ExportView
+    protected function view(Request $request): ExportView
     {
         return $this->catalogue($request)->view;
     }
 
-    private function jsonLd(Request $request): JsonLd
+    protected function jsonLd(Request $request): JsonLd
     {
         return new JsonLd($this->view($request));
     }
 
-    private function json(array $body): JsonResponse
+    protected function json(array $body): JsonResponse
     {
         return response()->json($body, 200, [], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
     }

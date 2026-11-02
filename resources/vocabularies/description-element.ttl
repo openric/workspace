@@ -13,7 +13,7 @@ v: a skos:ConceptScheme ;
     dcterms:title "OpenRiC Workspace Description Elements"@en ;
     dcterms:description "Elements of archival description, grouped under the ICA standard they come from. Only the elements, not the groups, are values of a description."@en ;
     dcterms:issued "2026-10-19"^^xsd:date ;
-    skos:hasTopConcept v:isdiah, v:isad-g, v:place, v:isaar-cpf, v:activity, v:instantiation, v:container, v:other-standards, v:accession, v:agreement .
+    skos:hasTopConcept v:isdiah, v:isad-g, v:place, v:isaar-cpf, v:activity, v:instantiation, v:container, v:other-standards, v:accession, v:agreement, v:rule .
 
 v:authorised-name a skos:Concept ;
     skos:inScheme v: ;
@@ -374,8 +374,15 @@ v:place-history a skos:Concept ;
     skos:inScheme v: ;
     skos:broader v:place ;
     skos:prefLabel "History"@en ;
-    skos:scopeNote "Exported as rico:history."@en ;
+    skos:scopeNote "RiC-CM 1.0.1 RiC-A21. Not exported: RiC-O 1.1 gives rico:history to agents only, and on a place it would make the place an agent; raised with openric/spec (roadmap phase 23b)."@en ;
     skos:definition "How the place developed over time, such as changes of boundary or jurisdiction."@en .
+
+v:place-location a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:place ;
+    skos:prefLabel "Location"@en ;
+    skos:scopeNote "RiC-CM 1.0.1 RiC-A27; exported as rico:location, and as openricx:streetAddress in the Authority & Context profile's shape."@en ;
+    skos:definition "Where the place is, in words: an address, or a description such as 'on the north bank of the river, east of the bridge'."@en .
 
 v:isaar-cpf a skos:Concept ;
     skos:inScheme v: ;
@@ -1153,3 +1160,45 @@ v:agreement-internal-notes a skos:Concept ;
     skos:prefLabel "Internal notes"@en ;
     skos:scopeNote "Heratio's donor_agreement; exported as rico:generalDescription, never outside the institution."@en ;
     skos:definition "Notes for staff."@en .
+
+v:rule a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Rule"@en ;
+    skos:scopeNote "The elements of a rule or mandate (rico:Rule, rico:Mandate when its rule type is mandate; RiC-CM 1.0.1), after Heratio's ric_rule. No ICA description standard covers rules; ISAAR(CPF) 5.2.6 and ISDF 5.2.4 name them as text."@en ;
+    skos:definition "The elements a rule or mandate is described with."@en .
+
+v:rule-name a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:rule ;
+    skos:prefLabel "Authorised name"@en ;
+    skos:scopeNote "Kept as a rico:Name entity of name type authorised, one in each language (rico:hasOrHadName); exported as rico:name."@en ;
+    skos:definition "The name by which the rule is known, such as the title of an act or a resolution."@en .
+
+v:rule-parallel-name a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:rule ;
+    skos:prefLabel "Parallel forms of name"@en ;
+    skos:scopeNote "Kept as rico:Name entities of name type parallel."@en ;
+    skos:definition "The name of the rule in another language."@en .
+
+v:rule-other-name a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:rule ;
+    skos:prefLabel "Other forms of name"@en ;
+    skos:scopeNote "Kept as rico:Name entities of name type other, such as a short title or a number."@en ;
+    skos:definition "Any other name by which the rule is known."@en .
+
+v:rule-description a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:rule ;
+    skos:prefLabel "Description"@en ;
+    skos:scopeNote "Exported as rico:generalDescription; Heratio's description and legislation."@en ;
+    skos:definition "What the rule says or provides, and who issued it."@en .
+
+v:rule-sources a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:rule ;
+    skos:prefLabel "Sources"@en ;
+    skos:scopeNote "Where the text of the rule is published, such as a government gazette; Heratio's sources. Exported in rico:generalDescription, as RiC-O 1.1 has no property for it."@en ;
+    skos:definition "Where the rule is published or can be read."@en .

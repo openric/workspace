@@ -74,6 +74,9 @@ final class UnitDraft
     /** @var list<array{uri: string, sha256: ?string}> files AtoM kept for the unit, to fetch on import */
     public array $files = [];
 
+    /** Relations by their RiC-O property, as EntityDraft::$relations (roadmap phase 23b). */
+    public array $relations = [];
+
     public function value(string $language, string $notation, ?string $text): void
     {
         $text = trim((string) $text);

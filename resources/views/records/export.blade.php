@@ -5,6 +5,7 @@
     <p><a href="{{ route('records.show', $record) }}">{{ __('Back to :name', ['name' => $record->described('title', ['en'])]) }}</a></p>
     <h1>{{ __('Export :name', ['name' => $record->described('title', ['en'])]) }}</h1>
     <p>{{ __('Only the units inside it that you may read are exported. Only accepted or disputed relations are exported, and only those whose other end you may read.') }}</p>
+    <p>{{ __('Each format carries part of a description. Under each, what of this unit it does not carry, found by reading the export itself;') }} <a href="{{ route('records.export.loss', $record) }}">{{ __('the same for every format and RiC-O, as JSON') }}</a>.</p>
     @foreach($formats as $format => [$name, $holds])
         <form method="get" action="{{ route('records.export.download', [$record, $format]) }}">
             <fieldset>
@@ -23,6 +24,13 @@
                 @if($mayDrafts)
                     <p><label><input type="checkbox" name="drafts" value="1"> {{ __('Include draft records') }}</label> <small>{{ __('Otherwise only published values and names are exported.') }}</small></p>
                 @endif
+                @php($lost = $losses[$format] ?? [])
+                <details>
+                    <summary>{{ $lost === [] ? __('Everything of this unit you may read is in it.') : trans_choice('{1} :count thing of this unit is not in it.|[2,*] :count things of this unit are not in it.', count($lost), ['count' => count($lost)]) }}</summary>
+                    @if($lost !== [])
+                        <ul>@foreach($lost as $item)<li>{{ $item['what'] }}: {{ \Illuminate\Support\Str::limit($item['value'], 120) }}</li>@endforeach</ul>
+                    @endif
+                </details>
                 <button type="submit">{{ __('Download :name', ['name' => $name]) }}</button>
             </fieldset>
         </form>

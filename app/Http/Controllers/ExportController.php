@@ -10,6 +10,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Api\JsonLd;
 use App\Description\Bcp47;
 use App\Description\EacCpf;
 use App\Description\RecordService;
@@ -17,12 +18,15 @@ use App\Exchange\DescriptionCsv;
 use App\Exchange\DublinCore;
 use App\Exchange\EacF;
 use App\Exchange\Ead;
+use App\Exchange\ExportLoss;
 use App\Exchange\ExportView;
 use App\Exchange\Mods;
+use App\Http\Controllers\Api\DiscoveryController;
 use App\Models\Activity;
 use App\Models\Agent;
 use App\Models\RecordResource;
 use App\Models\Repository;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\View\View;
@@ -46,7 +50,10 @@ class ExportController extends Controller
         $this->own($request, $record);
         $record->load('descriptionValues', 'names');
 
-        return view('records.export', ['record' => $record, 'formats' => self::FORMATS, 'languages' => $record->languages(),
+        $view = $this->view($request, $record);
+        $losses = collect(self::FORMATS)->map(fn ($f, $format) => app(ExportLoss::class)->of($this->content($request, $record, $format, $view), $record, $view))->all();
+
+        return view('records.export', ['record' => $record, 'formats' => self::FORMATS, 'losses' => $losses, 'languages' => $record->languages(),
             'original' => $record->originalLanguage('title'), 'mayDrafts' => $request->user()->may('view-draft', 'description', $record)]);
     }
 
@@ -54,14 +61,7 @@ class ExportController extends Controller
     {
         $this->own($request, $record);
         abort_unless(isset(self::FORMATS[$format]), 404);
-        $view = $this->view($request, $record);
-        $content = match ($format) {
-            'ead', 'ead3' => app(Ead::class)->export($record, $view, $format === 'ead3'),
-            'csv' => app(DescriptionCsv::class)->export([$record->loadMissing(RecordService::DESCRIBED),
-                ...array_column(RecordService::flatten($this->records->hierarchy($record, $request->user()), $record->id), 0)], $view, $request->query('rows') === 'every-language'),
-            'dc' => app(DublinCore::class)->export($record->loadMissing(RecordService::DESCRIBED), $view),
-            'mods' => app(Mods::class)->export($record->loadMissing(RecordService::DESCRIBED), $view),
-        };
+        $content = $this->content($request, $record, $format, $this->view($request, $record));
         [, , $extension, $type] = self::FORMATS[$format];
         $name = trim(preg_replace('/[^A-Za-z0-9-]+/', '-', (string) ($record->referenceCode() ?? $record->id)), '-');
 
@@ -69,6 +69,32 @@ class ExportController extends Controller
             'Content-Type' => "$type; charset=UTF-8",
             'Content-Disposition' => 'attachment; filename="'.$format.'-'.$name.'.'.$extension.'"',
         ]);
+    }
+
+    /**
+     * What each format, and RiC-O, leaves out of the unit, as JSON (roadmap phase 23b; the design review's machine-
+     * readable loss report): by format, each value, name, identifier, date or relation not in the export.
+     */
+    public function loss(Request $request, RecordResource $record): JsonResponse
+    {
+        $this->own($request, $record);
+        $view = $this->view($request, $record);
+        $loss = app(ExportLoss::class);
+        $formats = collect(array_keys(self::FORMATS))->mapWithKeys(fn ($format) => [$format => $loss->of($this->content($request, $record, $format, $view), $record, $view)])->all();
+        $formats['ric-o'] = $loss->of(json_encode((new JsonLd($view))->dump($record->loadMissing(DiscoveryController::RECORD_WITH)), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), $record, $view);
+
+        return response()->json(['record' => $record->iri, 'language' => $view->language, 'left_out' => $formats], 200, [], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    }
+
+    private function content(Request $request, RecordResource $record, string $format, ExportView $view): string
+    {
+        return match ($format) {
+            'ead', 'ead3' => app(Ead::class)->export($record, $view, $format === 'ead3'),
+            'csv' => app(DescriptionCsv::class)->export([$record->loadMissing(RecordService::DESCRIBED),
+                ...array_column(RecordService::flatten($this->records->hierarchy($record, $request->user()), $record->id), 0)], $view, $request->query('rows') === 'every-language'),
+            'dc' => app(DublinCore::class)->export($record->loadMissing(RecordService::DESCRIBED), $view),
+            'mods' => app(Mods::class)->export($record->loadMissing(RecordService::DESCRIBED), $view),
+        };
     }
 
     /** Every unit of description of the institution the account may read, or of one repository, as CSV. */

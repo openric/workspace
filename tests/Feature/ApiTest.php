@@ -103,7 +103,8 @@ class ApiTest extends TestCase
         $service = $this->valid($this->get(self::API.'/')->assertOk()->assertHeader('Vary', 'Accept')->assertHeader('Access-Control-Allow-Origin', '*'), 'service-description');
         $this->assertSame(['spec_version' => '0.56.0', 'profiles' => [['id' => 'core-discovery', 'version' => '0.7.0', 'conformance' => 'full'],
             ['id' => 'export-only', 'version' => '0.10.0', 'conformance' => 'full'], ['id' => 'portability', 'version' => '0.43.0', 'conformance' => 'full'],
-            ['id' => 'governance', 'version' => '0.45.0', 'conformance' => 'full']]], $service['openric_conformance']);
+            ['id' => 'governance', 'version' => '0.45.0', 'conformance' => 'full'], ['id' => 'authority-context', 'version' => '0.4.0', 'conformance' => 'full'],
+            ['id' => 'graph-traversal', 'version' => '0.6.0', 'conformance' => 'full']]], $service['openric_conformance']);
         $this->assertSame(trim(file_get_contents(base_path('VERSION'))), $service['version']);
         $this->get(self::API.'/health')->assertOk()->assertExactJson(['status' => 'ok']);
         $vocabulary = $this->valid($this->get(self::API.'/vocabulary')->assertOk(), 'vocabulary');
@@ -190,7 +191,8 @@ class ApiTest extends TestCase
         $this->valid($this->getJson(self::API.'/autocomplete')->assertStatus(400), 'error');
         $problem = $this->valid($this->getJson(self::API.'/records/not-a-key')->assertNotFound(), 'error');
         $this->assertSame(['https://openric.org/errors/not-found', '/api/ric/v1/records/not-a-key'], [$problem['type'], $problem['instance']]);
-        $this->valid($this->getJson(self::API.'/activities')->assertNotFound(), 'error');
+        // Served since Authority & Context was declared (roadmap phase 23b).
+        $this->valid($this->getJson(self::API.'/activities')->assertOk(), 'list');
         $this->getJson(self::API."/records/{$this->draft->id}")->assertNotFound();
         $this->postJson(self::API.'/records')->assertStatus(405)->assertHeader('Content-Type', 'application/problem+json');
 

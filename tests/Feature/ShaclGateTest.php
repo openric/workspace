@@ -13,14 +13,22 @@ namespace Tests\Feature;
 
 use App\Access\RoleService;
 use App\Accounts\AccountService;
+use App\Api\JsonLd;
+use App\Description\ActivityService;
 use App\Description\AgentService;
 use App\Description\ContactPointService;
 use App\Description\DateService;
+use App\Description\PlaceService;
 use App\Description\PublicationService;
 use App\Description\RecordService;
 use App\Description\RepositoryService;
+use App\Description\RuleService;
+use App\Models\Activity;
+use App\Models\Concept;
 use App\Models\Institution;
+use App\Models\Rule;
 use App\Relations\RelationService;
+use App\Vocabulary\SkosImporter;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Process;
 use Tests\TestCase;
@@ -33,7 +41,7 @@ class ShaclGateTest extends TestCase
 
     private const API = '/api/ric/v1';
 
-    private const SHAPES = ['openric', 'always-on', 'core-discovery', 'export-only'];
+    private const SHAPES = ['openric', 'always-on', 'core-discovery', 'export-only', 'authority-context'];
 
     public function test_every_kind_of_published_ric_o_conforms_to_the_pinned_shapes(): void
     {
@@ -43,6 +51,9 @@ class ShaclGateTest extends TestCase
         }
 
         $this->loadBundledVocabularies();
+        foreach (['rule-type', 'activity-type'] as $fixture) {
+            app(SkosImporter::class)->import(file_get_contents(base_path("tests/Fixtures/$fixture.ttl")));
+        }
         $institution = Institution::create(['name' => 'Riverside Archives', 'base_iri' => 'https://archives.example.org']);
         app(RoleService::class)->seedDefaults($institution);
         $editor = app(AccountService::class)->create($institution, 'Editor', 'editor@example.org', 'correct horse battery staple');
@@ -59,8 +70,20 @@ class ShaclGateTest extends TestCase
         $person = app(AgentService::class)->create($institution, 'person', 'Engelbrecht, Johanna', 'en');
         app(DateService::class)->add($person, ['property' => 'birth', 'normalized' => '1871']);
         app(RelationService::class)->create($fonds, 'creation', $council, [], $editor);
+        // Authority & Context and Graph Traversal (roadmap phase 23b): a place, a mandate and an activity, related.
+        $town = app(PlaceService::class)->create($institution, 'Riverside', 'en');
+        $mandate = app(RuleService::class)->create($institution, 'Local Government Ordinance 17 of 1939', 'en', Concept::where('iri', Rule::TYPES.'mandate')->value('id'));
+        app(RuleService::class)->describe($mandate, ['rule-description' => 'Section 12: the town clerk keeps the minutes.'], 'en');
+        $meetings = app(ActivityService::class)->create($institution, 'Council meetings', 'en', Concept::where('iri', Activity::TYPES.'production')->value('id'));
+        app(DateService::class)->add($meetings, ['property' => 'beginning', 'normalized' => '1902']);
+        $relations = app(RelationService::class);
+        $relations->create($mandate, 'mandate', $council, [], $editor);
+        $relations->create($mandate, 'regulation', $fonds, [], $editor);
+        $relations->create($meetings, 'performance', $council, [], $editor);
+        $relations->create($meetings, 'result', $fonds, [], $editor);
+        $relations->create($town, 'place', $meetings, [], $editor);
         $gone = $records->create($institution, self::LEVEL.'fonds', 'Withdrawn fonds', 'en', null, $holder, 'W');
-        foreach ([$holder, $council, $person, $fonds, $item, $gone] as $entity) {
+        foreach ([$holder, $council, $person, $fonds, $item, $gone, $town, $mandate, $meetings] as $entity) {
             app(PublicationService::class)->apply($entity, 'publish', null, false, $editor);
         }
         $this->actingAs($editor)->post("/records/{$gone->id}/delete", ['reason' => 'Withdrawn.', 'replaced_by' => $fonds->iri])->assertRedirect();
@@ -74,6 +97,9 @@ class ShaclGateTest extends TestCase
             'person' => $this->get(self::API."/agents/{$person->id}")->assertOk()->getContent(),
             'repository' => $this->get(self::API."/repositories/{$holder->id}")->assertOk()->getContent(),
             'deprecated' => $this->get(self::API."/records/{$gone->id}")->assertStatus(410)->getContent(),
+            'place' => $this->get(self::API."/places/{$town->id}")->assertOk()->getContent(),
+            'mandate' => $this->get(self::API."/rules/{$mandate->id}")->assertOk()->getContent(),
+            'activity' => $this->get(self::API."/activities/{$meetings->id}")->assertOk()->getContent(),
         ];
         foreach ($documents as $what => $json) {
             $data = tempnam(sys_get_temp_dir(), 'shacl').'.jsonld';
@@ -85,5 +111,19 @@ class ShaclGateTest extends TestCase
             }
             unlink($data);
         }
+
+        // Graph Traversal's shapes assume the whole graph (profile 5): every published document together. Its
+        // full-graph SPARQL checks are Warning or Info by the profile, but declare that inside the constraint, where
+        // SHACL does not read it, so pySHACL reports them as violations; only the type checks the profile makes
+        // violations fail the gate here (conformance/README.md, departures).
+        $graph = ['@context' => JsonLd::CONTEXT, '@graph' => collect($documents)->except('deprecated')->map(fn ($json) => json_decode($json, true))
+            ->map(fn ($d) => collect($d)->except('@context')->all())->values()->all()];
+        $data = tempnam(sys_get_temp_dir(), 'shacl').'.jsonld';
+        file_put_contents($data, json_encode($graph));
+        $result = Process::run([$validator, '--allow-warnings', '-s', base_path('tests/Fixtures/openric-0.56.0/shapes/graph-traversal.shacl.ttl'), '-df', 'json-ld', '-sf', 'turtle', $data]);
+        unlink($data);
+        preg_match_all('/Source Shape: :(\w+)/', $result->output(), $shapes);
+        $this->assertSame([], array_values(array_diff(array_unique($shapes[1]), ['OrphanedRecordShape', 'UnlinkedAgentShape', 'InstantiationLinkedFromRecordShape', 'DuplicateIdentifierShape', 'RelationConsistencyShape'])),
+            "the published graph conforms to graph-traversal.shacl.ttl:\n".mb_substr($result->output(), 0, 3000));
     }
 }
