@@ -58,9 +58,12 @@ if [[ ${WORKSPACE_DEPLOY_STAGE:-} != 2 ]]; then
 
   echo "== 2. CI on that commit"
   # The public GitHub API, so no token is needed: gh keeps its token in the desktop
-  # keyring, which a root session switching user cannot reach.
+  # keyring, which a root session switching user cannot reach. A release tag's own CI
+  # run skips the tests (its commit passed them on main), so the commit passes when a
+  # run of them succeeded and none failed, whatever the latest run says.
   CI=$(curl -fsS --max-time 30 "https://api.github.com/repos/$REPO/commits/$SHA/check-runs" \
-    | jq -r --arg name "$CI_CHECK" '[.check_runs[] | select(.name == $name) | .conclusion] | first // "none"') \
+    | jq -r --arg name "$CI_CHECK" '[.check_runs[] | select(.name == $name) | .conclusion] as $c
+        | if ($c | index("success")) and (($c | index("failure")) | not) then "success" else ($c | first // "none") end') \
     || fail "could not read CI status from GitHub"
   [[ $CI == success ]] || fail "CI \"$CI_CHECK\" on ${SHA:0:12} is $CI, not success"
   echo "passed"
