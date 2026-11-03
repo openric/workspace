@@ -1,0 +1,51 @@
+# OpenRiC Workspace - OpenRiC Workspace Fixity Failure Statuses.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Where a failed file stands (Heratio's integrity_dead_letter.status).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/fixity-failure-status/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Fixity Failure Statuses"@en ;
+    dcterms:description "Where a failed file stands (Heratio's integrity_dead_letter.status)."@en ;
+    dcterms:issued "2026-11-03"^^xsd:date ;
+    skos:hasTopConcept v:open, v:acknowledged, v:investigating, v:resolved, v:ignored .
+
+v:open a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Open"@en, "Oop"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's fixity checks, as Heratio's ahg-integrity keeps them; a check is a PREMIS fixity check event."@en ;
+    skos:definition "Not yet looked at."@en .
+
+v:acknowledged a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Acknowledged"@en, "Erken"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's fixity checks, as Heratio's ahg-integrity keeps them; a check is a PREMIS fixity check event."@en ;
+    skos:definition "Seen, not yet investigated."@en .
+
+v:investigating a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Investigating"@en, "Word ondersoek"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's fixity checks, as Heratio's ahg-integrity keeps them; a check is a PREMIS fixity check event."@en ;
+    skos:definition "Being looked into."@en .
+
+v:resolved a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Resolved"@en, "Opgelos"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's fixity checks, as Heratio's ahg-integrity keeps them; a check is a PREMIS fixity check event."@en ;
+    skos:definition "Restored or explained; it passed again or was closed."@en .
+
+v:ignored a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Ignored"@en, "Geïgnoreer"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's fixity checks, as Heratio's ahg-integrity keeps them; a check is a PREMIS fixity check event."@en ;
+    skos:definition "Closed without action, with a reason."@en .

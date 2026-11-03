@@ -28,9 +28,19 @@ Back these up with the database dumps, which do not contain them: the audit sign
 
 ## Fixity
 
-`php artisan workspace:fixity` rehashes every kept file and compares it with the SHA-256 recorded when it came in. A failure is recorded on the file, audited, shown on its instantiation's page, and makes the command exit with failure. Run it daily from cron as the owner of the live tree, for example in `/etc/cron.d/openric-workspace`:
+Fixity is checked on a schedule (roadmap phase 12a). Under Admin, Operations, Fixity, each institution makes its schedules: every file, a repository's, or a record's and everything inside it, daily, weekly or monthly, within a limit of files and minutes a run, with an account to tell of files changed or missing. The scheduler starts the schedules that are due every fifteen minutes, so the scheduler's cron entry (below) is all it needs. Every check is kept in the fixity ledger; a changed or missing file stays open under Fixity, Failures until it passes again or someone closes it with a reason.
 
-    15 2 * * * www-data /usr/bin/php /usr/share/nginx/openric-workspace-live/artisan workspace:fixity >> /usr/share/nginx/openric-workspace-live/storage/logs/fixity.log 2>&1
+`php artisan workspace:fixity` checks every file at once, through the same ledger, and exits with failure if any file is changed or missing; `--older-than=N` checks only files not checked for N days.
+
+## Operations and metrics
+
+Admin, Operations shows how the installation is doing and what needs attention: the database, the queue, failed background jobs (to try again or forget), the scheduler's heartbeat, the object store's space, fixity, webhooks and the audit signing key. The installation's part is shown to the accounts `WORKSPACE_OPERATORS` names (comma-separated emails); with none named and one institution, to whoever may manage it.
+
+A monitor reads the same figures as Prometheus text at `/metrics`, sending `Authorization: Bearer <WORKSPACE_METRICS_TOKEN>`; `WORKSPACE_METRICS_IPS` (comma-separated addresses or ranges) limits where it may come from. With no token set, `/metrics` is not served. Alert on `openric_workspace_scheduler_heartbeat_age_seconds` over 300, `openric_workspace_fixity_open_failures` above 0 and `openric_workspace_audit_signing_key_present` at 0.
+
+## Runbooks
+
+`deploy/runbooks/updating.md` (taking the live instance to a new release) and `deploy/runbooks/rotating-keys.md` (the application key, the database password, API keys, webhook secrets and the other secrets in `.env`; the audit signing key is never rotated).
 
 ## Background jobs
 

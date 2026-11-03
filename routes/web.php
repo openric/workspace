@@ -54,6 +54,7 @@ use App\Http\Controllers\JurisdictionController;
 use App\Http\Controllers\LabelController;
 use App\Http\Controllers\LocalVocabularyController;
 use App\Http\Controllers\NameController;
+use App\Http\Controllers\OperationsController;
 use App\Http\Controllers\PasswordController;
 use App\Http\Controllers\PlaceController;
 use App\Http\Controllers\PrivacyController;
@@ -170,6 +171,9 @@ Route::get('/', fn () => auth()->check() ? view('home') : redirect()->route('dis
 
 // The public catalogue (WS-009): no sign-in; DiscoverController shows only what the Public role may read and is published.
 // Sitemaps, robots.txt naming them, and an Atom feed of what was published last (roadmap phase 22c).
+// Prometheus text for a monitor that sends the operator's token (roadmap phase 12a); not served without one.
+Route::get('/metrics', [OperationsController::class, 'metrics'])->middleware('throttle:120,1')->name('metrics');
+
 Route::middleware([ServeDiscovery::class, 'throttle:120,1'])->group(function () {
     Route::get('/robots.txt', [PublishingController::class, 'robots'])->name('robots');
     Route::get('/sitemap.xml', [PublishingController::class, 'index'])->name('sitemap');
@@ -571,6 +575,16 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/labels/templates', [LabelController::class, 'templates'])->name('labels.templates');
         Route::post('/labels/templates', [LabelController::class, 'saveTemplate'])->name('labels.templates.store');
         Route::post('/labels/templates/{template}', [LabelController::class, 'saveTemplate'])->whereUuid('template')->name('labels.templates.update');
+        // Operations and fixity on a schedule (roadmap phase 12a).
+        Route::get('/operations', [OperationsController::class, 'index'])->name('operations.index');
+        Route::post('/operations/failed-jobs/{uuid}/{action}', [OperationsController::class, 'failedJob'])->whereUuid('uuid')->whereIn('action', ['retry', 'forget'])->name('operations.failed-job');
+        Route::get('/fixity', [OperationsController::class, 'schedules'])->name('fixity.schedules');
+        Route::post('/fixity', [OperationsController::class, 'saveSchedule'])->name('fixity.schedules.store');
+        Route::post('/fixity/{schedule}', [OperationsController::class, 'saveSchedule'])->whereUuid('schedule')->name('fixity.schedules.update');
+        Route::post('/fixity/{schedule}/run', [OperationsController::class, 'runNow'])->whereUuid('schedule')->name('fixity.schedules.run');
+        Route::get('/fixity/runs/{run}', [OperationsController::class, 'run'])->whereUuid('run')->name('fixity.run');
+        Route::get('/fixity/failures', [OperationsController::class, 'failures'])->name('fixity.failures');
+        Route::post('/fixity/failures/{failure}', [OperationsController::class, 'updateFailure'])->whereUuid('failure')->name('fixity.failures.update');
         // Webhooks (roadmap phase 22c).
         Route::get('/webhooks', [WebhookController::class, 'index'])->name('webhooks.index');
         Route::post('/webhooks', [WebhookController::class, 'save'])->name('webhooks.store');

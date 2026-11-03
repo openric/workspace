@@ -70,10 +70,10 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-inference-receipts` | 1569 | out: AI (V2+) | Partial | 17 (last) | none | Its signing code is copied for the audit chain |
 | `ahg-information-object-manage` | 47506 | V0.1 candidate | Covered | 9 | `ahgInformationObjectManagePlugin`, `ahgProvenancePlugin` | Records and record sets: ISAD(G), hierarchy, levels, instantiations, publication; provenance and custody history from v0.0.81 (9e) |
 | `ahg-ingest` | 5338 | later: V1.0+ | Covered | 22a | `ahgIngestPlugin` | The import with PSIS's ingest steps: spreadsheets, column mapping with kept mappings, ZIPs with their files, classification, undo, a BagIt bag, grid entry, from v0.0.106 (ADR 0020); OCR and AI processing in phase 17 |
-| `ahg-integrity` | 3078 | later: V1.0+ | Partial | 12 | `ahgIntegrityPlugin` | Fixity checked on demand |
+| `ahg-integrity` | 3078 | later: V1.0+ | Covered | 12a | `ahgIntegrityPlugin` | Fixity schedules, runs, the ledger and failures from v0.0.110 (ADR 0021); retention, holds and disposition are phase 13b's |
 | `ahg-ipsas` | 2129 | later: jurisdiction | Planned | 21 | `ahgIPSASPlugin` | With heritage accounting |
 | `ahg-jobs` | 950 | later: V1.0+ | Covered | 5 | none | Background jobs and their screen (v0.0.63) |
-| `ahg-jobs-manage` | 691 | later: V1.0+ | Planned | 12 | `ahgJobsManagePlugin` |  |
+| `ahg-jobs-manage` | 691 | later: V1.0+ | Covered | 12a | `ahgJobsManagePlugin` | The jobs page since phase 5; failed queue jobs on the operations page from v0.0.110 (ADR 0021) |
 | `ahg-label` | 1383 | later: V1.0+ | Covered | 22a | `ahgLabelPlugin` | Templates and sheets for records and containers, Code 128 and QR drawn by the Workspace, from v0.0.106 (ADR 0020) |
 | `ahg-landing-page` | 3557 | later: V1.0+ | Planned | 20 | `ahgLandingPagePlugin` |  |
 | `ahg-library` | 45610 | out: GLAM sector | Planned | 21 | `ahgLibraryPlugin` |  |
@@ -92,7 +92,7 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-naz` | 3600 | later: jurisdiction | Covered | 18e | `ahgNAZPlugin` | Closure periods and protected records kept as embargoes, research permits, records schedules and transfers, from v0.0.101 (ADR 0016); a pack switched on in the settings |
 | `ahg-nmmz` | 2666 | later: jurisdiction | Planned | 21 | `ahgNMMZPlugin` | Moved to phase 21 with the heritage objects it registers, by Dr Johan Pieterse on 2 November 2026 |
 | `ahg-oai` | 1847 | V0.1 candidate | Covered |  | `arOaiPlugin` | OAI-PMH, Export-Only profile |
-| `ahg-observability` | 1903 | later: V1.0+ | Planned | 12 | `ahgObservabilityPlugin` |  |
+| `ahg-observability` | 1903 | later: V1.0+ | Covered | 12a | `ahgObservabilityPlugin` | Health figures as a page and Prometheus text from v0.0.110 (ADR 0021); no tracing or latency histograms |
 | `ahg-ocfl` | 3106 | later: V1.0+ | Planned | 15 | `ahgOcflPlugin` |  |
 | `ahg-pdf-tools` | 2093 | V0.1 candidate | Partial | 5 | `ahgTiffPdfMergePlugin` | A PDF's text layer proposed as its transcript (v0.0.64); merging TIFFs into a PDF with the scanning workflows, phase 22 |
 | `ahg-portable-export` | 3000 | later: V1.0+ | Planned | 11c, deferred | `ahgPortableExportPlugin` | Read PSIS ahgPortableExportPlugin too, which does more; deferred by Dr Johan Pieterse on 30 October 2026 |
@@ -763,6 +763,28 @@ Added on 2 November 2026 with 18e.
 | none | Each pack switched on or off in the settings | Workspace only |
 
 : The National Archives of Zimbabwe and the CDPA, field by field
+
+### Fixity and operations (`ahg-integrity`, `ahg-observability`)
+
+Added on 3 November 2026 with 12a.
+
+| Heratio field | Workspace | Status |
+|---|---|---|
+| `integrity_schedule`: `name`, `scope_type`, `repository_id`, `information_object_id`, `frequency`, `batch_size`, `max_runtime_minutes`, `is_enabled`, `last_run_at`, `next_run_at` | The same; scope and frequency as vocabulary rows | Same, from v0.0.110 |
+| `notify_on_failure`, `notify_on_mismatch`, `notify_email` | An account to tell of files changed or missing | Modelled |
+| `algorithm`, `cron_expression`, `io_throttle_ms`, `max_memory_mb`, `max_concurrent_runs`, `total_runs` | SHA-256 only; the scheduler; one run at a time; runs counted from their rows | Modelled |
+| `description` | none | Not carried in 12a |
+| `integrity_run`: `status`, `objects_scanned`, `objects_passed`, `objects_failed`, `objects_missing`, `bytes_scanned`, `triggered_by`, `triggered_by_user`, `error_message`, `started_at`, `completed_at` | The same, the file counts as checked, unchanged, changed and missing | Same |
+| `objects_error`, `objects_skipped`, `lock_token` | An error ends the run as failed; `withoutOverlapping` | Modelled |
+| `integrity_ledger`: `digital_object_id`, `file_size`, `expected_hash`, `computed_hash`, `outcome`, `duration_ms`, `verified_at` | The same, with the size found beside the size expected | Same |
+| `file_path`, `file_exists`, `file_readable`, `hash_match`, `information_object_id`, `repository_id` | The outcome; the file's own instantiation and record | Modelled |
+| `integrity_dead_letter`: `failure_type`, `status`, `consecutive_failures`, `first_failure_at`, `last_failure_at`, `last_run_id`, `acknowledged_by`, `acknowledged_at`, `resolution_notes`, `resolved_at` | The same | Same |
+| `retry_count`, `max_retries`, `next_retry_at` | Checked again by each run until it passes | Modelled |
+| `integrity_retention_policy`, `integrity_legal_hold`, `integrity_disposition_queue`, destruction certificates | Retention schedules, disposal and certificates of phase 13b | Modelled |
+| `ahg-observability` metrics: HTTP, queue, database and AI compliance figures, Prometheus via APCu or Redis | The installation's figures read when asked, as a page and as Prometheus text | Changed |
+| OpenTelemetry traces, HTTP latency histograms | none | Not carried in 12a |
+
+: Fixity and operations, field by field
 
 ### Vendors (`ahg-vendor`)
 

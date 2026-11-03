@@ -1,0 +1,37 @@
+# OpenRiC Workspace - OpenRiC Workspace Fixity Check Scopes.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Which files a fixity schedule checks (Heratio's integrity_schedule.scope_type).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/fixity-scope/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Fixity Check Scopes"@en ;
+    dcterms:description "Which files a fixity schedule checks (Heratio's integrity_schedule.scope_type)."@en ;
+    dcterms:issued "2026-11-03"^^xsd:date ;
+    skos:hasTopConcept v:all, v:repository, v:record-set .
+
+v:all a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Every file"@en, "Elke lêer"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's fixity checks, as Heratio's ahg-integrity keeps them; a check is a PREMIS fixity check event."@en ;
+    skos:definition "Every file the institution keeps."@en .
+
+v:repository a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "A repository"@en, "'n Bewaarplek"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's fixity checks, as Heratio's ahg-integrity keeps them; a check is a PREMIS fixity check event."@en ;
+    skos:definition "The files of the records a repository holds."@en .
+
+v:record-set a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "A record and what is inside it"@en, "'n Rekord en wat daarin is"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's fixity checks, as Heratio's ahg-integrity keeps them; a check is a PREMIS fixity check event."@en ;
+    skos:definition "The files of a record and of every record inside it."@en .

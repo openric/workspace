@@ -1,0 +1,37 @@
+# OpenRiC Workspace - OpenRiC Workspace Fixity Check Frequencies.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# How often a fixity schedule runs (Heratio's integrity_schedule.frequency).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/fixity-frequency/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Fixity Check Frequencies"@en ;
+    dcterms:description "How often a fixity schedule runs (Heratio's integrity_schedule.frequency)."@en ;
+    dcterms:issued "2026-11-03"^^xsd:date ;
+    skos:hasTopConcept v:daily, v:weekly, v:monthly .
+
+v:daily a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Daily"@en, "Daagliks"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's fixity checks, as Heratio's ahg-integrity keeps them; a check is a PREMIS fixity check event."@en ;
+    skos:definition "Every day."@en .
+
+v:weekly a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Weekly"@en, "Weekliks"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's fixity checks, as Heratio's ahg-integrity keeps them; a check is a PREMIS fixity check event."@en ;
+    skos:definition "Every seven days."@en .
+
+v:monthly a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Monthly"@en, "Maandeliks"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's fixity checks, as Heratio's ahg-integrity keeps them; a check is a PREMIS fixity check event."@en ;
+    skos:definition "Every month."@en .

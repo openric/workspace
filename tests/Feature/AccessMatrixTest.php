@@ -34,6 +34,7 @@ use App\Description\RepositoryService;
 use App\Description\RuleService;
 use App\Description\WorkflowService;
 use App\Description\WorkflowSlaService;
+use App\Fixity\Fixity;
 use App\Iiif\CuratedCollections;
 use App\Jurisdiction\ExportPermits;
 use App\Jurisdiction\NarssaTransfers;
@@ -43,6 +44,7 @@ use App\Models\Concept;
 use App\Models\Container;
 use App\Models\DuplicateDetection;
 use App\Models\Feedback;
+use App\Models\FixityFailure;
 use App\Models\Import;
 use App\Models\Institution;
 use App\Models\ReadingRoom;
@@ -342,6 +344,15 @@ class AccessMatrixTest extends TestCase
             app(EmailCaptures::class)->capture($admin, UploadedFile::fake()->createWithContent('minutes.eml', file_get_contents(base_path('tests/Fixtures/mail/minutes.eml')))),
             app(Declarations::class)->request($admin, $fonds), app(Declarations::class)->flagVital($admin, $fonds, 'Proves ownership', 365),
             app(Compliance::class)->create($admin, ['framework' => 'iso-30300', 'reference' => 'CA-1', 'title' => 'Annual'])]);
+        // Phase 12a: a fixity schedule, a run of it and a failure it found.
+        $make('fixity', function () use ($institution, $admin) {
+            $schedule = app(Fixity::class)->saveSchedule($institution, ['name' => 'Weekly', 'scope' => 'all', 'frequency' => 'weekly', 'is_enabled' => 1], $admin);
+            $run = app(Fixity::class)->run($institution, $schedule, 'manual', $admin);
+
+            return [$schedule, $run, FixityFailure::create(['institution_id' => $institution->id, 'digital_file_id' => $this->objects['DigitalFile']->id,
+                'outcome_id' => Concept::where('iri', Vocab::BASE.'fixity-outcome/missing')->value('id'), 'status_id' => Concept::where('iri', Vocab::BASE.'fixity-failure-status/open')->value('id'),
+                'first_failed_at' => now(), 'last_failed_at' => now()])];
+        });
         // Phase 22d: a vendor, work sent to it with a record, and a document.
         $make('vendor', function () use ($institution, $admin, $letter) {
             $vendor = app(Vendors::class)->create(app(AgentService::class)->create($institution, 'corporate-body', 'Paper Conservation Studio', 'en'), ['services' => ['binding' => ['offered' => 1]]], $admin);

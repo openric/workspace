@@ -20,6 +20,7 @@ use App\AccessRequests\AccessRequestService;
 use App\Audit\AuditLog;
 use App\Files\FileStore;
 use App\Files\Watermark;
+use App\Fixity\Fixity;
 use App\Jobs\ExtractFileText;
 use App\Jobs\JobsService;
 use App\Jobs\MakeViewingCopies;
@@ -195,10 +196,8 @@ class InstantiationService
     /** Is the kept file still what was received? Records the outcome; a failure is audited. */
     public function checkFixity(DigitalFile $file, ?User $actor = null): bool
     {
-        $intact = $this->store->intact($file->storage_path, $file->size_bytes, $file->sha256);
-        AuditLog::actingAs($actor, fn () => $file->update($intact ? ['fixity_checked_at' => now(), 'fixity_failed_at' => null] : ['fixity_failed_at' => now()]));
-
-        return $intact;
+        // Kept in the fixity ledger, with any failure open until it passes again (phase 12a).
+        return app(Fixity::class)->check($file, null, $actor) === 'pass';
     }
 
     /**

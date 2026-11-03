@@ -6,6 +6,7 @@ use App\Description\AgreementService;
 use App\Description\WorkflowSlaService;
 use App\Files\FileStore;
 use App\Files\MediaDuration;
+use App\Fixity\Fixity;
 use App\Ingest\WatchFolders;
 use App\Jurisdiction\ExportPermits;
 use App\Jurisdiction\Naz;
@@ -27,6 +28,7 @@ use App\Webhooks\Webhooks;
 use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schedule;
 
@@ -156,6 +158,14 @@ Artisan::command('workspace:webhooks:retry', function (Webhooks $webhooks) {
     $this->info($webhooks->retryDue().' webhook deliveries tried again.');
 })->purpose('Send again the webhook deliveries that failed and whose next try is due (Heratio\'s webhook retry)');
 Schedule::command('workspace:webhooks:retry')->everyMinute()->withoutOverlapping();
+
+Artisan::command('workspace:fixity:scheduled', function (Fixity $fixity) {
+    $this->info($fixity->runDue().' fixity schedules run.');
+})->purpose('Run the fixity schedules that are due (Heratio\'s integrity scheduler)');
+
+// Fixity schedules that are due (roadmap phase 12a), and the heartbeat that shows the scheduler is running.
+Schedule::command('workspace:fixity:scheduled')->everyFifteenMinutes()->withoutOverlapping(180);
+Schedule::call(fn () => Cache::forever('workspace:scheduler:heartbeat', now()->getTimestamp()))->everyMinute()->name('scheduler-heartbeat');
 Artisan::command('workspace:research-digests', function (Notifications $notifications) {
     $this->info($notifications->digests().' digests of research notices sent.');
 })->purpose('Mail each researcher the notices held for their hourly, daily or weekly digest');
