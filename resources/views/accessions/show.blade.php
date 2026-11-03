@@ -182,4 +182,5 @@
         <p>{{ __('None.') }}</p>
     @endforelse
     <p class="meta">{{ __('Creation and revision dates and agents (CAAIS 7.2) are recorded automatically on every save.') }}</p>
+    @include('custom-fields._panel', ['entity' => $accession, 'kind' => 'accessions'])
 @endsection

@@ -63,4 +63,5 @@
     <p>{{ __('Description identifier') }}: {{ $repository->description_identifier ?? __('none') }}.
         {{ __('Status') }}: {{ $repository->descriptionStatus?->label(\App\Support\Vocab::languages()) ?? __('not set') }}.
         {{ __('Level of detail') }}: {{ $repository->descriptionDetail?->label(\App\Support\Vocab::languages()) ?? __('not set') }}.</p>
+    @include('custom-fields._panel', ['entity' => $repository, 'kind' => 'repositories'])
 @endsection

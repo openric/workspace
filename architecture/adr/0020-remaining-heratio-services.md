@@ -52,3 +52,45 @@ What was taken in moves to `.processed/`, what failed to `.failed/` with the rea
 - `tests/Feature/IntakeTest.php`: a watched folder taking in paged scans with a sidecar, a table, a good bag, and refusing a tampered bag; a folder outside the root refused; the scan API.
 - `tests/Feature/LabelsTest.php`: Code 128 symbols and check worked by hand (the same strings decoded by `zbarimg` when written), templates that must fit, sheets for records and containers, refused to another institution.
 - `tests/Feature/ImportTest.php` unchanged: a file in AtoM's columns is not sent to mapping.
+
+## Decision (22b: description quality), 3 November 2026
+
+**Version history.** After Heratio's `ahg-version-control`, for units of description and authority records.
+
+- **What a version holds.** The whole of what the entity says: values, names, dates, identifiers, own fields and relations, and where it sits.
+- **When one is written.** Heratio wrote a version when the entity's own row was saved. In the Workspace an edit changes values and names, not that row. So any write to the entity, or to anything of it, marks it, exactly as the search index is marked, and one version is written per entity when the request, command or job ends, unless nothing changed.
+- **Comparing and restoring.** Any two versions compare field by field. Restoring puts back the values, names and own fields a version had, each value and name under its own id and IRI. What changes goes back to draft for review, as an edit does. Dates, identifiers and relations are shown but not restored, as in Heratio, and the restore is itself a new version.
+- `workspace:versions:capture` takes a first version of everything that has none.
+
+**Duplicate descriptions.** After Heratio's `ahg-dedupe`, for archival descriptions; authority records and places already had their own duplicates and merge.
+
+- **Finding them.** Rules are rows: similar titles, the same or similar identifiers, the same date and creator, the same master file. Each has a threshold and Heratio's defaults. A weekly or requested scan writes each pair once, with its score and why. A pair dismissed stays dismissed.
+- **Merging.** Merging keeps one unit and gives it the other's units, relations, the names and values it lacks, dates and identifiers. The other unit is then deleted as merged, its IRI answering what replaced it, as a merged agent's does. A declared record is not merged away.
+- **Instantiations.** An instantiation stays with the unit it instantiates (the database holds to it). So the unit kept gets its own instantiation of each of the other's, from the same master file, and the store keeps one copy of the bytes.
+- **Changed from Heratio:** titles are compared within a repository.
+
+**The institution's own fields.** After Heratio's `ahg-custom-fields`, for records, authority records, repositories, accessions and activities.
+
+- **Definitions are rows,** with Heratio's switches: required, repeatable, searchable, shown to the public, on the edit form, exported, and a check (a regular expression). There are eight kinds of value. A dropdown draws from one of the institution's SKOS vocabularies rather than a separate dropdown manager, so its terms have IRIs.
+- **Display, search, export and import.** Values are shown on the entity's page (and publicly where marked), searched where marked (the public only what it sees), and kept in versions. They are exported in the archival description CSV as `custom_<key>` columns and read back by the CSV import.
+- **RDF.** RiC-O has no term for an institution's own field, so an RDF export lists them as not carried.
+
+**Form templates.** After Heratio's `ahg-forms`.
+
+- **What a template is.** A list of the description elements of its kind and the institution's own fields, each with its label, help, default, whether it is required, and its section, in order.
+- **Where it applies.** Where an assignment says, by repository, level or collection (a collection's covering what is inside it), the lowest priority number first, then the kind's default.
+- **Describing through one** writes through the same services as the full form, so each value keeps its element's RiC term.
+- **Changed from Heratio:** a field maps to an element or an own field, not to any table column.
+
+### Not carried in 22b
+
+- Heratio's version links injected into other packages' pages (the Workspace links its own).
+- Its dedupe report charts and its separate merge log table (the pair keeps what moved, and the audit log the rest).
+- Its form builder's drag-and-drop and its field types that are layout only (heading, divider), since sections do that work.
+- Form template export and import between installations.
+
+### Evidence (22b)
+
+- `tests/Feature/VersionsTest.php`: one version per change and none for no change; comparison; restore with ids kept; refusal; first versions captured.
+- `tests/Feature/DuplicatesTest.php`: the default rules finding a pair once; comparison; the merge with what moved and the deprecated IRI; a dismissed pair staying dismissed.
+- `tests/Feature/CustomFieldsTest.php`: definitions and values checked; public and staff display and search; versions; the CSV export and its import back; a form template that applies inside its collection and describes through it.

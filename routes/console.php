@@ -1,6 +1,7 @@
 <?php
 
 use App\AccessRequests\AccessRequestService;
+use App\Dedupe\Duplicates;
 use App\Description\AgreementService;
 use App\Description\WorkflowSlaService;
 use App\Files\FileStore;
@@ -9,6 +10,7 @@ use App\Ingest\WatchFolders;
 use App\Jurisdiction\ExportPermits;
 use App\Jurisdiction\Naz;
 use App\Models\DigitalFile;
+use App\Models\Institution;
 use App\Privacy\Registers;
 use App\Reports\ReportDelivery;
 use App\Reports\UsageService;
@@ -20,9 +22,11 @@ use App\Research\SavedSearches;
 use App\Research\ShareLinks;
 use App\Rights\Clearances;
 use App\Rights\Embargoes;
+use App\Versions\Versions;
 use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schedule;
 
 Artisan::command('inspire', function () {
@@ -130,6 +134,23 @@ Artisan::command('workspace:watch-folders', function (WatchFolders $folders) {
     $this->info($folders->runAll().' files taken in or refused.');
 })->purpose('Take in what was dropped in each enabled watched folder: tables and descriptions imported, bags checked, other files made records');
 Schedule::command('workspace:watch-folders')->everyMinute()->withoutOverlapping();
+Artisan::command('workspace:versions:capture', function (Versions $versions) {
+    $count = 0;
+    foreach (Versions::KINDS as $table => $class) {
+        $class::whereNull('deleted_at')->whereNotIn('id', DB::table('entity_versions')->where('subject_table', $table)->select('subject_id'))
+            ->chunkById(200, function ($entities) use ($versions, &$count) {
+                foreach ($entities as $entity) {
+                    $count += $versions->write($entity, null, __('Captured as it was before versions were kept')) ? 1 : 0;
+                }
+            });
+    }
+    $this->info("$count first versions captured.");
+})->purpose('Capture a first version of every unit of description and authority record that has none (Heratio\'s version-control backfill)');
+Artisan::command('workspace:duplicates:scan', function (Duplicates $duplicates) {
+    $found = Institution::all()->sum(fn ($i) => $duplicates->scan($i->id));
+    $this->info("$found new pairs of possible duplicates.");
+})->purpose('Find archival descriptions that may be duplicates, by each institution\'s rules (Heratio\'s dedupe scan)');
+Schedule::command('workspace:duplicates:scan')->weeklyOn(0, '03:40')->timezone(config('workspace.timezone'))->withoutOverlapping();
 Artisan::command('workspace:research-digests', function (Notifications $notifications) {
     $this->info($notifications->digests().' digests of research notices sent.');
 })->purpose('Mail each researcher the notices held for their hourly, daily or weekly digest');

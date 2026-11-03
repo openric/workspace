@@ -8,16 +8,19 @@ namespace App\Providers;
 
 use App\Access\AccessControl;
 use App\Mail\EmailAuditListener;
+use App\Models\CustomFieldValue;
 use App\Models\DescriptionValue;
 use App\Models\Identifier;
 use App\Models\Name;
 use App\Models\RecordRedaction;
+use App\Models\Relation;
 use App\Models\RicDate;
 use App\Models\User;
 use App\Privacy\Redaction;
 use App\Research\Shop;
 use App\Search\SearchIndex;
 use App\Support\Vocab;
+use App\Versions\Versions;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -25,6 +28,7 @@ use Illuminate\Mail\Events\MessageSending;
 use Illuminate\Mail\Events\MessageSent;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 
@@ -42,7 +46,7 @@ class AppServiceProvider extends ServiceProvider
     {
         // The search index follows what entities say (ADR 0009): a change to a name, a value, an identifier or a date,
         // or to the entity itself, marks it; marked entities are indexed again once, when the request or command ends.
-        foreach ([DescriptionValue::class, Name::class, Identifier::class, RicDate::class] as $part) {
+        foreach ([DescriptionValue::class, Name::class, Identifier::class, RicDate::class, CustomFieldValue::class] as $part) {
             $part::saved(fn ($model) => SearchIndex::mark((string) $model->subject_table, (string) $model->subject_id));
             $part::deleted(fn ($model) => SearchIndex::mark((string) $model->subject_table, (string) $model->subject_id));
         }
@@ -53,6 +57,23 @@ class AppServiceProvider extends ServiceProvider
         RecordRedaction::saved(fn ($model) => SearchIndex::mark('record_resources', (string) $model->record_resource_id));
         RecordRedaction::deleted(fn ($model) => SearchIndex::mark('record_resources', (string) $model->record_resource_id));
         $this->app->terminating(fn () => app(SearchIndex::class)->flush());
+        // Versions follow the same marks (roadmap phase 22b): a unit of description or authority record changed, or
+        // anything of it or a relation it takes part in, gets one new version when the request, command or job ends.
+        foreach ([DescriptionValue::class, Name::class, Identifier::class, RicDate::class, CustomFieldValue::class] as $part) {
+            $part::saved(fn ($model) => Versions::mark($model->subject_table, $model->subject_id));
+            $part::deleted(fn ($model) => Versions::mark($model->subject_table, $model->subject_id));
+        }
+        foreach (Versions::KINDS as $table => $kind) {
+            $kind::saved(fn ($model) => Versions::mark($table, $model->getKey()));
+        }
+        foreach (['saved', 'deleted'] as $event) {
+            Relation::$event(function ($r) {
+                Versions::mark($r->source_table, $r->source_id);
+                Versions::mark($r->target_table, $r->target_id);
+            });
+        }
+        $this->app->terminating(fn () => app(Versions::class)->flush());
+        Queue::after(fn () => app(Versions::class)->flush());
         // A visitor's cart joins the account's on signing in (Heratio's mergeGuestCart; phase 19a).
         Event::listen(Login::class, fn (Login $login) => $login->user instanceof User && session()->has('cart_key')
             ? app(Shop::class)->merge($login->user, session('cart_key')) : null);

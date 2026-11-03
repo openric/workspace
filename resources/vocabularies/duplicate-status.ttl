@@ -1,0 +1,44 @@
+# OpenRiC Workspace - OpenRiC Workspace Duplicate Statuses.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Where a suspected duplicate stands (Heratio's ahg_duplicate_detection.status).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/duplicate-status/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Duplicate Statuses"@en ;
+    dcterms:description "Where a suspected duplicate stands (Heratio's ahg_duplicate_detection.status)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:pending, v:confirmed, v:dismissed, v:merged .
+
+v:pending a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Waiting for review"@en, "Wag op hersiening"@af ;
+    skos:scopeNote "Not a RiC-O term: how the Workspace finds and resolves duplicate archival descriptions, as Heratio's ahg-dedupe keeps it."@en ;
+    skos:definition "Found, not yet looked at."@en .
+
+v:confirmed a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Confirmed"@en, "Bevestig"@af ;
+    skos:scopeNote "Not a RiC-O term: how the Workspace finds and resolves duplicate archival descriptions, as Heratio's ahg-dedupe keeps it."@en ;
+    skos:definition "The same; to be merged."@en .
+
+v:dismissed a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Not duplicates"@en, "Nie duplikate nie"@af ;
+    skos:scopeNote "Not a RiC-O term: how the Workspace finds and resolves duplicate archival descriptions, as Heratio's ahg-dedupe keeps it."@en ;
+    skos:definition "Looked at and found to be different."@en .
+
+v:merged a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Merged"@en, "Saamgevoeg"@af ;
+    skos:scopeNote "Not a RiC-O term: how the Workspace finds and resolves duplicate archival descriptions, as Heratio's ahg-dedupe keeps it."@en ;
+    skos:definition "One was merged into the other."@en .

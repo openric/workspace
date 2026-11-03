@@ -1,0 +1,51 @@
+# OpenRiC Workspace - OpenRiC Workspace Duplicate Rule Types.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# How a rule finds archival descriptions that may be the same (Heratio's ahg_duplicate_rule.rule_type).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/duplicate-rule-type/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Duplicate Rule Types"@en ;
+    dcterms:description "How a rule finds archival descriptions that may be the same (Heratio's ahg_duplicate_rule.rule_type)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:title-similarity, v:identifier-exact, v:identifier-fuzzy, v:date-creator, v:checksum .
+
+v:title-similarity a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Similar titles"@en, "Soortgelyke titels"@af ;
+    skos:scopeNote "Not a RiC-O term: how the Workspace finds and resolves duplicate archival descriptions, as Heratio's ahg-dedupe keeps it."@en ;
+    skos:definition "Titles that are alike once case, spacing and punctuation are set aside, within one repository."@en .
+
+v:identifier-exact a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Same identifier"@en, "Dieselfde identifiseerder"@af ;
+    skos:scopeNote "Not a RiC-O term: how the Workspace finds and resolves duplicate archival descriptions, as Heratio's ahg-dedupe keeps it."@en ;
+    skos:definition "The same identifier within one repository."@en .
+
+v:identifier-fuzzy a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Similar identifiers"@en, "Soortgelyke identifiseerders"@af ;
+    skos:scopeNote "Not a RiC-O term: how the Workspace finds and resolves duplicate archival descriptions, as Heratio's ahg-dedupe keeps it."@en ;
+    skos:definition "Identifiers that differ only in spacing, punctuation or leading zeros."@en .
+
+v:date-creator a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Same date and creator"@en, "Dieselfde datum en skepper"@af ;
+    skos:scopeNote "Not a RiC-O term: how the Workspace finds and resolves duplicate archival descriptions, as Heratio's ahg-dedupe keeps it."@en ;
+    skos:definition "The same date of creation and the same creator."@en .
+
+v:checksum a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Same file"@en, "Dieselfde lêer"@af ;
+    skos:scopeNote "Not a RiC-O term: how the Workspace finds and resolves duplicate archival descriptions, as Heratio's ahg-dedupe keeps it."@en ;
+    skos:definition "A master file with the same SHA-256 on both."@en .

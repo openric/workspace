@@ -82,4 +82,5 @@
     <p class="meta">{{ __('This description as RiC-O') }}: <a href="{{ route('api.record', $unit->id) }}">JSON-LD</a> · <a href="{{ route('api.export', [$unit->id, 'format' => 'ttl']) }}">Turtle</a> · <a href="{{ route('api.export', [$unit->id, 'format' => 'rdf']) }}">RDF/XML</a></p>
     @if($iiif)<p class="meta">{{ __('Its images as IIIF') }}: <a href="{{ route('discover.iiif', $unit->id) }}">{{ __('Open in Mirador') }}</a> · <a href="{{ route('iiif.manifest', $unit->id) }}">{{ __('IIIF manifest') }}</a></p>@endif
     @if($withTree)</div></div>@endif
+    @include('custom-fields._panel', ['entity' => $unit, 'kind' => $kind ?? 'records', 'public' => true])
 @endsection

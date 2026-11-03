@@ -48,7 +48,7 @@
     <p>@if($canUpdate)<a href="{{ route('records.move-form', $record) }}">{{ __('Move') }}</a>@endif
        @if($canUpdate && $canCreateInside) · @endif
        @if($canCreateInside)<a href="{{ route('records.create', ['parent' => $record->id]) }}">{{ __('Add a unit inside') }}</a> · <a href="{{ route('imports.create', ['parent' => $record->id]) }}">{{ __('Import units into it') }}</a> · <a href="{{ route('imports.grid', ['parent' => $record->id]) }}">{{ __('Enter units in a grid') }}</a>@endif
-       · <a href="{{ route('labels.print', ['kind' => 'records', 'ids' => [$record->id]]) }}">{{ __('Label') }}</a> · <a href="{{ route('labels.print', ['kind' => 'records', 'ids' => [$record->id], 'inside' => 1]) }}">{{ __('Labels for what is inside') }}</a></p>
+       · <a href="{{ route('labels.print', ['kind' => 'records', 'ids' => [$record->id]]) }}">{{ __('Label') }}</a> · <a href="{{ route('labels.print', ['kind' => 'records', 'ids' => [$record->id], 'inside' => 1]) }}">{{ __('Labels for what is inside') }}</a>@if(auth()->user()->may('update', 'description', $record)) · <a href="{{ route('versions.index', ['records', $record->id]) }}">{{ __('Versions') }}</a>@endif</p>
     @if($canUpdate || auth()->user()->may('translate', 'description', $record))
         @include('description._actions', ['subject' => $record, 'editRoute' => 'records.edit', 'required' => 'title'])
     @endif
@@ -144,4 +144,5 @@
         <p>{{ __('None yet.') }}</p>
     @endforelse
     @if($withTree)</div></div>@endif
+    @include('custom-fields._panel', ['entity' => $record, 'kind' => 'records'])
 @endsection

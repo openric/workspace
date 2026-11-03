@@ -71,6 +71,9 @@ final class UnitDraft
     /** @var list<array{name: string, type: ?string, location: ?string}> containers the unit is kept in, as the file names them (AtoM physical objects, EAD container) */
     public array $containers = [];
 
+    /** @var array<string, list<string>> the institution's own fields, by key, from custom_<key> columns (phase 22b) */
+    public array $customFields = [];
+
     /** @var list<array{uri: string, sha256: ?string}> files AtoM kept for the unit, to fetch on import */
     public array $files = [];
 

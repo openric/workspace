@@ -14,6 +14,9 @@ use App\AccessRequests\AccessRequestService;
 use App\Accounts\AccountService;
 use App\Accounts\ApiKeyService;
 use App\Accounts\RegistrationService;
+use App\CustomFields\CustomFields;
+use App\CustomFields\FormTemplates;
+use App\Dedupe\Duplicates;
 use App\Description\AccessionService;
 use App\Description\ActivityService;
 use App\Description\AgentService;
@@ -37,6 +40,7 @@ use App\Jurisdiction\NarssaTransfers;
 use App\Labels\Labels;
 use App\Models\Concept;
 use App\Models\Container;
+use App\Models\DuplicateDetection;
 use App\Models\Feedback;
 use App\Models\Import;
 use App\Models\Institution;
@@ -335,6 +339,13 @@ class AccessMatrixTest extends TestCase
             app(EmailCaptures::class)->capture($admin, UploadedFile::fake()->createWithContent('minutes.eml', file_get_contents(base_path('tests/Fixtures/mail/minutes.eml')))),
             app(Declarations::class)->request($admin, $fonds), app(Declarations::class)->flagVital($admin, $fonds, 'Proves ownership', 365),
             app(Compliance::class)->create($admin, ['framework' => 'iso-30300', 'reference' => 'CA-1', 'title' => 'Annual'])]);
+        // Phase 22b: an own field, a form template, a duplicate rule and a pair of possible duplicates.
+        $make('quality', fn () => [app(CustomFields::class)->saveDefinition($institution->id, ['entity_table' => 'record_resources', 'label' => 'Box number', 'field_type' => 'number']),
+            app(FormTemplates::class)->save($admin, ['entity_table' => 'record_resources', 'name' => 'Minutes', 'fields' => [['target' => 'title']]]),
+            app(Duplicates::class)->rules($institution->id)->first(),
+            DuplicateDetection::create(['institution_id' => $institution->id, 'record_a_id' => min($fonds->id, $letter->id), 'record_b_id' => max($fonds->id, $letter->id), 'similarity_score' => 0.9,
+                'rule_type_id' => Concept::where('iri', Vocab::BASE.'duplicate-rule-type/title-similarity')->value('id'),
+                'status_id' => Concept::where('iri', Vocab::BASE.'duplicate-status/pending')->value('id'), 'detected_at' => now()])]);
         // Phase 22a: an import, a watched folder and a label template.
         $make('intake', fn () => [Import::create(['institution_id' => $institution->id, 'user_id' => $admin->id, 'format' => 'csv', 'source' => 'matrix', 'file_name' => 'matrix.csv',
             'file_sha256' => hash('sha256', 'legacyId,title'), 'content' => "legacyId,title\nm1,Matrix\n", 'language' => 'en', 'repository_id' => $holder->id, 'options' => []]),

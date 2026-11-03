@@ -23,7 +23,8 @@
         <p><a href="{{ route('agents.print', $agent) }}">{{ __('Print view') }}</a>
             @if(\App\Description\EacCpf::exportable($agent)) · <a href="{{ route('agents.eac', $agent) }}">{{ __('Export as EAC-CPF') }}</a>@endif
             @if($canUpdate && auth()->user()->may('create', 'authority')) · <a href="{{ route('agents.split-form', $agent) }}">{{ __('Split into two') }}</a>@endif
-            @if(auth()->user()->may('delete', 'authority', $agent)) · <a href="{{ route('agents.merge-form', $agent) }}">{{ __('Merge into another') }}</a>@endif</p>
+            @if(auth()->user()->may('delete', 'authority', $agent)) · <a href="{{ route('agents.merge-form', $agent) }}">{{ __('Merge into another') }}</a>@endif
+            @if($canUpdate) · <a href="{{ route('versions.index', ['agents', $agent->id]) }}">{{ __('Versions') }}</a>@endif</p>
     @endunless
     @include('description._view', ['subject' => $agent, 'standard' => \App\Description\Elements::ISAAR_CPF, 'drafts' => auth()->user()->may('update', 'authority', $agent)])
 
@@ -88,4 +89,5 @@
         {{ __('Level of detail') }}: {{ $agent->descriptionDetail?->label(\App\Support\Vocab::languages()) ?? __('not set') }}.
         @if($agent->source_standard){{ __('Source standard') }}: {{ $agent->source_standard }}.@endif
         {{ __('ICIP sensitivity') }}: {{ $agent->icipSensitivity?->label(\App\Support\Vocab::languages()) ?? __('not classified') }}.</p>
+    @include('custom-fields._panel', ['entity' => $agent, 'kind' => 'agents'])
 @endsection

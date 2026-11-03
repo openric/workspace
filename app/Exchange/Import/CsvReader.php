@@ -102,6 +102,8 @@ class CsvReader
                     if (self::ATOM_EXPORT[$column] !== '') {
                         $report->once($column, self::ATOM_EXPORT[$column], 'note');
                     }
+                } elseif (str_starts_with($column, 'custom_')) {
+                    // The institution's own field (phase 22b): read, and checked against its definition on import.
                 } elseif (! array_key_exists($column, DescriptionCsv::COLUMNS)) {
                     $report->once($column, 'not a column of AtoM\'s ISAD(G) template or the Workspace; not read');
                 } elseif (DescriptionCsv::COLUMNS[$column] === null && ! in_array($column, ['qubitParentSlug', 'digitalObjectURI', 'digitalObjectPath', 'physicalObjectName', 'physicalObjectLocation', 'physicalObjectType'], true)) {
@@ -172,6 +174,11 @@ class CsvReader
             } elseif (($cells['digitalObjectPath'] ?? '') !== '') {
                 // A file in the ZIP the CSV came in (phase 22a); without one, a path on another server is not fetched.
                 $draft->files[] = ['path' => $cells['digitalObjectPath'], 'sha256' => strtolower($cells['digitalObjectChecksum'] ?? '') ?: null];
+            }
+            foreach ($cells as $column => $cell) {
+                if (str_starts_with($column, 'custom_') && $cell !== '') {
+                    $draft->customFields[substr($column, 7)] = $this->split($cell, true);
+                }
             }
             $drafts[$draft->key] = $draft;
         }

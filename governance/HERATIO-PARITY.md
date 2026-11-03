@@ -36,12 +36,12 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-cdpa` | 2774 | later: jurisdiction | Covered | 18e | `ahgCDPAPlugin` | The Cyber and Data Protection Act as a jurisdiction of the privacy registers, with data controller licences and the Data Protection Officer's certificate and form DP2, from v0.0.101 (ADR 0016); a pack switched on in the settings |
 | `ahg-condition` | 1690 | later: V1.0+ | Planned | 21 | `ahgConditionPlugin` |  |
 | `ahg-core` | 60173 | V0.1 candidate | Covered |  | `ahgAccessibilityPlugin`, `ahgCorePlugin` | Framework, not a function: the Workspace has its own (Laravel, PostgreSQL); its alternative text for images, with the worklist, is the instantiation's alternative-text element (v0.0.64) |
-| `ahg-custom-fields` | 1338 | V0.1 candidate | Planned | 22 | `ahgCustomFieldsPlugin` | As description elements in local vocabularies |
+| `ahg-custom-fields` | 1338 | later: V1.0+ | Covered | 22b | `ahgCustomFieldsPlugin` | The institution's own fields on five kinds of entity, from v0.0.107 (ADR 0020) |
 | `ahg-dacs-manage` | 1084 | V0.1 candidate | Covered |  | `ahgDacsManagePlugin`, `arDacsPlugin` | DACS display standard, from v0.0.76 |
 | `ahg-dam` | 4736 | out: GLAM sector | Planned | 21 | `ahgDAMPlugin` |  |
 | `ahg-data-migration` | 5270 | later: V1.0+ | Partial | 4 | `ahgDataMigrationPlugin` | AtoM CSV and EAD import with dry runs and reports |
 | `ahg-dc-manage` | 639 | V0.1 candidate | Covered |  | `ahgDcManagePlugin`, `sfDcPlugin` | Dublin Core export, and the Dublin Core display standard from v0.0.76 |
-| `ahg-dedupe` | 3144 | later: V1.0+ | Partial | 22 | `ahgDedupePlugin` | Duplicate authority records; other kinds later |
+| `ahg-dedupe` | 3144 | later: V1.0+ | Covered | 22b | `ahgDedupePlugin` | Rules, scan, review and merge of duplicate descriptions, from v0.0.107 (ADR 0020); authority records and places already had their own duplicates and merge |
 | `ahg-discovery` | 5836 | V0.1 candidate | Covered |  | `ahgDiscoveryPlugin` | Public catalogue, relationship graph, OAI-PMH |
 | `ahg-display` | 10111 | V0.1 candidate | Partial | 20 | `ahgDisplayPlugin` | Public catalogue display; display profiles later |
 | `ahg-doi` | 0 | later: V1.0+ | Planned | 20 | none |  |
@@ -54,7 +54,7 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-favorites` | 2634 | later: V1.0+ | Covered | 19a | `ahgFavoritesPlugin` | Favourites of any entity, folders shared by a link, nine export formats, import by IRI (ADR 0017); sending to collections (with notes), projects (as their records) and bibliographies |
 | `ahg-federation` | 15815 | later: V1.0+ | Planned | 16 | `ahgFederationPlugin` |  |
 | `ahg-feedback` | 879 | later: V1.0+ | Covered | 19a | `ahgFeedbackPlugin` | Feedback from anyone on the catalogue or a record, handled by staff (ADR 0017) |
-| `ahg-forms` | 2541 | V0.1 candidate | Planned | 22 | `ahgFormsPlugin` |  |
+| `ahg-forms` | 2541 | later: V1.0+ | Covered | 22b | `ahgFormsPlugin` | Form templates of elements and own fields, assigned by repository, level or collection, from v0.0.107 (ADR 0020) |
 | `ahg-ftp-upload` | 2301 | later: V1.0+ | Covered | 22a | `ahgFtpPlugin` | An FTP or SFTP account kept to a watched folder, from v0.0.106 (ADR 0020): files go to the Workspace's own store, not to an FTP server for later fetching |
 | `ahg-function-manage` | 2606 | V0.1 candidate | Covered |  | `ahgFunctionManagePlugin` | Activities with ISDF elements |
 | `ahg-functions-docs` | 716 | later: V1.0+ | Planned | 20 | `ahgFunctionsDocsPlugin` |  |
@@ -128,7 +128,7 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-translation` | 5726 | out: AI (V2+) | Planned | 17 (last) | `ahgTranslationPlugin` |  |
 | `ahg-user-manage` | 5651 | V0.1 candidate | Covered | 12 | `ahgUserManagePlugin`, `ahgUserRegistrationPlugin`, `arOidcPlugin` | Accounts, registration, roles; written fresh; OIDC single sign-on in phase 12 |
 | `ahg-vendor` | 6980 | later: V1.0+ | Planned | 22 | `ahgVendorPlugin` |  |
-| `ahg-version-control` | 3142 | later: V1.0+ | Partial | 22 | `ahgVersionControlPlugin` | Every change is in the audit log; version views later |
+| `ahg-version-control` | 3142 | later: V1.0+ | Covered | 22b | `ahgVersionControlPlugin` | Versions of descriptions and authority records, compared and restored, from v0.0.107 (ADR 0020) |
 | `ahg-workflow` | 7830 | later: V1.0+ | Covered | 10 | `ahgWorkflowPlugin` | Workflows, steps, tasks, pool, assignment, decisions, team work, history and bulk operations from v0.0.82 (10a); queues, service levels, overdue notices, publish gates, readiness and the diagram from v0.0.84 (10b); Spectrum procedures in phase 21 |
 | `ahg-z3950` | 5243 | out: GLAM sector | Planned | 21 | none |  |
 
@@ -763,6 +763,29 @@ Added on 2 November 2026 with 18e.
 | none | Each pack switched on or off in the settings | Workspace only |
 
 : The National Archives of Zimbabwe and the CDPA, field by field
+
+### Versions, duplicates, own fields and form templates (`ahg-version-control`, `ahg-dedupe`, `ahg-custom-fields`, `ahg-forms`)
+
+Added on 3 November 2026 with 22b.
+
+| Heratio field | Workspace | Status |
+|---|---|---|
+| `information_object_version`, `actor_version`: `version_number`, `snapshot`, `change_summary`, `changed_fields`, `created_by`, `created_at`, `is_restore`, `restored_from_version` | One table for both, the same fields | Same, from v0.0.107 |
+| Snapshot `base`, `i18n`, `access_points`, `events`, `relations`, `custom_fields` | Values, names, dates, identifiers, relations (access points among them), own fields, and where it sits | Same |
+| Restore of the record's row, texts and custom fields | Values, names and own fields; dates, identifiers and relations shown, not restored | Same |
+| `ahg_duplicate_rule`: `repository_id`, `name`, `rule_type`, `threshold`, `is_enabled`, `priority` | The same; rule types as vocabulary rows | Same, from v0.0.107 |
+| `config_json`, `is_blocking` | none | Not carried in 22b |
+| `ahg_duplicate_detection`: `record_a_id`, `record_b_id`, `similarity_score`, `detection_method`, `detection_details`, `status`, `reviewed_by`, `reviewed_at`, `review_notes`, `auto_detected` | The same | Same |
+| `ahg_merge_log` | The pair keeps the unit kept and what moved; the deprecated IRI keeps the rest | Modelled |
+| `custom_field_definition`: `field_key`, `field_label`, `field_type`, `entity_type`, `field_group`, `is_required`, `is_searchable`, `is_visible_public`, `is_visible_edit`, `is_repeatable`, `include_in_export`, `default_value`, `help_text`, `validation_rule`, `sort_order`, `is_active` | The same | Same, from v0.0.107 |
+| `dropdown_taxonomy` | A vocabulary of the institution | Changed |
+| `custom_field_value`: `value_text`, `value_number`, `value_date`, `value_boolean`, `value_dropdown`, `sequence` | The same, a dropdown value a concept | Same |
+| `ahg_form_template`: `name`, `description`, `form_type`, `is_default`, `is_active`, `version` | The same | Same, from v0.0.107 |
+| `ahg_form_field`: `field_name`, `label`, `help_text`, `default_value`, `validation_rules` (required), `section_name`, `sort_order` | The same, the field an element or an own field | Same |
+| `field_type` heading and divider, `tab_name`, `placeholder`, `options_json`, `autocomplete_source` | Sections; the element's or own field's own kind | Modelled |
+| `ahg_form_assignment`: `repository_id`, `level_of_description_id`, `collection_id`, `priority`, `inherit_to_children`, `is_active` | The same | Same |
+
+: Versions, duplicates, own fields and form templates, field by field
 
 ### Intake (`ahg-ingest`, PSIS's `ahgIngestPlugin`, `ahg-scan`, `ahg-ftp-upload`)
 

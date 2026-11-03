@@ -36,4 +36,5 @@
     <p>{{ __('Description identifier') }}: {{ $activity->description_identifier ?? __('none') }}.
         {{ __('Status') }}: {{ $activity->descriptionStatus?->label(\App\Support\Vocab::languages()) ?? __('not set') }}.
         {{ __('Level of detail') }}: {{ $activity->descriptionDetail?->label(\App\Support\Vocab::languages()) ?? __('not set') }}.</p>
+    @include('custom-fields._panel', ['entity' => $activity, 'kind' => 'activities'])
 @endsection

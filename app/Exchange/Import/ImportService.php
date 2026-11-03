@@ -22,6 +22,7 @@
 namespace App\Exchange\Import;
 
 use App\Audit\AuditLog;
+use App\CustomFields\CustomFields;
 use App\Description\ActivityService;
 use App\Description\AgentService;
 use App\Description\ContactPointService;
@@ -412,6 +413,17 @@ class ImportService
         $this->links($draft, $unit, $language);
         if ($draft->relations !== [] || $draft->memberships !== []) {
             $this->deferred[] = [$draft, $unit];
+        }
+        if ($draft->customFields !== []) {
+            $known = app(CustomFields::class)->definitions($this->institution->id, 'record_resources')->keyBy('field_key');
+            foreach (array_diff_key($draft->customFields, $known->all()) as $key => $value) {
+                $this->report->issue($draft->location, 'custom_'.$key, implode('|', $value), 'the institution has no field with this key; not read', 'left-out');
+            }
+            try {
+                app(CustomFields::class)->save($this->user, $unit, array_map(fn ($v) => count($v) === 1 ? $v[0] : $v, array_intersect_key($draft->customFields, $known->all())));
+            } catch (InvalidArgumentException $e) {
+                $this->report->issue($draft->location, 'custom fields', null, $e->getMessage().'; not kept', 'left-out');
+            }
         }
         foreach ($draft->files as $file) {
             isset($file['path']) ? $this->bundled($draft, $unit, $file['path'], $file['sha256'], $language)

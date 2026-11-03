@@ -347,6 +347,7 @@ On 3 November 2026 Dr Johan Pieterse chose 1B and 2B (ADR 0020): intake, descrip
 
 Progress:
 - **v0.0.106** (22a, intake): the import takes spreadsheets, maps a file's columns with suggestions and mappings kept by name, brings in the files a ZIP's rows name, classifies what it creates, is undone without losing later work, and downloads as a BagIt bag; rows entered in a grid; watched folders under an intake root, an FTP or SFTP drop among them, take in tables, bags and scans with Heratio's sidecars; a scan API; labels with Code 128 and QR codes drawn by the Workspace (ADR 0020).
+- **v0.0.107** (22b, description quality): version history of descriptions and authority records, compared field by field and restored; duplicate descriptions found by rules, reviewed and merged, the merged IRI pointing to the one kept; the institution's own fields on its entities, searched, versioned and carried in the CSV; form templates that apply by repository, level or collection (ADR 0020).
 
 Not copied: the 12 templates on the prohibited-copy list, until each is compared with AtoM's own; the Workspace's own theme, menus and accounts already do their work. Everything else in Heratio is a candidate to copy.
 

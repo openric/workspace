@@ -35,4 +35,5 @@
     @include('discover._relations', ['relations' => $relations, 'view' => $view, 'heading' => __('Relations')])
     @include('discover._identifiers', ['entity' => $entity])
     <p class="meta"><code>{{ $entity->getAttribute('iri') }}</code></p>
+    @include('custom-fields._panel', ['entity' => $entity, 'kind' => $kind ?? 'agents', 'public' => true])
 @endsection

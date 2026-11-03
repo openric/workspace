@@ -52,6 +52,7 @@
                 'iiif-validation.index' => [__('IIIF validation'), $user->mayAnywhere('publish', 'description'), 'iiif-validation.*'],
                 'embargoes.index' => [__('Embargoes'), $user->mayAnywhere('update', 'description'), 'embargoes.*'],
                 'retention.index' => [__('Records management'), $user->mayAnywhere('delete', 'description'), 'retention.*|disposals.*|records-management.*'],
+                'duplicates.index' => [__('Duplicate descriptions'), $user->mayAnywhere('delete', 'description'), 'duplicates.*'],
                 'jurisdiction.narssa' => [__('Transfers to the National Archives'), $user->institution->usesPack('narssa') && $user->mayAnywhere('delete', 'description'), 'jurisdiction.narssa*'],
                 'jurisdiction.permits' => [__('Export permits'), $user->institution->usesPack('export-permits') && $user->mayAnywhere('delete', 'description'), 'jurisdiction.permit*'],
                 'jurisdiction.naz' => [__('National Archives of Zimbabwe'), $user->institution->usesPack('naz') && $user->mayAnywhere('delete', 'description'), 'jurisdiction.naz*'],
@@ -87,6 +88,7 @@
                 'search.statistics' => [__('Search statistics'), $may('view-audit-log'), 'search.statistics'],
                 'intake.index' => [__('Intake'), $may('manage-institution'), 'intake.*'],
                 'labels.templates' => [__('Label templates'), $may('manage-institution'), 'labels.templates*'],
+                'custom-fields.index' => [__('Own fields and form templates'), $may('manage-institution'), 'custom-fields.index|custom-fields.template*|custom-fields.definitions*'],
                 'settings.edit' => [__('Settings'), $may('manage-institution'), 'settings.*'],
             ],
         ]));

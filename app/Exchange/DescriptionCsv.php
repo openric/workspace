@@ -18,6 +18,7 @@
 
 namespace App\Exchange;
 
+use App\CustomFields\CustomFields;
 use App\Description\Elements;
 use App\Models\Agent;
 use App\Models\RecordResource;
@@ -58,12 +59,18 @@ class DescriptionCsv
     public function export(iterable $units, ExportView $view, bool $everyLanguage = false): string
     {
         $out = fopen('php://temp', 'r+');
-        fputcsv($out, array_keys(self::COLUMNS), escape: '');
+        $units = collect($units);
+        // The institution's own fields marked for export, as custom_<key> columns (phase 22b); the public only those shown to it.
+        $custom = $units->isEmpty() ? collect() : app(CustomFields::class)->definitions($units->first()->institution_id, 'record_resources')
+            ->filter(fn ($d) => $d->include_in_export && ($view->user !== null || $d->is_visible_public))->values();
+        fputcsv($out, [...array_keys(self::COLUMNS), ...$custom->map(fn ($d) => 'custom_'.$d->field_key)], escape: '');
         $written = [];
         foreach ($units as $unit) {
             $languages = $everyLanguage ? ($view->languages($unit) ?: [$view->languageOf($unit)]) : [$view->languageOf($unit)];
+            $values = $custom->isEmpty() ? collect() : app(CustomFields::class)->values($unit);
             foreach ($languages as $i => $language) {
-                fputcsv($out, $this->row($unit, $view, $language, $everyLanguage && $i > 0, isset($written[$unit->parent_id])), escape: '');
+                fputcsv($out, [...$this->row($unit, $view, $language, $everyLanguage && $i > 0, isset($written[$unit->parent_id])),
+                    ...$custom->map(fn ($d) => $i > 0 ? '' : ($values[$d->field_key] ?? collect())->map(fn ($v) => $v->concept?->notation ?? ($d->fieldType->notation === 'boolean' ? ($v->value_boolean ? '1' : '0') : CustomFields::text($v)))->join('|'))], escape: '');
             }
             $written[$unit->id] = true;
         }

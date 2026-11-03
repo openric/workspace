@@ -13,6 +13,7 @@
 
 namespace App\Exchange;
 
+use App\CustomFields\CustomFields;
 use App\Models\RecordResource;
 use App\Relations\EntityKinds;
 use App\Relations\RelationService;
@@ -50,6 +51,12 @@ class ExportLoss
         foreach ($unit->dates as $date) {
             if ($absent($date->expressed) && $absent($date->normalized_value)) {
                 $missing[] = ['kind' => 'date', 'what' => (string) $date->property?->anyLabel(['en']), 'value' => (string) ($date->expressed ?? $date->normalized_value)];
+            }
+        }
+        // The institution's own fields (phase 22b): RiC-O has no term for them; the CSV carries those marked for export.
+        foreach (app(CustomFields::class)->values($unit)->flatten() as $value) {
+            if ($value->definition->is_active && ($view->user !== null || $value->definition->is_visible_public) && $absent($text = CustomFields::text($value))) {
+                $missing[] = ['kind' => 'own field', 'what' => $value->definition->label, 'value' => $text];
             }
         }
         foreach ($this->relations->of($unit) as $relation) {

@@ -1,0 +1,6 @@
+{{-- OpenRiC Workspace - the fields of a duplicate rule. Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems. SPDX-License-Identifier: AGPL-3.0-or-later --}}
+<p><label for="{{ $x }}-name">{{ __('Name') }}</label> <input id="{{ $x }}-name" name="name" size="30" required value="{{ old('name', $r?->name) }}">
+    <label for="{{ $x }}-type">{{ __('Finds') }}</label> <select id="{{ $x }}-type" name="rule_type">@foreach($ruleTypes as $t)<option value="{{ $t->notation }}" @selected(old('rule_type', $r?->ruleType?->notation) === $t->notation)>{{ $t->label(\App\Support\Vocab::languages()) }}</option>@endforeach</select>
+    <label for="{{ $x }}-t">{{ __('Threshold (0 to 1)') }}</label> <input id="{{ $x }}-t" name="threshold" type="number" step="0.01" min="0.01" max="1" value="{{ old('threshold', $r?->threshold ?? 0.9) }}" style="width: 5rem">
+    <label for="{{ $x }}-repo">{{ __('In') }}</label> <select id="{{ $x }}-repo" name="repository_id"><option value="">{{ __('every repository') }}</option>@foreach($repositories as $repo)<option value="{{ $repo->id }}" @selected(old('repository_id', $r?->repository_id) === $repo->id)>{{ \App\Relations\EntityKinds::label($repo) }}</option>@endforeach</select>
+    <label><input type="checkbox" name="is_enabled" value="1" @checked(old('is_enabled', $r?->is_enabled ?? true))> {{ __('on') }}</label></p>

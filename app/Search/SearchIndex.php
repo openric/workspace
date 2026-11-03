@@ -16,6 +16,7 @@
 
 namespace App\Search;
 
+use App\CustomFields\CustomFields;
 use App\Exchange\ExportView;
 use App\Models\Activity;
 use App\Models\Agent;
@@ -116,6 +117,10 @@ final class SearchIndex
             if ($shows($value)) {
                 $parts[] = [$says($value), $value->language, 'C'];
             }
+        }
+        // The institution's own fields marked searchable; the public entry only those shown to the public (phase 22b).
+        foreach (CustomFields::searchable($entity, $public) as $text) {
+            $parts[] = [$text, null, 'C'];
         }
         if ($parts === []) {
             return;

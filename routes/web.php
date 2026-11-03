@@ -24,9 +24,11 @@ use App\Http\Controllers\ClearanceController;
 use App\Http\Controllers\ClipboardController;
 use App\Http\Controllers\CommunityLabelController;
 use App\Http\Controllers\ConceptController;
+use App\Http\Controllers\CustomFieldController;
 use App\Http\Controllers\DateController;
 use App\Http\Controllers\DeletionController;
 use App\Http\Controllers\DiscoverController;
+use App\Http\Controllers\DuplicateController;
 use App\Http\Controllers\EmailBounceController;
 use App\Http\Controllers\EmailController;
 use App\Http\Controllers\EmbargoController;
@@ -89,6 +91,7 @@ use App\Http\Controllers\StorageController;
 use App\Http\Controllers\StudioController;
 use App\Http\Controllers\SubmissionController;
 use App\Http\Controllers\TeachingController;
+use App\Http\Controllers\VersionController;
 use App\Http\Controllers\VocabularyController;
 use App\Http\Controllers\WatermarkController;
 use App\Http\Controllers\WorkflowController;
@@ -512,6 +515,16 @@ Route::middleware(['auth', 'active'])->group(function () {
     });
 
     Route::middleware('can:'.Vocab::permission('manage-institution'))->group(function () {
+        // The institution's own fields and form templates (roadmap phase 22b).
+        Route::prefix('custom-fields')->name('custom-fields.')->whereUuid(['definition', 'template'])->group(function () {
+            Route::get('/', [CustomFieldController::class, 'index'])->name('index');
+            Route::post('/definitions', [CustomFieldController::class, 'saveDefinition'])->name('definitions.store');
+            Route::post('/definitions/{definition}', [CustomFieldController::class, 'saveDefinition'])->name('definitions.update');
+            Route::get('/templates/new', [CustomFieldController::class, 'template'])->name('templates.create');
+            Route::post('/templates', [CustomFieldController::class, 'saveTemplate'])->name('templates.store');
+            Route::get('/templates/{template}', [CustomFieldController::class, 'template'])->name('template');
+            Route::post('/templates/{template}', [CustomFieldController::class, 'saveTemplate'])->name('templates.update');
+        });
         // Label templates (roadmap phase 22a).
         Route::get('/labels/templates', [LabelController::class, 'templates'])->name('labels.templates');
         Route::post('/labels/templates', [LabelController::class, 'saveTemplate'])->name('labels.templates.store');
@@ -1052,6 +1065,15 @@ Route::middleware(['auth', 'active'])->group(function () {
             Route::post('/naz/{step}/{id?}', [JurisdictionController::class, 'nazStep'])
                 ->whereIn('step', ['restrict', 'release', 'permit', 'approve', 'reject', 'revoke', 'schedule', 'transfer'])->name('naz.step');
         });
+        // Duplicate archival descriptions (roadmap phase 22b).
+        Route::prefix('duplicates')->name('duplicates.')->whereUuid(['pair', 'rule'])->group(function () {
+            Route::get('/', [DuplicateController::class, 'index'])->name('index');
+            Route::post('/scan', [DuplicateController::class, 'scan'])->name('scan');
+            Route::post('/rules', [DuplicateController::class, 'saveRule'])->name('rules.store');
+            Route::post('/rules/{rule}', [DuplicateController::class, 'saveRule'])->name('rules.update');
+            Route::get('/{pair}', [DuplicateController::class, 'show'])->name('show');
+            Route::post('/{pair}/{step}', [DuplicateController::class, 'step'])->whereIn('step', ['dismiss', 'confirm', 'merge'])->name('step');
+        });
         Route::get('/disposals/{disposal}', [RetentionController::class, 'disposal'])->whereUuid('disposal')->name('disposals.show');
         Route::post('/disposals/{disposal}/{step}', [RetentionController::class, 'step'])->whereUuid('disposal')
             ->whereIn('step', ['recommend', 'approve', 'clear', 'reject', 'cancel', 'execute', 'verify'])->name('disposals.step');
@@ -1077,6 +1099,16 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::post('/{embargo}/lift', [EmbargoController::class, 'lift'])->name('lift');
         Route::post('/{embargo}/exceptions', [EmbargoController::class, 'except'])->name('exceptions.add');
         Route::post('/{embargo}/exceptions/{exception}/remove', [EmbargoController::class, 'removeException'])->name('exceptions.remove');
+    });
+    // An entity's own fields, and describing it through a form template (roadmap phase 22b).
+    Route::prefix('{kind}/{id}')->where(['kind' => 'records|agents|repositories|accessions|activities', 'id' => '[0-9a-f-]{36}'])->group(function () {
+        Route::get('/fields', [CustomFieldController::class, 'entity'])->name('custom-fields.entity');
+        Route::post('/fields', [CustomFieldController::class, 'saveEntity'])->name('custom-fields.entity.save');
+    });
+    // The version history of a unit of description or an authority record (roadmap phase 22b).
+    Route::prefix('{kind}/{id}')->where(['kind' => 'records|agents', 'id' => '[0-9a-f-]{36}'])->group(function () {
+        Route::get('/versions', [VersionController::class, 'index'])->name('versions.index');
+        Route::post('/versions/restore', [VersionController::class, 'restore'])->name('versions.restore');
     });
     Route::prefix('{kind}/{id}')->where(['kind' => 'records|instantiations|accessions', 'id' => '[0-9a-f-]{36}', 'right' => '[0-9a-f-]{36}'])->group(function () {
         Route::post('/rights', [RightsController::class, 'store'])->name('rights.store');

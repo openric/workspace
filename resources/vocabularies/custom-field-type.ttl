@@ -1,0 +1,72 @@
+# OpenRiC Workspace - OpenRiC Workspace Custom Field Types.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# The kind of value a field an institution adds holds (Heratio's custom_field_definition.field_type).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/custom-field-type/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Custom Field Types"@en ;
+    dcterms:description "The kind of value a field an institution adds holds (Heratio's custom_field_definition.field_type)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:text, v:textarea, v:number, v:date, v:boolean, v:concept, v:concepts, v:url .
+
+v:text a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Text (one line)"@en, "Teks (een reël)"@af ;
+    skos:scopeNote "Not a RiC-O term: the kind of value a field an institution adds holds, as Heratio's ahg-custom-fields keeps it."@en ;
+    skos:definition "A short text."@en .
+
+v:textarea a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Text (several lines)"@en, "Teks (verskeie reëls)"@af ;
+    skos:scopeNote "Not a RiC-O term: the kind of value a field an institution adds holds, as Heratio's ahg-custom-fields keeps it."@en ;
+    skos:definition "A longer text."@en .
+
+v:number a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Number"@en, "Getal"@af ;
+    skos:scopeNote "Not a RiC-O term: the kind of value a field an institution adds holds, as Heratio's ahg-custom-fields keeps it."@en ;
+    skos:definition "A number."@en .
+
+v:date a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Date"@en, "Datum"@af ;
+    skos:scopeNote "Not a RiC-O term: the kind of value a field an institution adds holds, as Heratio's ahg-custom-fields keeps it."@en ;
+    skos:definition "A date, YYYY-MM-DD."@en .
+
+v:boolean a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Yes or no"@en, "Ja of nee"@af ;
+    skos:scopeNote "Not a RiC-O term: the kind of value a field an institution adds holds, as Heratio's ahg-custom-fields keeps it."@en ;
+    skos:definition "Yes or no."@en .
+
+v:concept a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "A term from a vocabulary"@en, "'n Term uit 'n woordelys"@af ;
+    skos:scopeNote "Not a RiC-O term: the kind of value a field an institution adds holds, as Heratio's ahg-custom-fields keeps it."@en ;
+    skos:definition "One concept of a vocabulary the field names."@en .
+
+v:concepts a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Terms from a vocabulary"@en, "Terme uit 'n woordelys"@af ;
+    skos:scopeNote "Not a RiC-O term: the kind of value a field an institution adds holds, as Heratio's ahg-custom-fields keeps it."@en ;
+    skos:definition "Several concepts of a vocabulary the field names."@en .
+
+v:url a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Web address"@en, "Webadres"@af ;
+    skos:scopeNote "Not a RiC-O term: the kind of value a field an institution adds holds, as Heratio's ahg-custom-fields keeps it."@en ;
+    skos:definition "A web address."@en .
