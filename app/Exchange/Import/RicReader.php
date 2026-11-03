@@ -508,9 +508,9 @@ class RicReader
     /** List each property of the entry no one read, once per property. */
     private function end(Resource $node, string $location): void
     {
-        // A name as its own appellation repeats a name the shorthand properties gave (rico:name and the like), and adds
-        // the dates it was used, kept on the draft for the import to put on the name it makes.
-        foreach (['rico:hasOrHadAgentName', 'rico:hasOrHadPlaceName'] as $property) {
+        // A name or title as its own appellation repeats a name the shorthand properties gave (rico:name, rico:title and the
+        // like), and adds the dates it was used, kept on the draft for the import to put on the name it makes.
+        foreach (['rico:hasOrHadAgentName', 'rico:hasOrHadPlaceName', 'rico:hasOrHadTitle'] as $property) {
             foreach ($this->resources($node, $property) as $name) {
                 $this->nodes[$name->getUri()] = true;
                 $text = $name->getLiteral('<'.self::RICO.'textualValue>');

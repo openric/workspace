@@ -7,8 +7,12 @@
 
 name: CI
 
+# A release tag points at a commit whose tests have passed on main: it is checked for that, and for its signature,
+# rather than tested again (Dr Johan Pieterse's choice 3 of 3 November 2026).
 on:
   push:
+    branches: ['**']
+    tags: ['v*']
   pull_request:
 
 permissions:
@@ -17,6 +21,7 @@ permissions:
 jobs:
   test:
     name: Tests on PostgreSQL 16
+    if: github.ref_type != 'tag'
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -65,6 +70,26 @@ jobs:
         run: php artisan test
         env:
           SHACL_REQUIRED: '1'
+
+  release-tag:
+    name: The tag is signed and its commit passed on main
+    if: github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Signature and tests
+        run: |
+          tag=$(gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$GITHUB_REF_NAME" --jq '.object | select(.type == "tag") | .sha')
+          [ -n "$tag" ] || { echo "$GITHUB_REF_NAME is not an annotated tag"; exit 1; }
+          [ "$(gh api "repos/$GITHUB_REPOSITORY/git/tags/$tag" --jq .verification.verified)" = true ] || { echo "$GITHUB_REF_NAME is not signed by a verified key"; exit 1; }
+          commit=$(gh api "repos/$GITHUB_REPOSITORY/git/tags/$tag" --jq .object.sha)
+          passed=$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/ci.yml/runs?branch=main&head_sha=$commit&status=success" --jq .total_count)
+          [ "$passed" -gt 0 ] || { echo "CI has not passed on main for $commit"; exit 1; }
+          echo "$GITHUB_REF_NAME: signed, and $commit passed on main"
 
   # Roadmap phase 23 (hardening): known vulnerabilities in the locked dependencies, secrets anywhere in the history,
   # and a software bill of materials kept with every run, so each release tag has its own.

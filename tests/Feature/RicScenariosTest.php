@@ -304,6 +304,11 @@ class RicScenariosTest extends TestCase
         $creation = app(RelationService::class)->create($fonds, 'creation', $council, ['from' => '1902'], $this->editor);
         app(RelationService::class)->addEvidence($creation, $minutes, $this->editor);
         $this->publish($this->holder, $fonds, $minutes, $council);
+        // Each title is its own rico:Title too, the original first, beside the language-tagged rico:title values.
+        $doc = $this->getJson(self::API.'/records/'.$fonds->id)->assertOk()->json();
+        $this->assertSame([['rico:Title', 'Riverside Parish Council records', 'en'], ['rico:Title', 'Rekords van die Riverside-gemeenteraad', 'af']],
+            array_map(fn ($t) => [$t['@type'], $t['rico:textualValue']['@value'], $t['rico:textualValue']['@language']], $doc['rico:hasOrHadTitle']));
+        $this->assertCount(2, $doc['rico:title']);
 
         $report = $this->importElsewhere($this->exported($this->holder, $fonds, $minutes, $council));
         $fondsThere = $this->there(RecordResource::class, 'Riverside Parish Council records');

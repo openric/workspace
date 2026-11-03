@@ -102,6 +102,11 @@ class JsonLd
         $out = $this->head($unit, $withContext);
         $out['rico:identifier'] = $unit->referenceCode() ?? $unit->identifier ?? $unit->description_identifier ?? $unit->id;
         $out += $this->strings('rico:title', $unit->namesOfType('authorised'));
+        // Each title as its own rico:Title as well, so a second title and a translation can be told apart: two language-tagged
+        // rico:title values cannot be taken as one title in two languages (Richard Williamson, RiC users list, 3 November 2026).
+        if ($titles = $this->appellations($unit, 'rico:Title')) {
+            $out['rico:hasOrHadTitle'] = $titles;
+        }
         if (str_ends_with($out['@type'], 'RecordSet')) {
             $out['rico:hasRecordSetType'] = ['@id' => $unit->level->iri, 'rdfs:label' => (string) $unit->level->label(['en', 'und'])];
         } elseif ($unit->level) {
@@ -306,6 +311,11 @@ class JsonLd
         }
         $names = $this->strings('rico:title', $rule->namesOfType('authorised'));
         $out += $names + ($names ? ['rico:name' => $names['rico:title']] : []);
+        // Each title as its own rico:Title as well, so a second title and a translation can be told apart: two language-tagged
+        // rico:title values cannot be taken as one title in two languages (Richard Williamson, RiC users list, 3 November 2026).
+        if ($titles = $this->appellations($rule, 'rico:Title')) {
+            $out['rico:hasOrHadTitle'] = $titles;
+        }
         if ($description = $this->text($rule, 'rule-description')) {
             $out['openricx:description'] = $description;
         }
@@ -362,6 +372,11 @@ class JsonLd
             $out['@context'] += self::CARRIER_TYPE_AS_IRI;
         }
         $out += $this->strings('rico:title', $instantiation->namesOfType('authorised'));
+        // Each title as its own rico:Title as well, so a second title and a translation can be told apart: two language-tagged
+        // rico:title values cannot be taken as one title in two languages (Richard Williamson, RiC users list, 3 November 2026).
+        if ($titles = $this->appellations($instantiation, 'rico:Title')) {
+            $out['rico:hasOrHadTitle'] = $titles;
+        }
         $file = $instantiation->files->firstWhere(fn ($f) => $f->use?->notation === 'master') ?? $instantiation->files->first();
         if ($file?->original_name) {
             $out['rico:identifier'] = $file->original_name;

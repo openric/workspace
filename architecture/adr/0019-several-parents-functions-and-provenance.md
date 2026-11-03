@@ -27,3 +27,13 @@ The Workspace declares eight OpenRiC profiles. Live data published before this r
 - `tests/Feature/RicScenariosTest.php`: the design review's scenario E (two record sets, each with its order, through the page, the API and an exchange), and the compatibility label.
 - `tests/Feature/GraphProfilesTest.php`: instantiations and functions against the Digital Object Linkage schemas.
 - `tests/Feature/ShaclGateTest.php`: the pinned shapes of eight profiles, the instantiation, function and activity documents among them.
+
+## Amendment of 3 November 2026: each title its own rico:Title
+
+Richard Williamson (EGAD) answered on the Records in Contexts users list on 3 November 2026 that two language-tagged `rico:title` values cannot be taken as one title in two languages, and recommended at least one `rico:Title` instance per title, so a translation can be told from a second title of equal standing. Dr Johan Pieterse chose the same day to do so.
+
+- Records, instantiations and rules publish each title as a `rico:Title` through `rico:hasOrHadTitle` (its domain in RiC-O 1.1 is exactly these three), with `rico:textualValue` in its language and the dates it was used, as agents and places already publish `rico:AgentName` and `rico:PlaceName`. The original comes first.
+- The language-tagged `rico:title` (and a rule's `rico:name`) stay beside them: the profiles' schemas expect them, and Richard's advice to consumers is to query both patterns.
+- RiC-O has no way to say that a title translates another. An extension term (`openricx:isTranslationOf`) is asked of the specification in [openric/spec#74](https://github.com/openric/spec/issues/74); until it is defined, the order is the only sign of the original.
+
+Evidence: `tests/Feature/RicScenariosTest.php` (scenario S5: a record titled in English and Afrikaans publishes two `rico:Title` nodes, the original first, beside its two `rico:title` values).
