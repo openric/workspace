@@ -146,3 +146,14 @@ The form audit of 31 October 2026 found data forms of later phases with no term,
 - **No terms** on accounts, roles, password, API keys, institution settings, the watermark, the theme, workflows, the report builder, imports and the clipboard: they describe nothing in RiC.
 
 The term partial takes `rico:`, `openricx:`, `skos:` and `dcterms:` terms. A field named only by an `aria-label` still has its term beside it.
+
+## Amendment of 3 November 2026: historical and abbreviated forms of name
+
+Croatia's eArhiv register keeps five types of name: main, parallel, alternative, historical and abbreviated (Arhivski vjesnik 68, 2025, doi:10.36506/av.68.3, pp. 70-74). The Workspace had four: authorised, parallel, standardised and other. On 30 October 2026 Dr Johan Pieterse asked for eArhiv's two to be added later, and on 3 November 2026 said go.
+
+- **Rows, narrower than "other".** Historical and abbreviated forms are rows of the name-type vocabulary with `skos:broader` other form of name: ISAAR(CPF) 5.1.5 and ISDIAH 5.1.4 count both among the other forms, so nothing is lost where an exchange knows only those four. The names form offers them, with their RiC note.
+- **Exported as other forms, with their own type where the format can say it.** ISAAR(CPF), ISDIAH, MODS and `openricx:otherName` give them among the other forms; EAC-CPF writes the type itself as `nameEntry/@localType`, and its import keeps it. In RiC-O each is a `rico:AgentName` or `rico:PlaceName` with its dates of use; the type waits for `openricx:hasNameType` (openric/spec#64).
+- **A form still edits names of its exact type.** Writing the other forms never makes a historical or abbreviated name an other form again, so a re-import of the same EAC-CPF file changes nothing.
+- Afrikaans labels are given to all six name types, for Dr Johan Pieterse to review.
+
+Evidence: `tests/Feature/ContextExchangeTest.php` (an authority record's historical and abbreviated forms through EAC-CPF out and back, unchanged, and as a new record elsewhere with their types).

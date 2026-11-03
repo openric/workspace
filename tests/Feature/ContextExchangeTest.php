@@ -14,6 +14,7 @@ use App\Accounts\AccountService;
 use App\Description\ActivityService;
 use App\Description\AgentService;
 use App\Description\DateService;
+use App\Description\NameService;
 use App\Description\RecordService;
 use App\Description\RepositoryService;
 use App\Exchange\EacF;
@@ -114,6 +115,35 @@ class ContextExchangeTest extends TestCase
         $this->assertTrue(Relation::where(['source_id' => $council->id, 'target_id' => $new->id])->whereHas('relationType', fn ($q) => $q->where('notation', 'group-subdivision'))->exists(),
             'the council is still the source');
         $this->assertTrue(Relation::where(['source_id' => $fonds->id, 'target_id' => $new->id])->exists());
+    }
+
+    public function test_historical_and_abbreviated_names_are_other_forms_that_keep_their_type_through_eac_cpf(): void
+    {
+        [, $council] = $this->relations();
+        $names = app(NameService::class);
+        $names->add($council, ['type' => 'historical', 'value' => 'Riverside Village Board', 'language' => 'en'], $this->editor);
+        $names->add($council, ['type' => 'abbreviated', 'value' => 'RTC', 'language' => 'en'], $this->editor);
+        $names->add($council, ['type' => 'other', 'value' => 'Town Council of Riverside', 'language' => 'en'], $this->editor);
+        $council = $council->fresh();
+
+        // Other forms of name wherever they are exported: ISAAR(CPF) 5.1.5, openricx:otherName, and EAC-CPF with the type itself.
+        $this->assertEqualsCanonicalizing(['Riverside Village Board', 'RTC', 'Town Council of Riverside'], $council->namesOfKind('other')->pluck('value')->all());
+        $this->assertSame(['Town Council of Riverside'], $council->namesOfType('other')->pluck('value')->all(), 'a form edits the exact type');
+        $xml = $this->actingAs($this->editor)->get("/agents/{$council->id}/eac-cpf")->assertOk()->getContent();
+        $this->assertMatchesRegularExpression('~<nameEntry localType="historical" xml:lang="en">\\s*<part>Riverside Village Board</part>~', $xml);
+        $this->assertMatchesRegularExpression('~<nameEntry localType="abbreviated" xml:lang="en">\\s*<part>RTC</part>~', $xml);
+
+        // The same file reads back unchanged: the historical and abbreviated forms are not made other forms again.
+        $import = $this->upload($xml, 'eac-cpf');
+        $this->assertEquals(['created' => 0, 'updated' => 0, 'unchanged' => 1, 'rejected' => 0], $import->report['actions']);
+        $this->assertSame(3, $council->names()->whereHas('nameType.broader')->count() + $council->names()->whereHas('nameType', fn ($q) => $q->where('iri', Vocab::NAME_TYPES.'other'))->count());
+
+        // As a new authority record elsewhere, each name keeps its type.
+        $copy = str_replace([$council->iri, 'Riverside Town Council'], ['https://elsewhere.example.org/agent/7', 'Hillside Town Council'], $xml);
+        $this->upload($copy, 'eac-cpf');
+        $new = Agent::whereIn('id', Name::where(['subject_table' => 'agents', 'value' => 'Hillside Town Council'])->select('subject_id'))->sole();
+        $this->assertEquals(['RTC' => 'abbreviated', 'Riverside Village Board' => 'historical', 'Town Council of Riverside' => 'other'],
+            $new->names()->with('nameType')->get()->reject(fn ($n) => $n->nameType->notation === 'authorised')->mapWithKeys(fn ($n) => [$n->value => $n->nameType->notation])->sortKeys()->all());
     }
 
     public function test_an_activity_is_valid_eac_f_and_reads_back_unchanged(): void

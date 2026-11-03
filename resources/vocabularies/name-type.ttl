@@ -3,6 +3,8 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 #
 # The type of a rico:Name (ADR 0006). RiC-O 1.1 has no property for it; openricx:hasNameType is proposed in openric/spec#64.
+# Historical and abbreviated forms, narrower than other forms, after Croatia's eArhiv (Arhivski vjesnik 68, 2025,
+# doi:10.36506/av.68.3), added on Dr Johan Pieterse's word of 3 November 2026.
 
 @prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
@@ -13,32 +15,47 @@ v: a skos:ConceptScheme ;
     dcterms:title "OpenRiC Workspace Name Types"@en ;
     dcterms:description "Which form of the name of an entity a name is."@en ;
     dcterms:issued "2026-10-20"^^xsd:date ;
+    dcterms:modified "2026-11-03"^^xsd:date ;
     skos:hasTopConcept v:authorised, v:parallel, v:standardised, v:other .
 
 v:authorised a skos:Concept ;
     skos:inScheme v: ;
     skos:topConceptOf v: ;
-    skos:prefLabel "Authorised form of name"@en ;
+    skos:prefLabel "Authorised form of name"@en, "Gemagtigde vorm van naam"@af ;
     skos:scopeNote "ISAAR(CPF) 5.1.2, ISDIAH 5.1.2, ISAD(G) 3.1.2 (title, exported as rico:Title). Proposed export: openricx:hasNameType (openric/spec#64)."@en ;
     skos:definition "The standardised form of the name, one in each language; for a unit of description, its title."@en .
 
 v:parallel a skos:Concept ;
     skos:inScheme v: ;
     skos:topConceptOf v: ;
-    skos:prefLabel "Parallel form of name"@en ;
+    skos:prefLabel "Parallel form of name"@en, "Parallelle vorm van naam"@af ;
     skos:scopeNote "ISAAR(CPF) 5.1.3, ISDIAH 5.1.3. Proposed export: openricx:hasNameType (openric/spec#64)."@en ;
     skos:definition "The authorised form of name in another language or script."@en .
 
 v:standardised a skos:Concept ;
     skos:inScheme v: ;
     skos:topConceptOf v: ;
-    skos:prefLabel "Standardised form of name by other rules"@en ;
+    skos:prefLabel "Standardised form of name by other rules"@en, "Gestandaardiseerde vorm van naam volgens ander reëls"@af ;
     skos:scopeNote "ISAAR(CPF) 5.1.4. Proposed export: openricx:hasNameType (openric/spec#64)."@en ;
     skos:definition "The name as another set of rules forms it."@en .
 
 v:other a skos:Concept ;
     skos:inScheme v: ;
     skos:topConceptOf v: ;
-    skos:prefLabel "Other form of name"@en ;
+    skos:prefLabel "Other form of name"@en, "Ander vorm van naam"@af ;
     skos:scopeNote "ISAAR(CPF) 5.1.5, ISDIAH 5.1.4. Proposed export: openricx:hasNameType (openric/spec#64)."@en ;
     skos:definition "Any other name by which the entity is or was known, such as an abbreviation or an earlier name."@en .
+
+v:historical a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:other ;
+    skos:prefLabel "Historical form of name"@en, "Historiese vorm van naam"@af ;
+    skos:scopeNote "ISAAR(CPF) 5.1.5, ISDIAH 5.1.4, as one of the other forms; Croatia's eArhiv keeps it as its own type. Exported wherever other forms are, and in EAC-CPF as its localType; its dates of use go on rico:usedFromDate and rico:usedToDate. Proposed export: openricx:hasNameType (openric/spec#64)."@en ;
+    skos:definition "A name by which the entity was known before, no longer in use."@en .
+
+v:abbreviated a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:other ;
+    skos:prefLabel "Abbreviated form of name"@en, "Afgekorte vorm van naam"@af ;
+    skos:scopeNote "ISAAR(CPF) 5.1.5, ISDIAH 5.1.4, as one of the other forms; Croatia's eArhiv keeps it as its own type. Exported wherever other forms are, and in EAC-CPF as its localType. Proposed export: openricx:hasNameType (openric/spec#64)."@en ;
+    skos:definition "A shortened form of the name, such as an acronym or initials."@en .

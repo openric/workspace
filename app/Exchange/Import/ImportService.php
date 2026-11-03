@@ -631,6 +631,12 @@ class ImportService
                 }
             }
         }
+        // A name of a narrower type than its element's (a historical or abbreviated form) is given that type.
+        foreach ($draft->nameTypes as $typed) {
+            Name::where(['subject_table' => $entity->getTable(), 'subject_id' => $entity->getKey(), 'value' => $typed['value'], 'language' => $typed['language']])
+                ->whereHas('nameType', fn ($q) => $q->where('iri', Vocab::NAME_TYPES.'other'))->first()
+                ?->update(['name_type_id' => Concept::where('iri', Vocab::NAME_TYPES.$typed['type'])->value('id')]);
+        }
         // The dates a name was used, on the name of that text and language (roadmap phase 23b).
         foreach ($draft->nameDates as $dated) {
             $name = Name::where(['subject_table' => $entity->getTable(), 'subject_id' => $entity->getKey(), 'value' => $dated['value']])

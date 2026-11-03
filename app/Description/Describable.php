@@ -36,6 +36,15 @@ trait Describable
         return $this->names->filter(fn (Name $n) => $n->nameType->iri === Vocab::NAME_TYPES.$type)->values();
     }
 
+    /**
+     * The names of one name type and of the types narrower than it, such as a historical or abbreviated form, which are
+     * other forms of name too: what an export gives for the type. A form edits names of its exact type (namesOfType).
+     */
+    public function namesOfKind(string $type): Collection
+    {
+        return $this->names->filter(fn (Name $n) => $n->nameType->iri === Vocab::NAME_TYPES.$type || $n->nameType->broader?->iri === Vocab::NAME_TYPES.$type)->values();
+    }
+
     /** The values of one element: names for a name element, description values for the rest. */
     public function valuesOf(Concept $element): Collection
     {

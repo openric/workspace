@@ -97,7 +97,10 @@ class NameService
                 $this->delete($name);
             }
         }
-        foreach (array_diff($lines, $existing->pluck('value')->all()) as $line) {
+        // A line held already as a narrower type (a historical or abbreviated form among the other forms) stays that name.
+        $narrower = Name::where(['subject_table' => $subject->getTable(), 'subject_id' => $subject->getKey(), 'language' => $language])
+            ->whereHas('nameType.broader', fn ($q) => $q->where('id', $this->type($type)->id))->pluck('value')->all();
+        foreach (array_diff($lines, $existing->pluck('value')->all(), $narrower) as $line) {
             $this->create($subject, $this->type($type), $this->value($line), $language);
         }
     }

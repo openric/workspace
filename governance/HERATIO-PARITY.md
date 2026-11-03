@@ -210,6 +210,7 @@ Asked for by Dr Johan Pieterse on 28 October 2026: each Workspace screen has a p
 | `entity_type_id` | Type of entity | Same |
 | `authorized_form_of_name` | Authorised form(s) of name | Same |
 | `other_names[parallel, standardized, other]` | Parallel, standardised and other forms of name | Same |
+| none | Historical and abbreviated forms of name, kinds of other form (Croatia's eArhiv) | Workspace only, from v0.0.105 |
 | `corporate_body_identifiers` | Identifiers | Modelled |
 | `dates_of_existence` | Dates of existence, with existence, birth and death dates | Same |
 | `history`, `places`, `legal_status`, `functions`, `mandates`, `internal_structures`, `general_context` | The ISAAR(CPF) elements of the same names | Same |

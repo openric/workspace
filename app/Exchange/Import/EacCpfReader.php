@@ -92,6 +92,10 @@ class EacCpfReader
                     $nameLanguage = $this->lang($entry) ?? $language;
                     $existing = $draft->values[$nameLanguage][$element] ?? null;
                     $draft->value($nameLanguage, $element, $existing === null ? $name : $existing."\n".$name);
+                    // A historical or abbreviated form comes in among the other forms and keeps its own type.
+                    if (in_array($entry->getAttribute('localType'), ['historical', 'abbreviated'], true)) {
+                        $draft->nameTypes[] = ['value' => $name, 'language' => $nameLanguage, 'type' => $entry->getAttribute('localType')];
+                    }
                     foreach (['authorizedForm', 'alternativeForm', 'preferredForm'] as $form) {
                         foreach ($this->children($entry, $form) as $f) {
                             $this->mark($f);

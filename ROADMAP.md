@@ -293,6 +293,7 @@ Progress:
 - **v0.0.102** (the rest of phase 14, Dr Johan Pieterse's choices 1A and 2A of 3 November 2026): the length of sound and video read by ffprobe at upload and once for files already held, so their IIIF canvases carry it; sound and video given viewing copies as images are (an MP3 and its waveform, an H.264 MP4 and a frame), so the public can hear and see them; IIIF asked for a licence on the presentation-validator's schema (IIIF/presentation-validator#222), the tests checking the requirements by hand meanwhile (ADR 0014).
 - **v0.0.103**: each title of a record, instantiation or rule also published as its own `rico:Title`, the original first, as Richard Williamson (EGAD) advised on the RiC users list (ADR 0019); faster releases: the test database given the bundled vocabularies once a run, not once a test, and a release tag checked for its signature and its commit's passing tests rather than tested again.
 - **v0.0.104**: the deploy's CI check accepts a commit whose tests passed on main though its release tag's own run skipped them, as v0.0.103 made it; v0.0.103 was deployed with the corrected check run from the development copy.
+- **v0.0.105**: historical and abbreviated forms of name after Croatia's eArhiv, as kinds of other form: offered in the names form, exported wherever other forms are and in EAC-CPF with their own type, kept on import (ADR 0006).
 
 **15. Preservation connectors (WS-019).**
 - Copy PREMIS events from `ahg-preservation`: ingest, fixity, migration.

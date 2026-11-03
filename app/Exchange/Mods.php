@@ -58,7 +58,7 @@ class Mods
             $x->endElement();
         }
         foreach (['parallel' => 'translated', 'other' => 'alternative'] as $nameType => $titleType) {
-            foreach ($unit->namesOfType($nameType)->filter(fn ($n) => $view->visible($n)) as $name) {
+            foreach ($unit->namesOfKind($nameType)->filter(fn ($n) => $view->visible($n)) as $name) {
                 $x->startElement('titleInfo');
                 $x->writeAttribute('type', $titleType);
                 $x->writeAttribute('xml:lang', $name->language);

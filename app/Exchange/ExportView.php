@@ -76,7 +76,7 @@ class ExportView
         $element = Elements::nameType($notation) ? null : Vocab::element($notation);
         $values = $element
             ? $entity->descriptionValues->filter(fn ($v) => $v->element->iri === $element)
-            : $entity->namesOfType(Elements::nameType($notation));
+            : $entity->namesOfKind(Elements::nameType($notation));
         $values = $values->filter(fn ($v) => $this->visible($v));
         $language ??= $this->languageOf($entity);
         $chosen = $values->first(fn ($v) => $v->language === $language) ?? $values->first(fn ($v) => $v->is_original) ?? $values->first();
@@ -102,7 +102,7 @@ class ExportView
     {
         // A name element (a parallel or other name, an alternate title) reads the entity's names of its type.
         if ($type = Elements::nameType($notation)) {
-            return $this->redacted($entity, $notation, $entity->namesOfType($type)->filter(fn ($n) => $this->visible($n))->sortBy(fn ($n) => [! $n->is_original, $n->language])->values());
+            return $this->redacted($entity, $notation, $entity->namesOfKind($type)->filter(fn ($n) => $this->visible($n))->sortBy(fn ($n) => [! $n->is_original, $n->language])->values());
         }
         $element = Vocab::element($notation);
 

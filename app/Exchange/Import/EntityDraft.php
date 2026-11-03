@@ -64,6 +64,9 @@ final class EntityDraft
      */
     public array $relations = [];
 
+    /** Names of a type narrower than the element they came in by (a historical form among the other forms), by text and language. */
+    public array $nameTypes = [];
+
     /** The dates its names were used (rico:usedFromDate, rico:usedToDate), by the name's text and language. */
     public array $nameDates = [];
 

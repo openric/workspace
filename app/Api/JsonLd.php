@@ -186,7 +186,7 @@ class JsonLd
         $out = $this->head($agent, $withContext);
         $out += $this->strings('rico:name', $agent->namesOfType('authorised'));
         $out += $this->strings('openricx:alternativeForm', $agent->namesOfType('parallel')->merge($agent->namesOfType('standardised')));
-        $out += $this->strings('openricx:otherName', $agent->namesOfType('other'));
+        $out += $this->strings('openricx:otherName', $agent->namesOfKind('other'));
         if ($agent->identifier) {
             $out['rico:identifier'] = $agent->identifier;
         }
@@ -222,7 +222,7 @@ class JsonLd
         // A repository is a rico:CorporateBody; this says it is one that holds records here, so it is read back as one.
         $out['openric:localType'] = 'repository';
         $out += $this->strings('openricx:alternativeForm', $repository->namesOfType('parallel'));
-        $out += $this->strings('openricx:otherName', $repository->namesOfType('other'));
+        $out += $this->strings('openricx:otherName', $repository->namesOfKind('other'));
         if ($repository->identifier) {
             $out['rico:identifier'] = $repository->identifier;
         }
@@ -270,7 +270,7 @@ class JsonLd
         $out = $this->head($place, $withContext);
         $out += $this->strings('rico:name', $place->namesOfType('authorised'));
         $out += $this->strings('openricx:alternativeForm', $place->namesOfType('parallel'));
-        $out += $this->strings('openricx:otherName', $place->namesOfType('other'));
+        $out += $this->strings('openricx:otherName', $place->namesOfKind('other'));
         if ($names = $this->appellations($place, 'rico:PlaceName')) {
             $out['rico:hasOrHadPlaceName'] = $names;
         }
