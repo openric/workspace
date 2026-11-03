@@ -146,6 +146,43 @@ class IiifTest extends TestCase
         $this->get(route('iiif.manifest', $this->letter->id))->assertNotFound();
     }
 
+    public function test_sound_and_video_get_viewing_copies_and_are_painted_with_the_length_ffprobe_read(): void
+    {
+        // Two and a half seconds of silence: 8,000 one-byte samples a second, mono.
+        $samples = 20000;
+        $wav = 'RIFF'.pack('V', 36 + $samples).'WAVEfmt '.pack('VvvVVvv', 16, 1, 1, 8000, 8000, 1, 8).'data'.pack('V', $samples).str_repeat("\x80", $samples);
+        $path = tempnam(sys_get_temp_dir(), 'sound');
+        file_put_contents($path, $wav);
+        $sound = app(InstantiationService::class)->upload($this->letter, $path, 'interview.wav', 'en', 'Recording of the interview', null, 'online', $this->editor);
+        // Two seconds of video, 640 by 360, made by ffmpeg.
+        $video = tempnam(sys_get_temp_dir(), 'video').'.mp4';
+        exec('ffmpeg -v error -f lavfi -i testsrc=duration=2:size=640x360:rate=10 -pix_fmt yuv420p '.escapeshellarg($video), $out, $code);
+        $this->assertSame(0, $code, 'ffmpeg made the test video');
+        $film = app(InstantiationService::class)->upload($this->letter, $video, 'opening.mp4', 'en', 'Film of the opening', null, 'online', $this->editor);
+        foreach ([$sound, $film] as $instantiation) {
+            app(PublicationService::class)->apply($instantiation, 'publish', null, false, $this->editor);
+        }
+
+        // Made like an image's: a reference copy the public may receive, and a thumbnail (Heratio's MediaDerivativeService).
+        $types = fn ($i) => $i->fresh()->files()->with('use')->get()->mapWithKeys(fn ($f) => [$f->use->notation => $f->mime_type])->all();
+        $this->assertSame(['master' => 'audio/x-wav', 'reference' => 'audio/mpeg', 'thumbnail' => 'image/png'], collect($types($sound))->sortKeys()->all());
+        $this->assertSame(['master' => 'video/mp4', 'reference' => 'video/mp4', 'thumbnail' => 'image/jpeg'], collect($types($film))->sortKeys()->all());
+        $master = $sound->file('master');
+        $this->assertSame(2.5, $master->fresh()->duration_seconds, 'read at upload');
+
+        // The public manifest paints both, each with its length, from the reference copy.
+        $canvases = fn () => collect($this->get(route('iiif.manifest', $this->letter->id))->assertOk()->json('items'))->filter(fn ($c) => isset($c['duration']))->values();
+        $bodies = $canvases()->map(fn ($c) => [$c['items'][0]['items'][0]['body']['type'], $c['items'][0]['items'][0]['body']['format'], (float) $c['duration']])->all();
+        $this->assertSame([['Sound', 'audio/mpeg', 2.5], ['Video', 'video/mp4', 2.0]], $bodies);
+        $this->assertArrayHasKey('thumbnail', $canvases()->first());
+
+        // Held before lengths were read, with no length in its embedded metadata: left out, until the one-off run reads it.
+        $sound->files()->update(['duration_seconds' => null, 'embedded_metadata' => null]);
+        $this->assertCount(1, $canvases());
+        $this->artisan('workspace:read-durations')->expectsOutputToContain('2 sound and video files given their length')->assertSuccessful();
+        $this->assertCount(2, $canvases());
+    }
+
     public function test_a_record_with_parts_is_a_collection_and_the_institution_has_one_of_everything(): void
     {
         $collection = $this->get(route('iiif.collection', $this->fonds->id))->assertOk()->json();

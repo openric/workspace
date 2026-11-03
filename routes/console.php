@@ -3,8 +3,11 @@
 use App\AccessRequests\AccessRequestService;
 use App\Description\AgreementService;
 use App\Description\WorkflowSlaService;
+use App\Files\FileStore;
+use App\Files\MediaDuration;
 use App\Jurisdiction\ExportPermits;
 use App\Jurisdiction\Naz;
+use App\Models\DigitalFile;
 use App\Privacy\Registers;
 use App\Reports\ReportDelivery;
 use App\Reports\UsageService;
@@ -102,6 +105,18 @@ Artisan::command('workspace:research-impact', function (Impact $impact) {
     $this->info($impact->scanAll().' signs of impact found.');
 })->purpose('Ask OpenAlex and Crossref Event Data who cites, mentions or reuses the published outputs of research projects');
 Schedule::command('workspace:research-impact')->dailyAt('04:30')->timezone(config('workspace.timezone'))->withoutOverlapping();
+Artisan::command('workspace:read-durations', function (MediaDuration $durations, FileStore $store) {
+    [$read, $unread] = [0, 0];
+    DigitalFile::whereNull('duration_seconds')->where(fn ($q) => $q->where('mime_type', 'like', 'audio/%')->orWhere('mime_type', 'like', 'video/%'))
+        ->chunkById(100, function ($files) use ($durations, $store, &$read, &$unread) {
+            foreach ($files as $file) {
+                $seconds = $durations->read($store->path($file->storage_path));
+                $seconds ? $file->update(['duration_seconds' => $seconds]) : null;
+                $seconds ? $read++ : $unread++;
+            }
+        });
+    $this->info("$read sound and video files given their length; $unread could not be read and stay out of IIIF manifests.");
+})->purpose('Read the length of the sound and video files held before lengths were read at upload, for their IIIF canvases');
 Artisan::command('workspace:declassify', function (Clearances $clearances) {
     $this->info($clearances->declassifyDue().' records declassified.');
 })->purpose('Declassify the records whose declassification date has come, and record the clearances that have ended');

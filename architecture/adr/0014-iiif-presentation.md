@@ -108,3 +108,14 @@ Evidence: `tests/Feature/IiifServicesTest.php`. It covers:
 - The probe, access and token services, with and without the sign-in, a token honoured and a false one refused, the file served only to who may have it, and no token posted to a non-web origin.
 - A layout saved with a foreign manifest and canvas dropped, set as the default, and opened again, but not by another account.
 - Validation of a published record and a draft, the batch summary and the dashboard.
+
+## Amendment of 3 November 2026: the two choices of 14a, decided
+
+On 30 October 2026 Dr Johan Pieterse kept two of 14a's choices for later. On 3 November 2026 he decided them.
+
+- **1A: the length of sound and video is read by ffprobe.** At upload, with the embedded metadata, ffprobe reads the length of a sound or video file from its container and keeps it with the file; `workspace:read-durations` does the same once for the files held before. A canvas takes the length ffprobe read, else the one exiftool read. A file neither can read is still left out of the manifest, and the validation page names it, rather than given Heratio's placeholder of one second. CI installs ffmpeg for ffprobe.
+- **2A: IIIF is asked for a licence on the schema.** IIIF's presentation-validator still declares no licence. Another project had asked on 26 September 2026 ([IIIF/presentation-validator#222](https://github.com/IIIF/presentation-validator/issues/222)); the Workspace's request was added there on 3 November 2026 rather than opened again. Until a licence is stated, the tests keep checking the Presentation 3 requirements by hand.
+
+- **Viewing copies of sound and video, as of images.** Testing 1A found that the public receives no master files (the Public role has no read-master) while only images had reference copies, so a sound or video available online reached the public neither as a file nor in a manifest. Dr Johan Pieterse chose on 3 November 2026 to "make like images": as Heratio's `MediaDerivativeService` does, a sound gets an MP3 at 128 kbit/s as its reference copy and its waveform as its thumbnail; a video an H.264 MP4 of at most 480 lines with AAC sound, and a frame of it as its thumbnail. ffmpeg makes them in the background job that makes an image's copies, and `workspace:copies` makes them for the masters held before. A canvas paints the reference copy, with the master's length where known, since an MP3's own length is padded.
+
+Evidence: `tests/Feature/IiifTest.php` (a sound and a video given their copies at upload, both painted in the public manifest with their lengths; a file without a length left out until `workspace:read-durations` reads it).

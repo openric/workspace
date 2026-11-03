@@ -85,6 +85,9 @@ class FileStore
             return ['reference' => [...$this->keep($institutionId, $masterPath, $sha), 'sha256' => $sha, 'size_bytes' => $size, 'mime_type' => $mime,
                 'width' => null, 'height' => null, 'scanned_with' => null, 'scanned_at' => null]];
         }
+        if (MediaDuration::timed($mime)) {
+            return $this->mediaCopies($institutionId, $masterPath, $mime);
+        }
         if (! str_starts_with($mime, 'image/') && $mime !== 'application/pdf') {
             return [];
         }
@@ -134,6 +137,44 @@ class FileStore
                 @unlink($page.'.png');
             }
         }
+    }
+
+    /**
+     * The copies of a sound or video for viewing, as Heratio's MediaDerivativeService makes them (Dr Johan Pieterse,
+     * 3 November 2026: "make like images"): a sound's reference copy an MP3 at 128 kbit/s and its thumbnail its waveform;
+     * a video's reference copy an H.264 MP4 at 480 lines with AAC sound, and its thumbnail a frame from it. ffmpeg runs in
+     * its own process with a time limit, so a file it cannot read costs only the copies.
+     */
+    private function mediaCopies(string $institutionId, string $masterPath, string $mime): array
+    {
+        $video = str_starts_with($mime, 'video/');
+        $make = [
+            'reference' => [$video ? 'video/mp4' : 'audio/mpeg', $video
+                ? ['-vf', 'scale=-2:min(480\\,ih)', '-c:v', 'libx264', '-preset', 'fast', '-crf', '23', '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '128k', '-movflags', '+faststart', '-f', 'mp4']
+                : ['-vn', '-codec:a', 'libmp3lame', '-b:a', '128k', '-f', 'mp3']],
+            'thumbnail' => [$video ? 'image/jpeg' : 'image/png', $video
+                ? ['-vf', 'thumbnail,scale='.self::COPIES['thumbnail'].':-2', '-frames:v', '1', '-q:v', '3', '-f', 'image2']
+                : ['-filter_complex', 'showwavespic=s='.self::COPIES['thumbnail'].'x60:colors=#555555', '-frames:v', '1', '-f', 'image2']],
+        ];
+        $copies = [];
+        foreach ($make as $use => [$type, $arguments]) {
+            $temp = tempnam(sys_get_temp_dir(), 'wsm');
+            $process = new Process(['ffmpeg', '-y', '-v', 'error', '-i', $masterPath, ...$arguments, $temp]);
+            $process->setTimeout(3600)->run();
+            if (! $process->isSuccessful() || filesize($temp) === 0) {
+                @unlink($temp);
+                Log::warning('no copy made of a sound or video', ['use' => $use, 'mime' => $mime, 'error' => mb_substr($process->getErrorOutput(), 0, 300)]);
+
+                continue;
+            }
+            $sha = hash_file('sha256', $temp);
+            $copies[$use] = [...$this->keep($institutionId, $temp, $sha), 'sha256' => $sha, 'size_bytes' => (int) filesize($temp), 'mime_type' => $type,
+                ...($use === 'thumbnail' ? $this->dimensions($temp) : ['width' => null, 'height' => null, 'duration_seconds' => app(MediaDuration::class)->read($temp)]),
+                'scanned_with' => null, 'scanned_at' => null];
+            unlink($temp);
+        }
+
+        return $copies;
     }
 
     public function path(string $storagePath): string

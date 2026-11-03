@@ -14,6 +14,7 @@ namespace App\Jobs;
 
 use App\Description\InstantiationService;
 use App\Files\EmbeddedMetadata;
+use App\Files\MediaDuration;
 use App\Models\BackgroundJob;
 use App\Models\Instantiation;
 use App\Proposals\ProposalService;
@@ -36,8 +37,10 @@ class ReadEmbeddedMetadata extends TrackedJob
         $instantiation = Instantiation::findOrFail($this->instantiationId);
         $master = $instantiation->file('master') ?? throw new \RuntimeException('the instantiation has no master');
         $reader = app(EmbeddedMetadata::class);
-        $raw = $reader->extract(app(InstantiationService::class)->path($master));
-        $master->update(['embedded_metadata' => $raw]);
+        $path = app(InstantiationService::class)->path($master);
+        $raw = $reader->extract($path);
+        // A sound or video file's length, for its IIIF canvas (phase 14, choice 1A).
+        $master->update(['embedded_metadata' => $raw] + (MediaDuration::timed($master->mime_type) ? ['duration_seconds' => app(MediaDuration::class)->read($path)] : []));
         $values = $reader->normalise($raw);
         $from = fn (string $field) => ['evidence' => 'Embedded in '.$master->original_name.' as '.$values[$field]['tag'].'.'];
 

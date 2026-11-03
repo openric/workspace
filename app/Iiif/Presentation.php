@@ -292,7 +292,8 @@ class Presentation
         }
         $canvas = ['id' => $id, 'type' => 'Canvas', 'label' => $label];
         if ($this->timed($file)) {
-            $duration = $this->duration($files);
+            // The master's length is the true one (an MP3 copy is padded), and is no secret where the master itself is withheld.
+            $duration = $this->duration($instantiation->files->keyBy(fn ($f) => $f->use->notation));
             if ($duration === null) {
                 return null; // a timed canvas needs its duration; the file is still offered to take away
             }
@@ -331,9 +332,14 @@ class Presentation
         return $size ? [$size[0], $size[1]] : [null, null];
     }
 
-    /** Seconds, from what exiftool read from the file itself. */
+    /** Seconds: as ffprobe read them, else from what exiftool read from the file itself. */
     private function duration(Collection $files): ?float
     {
+        foreach (['master', 'reference'] as $use) {
+            if ($files->get($use)?->duration_seconds > 0) {
+                return $files->get($use)->duration_seconds;
+            }
+        }
         foreach (['master', 'reference'] as $use) {
             foreach ((array) ($files->get($use)?->embedded_metadata ?? []) as $tag => $value) {
                 if (! str_ends_with((string) $tag, 'Duration')) {

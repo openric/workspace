@@ -110,7 +110,7 @@ class Validation
         $store = app(FileStore::class);
         $missing = $painted->filter(fn ($f) => ! is_file($store->path($f->storage_path)));
         $noSize = $images->filter(fn ($f) => ! ($f->width && $f->height) && ! @getimagesize($store->path($f->storage_path)));
-        $noDuration = $timed->filter(fn ($f) => ! collect((array) ($f->embedded_metadata ?? []))->keys()->contains(fn ($k) => str_ends_with((string) $k, 'Duration')));
+        $noDuration = $timed->filter(fn ($f) => ! ($f->duration_seconds > 0) && ! collect((array) ($f->embedded_metadata ?? []))->keys()->contains(fn ($k) => str_ends_with((string) $k, 'Duration')));
         $rights = app(RightsService::class)->of($unit)->filter(fn ($r) => $r->inForce())
             ->contains(fn ($r) => collect([$r->licence?->iri, $r->statement?->iri])->filter()->contains(fn ($iri) => preg_match('~^https?://(creativecommons\.org/(licenses|publicdomain)/|rightsstatements\.org/vocab/)~', $iri)));
         $holder = $unit->repository ?? collect($unit->ancestors())->first()?->repository;

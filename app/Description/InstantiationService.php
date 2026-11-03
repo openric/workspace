@@ -172,7 +172,7 @@ class InstantiationService
     private function addCopies(Instantiation $instantiation, string $originalName, array $copies): void
     {
         foreach ($copies as $use => $copy) {
-            $extension = $copy['mime_type'] === FileStore::MODEL ? 'glb' : 'jpg';
+            $extension = ['model/gltf-binary' => 'glb', 'audio/mpeg' => 'mp3', 'video/mp4' => 'mp4', 'image/png' => 'png'][$copy['mime_type']] ?? 'jpg';
             $this->addFile($instantiation, $use, pathinfo($originalName, PATHINFO_FILENAME).'-'.$use.'.'.$extension, $copy);
         }
     }
