@@ -38,6 +38,11 @@
         @csrf
         <button type="submit">{{ __('New password link') }}</button>
     </form>
+    <p>{{ __('Two-factor sign-in') }}: {{ app(\App\Accounts\TwoFactor::class)->enabled($account) ? __('on') : __('off') }}@foreach($account->identities()->with('provider')->get() as $identity) · {{ __('signs in with :provider', ['provider' => $identity->provider->label]) }}@endforeach</p>
+    @if(app(\App\Accounts\TwoFactor::class)->enabled($account))
+        <form method="post" action="{{ route('accounts.two-factor.reset', $account) }}">@csrf<button type="submit">{{ __('Turn two-factor sign-in off for this account') }}</button>
+            <small>{{ __('For someone who lost both their phone and their recovery codes. They set it up again at the next sign-in if it is required.') }}</small></form>
+    @endif
     @if($account->isDisabled())
         <form method="post" action="{{ route('accounts.enable', $account) }}">@csrf<button type="submit">{{ __('Enable user') }}</button></form>
     @else

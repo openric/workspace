@@ -5,7 +5,7 @@
 @section('content')
     <h1>{{ $account->name }}</h1>
     <p>{{ $account->email }}</p>
-    <p><a href="{{ route('account.edit') }}">{{ __('Edit profile') }}</a> · <a href="{{ route('password.edit') }}">{{ __('Change password') }}</a> · <a href="{{ route('account.access') }}">{{ __('What you may do') }}</a> · <a href="{{ route('account.api-keys') }}">{{ __('API keys') }}</a></p>
+    <p><a href="{{ route('account.edit') }}">{{ __('Edit profile') }}</a> · <a href="{{ route('password.edit') }}">{{ __('Change password') }}</a> · <a href="{{ route('two-factor.show') }}">{{ __('Two-factor sign-in') }}</a> · <a href="{{ route('account.access') }}">{{ __('What you may do') }}</a> · <a href="{{ route('account.api-keys') }}">{{ __('API keys') }}</a></p>
 
     <h2>{{ __('Your roles') }}</h2>
     @forelse($account->roles as $role)<p style="margin: .2rem 0">{{ $role->name() }}</p>@empty<p>{{ __('None of your own.') }}</p>@endforelse

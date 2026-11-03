@@ -80,3 +80,42 @@ Changed from Heratio: no metrics library or shared store. Heratio's HTTP latency
   - encrypted fields encrypted again under a new application key.
 - `tests/Feature/InstantiationTest.php` unchanged: `workspace:fixity` still records a failure on the file and exits with failure.
 - `tests/Feature/AccessMatrixTest.php`: schedules, runs and failures refused to another institution's administrator.
+
+## Decision (12b: single sign-on and two-factor sign-in), 3 November 2026
+
+**Single sign-on by OpenID Connect.** After AtoM's `arOidcPlugin`, which Heratio never carried (its login page only names it). It uses the same client library, `jumbojett/openid-connect-php` (Apache 2.0).
+
+- **Providers.** Each institution keeps its identity providers as rows: Microsoft Entra ID, Google Workspace, Keycloak or any other OpenID Connect provider. Each row holds the button's name, the issuer, the client ID and secret (the secret encrypted, and kept out of the audit log), the scopes, how a sign-in finds its account, which claim holds roles and which role each value gives, and whether an unknown sign-in may ask for an account. The sign-in page shows a "Sign in with" button for each active provider of the institution it is for.
+- **The protocol.** The authorisation code flow with PKCE (S256). Everything that checks the provider's answer is the library's: the state, the ID token's signature against the keys the provider publishes, its issuer, audience, expiry and nonce. The library accepts a token that carries no nonce or no expiry; the Workspace does not.
+- **Fitted to Laravel.** The library is used through a subclass. Its redirect comes back to the controller instead of calling `exit`. Its state, nonce and code verifier live in Laravel's session. It fetches through Laravel's HTTP client, so the tests play the provider end to end.
+- **Finding the account.** By the provider's subject, once linked. Before that, where the provider is set to match by email, by an email the provider says it has verified; an unverified email never matches.
+- **An unknown sign-in.** On Dr Johan Pieterse's choice, a sign-in that finds no account becomes a request for one. An administrator approves or rejects it under the existing requests, as Heratio's registration does, and approving it links the identity to the new account. AtoM made the account at once. A provider can also refuse unknown sign-ins altogether.
+- **Roles.** Roles from a claim (AtoM's `set_groups_from_attributes`) are added at each sign-in as the provider maps them, and never taken away, so a role given in the Workspace is not lost when the provider omits it.
+- **Refusals.** A disabled account is refused, and so is an account of another institution.
+
+**Two-factor sign-in.** After Heratio's `ahg-security-clearance` TotpService and MfaPolicyService.
+
+- **The codes.** Time-based one-time passwords, RFC 6238: HMAC-SHA1, 30-second steps, six digits, one step either side accepted. They are worked in the Workspace rather than through Heratio's Google2FA package, and checked against the RFC's own test values. A code is never accepted twice, as RFC 6238 5.2 asks.
+- **Setting it up.** The secret is set up from a QR code and kept encrypted. It comes into force only when a code from it is confirmed.
+- **Recovery codes.** Ten, of ten characters, each good once, kept only as SHA-256 hashes, and shown once.
+- **Signing in.** With two-factor on, the password alone does not sign in: the code must follow within ten minutes.
+- **Turning it off.** The account turns it off with a current code; an administrator turns it off for someone who lost their phone and their codes.
+- **The policy.** It is the institution's: off, optional, required for administrators (accounts that may manage the institution, its accounts or its roles), or required for every account. Days of grace run from when the policy changed or the account was made. After them, an account that must have it is sent to set it up before it can do anything else.
+- **Signing in through the provider.** A sign-in through the institution's identity provider uses that provider's own second factor, and is not asked for the Workspace's.
+
+### Not carried in 12b
+
+- WebAuthn security keys and one-time codes by email (Heratio's WebAuthnService and OtpService). The authenticator app and the identity provider's own second factor cover the policy; WebAuthn can follow when an institution asks for it.
+- Signing out at the provider, and refresh tokens. A Workspace session is its own, and ends when the person signs out of the Workspace.
+- Heratio's per-tenant global default policy. Each institution sets its own.
+
+### Evidence (12b)
+
+- `tests/Feature/SignOnTest.php`. The test plays the identity provider: discovery, a published RSA key and signed ID tokens. It covers:
+  - an unknown sign-in becoming one request, approved, then signing in with the role its claim maps to;
+  - a verified email linking an existing account, and an unverified one not;
+  - refusals: a token signed with a key the provider does not publish, a token with no nonce, a callback with the wrong state, and a disabled account;
+  - TOTP checked against RFC 6238's test values, a code refused the second time, a recovery code working once, and the second factor expiring after ten minutes;
+  - the policy sending an administrator to set it up after the grace days, and not a reader, and not an account signed in through the provider;
+  - an administrator's reset.
+- `tests/Feature/AccessMatrixTest.php`: identity providers refused to another institution's administrator.

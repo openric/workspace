@@ -20,11 +20,12 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 #[Fillable(['institution_id', 'name', 'email', 'password', 'disabled_at', 'interface_language', 'email_bounced_at'])]
-#[Hidden(['password', 'remember_token'])]
+#[Hidden(['password', 'remember_token', 'two_factor_secret', 'two_factor_recovery_codes'])]
 class User extends Authenticatable implements HasLocalePreference
 {
     use Audited, HasUuids, Notifiable;
@@ -36,6 +37,10 @@ class User extends Authenticatable implements HasLocalePreference
             'disabled_at' => 'immutable_datetime',
             'email_bounced_at' => 'immutable_datetime',
             'password' => 'hashed',
+            // Two-factor sign-in (phase 12b): the secret encrypted, the recovery codes as hashes.
+            'two_factor_secret' => 'encrypted',
+            'two_factor_confirmed_at' => 'immutable_datetime',
+            'two_factor_recovery_codes' => 'array',
         ];
     }
 
@@ -48,6 +53,12 @@ class User extends Authenticatable implements HasLocalePreference
     public function institution(): BelongsTo
     {
         return $this->belongsTo(Institution::class);
+    }
+
+    /** The provider identities it signs in with (phase 12b). */
+    public function identities(): HasMany
+    {
+        return $this->hasMany(UserIdentity::class);
     }
 
     public function roles(): BelongsToMany

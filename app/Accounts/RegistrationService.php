@@ -48,6 +48,8 @@ class RegistrationService
             // The password is the hash the visitor's choice became; the hashed cast keeps it as it is.
             $account = $this->accounts->create(Institution::findOrFail($request->institution_id), $request->name, $request->email, $request->getRawOriginal('password'), $actor);
             $this->accounts->setRoles($account, $roleIds, $actor);
+            // A request made by signing in with a provider: the account signs in with it from now on (phase 12b).
+            app(SingleSignOn::class)->linkApproved($request, $account);
             $request->update(['approved_at' => now(), 'decided_by_id' => $actor->id, 'account_id' => $account->id]);
             AuditLog::record(Vocab::action('update'), $request, ['decision' => null], ['decision' => 'approved', 'account_id' => $account->id], $actor);
 

@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['institution_id', 'name', 'email', 'password', 'reason', 'approved_at', 'rejected_at', 'decided_by_id', 'account_id'])]
+#[Fillable(['institution_id', 'name', 'email', 'password', 'reason', 'approved_at', 'rejected_at', 'decided_by_id', 'account_id', 'provider_id', 'subject'])]
 #[Hidden(['password'])]
 class RegistrationRequest extends Model
 {

@@ -84,6 +84,7 @@
             'Admin' => [
                 'accounts.index' => [__('Users'), $may('manage-accounts'), 'accounts.*'],
                 'email.index' => [__('Email'), $may('manage-accounts'), 'email.*'],
+                'sign-in-settings.index' => [__('Sign-in settings'), $may('manage-accounts'), 'sign-in-settings.*'],
                 'roles.index' => [__('Roles'), $may('manage-roles'), 'roles.*'],
                 'audit' => [__('Audit log'), $may('view-audit-log'), 'audit'],
                 'search.statistics' => [__('Search statistics'), $may('view-audit-log'), 'search.statistics'],

@@ -114,7 +114,7 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-rights-holder-manage` | 5215 | V0.1 candidate | Covered |  | `ahgRightsHolderManagePlugin` | Rights holders are agents, linked by rico:hasOrHadIntellectualPropertyRightsHolder (v0.0.57) |
 | `ahg-scan` | 7065 | later: V1.0+ | Partial | 22a | `ahgScanPlugin` | Watched folders, Heratio's sidecars, BagIt intake and the scan API, from v0.0.106 (ADR 0020); not its sector routing, rights enforcement or web archiving |
 | `ahg-search` | 7659 | V0.1 candidate | Partial | 17 | `ahgSearchPlugin` | Full-text search with facets, staff search and statistics (v0.0.60, v0.0.61, ADR 0009); search by meaning in phase 17 |
-| `ahg-security-clearance` | 9206 | later: jurisdiction | Partial | 18c, 12 | `ahgSecurityClearancePlugin` | Levels, compartments, clearances, classified records with inheritance and declassification, requests for access, all in the one read check, from v0.0.101 (ADR 0016); two-factor sign-in in phase 12 |
+| `ahg-security-clearance` | 9206 | later: jurisdiction | Covered | 18c, 12b | `ahgSecurityClearancePlugin` | Levels, compartments, clearances, classified records with inheritance and declassification, requests for access, all in the one read check, from v0.0.101 (ADR 0016); TOTP two-factor sign-in and its policy from v0.0.111 (ADR 0021); WebAuthn and codes by email not carried |
 | `ahg-semantic-search` | 29749 | out: AI (V2+) | Planned | 17 (last) | `ahgSemanticSearchPlugin` |  |
 | `ahg-settings` | 16789 | V0.1 candidate | Covered |  | `ahgSettingsPlugin` | Institution settings, written fresh |
 | `ahg-share-link` | 2659 | later: V1.0+ | Covered | 19a | `ahgTimeLimitedShareLinkPlugin` | Share links that never open more than their issuer may read, with their log and prune (ADR 0017); clearance with 18c |
@@ -126,7 +126,7 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-term-taxonomy` | 6138 | V0.1 candidate | Covered |  | `ahgTermTaxonomyPlugin` | SKOS vocabularies: bundled, local, imported, matched |
 | `ahg-theme-b5` | 4574 | V0.1 candidate | Covered |  | `ahgThemeB5Plugin`, `ahgUiOverridesPlugin` | Interface written fresh |
 | `ahg-translation` | 5726 | out: AI (V2+) | Planned | 17 (last) | `ahgTranslationPlugin` |  |
-| `ahg-user-manage` | 5651 | V0.1 candidate | Covered | 12 | `ahgUserManagePlugin`, `ahgUserRegistrationPlugin`, `arOidcPlugin` | Accounts, registration, roles; written fresh; OIDC single sign-on in phase 12 |
+| `ahg-user-manage` | 5651 | V0.1 candidate | Covered | 12b | `ahgUserManagePlugin`, `ahgUserRegistrationPlugin`, `arOidcPlugin` | Accounts, registration, roles; written fresh; OpenID Connect single sign-on after AtoM's `arOidcPlugin`, which Heratio did not carry, and TOTP two-factor sign-in from v0.0.111 (ADR 0021) |
 | `ahg-vendor` | 6980 | later: V1.0+ | Covered | 22d | `ahgVendorPlugin` | Vendors on authority records, services, transactions with records, condition, history and documents, from v0.0.109 (ADR 0020); contracts not carried |
 | `ahg-version-control` | 3142 | later: V1.0+ | Covered | 22b | `ahgVersionControlPlugin` | Versions of descriptions and authority records, compared and restored, from v0.0.107 (ADR 0020) |
 | `ahg-workflow` | 7830 | later: V1.0+ | Covered | 10 | `ahgWorkflowPlugin` | Workflows, steps, tasks, pool, assignment, decisions, team work, history and bulk operations from v0.0.82 (10a); queues, service levels, overdue notices, publish gates, readiness and the diagram from v0.0.84 (10b); Spectrum procedures in phase 21 |
@@ -763,6 +763,25 @@ Added on 2 November 2026 with 18e.
 | none | Each pack switched on or off in the settings | Workspace only |
 
 : The National Archives of Zimbabwe and the CDPA, field by field
+
+### Single sign-on and two-factor sign-in (`arOidcPlugin`, `ahg-security-clearance`)
+
+Added on 3 November 2026 with 12b.
+
+| AtoM or Heratio setting | Workspace | Status |
+|---|---|---|
+| `arOidcPlugin` `providers`: `url`, `client_id`, `client_secret`, `scopes` | A sign-in provider per row, per institution: issuer, client ID, client secret encrypted, scopes | Same, from v0.0.111 |
+| `user_matching_source` (oidc-email, oidc-username) | By verified email, or by the provider's subject | Changed: an email matches only when the provider has verified it |
+| `auto_create_atom_user` | A request for an account, approved by an administrator | Changed, on Dr Johan Pieterse's choice |
+| `set_groups_from_attributes`, `roles_source`, `roles_path`, `user_groups` | The claim holding roles, and which role each value gives; roles added, never taken away | Same |
+| `primary_provider_name`, `provider_query_param_name` | A button for each active provider | Modelled |
+| `send_oidc_logout`, `logout_redirect_url`, `enable_refresh_token_use` | none | Not carried in 12b |
+| `server_cert` | The host's certificate store | Modelled |
+| TotpService: secret, QR, confirm, verify with a window of one step, ten recovery codes | The same; RFC 6238 worked in the Workspace; a code never accepted twice; recovery codes as hashes | Same |
+| MfaPolicyService: off, optional, required for administrators, required; grace days | The same, per institution, as vocabulary rows | Same |
+| WebAuthnService, OtpService (codes by email) | none | Not carried in 12b |
+
+: Single sign-on and two-factor sign-in, field by field
 
 ### Fixity and operations (`ahg-integrity`, `ahg-observability`)
 

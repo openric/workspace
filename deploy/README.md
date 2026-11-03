@@ -38,6 +38,12 @@ Admin, Operations shows how the installation is doing and what needs attention: 
 
 A monitor reads the same figures as Prometheus text at `/metrics`, sending `Authorization: Bearer <WORKSPACE_METRICS_TOKEN>`; `WORKSPACE_METRICS_IPS` (comma-separated addresses or ranges) limits where it may come from. With no token set, `/metrics` is not served. Alert on `openric_workspace_scheduler_heartbeat_age_seconds` over 300, `openric_workspace_fixity_open_failures` above 0 and `openric_workspace_audit_signing_key_present` at 0.
 
+## Single sign-on and two-factor sign-in
+
+Under Admin, Sign-in settings, an institution adds its identity providers (roadmap phase 12b): Microsoft Entra ID, Google Workspace, Keycloak or any OpenID Connect provider. Register the Workspace at the provider as a web application with the redirect address the settings page shows for the provider (`https://<host>/sign-in/provider/<id>/callback`), and give the provider's issuer, client ID and client secret. The sign-in page then shows a "Sign in with" button for it. A sign-in that matches no account becomes a request for one under Users, Requests; approving it links the account to the provider. The Workspace must reach the provider's discovery, key and token addresses over https.
+
+The same page sets who must sign in with a second factor: off, optional, required for administrators, or required, with days of grace. An account sets up its authenticator app under Your profile, Two-factor sign-in, and keeps ten recovery codes; an administrator can turn it off on the account's page for someone who lost both.
+
 ## Runbooks
 
 `deploy/runbooks/updating.md` (taking the live instance to a new release) and `deploy/runbooks/rotating-keys.md` (the application key, the database password, API keys, webhook secrets and the other secrets in `.env`; the audit signing key is never rotated).

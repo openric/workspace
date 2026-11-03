@@ -90,10 +90,12 @@ use App\Http\Controllers\SessionController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\ShareLinkController;
 use App\Http\Controllers\ShopController;
+use App\Http\Controllers\SignOnController;
 use App\Http\Controllers\StorageController;
 use App\Http\Controllers\StudioController;
 use App\Http\Controllers\SubmissionController;
 use App\Http\Controllers\TeachingController;
+use App\Http\Controllers\TwoFactorController;
 use App\Http\Controllers\VendorController;
 use App\Http\Controllers\VersionController;
 use App\Http\Controllers\VocabularyController;
@@ -260,6 +262,11 @@ Route::middleware('guest')->group(function () {
     Route::post('/sign-in', [SessionController::class, 'store'])->middleware('throttle:sign-in');
     Route::get('/set-password/{token}', [PasswordController::class, 'createFromLink'])->name('password.set');
     Route::post('/set-password', [PasswordController::class, 'storeFromLink'])->middleware('throttle:sign-in')->name('password.store');
+    // Single sign-on through the institution's identity provider, and the second factor after a password (roadmap phase 12b).
+    Route::get('/sign-in/provider/{provider}', [SignOnController::class, 'start'])->whereUuid('provider')->middleware('throttle:sign-in')->name('sso.start');
+    Route::get('/sign-in/provider/{provider}/callback', [SignOnController::class, 'callback'])->whereUuid('provider')->middleware('throttle:sign-in')->name('sso.callback');
+    Route::get('/sign-in/two-factor', [SignOnController::class, 'challenge'])->name('two-factor.challenge');
+    Route::post('/sign-in/two-factor', [SignOnController::class, 'verify'])->middleware('throttle:sign-in')->name('two-factor.verify');
 });
 
 Route::middleware(['auth', 'active'])->group(function () {
@@ -276,6 +283,12 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::get('/account/password', [PasswordController::class, 'edit'])->name('password.edit');
     Route::post('/account/password', [PasswordController::class, 'update'])->name('password.update');
     Route::post('/sign-out', [SessionController::class, 'destroy'])->name('sign-out');
+    // The account's own two-factor sign-in (roadmap phase 12b).
+    Route::get('/account/two-factor', [TwoFactorController::class, 'show'])->name('two-factor.show');
+    Route::post('/account/two-factor', [TwoFactorController::class, 'begin'])->name('two-factor.begin');
+    Route::post('/account/two-factor/confirm', [TwoFactorController::class, 'confirm'])->middleware('throttle:sign-in')->name('two-factor.confirm');
+    Route::post('/account/two-factor/recovery-codes', [TwoFactorController::class, 'regenerate'])->middleware('throttle:sign-in')->name('two-factor.regenerate');
+    Route::post('/account/two-factor/off', [TwoFactorController::class, 'disable'])->middleware('throttle:sign-in')->name('two-factor.disable');
     Route::get('/audit', [AuditLogController::class, 'index'])
         ->middleware('can:'.Vocab::permission('view-audit-log'))
         ->name('audit');
@@ -1266,6 +1279,12 @@ Route::middleware(['auth', 'active'])->group(function () {
         // Sent mail and the addresses held after a bounce (roadmap phase 7).
         Route::get('/email', [EmailController::class, 'index'])->name('email.index');
         Route::post('/email/held/{user}/clear', [EmailController::class, 'clear'])->whereUuid('user')->name('email.clear');
+        // Sign-in settings: identity providers and the two-factor policy (roadmap phase 12b).
+        Route::get('/sign-in-settings', [TwoFactorController::class, 'settings'])->name('sign-in-settings.index');
+        Route::post('/sign-in-settings/two-factor', [TwoFactorController::class, 'savePolicy'])->name('sign-in-settings.policy');
+        Route::post('/sign-in-settings/providers', [TwoFactorController::class, 'saveProvider'])->name('sign-in-settings.providers.store');
+        Route::post('/sign-in-settings/providers/{provider}', [TwoFactorController::class, 'saveProvider'])->whereUuid('provider')->name('sign-in-settings.providers.update');
+        Route::post('/accounts/{account}/two-factor/reset', [TwoFactorController::class, 'reset'])->whereUuid('account')->name('accounts.two-factor.reset');
     });
 
     Route::middleware('can:'.Vocab::permission('manage-accounts'))->prefix('accounts')->name('accounts.')->group(function () {

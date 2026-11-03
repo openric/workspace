@@ -15,6 +15,7 @@
         "php": "^8.3",
         "bacon/bacon-qr-code": "^3.0",
         "dompdf/dompdf": "^3.1",
+        "jumbojett/openid-connect-php": "^1.0",
         "laravel/framework": "^13.17",
         "laravel/tinker": "^3.0",
         "ml/json-ld": "^1.2",

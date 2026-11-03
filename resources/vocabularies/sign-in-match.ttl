@@ -1,0 +1,30 @@
+# OpenRiC Workspace - OpenRiC Workspace Sign-in Matching.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# How a single sign-on finds the Workspace account it is for (AtoM's arOidcPlugin user_matching_source).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/sign-in-match/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Sign-in Matching"@en ;
+    dcterms:description "How a single sign-on finds the Workspace account it is for (AtoM's arOidcPlugin user_matching_source)."@en ;
+    dcterms:issued "2026-11-03"^^xsd:date ;
+    skos:hasTopConcept v:email, v:subject .
+
+v:email a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "By verified email"@en, "Volgens geverifieerde e-pos"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's sign-in settings, as Heratio's ahg-user-manage and ahg-security-clearance keep them."@en ;
+    skos:definition "The provider's verified email address is the account's email address."@en .
+
+v:subject a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "By subject"@en, "Volgens subjek"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's sign-in settings, as Heratio's ahg-user-manage and ahg-security-clearance keep them."@en ;
+    skos:definition "The provider's subject identifier, linked to the account once, after an administrator approved it."@en .

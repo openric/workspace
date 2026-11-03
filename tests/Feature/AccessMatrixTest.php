@@ -54,6 +54,7 @@ use App\Models\Researcher;
 use App\Models\ResearcherType;
 use App\Models\ResearchNotification;
 use App\Models\RetrievalSchedule;
+use App\Models\SignInProvider;
 use App\Models\User;
 use App\Models\WatchFolder;
 use App\Proposals\ProposalService;
@@ -344,6 +345,9 @@ class AccessMatrixTest extends TestCase
             app(EmailCaptures::class)->capture($admin, UploadedFile::fake()->createWithContent('minutes.eml', file_get_contents(base_path('tests/Fixtures/mail/minutes.eml')))),
             app(Declarations::class)->request($admin, $fonds), app(Declarations::class)->flagVital($admin, $fonds, 'Proves ownership', 365),
             app(Compliance::class)->create($admin, ['framework' => 'iso-30300', 'reference' => 'CA-1', 'title' => 'Annual'])]);
+        // Phase 12b: an identity provider.
+        $make('sign-in provider', fn () => SignInProvider::create(['institution_id' => $institution->id, 'label' => 'Staff', 'issuer_url' => 'https://idp.example.org',
+            'client_id' => 'workspace', 'client_secret' => 'secret', 'scopes' => ['openid'], 'match_id' => Concept::where('iri', Vocab::BASE.'sign-in-match/subject')->value('id')]));
         // Phase 12a: a fixity schedule, a run of it and a failure it found.
         $make('fixity', function () use ($institution, $admin) {
             $schedule = app(Fixity::class)->saveSchedule($institution, ['name' => 'Weekly', 'scope' => 'all', 'frequency' => 'weekly', 'is_enabled' => 1], $admin);

@@ -6,8 +6,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Accounts\TwoFactor;
 use App\Audit\AuditLog;
+use App\Models\SignInProvider;
 use App\Models\User;
+use App\Support\HostInstitution;
 use App\Support\Vocab;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -17,9 +20,12 @@ use Illuminate\View\View;
 
 class SessionController extends Controller
 {
-    public function create(): View
+    public function create(Request $request): View
     {
-        return view('auth.sign-in');
+        // The institution's identity providers, each a "Sign in with" button (phase 12b).
+        $institution = HostInstitution::for($request);
+
+        return view('auth.sign-in', ['providers' => $institution ? SignInProvider::where(['institution_id' => $institution->id, 'is_active' => true])->orderBy('label')->get() : collect()]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -38,6 +44,14 @@ class SessionController extends Controller
         }
 
         $request->session()->regenerate();
+        // With two-factor sign-in on, the password is half: the code comes next, and only then is the account signed in (phase 12b).
+        $user = $request->user();
+        if (app(TwoFactor::class)->enabled($user)) {
+            Auth::logout();
+            $request->session()->put('two_factor.pending', ['id' => $user->id, 'at' => now()->getTimestamp()]);
+
+            return redirect()->route('two-factor.challenge');
+        }
         AuditLog::record(Vocab::action('sign-in'), $request->user());
 
         // The public catalogue, with the staff menus; a page asked for before signing in comes first.

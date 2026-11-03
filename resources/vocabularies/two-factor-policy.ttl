@@ -1,0 +1,44 @@
+# OpenRiC Workspace - OpenRiC Workspace Two-factor Policies.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Who must sign in with a second factor (Heratio's MFA policy enforcement).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/two-factor-policy/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Two-factor Policies"@en ;
+    dcterms:description "Who must sign in with a second factor (Heratio's MFA policy enforcement)."@en ;
+    dcterms:issued "2026-11-03"^^xsd:date ;
+    skos:hasTopConcept v:off, v:optional, v:required-for-administrators, v:required .
+
+v:off a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Off"@en, "Af"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's sign-in settings, as Heratio's ahg-user-manage and ahg-security-clearance keep them."@en ;
+    skos:definition "Nobody is asked for a second factor."@en .
+
+v:optional a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Optional"@en, "Opsioneel"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's sign-in settings, as Heratio's ahg-user-manage and ahg-security-clearance keep them."@en ;
+    skos:definition "Each account may set one up."@en .
+
+v:required-for-administrators a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Required for administrators"@en, "Verpligtend vir administrateurs"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's sign-in settings, as Heratio's ahg-user-manage and ahg-security-clearance keep them."@en ;
+    skos:definition "Accounts that may manage the institution, its accounts or its roles must set one up."@en .
+
+v:required a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Required"@en, "Verpligtend"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's sign-in settings, as Heratio's ahg-user-manage and ahg-security-clearance keep them."@en ;
+    skos:definition "Every account must set one up."@en .
