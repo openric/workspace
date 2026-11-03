@@ -26,6 +26,19 @@
     @if($mayCommit && ($report['units'] ?? []) !== [])
         <form method="post" action="{{ route('imports.commit', $import) }}">@csrf<button type="submit">{{ __('Import now') }}</button></form>
     @endif
+    @if($import->options['mapping'] ?? null)<p class="meta">{{ __('Its headings were mapped to the columns the import reads.') }} <a href="{{ route('imports.mapping', $import) }}">{{ __('See the mapping') }}</a></p>
+    @elseif(! $done && in_array($import->format, ['csv', 'authority-csv', 'repository-csv'], true))<p class="meta"><a href="{{ route('imports.mapping', $import) }}">{{ __('Map its columns') }}</a> {{ __('if its headings are not AtoM\'s.') }}</p>@endif
+    @if($import->options['classification_level_id'] ?? null)<p class="meta">{{ __('What it creates is classified at :level.', ['level' => \App\Models\SecurityLevel::find($import->options['classification_level_id'])?->name]) }}</p>@endif
+    @if($done)
+        <p><a href="{{ route('imports.bag', $import) }}">{{ __('Download as a BagIt bag') }}</a> <span class="meta">{{ __('The file as uploaded, the files it kept and what became of each entry, with their SHA-256.') }}</span></p>
+        @if($undo = $import->options['undo'] ?? null)
+            <p><strong>{{ __('Undone on :date: :count deleted.', ['date' => \Illuminate\Support\Carbon::parse($import->options['undone_at'])->format('Y-m-d H:i'), 'count' => $undo['deleted']]) }}</strong></p>
+            @if($undo['kept'])<p>{{ __('Kept') }}:</p><ul>@foreach($undo['kept'] as $k)<li>{{ $k['title'] ?? $k['id'] }}: {{ $k['why'] }}</li>@endforeach</ul>@endif
+        @else
+            <form method="post" action="{{ route('imports.undo', $import) }}" onsubmit="return confirm('{{ __('Delete what this import created? What anyone changed since is kept.') }}')">@csrf
+                <button type="submit">{{ __('Undo this import') }}</button> <span class="meta">{{ __('Deletes what it created, unless changed since; what it updated stays.') }}</span></form>
+        @endif
+    @endif
     @if($rec = $report['reconciliation'] ?? null)
         <h2>{{ __('Reconciliation') }}</h2>
         <p>{{ $rec['holds'] ? __('Reconciled.') : __('Does not reconcile; look at the units below.') }}

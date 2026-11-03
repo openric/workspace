@@ -5,6 +5,7 @@ use App\Description\AgreementService;
 use App\Description\WorkflowSlaService;
 use App\Files\FileStore;
 use App\Files\MediaDuration;
+use App\Ingest\WatchFolders;
 use App\Jurisdiction\ExportPermits;
 use App\Jurisdiction\Naz;
 use App\Models\DigitalFile;
@@ -125,6 +126,10 @@ Artisan::command('workspace:jurisdiction-daily', function (ExportPermits $permit
     $this->info($permits->expireOverdue().' export permits expired, '.$naz->advancePermits().' National Archives of Zimbabwe research permits moved on, '.Registers::expireLicences().' data controller licences expired.');
 })->purpose('Expire export permits and data controller licences whose period has ended, and start or end research permits of the National Archives of Zimbabwe');
 Schedule::command('workspace:jurisdiction-daily')->dailyAt('00:25')->timezone(config('workspace.timezone'))->withoutOverlapping();
+Artisan::command('workspace:watch-folders', function (WatchFolders $folders) {
+    $this->info($folders->runAll().' files taken in or refused.');
+})->purpose('Take in what was dropped in each enabled watched folder: tables and descriptions imported, bags checked, other files made records');
+Schedule::command('workspace:watch-folders')->everyMinute()->withoutOverlapping();
 Artisan::command('workspace:research-digests', function (Notifications $notifications) {
     $this->info($notifications->digests().' digests of research notices sent.');
 })->purpose('Mail each researcher the notices held for their hourly, daily or weekly digest');

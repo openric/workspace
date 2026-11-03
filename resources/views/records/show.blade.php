@@ -47,7 +47,8 @@
            · <form method="post" action="{{ route('records.calculate-dates', $record) }}" style="display: inline">@csrf<button type="submit" style="margin-top: 0; padding: .1rem .5rem">{{ __('Calculate dates from the units inside') }}</button></form>@endif</p>
     <p>@if($canUpdate)<a href="{{ route('records.move-form', $record) }}">{{ __('Move') }}</a>@endif
        @if($canUpdate && $canCreateInside) · @endif
-       @if($canCreateInside)<a href="{{ route('records.create', ['parent' => $record->id]) }}">{{ __('Add a unit inside') }}</a> · <a href="{{ route('imports.create', ['parent' => $record->id]) }}">{{ __('Import units into it') }}</a>@endif</p>
+       @if($canCreateInside)<a href="{{ route('records.create', ['parent' => $record->id]) }}">{{ __('Add a unit inside') }}</a> · <a href="{{ route('imports.create', ['parent' => $record->id]) }}">{{ __('Import units into it') }}</a> · <a href="{{ route('imports.grid', ['parent' => $record->id]) }}">{{ __('Enter units in a grid') }}</a>@endif
+       · <a href="{{ route('labels.print', ['kind' => 'records', 'ids' => [$record->id]]) }}">{{ __('Label') }}</a> · <a href="{{ route('labels.print', ['kind' => 'records', 'ids' => [$record->id], 'inside' => 1]) }}">{{ __('Labels for what is inside') }}</a></p>
     @if($canUpdate || auth()->user()->may('translate', 'description', $record))
         @include('description._actions', ['subject' => $record, 'editRoute' => 'records.edit', 'required' => 'title'])
     @endif

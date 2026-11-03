@@ -12,6 +12,8 @@ namespace App\Http\Controllers;
 
 use App\Description\Bcp47;
 use App\Exchange\Import\ImportService;
+use App\Ingest\ColumnMapping;
+use App\Ingest\IngestFile;
 use App\Jobs\JobsService;
 use App\Jobs\RunImport;
 use App\Models\Agent;
@@ -20,6 +22,7 @@ use App\Models\Concept;
 use App\Models\Import;
 use App\Models\RecordResource;
 use App\Models\Repository;
+use App\Rights\Clearances;
 use App\Support\Vocab;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -45,6 +48,7 @@ class ImportController extends Controller
         $parent = $request->query('parent') ? $this->unit($request, (string) $request->query('parent')) : null;
 
         return view('imports.create', ['parent' => $parent, 'formats' => $this->formats($request), 'repositories' => $this->repositories($request),
+            'securityLevels' => app(Clearances::class)->levels($request->user()->institution_id)->where('is_active', true)->where('level', '>', 0)->values(),
             'agentTypes' => Concept::choices(Agent::TYPES)->get()->filter(fn ($t) => in_array($t->notation, ['person', 'family', 'corporate-body'], true)),
             'levels' => Concept::choices(self::LEVELS)->get()]);
     }
@@ -64,12 +68,23 @@ class ImportController extends Controller
             'create_terms' => ['nullable', 'boolean'],
             'match_identifier' => ['nullable', 'boolean'],
             'default_level' => ['nullable', Rule::in(Concept::choices(self::LEVELS)->pluck('notation')->all())],
+            'classification_level' => ['nullable', 'uuid'],
         ]);
         $describes = ImportService::permission($data['format']) === 'description';
         $repository = $describes ? ($this->repositories($request)->firstWhere('id', $data['repository']) ?? abort(404)) : null;
         $parent = $describes && isset($data['parent']) ? $this->unit($request, $data['parent']) : null;
-        $content = (string) file_get_contents($request->file('file')->getRealPath());
-        $sha256 = hash('sha256', $content);
+        $sha256 = hash_file('sha256', $request->file('file')->getRealPath());
+        $bundle = null;
+        // A spreadsheet, or a ZIP of a CSV or spreadsheet and the files its rows name (phase 22a).
+        if (in_array($data['format'], ['csv', 'authority-csv', 'repository-csv'], true)) {
+            try {
+                ['content' => $content, 'bundle' => $bundle] = app(IngestFile::class)->read($user->institution_id, $request->file('file')->getRealPath(), $request->file('file')->getClientOriginalName());
+            } catch (\InvalidArgumentException $e) {
+                return back()->withInput()->withErrors(['file' => ucfirst($e->getMessage()).'.']);
+            }
+        } else {
+            $content = (string) file_get_contents($request->file('file')->getRealPath());
+        }
         // EAC-CPF and EAC-F come one record to a file: a ZIP of them is kept as the list of its XML files (phase 11a).
         if (in_array($data['format'], ['eac-cpf', 'eac-f'], true) && str_starts_with($content, "PK\x03\x04")) {
             try {
@@ -87,8 +102,13 @@ class ImportController extends Controller
             'source' => trim((string) ($data['source'] ?? '')) ?: $name, 'file_name' => $name, 'file_sha256' => $sha256,
             'content' => $content, 'language' => $data['language'], 'repository_id' => $repository?->id, 'parent_id' => $parent?->id,
             'options' => ['agent_type' => $data['agent_type'] ?? null, 'create_terms' => (bool) ($data['create_terms'] ?? false),
-                'match_identifier' => (bool) ($data['match_identifier'] ?? false), 'default_level' => $describes ? ($data['default_level'] ?? null) : null],
+                'match_identifier' => (bool) ($data['match_identifier'] ?? false), 'default_level' => $describes ? ($data['default_level'] ?? null) : null,
+                'bundle' => $bundle, 'classification_level_id' => $describes ? ($data['classification_level'] ?? null) : null],
         ]);
+        // Headings the format does not read are mapped first (PSIS's map step); the dry run follows.
+        if (ColumnMapping::needed($data['format'], $content)) {
+            return redirect()->route('imports.mapping', $import)->with('status', __('Some headings are not columns this import reads. Say what each one is, then the dry run follows.'));
+        }
         $job = $this->queue($import, false);
 
         return redirect()->route('imports.show', $import)->with('status', $job->active()
@@ -113,6 +133,9 @@ class ImportController extends Controller
         if ($import->committed_at !== null) {
             return redirect()->route('imports.show', $import)->withErrors(['import' => 'This file was imported already. Upload it again to import it again.']);
         }
+        if (ColumnMapping::needed($import->format, $import->content)) {
+            return redirect()->route('imports.mapping', $import);
+        }
         if (app(JobsService::class)->latestFor($import)?->active()) {
             return redirect()->route('imports.show', $import)->withErrors(['import' => __('This file is being read already; wait until it is done.')]);
         }
@@ -126,7 +149,7 @@ class ImportController extends Controller
     }
 
     /** The dry run or the import as a background job (roadmap phase 5); where the queue runs at once, it is done on return. */
-    private function queue(Import $import, bool $commit): BackgroundJob
+    public function queue(Import $import, bool $commit): BackgroundJob
     {
         $job = app(JobsService::class)->create($import->institution_id, 'import', __($commit ? 'Import of :name' : 'Dry run of :name', ['name' => $import->file_name]), $import->user, $import);
         RunImport::dispatch($job->id, $import->id, $commit);

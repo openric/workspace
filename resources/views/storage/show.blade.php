@@ -12,7 +12,7 @@
         <br><strong>{{ __('Container type') }}:</strong> {{ $container->containerType ? $container->containerType->anyLabel(['en']).' ('.$container->containerType->vocabulary->title.')' : 'not set' }} @include('description._ric', ['term' => 'openricx:hasContainerType'])
         @if($barcode)<br><strong>{{ __('Barcode') }}:</strong> {{ $barcode }} @include('description._ric', ['term' => 'rico:Identifier'])@endif
         <br><strong>{{ __('Kept in') }}:</strong> {{ $path ?? __('nowhere yet') }} @include('description._ric', ['term' => 'rico:hasOrHadLocation'])
-        <br><a href="{{ route('containers.box-list', $container) }}">{{ __('Box list to print') }}</a></p>
+        <br><a href="{{ route('containers.box-list', $container) }}">{{ __('Box list to print') }}</a> · <a href="{{ route('labels.print', ['kind' => 'containers', 'ids' => [$container->id]]) }}">{{ __('Label') }}</a></p>
     @if($canUpdate)
         @include('description._actions', ['subject' => $container, 'editRoute' => 'containers.edit', 'required' => 'container-name'])
         <h2>{{ __('Move') }}</h2>

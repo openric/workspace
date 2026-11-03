@@ -1,0 +1,44 @@
+# OpenRiC Workspace - OpenRiC Workspace Intake Outcomes.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What became of a file a watched folder or the scan API took in (Heratio's scan inbox status).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/intake-outcome/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Intake Outcomes"@en ;
+    dcterms:description "What became of a file a watched folder or the scan API took in (Heratio's scan inbox status)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:imported, v:awaiting-review, v:item-created, v:failed .
+
+v:imported a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Imported"@en, "Ingevoer"@af ;
+    skos:scopeNote "Not a RiC-O term: what became of a file the Workspace took in, as Heratio's ahg-scan and PSIS's ahgIngestPlugin keep it."@en ;
+    skos:definition "A table or description file imported, its dry run having found nothing to refuse."@en .
+
+v:awaiting-review a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Waiting for review"@en, "Wag vir hersiening"@af ;
+    skos:scopeNote "Not a RiC-O term: what became of a file the Workspace took in, as Heratio's ahg-scan and PSIS's ahgIngestPlugin keep it."@en ;
+    skos:definition "A table or description file read in a dry run that found something to look at; import it from its report."@en .
+
+v:item-created a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Record made"@en, "Rekord gemaak"@af ;
+    skos:scopeNote "Not a RiC-O term: what became of a file the Workspace took in, as Heratio's ahg-scan and PSIS's ahgIngestPlugin keep it."@en ;
+    skos:definition "A single file kept as the instantiation of a new record."@en .
+
+v:failed a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Failed"@en, "Misluk"@af ;
+    skos:scopeNote "Not a RiC-O term: what became of a file the Workspace took in, as Heratio's ahg-scan and PSIS's ahgIngestPlugin keep it."@en ;
+    skos:definition "Not taken in; the reason is kept with it."@en .

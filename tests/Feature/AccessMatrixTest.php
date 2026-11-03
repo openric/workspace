@@ -34,9 +34,11 @@ use App\Description\WorkflowSlaService;
 use App\Iiif\CuratedCollections;
 use App\Jurisdiction\ExportPermits;
 use App\Jurisdiction\NarssaTransfers;
+use App\Labels\Labels;
 use App\Models\Concept;
 use App\Models\Container;
 use App\Models\Feedback;
+use App\Models\Import;
 use App\Models\Institution;
 use App\Models\ReadingRoom;
 use App\Models\ReadingRoomSeat;
@@ -46,6 +48,7 @@ use App\Models\ResearcherType;
 use App\Models\ResearchNotification;
 use App\Models\RetrievalSchedule;
 use App\Models\User;
+use App\Models\WatchFolder;
 use App\Proposals\ProposalService;
 use App\Relations\RelationService;
 use App\Reports\ReportBuilder;
@@ -332,6 +335,12 @@ class AccessMatrixTest extends TestCase
             app(EmailCaptures::class)->capture($admin, UploadedFile::fake()->createWithContent('minutes.eml', file_get_contents(base_path('tests/Fixtures/mail/minutes.eml')))),
             app(Declarations::class)->request($admin, $fonds), app(Declarations::class)->flagVital($admin, $fonds, 'Proves ownership', 365),
             app(Compliance::class)->create($admin, ['framework' => 'iso-30300', 'reference' => 'CA-1', 'title' => 'Annual'])]);
+        // Phase 22a: an import, a watched folder and a label template.
+        $make('intake', fn () => [Import::create(['institution_id' => $institution->id, 'user_id' => $admin->id, 'format' => 'csv', 'source' => 'matrix', 'file_name' => 'matrix.csv',
+            'file_sha256' => hash('sha256', 'legacyId,title'), 'content' => "legacyId,title\nm1,Matrix\n", 'language' => 'en', 'repository_id' => $holder->id, 'options' => []]),
+            WatchFolder::create(['institution_id' => $institution->id, 'label' => 'Scanner', 'path' => 'scanner', 'repository_id' => $holder->id, 'user_id' => $admin->id,
+                'level_id' => Concept::where('iri', self::LEVEL.'item')->value('id')]),
+            app(Labels::class)->templates($institution->id)->first()]);
         // Phase 18d: a NARSSA transfer, an export permit and its document.
         $make('jurisdiction', function () use ($admin, $letter, $institution) {
             $institution->jurisdictionPacks()->attach(Concept::choices(Vocab::BASE.'jurisdiction-pack/')->pluck('id'));

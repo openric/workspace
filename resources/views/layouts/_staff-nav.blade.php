@@ -85,6 +85,8 @@
                 'roles.index' => [__('Roles'), $may('manage-roles'), 'roles.*'],
                 'audit' => [__('Audit log'), $may('view-audit-log'), 'audit'],
                 'search.statistics' => [__('Search statistics'), $may('view-audit-log'), 'search.statistics'],
+                'intake.index' => [__('Intake'), $may('manage-institution'), 'intake.*'],
+                'labels.templates' => [__('Label templates'), $may('manage-institution'), 'labels.templates*'],
                 'settings.edit' => [__('Settings'), $may('manage-institution'), 'settings.*'],
             ],
         ]));

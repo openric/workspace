@@ -28,7 +28,7 @@ return [
         'file-plan-node-type.ttl', 'file-plan-status.ttl', 'file-plan-import-source.ttl', 'file-plan-import-status.ttl', 'email-capture-source.ttl', 'email-capture-status.ttl', 'classification-rule-type.ttl', 'classification-apply-on.ttl', 'declaration-status.ttl', 'compliance-framework.ttl', 'assessment-status.ttl',
         'clearance-action.ttl', 'clearance-request-type.ttl', 'clearance-request-status.ttl', 'clearance-request-priority.ttl',
         'narssa-transfer-status.ttl', 'export-permit-status.ttl',
-        'naz-closure-type.ttl', 'naz-protection-type.ttl', 'naz-permit-type.ttl', 'naz-permit-status.ttl', 'naz-schedule-status.ttl', 'naz-records-class.ttl', 'naz-access-restriction.ttl', 'naz-transfer-type.ttl', 'naz-transfer-status.ttl', 'cdpa-licence-tier.ttl', 'licence-status.ttl', 'jurisdiction-pack.ttl'],
+        'naz-closure-type.ttl', 'naz-protection-type.ttl', 'naz-permit-type.ttl', 'naz-permit-status.ttl', 'naz-schedule-status.ttl', 'naz-records-class.ttl', 'naz-access-restriction.ttl', 'naz-transfer-type.ttl', 'naz-transfer-status.ttl', 'cdpa-licence-tier.ttl', 'licence-status.ttl', 'jurisdiction-pack.ttl', 'label-page-size.ttl', 'label-barcode-source.ttl', 'label-qr-target.ttl', 'intake-outcome.ttl'],
 
     // API keys (ADR 0007, Heratio's ApiKeyService): what an account must hold, anywhere, for a key it
     // owns to carry each scope (api-scope vocabulary), as [action, kind] pairs of which any one will do.
@@ -188,6 +188,11 @@ return [
     // A copy of AtoM's uploads folder (the one holding r/), from which an import of
     // archival descriptions takes the file each digitalObjectURI names; empty, none is.
     'import_files' => env('WORKSPACE_IMPORT_FILES'),
+
+    // Watched folders (roadmap phase 22a): the one folder on the server under which every watched folder lies, an FTP
+    // or SFTP drop among them, and how long a file must be left unchanged before it is taken in.
+    'intake_root' => env('WORKSPACE_INTAKE_ROOT'),
+    'intake_settle_seconds' => (int) env('WORKSPACE_INTAKE_SETTLE_SECONDS', 60),
 
     // The OAI-PMH adminEmail when no repository gives a contact email (Export-Only).
     'oai_admin_email' => env('WORKSPACE_OAI_ADMIN_EMAIL'),

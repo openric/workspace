@@ -45,7 +45,7 @@ class AtomEntityReader
     ];
 
     /** Columns read apart from the element maps, by kind. */
-    private const READ = [
+    public const READ = [
         'authority' => ['legacyId', 'culture', 'typeOfEntity', 'corporateBodyIdentifiers', 'descriptionIdentifier', 'status', 'levelOfDetail',
             'actorOccupations', 'actorOccupationNotes', 'placeAccessPoints'],
         'repository' => ['legacyId', 'culture', 'identifier', 'descriptionIdentifier', 'descriptionStatus', 'levelOfDetail',

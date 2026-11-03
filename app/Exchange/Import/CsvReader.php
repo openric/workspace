@@ -104,7 +104,7 @@ class CsvReader
                     }
                 } elseif (! array_key_exists($column, DescriptionCsv::COLUMNS)) {
                     $report->once($column, 'not a column of AtoM\'s ISAD(G) template or the Workspace; not read');
-                } elseif (DescriptionCsv::COLUMNS[$column] === null && ! in_array($column, ['qubitParentSlug', 'digitalObjectURI', 'physicalObjectName', 'physicalObjectLocation', 'physicalObjectType'], true)) {
+                } elseif (DescriptionCsv::COLUMNS[$column] === null && ! in_array($column, ['qubitParentSlug', 'digitalObjectURI', 'digitalObjectPath', 'physicalObjectName', 'physicalObjectLocation', 'physicalObjectType'], true)) {
                     $report->once($column, $this->why($column));
                 }
             }
@@ -169,6 +169,9 @@ class CsvReader
             $this->events($draft, $cells, $rowLanguage, $report);
             if (($cells['digitalObjectURI'] ?? '') !== '') {
                 $draft->files[] = ['uri' => $cells['digitalObjectURI'], 'sha256' => strtolower($cells['digitalObjectChecksum'] ?? '') ?: null];
+            } elseif (($cells['digitalObjectPath'] ?? '') !== '') {
+                // A file in the ZIP the CSV came in (phase 22a); without one, a path on another server is not fetched.
+                $draft->files[] = ['path' => $cells['digitalObjectPath'], 'sha256' => strtolower($cells['digitalObjectChecksum'] ?? '') ?: null];
             }
             $drafts[$draft->key] = $draft;
         }
@@ -273,7 +276,6 @@ class CsvReader
     {
         return match ($column) {
             'accessionNumber' => 'accessions are not kept yet; not read',
-            'digitalObjectPath' => 'a path on the AtoM server is not fetched; export with digitalObjectURI to bring the file',
             default => 'not read',
         };
     }

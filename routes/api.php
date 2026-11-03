@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\DiscoveryController;
 use App\Http\Controllers\Api\GraphController;
 use App\Http\Controllers\Api\OaiController;
 use App\Http\Controllers\Api\ProposalController;
+use App\Http\Controllers\IntakeController;
 use App\Http\Middleware\AuthenticateApiKey;
 use App\Http\Middleware\ServeRicApi;
 use Illuminate\Support\Facades\Route;
@@ -55,4 +56,6 @@ Route::middleware([ServeRicApi::class, 'throttle:600,1', AuthenticateApiKey::cla
 Route::middleware([ServeRicApi::class, 'throttle:600,1'])->group(function () {
     Route::post('/records/{key}/proposals', [ProposalController::class, 'store'])->middleware(AuthenticateApiKey::class.':write')->name('api.proposals.store');
     Route::get('/proposals', [ProposalController::class, 'index'])->middleware(AuthenticateApiKey::class.':read')->name('api.proposals');
+    // A scanner's or capture station's files made a record (roadmap phase 22a, Heratio's scan API).
+    Route::post('/intake', [IntakeController::class, 'api'])->middleware(AuthenticateApiKey::class.':write')->name('api.intake');
 });

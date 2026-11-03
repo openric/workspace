@@ -22,8 +22,6 @@ agreements.documents.destroy
 proposals.accept
 proposals.reject
 proposals.relation
-imports.show
-imports.commit
 concepts.matches.destroy
 accessions.templates.save
 accessions.templates.destroy

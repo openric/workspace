@@ -1,0 +1,44 @@
+# OpenRiC Workspace - OpenRiC Workspace Label Barcode Sources.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What a label's barcode encodes (Heratio's label_template.barcode_source).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/label-barcode-source/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Label Barcode Sources"@en ;
+    dcterms:description "What a label's barcode encodes (Heratio's label_template.barcode_source)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:identifier, v:reference-code, v:barcode, v:iri .
+
+v:identifier a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Identifier"@en, "Identifiseerder"@af ;
+    skos:scopeNote "Not a RiC-O term: how the Workspace prints labels, as Heratio's ahg-label keeps it."@en ;
+    skos:definition "The identifier of the record or container."@en .
+
+v:reference-code a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Reference code"@en, "Verwysingskode"@af ;
+    skos:scopeNote "Not a RiC-O term: how the Workspace prints labels, as Heratio's ahg-label keeps it."@en ;
+    skos:definition "The full reference code of the record."@en .
+
+v:barcode a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Barcode"@en, "Strepieskode"@af ;
+    skos:scopeNote "Not a RiC-O term: how the Workspace prints labels, as Heratio's ahg-label keeps it."@en ;
+    skos:definition "The barcode recorded for the container."@en .
+
+v:iri a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Persistent IRI"@en, "Permanente IRI"@af ;
+    skos:scopeNote "Not a RiC-O term: how the Workspace prints labels, as Heratio's ahg-label keeps it."@en ;
+    skos:definition "The persistent IRI of the record or container."@en .

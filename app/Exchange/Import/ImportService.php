@@ -38,6 +38,7 @@ use App\Description\RepositoryService;
 use App\Description\RuleService;
 use App\Description\StorageService;
 use App\Exchange\Ead;
+use App\Ingest\IngestFile;
 use App\Models\Activity;
 use App\Models\Agent;
 use App\Models\Concept;
@@ -55,10 +56,12 @@ use App\Models\Relation;
 use App\Models\Repository;
 use App\Models\RicDate;
 use App\Models\Rule;
+use App\Models\SecurityLevel;
 use App\Models\User;
 use App\Relations\EntityKinds;
 use App\Relations\RelationService;
 use App\Relations\RelationTypes;
+use App\Rights\Clearances;
 use App\Support\Vocab;
 use App\Vocabulary\ConceptService;
 use Illuminate\Database\Eloquent\Model;
@@ -240,11 +243,16 @@ class ImportService
                 array_unique(array_map(fn ($i) => $i['kind'] === 'created' ? $i['kind'].'|'.$i['field'].'|'.$i['value'] : serialize($i), $this->report->issues))));
         }
 
+        if ($commit && ($levelId = $this->import->options['classification_level_id'] ?? null) && self::TABLES[$this->import->format] === 'record_resources') {
+            $this->classifyCreated($levelId);
+        }
         $report = $this->report->toArray();
         if ($commit) {
             $report['reconciliation'] = $this->reconcile();
         }
-        $import->update(['report' => $report, 'committed_at' => $commit ? now() : null]);
+        // The audit log's last entry when committed: what changes an entry after it is later work, which undoing keeps (phase 22a).
+        $import->update(['report' => $report, 'committed_at' => $commit ? now() : null]
+            + ($commit ? ['options' => [...$import->options, 'audit_seq' => (int) DB::table('audit_log')->max('seq')]] : []));
 
         return $this->report;
     }
@@ -406,7 +414,8 @@ class ImportService
             $this->deferred[] = [$draft, $unit];
         }
         foreach ($draft->files as $file) {
-            $this->file($draft, $unit, $file['uri'], $file['sha256'], $language);
+            isset($file['path']) ? $this->bundled($draft, $unit, $file['path'], $file['sha256'], $language)
+                : $this->file($draft, $unit, $file['uri'], $file['sha256'], $language);
         }
         $this->key($draft->key, $unit);
 
@@ -441,6 +450,66 @@ class ImportService
             ->whereIn('id', $this->namedQuery('repositories', $draft->repositoryName))->get();
 
         return $found->count() === 1 && $this->user->may('create', 'description', $found->first()) ? $found->first() : null;
+    }
+
+    /**
+     * The units of description the import made, classified at the level chosen when it was uploaded (phase 22a, PSIS's
+     * security_classification_id on an ingest session): a unit inside another it made takes the classification from it.
+     * A unit the importer may not classify is reported, not classified.
+     */
+    private function classifyCreated(string $levelId): void
+    {
+        $level = SecurityLevel::where('institution_id', $this->institution->id)->find($levelId);
+        $made = collect($this->report->units)->where('action', 'created')->pluck('unit_id')->filter()->all();
+        foreach (RecordResource::whereIn('id', $made)->get() as $unit) {
+            if ($unit->parent_id !== null && in_array($unit->parent_id, $made, true)) {
+                continue;
+            }
+            try {
+                $level && app(Clearances::class)->classify($this->user, $unit, $level, ['reason' => __('Classified when imported from :file', ['file' => $this->import->file_name]),
+                    'justification' => __('Classified when imported from :file', ['file' => $this->import->file_name]), 'inherit_to_children' => true]);
+            } catch (InvalidArgumentException $e) {
+                $this->report->issue((string) $unit->iri, 'classification', $level?->name, $e->getMessage(), 'left-out');
+            }
+        }
+    }
+
+    /**
+     * The file a row names by digitalObjectPath in the ZIP the CSV came in (phase 22a, PSIS's matchDigitalObjects): checked
+     * against the row's checksum, kept as a digital instantiation when committed. Without a ZIP, the path is on another
+     * server and is not fetched.
+     */
+    private function bundled(UnitDraft $draft, RecordResource $unit, string $path, ?string $sha256, string $language): void
+    {
+        $bundle = $this->import->options['bundle'] ?? null;
+        if ($bundle === null) {
+            $this->report->issue($draft->location, 'digitalObjectPath', $path, 'a path on another server is not fetched: upload a ZIP of the CSV and its files, or export with digitalObjectURI', 'left-out');
+
+            return;
+        }
+        $local = app(IngestFile::class)->extract($bundle, $path);
+        if ($local === null) {
+            $this->report->issue($draft->location, 'digitalObjectPath', $path, 'not in the ZIP; the file is not kept', 'left-out');
+
+            return;
+        }
+        try {
+            if ($sha256 !== null && ! hash_equals($sha256, hash_file('sha256', $local))) {
+                $this->report->issue($draft->location, 'digitalObjectChecksum', $sha256, 'the file in the ZIP is not the one the row names: its SHA-256 differs; not kept', 'left-out');
+            } elseif (! $this->commit) {
+                $this->report->issue($draft->location, 'digitalObjectPath', basename($path), 'found in the ZIP; kept as a digital instantiation when imported', 'note');
+            } elseif (! $this->user->may('update', 'description', $unit)) {
+                $this->report->issue($draft->location, 'digitalObjectPath', $path, 'you may not add instantiations to this unit; the file is not kept', 'left-out');
+            } elseif (DigitalFile::where('sha256', hash_file('sha256', $local))->whereHas('use', fn ($q) => $q->where('notation', 'master'))
+                ->whereHas('instantiation', fn ($q) => $q->where('record_resource_id', $unit->id)->whereNull('deleted_at'))->doesntExist()) {
+                $this->instantiations->upload($unit, $local, basename($path), $language, null, $sha256, 'online', $this->user);
+                $this->report->counts['files']++;
+            }
+        } catch (RuntimeException|InvalidArgumentException $e) {
+            $this->report->issue($draft->location, 'digitalObjectPath', $path, 'not kept: '.$e->getMessage(), 'left-out');
+        } finally {
+            @unlink($local);
+        }
     }
 
     /**

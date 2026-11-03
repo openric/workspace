@@ -41,11 +41,14 @@ use App\Http\Controllers\IiifController;
 use App\Http\Controllers\IiifValidationController;
 use App\Http\Controllers\IiifWorkspaceController;
 use App\Http\Controllers\ImportController;
+use App\Http\Controllers\IngestController;
 use App\Http\Controllers\InstantiationController;
+use App\Http\Controllers\IntakeController;
 use App\Http\Controllers\IriController;
 use App\Http\Controllers\JobsController;
 use App\Http\Controllers\JournalController;
 use App\Http\Controllers\JurisdictionController;
+use App\Http\Controllers\LabelController;
 use App\Http\Controllers\LocalVocabularyController;
 use App\Http\Controllers\NameController;
 use App\Http\Controllers\PasswordController;
@@ -426,12 +429,22 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::post('/relations/{assertion}', [ProposalReviewController::class, 'reviewRelation'])->name('relation');
     });
 
+    // A sheet of labels for records or containers (roadmap phase 22a).
+    Route::get('/labels', [LabelController::class, 'print'])->name('labels.print');
+
     Route::prefix('imports')->name('imports.')->group(function () {
         Route::get('/', [ImportController::class, 'index'])->name('index');
         Route::get('/new', [ImportController::class, 'create'])->name('create');
+        Route::get('/grid', [IngestController::class, 'grid'])->name('grid');
+        Route::post('/grid', [IngestController::class, 'saveGrid'])->name('grid.save');
         Route::post('/', [ImportController::class, 'store'])->name('store');
         Route::get('/{import}', [ImportController::class, 'show'])->name('show');
         Route::post('/{import}/commit', [ImportController::class, 'commit'])->name('commit');
+        // Phase 22a: mapping a spreadsheet's headings, grid entry, undo, and the import as a BagIt bag.
+        Route::get('/{import}/mapping', [IngestController::class, 'mapping'])->name('mapping');
+        Route::post('/{import}/mapping', [IngestController::class, 'saveMapping'])->name('mapping.save');
+        Route::post('/{import}/undo', [IngestController::class, 'undo'])->name('undo');
+        Route::get('/{import}/bag', [IngestController::class, 'bag'])->name('bag');
     });
 
     // Authority records (ISAAR(CPF)); the controller checks the authority permissions and embargoes.
@@ -499,6 +512,15 @@ Route::middleware(['auth', 'active'])->group(function () {
     });
 
     Route::middleware('can:'.Vocab::permission('manage-institution'))->group(function () {
+        // Label templates (roadmap phase 22a).
+        Route::get('/labels/templates', [LabelController::class, 'templates'])->name('labels.templates');
+        Route::post('/labels/templates', [LabelController::class, 'saveTemplate'])->name('labels.templates.store');
+        Route::post('/labels/templates/{template}', [LabelController::class, 'saveTemplate'])->whereUuid('template')->name('labels.templates.update');
+        // Watched folders and what was taken in (roadmap phase 22a).
+        Route::get('/intake', [IntakeController::class, 'index'])->name('intake.index');
+        Route::post('/intake', [IntakeController::class, 'save'])->name('intake.store');
+        Route::post('/intake/{folder}', [IntakeController::class, 'save'])->whereUuid('folder')->name('intake.update');
+        Route::post('/intake/{folder}/run', [IntakeController::class, 'run'])->whereUuid('folder')->name('intake.run');
         Route::get('/settings', [SettingsController::class, 'edit'])->name('settings.edit');
         Route::post('/settings', [SettingsController::class, 'update'])->name('settings.update');
         // The watermark on images' reference copies, and making the copies again (roadmap phase 5).

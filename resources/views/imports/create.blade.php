@@ -2,7 +2,7 @@
 @extends('layouts.app')
 @section('title', __('Import'))
 @section('content')
-    <p><a href="{{ route('records.index') }}">{{ __('Archival descriptions') }}</a> · <a href="{{ route('imports.index') }}">{{ __('Earlier imports') }}</a></p>
+    <p><a href="{{ route('records.index') }}">{{ __('Archival descriptions') }}</a> · <a href="{{ route('imports.index') }}">{{ __('Earlier imports') }}</a>@if($parent) · <a href="{{ route('imports.grid', ['parent' => $parent->id]) }}">{{ __('Enter rows in a grid instead') }}</a>@endif</p>
     <h1>{{ $parent ? 'Import archival descriptions into '.$parent->described('title', ['en']) : 'Import' }}</h1>
     <p>{{ __('Uploading makes a dry run: the import is made and rolled back, and its report says what each entry would become and every field that cannot be taken as given. Nothing is written until you read the report and import.') }}</p>
     <p>{{ __('Moving from AtoM: import the repositories first, then the authority records, then the archival descriptions, each with the same source, so the descriptions find their holders and creators.') }}</p>
@@ -11,7 +11,8 @@
         @csrf
         @if($parent)<input type="hidden" name="parent" value="{{ $parent->id }}">@endif
         <label for="file">{{ __('File (UTF-8, up to 20 MB)') }}</label>
-        <input id="file" type="file" name="file" required accept=".csv,.xml,text/csv,application/xml,text/xml">
+        <input id="file" type="file" name="file" required accept=".csv,.xml,.xlsx,.xls,.ods,.zip,text/csv,application/xml,text/xml,application/zip" aria-describedby="file-help">
+        <small id="file-help">{{ __('For a CSV import, an Excel or OpenDocument spreadsheet is read as its first sheet, and a ZIP of one CSV or spreadsheet with the files its rows name in digitalObjectPath brings those files too. Headings the import does not know are mapped before the dry run.') }}</small>
         <fieldset><legend>{{ __('Format') }}</legend>
             @foreach($formats as $format => $name)
                 @continue($parent && \App\Exchange\Import\ImportService::permission($format) !== 'description')
@@ -42,6 +43,10 @@
             @foreach($agentTypes as $type)<option value="{{ $type->notation }}" @selected(old('agent_type') === $type->notation)>{{ __('Create them as a :type', ['type' => mb_strtolower($type->label(\App\Support\Vocab::languages()))]) }}</option>@endforeach
         </select>
         <small id="agent-help">{{ __('For creators and names with no authority record yet, and for authority records with no type of entity. EAD says whether a name is a person, family or corporate body; AtoM\'s description CSV does not, and AtoM lets an authority record have no type.') }}</small>
+        @if($securityLevels->isNotEmpty())
+            <label for="classification_level">{{ __('Classify what it creates (archival descriptions only)') }}</label>
+            <select id="classification_level" name="classification_level"><option value="">{{ __('No classification') }}</option>@foreach($securityLevels as $l)<option value="{{ $l->id }}" @selected(old('classification_level') === $l->id)>{{ $l->name }}</option>@endforeach</select>
+        @endif
         <p><label><input type="checkbox" name="create_terms" value="1" @checked(old('create_terms', true))> {{ __('Create subjects, places, occupations and documentary form types not yet in the vocabularies') }}</label></p>
         <p><label><input type="checkbox" name="match_identifier" value="1" @checked(old('match_identifier'))> {{ __('Also match what is already here: units by their identifier under the same parent, authority records and repositories by their one authorised name') }}</label></p>
         <button type="submit">{{ __('Upload and make a dry run') }}</button>

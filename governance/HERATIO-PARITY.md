@@ -5,6 +5,7 @@ Where each Heratio package stands in the OpenRiC Workspace. The end product has 
 - **Covered**: the Workspace does what the package does, to be confirmed against Heratio function by function as each area is finished.
 - **Partial**: some of it exists; the phase completes it.
 - **Planned**: nothing yet; the phase brings it.
+- **Not carried**: decided against, for the reason given.
 
 Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 
@@ -30,7 +31,7 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-backup` | 5683 | later: V1.0+ | Partial | 3 (last) | `ahgBackupPlugin` | Database backup before each deploy; deferred to the end |
 | `ahg-biblio-bf` | 3060 | out: GLAM sector | Planned | 21 | none |  |
 | `ahg-biblio-frbr` | 2006 | out: GLAM sector | Planned | 21 | none |  |
-| `ahg-c2pa` | 17272 | V0.1 candidate | Planned | 22 | `ahgC2paPlugin` |  |
+| `ahg-c2pa` | 17272 | V0.1 candidate | Planned | 17 (last) | `ahgC2paPlugin` | Moved to phase 17 with the AI services its manifests describe, on Dr Johan Pieterse's choice 1B of 3 November 2026 (ADR 0020) |
 | `ahg-cart` | 2166 | later: V1.0+ | Covered | 19a | `ahgCartPlugin` | The cart, the shop with PayFast, orders and paid downloads; with the shop closed, requests to publish (ADR 0017). Not Stripe, which Heratio never charges with |
 | `ahg-cdpa` | 2774 | later: jurisdiction | Covered | 18e | `ahgCDPAPlugin` | The Cyber and Data Protection Act as a jurisdiction of the privacy registers, with data controller licences and the Data Protection Officer's certificate and form DP2, from v0.0.101 (ADR 0016); a pack switched on in the settings |
 | `ahg-condition` | 1690 | later: V1.0+ | Planned | 21 | `ahgConditionPlugin` |  |
@@ -54,7 +55,7 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-federation` | 15815 | later: V1.0+ | Planned | 16 | `ahgFederationPlugin` |  |
 | `ahg-feedback` | 879 | later: V1.0+ | Covered | 19a | `ahgFeedbackPlugin` | Feedback from anyone on the catalogue or a record, handled by staff (ADR 0017) |
 | `ahg-forms` | 2541 | V0.1 candidate | Planned | 22 | `ahgFormsPlugin` |  |
-| `ahg-ftp-upload` | 2301 | later: V1.0+ | Planned | 22 | `ahgFtpPlugin` |  |
+| `ahg-ftp-upload` | 2301 | later: V1.0+ | Covered | 22a | `ahgFtpPlugin` | An FTP or SFTP account kept to a watched folder, from v0.0.106 (ADR 0020): files go to the Workspace's own store, not to an FTP server for later fetching |
 | `ahg-function-manage` | 2606 | V0.1 candidate | Covered |  | `ahgFunctionManagePlugin` | Activities with ISDF elements |
 | `ahg-functions-docs` | 716 | later: V1.0+ | Planned | 20 | `ahgFunctionsDocsPlugin` |  |
 | `ahg-gallery` | 7210 | out: GLAM sector | Planned | 21 | `ahgGalleryPlugin` |  |
@@ -68,17 +69,17 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-image-ar` | 896 | out: GLAM sector | Planned | 21 | `ahgImageArPlugin` |  |
 | `ahg-inference-receipts` | 1569 | out: AI (V2+) | Partial | 17 (last) | none | Its signing code is copied for the audit chain |
 | `ahg-information-object-manage` | 47506 | V0.1 candidate | Covered | 9 | `ahgInformationObjectManagePlugin`, `ahgProvenancePlugin` | Records and record sets: ISAD(G), hierarchy, levels, instantiations, publication; provenance and custody history from v0.0.81 (9e) |
-| `ahg-ingest` | 5338 | later: V1.0+ | Planned | 22 | `ahgIngestPlugin` | Read PSIS ahgIngestPlugin too, which does more |
+| `ahg-ingest` | 5338 | later: V1.0+ | Covered | 22a | `ahgIngestPlugin` | The import with PSIS's ingest steps: spreadsheets, column mapping with kept mappings, ZIPs with their files, classification, undo, a BagIt bag, grid entry, from v0.0.106 (ADR 0020); OCR and AI processing in phase 17 |
 | `ahg-integrity` | 3078 | later: V1.0+ | Partial | 12 | `ahgIntegrityPlugin` | Fixity checked on demand |
 | `ahg-ipsas` | 2129 | later: jurisdiction | Planned | 21 | `ahgIPSASPlugin` | With heritage accounting |
 | `ahg-jobs` | 950 | later: V1.0+ | Covered | 5 | none | Background jobs and their screen (v0.0.63) |
 | `ahg-jobs-manage` | 691 | later: V1.0+ | Planned | 12 | `ahgJobsManagePlugin` |  |
-| `ahg-label` | 1383 | later: V1.0+ | Planned | 22 | `ahgLabelPlugin` |  |
+| `ahg-label` | 1383 | later: V1.0+ | Covered | 22a | `ahgLabelPlugin` | Templates and sheets for records and containers, Code 128 and QR drawn by the Workspace, from v0.0.106 (ADR 0020) |
 | `ahg-landing-page` | 3557 | later: V1.0+ | Planned | 20 | `ahgLandingPagePlugin` |  |
 | `ahg-library` | 45610 | out: GLAM sector | Planned | 21 | `ahgLibraryPlugin` |  |
 | `ahg-loan` | 3798 | out: GLAM sector | Planned | 21 | `ahgLoanPlugin` |  |
 | `ahg-marketing` | 726 | later: V1.0+ | Planned | 20 | none |  |
-| `ahg-marketplace` | 19926 | out: GLAM sector | Planned | 22 | `ahgMarketplacePlugin` |  |
+| `ahg-marketplace` | 19926 | out: GLAM sector | Not carried | 22 | `ahgMarketplacePlugin` | Selling items is not an archive's work; archives only to V1.0 (choice 1B, ADR 0020) |
 | `ahg-media-processing` | 2733 | V0.1 candidate | Partial | 5 | none | Reference copies and thumbnails in a job, made again on request, the institution's watermark on reference copies (v0.0.64); a watermark per object and by security classification in phase 18, audio and video previews and transcription later |
 | `ahg-media-streaming` | 1727 | V0.1 candidate | Planned | 22 | none |  |
 | `ahg-menu-manage` | 1790 | V0.1 candidate | Covered |  | `ahgMenuManagePlugin` | Navigation written fresh |
@@ -99,7 +100,7 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-privacy` | 16854 | later: jurisdiction | Partial | 18a, 18b | `ahgPrivacyPlugin` | POPIA governance (registers, requests, compromises, assessments, controls, report) from v0.0.91 (18a, ADR 0016); PII scanning, field redaction and file screening from v0.0.94 (18b); not visual redaction of images, named-entity recognition, the Article 30 export or the autopilot |
 | `ahg-provenance-ai` | 2662 | out: AI (V2+) | Planned | 17 (last) | none |  |
 | `ahg-rad-manage` | 1233 | V0.1 candidate | Covered |  | `ahgRadManagePlugin`, `sfRadPlugin` | RAD display standard, from v0.0.76 |
-| `ahg-rdm` | 2739 | later: V1.0+ | Planned | 22 | `ahgRdmPlugin` |  |
+| `ahg-rdm` | 2739 | later: V1.0+ | Planned | 17 (last) | `ahgRdmPlugin` | Moved to phase 17: it orchestrates ingest, research and the AI services (choice 1B, ADR 0020) |
 | `ahg-records-manage` | 10687 | later: V1.0+ | Covered | 13b, 13c | `ahgRecordsManagePlugin` | Retention schedules, disposal classes, reviews, the disposal workflow and destruction certificates from v0.0.90 (13b, ADR 0015); file plans and their imports, e-mail capture, classification rules, declaration, vital records and compliance assessments from v0.0.100 (13c, Dr Johan Pieterse's choices 1A and 2A of 2 November 2026); IMAP polling not yet |
 | `ahg-reports` | 13861 | later: V1.0+ | Done | 8 | `ahgReportBuilderPlugin`, `ahgReportsPlugin` | Reports (overview, data quality, and six lists with filters and CSV), the authority completeness dashboard and the rights report; the report builder (saved reports, columns from the standards, sections, templates, export as CSV, XLSX, PDF and Word); the accession and donor reports come with phase 9; schedules with email, an archive of the files made, expiring share links and versions; not its comments, attachments, links, widgets, data snapshots or cover page |
 | `ahg-repository-manage` | 4578 | V0.1 candidate | Covered |  | `ahgRepositoryManagePlugin` | Repositories with ISDIAH elements and contact points |
@@ -111,13 +112,13 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-ric-manage` | 1464 | V0.1 candidate | Covered |  | `ahgRicManagePlugin` | Relations, their types, roles and assertions |
 | `ahg-rights` | 0 | V0.1 candidate | Covered |  | `ahgRightsPlugin` | Rights as rico:Rule on records and files (v0.0.57 to v0.0.59, ADR 0008) |
 | `ahg-rights-holder-manage` | 5215 | V0.1 candidate | Covered |  | `ahgRightsHolderManagePlugin` | Rights holders are agents, linked by rico:hasOrHadIntellectualPropertyRightsHolder (v0.0.57) |
-| `ahg-scan` | 7065 | later: V1.0+ | Planned | 22 | `ahgScanPlugin` |  |
+| `ahg-scan` | 7065 | later: V1.0+ | Partial | 22a | `ahgScanPlugin` | Watched folders, Heratio's sidecars, BagIt intake and the scan API, from v0.0.106 (ADR 0020); not its sector routing, rights enforcement or web archiving |
 | `ahg-search` | 7659 | V0.1 candidate | Partial | 17 | `ahgSearchPlugin` | Full-text search with facets, staff search and statistics (v0.0.60, v0.0.61, ADR 0009); search by meaning in phase 17 |
 | `ahg-security-clearance` | 9206 | later: jurisdiction | Partial | 18c, 12 | `ahgSecurityClearancePlugin` | Levels, compartments, clearances, classified records with inheritance and declassification, requests for access, all in the one read check, from v0.0.101 (ADR 0016); two-factor sign-in in phase 12 |
 | `ahg-semantic-search` | 29749 | out: AI (V2+) | Planned | 17 (last) | `ahgSemanticSearchPlugin` |  |
 | `ahg-settings` | 16789 | V0.1 candidate | Covered |  | `ahgSettingsPlugin` | Institution settings, written fresh |
 | `ahg-share-link` | 2659 | later: V1.0+ | Covered | 19a | `ahgTimeLimitedShareLinkPlugin` | Share links that never open more than their issuer may read, with their log and prune (ADR 0017); clearance with 18c |
-| `ahg-sharepoint` | 6045 | later: V1.0+ | Planned | 22 | `ahgSharePointPlugin` |  |
+| `ahg-sharepoint` | 6045 | later: V1.0+ | Planned | 22, pilot | `ahgSharePointPlugin` | When a pilot with a Microsoft tenant needs it (choice 2B, ADR 0020) |
 | `ahg-spectrum` | 12393 | out: GLAM sector | Planned | 21 | `ahgSpectrumPlugin` |  |
 | `ahg-static-page` | 695 | later: V1.0+ | Planned | 20 | `ahgStaticPagePlugin` |  |
 | `ahg-statistics` | 1906 | later: V1.0+ | Done | 8 | `ahgStatisticsPlugin` | Views and downloads of the public catalogue by day, item and repository, web crawlers apart, CSV; no address, user agent or place is kept, so there is no count by country |
@@ -762,6 +763,49 @@ Added on 2 November 2026 with 18e.
 | none | Each pack switched on or off in the settings | Workspace only |
 
 : The National Archives of Zimbabwe and the CDPA, field by field
+
+### Intake (`ahg-ingest`, PSIS's `ahgIngestPlugin`, `ahg-scan`, `ahg-ftp-upload`)
+
+Added on 3 November 2026 with 22a.
+
+| PSIS or Heratio field | Workspace | Status |
+|---|---|---|
+| `ingest_session`: `title`, `standard`, `repository_id`, `parent_id`, `parent_placement` | The import: file name, format, repository, inside the record set, CSV hierarchy by legacyId and parentId | Same |
+| `entity_type` (description, accession), `sector` | The import's format (descriptions, authority records, repositories, EAC, RiC-O); archives only | Modelled |
+| `security_classification_id` | Classify what it creates | Same, from v0.0.106 |
+| `output_create_records`, `output_generate_sip`, `output_generate_aip`, `output_generate_dip` | Records are made on commit; the import as a BagIt bag | Modelled: BagIt in place of OAIS packages |
+| `derivative_thumbnails`, `derivative_reference` | Viewing copies made for every file kept | Same |
+| `process_ner`, `process_ocr`, `process_summarize`, `process_spellcheck`, `process_translate`, `process_face_detect`, `process_format_id` | none | Phase 17 |
+| `process_virus_scan` | The file store's virus scanner (`WORKSPACE_VIRUS_SCANNER`) | Same |
+| `status` (configure to commit) | Uploaded, mapped if need be, dry run, committed, undone | Modelled |
+| `ingest_file` (csv, zip, ead, directory) | The upload; a ZIP kept for its files | Same |
+| `ingest_mapping`: `source_column`, `target_field`, `is_ignored`, `default_value`, `transform` | The mapping: heading, column, left out, value when empty, transform | Same, from v0.0.106 |
+| saved mapping profiles | Mappings kept by name | Same |
+| `ingest_validation`, `ingest_row` | The dry run's report, entry by entry | Modelled |
+| Rollback | Undo, keeping what was changed since | Changed |
+| Grid entry | Grid entry under a record set | Same |
+| `ingest_watch_folder`: `watch_path`, `label`, `config`, `user_id`, `is_enabled`, `last_scan_at`, `last_status`, `files_ingested` | Folder under the intake root, Name, the folder's import settings and mapping, Working as, Watched, last look, its outcome, files taken | Same, from v0.0.106 |
+| Heratio scan sidecar (`heratioScan`: title, identifier, levelOfDescription, scopeAndContent, accessConditions, dates, parentIdentifier) | Read as Heratio writes it | Same |
+| `sector`, `standard`, `rights`, `digital_object` options, `dam_augmentation`, `custom_fields`, `merge` in the sidecar | Not read | Not carried in 22a |
+| Scan inbox | The intake log | Same |
+| Scan API sessions (create, upload, commit, abandon) | One request with the item's files | Changed |
+| FTP upload to a remote server (`FtpService`) | An FTP or SFTP account kept to a watched folder | Changed |
+
+: Intake, field by field
+
+### Labels (`ahg-label`)
+
+Added on 3 November 2026 with 22a.
+
+| Heratio field | Workspace | Status |
+|---|---|---|
+| `name`, `page_size`, `columns`, `rows`, `label_width_mm`, `label_height_mm`, `margin_mm`, `gutter_mm`, `font_size_pt` | The same | Same, from v0.0.106 |
+| `show_title`, `show_identifier`, `show_repository`, `show_barcode`, `show_qr`, `is_default` | The same | Same |
+| `barcode_source` (identifier, accession, call number, ISBN) | Identifier, reference code, container barcode, persistent IRI | Modelled: library numbers are not an archive's |
+| `qr_target` (url, identifier) | Its page (the IRI), its identifier | Same |
+| Barcodes from barcodeapi.org | Code 128 drawn by the Workspace | Changed |
+
+: Labels, field by field
 
 ### Favourites (`ahg-favorites`)
 

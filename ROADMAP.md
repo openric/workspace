@@ -343,6 +343,11 @@ Done for each domain when its Heratio functions work on the RiC model and export
 
 **22. Remaining Heratio services.** Whatever the parity register still lists as open after phase 21 is copied, or replaced by something the Workspace already does. That includes ingest (reading PSIS's `ahgIngestPlugin`, which does more) and scanning workflows, box labels, vendors, version history, C2PA, GraphQL, and SharePoint and FTP intake. The AI chatbot, AI compliance and inference receipts moved to phase 17. Done when the parity register has no open row.
 
+On 3 November 2026 Dr Johan Pieterse chose 1B and 2B (ADR 0020): intake, description quality, interfaces and vendors, built as 22a to 22d and released one by one; C2PA and research data management move to phase 17 with the AI they depend on; the marketplace is not carried; FTP drops and watched folders now, SharePoint intake when a pilot needs it.
+
+Progress:
+- **v0.0.106** (22a, intake): the import takes spreadsheets, maps a file's columns with suggestions and mappings kept by name, brings in the files a ZIP's rows name, classifies what it creates, is undone without losing later work, and downloads as a BagIt bag; rows entered in a grid; watched folders under an intake root, an FTP or SFTP drop among them, take in tables, bags and scans with Heratio's sidecars; a scan API; labels with Code 128 and QR codes drawn by the Workspace (ADR 0020).
+
 Not copied: the 12 templates on the prohibited-copy list, until each is compared with AtoM's own; the Workspace's own theme, menus and accounts already do their work. Everything else in Heratio is a candidate to copy.
 
 **23. Hardening and acceptance.** Added on 1 November 2026 from two external desk reviews: the security and functional audit, and the RiC standards gap assessment. Neither found an exploitable problem; both found that what the Workspace claims is not yet proven by evidence anyone else can rerun. This phase adds tests and evidence, not features:

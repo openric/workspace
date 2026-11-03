@@ -1,0 +1,30 @@
+# OpenRiC Workspace - OpenRiC Workspace Label QR Targets.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What a label's QR code opens or says (Heratio's label_template.qr_target).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/label-qr-target/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Label QR Targets"@en ;
+    dcterms:description "What a label's QR code opens or says (Heratio's label_template.qr_target)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:url, v:identifier .
+
+v:url a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Its page"@en, "Sy bladsy"@af ;
+    skos:scopeNote "Not a RiC-O term: how the Workspace prints labels, as Heratio's ahg-label keeps it."@en ;
+    skos:definition "The record or container's persistent IRI, which opens its page."@en .
+
+v:identifier a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Its identifier"@en, "Sy identifiseerder"@af ;
+    skos:scopeNote "Not a RiC-O term: how the Workspace prints labels, as Heratio's ahg-label keeps it."@en ;
+    skos:definition "The identifier as text."@en .
