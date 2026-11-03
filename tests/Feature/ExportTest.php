@@ -238,7 +238,7 @@ class ExportTest extends TestCase
     public function test_each_format_says_what_of_the_unit_it_does_not_carry(): void
     {
         $report = $this->actingAs($this->editor)->getJson(route('records.export.loss', [$this->fonds, 'language' => 'en']))->assertOk()->json();
-        $this->assertSame(['ead', 'ead3', 'csv', 'dc', 'mods', 'ric-o'], array_keys($report['left_out']));
+        $this->assertSame(['ead', 'ead3', 'csv', 'dc', 'mods', 'mets', 'ric-o'], array_keys($report['left_out']));
         $lost = fn (string $format) => collect($report['left_out'][$format])->map(fn ($i) => $i['what'])->sort()->values()->all();
         // A finding aid in English leaves out the Afrikaans; its paragraphs are read through their markup.
         $this->assertSame(['Authorised form of name (af)', 'Scope and content (af)'], $lost('ead'));

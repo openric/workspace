@@ -21,6 +21,7 @@ use App\Research\Shop;
 use App\Search\SearchIndex;
 use App\Support\Vocab;
 use App\Versions\Versions;
+use App\Webhooks\Webhooks;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -73,7 +74,21 @@ class AppServiceProvider extends ServiceProvider
             });
         }
         $this->app->terminating(fn () => app(Versions::class)->flush());
-        Queue::after(fn () => app(Versions::class)->flush());
+        // Webhooks follow the same marks (roadmap phase 22c): an entity created, changed or deleted, or anything of it.
+        foreach ([DescriptionValue::class, Name::class, Identifier::class, RicDate::class, CustomFieldValue::class] as $part) {
+            $part::saved(fn ($model) => Webhooks::mark('updated', $model->subject_table, $model->subject_id));
+            $part::deleted(fn ($model) => Webhooks::mark('updated', $model->subject_table, $model->subject_id));
+        }
+        foreach (Webhooks::KINDS as $kind => $name) {
+            $class = SearchIndex::KINDS[$name];
+            $class::saved(fn ($model) => Webhooks::mark($model->wasRecentlyCreated ? 'created' : ($model->wasChanged('deleted_at') && $model->deleted_at ? 'deleted' : 'updated'),
+                $model->getTable(), $model->getKey()));
+        }
+        $this->app->terminating(fn () => app(Webhooks::class)->flush());
+        Queue::after(function () {
+            app(Versions::class)->flush();
+            app(Webhooks::class)->flush();
+        });
         // A visitor's cart joins the account's on signing in (Heratio's mergeGuestCart; phase 19a).
         Event::listen(Login::class, fn (Login $login) => $login->user instanceof User && session()->has('cart_key')
             ? app(Shop::class)->merge($login->user, session('cart_key')) : null);

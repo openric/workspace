@@ -94,3 +94,45 @@ What was taken in moves to `.processed/`, what failed to `.failed/` with the rea
 - `tests/Feature/VersionsTest.php`: one version per change and none for no change; comparison; restore with ids kept; refusal; first versions captured.
 - `tests/Feature/DuplicatesTest.php`: the default rules finding a pair once; comparison; the merge with what moved and the deprecated IRI; a dismissed pair staying dismissed.
 - `tests/Feature/CustomFieldsTest.php`: definitions and values checked; public and staff display and search; versions; the CSV export and its import back; a form template that applies inside its collection and describes through it.
+
+## Decision (22c: interfaces), 3 November 2026
+
+Dr Johan Pieterse chose 1A and 2A on 3 November 2026.
+
+**1A: the API still never writes directly (ADR 0007 kept).** Everything 22c adds to the API reads, and only what the public may read, from the same public catalogue the rest of the API uses. A system that wants to change something sends proposals, as before.
+
+**Webhooks.** After Heratio's `ahg-api` WebhookService, kept as rows per institution and managed by who may manage the institution.
+
+- **What is sent.** The event (created, updated, deleted, published, withdrawn), the kind of entity, its id, its persistent IRI, its API address and when it happened. Never what the entity says: the receiver reads that through the API with its own key, so clearance, embargoes and redaction hold. Heratio sent the entity's data.
+- **When.** An entity is marked as the search index and versions mark it, and each webhook is told once per entity and event when the request, command or job ends. A publish or withdrawal is told as that, not also as a change; a create is not also told as a change.
+- **Signing and retries.** Heratio's HMAC-SHA256 of the body with the webhook's secret, in `X-OpenRiC-Signature`; retries after 1, 2, 4, 8 and 16 minutes (`workspace:webhooks:retry` every minute); after five failed deliveries the webhook is left alone until saved again. The secret is shown once, when it is made.
+- **Where it may post.** Only a public http or https address, never this server or a private network, checked when it is saved and again at every delivery; redirects are not followed. Heratio did not check.
+
+**Read surfaces.**
+
+- **OpenAPI 3.1** at `/api/ric/v1/openapi.json`, built from the API's own routes each time it is asked for, so it never describes an address the API does not have.
+- **Sitemaps** (sitemaps.org 0.9) at `/sitemap.xml`, one per kind with a public page, and `/robots.txt` naming them, after Heratio's `PublicSitemapController`. The old static `public/robots.txt` is gone.
+- **An Atom feed** (RFC 4287) at `/feed.atom` of the last 50 archival descriptions made public, each with its scope and content, after Heratio's `FeedController`.
+- **METS 1.12** as an export format of a unit and everything inside it: each unit's Dublin Core in its own `dmdSec`, the files the reader may receive in the `fileSec` by use with their SHA-256, and a logical `structMap`, after Heratio's `MetsController`.
+- **GraphQL**, read only, at `/api/ric/v1/graphql` (GET or POST), after Heratio's `ahg-graphql`: records, agents, repositories, places, activities and rules, one by id or a page of up to 100, with aliases and variables. Heratio matched the query by pattern and answered a fixed shape; the Workspace parses it, answers the fields asked for and refuses one it does not have, as GraphQL says. Mutations are refused (ADR 0007). It is a subset: no fragments, directives or nested selections.
+- **Places within a box or radius** at `/api/ric/v1/places/within`, as GeoJSON (RFC 7946), after Heratio's `ahg-gis`. Heratio searched descriptions' own coordinates; in the Workspace coordinates belong to places, which descriptions point to. A box across the antimeridian works; distance is the haversine distance.
+
+**2A: caption tracks, WebVTT only, no HLS.** After Heratio's `ahg-media-streaming` caption tracks.
+
+- **Kept.** Subtitles, captions, audio descriptions and chapters, one of each kind for each language, one shown by default, on a sound or video instantiation. Each is checked as WebVTT (the header, every cue's timing, none ending before it starts) and kept in the file store under its checksum. Heratio kept the text in its database row.
+- **Who receives one.** Who may receive the recording it goes with: a track says what the recording says. Withdraw the recording and its captions go with it.
+- **Shown.** As `<track>` elements in the player, and in the IIIF manifest as supplementing annotations on the canvas (Presentation 3 cookbook 0219).
+- **The player now plays the viewing copy** where there is one, as the IIIF manifest paints it, so the public, who never receive a master, hear and see the recording on the record's page. Before 22c the page showed only the thumbnail to the public.
+
+### Not carried in 22c
+
+- Writes through the API, GraphQL mutations, and Heratio's API write endpoints (ADR 0007).
+- HLS and transcoding on request (2A); the Workspace's viewing copies are made when the file is kept.
+- Heratio's caption fetch from a remote URL (a server fetching addresses users give is the SSRF webhooks are guarded against), SRT conversion, and its active switch (remove a track instead). Its SDH flag is WebVTT's captions kind.
+- Heratio's GIS map pages; places already show their map.
+
+### Evidence (22c)
+
+- `tests/Feature/WebhooksTest.php`: only public addresses; a delivery signed and holding no content; one per entity and event; a publish told as published; retries on Heratio's schedule; the secret shown once.
+- `tests/Feature/InterfacesTest.php`: sitemaps, robots.txt and the feed without what the public may not read; METS with units, files and checksums; OpenAPI from the routes; GraphQL answering only what is published, with aliases and variables, refusing mutations, unknown fields and limits over 100; places within a box and a radius as GeoJSON; caption tracks checked, played publicly with the recording, offered in the manifest, and withheld with it.
+- `tests/Feature/AccessMatrixTest.php`: webhooks and caption tracks refused to another institution's administrator.

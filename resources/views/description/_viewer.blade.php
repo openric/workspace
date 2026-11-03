@@ -2,7 +2,7 @@
 {{-- Reused from Heratio (ahg-information-object-manage partials/_digital-object-viewer.blade.php and its vendor files, copied under public/vendor):
      images in OpenSeadragon deep zoom, Mirador or a plain image (Heratio's ahg-iiif-viewer.js, unchanged; with no IIIF image server it opens the
      image itself and Mirador builds its manifest in the browser), OBJ and STL in Heratio's three.js viewer, video and audio with Plyr and a
-     wavesurfer waveform. PDFs: Heratio shows them in an iframe, which a sandboxed file response cannot fill, so they are drawn with Heratio's
+     wavesurfer waveform, with the instantiation's WebVTT caption tracks. PDFs: Heratio shows them in an iframe, which a sandboxed file response cannot fill, so they are drawn with Heratio's
      pdf.js here. GLB models keep model-viewer (description._model).
      Needs $instantiation, $files (the files the reader may receive, keyed by use: master, reference, thumbnail), $title and $fileRoute
      ('files.show' signed in, 'discover.file' public); $alt, the instantiation's alternative text in the reader's language, is what an
@@ -14,16 +14,23 @@
     $url = fn ($file) => route($fileRoute, $file);
     $extension = fn ($file) => strtolower(pathinfo((string) $file?->original_name, PATHINFO_EXTENSION));
     $browserImage = fn ($file) => $file && in_array($file->mime_type, ['image/jpeg', 'image/png', 'image/gif', 'image/webp'], true);
+    // Sound and video play from the viewing copy where there is one, as the IIIF manifest paints it, so the public, who never
+    // receive a master, hear and see the recording too; from the master where it has no copy.
+    $isTimed = fn ($file) => $file && (str_starts_with($file->mime_type, 'video/') || str_starts_with($file->mime_type, 'audio/'));
+    $timed = $isTimed($reference) ? $reference : ($isTimed($master) ? $master : null);
     $kind = match (true) {
         $reference?->mime_type === \App\Files\FileStore::MODEL || ($master?->mime_type === \App\Files\FileStore::MODEL) => 'glb',
         $master && in_array($extension($master), ['obj', 'stl'], true) => 'mesh',
         $master && $master->mime_type === 'application/pdf' => 'pdf',
-        $master && str_starts_with($master->mime_type, 'video/') => 'video',
-        $master && str_starts_with($master->mime_type, 'audio/') => 'audio',
+        $timed && str_starts_with($timed->mime_type, 'video/') => 'video',
+        $timed && str_starts_with($timed->mime_type, 'audio/') => 'audio',
         $browserImage($reference) || $browserImage($master) || $browserImage($thumbnail) => 'image',
         default => null,
     };
     $viewerId = 'v-'.$instantiation->id;
+    // Its WebVTT caption tracks (phase 22c), at the address that checks the reader as the recording's own does.
+    $tracks = in_array($kind, ['video', 'audio'], true) ? $instantiation->captionTracks : collect();
+    $trackUrl = fn ($track) => route($fileRoute === 'discover.file' ? 'discover.caption' : 'captions.show', $track);
     $alt = ($alt ?? null) ?: $title;
 @endphp
 @if($kind === 'glb')
@@ -107,11 +114,14 @@
     <div class="file-viewer media-viewer">
         @if($kind === 'video')
             <video id="{{ $viewerId }}" controls preload="metadata" @if($thumbnail) poster="{{ $url($thumbnail) }}" @endif style="width: 100%; max-height: 500px; background: #000">
-                <source src="{{ $url($master) }}" type="{{ $master->mime_type }}">
+                <source src="{{ $url($timed) }}" type="{{ $timed->mime_type }}">
+                @foreach($tracks as $track)<track kind="{{ $track->kind }}" srclang="{{ $track->language }}" label="{{ $track->label }}" src="{{ $trackUrl($track) }}" @if($track->is_default) default @endif>@endforeach
             </video>
         @else
             <div class="waveform" id="wave-{{ $viewerId }}" aria-hidden="true"></div>
-            <audio id="{{ $viewerId }}" controls preload="metadata" style="width: 100%"><source src="{{ $url($master) }}" type="{{ $master->mime_type }}"></audio>
+            <audio id="{{ $viewerId }}" controls preload="metadata" style="width: 100%"><source src="{{ $url($timed) }}" type="{{ $timed->mime_type }}">
+                @foreach($tracks as $track)<track kind="{{ $track->kind }}" srclang="{{ $track->language }}" label="{{ $track->label }}" src="{{ $trackUrl($track) }}" @if($track->is_default) default @endif>@endforeach
+            </audio>
         @endif
     </div>
     @once

@@ -52,6 +52,12 @@ class Instantiation extends Model
     }
 
     /** The file of one use (file-use notation: master, reference, thumbnail), or null. */
+    /** Its WebVTT caption tracks, the default first (phase 22c). */
+    public function captionTracks(): HasMany
+    {
+        return $this->hasMany(CaptionTrack::class)->orderByDesc('is_default')->orderBy('language')->orderBy('kind');
+    }
+
     public function file(string $use): ?DigitalFile
     {
         return $this->files->first(fn (DigitalFile $f) => $f->use->notation === $use);

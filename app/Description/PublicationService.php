@@ -23,6 +23,7 @@ use App\Models\RecordResource;
 use App\Models\User;
 use App\Relations\RelationService;
 use App\Support\Vocab;
+use App\Webhooks\Webhooks;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
@@ -58,6 +59,15 @@ class PublicationService
         $subjects = [$entity->getTable() => $ids];
         if ($entity instanceof RecordResource) {
             $subjects['instantiations'] = Instantiation::whereIn('record_resource_id', $ids)->whereNull('deleted_at')->pluck('id')->all();
+        }
+
+        // Webhooks are told the entities that became public, or stopped being (phase 22c).
+        if (in_array($action, ['publish', 'withdraw'], true)) {
+            foreach ($subjects as $table => $subjectIds) {
+                foreach ($subjectIds as $subjectId) {
+                    Webhooks::mark($action === 'publish' ? 'published' : 'withdrawn', $table, $subjectId);
+                }
+            }
         }
 
         return DB::transaction(fn () => AuditLog::actingAs($actor, function () use ($subjects, $fromIds, $toId, $language) {

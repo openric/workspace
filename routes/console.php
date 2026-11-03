@@ -23,6 +23,7 @@ use App\Research\ShareLinks;
 use App\Rights\Clearances;
 use App\Rights\Embargoes;
 use App\Versions\Versions;
+use App\Webhooks\Webhooks;
 use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
@@ -151,6 +152,10 @@ Artisan::command('workspace:duplicates:scan', function (Duplicates $duplicates) 
     $this->info("$found new pairs of possible duplicates.");
 })->purpose('Find archival descriptions that may be duplicates, by each institution\'s rules (Heratio\'s dedupe scan)');
 Schedule::command('workspace:duplicates:scan')->weeklyOn(0, '03:40')->timezone(config('workspace.timezone'))->withoutOverlapping();
+Artisan::command('workspace:webhooks:retry', function (Webhooks $webhooks) {
+    $this->info($webhooks->retryDue().' webhook deliveries tried again.');
+})->purpose('Send again the webhook deliveries that failed and whose next try is due (Heratio\'s webhook retry)');
+Schedule::command('workspace:webhooks:retry')->everyMinute()->withoutOverlapping();
 Artisan::command('workspace:research-digests', function (Notifications $notifications) {
     $this->info($notifications->digests().' digests of research notices sent.');
 })->purpose('Mail each researcher the notices held for their hourly, daily or weekly digest');

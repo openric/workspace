@@ -1,0 +1,44 @@
+# OpenRiC Workspace - OpenRiC Workspace Webhook Delivery Statuses.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Where a webhook delivery stands (Heratio's ahg_webhook_delivery.status).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/webhook-delivery-status/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Webhook Delivery Statuses"@en ;
+    dcterms:description "Where a webhook delivery stands (Heratio's ahg_webhook_delivery.status)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:pending, v:delivered, v:retrying, v:failed .
+
+v:pending a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Waiting"@en, "Wag"@af ;
+    skos:scopeNote "Not a RiC-O term: what the Workspace tells another system when it happens, as Heratio's ahg-api webhooks keep it."@en ;
+    skos:definition "Not yet sent."@en .
+
+v:delivered a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Delivered"@en, "Afgelewer"@af ;
+    skos:scopeNote "Not a RiC-O term: what the Workspace tells another system when it happens, as Heratio's ahg-api webhooks keep it."@en ;
+    skos:definition "The receiver answered with success."@en .
+
+v:retrying a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Trying again"@en, "Probeer weer"@af ;
+    skos:scopeNote "Not a RiC-O term: what the Workspace tells another system when it happens, as Heratio's ahg-api webhooks keep it."@en ;
+    skos:definition "It failed and will be sent again."@en .
+
+v:failed a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Failed"@en, "Misluk"@af ;
+    skos:scopeNote "Not a RiC-O term: what the Workspace tells another system when it happens, as Heratio's ahg-api webhooks keep it."@en ;
+    skos:definition "It failed five times; no more attempts."@en .

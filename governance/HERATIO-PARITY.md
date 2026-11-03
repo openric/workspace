@@ -20,7 +20,7 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-ai-compliance` | 4043 | out: AI (V2+) | Planned | 17 (last) | `ahgAiCompliancePlugin` |  |
 | `ahg-ai-services` | 30242 | out: AI (V2+) | Partial | 17 (last) | `ahgAIPlugin`, `ahgAiConditionPlugin` | Proposals and their review queue (v0.0.47, v0.0.48); all AI work deferred to the end |
 | `ahg-annotations` | 1286 | V0.1 candidate | Planned | 14 | `ahgAnnotationsPlugin` | As IIIF annotations |
-| `ahg-api` | 30902 | V0.1 candidate | Partial | 22 | `ahgAPIPlugin`, `arRestApiPlugin` | Read API, keys, proposals, files (ADR 0007); GraphQL in phase 22 |
+| `ahg-api` | 30902 | V0.1 candidate | Covered | 22c | `ahgAPIPlugin`, `arRestApiPlugin` | Read API, keys, proposals, files (ADR 0007); webhooks, OpenAPI, sitemaps, Atom feed and METS from v0.0.108 (ADR 0020); API writes stay proposals |
 | `ahg-api-plugin` | 179 | V0.1 candidate | Covered |  | none | The proposals contract the MCP uses (v0.0.47) |
 | `ahg-archaeology` | 4291 | out: GLAM sector | Planned | 21 | `ahgArchaeologyPlugin` |  |
 | `ahg-archivematica` | 4049 | later: V1.0+ | Planned | 15 | `arStorageServicePlugin` |  |
@@ -59,8 +59,8 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-function-manage` | 2606 | V0.1 candidate | Covered |  | `ahgFunctionManagePlugin` | Activities with ISDF elements |
 | `ahg-functions-docs` | 716 | later: V1.0+ | Planned | 20 | `ahgFunctionsDocsPlugin` |  |
 | `ahg-gallery` | 7210 | out: GLAM sector | Planned | 21 | `ahgGalleryPlugin` |  |
-| `ahg-gis` | 280 | V0.1 candidate | Partial | 22 | `ahgGISPlugin` | Places have coordinates and containment; maps later |
-| `ahg-graphql` | 764 | later: V1.0+ | Planned | 22 | `ahgGraphQLPlugin` |  |
+| `ahg-gis` | 280 | V0.1 candidate | Covered | 22c | `ahgGISPlugin` | Places have coordinates and containment; places within a box or radius as GeoJSON from v0.0.108 (ADR 0020) |
+| `ahg-graphql` | 764 | later: V1.0+ | Covered | 22c | `ahgGraphQLPlugin` | Read-only GraphQL over what the public may read, from v0.0.108 (ADR 0020) |
 | `ahg-harris-matrix` | 1343 | out: GLAM sector | Planned | 21 | none |  |
 | `ahg-help` | 5771 | later: V1.0+ | Planned | 20 | `ahgHelpPlugin` |  |
 | `ahg-heritage-manage` | 12679 | V0.1 candidate | Planned | 21 | `ahgHeritagePlugin`, `ahgHeritageAccountingPlugin` | Heritage asset register and heritage accounting, with the museum domain |
@@ -81,7 +81,7 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-marketing` | 726 | later: V1.0+ | Planned | 20 | none |  |
 | `ahg-marketplace` | 19926 | out: GLAM sector | Not carried | 22 | `ahgMarketplacePlugin` | Selling items is not an archive's work; archives only to V1.0 (choice 1B, ADR 0020) |
 | `ahg-media-processing` | 2733 | V0.1 candidate | Partial | 5 | none | Reference copies and thumbnails in a job, made again on request, the institution's watermark on reference copies (v0.0.64); a watermark per object and by security classification in phase 18, audio and video previews and transcription later |
-| `ahg-media-streaming` | 1727 | V0.1 candidate | Planned | 22 | none |  |
+| `ahg-media-streaming` | 1727 | V0.1 candidate | Partial | 22c | none | Viewing copies made when kept (14a); WebVTT caption tracks from v0.0.108 (ADR 0020); no HLS or transcoding on request |
 | `ahg-menu-manage` | 1790 | V0.1 candidate | Covered |  | `ahgMenuManagePlugin` | Navigation written fresh |
 | `ahg-metadata-export` | 15322 | V0.1 candidate | Partial | 11 | `ahgMetadataExportPlugin` | EAD 2002, EAD3, DC, MODS, CSV, RiC-O; EAC-CPF import and EAC-F export and import from v0.0.85 (11a); RiC-O import in 11b |
 | `ahg-metadata-extraction` | 2770 | V0.1 candidate | Partial | 5 | `ahgMetadataExtractionPlugin` | Embedded metadata read with exiftool and kept on the master; creator, date, title, description and copyright proposed for review (v0.0.64); keywords wait for a subject proposal kind |
@@ -763,6 +763,22 @@ Added on 2 November 2026 with 18e.
 | none | Each pack switched on or off in the settings | Workspace only |
 
 : The National Archives of Zimbabwe and the CDPA, field by field
+
+### Webhooks and caption tracks (`ahg-api`, `ahg-media-streaming`)
+
+Added on 3 November 2026 with 22c.
+
+| Heratio field | Workspace | Status |
+|---|---|---|
+| `ahg_webhook`: `name`, `url`, `secret`, `events`, `entity_types`, `is_active`, `failure_count`, `last_triggered_at` | The same, per institution | Same, from v0.0.108 |
+| `user_id` | The account that made it; the institution owns it | Modelled |
+| `ahg_webhook_delivery`: `event_type`, `entity_type`, `entity_id`, `payload`, `response_code`, `response_body`, `attempt_count`, `status`, `next_retry_at`, `delivered_at` | The same; event and status as vocabulary rows; the payload names the entity, never its content | Changed |
+| `media_caption_track`: `track_type`, `label`, `language_code`, `is_default` | Kind, label, language, shown by default | Same, from v0.0.108 |
+| `vtt_content` | The WebVTT file in the file store, with its SHA-256 and cue count | Modelled |
+| `is_sdh` | The captions kind | Modelled |
+| `source_url`, `active` | none | Not carried in 22c |
+
+: Webhooks and caption tracks, field by field
 
 ### Versions, duplicates, own fields and form templates (`ahg-version-control`, `ahg-dedupe`, `ahg-custom-fields`, `ahg-forms`)
 

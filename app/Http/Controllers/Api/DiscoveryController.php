@@ -12,7 +12,9 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Api\GraphQl;
 use App\Api\JsonLd;
+use App\Api\OpenApi;
 use App\Api\Problem;
 use App\Api\PublicCatalogue;
 use App\Api\Rdf;
@@ -406,5 +408,57 @@ class DiscoveryController extends Controller
     protected function json(array $body): JsonResponse
     {
         return response()->json($body, 200, [], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+    }
+
+    /** GET or POST /graphql: read-only GraphQL over what the public may read (phase 22c); the query in ?query= or a JSON body. */
+    public function graphql(Request $request): JsonResponse
+    {
+        $query = $request->isMethod('post') && $request->isJson() ? $request->json('query') : $request->input('query');
+        $variables = $request->isMethod('post') && $request->isJson() ? $request->json('variables') : json_decode((string) $request->input('variables', '{}'), true);
+        if (! is_string($query) || trim($query) === '') {
+            return response()->json(['errors' => [['message' => 'Give query, a GraphQL query.']]], 400);
+        }
+
+        return response()->json((new GraphQl($this->catalogue($request)))->execute($query, is_array($variables) ? $variables : []), 200, [], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+    }
+
+    /**
+     * GET /places/within: the places the public may read whose coordinates lie in a bounding box (bbox=west,south,east,north)
+     * or within a radius (lat, lon and radius in kilometres, up to 20,000), as a GeoJSON FeatureCollection (RFC 7946), after
+     * Heratio's ahg-gis. A place without coordinates is never in it.
+     */
+    public function placesWithin(Request $request): JsonResponse|Response
+    {
+        $number = fn ($v) => is_numeric($v) ? (float) $v : null;
+        if ($request->filled('bbox')) {
+            $box = array_map($number, explode(',', (string) $request->query('bbox')));
+            if (count($box) !== 4 || in_array(null, $box, true) || $box[1] < -90 || $box[3] > 90 || $box[1] > $box[3] || abs($box[0]) > 180 || abs($box[2]) > 180) {
+                return Problem::response($request, 400, 'bbox is west,south,east,north in decimal degrees.');
+            }
+            // A box across the antimeridian has west greater than east (RFC 7946 5.2).
+            $inside = fn ($lat, $lon) => $lat >= $box[1] && $lat <= $box[3] && ($box[0] <= $box[2] ? $lon >= $box[0] && $lon <= $box[2] : $lon >= $box[0] || $lon <= $box[2]);
+        } else {
+            [$lat, $lon, $radius] = [$number($request->query('lat')), $number($request->query('lon')), $number($request->query('radius'))];
+            if ($lat === null || $lon === null || $radius === null || abs($lat) > 90 || abs($lon) > 180 || $radius <= 0 || $radius > 20000) {
+                return Problem::response($request, 400, 'Give bbox=west,south,east,north, or lat, lon and radius in kilometres.');
+            }
+            // The haversine distance on a sphere of the earth's mean radius.
+            $inside = fn ($la, $lo) => 2 * 6371.0088 * asin(min(1, sqrt(sin(deg2rad($la - $lat) / 2) ** 2 + cos(deg2rad($lat)) * cos(deg2rad($la)) * sin(deg2rad($lo - $lon) / 2) ** 2))) <= $radius;
+        }
+        $limit = $this->bounded($request, 'limit', 500, 5000) ?? 500;
+        $features = $this->catalogue($request)->visible('places')
+            ->filter(fn ($p) => $p->latitude !== null && $inside((float) $p->latitude, (float) $p->longitude))->take($limit)
+            ->map(fn ($p) => ['type' => 'Feature', 'id' => $p->id,
+                'geometry' => ['type' => 'Point', 'coordinates' => array_values(array_filter([(float) $p->longitude, (float) $p->latitude, $p->altitude !== null ? (float) $p->altitude : null], fn ($v) => $v !== null))],
+                'properties' => ['iri' => $p->iri, 'name' => (string) $this->view($request)->label($p), 'url' => route('discover.place', $p->id), 'api' => route('api.place', $p->id)]])
+            ->values()->all();
+
+        return response()->json(['type' => 'FeatureCollection', 'features' => $features], 200, ['Content-Type' => 'application/geo+json'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+    }
+
+    /** GET /openapi.json: an OpenAPI 3.1 description of this API (phase 22c). */
+    public function openapi(): JsonResponse
+    {
+        return response()->json(app(OpenApi::class)->document(), 200, [], JSON_UNESCAPED_SLASHES);
     }
 }

@@ -38,6 +38,7 @@ use App\Iiif\CuratedCollections;
 use App\Jurisdiction\ExportPermits;
 use App\Jurisdiction\NarssaTransfers;
 use App\Labels\Labels;
+use App\Models\CaptionTrack;
 use App\Models\Concept;
 use App\Models\Container;
 use App\Models\DuplicateDetection;
@@ -97,6 +98,7 @@ use App\Rights\RightsService;
 use App\Support\Vocab;
 use App\Vocabulary\ConceptService;
 use App\Vocabulary\SkosImporter;
+use App\Webhooks\Webhooks;
 use Illuminate\Contracts\Routing\UrlRoutable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -339,6 +341,10 @@ class AccessMatrixTest extends TestCase
             app(EmailCaptures::class)->capture($admin, UploadedFile::fake()->createWithContent('minutes.eml', file_get_contents(base_path('tests/Fixtures/mail/minutes.eml')))),
             app(Declarations::class)->request($admin, $fonds), app(Declarations::class)->flagVital($admin, $fonds, 'Proves ownership', 365),
             app(Compliance::class)->create($admin, ['framework' => 'iso-30300', 'reference' => 'CA-1', 'title' => 'Annual'])]);
+        // Phase 22c: a webhook and a caption track.
+        $make('interfaces', fn () => [app(Webhooks::class)->save($institution->id, $admin->id, ['name' => 'Mirror', 'url' => 'https://8.8.8.8/hook', 'events' => ['created'], 'entity_kinds' => ['records']])[0],
+            CaptionTrack::create(['institution_id' => $institution->id, 'instantiation_id' => $this->objects['Instantiation']->id, 'language' => 'en', 'kind' => 'captions', 'label' => 'English',
+                'storage_path' => 'matrix.vtt', 'sha256' => str_repeat('0', 64), 'cue_count' => 1])]);
         // Phase 22b: an own field, a form template, a duplicate rule and a pair of possible duplicates.
         $make('quality', fn () => [app(CustomFields::class)->saveDefinition($institution->id, ['entity_table' => 'record_resources', 'label' => 'Box number', 'field_type' => 'number']),
             app(FormTemplates::class)->save($admin, ['entity_table' => 'record_resources', 'name' => 'Minutes', 'fields' => [['target' => 'title']]]),

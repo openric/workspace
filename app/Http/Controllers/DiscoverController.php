@@ -21,6 +21,8 @@ use App\Discovery\Graph;
 use App\Discovery\Links;
 use App\Files\FileResponse;
 use App\Iiif\Presentation;
+use App\Media\Captions;
+use App\Models\CaptionTrack;
 use App\Models\Concept;
 use App\Models\DigitalFile;
 use App\Models\RecordResource;
@@ -36,6 +38,7 @@ use App\Search\SearchService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -259,6 +262,16 @@ class DiscoverController extends Controller
         }
 
         return FileResponse::make($file, $path, $request->boolean('download'));
+    }
+
+    /** A caption track, to whoever may receive the sound or video it goes with (phase 22c). */
+    public function caption(Request $request, CaptionTrack $track): Response
+    {
+        $captions = app(Captions::class);
+        abort_unless($track->institution_id === $this->catalogue($request)->institution->id
+            && ($captions->deliverable(null, $track) || ($request->user() !== null && $captions->deliverable($request->user(), $track))), 404);
+
+        return app(CaptionController::class)->send($track);
     }
 
     private function entity(Request $request, string $kind, string $id, array $with, array $more = []): View

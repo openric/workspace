@@ -20,6 +20,7 @@ use App\Exchange\EacF;
 use App\Exchange\Ead;
 use App\Exchange\ExportLoss;
 use App\Exchange\ExportView;
+use App\Exchange\Mets;
 use App\Exchange\Mods;
 use App\Http\Controllers\Api\DiscoveryController;
 use App\Models\Activity;
@@ -41,6 +42,7 @@ class ExportController extends Controller
         'csv' => ['CSV', 'This unit and every unit inside it, one row each, in AtoM\'s ISAD(G) columns.', 'csv', 'text/csv'],
         'dc' => ['Dublin Core', 'This unit alone, as simple Dublin Core (oai_dc).', 'xml', 'application/xml'],
         'mods' => ['MODS 3.8', 'This unit alone.', 'xml', 'application/xml'],
+        'mets' => ['METS 1.12', 'This unit and every unit inside it, each described in Dublin Core, with the files you may receive and their SHA-256.', 'xml', 'application/xml'],
     ];
 
     public function __construct(private RecordService $records) {}
@@ -94,6 +96,7 @@ class ExportController extends Controller
                 ...array_column(RecordService::flatten($this->records->hierarchy($record, $request->user()), $record->id), 0)], $view, $request->query('rows') === 'every-language'),
             'dc' => app(DublinCore::class)->export($record->loadMissing(RecordService::DESCRIBED), $view),
             'mods' => app(Mods::class)->export($record->loadMissing(RecordService::DESCRIBED), $view),
+            'mets' => app(Mets::class)->export($record->loadMissing(RecordService::DESCRIBED), $this->records->hierarchy($record, $request->user()), $view),
         };
     }
 

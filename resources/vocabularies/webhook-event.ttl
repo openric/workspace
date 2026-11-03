@@ -1,0 +1,51 @@
+# OpenRiC Workspace - OpenRiC Workspace Webhook Events.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What a webhook is told about (Heratio's ahg_webhook.events).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/webhook-event/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Webhook Events"@en ;
+    dcterms:description "What a webhook is told about (Heratio's ahg_webhook.events)."@en ;
+    dcterms:issued "2026-10-31"^^xsd:date ;
+    skos:hasTopConcept v:created, v:updated, v:deleted, v:published, v:withdrawn .
+
+v:created a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Created"@en, "Geskep"@af ;
+    skos:scopeNote "Not a RiC-O term: what the Workspace tells another system when it happens, as Heratio's ahg-api webhooks keep it."@en ;
+    skos:definition "An entity was made."@en .
+
+v:updated a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Changed"@en, "Verander"@af ;
+    skos:scopeNote "Not a RiC-O term: what the Workspace tells another system when it happens, as Heratio's ahg-api webhooks keep it."@en ;
+    skos:definition "What an entity says changed."@en .
+
+v:deleted a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Deleted"@en, "Geskrap"@af ;
+    skos:scopeNote "Not a RiC-O term: what the Workspace tells another system when it happens, as Heratio's ahg-api webhooks keep it."@en ;
+    skos:definition "An entity was deleted or merged; its IRI says what replaced it."@en .
+
+v:published a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Published"@en, "Gepubliseer"@af ;
+    skos:scopeNote "Not a RiC-O term: what the Workspace tells another system when it happens, as Heratio's ahg-api webhooks keep it."@en ;
+    skos:definition "An entity, or values of it, became public."@en .
+
+v:withdrawn a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Withdrawn"@en, "Teruggetrek"@af ;
+    skos:scopeNote "Not a RiC-O term: what the Workspace tells another system when it happens, as Heratio's ahg-api webhooks keep it."@en ;
+    skos:definition "An entity, or values of it, stopped being public."@en .

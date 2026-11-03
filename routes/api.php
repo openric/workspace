@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\Route;
 Route::middleware([ServeRicApi::class, 'throttle:600,1', AuthenticateApiKey::class])->group(function () {
     Route::get('/', [DiscoveryController::class, 'service'])->name('api.service');
     Route::get('/health', [DiscoveryController::class, 'health'])->name('api.health');
+    Route::get('/openapi.json', [DiscoveryController::class, 'openapi'])->name('api.openapi');
     Route::get('/vocabulary', [DiscoveryController::class, 'vocabulary'])->name('api.vocabulary');
     Route::get('/records', [DiscoveryController::class, 'records'])->name('api.records');
     Route::get('/records/{key}', [DiscoveryController::class, 'record'])->name('api.record');
@@ -33,6 +34,7 @@ Route::middleware([ServeRicApi::class, 'throttle:600,1', AuthenticateApiKey::cla
     Route::get('/autocomplete', [DiscoveryController::class, 'autocomplete'])->name('api.autocomplete');
     // Authority & Context (0.4.0) and Graph Traversal (0.6.0), roadmap phase 23b.
     Route::get('/places', [DiscoveryController::class, 'places'])->name('api.places');
+    Route::get('/places/within', [DiscoveryController::class, 'placesWithin'])->name('api.places.within');
     Route::get('/places/{key}', [DiscoveryController::class, 'place'])->name('api.place');
     Route::get('/rules', [DiscoveryController::class, 'rules'])->name('api.rules');
     Route::get('/rules/{key}', [DiscoveryController::class, 'rule'])->name('api.rule');
@@ -50,6 +52,8 @@ Route::middleware([ServeRicApi::class, 'throttle:600,1', AuthenticateApiKey::cla
     // Portability 3 and 4: the dataset descriptor and its change feed (phase 11b).
     Route::get('/dataset', [DatasetController::class, 'dataset'])->name('api.dataset');
     Route::get('/changelog', [DatasetController::class, 'changelog'])->name('api.changelog');
+    // Read-only GraphQL over the same public catalogue (roadmap phase 22c, after Heratio's ahg-graphql).
+    Route::match(['get', 'post'], '/graphql', [DiscoveryController::class, 'graphql'])->name('api.graphql');
 });
 
 // Proposals need a key (ADR 0007): to send them, one with the write scope; to list them, any.

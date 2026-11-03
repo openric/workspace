@@ -317,6 +317,12 @@ class Presentation
         $canvas['items'] = [['id' => $id.'/page', 'type' => 'AnnotationPage', 'items' => [
             ['id' => $id.'/page/painting', 'type' => 'Annotation', 'motivation' => 'painting', 'body' => $body, 'target' => $id],
         ]]];
+        // Caption tracks as supplementing annotations (Presentation 3 cookbook 0219), only with a recording the public may play (phase 22c).
+        if (! $onRequest && $this->timed($file) && ($tracks = $instantiation->captionTracks)->isNotEmpty()) {
+            $canvas['annotations'] = [['id' => $id.'/captions', 'type' => 'AnnotationPage', 'items' => $tracks->map(fn ($t) => ['id' => $id.'/captions/'.$t->id,
+                'type' => 'Annotation', 'motivation' => 'supplementing', 'target' => $id,
+                'body' => ['id' => route('discover.caption', $t), 'type' => 'Text', 'format' => 'text/vtt', 'language' => $t->language, 'label' => [$t->language => [$t->label]]]])->values()->all()]];
+        }
 
         return $canvas;
     }

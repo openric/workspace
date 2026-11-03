@@ -20,6 +20,7 @@ use App\Http\Controllers\AltTextController;
 use App\Http\Controllers\AnalysisController;
 use App\Http\Controllers\ApiKeyController;
 use App\Http\Controllers\AuditLogController;
+use App\Http\Controllers\CaptionController;
 use App\Http\Controllers\ClearanceController;
 use App\Http\Controllers\ClipboardController;
 use App\Http\Controllers\CommunityLabelController;
@@ -61,6 +62,7 @@ use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProposalReviewController;
 use App\Http\Controllers\ProvenanceController;
 use App\Http\Controllers\PublicationController;
+use App\Http\Controllers\PublishingController;
 use App\Http\Controllers\ReadingRoomController;
 use App\Http\Controllers\ReasoningController;
 use App\Http\Controllers\RecordController;
@@ -94,6 +96,7 @@ use App\Http\Controllers\TeachingController;
 use App\Http\Controllers\VersionController;
 use App\Http\Controllers\VocabularyController;
 use App\Http\Controllers\WatermarkController;
+use App\Http\Controllers\WebhookController;
 use App\Http\Controllers\WorkflowController;
 use App\Http\Controllers\WorkflowQueueController;
 use App\Http\Middleware\ServeDiscovery;
@@ -165,6 +168,13 @@ Route::post('/language', function (Request $request) {
 Route::get('/', fn () => auth()->check() ? view('home') : redirect()->route('discover.home'))->middleware(['web', 'active'])->name('home');
 
 // The public catalogue (WS-009): no sign-in; DiscoverController shows only what the Public role may read and is published.
+// Sitemaps, robots.txt naming them, and an Atom feed of what was published last (roadmap phase 22c).
+Route::middleware([ServeDiscovery::class, 'throttle:120,1'])->group(function () {
+    Route::get('/robots.txt', [PublishingController::class, 'robots'])->name('robots');
+    Route::get('/sitemap.xml', [PublishingController::class, 'index'])->name('sitemap');
+    Route::get('/sitemap-{kind}.xml', [PublishingController::class, 'kind'])->whereIn('kind', ['records', 'agents', 'repositories', 'places', 'activities', 'rules'])->name('sitemap.kind');
+    Route::get('/feed.atom', [PublishingController::class, 'feed'])->name('feed');
+});
 Route::middleware(ServeDiscovery::class)->prefix('discover')->name('discover.')->group(function () {
     Route::get('/', [DiscoverController::class, 'home'])->name('home');
     Route::get('/records/{id}', [DiscoverController::class, 'record'])->name('record');
@@ -177,6 +187,7 @@ Route::middleware(ServeDiscovery::class)->prefix('discover')->name('discover.')-
     Route::get('/rules/{id}', [DiscoverController::class, 'rule'])->name('rule');
     Route::get('/graph/{kind}/{id}', [DiscoverController::class, 'graph'])->where('kind', 'records|agents|repositories|places|activities|rules')->name('graph');
     Route::get('/files/{file}', [DiscoverController::class, 'file'])->name('file');
+    Route::get('/captions/{track}', [DiscoverController::class, 'caption'])->whereUuid('track')->name('caption');
     Route::get('/records/{id}/iiif', [IiifController::class, 'viewer'])->name('iiif');
 });
 
@@ -302,7 +313,7 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/{record}/export', [ExportController::class, 'form'])->name('export');
         // What each format leaves out of the unit (roadmap phase 23b).
         Route::get('/{record}/export/left-out.json', [ExportController::class, 'loss'])->name('export.loss');
-        Route::get('/{record}/export/{format}', [ExportController::class, 'download'])->where('format', 'ead|ead3|csv|dc|mods')->name('export.download');
+        Route::get('/{record}/export/{format}', [ExportController::class, 'download'])->where('format', 'ead|ead3|csv|dc|mods|mets')->name('export.download');
         // Provenance and custody history (roadmap phase 9e; Heratio's provenance); the controller checks update to change it.
         Route::get('/{record}/publish-readiness', [WorkflowQueueController::class, 'readiness'])->name('publish-readiness');
         Route::get('/{record}/provenance', [ProvenanceController::class, 'index'])->name('provenance');
@@ -324,6 +335,10 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::post('/instantiations/{instantiation}/copies', [WatermarkController::class, 'remake'])->name('instantiations.remake-copies');
     Route::post('/instantiations/{instantiation}/own-copy', [InstantiationController::class, 'replaceCopy'])->name('instantiations.replace-copy');
     Route::get('/files/{file}', [InstantiationController::class, 'file'])->name('files.show');
+    // WebVTT caption tracks of a sound or video instantiation (roadmap phase 22c).
+    Route::post('/instantiations/{instantiation}/captions', [CaptionController::class, 'store'])->name('captions.store');
+    Route::get('/captions/{track}', [CaptionController::class, 'show'])->whereUuid('track')->name('captions.show');
+    Route::post('/captions/{track}/delete', [CaptionController::class, 'destroy'])->whereUuid('track')->name('captions.destroy');
     Route::post('/files/{file}/fixity', [InstantiationController::class, 'fixity'])->name('files.fixity');
 
     // Activities (rico:Activity); the controller checks the authority permissions.
@@ -529,6 +544,10 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/labels/templates', [LabelController::class, 'templates'])->name('labels.templates');
         Route::post('/labels/templates', [LabelController::class, 'saveTemplate'])->name('labels.templates.store');
         Route::post('/labels/templates/{template}', [LabelController::class, 'saveTemplate'])->whereUuid('template')->name('labels.templates.update');
+        // Webhooks (roadmap phase 22c).
+        Route::get('/webhooks', [WebhookController::class, 'index'])->name('webhooks.index');
+        Route::post('/webhooks', [WebhookController::class, 'save'])->name('webhooks.store');
+        Route::post('/webhooks/{hook}', [WebhookController::class, 'save'])->whereUuid('hook')->name('webhooks.update');
         // Watched folders and what was taken in (roadmap phase 22a).
         Route::get('/intake', [IntakeController::class, 'index'])->name('intake.index');
         Route::post('/intake', [IntakeController::class, 'save'])->name('intake.store');

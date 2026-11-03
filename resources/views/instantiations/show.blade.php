@@ -63,6 +63,34 @@
         <p>{{ __('No file: a carrier recorded without one, such as the paper original.') }}</p>
     @endforelse
 
+    @if($instantiation->files->contains(fn ($f) => str_starts_with($f->mime_type, 'audio/') || str_starts_with($f->mime_type, 'video/')))
+        <h2 id="captions">{{ __('Captions') }}</h2>
+        @error('captions')<p class="error" role="alert">{{ $message }}</p>@enderror
+        @forelse($instantiation->captionTracks as $track)
+            <p>{{ $track->label }} ({{ $track->language }}, {{ __($track->kind) }}) · {{ trans_choice(':count cue|:count cues', $track->cue_count, ['count' => $track->cue_count]) }}@if($track->is_default) · {{ __('shown by default') }}@endif
+                · <a href="{{ route('captions.show', $track) }}">{{ __('Open') }}</a>
+                @if($canUpdate)<form method="post" action="{{ route('captions.destroy', $track) }}" style="display: inline">@csrf<button type="submit" style="margin-top: 0; padding: .1rem .5rem">{{ __('Remove') }}</button></form>@endif</p>
+        @empty
+            <p>{{ __('No caption tracks yet.') }}</p>
+        @endforelse
+        @if($canUpdate)
+            <form method="post" action="{{ route('captions.store', $instantiation) }}" enctype="multipart/form-data">
+                @csrf
+                <label for="caption-file">{{ __('WebVTT file') }}</label>
+                <small id="caption-help">{{ __('A .vtt file of at most 2 MB. A track of the same language and kind replaces the one there.') }}</small>
+                <input type="file" id="caption-file" name="file" accept=".vtt,text/vtt" required aria-describedby="caption-help">
+                <label for="caption-language">{{ __('Language') }}</label>
+                <input type="text" id="caption-language" name="language" required maxlength="35" value="{{ old('language', 'en') }}">
+                <label for="caption-kind">{{ __('Kind') }}</label>
+                <select id="caption-kind" name="kind">@foreach(\App\Media\Captions::KINDS as $kind)<option value="{{ $kind }}">{{ __($kind) }}</option>@endforeach</select>
+                <label for="caption-label">{{ __('Label') }}</label>
+                <input type="text" id="caption-label" name="label" maxlength="200" value="{{ old('label') }}">
+                <label><input type="checkbox" name="is_default" value="1"> {{ __('Shown by default') }}</label>
+                <button type="submit">{{ __('Add the caption track') }}</button>
+            </form>
+        @endif
+    @endif
+
     @include('description._view', ['subject' => $instantiation, 'standard' => \App\Description\Elements::INSTANTIATION, 'drafts' => $canUpdate])
     @include('description._names', ['subject' => $instantiation, 'kind' => 'instantiations', 'canUpdate' => $canUpdate])
     @include('description._identifiers', ['subject' => $instantiation, 'kind' => 'instantiations', 'canUpdate' => $canUpdate])
