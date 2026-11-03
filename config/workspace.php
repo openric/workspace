@@ -28,7 +28,8 @@ return [
         'file-plan-node-type.ttl', 'file-plan-status.ttl', 'file-plan-import-source.ttl', 'file-plan-import-status.ttl', 'email-capture-source.ttl', 'email-capture-status.ttl', 'classification-rule-type.ttl', 'classification-apply-on.ttl', 'declaration-status.ttl', 'compliance-framework.ttl', 'assessment-status.ttl',
         'clearance-action.ttl', 'clearance-request-type.ttl', 'clearance-request-status.ttl', 'clearance-request-priority.ttl',
         'narssa-transfer-status.ttl', 'export-permit-status.ttl',
-        'naz-closure-type.ttl', 'naz-protection-type.ttl', 'naz-permit-type.ttl', 'naz-permit-status.ttl', 'naz-schedule-status.ttl', 'naz-records-class.ttl', 'naz-access-restriction.ttl', 'naz-transfer-type.ttl', 'naz-transfer-status.ttl', 'cdpa-licence-tier.ttl', 'licence-status.ttl', 'jurisdiction-pack.ttl', 'label-page-size.ttl', 'label-barcode-source.ttl', 'label-qr-target.ttl', 'intake-outcome.ttl', 'duplicate-rule-type.ttl', 'duplicate-status.ttl', 'custom-field-type.ttl', 'webhook-event.ttl', 'webhook-delivery-status.ttl'],
+        'naz-closure-type.ttl', 'naz-protection-type.ttl', 'naz-permit-type.ttl', 'naz-permit-status.ttl', 'naz-schedule-status.ttl', 'naz-records-class.ttl', 'naz-access-restriction.ttl', 'naz-transfer-type.ttl', 'naz-transfer-status.ttl', 'cdpa-licence-tier.ttl', 'licence-status.ttl', 'jurisdiction-pack.ttl', 'label-page-size.ttl', 'label-barcode-source.ttl', 'label-qr-target.ttl', 'intake-outcome.ttl', 'duplicate-rule-type.ttl', 'duplicate-status.ttl', 'custom-field-type.ttl',
+        'vendor-type.ttl', 'vendor-status.ttl', 'vendor-service-type.ttl', 'vendor-transaction-status.ttl', 'vendor-payment-status.ttl', 'condition-grade.ttl', 'vendor-attachment-type.ttl', 'webhook-event.ttl', 'webhook-delivery-status.ttl'],
 
     // API keys (ADR 0007, Heratio's ApiKeyService): what an account must hold, anywhere, for a key it
     // owns to carry each scope (api-scope vocabulary), as [action, kind] pairs of which any one will do.
@@ -54,6 +55,7 @@ return [
         'storage' => ['read', 'create', 'update', 'delete'],
         'accession' => ['read', 'create', 'update', 'delete'],
         'agreement' => ['read', 'create', 'update', 'delete'],
+        'vendor' => ['read', 'create', 'update', 'delete'],
     ],
 
     // Which date properties (date-property vocabulary) each kind of entity (App\Relations\EntityKinds,
@@ -154,6 +156,7 @@ return [
             'storage' => ['read', 'create', 'update'],
             'accession' => ['read', 'create', 'update', 'delete'],
             'agreement' => ['read', 'create', 'update', 'delete'],
+            'vendor' => ['read', 'create', 'update', 'delete'],
         ]],
         'contributor' => ['parent' => 'signed-in', 'grants' => [
             'repository' => ['read'],

@@ -1,0 +1,51 @@
+# OpenRiC Workspace - OpenRiC Workspace Vendor Attachment Types.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What a document kept with work sent to a vendor is (Heratio's ahg_vendor_transaction_attachments.attachment_type).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/vendor-attachment-type/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Vendor Attachment Types"@en ;
+    dcterms:description "What a document kept with work sent to a vendor is (Heratio's ahg_vendor_transaction_attachments.attachment_type)."@en ;
+    dcterms:issued "2026-11-03"^^xsd:date ;
+    skos:hasTopConcept v:quote, v:invoice, v:condition-report, v:photograph, v:other .
+
+v:quote a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Quote"@en, "Kwotasie"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's vendors and the work they do on its records, as Heratio's ahg-vendor keeps it."@en ;
+    skos:definition "The vendor's quote."@en .
+
+v:invoice a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Invoice"@en, "Faktuur"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's vendors and the work they do on its records, as Heratio's ahg-vendor keeps it."@en ;
+    skos:definition "The vendor's invoice."@en .
+
+v:condition-report a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Condition report"@en, "Toestandsverslag"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's vendors and the work they do on its records, as Heratio's ahg-vendor keeps it."@en ;
+    skos:definition "A report on the condition of the records."@en .
+
+v:photograph a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Photograph"@en, "Foto"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's vendors and the work they do on its records, as Heratio's ahg-vendor keeps it."@en ;
+    skos:definition "A photograph of the records."@en .
+
+v:other a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Other"@en, "Ander"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's vendors and the work they do on its records, as Heratio's ahg-vendor keeps it."@en ;
+    skos:definition "Another document."@en .

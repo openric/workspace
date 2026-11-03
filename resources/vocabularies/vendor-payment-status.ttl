@@ -1,0 +1,72 @@
+# OpenRiC Workspace - OpenRiC Workspace Vendor Payment Statuses.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Where payment for a vendor's work stands (Heratio's payment_status dropdown).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/vendor-payment-status/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Vendor Payment Statuses"@en ;
+    dcterms:description "Where payment for a vendor's work stands (Heratio's payment_status dropdown)."@en ;
+    dcterms:issued "2026-11-03"^^xsd:date ;
+    skos:hasTopConcept v:not-invoiced, v:invoiced, v:pending, v:processing, v:completed, v:failed, v:refunded, v:disputed .
+
+v:not-invoiced a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Not invoiced"@en, "Nie gefaktureer nie"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's vendors and the work they do on its records, as Heratio's ahg-vendor keeps it."@en ;
+    skos:definition "No invoice yet."@en .
+
+v:invoiced a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Invoiced"@en, "Gefaktureer"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's vendors and the work they do on its records, as Heratio's ahg-vendor keeps it."@en ;
+    skos:definition "Invoiced, not yet paid."@en .
+
+v:pending a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Pending"@en, "Hangende"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's vendors and the work they do on its records, as Heratio's ahg-vendor keeps it."@en ;
+    skos:definition "Payment started."@en .
+
+v:processing a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Processing"@en, "Word verwerk"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's vendors and the work they do on its records, as Heratio's ahg-vendor keeps it."@en ;
+    skos:definition "Payment being processed."@en .
+
+v:completed a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Paid"@en, "Betaal"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's vendors and the work they do on its records, as Heratio's ahg-vendor keeps it."@en ;
+    skos:definition "Paid."@en .
+
+v:failed a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Failed"@en, "Misluk"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's vendors and the work they do on its records, as Heratio's ahg-vendor keeps it."@en ;
+    skos:definition "Payment failed."@en .
+
+v:refunded a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Refunded"@en, "Terugbetaal"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's vendors and the work they do on its records, as Heratio's ahg-vendor keeps it."@en ;
+    skos:definition "Paid back."@en .
+
+v:disputed a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Disputed"@en, "Betwis"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's vendors and the work they do on its records, as Heratio's ahg-vendor keeps it."@en ;
+    skos:definition "The invoice is disputed."@en .

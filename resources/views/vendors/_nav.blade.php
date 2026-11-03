@@ -1,0 +1,3 @@
+{{-- OpenRiC Workspace - the links between the vendor pages (Heratio's ahg-vendor menu). Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems. SPDX-License-Identifier: AGPL-3.0-or-later --}}
+<p><a href="{{ route('vendors.index') }}">{{ __('Vendor dashboard') }}</a> · <a href="{{ route('vendors.list') }}">{{ __('Vendors') }}</a> · <a href="{{ route('vendors.transactions') }}">{{ __('Transactions') }}</a>
+    · <a href="{{ route('vendors.services') }}">{{ __('Service types') }}</a>@if(auth()->user()->may('create', 'vendor')) · <a href="{{ route('vendors.create') }}">{{ __('Add a vendor') }}</a>@endif</p>

@@ -1,0 +1,128 @@
+# OpenRiC Workspace - OpenRiC Workspace Vendor Service Types.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# The work a vendor does on records (Heratio's ahg_vendor_service_types).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/vendor-service-type/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Vendor Service Types"@en ;
+    dcterms:description "The work a vendor does on records (Heratio's ahg_vendor_service_types)."@en ;
+    dcterms:issued "2026-11-03"^^xsd:date ;
+    skos:hasTopConcept v:conservation, v:restoration, v:framing, v:digitisation, v:photography, v:binding, v:cleaning, v:pest-treatment, v:storage-materials, v:transport, v:valuation, v:insurance, v:mounting, v:deacidification, v:encapsulation, v:other .
+
+v:conservation a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Conservation"@en, "Konservering"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's vendors and the work they do on its records, as Heratio's ahg-vendor keeps it."@en ;
+    skos:definition "Treatment to stabilise records."@en .
+
+v:restoration a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Restoration"@en, "Restourasie"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's vendors and the work they do on its records, as Heratio's ahg-vendor keeps it."@en ;
+    skos:definition "Repair towards a former state."@en .
+
+v:framing a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Framing"@en, "Raamwerk"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's vendors and the work they do on its records, as Heratio's ahg-vendor keeps it."@en ;
+    skos:definition "Framing for display."@en .
+
+v:digitisation a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Digitisation"@en, "Digitalisering"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's vendors and the work they do on its records, as Heratio's ahg-vendor keeps it."@en ;
+    skos:definition "Scanning or imaging for digital copies."@en .
+
+v:photography a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Photography"@en, "Fotografie"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's vendors and the work they do on its records, as Heratio's ahg-vendor keeps it."@en ;
+    skos:definition "Photographs of the records."@en .
+
+v:binding a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Binding"@en, "Bindwerk"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's vendors and the work they do on its records, as Heratio's ahg-vendor keeps it."@en ;
+    skos:definition "Binding or rebinding volumes."@en .
+
+v:cleaning a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Cleaning"@en, "Skoonmaak"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's vendors and the work they do on its records, as Heratio's ahg-vendor keeps it."@en ;
+    skos:definition "Surface cleaning."@en .
+
+v:pest-treatment a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Pest treatment"@en, "Plaagbehandeling"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's vendors and the work they do on its records, as Heratio's ahg-vendor keeps it."@en ;
+    skos:definition "Treatment against insects or mould."@en .
+
+v:storage-materials a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Storage materials"@en, "Bergingsmateriaal"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's vendors and the work they do on its records, as Heratio's ahg-vendor keeps it."@en ;
+    skos:definition "Boxes, folders and other housing."@en .
+
+v:transport a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Transport"@en, "Vervoer"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's vendors and the work they do on its records, as Heratio's ahg-vendor keeps it."@en ;
+    skos:definition "Moving records."@en .
+
+v:valuation a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Valuation"@en, "Waardasie"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's vendors and the work they do on its records, as Heratio's ahg-vendor keeps it."@en ;
+    skos:definition "A valuation of the records."@en .
+
+v:insurance a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Insurance"@en, "Versekering"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's vendors and the work they do on its records, as Heratio's ahg-vendor keeps it."@en ;
+    skos:definition "Insurance cover."@en .
+
+v:mounting a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Mounting"@en, "Montering"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's vendors and the work they do on its records, as Heratio's ahg-vendor keeps it."@en ;
+    skos:definition "Mounting for display or storage."@en .
+
+v:deacidification a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Deacidification"@en, "Ontsuring"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's vendors and the work they do on its records, as Heratio's ahg-vendor keeps it."@en ;
+    skos:definition "Neutralising acid in paper."@en .
+
+v:encapsulation a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Encapsulation"@en, "Enkapsulering"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's vendors and the work they do on its records, as Heratio's ahg-vendor keeps it."@en ;
+    skos:definition "Sealing between sheets of polyester."@en .
+
+v:other a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Other"@en, "Ander"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's vendors and the work they do on its records, as Heratio's ahg-vendor keeps it."@en ;
+    skos:definition "Other work."@en .

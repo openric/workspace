@@ -93,6 +93,7 @@ use App\Http\Controllers\StorageController;
 use App\Http\Controllers\StudioController;
 use App\Http\Controllers\SubmissionController;
 use App\Http\Controllers\TeachingController;
+use App\Http\Controllers\VendorController;
 use App\Http\Controllers\VersionController;
 use App\Http\Controllers\VocabularyController;
 use App\Http\Controllers\WatermarkController;
@@ -359,6 +360,32 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/{rule}', [RuleController::class, 'show'])->name('show');
         Route::get('/{rule}/edit', [RuleController::class, 'edit'])->name('edit');
         Route::post('/{rule}', [RuleController::class, 'update'])->name('update');
+    });
+
+    // Vendors and the work sent to them (Heratio's ahg-vendor, roadmap phase 22d): staff only, under the vendor permissions.
+    Route::middleware('access:read,vendor')->prefix('vendors')->name('vendors.')->group(function () {
+        Route::get('/', [VendorController::class, 'index'])->name('index');
+        Route::get('/list', [VendorController::class, 'list'])->name('list');
+        Route::get('/services', [VendorController::class, 'services'])->name('services');
+        Route::post('/services', [VendorController::class, 'saveServices'])->name('services.save');
+        Route::get('/transactions', [VendorController::class, 'transactions'])->name('transactions');
+        Route::get('/add', [VendorController::class, 'create'])->name('create');
+        Route::post('/add', [VendorController::class, 'store'])->name('store');
+        Route::get('/transactions/{transaction}', [VendorController::class, 'transaction'])->whereUuid('transaction')->name('transaction');
+        Route::get('/transactions/{transaction}/edit', [VendorController::class, 'editTransaction'])->whereUuid('transaction')->name('transaction.edit');
+        Route::post('/transactions/{transaction}', [VendorController::class, 'updateTransaction'])->whereUuid('transaction')->name('transaction.update');
+        Route::post('/transactions/{transaction}/status', [VendorController::class, 'status'])->whereUuid('transaction')->name('transaction.status');
+        Route::post('/transactions/{transaction}/items', [VendorController::class, 'addItem'])->whereUuid('transaction')->name('items.add');
+        Route::post('/transactions/{transaction}/items/{item}', [VendorController::class, 'updateItem'])->whereUuid(['transaction', 'item'])->name('items.update');
+        Route::post('/transactions/{transaction}/items/{item}/remove', [VendorController::class, 'removeItem'])->whereUuid(['transaction', 'item'])->name('items.remove');
+        Route::post('/transactions/{transaction}/documents', [VendorController::class, 'attach'])->whereUuid('transaction')->name('attach');
+        Route::get('/transactions/{transaction}/documents/{attachment}', [VendorController::class, 'attachment'])->whereUuid(['transaction', 'attachment'])->name('attachment');
+        Route::get('/{vendor}', [VendorController::class, 'show'])->whereUuid('vendor')->name('show');
+        Route::get('/{vendor}/edit', [VendorController::class, 'edit'])->whereUuid('vendor')->name('edit');
+        Route::post('/{vendor}', [VendorController::class, 'update'])->whereUuid('vendor')->name('update');
+        Route::post('/{vendor}/delete', [VendorController::class, 'destroy'])->whereUuid('vendor')->name('destroy');
+        Route::get('/{vendor}/request', [VendorController::class, 'requestWork'])->whereUuid('vendor')->name('request');
+        Route::post('/{vendor}/request', [VendorController::class, 'storeTransaction'])->whereUuid('vendor')->name('transactions.store');
     });
 
     // Accessions (Heratio's ahg-accession-manage, roadmap phase 9a): staff only, under the accession permissions.

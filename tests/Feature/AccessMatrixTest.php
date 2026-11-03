@@ -96,6 +96,7 @@ use App\Retention\RetentionService;
 use App\Rights\Embargoes;
 use App\Rights\RightsService;
 use App\Support\Vocab;
+use App\Vendors\Vendors;
 use App\Vocabulary\ConceptService;
 use App\Vocabulary\SkosImporter;
 use App\Webhooks\Webhooks;
@@ -341,6 +342,15 @@ class AccessMatrixTest extends TestCase
             app(EmailCaptures::class)->capture($admin, UploadedFile::fake()->createWithContent('minutes.eml', file_get_contents(base_path('tests/Fixtures/mail/minutes.eml')))),
             app(Declarations::class)->request($admin, $fonds), app(Declarations::class)->flagVital($admin, $fonds, 'Proves ownership', 365),
             app(Compliance::class)->create($admin, ['framework' => 'iso-30300', 'reference' => 'CA-1', 'title' => 'Annual'])]);
+        // Phase 22d: a vendor, work sent to it with a record, and a document.
+        $make('vendor', function () use ($institution, $admin, $letter) {
+            $vendor = app(Vendors::class)->create(app(AgentService::class)->create($institution, 'corporate-body', 'Paper Conservation Studio', 'en'), ['services' => ['binding' => ['offered' => 1]]], $admin);
+            $work = app(Vendors::class)->request($vendor, ['service_type' => 'binding'], $admin);
+            $path = tempnam(sys_get_temp_dir(), 'quote');
+            file_put_contents($path, 'Quote');
+
+            return [$vendor, $work, app(Vendors::class)->addItem($work, $letter, [], $admin), app(Vendors::class)->attach($work, $path, 'quote.txt', 'quote', null, $admin)];
+        });
         // Phase 22c: a webhook and a caption track.
         $make('interfaces', fn () => [app(Webhooks::class)->save($institution->id, $admin->id, ['name' => 'Mirror', 'url' => 'https://8.8.8.8/hook', 'events' => ['created'], 'entity_kinds' => ['records']])[0],
             CaptionTrack::create(['institution_id' => $institution->id, 'instantiation_id' => $this->objects['Instantiation']->id, 'language' => 'en', 'kind' => 'captions', 'label' => 'English',

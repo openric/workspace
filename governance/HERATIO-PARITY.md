@@ -127,7 +127,7 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-theme-b5` | 4574 | V0.1 candidate | Covered |  | `ahgThemeB5Plugin`, `ahgUiOverridesPlugin` | Interface written fresh |
 | `ahg-translation` | 5726 | out: AI (V2+) | Planned | 17 (last) | `ahgTranslationPlugin` |  |
 | `ahg-user-manage` | 5651 | V0.1 candidate | Covered | 12 | `ahgUserManagePlugin`, `ahgUserRegistrationPlugin`, `arOidcPlugin` | Accounts, registration, roles; written fresh; OIDC single sign-on in phase 12 |
-| `ahg-vendor` | 6980 | later: V1.0+ | Planned | 22 | `ahgVendorPlugin` |  |
+| `ahg-vendor` | 6980 | later: V1.0+ | Covered | 22d | `ahgVendorPlugin` | Vendors on authority records, services, transactions with records, condition, history and documents, from v0.0.109 (ADR 0020); contracts not carried |
 | `ahg-version-control` | 3142 | later: V1.0+ | Covered | 22b | `ahgVersionControlPlugin` | Versions of descriptions and authority records, compared and restored, from v0.0.107 (ADR 0020) |
 | `ahg-workflow` | 7830 | later: V1.0+ | Covered | 10 | `ahgWorkflowPlugin` | Workflows, steps, tasks, pool, assignment, decisions, team work, history and bulk operations from v0.0.82 (10a); queues, service levels, overdue notices, publish gates, readiness and the diagram from v0.0.84 (10b); Spectrum procedures in phase 21 |
 | `ahg-z3950` | 5243 | out: GLAM sector | Planned | 21 | none |  |
@@ -763,6 +763,32 @@ Added on 2 November 2026 with 18e.
 | none | Each pack switched on or off in the settings | Workspace only |
 
 : The National Archives of Zimbabwe and the CDPA, field by field
+
+### Vendors (`ahg-vendor`)
+
+Added on 3 November 2026 with 22d.
+
+| Heratio field | Workspace | Status |
+|---|---|---|
+| `ahg_vendors`: `name`, `slug`, `street_address`, `city`, `province`, `postal_code`, `country`, `phone`, `phone_alt`, `fax`, `email`, `website` | The authority record's names and contact points | Modelled |
+| `vendor_code`, `vendor_type`, `registration_number`, `vat_number`, `status`, `approved_by`, `approved_at`, `notes`, `is_preferred`, `is_bbbee_compliant` | The vendor profile; type and status as vocabulary rows | Same, from v0.0.109 |
+| `bank_name`, `bank_branch`, `bank_account_number`, `bank_branch_code`, `bank_account_type` | The same, encrypted and kept out of the audit log | Same |
+| `has_insurance`, `insurance_provider`, `insurance_policy_number`, `insurance_expiry_date`, `insurance_coverage_amount` | The same | Same |
+| `quality_rating`, `reliability_rating`, `price_rating` | The same, 1 to 5 | Same |
+| `ahg_vendor_contacts` | Contact points of the authority record | Modelled |
+| `ahg_vendor_service_types`: `name`, `slug`, `requires_insurance`, `requires_valuation`, `typical_duration_days`, `is_active` | A vocabulary of service types; what each needs, per institution | Modelled |
+| `description`, `display_order` | The concept's definition and vocabulary order | Modelled |
+| `ahg_vendor_services`: `hourly_rate`, `fixed_rate`, `currency`, `notes`, `is_preferred` | The same, currency a concept | Same |
+| `ahg_vendor_transactions`: every field, `completion_date` among them | The same; status and payment status as vocabulary rows | Same |
+| `has_quotes`, `has_invoices`, `has_condition_reports` | The documents filed, by kind | Modelled |
+| `ahg_vendor_transaction_items`: `information_object_id`, `condition_before`, `condition_before_rating`, `condition_after`, `condition_after_rating`, `declared_value`, `currency`, `service_description`, `service_completed`, `service_notes`, `item_cost`, `dispatched_at`, `returned_at` | The same, the record a unit of description, ratings as condition grades, currency the transaction's | Same |
+| `item_title`, `item_reference` | The record's own title and identifier | Modelled |
+| `ahg_vendor_transaction_history` | The same | Same |
+| `ahg_vendor_transaction_attachments` | The same, kept in the file store with SHA-256 and scan | Same |
+| `ahg_vendor_metrics` | Worked out when shown | Modelled |
+| `ahg_contract`, `ahg_contract_type`, `ahg_contract_document`, `ahg_contract_reminder`, `ahg_contract_history` | none | Not carried in 22d |
+
+: Vendors, field by field
 
 ### Webhooks and caption tracks (`ahg-api`, `ahg-media-streaming`)
 

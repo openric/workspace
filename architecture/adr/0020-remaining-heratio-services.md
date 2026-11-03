@@ -136,3 +136,54 @@ Dr Johan Pieterse chose 1A and 2A on 3 November 2026.
 - `tests/Feature/WebhooksTest.php`: only public addresses; a delivery signed and holding no content; one per entity and event; a publish told as published; retries on Heratio's schedule; the secret shown once.
 - `tests/Feature/InterfacesTest.php`: sitemaps, robots.txt and the feed without what the public may not read; METS with units, files and checksums; OpenAPI from the routes; GraphQL answering only what is published, with aliases and variables, refusing mutations, unknown fields and limits over 100; places within a box and a radius as GeoJSON; caption tracks checked, played publicly with the recording, offered in the manifest, and withheld with it.
 - `tests/Feature/AccessMatrixTest.php`: webhooks and caption tracks refused to another institution's administrator.
+
+## Decision (22d: vendors), 3 November 2026
+
+After Heratio's `ahg-vendor`: the conservators, binders, digitisation bureaux, framers and carriers an institution sends records to, and the work sent.
+
+**A vendor is an authority record.** This is the same choice Dr Johan Pieterse made for donors in phase 9: no second store of agents. The vendor profile holds what Heratio's `ahg_vendors` holds beyond a name and contact details:
+
+- the vendor code (VND, the year and a number, as Heratio gives them);
+- the type and status (vocabulary rows);
+- registration and VAT numbers;
+- bank details, encrypted as Heratio encrypts them and kept out of the audit log;
+- insurance;
+- three ratings;
+- the preferred and B-BBEE flags.
+
+The names, contact points and relations stay on the authority record, which links to its profile. A vendor that has done work is made inactive rather than deleted.
+
+**Services.** Heratio's sixteen service types are a vocabulary. What each needs at the institution is a row per institution, with Heratio's values as defaults: whether it needs insurance, whether it needs a valuation, its usual number of days, and whether it is offered. A vendor offers services at hourly or fixed rates in a currency.
+
+**Transactions.** Work is requested of a vendor for one service and numbered TXN, the year and month, and a number. It carries Heratio's dates, costs, payment status, insurance, shipping and notes. The date it is due back defaults to the service's usual days. Each status change stamps what Heratio stamps (approved, sent, returned, with who did it) and is kept in the history. The records sent are items with their condition before and after (graded and described), a declared value, the work and its cost. They are dated out and back with the work. Quotes, invoices, condition reports and photographs are kept in the file store.
+
+**Changed from Heratio**, which let any status follow any other and sent anything:
+
+- Records leave only once the work is approved and has records.
+- A service that needs insurance goes only to a vendor whose cover is in force, or with insurance arranged for the work.
+- A service that needs a valuation goes only once every record has a declared value.
+- A record already out with a vendor is not sent with other work until it is back.
+- Work goes only to an active vendor.
+- Returned or cancelled work is over.
+
+**RiC.** A transaction is shown as a `rico:Activity` that the vendor performs (`rico:isOrWasPerformedBy`), of a type (`rico:hasActivityType`), affecting the records sent (`rico:affectsOrAffected`). In 22d it is kept for staff and not exported.
+
+### Not carried in 22d
+
+- Heratio's contract tables (`ahg_contract` and the tables around it): its vendor screens never used them, and donor agreements already cover the institution's own agreements.
+- Its stored monthly metrics table: the dashboard and a vendor's figures are worked out when shown.
+- Heratio's encryption of a vendor's telephone and email: these are the authority record's contact points, kept as every contact point is.
+
+### Evidence (22d)
+
+- `tests/Feature/VendorsTest.php`:
+  - an authority record made a vendor, with codes in turn and bank details encrypted and absent from the audit log;
+  - a second profile for the same record, and a bad rating, refused;
+  - a vendor with work not deleted;
+  - work refused for a service the vendor does not offer, and the due date taken from the service;
+  - sending refused before approval, without records, without insurance and without a valuation;
+  - a record out with one vendor refused to another;
+  - the history kept;
+  - closed work not reopened, and an inactive vendor given no work;
+  - the pages, documents and service settings, and a contributor refused.
+- `tests/Feature/AccessMatrixTest.php`: vendors, transactions, their records and documents refused to another institution's administrator.

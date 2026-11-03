@@ -15,6 +15,7 @@ use App\Models\AgreementDocument;
 use App\Models\DigitalFile;
 use App\Models\ProvenanceDocument;
 use App\Models\ResearchFile;
+use App\Models\VendorTransactionAttachment;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 
@@ -23,7 +24,7 @@ final class FileResponse
     /** Types a browser shows itself; any other file is sent as a download. */
     private const INLINE = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'application/pdf', 'text/plain', 'audio/mpeg', 'audio/wav', 'video/mp4'];
 
-    public static function make(DigitalFile|AgreementDocument|AccessionAttachment|ProvenanceDocument|ResearchFile $file, string $path, bool $download = false): BinaryFileResponse
+    public static function make(DigitalFile|AgreementDocument|AccessionAttachment|ProvenanceDocument|ResearchFile|VendorTransactionAttachment $file, string $path, bool $download = false): BinaryFileResponse
     {
         $disposition = in_array($file->mime_type, self::INLINE, true) && ! $download ? ResponseHeaderBag::DISPOSITION_INLINE : ResponseHeaderBag::DISPOSITION_ATTACHMENT;
         $fallback = preg_replace('/[^A-Za-z0-9._-]+/', '_', $file->original_name) ?: 'file';

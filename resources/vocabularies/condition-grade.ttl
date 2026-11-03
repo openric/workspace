@@ -1,0 +1,51 @@
+# OpenRiC Workspace - OpenRiC Workspace Condition Grades.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# How sound a record is, before or after work on it (Heratio's condition_grade dropdown).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/condition-grade/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Condition Grades"@en ;
+    dcterms:description "How sound a record is, before or after work on it (Heratio's condition_grade dropdown)."@en ;
+    dcterms:issued "2026-11-03"^^xsd:date ;
+    skos:hasTopConcept v:excellent, v:good, v:fair, v:poor, v:unacceptable .
+
+v:excellent a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Excellent"@en, "Uitstekend"@af ;
+    skos:scopeNote "Not a RiC-O term: a condition grade, as Heratio's condition_grade dropdown keeps it."@en ;
+    skos:definition "No damage."@en .
+
+v:good a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Good"@en, "Goed"@af ;
+    skos:scopeNote "Not a RiC-O term: a condition grade, as Heratio's condition_grade dropdown keeps it."@en ;
+    skos:definition "Minor wear only."@en .
+
+v:fair a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Fair"@en, "Redelik"@af ;
+    skos:scopeNote "Not a RiC-O term: a condition grade, as Heratio's condition_grade dropdown keeps it."@en ;
+    skos:definition "Damage that does not yet threaten it."@en .
+
+v:poor a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Poor"@en, "Swak"@af ;
+    skos:scopeNote "Not a RiC-O term: a condition grade, as Heratio's condition_grade dropdown keeps it."@en ;
+    skos:definition "Damage that threatens it."@en .
+
+v:unacceptable a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Unacceptable"@en, "Onaanvaarbaar"@af ;
+    skos:scopeNote "Not a RiC-O term: a condition grade, as Heratio's condition_grade dropdown keeps it."@en ;
+    skos:definition "Not fit to handle or use."@en .

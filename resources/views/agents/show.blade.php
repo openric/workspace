@@ -50,6 +50,11 @@
     @include('description._relations', ['subject' => $agent, 'kind' => 'agents', 'relations' => $relations, 'canUpdate' => $canUpdate,
         'heading' => 'Units of description about it', 'types' => ['subject'], 'section' => 'su', 'add' => 'subject|target', 'addLabel' => 'Add a unit of description about it'])
 
+    @if(auth()->user()->mayAnywhere('read', 'vendor'))
+        @php($vendor = \App\Models\Vendor::where('agent_id', $agent->id)->first())
+        @if($vendor)<p>{{ __('A vendor:') }} <a href="{{ route('vendors.show', $vendor) }}">{{ $vendor->vendor_code }}</a></p>
+        @elseif(auth()->user()->may('create', 'vendor'))<p><a href="{{ route('vendors.create', ['agent' => $agent->id]) }}">{{ __('Make this a vendor') }}</a></p>@endif
+    @endif
     <h2>{{ __('Contact points') }}</h2>
     @forelse($agent->contactPoints as $contact)
         @unless($canUpdate)

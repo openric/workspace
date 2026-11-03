@@ -15,7 +15,7 @@ v: a skos:ConceptScheme ;
     dcterms:title "OpenRiC Workspace Record Kinds"@en ;
     dcterms:description "Kinds of record that permissions are granted on."@en ;
     dcterms:issued "2026-10-20"^^xsd:date ;
-    skos:hasTopConcept v:institution, v:repository, v:description, v:vocabulary, v:authority, v:storage, v:accession, v:agreement .
+    skos:hasTopConcept v:institution, v:repository, v:description, v:vocabulary, v:authority, v:storage, v:accession, v:agreement, v:vendor .
 
 v:institution a skos:Concept ;
     skos:inScheme v: ;
@@ -65,3 +65,9 @@ v:agreement a skos:Concept ;
     skos:topConceptOf v: ;
     skos:prefLabel "Donor agreements"@en ;
     skos:definition "Donor agreements: deeds of gift, deposit and loan with their rights, restrictions, reminders and documents. Staff only; never public."@en .
+
+v:vendor a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Vendors"@en ;
+    skos:definition "Vendors and the work sent to them: conservation, digitisation, binding and other services, with the records sent, their condition and the documents filed. Staff only; never public."@en .
