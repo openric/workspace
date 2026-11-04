@@ -147,10 +147,10 @@ class RetentionTest extends TestCase
 
     public function test_destruction_passes_four_pairs_of_hands_erases_the_files_and_keeps_the_evidence(): void
     {
-        // Another record holds the same file: it is kept for that record.
+        // Another record holds the same file: it is kept in that record's own OCFL object, and stays when this one goes.
         $twin = app(RecordService::class)->create($this->institution, self::LEVEL.'file', 'Copy kept elsewhere', 'en', null, $this->file->repository, 'TL-2');
         $copyImage = $this->image('#c0c0c0');
-        app(InstantiationService::class)->upload($twin, $copyImage, 'copy.png', 'en', 'Same scan', null, 'online', $this->people['initiator']);
+        $twinScan = app(InstantiationService::class)->upload($twin, $copyImage, 'copy.png', 'en', 'Same scan', null, 'online', $this->people['initiator']);
         $store = app(FileStore::class);
         $master = $this->scan->file('master');
         $paths = $this->scan->files()->pluck('storage_path', 'id');
@@ -181,7 +181,9 @@ class RetentionTest extends TestCase
             $shared = collect($certificate->files)->firstWhere('storage_path', $path)['shared'];
             $this->assertSame(! $shared, ! is_file($store->path($path)), 'erased unless another record uses it');
         }
-        $this->assertTrue(collect($certificate->files)->firstWhere('use', 'master')['shared'], 'the twin record holds the same master');
+        $this->assertFalse(collect($certificate->files)->contains('shared', true), 'each record has its own object');
+        $this->assertFalse($store->ocfl()->exists($this->scan->iri), 'the object purged, every version of it');
+        $this->assertSame($master->sha256, hash_file('sha256', $store->path($twinScan->file('master')->storage_path)), 'the twin record keeps its own');
 
         // The description is kept as evidence: deleted, its destruction in its custody history, its IRI 410 with the reason.
         $this->assertNotNull($this->file->fresh()->deleted_at);

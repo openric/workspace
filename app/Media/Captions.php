@@ -3,7 +3,7 @@
 // OpenRiC Workspace - caption tracks of a sound or video instantiation (roadmap phase 22c, ADR 0020), after Heratio's
 // ahg-media-streaming caption_track: WebVTT subtitles, captions, audio descriptions and chapters, one of each kind for
 // each language, one of them shown by default. Changed: a track is checked as WebVTT before it is kept, kept in the
-// file store under its checksum like any file, and reaches a reader only with the sound or video it belongs to.
+// instantiation's own OCFL object as captions/<language>-<kind>.vtt (roadmap phase 15b), and reaches a reader only with the sound or video it belongs to.
 // Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
@@ -59,7 +59,7 @@ class Captions
         in_array($kind, self::KINDS, true) || throw new InvalidArgumentException(__(':value is not in the list', ['value' => $kind]));
         (filesize($path) ?: 0) <= self::MAX_BYTES || throw new InvalidArgumentException(__('A caption file may be at most 2 MB.'));
         $cues = self::cues((string) file_get_contents($path));
-        $kept = $this->store->ingest($instantiation->institution_id, $path);
+        $kept = $this->store->into($instantiation->iri)->ingest($instantiation->institution_id, $path, null, "captions/$language-$kind.vtt");
 
         return DB::transaction(function () use ($instantiation, $language, $kind, $label, $default, $by, $cues, $kept) {
             if ($default) {

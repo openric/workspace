@@ -50,17 +50,16 @@ class InstantiationService
 
     public function __construct(private DescriptionService $descriptions, private FileStore $store) {}
 
-    public function create(RecordResource $unit, string $title, string $language, ?string $carrierType = null, string $availability = 'online', ?User $actor = null): Instantiation
+    public function create(RecordResource $unit, string $title, string $language, ?string $carrierType = null, string $availability = 'online', ?User $actor = null, ?string $id = null): Instantiation
     {
         if ($unit->deleted_at !== null) {
             throw new InvalidArgumentException(__('a deleted unit of description takes no new instantiations'));
         }
 
-        return DB::transaction(fn () => AuditLog::actingAs($actor, function () use ($unit, $title, $language, $carrierType, $availability) {
-            $id = (string) Str::uuid7();
-            $base = DB::table('institutions')->where('id', $unit->institution_id)->value('base_iri');
+        return DB::transaction(fn () => AuditLog::actingAs($actor, function () use ($unit, $title, $language, $carrierType, $availability, $id) {
+            $id ??= (string) Str::uuid7();
             $instantiation = new Instantiation([
-                'institution_id' => $unit->institution_id, 'iri' => $base.'/'.Instantiation::IRI_SEGMENT.'/'.$id, 'record_resource_id' => $unit->id,
+                'institution_id' => $unit->institution_id, 'iri' => $this->iri($unit->institution_id, $id), 'record_resource_id' => $unit->id,
                 'carrier_type_id' => $carrierType ? $this->concept(self::CARRIER_TYPES, $carrierType)->id : null,
                 'availability_id' => $this->concept(self::AVAILABILITY, $availability)->id,
                 'position' => (int) Instantiation::where('record_resource_id', $unit->id)->max('position') + 1,
@@ -81,10 +80,12 @@ class InstantiationService
         string $availability = 'online', ?User $actor = null): Instantiation
     {
         app(RepositoryService::class)->assertRoomFor($unit->repository, (int) filesize($path));
-        $master = $this->store->ingest($unit->institution_id, $path, $expectedSha256);
+        // The master is kept in the instantiation's own OCFL object, named by the instantiation's IRI (roadmap phase 15b).
+        $id = (string) Str::uuid7();
+        $master = $this->store->into($this->iri($unit->institution_id, $id))->ingest($unit->institution_id, $path, $expectedSha256, 'files/master/'.self::logicalName($originalName));
 
-        $instantiation = DB::transaction(fn () => AuditLog::actingAs($actor, function () use ($unit, $originalName, $language, $title, $availability, $master) {
-            $instantiation = $this->create($unit, trim((string) $title) !== '' ? (string) $title : $originalName, $language, 'digital-file', $availability);
+        $instantiation = DB::transaction(fn () => AuditLog::actingAs($actor, function () use ($unit, $originalName, $language, $title, $availability, $master, $id) {
+            $instantiation = $this->create($unit, trim((string) $title) !== '' ? (string) $title : $originalName, $language, 'digital-file', $availability, null, $id);
             $this->addFile($instantiation, 'master', $originalName, $master);
 
             return $instantiation;
@@ -113,7 +114,7 @@ class InstantiationService
             return 0;
         }
         $watermark = app(Watermark::class)->configFor(Institution::findOrFail($instantiation->institution_id), $instantiation->record);
-        $copies = $this->store->copies($instantiation->institution_id, $this->store->path($master->storage_path), $master->mime_type, $watermark);
+        $copies = $this->store->into($instantiation->iri)->copies($instantiation->institution_id, $this->store->path($master->storage_path), $master->mime_type, $watermark);
         DB::transaction(fn () => AuditLog::actingAs($actor, fn () => $this->addCopies($instantiation, $master->original_name, $copies)));
 
         return count($copies);
@@ -160,7 +161,7 @@ class InstantiationService
         $watermark = app(Watermark::class)->configFor(Institution::findOrFail($instantiation->institution_id), $instantiation->record);
         // ponytail: copies() makes and keeps both sizes; the one not used stays in the store unreferenced, as an old copy
         // does after remakeCopies. A copies() that takes the uses wanted would keep only the one.
-        $copy = $this->store->copies($instantiation->institution_id, $path, $mime, $watermark)[$use];
+        $copy = $this->store->into($instantiation->iri)->copies($instantiation->institution_id, $path, $mime, $watermark)[$use];
 
         return DB::transaction(fn () => AuditLog::actingAs($actor, function () use ($instantiation, $use, $copy) {
             $instantiation->files()->whereHas('use', fn ($q) => $q->where('notation', $use))->get()->each->delete();
@@ -256,6 +257,19 @@ class InstantiationService
     {
         return DigitalFile::create([...$kept, 'institution_id' => $instantiation->institution_id, 'instantiation_id' => $instantiation->id,
             'use_id' => $this->concept(self::USES, $use)->id, 'original_name' => mb_substr($name, 0, 255), 'fixity_checked_at' => now()]);
+    }
+
+    private function iri(string $institutionId, string $id): string
+    {
+        return DB::table('institutions')->where('id', $institutionId)->value('base_iri').'/'.Instantiation::IRI_SEGMENT.'/'.$id;
+    }
+
+    /** A file's name as the last part of a logical path in its OCFL object: no folders, no control characters. */
+    public static function logicalName(string $name): string
+    {
+        $name = trim((string) preg_replace('/[\x00-\x1f\x7f]/u', '', basename(str_replace('\\', '/', $name))));
+
+        return in_array($name, ['', '.', '..'], true) ? 'file' : mb_substr($name, 0, 200);
     }
 
     private function concept(string $vocabulary, string $notation): Concept

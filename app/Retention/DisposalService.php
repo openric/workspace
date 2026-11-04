@@ -23,6 +23,7 @@ use App\Audit\AuditLog;
 use App\Description\EntityDeletion;
 use App\Description\ProvenanceService;
 use App\Files\FileStore;
+use App\Files\Ocfl\StorageRoot;
 use App\Models\DestructionCertificate;
 use App\Models\DigitalFile;
 use App\Models\DisposalAction;
@@ -161,14 +162,16 @@ class DisposalService
             return $certificate;
         }));
 
-        // Then the files, once the record of their destruction is kept: each unless another record still uses it.
+        // Then the files, once the record of their destruction is kept: each instantiation's OCFL object purged, every
+        // version of it, since OCFL keeps them all (roadmap phase 15b); an object another record still uses is left.
         $store = app(FileStore::class);
         $kept = [];
         foreach ($certificate->files as $file) {
-            $shared = DigitalFile::where(['institution_id' => $institution, 'storage_path' => $file['storage_path']])
+            $object = StorageRoot::objectRootOf($file['storage_path']);
+            $shared = DigitalFile::where('institution_id', $institution)->where('storage_path', 'like', $object.'/%')
                 ->whereHas('instantiation', fn ($q) => $q->whereNull('deleted_at'))->exists();
-            if (! $shared && is_file($store->path($file['storage_path']))) {
-                @unlink($store->path($file['storage_path']));
+            if (! $shared) {
+                $store->ocfl()->purgeRoot($object);
             }
             $kept[] = [...$file, 'shared' => $shared];
         }

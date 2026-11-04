@@ -72,3 +72,40 @@ It validates against the PREMIS 3.0 schema. The schema states no licence, so it 
   - the PREMIS export's entity, representation, files, digest, derivation and events, valid PREMIS 3.0 where `PREMIS_XSD` is set;
   - a deletion kept after the file is gone;
   - the formats page, and a format's risk and action set by an operator.
+
+## 15b: OCFL as the one object store
+
+Dr Johan Pieterse, 4 November 2026: "this is not live data. so one store." The checksum layout the Workspace kept files in until 0.0.114 (`<institution>/<aa>/<bb>/<sha256>`) is replaced outright by an OCFL 1.1 storage root, copied from Heratio's `ahg-ocfl` and corrected. There is no period of keeping both.
+
+**The storage root** declares itself (`0=ocfl_1.1`) and its layout in `ocfl_layout.json`. The layout is OCFL's published extension 0004, hashed n-tuple storage: the SHA-256 of the object's id, three tuples of three characters, then the whole digest. Any OCFL tool can find an object from its id without the Workspace.
+
+**One object per instantiation**, named by the instantiation's IRI. Its master is at `files/master/<the file's name>`, its copies at `files/reference/...` and `files/thumbnail/...`, its caption tracks at `captions/<language>-<kind>.vtt`. Any other file the Workspace keeps (an agreement, a permit, an email, a transfer package) is an object of its own, named `<base IRI>/file/<sha256>`. A row's `storage_path` is the content file in the object, so reading a file is unchanged.
+
+**Each change is a new version holding the whole object**: the head's files, less those removed, with those added or replaced. Content already in the object is not written twice. A version is written to a staging folder and put in place whole, the object's inventory and its SHA-512 sidecar after it, and writes to one object wait for each other. Each content file's SHA-256 is in the inventory's fixity block, so the fixity checks of phase 12a go on reading the digest every file came in with.
+
+What was changed from Heratio:
+
+- Heratio's layout ended in the url-encoded id and named no published extension; this one is extension 0004.
+- Heratio's new version held only the files written in it, so each version dropped the earlier files; here each version is the whole object.
+- Heratio had no lock and no staging, so a failed write could leave half a version.
+- Heratio had no purge. A disposal must erase, and OCFL keeps every version, so a destruction now removes the instantiation's object, every version of it, unless a record still in the Workspace uses it.
+
+**Moving what was kept.** `workspace:ocfl:migrate` moves each instantiation's files and captions into the first version of its object and every other kept file into its own object. A file is moved only when its checksum is still the one recorded. The old layout is removed once every object written verifies and no row names an old path. The file guard on `digital_files` lets a file's place change in that command's transaction only, which says so with `SET LOCAL workspace.moving_files`; nothing else may change it. The release of 0.0.115 runs it on live.
+
+`workspace:ocfl:verify` checks the storage root and every object in it: the declaration, the inventory and its sidecar, each version's inventory, and every content file against its digest.
+
+### Not carried in 15b
+
+- Heratio's `ocfl_object` table: the inventory is the record of an object, and the Workspace's rows point into it; a second copy of the inventory in the database would only drift.
+- Heratio's mirror to a second storage root: replication comes in 15c.
+
+### Evidence (15b)
+
+- `tests/Feature/OcflStoreTest.php`:
+  - the storage root's declaration and layout, the object at its extension 0004 path, every file's content where its row says;
+  - the master and its copies in the head version under their logical paths, a file's name without its folders;
+  - a copy given again as a new version that still holds the master;
+  - every object verifying, and a changed content file found;
+  - a purged object gone with its folders;
+  - files put back in the old layout moved into OCFL, the old layout removed, and the command run again moving nothing.
+- `tests/Feature/RetentionTest.php`: a destruction purges the instantiation's object, and a twin record keeps its own.

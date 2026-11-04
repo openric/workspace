@@ -93,7 +93,7 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-nmmz` | 2666 | later: jurisdiction | Planned | 21 | `ahgNMMZPlugin` | Moved to phase 21 with the heritage objects it registers, by Dr Johan Pieterse on 2 November 2026 |
 | `ahg-oai` | 1847 | V0.1 candidate | Covered |  | `arOaiPlugin` | OAI-PMH, Export-Only profile |
 | `ahg-observability` | 1903 | later: V1.0+ | Covered | 12a | `ahgObservabilityPlugin` | Health figures as a page and Prometheus text from v0.0.110 (ADR 0021); no tracing or latency histograms |
-| `ahg-ocfl` | 3106 | later: V1.0+ | Planned | 15b | `ahgOcflPlugin` | OCFL as the one object store (ADR 0022) |
+| `ahg-ocfl` | 3106 | later: V1.0+ | Done | 15b | `ahgOcflPlugin` | OCFL 1.1 as the one object store from v0.0.115, laid out by extension 0004, each version the whole object, objects purged at destruction (ADR 0022); the mirror to a second root is replication, in 15c |
 | `ahg-pdf-tools` | 2093 | V0.1 candidate | Partial | 5 | `ahgTiffPdfMergePlugin` | A PDF's text layer proposed as its transcript (v0.0.64); merging TIFFs into a PDF with the scanning workflows, phase 22 |
 | `ahg-portable-export` | 3000 | later: V1.0+ | Planned | 11c, deferred | `ahgPortableExportPlugin` | Read PSIS ahgPortableExportPlugin too, which does more; deferred by Dr Johan Pieterse on 30 October 2026 |
 | `ahg-preservation` | 10211 | later: V1.0+ | Partial | 15a | `ahgPreservationPlugin` | PREMIS events, PRONOM formats by Siegfried and the PREMIS 3.0 export from v0.0.114 (ADR 0022); policies, migration, replication and packages in 15c and 15d |
@@ -763,6 +763,17 @@ Added on 2 November 2026 with 18e.
 | none | Each pack switched on or off in the settings | Workspace only |
 
 : The National Archives of Zimbabwe and the CDPA, field by field
+
+### The OCFL object store (`ahg-ocfl`)
+
+Added on 4 November 2026 with 15b.
+
+| Heratio field | Workspace | Status |
+|---|---|---|
+| `ahg_ocfl_object_map`: `information_object_id`, `ocfl_object_id` | The instantiation, whose IRI is its object's id | Modelled |
+| `storage_root` | One storage root, the object store | Same |
+| `head_version` | The object's own inventory, read when needed | Modelled |
+| `created_at`, `updated_at` | Each version's `created` in the inventory | Modelled |
 
 ### PREMIS events and file formats (`ahg-preservation`)
 

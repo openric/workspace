@@ -7,15 +7,18 @@
 // A file is taken in once: its SHA-256 is computed and, when the uploader
 // gives the checksum they expect, compared with it; its type is read from its
 // content, not its name; it is scanned for viruses when a scanner is
-// configured; and it is kept by its checksum under the institution, outside
-// the web root, so the only way to it is through the Workspace. Copies for
+// configured; and it is kept in the OCFL storage root (roadmap phase 15b, ADR 0022), outside
+// the web root, so the only way to it is through the Workspace: an instantiation's files
+// in its own object (FileStore::into), any other file in an object of its own. Copies for
 // viewing (a reference image and a thumbnail) are made from images and from
 // the first page of a PDF, without the master's embedded metadata. A glTF
 // binary (GLB) 3D model is its own reference copy, shown in a 3D viewer.
 
 namespace App\Files;
 
+use App\Files\Ocfl\StorageRoot;
 use finfo;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
 use RuntimeException;
@@ -43,7 +46,7 @@ class FileStore
      *
      * @return array{sha256: string, size_bytes: int, mime_type: string, storage_path: string, width: ?int, height: ?int, scanned_with: ?string, scanned_at: ?\DateTimeInterface}
      */
-    public function ingest(string $institutionId, string $path, ?string $expectedSha256 = null): array
+    public function ingest(string $institutionId, string $path, ?string $expectedSha256 = null, ?string $logical = null): array
     {
         $size = filesize($path);
         $limit = config('workspace.max_upload_megabytes') * 1024 * 1024;
@@ -60,7 +63,7 @@ class FileStore
         }
         $scanner = $this->scan($path);
 
-        return [...$this->keep($institutionId, $path, $sha), 'sha256' => $sha, 'size_bytes' => (int) $size, 'mime_type' => $this->type($path), ...$this->dimensions($path),
+        return [...$this->keep($institutionId, $path, $sha, $logical), 'sha256' => $sha, 'size_bytes' => (int) $size, 'mime_type' => $this->type($path), ...$this->dimensions($path),
             'scanned_with' => $scanner, 'scanned_at' => $scanner ? now() : null];
     }
 
@@ -82,7 +85,7 @@ class FileStore
             }
             $sha = hash_file('sha256', $masterPath);
 
-            return ['reference' => [...$this->keep($institutionId, $masterPath, $sha), 'sha256' => $sha, 'size_bytes' => $size, 'mime_type' => $mime,
+            return ['reference' => [...$this->keep($institutionId, $masterPath, $sha, 'files/reference/model.glb'), 'sha256' => $sha, 'size_bytes' => $size, 'mime_type' => $mime,
                 'width' => null, 'height' => null, 'scanned_with' => null, 'scanned_at' => null]];
         }
         if (MediaDuration::timed($mime)) {
@@ -120,7 +123,7 @@ class FileStore
                     app(Watermark::class)->apply($temp, $watermark);
                 }
                 $sha = hash_file('sha256', $temp);
-                $copies[$use] = [...$this->keep($institutionId, $temp, $sha), 'sha256' => $sha, 'size_bytes' => (int) filesize($temp), 'mime_type' => 'image/jpeg',
+                $copies[$use] = [...$this->keep($institutionId, $temp, $sha, "files/$use/$use.jpg"), 'sha256' => $sha, 'size_bytes' => (int) filesize($temp), 'mime_type' => 'image/jpeg',
                     ...$this->dimensions($temp), 'scanned_with' => null, 'scanned_at' => null];
                 unlink($temp);
             }
@@ -168,7 +171,7 @@ class FileStore
                 continue;
             }
             $sha = hash_file('sha256', $temp);
-            $copies[$use] = [...$this->keep($institutionId, $temp, $sha), 'sha256' => $sha, 'size_bytes' => (int) filesize($temp), 'mime_type' => $type,
+            $copies[$use] = [...$this->keep($institutionId, $temp, $sha, "files/$use/$use.".self::extension($type)), 'sha256' => $sha, 'size_bytes' => (int) filesize($temp), 'mime_type' => $type,
                 ...($use === 'thumbnail' ? $this->dimensions($temp) : ['width' => null, 'height' => null, 'duration_seconds' => app(MediaDuration::class)->read($temp)]),
                 'scanned_with' => null, 'scanned_at' => null];
             unlink($temp);
@@ -190,22 +193,49 @@ class FileStore
         return is_file($path) && filesize($path) === $size && hash_file('sha256', $path) === $sha256;
     }
 
-    /** @return array{storage_path: string} the file kept under its checksum, once, whatever it was called */
-    private function keep(string $institutionId, string $path, string $sha): array
+    /**
+     * The same store, keeping what it keeps next in the OCFL object given (an instantiation's, by its IRI), each file under
+     * the logical path its caller gives, or under $logical.
+     */
+    public function into(string $objectId, ?string $logical = null): static
     {
-        $relative = $institutionId.'/'.substr($sha, 0, 2).'/'.substr($sha, 2, 2).'/'.$sha;
-        $target = $this->path($relative);
-        if (! is_file($target)) {
-            if (! is_dir(dirname($target)) && ! mkdir(dirname($target), 0750, true) && ! is_dir(dirname($target))) {
-                throw new RuntimeException('the file store cannot be written to');
-            }
-            if (! copy($path, $target.'.part') || ! rename($target.'.part', $target)) {
-                throw new RuntimeException('the file could not be kept');
-            }
-            chmod($target, 0640);
+        $store = clone $this;
+        [$store->object, $store->logical] = [$objectId, $logical];
+
+        return $store;
+    }
+
+    private ?string $object = null;
+
+    private ?string $logical = null;
+
+    public function ocfl(): StorageRoot
+    {
+        return new StorageRoot($this->root());
+    }
+
+    /**
+     * @return array{storage_path: string} the file kept as a new version of its OCFL object: the object given by into(), or
+     *                                     else one of its own named by the institution and the file's checksum
+     */
+    private function keep(string $institutionId, string $path, string $sha, ?string $logical = null): array
+    {
+        $object = $this->object ?? rtrim((string) DB::table('institutions')->where('id', $institutionId)->value('base_iri'), '/').'/file/'.$sha;
+        $name = $logical ?? $this->logical ?? 'file';
+        $user = auth()->user();
+        try {
+            $written = $this->ocfl()->commit($object, [$name => $path], [], 'Kept by the OpenRiC Workspace', $user?->name, $user ? 'mailto:'.$user->email : null);
+        } catch (InvalidArgumentException $e) {
+            throw new RuntimeException('the file could not be kept: '.$e->getMessage());
         }
 
-        return ['storage_path' => $relative];
+        return ['storage_path' => $written[$name]];
+    }
+
+    /** The extension a copy of this type is named with. */
+    private static function extension(string $mime): string
+    {
+        return ['audio/mpeg' => 'mp3', 'video/mp4' => 'mp4', 'image/png' => 'png', 'image/jpeg' => 'jpg'][$mime] ?? 'bin';
     }
 
     private function type(string $path): string

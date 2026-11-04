@@ -11,6 +11,7 @@ use App\Accounts\AccountService;
 use App\Description\InstantiationService;
 use App\Description\RecordService;
 use App\Description\RepositoryService;
+use App\Files\Ocfl\StorageRoot;
 use App\Models\DigitalFile;
 use App\Models\Instantiation;
 use App\Models\Institution;
@@ -94,7 +95,8 @@ class InstantiationTest extends TestCase
         $this->assertStringStartsWith('https://archives.example.org/instantiation/', $instantiation->iri);
         $master = $instantiation->file('master');
         $this->assertSame([$sha, 'image/png', 2400, 1800, 'minute-book-scan.dat'], [$master->sha256, $master->mime_type, $master->width, $master->height, $master->original_name]);
-        $this->assertFileExists($this->store.'/'.$this->institution->id.'/'.substr($sha, 0, 2).'/'.substr($sha, 2, 2).'/'.$sha);
+        $this->assertSame(StorageRoot::objectRoot($instantiation->iri).'/v1/content/files/master/minute-book-scan.dat', $master->storage_path, 'in its OCFL object');
+        $this->assertFileExists($this->store.'/'.$master->storage_path);
         $this->assertStringNotContainsString(public_path(), app(InstantiationService::class)->path($master), 'outside the web root');
         $this->assertSame([1600, 1200, 'image/jpeg'], [$instantiation->file('reference')->width, $instantiation->file('reference')->height, $instantiation->file('reference')->mime_type]);
         $this->assertSame(300, $instantiation->file('thumbnail')->width);
