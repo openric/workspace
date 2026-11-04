@@ -23,7 +23,7 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-api` | 30902 | V0.1 candidate | Covered | 22c | `ahgAPIPlugin`, `arRestApiPlugin` | Read API, keys, proposals, files (ADR 0007); webhooks, OpenAPI, sitemaps, Atom feed and METS from v0.0.108 (ADR 0020); API writes stay proposals |
 | `ahg-api-plugin` | 179 | V0.1 candidate | Covered |  | none | The proposals contract the MCP uses (v0.0.47) |
 | `ahg-archaeology` | 4291 | out: GLAM sector | Planned | 21 | `ahgArchaeologyPlugin` |  |
-| `ahg-archivematica` | 4049 | later: V1.0+ | Planned | 15d | `arStorageServicePlugin` | Built against its API, last in phase 15 (ADR 0022) |
+| `ahg-archivematica` | 4049 | later: V1.0+ | Done | 15d | `arStorageServicePlugin` | Against Archivematica's API from v0.0.117: transfers followed to their AIP, DIPs fetched from the Storage Service and taken in, its METS parser copied; settings by operators (ADR 0022) |
 | `ahg-articles` | 2447 | later: V1.0+ | Planned | 20 | none |  |
 | `ahg-artwork-request` | 1844 | out: GLAM sector | Planned | 21 | none |  |
 | `ahg-audit-trail` | 4072 | V0.1 candidate | Covered |  | `ahgAuditTrailPlugin` | Tamper-evident audit log (ADR 0004) |
@@ -96,7 +96,7 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-ocfl` | 3106 | later: V1.0+ | Done | 15b | `ahgOcflPlugin` | OCFL 1.1 as the one object store from v0.0.115, laid out by extension 0004, each version the whole object, objects purged at destruction (ADR 0022); the mirror to a second root is replication, in 15c |
 | `ahg-pdf-tools` | 2093 | V0.1 candidate | Partial | 5 | `ahgTiffPdfMergePlugin` | A PDF's text layer proposed as its transcript (v0.0.64); merging TIFFs into a PDF with the scanning workflows, phase 22 |
 | `ahg-portable-export` | 3000 | later: V1.0+ | Planned | 11c, deferred | `ahgPortableExportPlugin` | Read PSIS ahgPortableExportPlugin too, which does more; deferred by Dr Johan Pieterse on 30 October 2026 |
-| `ahg-preservation` | 10211 | later: V1.0+ | Partial | 15a, 15c | `ahgPreservationPlugin` | PREMIS events, PRONOM formats by Siegfried and the PREMIS 3.0 export from v0.0.114; normalisation, migration plans, format risk, replication and PREMIS rights from v0.0.116 (ADR 0022); OAIS packages and BagIt in 15d |
+| `ahg-preservation` | 10211 | later: V1.0+ | Done | 15a, 15c, 15d | `ahgPreservationPlugin` | PREMIS events, PRONOM formats by Siegfried and the PREMIS 3.0 export from v0.0.114; normalisation, migration plans, format risk, replication and PREMIS rights from v0.0.116; OAIS packages as BagIt bags from v0.0.117 (ADR 0022); backup verification in phase 3 |
 | `ahg-privacy` | 16854 | later: jurisdiction | Partial | 18a, 18b | `ahgPrivacyPlugin` | POPIA governance (registers, requests, compromises, assessments, controls, report) from v0.0.91 (18a, ADR 0016); PII scanning, field redaction and file screening from v0.0.94 (18b); not visual redaction of images, named-entity recognition, the Article 30 export or the autopilot |
 | `ahg-provenance-ai` | 2662 | out: AI (V2+) | Planned | 17 (last) | none |  |
 | `ahg-rad-manage` | 1233 | V0.1 candidate | Covered |  | `ahgRadManagePlugin`, `sfRadPlugin` | RAD display standard, from v0.0.76 |
@@ -147,7 +147,7 @@ Checked on 27 October 2026 against PSIS (`archive/plugins`, 143 plugins: 124 of 
 | `ahgSiteRecordPlugin` | Archaeological, heritage and rock art site records, locality shown by role | Phase 21 |
 | `ahgRegistryPlugin` | The AHG community hub and registry | Out of scope: a separate product |
 | `ahgUiOverridesPlugin` | Overrides of AtoM module actions | Not needed: specific to AtoM |
-| `qtSwordPlugin` | SWORD deposit | Phase 15, written fresh |
+| `qtSwordPlugin` | SWORD deposit | Done, v0.0.117: SWORD 1.3 service document and METSArchivematicaDIP deposit, written fresh, signed in with an API key (ADR 0022) |
 | `arCasPlugin` | CAS single sign-on | Not planned; OIDC in phase 12 |
 | `arOpenSearchPlugin` | OpenSearch description of the catalogue search | Not planned; small, can follow phase 6 if asked |
 | `arDominionB5Plugin`, `sfWebBrowserPlugin`, `sfPluginAdminPlugin`, `sfDrupalPlugin` | AtoM's theme, browser and plugin plumbing | Not needed |
@@ -774,6 +774,25 @@ Added on 4 November 2026 with 15b.
 | `storage_root` | One storage root, the object store | Same |
 | `head_version` | The object's own inventory, read when needed | Modelled |
 | `created_at`, `updated_at` | Each version's `created` in the inventory | Modelled |
+
+### OAIS packages, SWORD and Archivematica (`ahg-preservation`, `qtSwordPlugin`, `ahg-archivematica`)
+
+Added on 4 November 2026 with 15d.
+
+| Heratio or AtoM field | Workspace | Status |
+|---|---|---|
+| `preservation_package`: `uuid`, `name`, `description`, `package_type`, `status`, `package_format`, `bagit_version`, `object_count`, `total_size`, `manifest_algorithm`, `package_checksum`, `originator`, `submission_agreement`, `retention_period`, `parent_package_id`, `information_object_id`, `created_by`, `built_at`, `validated_at`, `exported_at`, `metadata` | The same, type, status and format as vocabulary rows; the id a UUID | Same, from v0.0.117 |
+| `source_path`, `export_path` | The serialised bag's place in its own OCFL object | Modelled |
+| `preservation_package_object`: `package_id`, `digital_object_id`, `relative_path`, `file_name`, `file_size`, `checksum_algorithm`, `checksum_value`, `mime_type`, `puid`, `object_role`, `sequence` | The same | Same |
+| `preservation_package_event`: `event_type`, `event_datetime`, `event_detail`, `event_outcome`, `event_outcome_detail`, `agent_type`, `agent_value` | The same, with the PREMIS event types and outcomes | Same |
+| `am_job`: `object_id`, `direction`, `status`, `am_uuid`, `microservice`, `last_polled_at`, `error`, `payload` | The same, with the transfer, SIP and AIP UUIDs each kept | Same |
+| `am_link`: `object_id`, `transfer_uuid`, `sip_uuid`, `aip_uuid`, `dip_uuid`, `am_pipeline_uuid`, `status` | The same, with the files taken in and a note | Same |
+| Settings `am_dashboard_*`, `am_ss_*`, `am_default_pipeline_uuid`, `am_transfer_source_location_uuid`, `am_transfer_source_path`, `am_transfer_staging_path` | One row, set by operators, the API keys encrypted | Same |
+| `am_dip_match_strategy` uuid, identifier | The AIP's UUID first, then the IRI or identifier in `dc:identifier` | Same |
+| `am_dip_match_strategy` slug | No slugs in the Workspace; the IRI instead | Modelled |
+| AtoM `qtSwordPlugin` service document, deposit, `X-Packaging`, `Content-Location`, `Content-MD5`, `Content-Disposition` | The same, SWORD 1.3 | Same |
+| AtoM SWORD HTTP Basic with the password | An API key with the write scope instead | Modelled |
+| AtoM SWORD child descriptions made from a DIP's structMap | The DIP's files kept as instantiations of the unit deposited to | Modelled |
 
 ### PREMIS events and file formats (`ahg-preservation`)
 

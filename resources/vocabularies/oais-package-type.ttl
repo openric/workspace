@@ -1,0 +1,37 @@
+# OpenRiC Workspace - OpenRiC Workspace OAIS Package Types.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What an OAIS information package is for (ISO 14721; Heratio's preservation_package.package_type).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/oais-package-type/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace OAIS Package Types"@en ;
+    dcterms:description "What an OAIS information package is for (ISO 14721; Heratio's preservation_package.package_type)."@en ;
+    dcterms:issued "2026-11-04"^^xsd:date ;
+    skos:hasTopConcept v:sip, v:aip, v:dip .
+
+v:sip a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Submission Information Package"@en, "Voorleggingsinligtingspakket"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's preservation packages, as Heratio's ahg-preservation keeps them."@en ;
+    skos:definition "What a producer gives the archive to take in."@en .
+
+v:aip a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Archival Information Package"@en, "Argiefinligtingspakket"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's preservation packages, as Heratio's ahg-preservation keeps them."@en ;
+    skos:definition "What the archive keeps: the files and everything needed to keep them readable."@en .
+
+v:dip a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Dissemination Information Package"@en, "Verspreidingsinligtingspakket"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's preservation packages, as Heratio's ahg-preservation keeps them."@en ;
+    skos:definition "What the archive gives a reader: copies to use and their description."@en .

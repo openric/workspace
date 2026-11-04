@@ -1,0 +1,51 @@
+# OpenRiC Workspace - OpenRiC Workspace Package Object Roles.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What a file is in an information package (Heratio's preservation_package_object.object_role).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/package-object-role/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Package Object Roles"@en ;
+    dcterms:description "What a file is in an information package (Heratio's preservation_package_object.object_role)."@en ;
+    dcterms:issued "2026-11-04"^^xsd:date ;
+    skos:hasTopConcept v:payload, v:metadata, v:tag, v:manifest, v:tagmanifest .
+
+v:payload a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Payload"@en, "Vrag"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's preservation packages, as Heratio's ahg-preservation keeps them."@en ;
+    skos:definition "A file kept or given: a master, a preservation master or a copy."@en .
+
+v:metadata a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Metadata"@en, "Metadata"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's preservation packages, as Heratio's ahg-preservation keeps them."@en ;
+    skos:definition "The description or preservation metadata of the payload, such as METS or PREMIS."@en .
+
+v:tag a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Tag file"@en, "Etiketlêer"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's preservation packages, as Heratio's ahg-preservation keeps them."@en ;
+    skos:definition "A BagIt tag file: bagit.txt or bag-info.txt."@en .
+
+v:manifest a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Manifest"@en, "Manifes"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's preservation packages, as Heratio's ahg-preservation keeps them."@en ;
+    skos:definition "The BagIt payload manifest: each file with its checksum."@en .
+
+v:tagmanifest a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Tag manifest"@en, "Etiketmanifes"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's preservation packages, as Heratio's ahg-preservation keeps them."@en ;
+    skos:definition "The BagIt tag manifest: each tag file with its checksum."@en .

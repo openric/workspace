@@ -29,9 +29,11 @@ use App\Models\DigitalFile;
 use App\Models\DisposalAction;
 use App\Models\DisposalClass;
 use App\Models\Instantiation;
+use App\Models\Package;
 use App\Models\RecordDisposalClass;
 use App\Models\RecordResource;
 use App\Models\User;
+use App\Preservation\Packages;
 use App\Relations\EntityKinds;
 use App\Support\Vocab;
 use Illuminate\Support\Facades\DB;
@@ -176,6 +178,8 @@ class DisposalService
             $kept[] = [...$file, 'shared' => $shared];
         }
         $certificate->update(['files' => $kept]);
+        // Its information packages hold copies of its files, so they go with them (phase 15d).
+        Package::where('record_resource_id', $unit->id)->get()->each(fn (Package $package) => app(Packages::class)->purge($package));
 
         return $disposal->fresh();
     }

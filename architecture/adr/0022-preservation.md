@@ -183,3 +183,86 @@ The export validates against the PREMIS 3.0 schema with them.
   - a folder holding other files refused and left as it was;
   - a folder inside the object store, and a host a shell would read, refused;
   - the unit's copyright and statute rights as PREMIS rights statements, valid where `PREMIS_XSD` is set.
+
+## 15d: OAIS packages, SWORD and Archivematica
+
+**OAIS information packages**, after Heratio's `BagItService` and `OaisLifecycleService`. A unit of description, with what it includes where chosen, is put together as a BagIt 1.0 bag (RFC 8493) and serialised in one ZIP or TAR file. The file is kept in an OCFL object of its own, named `<base IRI>/package/<id>`.
+
+What each kind holds:
+
+- a SIP: the masters;
+- an AIP: the masters and preservation masters, with the unit's RiC-O;
+- a DIP: the access copies, or else the reference copies.
+
+Each holds the unit's METS and PREMIS under `data/metadata`. A DIP carries what a reader sees, never drafts. A file goes in only where the account that builds the package may receive it.
+
+The bag has its manifest and tag manifest (SHA-256 or SHA-512) and a bag-info with:
+
+- Source-Organization, the contact, and External-Identifier (the unit's IRI);
+- Bagging-Date, Bag-Size and Payload-Oxum;
+- Bag-Group-Identifier (the package it was made from) and the Workspace as Bag-Software-Agent.
+
+A SIP is carried on into an AIP and an AIP into a DIP, each naming the one it came from, as Heratio's lineage does. A package is validated again against its kept SHA-256, its manifests and its Payload-Oxum. Every build and validation is a PREMIS event of the package.
+
+A package can be downloaded, which marks it exported, and removed, which purges its OCFL object. A destruction purges the unit's packages with its files, since they hold copies of them. The test checks a built bag with the Library of Congress's bagit-python where `BAGIT` names it.
+
+**SWORD 1.3 deposit**, as AtoM's `qtSwordPlugin` answers it, so that Archivematica's "Upload DIP to AtoM" can deposit a DIP here. Heratio has no twin; it is written fresh against the DIP ingest.
+
+What it offers:
+
+- a service document listing the top-level units, or a unit's parts, as collections;
+- a deposit to a unit of a `METSArchivematicaDIP` package, as a ZIP body or named by Content-Location in the one folder the installation allows;
+- the deposit taken in in the background, and answered 202 with an Atom entry.
+
+What it refuses, with SWORD's error documents:
+
+- another packaging or content type;
+- a Content-MD5 that does not match;
+- a package larger than an upload may be;
+- a Content-Location outside the folder.
+
+An account signs in with HTTP Basic as its e-mail address and an API key of its own with the write scope, never its password. Two-factor sign-in is therefore not passed by, where AtoM takes the password.
+
+**Archivematica**, after Heratio's `ahg-archivematica`, against Archivematica's documented Dashboard and Storage Service APIs (Dr Johan Pieterse, 4 November 2026: "Build last, against its API (Recommended)"). Tested with a faked Archivematica.
+
+- **Settings.** The installation's operators set them: the Dashboard and Storage Service with their users and API keys (encrypted), the pipeline, the transfer source location UUID and folder, the staging folder, the transfer type, and the SWORD deposit folder.
+- **Sending a unit.** Its masters, with what it includes, are staged under `objects/`. A `metadata/metadata.csv` gives the unit's IRI as `dc.identifier`, so the DIP that comes back finds it. The transfer is started, approved once Archivematica lists it, and followed every five minutes through transfer and ingest to its AIP.
+- **Fetching DIPs.** Where switched on, the DIPs the Storage Service holds are fetched each hour, each once.
+- **Taking a DIP in.** A fetched DIP and a SWORD deposit go through one ingest. Its METS is read with Heratio's METS parser, copied unchanged.
+- **Finding the unit.** It is the unit the deposit names, else the one the AIP's transfer was sent from, else the one whose IRI, or whose identifier alone, the DIP's `dc:identifier` gives.
+- **The files.** Each access file is kept through the same upload every file takes, as an instantiation of the unit. What the AIP's PREMIS said of it (original name, PUID, digest) is kept as a PREMIS metadata extraction event.
+
+What was changed from Heratio and AtoM:
+
+- No processing configuration is shipped. Heratio's `processingMCP.xml` is Archivematica's own, whose authorship is not Heratio's, so it is not copied. An operator's `processingMCP.xml` in the staging folder is used where there is one, else Archivematica's default.
+- A DIP's files come in as instantiations of the unit, not as new descriptions as AtoM makes them.
+- An archive is unpacked only where no name in it climbs out of its folder.
+- A DIP that matches no unit belongs to no institution, and only operators see it.
+
+Two encrypted fields that key rotation (12a) did not re-encrypt are added to it: single sign-on client secrets and two-factor secrets, both from 12b. A test now fails when an encrypted field is left out.
+
+### Not carried in 15d
+
+- Heratio's `PackageCleanupCommand`: packages are kept until removed, in their OCFL objects; nothing is built in a folder that lingers.
+- Heratio's slug match strategy for DIPs: the Workspace has no slugs; the IRI takes its place.
+- AtoM's SWORD mediation (X-On-Behalf-Of), no-op and verbose modes, which AtoM leaves undone too.
+- Archivematica's reingest and the AIP's own download: the AIP stays in Archivematica's Storage Service, linked by its UUID.
+
+### Evidence (15d)
+
+- `tests/Feature/PackagesAndArchivematicaTest.php`:
+  - packages:
+    - a fonds packaged as a SIP with its item's master, METS and PREMIS, its bag valid by the Workspace and by bagit-python;
+    - carried on into an AIP with RiC-O and a DIP with the reference copy and not the master, and no package made from a DIP;
+    - a changed package found;
+    - downloaded and marked exported, and removed with its OCFL object;
+  - SWORD:
+    - refused without a key, with the password, or with a read-only key;
+    - the service document listing the units as collections;
+    - deposits refused for another packaging, a wrong MD5, or a location outside the folder;
+    - a DIP deposited as a ZIP and by Content-Location, each taken in as an instantiation of the unit with the AIP's PREMIS kept;
+  - Archivematica:
+    - a fonds sent to a faked Archivematica: its masters staged with its IRI as `dc.identifier`, the paths sent as Archivematica reads them with its API key;
+    - followed through transfer and ingest to its AIP;
+    - its DIP fetched from the Storage Service, matched by the AIP's UUID, taken in once.
+- `tests/Unit/EncryptedFieldsTest.php`: every field cast as encrypted is one key rotation re-encrypts.

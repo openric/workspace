@@ -50,6 +50,7 @@ use App\Models\Import;
 use App\Models\Institution;
 use App\Models\MigrationPathway;
 use App\Models\NormalisationRule;
+use App\Models\Package;
 use App\Models\ReadingRoom;
 use App\Models\ReadingRoomSeat;
 use App\Models\ResearchDoi;
@@ -361,6 +362,10 @@ class AccessMatrixTest extends TestCase
             return [$rule, $pathway, app(MigrationPlans::class)->save($institution, ['name' => 'PNG to TIFF', 'pathway_id' => $pathway->id], $admin),
                 app(Replication::class)->save(['name' => 'Second disk', 'type' => 'local', 'path' => sys_get_temp_dir().'/matrix-replica', 'frequency' => 'weekly'])];
         });
+        // Phase 15d: an information package of the fonds.
+        $make('information package', fn () => Package::create(['institution_id' => $institution->id, 'record_resource_id' => $fonds->id, 'name' => 'aip-matrix',
+            'type_id' => Concept::where('iri', Vocab::BASE.'oais-package-type/aip')->value('id'), 'status_id' => Concept::where('iri', Vocab::BASE.'package-status/complete')->value('id'),
+            'format_id' => Concept::where('iri', Vocab::BASE.'package-format/zip')->value('id'), 'created_by_id' => $admin->id]));
         // Phase 12b: an identity provider.
         $make('sign-in provider', fn () => SignInProvider::create(['institution_id' => $institution->id, 'label' => 'Staff', 'issuer_url' => 'https://idp.example.org',
             'client_id' => 'workspace', 'client_secret' => 'secret', 'scopes' => ['openid'], 'match_id' => Concept::where('iri', Vocab::BASE.'sign-in-match/subject')->value('id')]));

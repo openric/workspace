@@ -1,0 +1,30 @@
+# OpenRiC Workspace - OpenRiC Workspace Package Formats.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# How an information package is serialised (Heratio's preservation_package.package_format).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/package-format/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Package Formats"@en ;
+    dcterms:description "How an information package is serialised (Heratio's preservation_package.package_format)."@en ;
+    dcterms:issued "2026-11-04"^^xsd:date ;
+    skos:hasTopConcept v:zip, v:tar .
+
+v:zip a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "BagIt bag in a ZIP file"@en, "BagIt-sak in 'n ZIP-lêer"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's preservation packages, as Heratio's ahg-preservation keeps them."@en ;
+    skos:definition "A BagIt 1.0 bag, in one ZIP file."@en .
+
+v:tar a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "BagIt bag in a TAR file"@en, "BagIt-sak in 'n TAR-lêer"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's preservation packages, as Heratio's ahg-preservation keeps them."@en ;
+    skos:definition "A BagIt 1.0 bag, in one TAR file."@en .

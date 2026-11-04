@@ -56,6 +56,7 @@ use App\Http\Controllers\LabelController;
 use App\Http\Controllers\LocalVocabularyController;
 use App\Http\Controllers\NameController;
 use App\Http\Controllers\OperationsController;
+use App\Http\Controllers\PackageController;
 use App\Http\Controllers\PasswordController;
 use App\Http\Controllers\PlaceController;
 use App\Http\Controllers\PreservationController;
@@ -96,6 +97,7 @@ use App\Http\Controllers\SignOnController;
 use App\Http\Controllers\StorageController;
 use App\Http\Controllers\StudioController;
 use App\Http\Controllers\SubmissionController;
+use App\Http\Controllers\SwordController;
 use App\Http\Controllers\TeachingController;
 use App\Http\Controllers\TwoFactorController;
 use App\Http\Controllers\VendorController;
@@ -233,6 +235,12 @@ Route::middleware('throttle:120,1')->prefix('cart')->name('shop.cart')->whereUui
     Route::post('/clear', [ShopController::class, 'clear'])->name('.clear');
 });
 Route::post('/shop/payfast/notify', [ShopController::class, 'notify'])->middleware('throttle:60,1')->name('shop.payfast.notify');
+// SWORD 1.3 deposit, as AtoM's qtSwordPlugin answers it, for Archivematica's DIP upload (roadmap phase 15d); HTTP Basic with an API key.
+Route::middleware('throttle:60,1')->prefix('sword')->name('sword.')->whereUuid('record')->group(function () {
+    Route::get('/servicedocument', [SwordController::class, 'serviceDocument'])->name('service-root');
+    Route::get('/servicedocument/{record}', [SwordController::class, 'serviceDocument'])->name('service');
+    Route::match(['post', 'put', 'delete'], '/deposit/{record}', [SwordController::class, 'deposit'])->name('deposit');
+});
 // Citing a record, and a bibliography opened by its link (roadmap phase 19c, ADR 0017): for anyone.
 Route::get('/cite/{record}', [ResearchToolsController::class, 'cite'])->middleware('throttle:120,1')->whereUuid('record')->name('cite');
 Route::get('/bibliographies/shared/{token}', [ResearchToolsController::class, 'sharedBibliography'])->middleware('throttle:60,1')->where('token', '[A-Za-z0-9]{48}')->name('research.bibliographies.shared');
@@ -597,6 +605,18 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/formats', [FormatController::class, 'index'])->name('formats.index');
         Route::post('/formats/identify', [FormatController::class, 'identify'])->name('formats.identify');
         Route::post('/formats/{format}', [FormatController::class, 'update'])->whereUuid('format')->name('formats.update');
+        // OAIS information packages and Archivematica (roadmap phase 15d).
+        Route::whereUuid(['record', 'package'])->group(function () {
+            Route::get('/records/{record}/packages', [PackageController::class, 'index'])->name('packages.index');
+            Route::post('/records/{record}/packages', [PackageController::class, 'store'])->name('packages.store');
+            Route::post('/records/{record}/archivematica', [PackageController::class, 'transfer'])->name('packages.transfer');
+            Route::get('/packages/{package}', [PackageController::class, 'show'])->name('packages.show');
+            Route::get('/packages/{package}/download', [PackageController::class, 'download'])->name('packages.download');
+            Route::post('/packages/{package}/{action}', [PackageController::class, 'act'])->whereIn('action', ['validate', 'derive', 'remove'])->name('packages.act');
+        });
+        Route::get('/archivematica', [PackageController::class, 'archivematica'])->name('archivematica.index');
+        Route::post('/archivematica', [PackageController::class, 'saveArchivematica'])->name('archivematica.save');
+        Route::post('/archivematica/ping', [PackageController::class, 'ping'])->name('archivematica.ping');
         // Preservation planning: normalisation, migration and replication (roadmap phase 15c).
         Route::prefix('preservation')->name('preservation.')->whereUuid(['rule', 'pathway', 'plan', 'target', 'instantiation'])->group(function () {
             Route::get('/', [PreservationController::class, 'index'])->name('index');

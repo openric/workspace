@@ -1,0 +1,44 @@
+# OpenRiC Workspace - OpenRiC Workspace Archivematica Link Statuses.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Whether a package from Archivematica found its unit of description (Heratio's am_link.status).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/archivematica-link-status/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Archivematica Link Statuses"@en ;
+    dcterms:description "Whether a package from Archivematica found its unit of description (Heratio's am_link.status)."@en ;
+    dcterms:issued "2026-11-04"^^xsd:date ;
+    skos:hasTopConcept v:pending, v:linked, v:unmatched, v:failed .
+
+v:pending a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Pending"@en, "Hangende"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's link to Archivematica, as Heratio's ahg-archivematica keeps it."@en ;
+    skos:definition "Not yet looked at."@en .
+
+v:linked a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Linked"@en, "Gekoppel"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's link to Archivematica, as Heratio's ahg-archivematica keeps it."@en ;
+    skos:definition "Its files are kept with the unit it came from."@en .
+
+v:unmatched a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Unmatched"@en, "Ongepaar"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's link to Archivematica, as Heratio's ahg-archivematica keeps it."@en ;
+    skos:definition "No unit of description matched it."@en .
+
+v:failed a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Failed"@en, "Misluk"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's link to Archivematica, as Heratio's ahg-archivematica keeps it."@en ;
+    skos:definition "It could not be taken in; the reason is kept."@en .

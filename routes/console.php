@@ -12,6 +12,7 @@ use App\Jurisdiction\ExportPermits;
 use App\Jurisdiction\Naz;
 use App\Models\DigitalFile;
 use App\Models\Institution;
+use App\Preservation\Archivematica\Transfers;
 use App\Preservation\Conversions;
 use App\Preservation\FormatIdentification;
 use App\Preservation\MigrationPlans;
@@ -188,6 +189,21 @@ Artisan::command('workspace:migration-plans:scheduled', function (MigrationPlans
     $this->info($plans->runDue().' migration plans started.');
 })->purpose('Start the approved migration plans whose scheduled start has come');
 Schedule::command('workspace:migration-plans:scheduled')->everyFifteenMinutes()->withoutOverlapping(60);
+// Archivematica (roadmap phase 15d): transfers followed to their AIP every five minutes, DIPs fetched each hour, and a ping.
+Artisan::command('workspace:archivematica:poll', function (Transfers $transfers) {
+    $this->info($transfers->poll().' transfers looked at.');
+})->purpose('Follow each transfer to Archivematica one step, to its AIP (Heratio\'s PollArchivematicaJobs)');
+Schedule::command('workspace:archivematica:poll')->everyFiveMinutes()->withoutOverlapping(30);
+Artisan::command('workspace:archivematica:fetch-dips', function (Transfers $transfers) {
+    $links = $transfers->fetchDips();
+    $this->info(count($links).' DIPs looked at: '.collect($links)->countBy(fn ($l) => $l->status->notation)->map(fn ($n, $s) => "$n $s")->join(', '));
+})->purpose('Fetch the DIPs the Archivematica Storage Service holds and take each in (Heratio\'s IngestDipsCommand)');
+Schedule::command('workspace:archivematica:fetch-dips')->hourly()->withoutOverlapping(120);
+Artisan::command('workspace:archivematica:ping', function (Transfers $transfers) {
+    foreach ($transfers->ping() as $service => $answer) {
+        $this->line("$service: $answer");
+    }
+})->purpose('Ask the Archivematica Dashboard and Storage Service whether they answer (Heratio\'s PingCommand)');
 Artisan::command('workspace:normalise {--institution= : only this institution\'s masters}', function (Conversions $conversions) {
     $done = $failed = 0;
     DigitalFile::whereHas('use', fn ($q) => $q->where('notation', 'master'))->whereHas('instantiation', fn ($q) => $q->whereNull('deleted_at'))

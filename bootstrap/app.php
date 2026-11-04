@@ -24,8 +24,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias(['active' => EnsureAccountActive::class, 'access' => RequireAccess::class]);
         // The interface's language for every web page (WS-005); the API answers in data, not prose.
         $middleware->appendToGroup('web', SetLocale::class);
-        // PayFast's notification comes from PayFast, with no CSRF token; the shop verifies it (roadmap phase 19a).
-        $middleware->validateCsrfTokens(except: ['shop/payfast/notify']);
+        // PayFast's notification comes from PayFast, with no CSRF token; the shop verifies it (roadmap phase 19a). A SWORD
+        // deposit comes from Archivematica, signed in with an API key on each request (phase 15d).
+        $middleware->validateCsrfTokens(except: ['shop/payfast/notify', 'sword/*']);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         // The OpenRiC API answers every error as RFC 7807 problem details (Core Discovery 0.6.0, section 4).

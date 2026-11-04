@@ -180,6 +180,19 @@ class FileStore
         return $copies;
     }
 
+    /**
+     * Keep a file the Workspace made itself (an information package, roadmap phase 15d) in the OCFL object into() names,
+     * under $logical: not held to the upload limit, and not scanned, as nothing came in.
+     *
+     * @return array{storage_path: string, sha256: string, size_bytes: int}
+     */
+    public function keepMade(string $institutionId, string $path, string $logical): array
+    {
+        $sha = hash_file('sha256', $path);
+
+        return [...$this->keep($institutionId, $path, $sha, $logical), 'sha256' => $sha, 'size_bytes' => (int) filesize($path)];
+    }
+
     public function path(string $storagePath): string
     {
         return $this->root().'/'.$storagePath;
