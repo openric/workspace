@@ -1,0 +1,86 @@
+# OpenRiC Workspace - OpenRiC Workspace Article Attachment Kinds.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What a file attached to an article is (Heratio's blog_attachment_kind dropdown).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/article-attachment-kind/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Article Attachment Kinds"@en ;
+    dcterms:description "What a file attached to an article is (Heratio's blog_attachment_kind dropdown)."@en ;
+    dcterms:issued "2026-11-04"^^xsd:date ;
+    skos:hasTopConcept v:guide, v:template, v:checklist, v:worksheet, v:report, v:dataset, v:presentation, v:policy, v:conference-paper, v:video .
+
+v:guide a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Guide"@en, "Gids"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's articles on its public site, as Heratio's ahg-articles keeps them."@en ;
+    skos:definition "A guide to read or follow."@en .
+
+v:template a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Template"@en, "Sjabloon"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's articles on its public site, as Heratio's ahg-articles keeps them."@en ;
+    skos:definition "A template to fill in or adapt."@en .
+
+v:checklist a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Checklist"@en, "Kontrolelys"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's articles on its public site, as Heratio's ahg-articles keeps them."@en ;
+    skos:definition "A checklist or tick-sheet."@en .
+
+v:worksheet a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Worksheet"@en, "Werkblad"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's articles on its public site, as Heratio's ahg-articles keeps them."@en ;
+    skos:definition "A worksheet."@en .
+
+v:report a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Report"@en, "Verslag"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's articles on its public site, as Heratio's ahg-articles keeps them."@en ;
+    skos:definition "A report."@en .
+
+v:dataset a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Dataset"@en, "Datastel"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's articles on its public site, as Heratio's ahg-articles keeps them."@en ;
+    skos:definition "A dataset."@en .
+
+v:presentation a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Presentation"@en, "Aanbieding"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's articles on its public site, as Heratio's ahg-articles keeps them."@en ;
+    skos:definition "A presentation or slide deck."@en .
+
+v:policy a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Policy"@en, "Beleid"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's articles on its public site, as Heratio's ahg-articles keeps them."@en ;
+    skos:definition "A policy."@en .
+
+v:conference-paper a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Conference paper"@en, "Konferensievoordrag"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's articles on its public site, as Heratio's ahg-articles keeps them."@en ;
+    skos:definition "A paper given at a conference."@en .
+
+v:video a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Video"@en, "Video"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's articles on its public site, as Heratio's ahg-articles keeps them."@en ;
+    skos:definition "A video, played in the page."@en .

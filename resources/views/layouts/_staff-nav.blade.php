@@ -81,6 +81,14 @@
                 'shop.orders' => [__('Orders'), $may('manage-shop'), 'shop.orders*'],
                 'shop.settings' => [__('Shop settings'), $may('manage-shop'), 'shop.settings*'],
             ],
+            // The institution's own pages on its public site, and each user's dashboards (roadmap phase 20a).
+            'Public site' => [
+                'site.pages' => [__('Static pages'), $user->mayAnywhere('publish', 'description'), 'site.pages*'],
+                'site.articles' => [__('Articles'), $user->mayAnywhere('publish', 'description'), 'site.articles*|site.attachments.*|site.links.*'],
+                'site.comments' => [__('Article comments'), $user->mayAnywhere('publish', 'description'), 'site.comments*'],
+                'site.landing' => [__('Landing pages'), $user->mayAnywhere('publish', 'description'), 'site.landing*|landing.*'],
+                'dashboards' => [__('My dashboards'), true, 'dashboards*'],
+            ],
             'Admin' => [
                 'accounts.index' => [__('Users'), $may('manage-accounts'), 'accounts.*'],
                 'email.index' => [__('Email'), $may('manage-accounts'), 'email.*'],
@@ -109,6 +117,7 @@
             'Import and export' => '<path d="M7 4v13M3 13l4 4 4-4"/><path d="M17 20V7M13 11l4-4 4 4"/>',
             'Reports' => '<path d="M4 20V10M10 20V4M16 20v-7M2 20h20"/>',
             'Research' => '<path d="M2 5c3-1.5 7-1.5 10 1 3-2.5 7-2.5 10-1v14c-3-1.5-7-1.5-10 1-3-2.5-7-2.5-10-1z"/><path d="M12 6v14"/>',
+            'Public site' => '<path d="M3 5h18v14H3z"/><path d="M3 9h18M8 13h8M8 16h5"/>',
             'Admin' => '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/>',
             'Public catalogue' => '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3.5 3.5 3.5 14.5 0 18M12 3c-3.5 3.5-3.5 14.5 0 18"/>',
         ];

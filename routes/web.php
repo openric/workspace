@@ -97,6 +97,8 @@ use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\ShareLinkController;
 use App\Http\Controllers\ShopController;
 use App\Http\Controllers\SignOnController;
+use App\Http\Controllers\SiteAdminController;
+use App\Http\Controllers\SiteController;
 use App\Http\Controllers\SparqlController;
 use App\Http\Controllers\StorageController;
 use App\Http\Controllers\StudioController;
@@ -117,6 +119,7 @@ use App\Privacy\Registers;
 use App\Relations\EntityKinds;
 use App\Reports\ReportService;
 use App\Research\ProjectExport;
+use App\Site\StaticPages;
 use App\Support\Vocab;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Http\Request;
@@ -215,6 +218,19 @@ Route::middleware([ServeDiscovery::class, 'throttle:120,1'])->group(function () 
     Route::get('/open-data/network', [FederationController::class, 'network'])->name('federation.network');
     Route::get('/federation/join', [FederationController::class, 'joinForm'])->name('federation.join');
     Route::post('/federation/join', [FederationController::class, 'join'])->middleware('throttle:5,1')->name('federation.join.submit');
+});
+// The institution's own pages on its public site (roadmap phase 20a): static pages, articles and landing pages.
+Route::middleware([ServeDiscovery::class, 'throttle:120,1'])->group(function () {
+    Route::get('/pages/{slug}', [SiteController::class, 'page'])->where('slug', '[a-z0-9]+(-[a-z0-9]+)*')->name('site.page');
+    foreach (StaticPages::NAMED as $named) {
+        Route::get('/'.$named, [SiteController::class, 'page'])->defaults('slug', $named)->name('site.'.$named);
+    }
+    Route::get('/articles', [SiteController::class, 'articles'])->name('site.articles-public');
+    Route::get('/articles/{slug}', [SiteController::class, 'article'])->where('slug', '[a-z0-9][a-z0-9-]*')->name('site.article');
+    Route::post('/articles/{slug}/read', [SiteController::class, 'read'])->where('slug', '[a-z0-9][a-z0-9-]*')->middleware('throttle:30,1')->name('site.article.read');
+    Route::post('/articles/{slug}/comments', [SiteController::class, 'comment'])->where('slug', '[a-z0-9][a-z0-9-]*')->middleware('throttle:6,1')->name('site.article.comment');
+    Route::get('/site-files/{file}', [SiteController::class, 'file'])->whereUuid('file')->name('site.file');
+    Route::get('/landing/{slug?}', [SiteController::class, 'landing'])->where('slug', '[a-z0-9]+(-[a-z0-9]+)*')->name('site.landing-page');
 });
 Route::middleware(ServeDiscovery::class)->prefix('discover')->name('discover.')->group(function () {
     Route::get('/', [DiscoverController::class, 'home'])->name('home');
@@ -613,6 +629,49 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::post('/{concept}/restore', [ConceptController::class, 'restore'])->name('restore');
     });
 
+    // Editing the public site (roadmap phase 20a), by who may publish descriptions.
+    Route::middleware('access:publish,description')->prefix('site')->name('site.')->whereUuid(['page', 'article', 'attachment', 'target', 'comment'])->group(function () {
+        Route::get('/pages', [SiteAdminController::class, 'pages'])->name('pages');
+        Route::get('/pages/new', [SiteAdminController::class, 'pageForm'])->name('pages.create');
+        Route::post('/pages', [SiteAdminController::class, 'savePage'])->name('pages.store');
+        Route::get('/pages/{page}', [SiteAdminController::class, 'pageForm'])->name('pages.edit');
+        Route::put('/pages/{page}', [SiteAdminController::class, 'savePage'])->name('pages.update');
+        Route::delete('/pages/{page}', [SiteAdminController::class, 'deletePage'])->name('pages.destroy');
+        Route::get('/articles', [SiteAdminController::class, 'articles'])->name('articles');
+        Route::get('/articles/new', [SiteAdminController::class, 'articleForm'])->name('articles.create');
+        Route::post('/articles', [SiteAdminController::class, 'saveArticle'])->name('articles.store');
+        Route::post('/articles/images', [SiteAdminController::class, 'uploadImage'])->name('images.store');
+        Route::get('/articles/comments', [SiteAdminController::class, 'comments'])->name('comments');
+        Route::put('/articles/comments/{comment}', [SiteAdminController::class, 'commentStatus'])->name('comments.update');
+        Route::delete('/articles/comments/{comment}', [SiteAdminController::class, 'deleteComment'])->name('comments.destroy');
+        Route::get('/articles/{article}', [SiteAdminController::class, 'articleForm'])->name('articles.edit');
+        Route::put('/articles/{article}', [SiteAdminController::class, 'saveArticle'])->name('articles.update');
+        Route::delete('/articles/{article}', [SiteAdminController::class, 'deleteArticle'])->name('articles.destroy');
+        Route::post('/articles/{article}/attachments', [SiteAdminController::class, 'addAttachment'])->name('attachments.store');
+        Route::put('/articles/{article}/attachments/order', [SiteAdminController::class, 'reorderAttachments'])->name('attachments.order');
+        Route::put('/articles/{article}/attachments/{attachment}', [SiteAdminController::class, 'updateAttachment'])->name('attachments.update');
+        Route::delete('/articles/{article}/attachments/{attachment}', [SiteAdminController::class, 'deleteAttachment'])->name('attachments.destroy');
+        Route::post('/articles/{article}/links', [SiteAdminController::class, 'link'])->name('links.store');
+        Route::put('/articles/{article}/links/order', [SiteAdminController::class, 'reorderLinks'])->name('links.order');
+        Route::delete('/articles/{article}/links/{target}', [SiteAdminController::class, 'unlink'])->name('links.destroy');
+        Route::get('/landing-pages', [SiteAdminController::class, 'landingPages'])->name('landing');
+        Route::post('/landing-pages', [SiteAdminController::class, 'createLanding'])->name('landing.store');
+    });
+    // Landing pages built block by block: the institution's, by who may publish; a dashboard, by its owner (phase 20a).
+    Route::prefix('landing-pages')->name('landing.')->whereUuid(['page', 'block'])->group(function () {
+        Route::get('/{page}/edit', [SiteAdminController::class, 'editLanding'])->name('edit');
+        Route::put('/{page}', [SiteAdminController::class, 'updateLanding'])->name('update');
+        Route::delete('/{page}', [SiteAdminController::class, 'deleteLanding'])->name('destroy');
+        Route::post('/{page}/blocks', [SiteAdminController::class, 'addBlock'])->name('blocks.store');
+        Route::put('/{page}/blocks/order', [SiteAdminController::class, 'reorderBlocks'])->name('blocks.order');
+        Route::put('/blocks/{block}', [SiteAdminController::class, 'updateBlock'])->name('blocks.update');
+        Route::delete('/blocks/{block}', [SiteAdminController::class, 'deleteBlock'])->name('blocks.destroy');
+        Route::post('/blocks/{block}/duplicate', [SiteAdminController::class, 'duplicateBlock'])->name('blocks.duplicate');
+        Route::post('/blocks/{block}/visibility', [SiteAdminController::class, 'toggleBlock'])->name('blocks.toggle');
+    });
+    Route::get('/dashboards', [SiteAdminController::class, 'dashboards'])->name('dashboards');
+    Route::post('/dashboards', [SiteAdminController::class, 'createLanding'])->name('dashboards.store');
+    Route::get('/dashboards/{page}', [SiteAdminController::class, 'showDashboard'])->whereUuid('page')->name('dashboards.show');
     Route::middleware('can:'.Vocab::permission('manage-institution'))->group(function () {
         // The institution's own fields and form templates (roadmap phase 22b).
         Route::prefix('custom-fields')->name('custom-fields.')->whereUuid(['definition', 'template'])->group(function () {

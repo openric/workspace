@@ -24,7 +24,7 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-api-plugin` | 179 | V0.1 candidate | Covered |  | none | The proposals contract the MCP uses (v0.0.47) |
 | `ahg-archaeology` | 4291 | out: GLAM sector | Planned | 21 | `ahgArchaeologyPlugin` |  |
 | `ahg-archivematica` | 4049 | later: V1.0+ | Done | 15d | `arStorageServicePlugin` | Against Archivematica's API from v0.0.117: transfers followed to their AIP, DIPs fetched from the Storage Service and taken in, its METS parser copied; settings by operators (ADR 0022) |
-| `ahg-articles` | 2447 | later: V1.0+ | Planned | 20 | none |  |
+| `ahg-articles` | 2447 | later: V1.0+ | Done | 20a | none | Articles with their files, sections, related articles, comments and moderation, and reads, from v0.0.123 (ADR 0024) |
 | `ahg-artwork-request` | 1844 | out: GLAM sector | Planned | 21 | none |  |
 | `ahg-audit-trail` | 4072 | V0.1 candidate | Covered |  | `ahgAuditTrailPlugin` | Tamper-evident audit log (ADR 0004) |
 | `ahg-authority-resolution` | 12466 | V0.1 candidate | Partial | 17 (last) | `ahgAuthorityResolutionPlugin` | A proposal may name the existing record; candidate ranking in phase 17 |
@@ -75,10 +75,10 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-jobs` | 950 | later: V1.0+ | Covered | 5 | none | Background jobs and their screen (v0.0.63) |
 | `ahg-jobs-manage` | 691 | later: V1.0+ | Covered | 12a | `ahgJobsManagePlugin` | The jobs page since phase 5; failed queue jobs on the operations page from v0.0.110 (ADR 0021) |
 | `ahg-label` | 1383 | later: V1.0+ | Covered | 22a | `ahgLabelPlugin` | Templates and sheets for records and containers, Code 128 and QR drawn by the Workspace, from v0.0.106 (ADR 0020) |
-| `ahg-landing-page` | 3557 | later: V1.0+ | Planned | 20 | `ahgLandingPagePlugin` |  |
+| `ahg-landing-page` | 3557 | later: V1.0+ | Done | 20a | `ahgLandingPagePlugin` | Landing pages of 20 kinds of block from what the public may read, the default one the catalogue's home, and users' dashboards, from v0.0.123 (ADR 0024) |
 | `ahg-library` | 45610 | out: GLAM sector | Planned | 21 | `ahgLibraryPlugin` |  |
 | `ahg-loan` | 3798 | out: GLAM sector | Planned | 21 | `ahgLoanPlugin` |  |
-| `ahg-marketing` | 726 | later: V1.0+ | Planned | 20 | none |  |
+| `ahg-marketing` | 726 | later: V1.0+ | Not carried | 20a | none | AHG's own sales pages for Heratio (a comparison with AtoM and a migration lead form into AHG's Workbench); an institution has no use for them (ADR 0024) |
 | `ahg-marketplace` | 19926 | out: GLAM sector | Not carried | 22 | `ahgMarketplacePlugin` | Selling items is not an archive's work; archives only to V1.0 (choice 1B, ADR 0020) |
 | `ahg-media-processing` | 2733 | V0.1 candidate | Partial | 5 | none | Reference copies and thumbnails in a job, made again on request, the institution's watermark on reference copies (v0.0.64); a watermark per object and by security classification in phase 18, audio and video previews and transcription later |
 | `ahg-media-streaming` | 1727 | V0.1 candidate | Partial | 22c | none | Viewing copies made when kept (14a); WebVTT caption tracks from v0.0.108 (ADR 0020); no HLS or transcoding on request |
@@ -120,7 +120,7 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-share-link` | 2659 | later: V1.0+ | Covered | 19a | `ahgTimeLimitedShareLinkPlugin` | Share links that never open more than their issuer may read, with their log and prune (ADR 0017); clearance with 18c |
 | `ahg-sharepoint` | 6045 | later: V1.0+ | Planned | 22, pilot | `ahgSharePointPlugin` | When a pilot with a Microsoft tenant needs it (choice 2B, ADR 0020) |
 | `ahg-spectrum` | 12393 | out: GLAM sector | Planned | 21 | `ahgSpectrumPlugin` |  |
-| `ahg-static-page` | 695 | later: V1.0+ | Planned | 20 | `ahgStaticPagePlugin` |  |
+| `ahg-static-page` | 695 | later: V1.0+ | Done | 20a | `ahgStaticPagePlugin` | Static pages in each language, about, privacy and terms at their own addresses, from v0.0.123 (ADR 0024) |
 | `ahg-statistics` | 1906 | later: V1.0+ | Done | 8 | `ahgStatisticsPlugin` | Views and downloads of the public catalogue by day, item and repository, web crawlers apart, CSV; no address, user agent or place is kept, so there is no count by country |
 | `ahg-storage-manage` | 7645 | V0.1 candidate | Covered |  | `ahgStorageManagePlugin` | Containers and storage places, with movements |
 | `ahg-term-taxonomy` | 6138 | V0.1 candidate | Covered |  | `ahgTermTaxonomyPlugin` | SKOS vocabularies: bundled, local, imported, matched |
@@ -1329,4 +1329,53 @@ Added with 19j.
 | `research_offline_sync_log`, `researcher_offline_sync_targets` | none yet | With the offline catalogue, phase 11c (parked) |
 
 : Lectures, training, quotas, notices and the rest, field by field
+
+### Static pages (`ahg-static-page`)
+
+Added on 4 November 2026 with 20a.
+
+| Heratio field | Workspace | Status |
+|---|---|---|
+| `static_page`: `id`, `source_culture` | `static_pages`: the same, per institution | Same, from v0.0.123 |
+| `slug` (AtoM's slug table) | `static_pages.slug`, unique within the institution | Same |
+| `static_page_i18n`: `culture`, `title`, `content` | `static_page_translations`: `language`, `title`, `content` (Markdown, its HTML stripped when shown) | Same |
+| `/about`, `/privacy`, `/terms`, `/pages/{slug}` | The same addresses | Same |
+
+### Articles (`ahg-articles`)
+
+Added on 4 November 2026 with 20a.
+
+| Heratio field | Workspace | Status |
+|---|---|---|
+| `blog_post`: `slug`, `title`, `excerpt`, `body`, `attachments_label`, `author`, `article_group`, `view_count`, `published_at`, `created_by` | `articles`: the same, per institution | Same, from v0.0.123 |
+| `status` (draft, published) | The article status vocabulary | Same |
+| `cover_image` | A site file kept in OCFL | Modelled |
+| `protect_from_reset` | Not carried: the Workspace has no nightly demonstration reset | Not carried |
+| `blog_attachment`: `kind`, `group_label`, `title`, `description`, `file_name`, `mime`, `file_size`, `sort_order`, `created_by` | `article_attachments` with its site file; the kind a vocabulary row | Same |
+| `blog_attachment.file_path` (the public disk) | The site file's OCFL object, served only while the article is published | Modelled |
+| `blog_attachment_kind` dropdown (ten kinds) | The article attachment kind vocabulary | Same |
+| `blog_post_link`: `post_id`, `related_post_id`, `description`, `sort_order` | `article_links`: the same | Same |
+| `blog_comment`: `author_name`, `body`, `ip`, `user_agent` | `article_comments`: the same | Same |
+| `blog_comment.status` (approved, pending, spam) | The article comment status vocabulary | Same |
+| Uploaded body images (`storeImage`) | Site files kept in OCFL | Modelled |
+
+### Landing pages (`ahg-landing-page`)
+
+Added on 4 November 2026 with 20a.
+
+| Heratio field | Workspace | Status |
+|---|---|---|
+| `atom_landing_page`: `name`, `slug`, `description`, `is_default`, `is_active`, `meta_title`, `meta_description`, `css_classes`, `custom_css`, `published_at`, `user_id` | `landing_pages`: the same, per institution, `created_by_id` for `user_id` | Same, from v0.0.123 |
+| `layout` 'dashboard' and the dashboard's owner | `owner_id` | Modelled |
+| `custom_js` | Not carried: nothing typed into a page runs in a visitor's browser | Not carried |
+| `atom_landing_page_block_type`: `machine_name`, `label`, `description`, `category`, `is_container`, `default_config` | The landing page block type vocabulary; containers and defaults in `LandingPages` | Modelled |
+| `config_schema` | The defaults' kinds, which `cleanConfig` holds each setting to | Modelled |
+| `atom_landing_page_block`: `parent_block_id`, `column_slot`, `title`, `position`, `config`, `css_classes`, `background_color`, `text_color`, `col_span`, `is_visible` | `landing_page_blocks`: the same | Same |
+| `container_type` (container, container-fluid, none) | `full_width` | Modelled |
+| `padding_top`, `padding_bottom` (Bootstrap classes) | The same, in rem | Modelled |
+| `atom_landing_page_version` (never written by Heratio) | The audit log | Modelled |
+| `atom_landing_page_audit_log` | The audit log | Modelled |
+| Block types: rows of 1, 2 and 3 columns, hero banner, text, image carousel, search box, statistics, browse panels, recent items, holdings list, featured items, repository spotlight, map, header, footer, quick links, copyright bar, spacer, divider | The same 20 | Same |
+| Block types: GLAM browser, 2 column row public | Not carried: phase 21's other domains, and the same as the 2 column row | Not carried |
+| `BlockDataResolver` | `BlockData`, from what the public catalogue may read | Same |
 

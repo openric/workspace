@@ -110,6 +110,9 @@ use App\Retention\FilePlan;
 use App\Retention\RetentionService;
 use App\Rights\Embargoes;
 use App\Rights\RightsService;
+use App\Site\Articles;
+use App\Site\LandingPages;
+use App\Site\StaticPages;
 use App\Support\Vocab;
 use App\Vendors\Vendors;
 use App\Vocabulary\ConceptService;
@@ -436,6 +439,17 @@ class AccessMatrixTest extends TestCase
             app(ExportPermits::class)->addDocument($admin, $permit, UploadedFile::fake()->createWithContent('application.pdf', "%PDF-1.4\n"), null);
 
             return [app(NarssaTransfers::class)->build($admin, [$letter]), $permit, $permit->documents()->sole()];
+        });
+        // Phase 20a: a static page, two linked articles with a file and a comment, and a landing page with a block.
+        $make('public site', function () use ($admin, $institution) {
+            $articles = app(Articles::class);
+            $article = $articles->save($institution, ['title' => 'Conserving the letters', 'status' => 'published'], $admin);
+            $articles->link($article, $articles->save($institution, ['title' => 'Digitising the maps', 'status' => 'published'], $admin), null, $admin);
+            $landing = app(LandingPages::class)->save($institution, ['name' => 'Home'], $admin);
+
+            return [app(StaticPages::class)->save($institution, ['slug' => 'about', 'title' => 'About'], 'en', $admin), $article,
+                $articles->addAttachment($article, UploadedFile::fake()->createWithContent('guide.pdf', "%PDF-1.4\n"), ['kind' => 'guide'], $admin),
+                $articles->comment($article, ['body' => 'A fine article'], '10.0.0.9', null), $landing, app(LandingPages::class)->addBlock($landing, 'text-content', [], $admin)];
         });
         // Phase 19j: lectures, training, notices, the inbox, documents, print templates, quotas and rights policies.
         $make('teaching', fn () => [$lecture = app(Teaching::class)->saveLecture($admin, ['title' => 'Minutes', 'institutional' => 1]),

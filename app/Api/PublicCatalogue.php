@@ -12,9 +12,11 @@
 
 namespace App\Api;
 
+use App\Description\InstantiationService;
 use App\Exchange\ExportView;
 use App\Models\Activity;
 use App\Models\Agent;
+use App\Models\DigitalFile;
 use App\Models\Instantiation;
 use App\Models\Institution;
 use App\Models\Name;
@@ -28,6 +30,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class PublicCatalogue
 {
@@ -101,5 +104,43 @@ class PublicCatalogue
 
         return DB::query()->fromSub($changes, 'changes')->groupBy('subject_id')->selectRaw('subject_id, max(updated_at) as changed')->pluck('changed', 'subject_id')
             ->map(fn ($at) => CarbonImmutable::parse($at)->utc())->all();
+    }
+
+    /**
+     * The collections the home page's carousel shows: each published unit at the top that has a picture the public may
+     * see, in itself or in a unit inside it, newest first, with how many published units it holds and the start of its
+     * scope and content. The picture is the thumbnail, else the reference copy, of the first such file.
+     *
+     * @param  Collection<int, RecordResource>|null  $records  every published unit, when the caller has them already
+     * @return Collection<int, array{unit: RecordResource, file: DigitalFile, count: int, summary: ?string}>
+     */
+    public function featured(?Collection $records = null): Collection
+    {
+        $records ??= $this->visible('records');
+        $parents = $records->pluck('parent_id', 'id');
+        $top = function (string $id) use ($parents): string {
+            for ($seen = 0; ($parents[$id] ?? null) !== null && $seen < 100; $seen++) {
+                $id = $parents[$id];
+            }
+
+            return $id;
+        };
+        $inside = $records->countBy(fn ($unit) => $top($unit->id));
+        $service = app(InstantiationService::class);
+        $pictures = [];
+        DigitalFile::query()->whereHas('use', fn ($q) => $q->whereIn('notation', ['thumbnail', 'reference']))->where('mime_type', 'like', 'image/%')
+            ->whereHas('instantiation', fn ($q) => $q->whereIn('record_resource_id', $parents->keys())->whereNull('deleted_at'))
+            ->with('use', 'instantiation.record', 'instantiation.availability')->orderBy('created_at')->get()
+            ->sortBy(fn (DigitalFile $f) => $f->use->notation === 'thumbnail' ? 0 : 1)
+            ->each(function (DigitalFile $file) use (&$pictures, $top, $service) {
+                $key = $top($file->instantiation->record_resource_id);
+                if (! isset($pictures[$key]) && $service->deliverable(null, $file)) {
+                    $pictures[$key] = $file;
+                }
+            });
+
+        return $records->whereNull('parent_id')->filter(fn ($unit) => isset($pictures[$unit->id]))->sortByDesc('created_at')->take(12)->values()
+            ->map(fn ($unit) => ['unit' => $unit, 'file' => $pictures[$unit->id], 'count' => max(0, ($inside[$unit->id] ?? 1) - 1),
+                'summary' => ($text = $this->view->value($unit, 'scope-and-content')) ? Str::limit(trim(preg_replace('/\s+/', ' ', $text)), 140) : null]);
     }
 }

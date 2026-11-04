@@ -35,13 +35,13 @@ use App\Research\RightsPolicies;
 use App\Rights\Embargoes;
 use App\Search\SearchIndex;
 use App\Search\SearchService;
+use App\Site\LandingPages;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
@@ -58,6 +58,10 @@ class DiscoverController extends Controller
         $catalogue = $this->catalogue($request);
         $query = trim((string) $request->query('q', ''));
         $kind = array_key_exists($request->query('kind'), self::FOUND) ? $request->query('kind') : null;
+        // The institution's default landing page, where it has one, is the catalogue's home (Heratio's landing page; phase 20a).
+        if ($query === '' && ! $request->has('catalogue') && $landing = app(LandingPages::class)->public($catalogue->institution, null)) {
+            return app(SiteController::class)->showLanding($landing, $catalogue);
+        }
         // Full-text search of what the public may read (ADR 0009), with facets.
         $search = null;
         if ($query !== '') {
@@ -75,46 +79,9 @@ class DiscoverController extends Controller
         $records = $query === '' ? $catalogue->visible('records', '', false, ['level.labels']) : collect();
 
         return view('discover.home', ['institution' => $catalogue->institution, 'query' => $query, 'kind' => $kind, 'search' => $search, 'kinds' => self::FOUND,
-            'featured' => $query === '' ? $this->featured($catalogue, $records) : collect(),
+            'featured' => $query === '' ? $catalogue->featured($records) : collect(),
             'view' => $catalogue->view, 'tops' => $records->whereNull('parent_id')->values(), 'counts' => $query === '' ? collect(array_keys(self::FOUND))->mapWithKeys(fn ($k) => [$k => $k === 'records' ? $records->count() : $catalogue->visible($k)->count()]) : collect(),
             'repositories' => $query === '' ? $catalogue->visible('repositories') : collect()]);
-    }
-
-    /**
-     * The collections the home page's carousel shows: each published unit at the top that has a picture the public may
-     * see, in itself or in a unit inside it, newest first, with how many published units it holds and the start of its
-     * scope and content. The picture is the thumbnail, else the reference copy, of the first such file.
-     *
-     * @param  Collection<int, RecordResource>  $records  every published unit
-     * @return Collection<int, array{unit: RecordResource, file: DigitalFile, count: int, summary: ?string}>
-     */
-    private function featured(PublicCatalogue $catalogue, Collection $records): Collection
-    {
-        $parents = $records->pluck('parent_id', 'id');
-        $top = function (string $id) use ($parents): string {
-            for ($seen = 0; ($parents[$id] ?? null) !== null && $seen < 100; $seen++) {
-                $id = $parents[$id];
-            }
-
-            return $id;
-        };
-        $inside = $records->countBy(fn ($unit) => $top($unit->id));
-        $service = app(InstantiationService::class);
-        $pictures = [];
-        DigitalFile::query()->whereHas('use', fn ($q) => $q->whereIn('notation', ['thumbnail', 'reference']))->where('mime_type', 'like', 'image/%')
-            ->whereHas('instantiation', fn ($q) => $q->whereIn('record_resource_id', $parents->keys())->whereNull('deleted_at'))
-            ->with('use', 'instantiation.record', 'instantiation.availability')->orderBy('created_at')->get()
-            ->sortBy(fn (DigitalFile $f) => $f->use->notation === 'thumbnail' ? 0 : 1)
-            ->each(function (DigitalFile $file) use (&$pictures, $top, $service) {
-                $key = $top($file->instantiation->record_resource_id);
-                if (! isset($pictures[$key]) && $service->deliverable(null, $file)) {
-                    $pictures[$key] = $file;
-                }
-            });
-
-        return $records->whereNull('parent_id')->filter(fn ($unit) => isset($pictures[$unit->id]))->sortByDesc('created_at')->take(12)->values()
-            ->map(fn ($unit) => ['unit' => $unit, 'file' => $pictures[$unit->id], 'count' => max(0, ($inside[$unit->id] ?? 1) - 1),
-                'summary' => ($text = $catalogue->view->value($unit, 'scope-and-content')) ? Str::limit(trim(preg_replace('/\s+/', ' ', $text)), 140) : null]);
     }
 
     public function record(Request $request, string $id): View

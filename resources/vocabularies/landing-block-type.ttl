@@ -1,0 +1,156 @@
+# OpenRiC Workspace - OpenRiC Workspace Landing Page Block Types.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# The kinds of block a landing page is built from (Heratio's atom_landing_page_block_type).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/landing-block-type/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Landing Page Block Types"@en ;
+    dcterms:description "The kinds of block a landing page is built from (Heratio's atom_landing_page_block_type)."@en ;
+    dcterms:issued "2026-11-04"^^xsd:date ;
+    skos:hasTopConcept v:row-1-col, v:row-2-col, v:row-3-col, v:hero-banner, v:text-content, v:image-carousel, v:search-box, v:statistics, v:browse-panels, v:recent-items, v:holdings-list, v:featured-items, v:repository-spotlight, v:map, v:header-section, v:footer-section, v:quick-links, v:copyright-bar, v:spacer, v:divider .
+
+v:row-1-col a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "1 column row"@en, "Ry met 1 kolom"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's landing pages on its public site, as Heratio's ahg-landing-page keeps them."@en ;
+    skos:definition "A row holding blocks in one column."@en .
+
+v:row-2-col a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "2 column row"@en, "Ry met 2 kolomme"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's landing pages on its public site, as Heratio's ahg-landing-page keeps them."@en ;
+    skos:definition "A row holding blocks in two columns."@en .
+
+v:row-3-col a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "3 column row"@en, "Ry met 3 kolomme"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's landing pages on its public site, as Heratio's ahg-landing-page keeps them."@en ;
+    skos:definition "A row holding blocks in three columns."@en .
+
+v:hero-banner a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Hero banner"@en, "Hoofbanier"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's landing pages on its public site, as Heratio's ahg-landing-page keeps them."@en ;
+    skos:definition "A large banner with an image, a heading and a button."@en .
+
+v:text-content a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Text"@en, "Teks"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's landing pages on its public site, as Heratio's ahg-landing-page keeps them."@en ;
+    skos:definition "Text written in Markdown."@en .
+
+v:image-carousel a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Image carousel"@en, "Beeldkarrousel"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's landing pages on its public site, as Heratio's ahg-landing-page keeps them."@en ;
+    skos:definition "A slideshow of images, chosen or from published records."@en .
+
+v:search-box a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Search box"@en, "Soekblokkie"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's landing pages on its public site, as Heratio's ahg-landing-page keeps them."@en ;
+    skos:definition "A search of the catalogue."@en .
+
+v:statistics a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Statistics"@en, "Statistiek"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's landing pages on its public site, as Heratio's ahg-landing-page keeps them."@en ;
+    skos:definition "How much of each kind is published."@en .
+
+v:browse-panels a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Browse panels"@en, "Bladsypanele"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's landing pages on its public site, as Heratio's ahg-landing-page keeps them."@en ;
+    skos:definition "Cards leading to each part of the catalogue, with how much each holds."@en .
+
+v:recent-items a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Recent items"@en, "Onlangse items"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's landing pages on its public site, as Heratio's ahg-landing-page keeps them."@en ;
+    skos:definition "The descriptions published most recently."@en .
+
+v:holdings-list a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Holdings list"@en, "Lys van bestande"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's landing pages on its public site, as Heratio's ahg-landing-page keeps them."@en ;
+    skos:definition "The top-level descriptions, of a repository or of all."@en .
+
+v:featured-items a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Featured items"@en, "Uitgeligte items"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's landing pages on its public site, as Heratio's ahg-landing-page keeps them."@en ;
+    skos:definition "Descriptions chosen to be shown."@en .
+
+v:repository-spotlight a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Repository spotlight"@en, "Bewaarplek in die kollig"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's landing pages on its public site, as Heratio's ahg-landing-page keeps them."@en ;
+    skos:definition "A repository with its holdings and how to reach it."@en .
+
+v:map a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Map"@en, "Kaart"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's landing pages on its public site, as Heratio's ahg-landing-page keeps them."@en ;
+    skos:definition "A map of the published places and repositories."@en .
+
+v:header-section a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Header"@en, "Opskrif"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's landing pages on its public site, as Heratio's ahg-landing-page keeps them."@en ;
+    skos:definition "A heading and subheading for the page."@en .
+
+v:footer-section a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Footer"@en, "Voetskrif"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's landing pages on its public site, as Heratio's ahg-landing-page keeps them."@en ;
+    skos:definition "Columns of links at the foot of the page."@en .
+
+v:quick-links a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Quick links"@en, "Vinnige skakels"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's landing pages on its public site, as Heratio's ahg-landing-page keeps them."@en ;
+    skos:definition "A row of buttons to other pages."@en .
+
+v:copyright-bar a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Copyright bar"@en, "Kopieregstrook"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's landing pages on its public site, as Heratio's ahg-landing-page keeps them."@en ;
+    skos:definition "A copyright notice with the year."@en .
+
+v:spacer a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Spacer"@en, "Spasie"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's landing pages on its public site, as Heratio's ahg-landing-page keeps them."@en ;
+    skos:definition "Space between blocks."@en .
+
+v:divider a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Divider"@en, "Skeidslyn"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's landing pages on its public site, as Heratio's ahg-landing-page keeps them."@en ;
+    skos:definition "A line between blocks."@en .
