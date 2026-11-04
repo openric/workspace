@@ -12,6 +12,7 @@
                 <label for="q">{{ __('Search names, titles and reference codes') }}</label>
                 <div><input id="q" name="q" required><button type="submit">{{ __('Search') }}</button></div>
             </form>
+            @if(\App\Federation\TripleStore::configured())<p><a href="{{ route('discover.explore') }}">{{ __('Explore the graph') }}</a></p>@endif
         </section>
         @if($featured->isNotEmpty())
             <h2>{{ __('Explore the collections') }}</h2>

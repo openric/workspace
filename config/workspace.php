@@ -207,6 +207,20 @@ return [
     'metrics_token' => env('WORKSPACE_METRICS_TOKEN', ''),
     'metrics_ips' => env('WORKSPACE_METRICS_IPS', ''),
 
+    // The SPARQL endpoint of the published RiC-O (roadmap phase 16e): an Apache Jena Fuseki server and the dataset the
+    // Workspace keeps there, fed only with what is published; its user and password may update the dataset. Off while
+    // no address is set. The public query endpoint is /sparql, which forwards queries only, never updates.
+    'sparql' => [
+        'url' => env('WORKSPACE_SPARQL_URL', ''),
+        'dataset' => env('WORKSPACE_SPARQL_DATASET', 'openric-workspace'),
+        'user' => env('WORKSPACE_SPARQL_USER', ''),
+        'password' => env('WORKSPACE_SPARQL_PASSWORD', ''),
+        'timeout_seconds' => (int) env('WORKSPACE_SPARQL_TIMEOUT', 15),
+    ],
+
+    // ResourceSync (phase 16e), as Heratio's ahg-resourcesync: the change list's horizon in days, and the size of a page.
+    'resourcesync' => ['changelist_days' => (int) env('RESOURCESYNC_CHANGELIST_DAYS', 30), 'page_size' => (int) env('RESOURCESYNC_PAGE_SIZE', 1000)],
+
     // Webhooks (roadmap phase 22c) post only to hosts that resolve to public addresses; tests, which post to fake hosts, switch the look-up off.
     'webhooks_check_hosts' => (bool) env('WORKSPACE_WEBHOOKS_CHECK_HOSTS', true),
 

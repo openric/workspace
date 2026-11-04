@@ -1,0 +1,48 @@
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# OpenRiC SHACL shapes — always-on
+# ================================
+# Cross-cutting shapes that apply regardless of which conformance profile
+# a server claims. Load alongside any profile-scoped shape file.
+#
+# Shapes in this file:
+#   - DateRangeShape        — structural validation of openricx:DateRange (used
+#                             by Records, Agents, Activities, Rules, …)
+#
+# Usage (combined with a profile file):
+#   pyshacl -s always-on.shacl.ttl -s core-discovery.shacl.ttl \
+#           -d data.jsonld -f human
+
+@prefix sh:   <http://www.w3.org/ns/shacl#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix rico: <https://www.ica.org/standards/RiC/ontology#> .
+@prefix openricx: <https://openric.org/ns/ext/v1#> .
+@prefix :     <https://openric.org/shapes#> .
+
+
+:DateRangeShape a sh:NodeShape ;
+    sh:targetClass openricx:DateRange ;
+    sh:name "DateRange Validation" ;
+
+    sh:or (
+        [ sh:property [ sh:path rico:beginningDate ; sh:minCount 1 ] ]
+        [ sh:property [ sh:path rico:endDate ; sh:minCount 1 ] ]
+        [ sh:property [ sh:path rico:expressedDate ; sh:minCount 1 ] ]
+    ) ;
+
+    sh:property [
+        sh:path rico:beginningDate ;
+        sh:maxCount 1 ;
+        sh:pattern "^\\d{4}(-\\d{2}(-\\d{2})?)?$" ;
+        sh:severity sh:Warning ;
+        sh:message "Beginning date should be in ISO format (YYYY, YYYY-MM, or YYYY-MM-DD)"
+    ] ;
+
+    sh:property [
+        sh:path rico:endDate ;
+        sh:maxCount 1 ;
+        sh:pattern "^\\d{4}(-\\d{2}(-\\d{2})?)?$" ;
+        sh:severity sh:Warning ;
+        sh:message "End date should be in ISO format"
+    ] .

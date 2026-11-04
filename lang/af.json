@@ -6000,5 +6000,15 @@
     "The loan ends on or after the day it begins.": "Die lening eindig op of ná die dag waarop dit begin.",
     "A loan that is :from is not :to next.": "'n Lening wat :from is, is nie volgende :to nie.",
     "Only who administers the institution handles its loans.": "Slegs wie die instelling administreer, hanteer sy lenings.",
-    ":count record exported.|:count records exported.": ":count rekord uitgevoer.|:count rekords uitgevoer."
+    ":count record exported.|:count records exported.": ":count rekord uitgevoer.|:count rekords uitgevoer.",
+    "Explore the graph": "Verken die grafiek",
+    "Build a question of the published records, people, organisations, places and activities by choosing what you look for and how they are linked; Sparnatural writes the SPARQL query, and the answer appears below. The same query can be sent to :url.": "Bou 'n vraag oor die gepubliseerde rekords, persone, organisasies, plekke en aktiwiteite deur te kies waarna u soek en hoe hulle verbind is; Sparnatural skryf die SPARQL-navraag, en die antwoord verskyn hieronder. Dieselfde navraag kan na :url gestuur word.",
+    "The graph is not yet open on this installation.": "Die grafiek is nog nie op hierdie installasie oop nie.",
+    "The query could not be answered.": "Die navraag kon nie beantwoord word nie.",
+    "No SPARQL endpoint is set up on this installation.": "Geen SPARQL-eindpunt is op hierdie installasie opgestel nie.",
+    "Send a SPARQL query (SELECT, ASK, CONSTRUCT or DESCRIBE) as the query parameter; this endpoint answers queries only.": "Stuur 'n SPARQL-navraag (SELECT, ASK, CONSTRUCT of DESCRIBE) as die query-parameter; hierdie eindpunt beantwoord slegs navrae.",
+    "The SPARQL endpoint did not answer in time.": "Die SPARQL-eindpunt het nie betyds geantwoord nie.",
+    "Give from as an ISO 8601 date and time.": "Gee from as 'n ISO 8601-datum en -tyd.",
+    "No SPARQL triple store is set up (WORKSPACE_SPARQL_URL).": "Geen SPARQL-drievoudstoor is opgestel nie (WORKSPACE_SPARQL_URL).",
+    "The triple store answered HTTP :status.": "Die drievoudstoor het HTTP :status geantwoord."
 }

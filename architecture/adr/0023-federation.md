@@ -235,3 +235,52 @@ What was changed from Heratio: only who administers the institution moves a loan
     - a loan of the institution's own unit requested by a member, a move out of turn refused, a member borrowing from itself refused, and a window ending before it begins refused;
     - the loan approved with a note, sent and returned;
     - a second declined, and the figures counting both, out and in, at half approved.
+
+## 16e: the triple store, the SPARQL endpoint, Sparnatural and ResourceSync
+
+**The triple store.** The Workspace keeps its published RiC-O in a dataset of its own on an Apache Jena Fuseki server. Fuseki already runs on this host for the OpenRiC reference service, and Dr Johan Pieterse chose it on 4 November 2026.
+
+- Each published unit of description, authority record, activity, place, rule and repository is a named graph, and the graph's name is the entity's IRI. Its content is the RiC-O the public API gives for it, turned from JSON-LD into N-Triples and written by the SPARQL 1.1 Graph Store Protocol.
+- A sync takes what changed since the last one. It reaches a quarter of an hour further back, because a search entry is stamped with the time its transaction began, and writing a graph again changes nothing. A deprecated entity's graph is dropped. A full sync, run each night, also drops any graph under the institution's base IRI that is no longer published.
+- Only what is published goes in. The store never holds a draft, so nothing that queries it can find one.
+- Nothing is switched on until `WORKSPACE_SPARQL_URL` is set.
+
+**The SPARQL endpoint.** `/sparql` takes a query by GET or POST and forwards it to the dataset, with a time limit and an open CORS header. Only SELECT, ASK, CONSTRUCT and DESCRIBE are forwarded; a query that carries an update form is refused before it reaches the store. The store's own update user is never exposed.
+
+**Sparnatural.** Sparnatural 14.0.0 (LGPL-3.0) is served from `public/vendor/sparnatural/` and embedded at `/discover/explore`, and it sends its queries to `/sparql`. Its configuration, `/sparnatural/config.ttl`, is not written by hand. It is built from the pinned OpenRiC shapes:
+
+- each RiC-O or OpenRiC class a shape targets is an entity;
+- a property constrained to another such class is a link;
+- a literal is searched as text, or as a date where its datatype is one;
+- the title or name is the label.
+
+The relation types add their links, each by its RiC-O property between the RiC-O classes of its kinds and named as the type is. Yasgui is not used, as the roadmap says.
+
+**ResourceSync**, after Heratio's `ahg-resourcesync`, at the same addresses: the source description at `/.well-known/resourcesync`, the capability list, the resource list, and the change list.
+
+- Every published entity is listed by its persistent IRI with when it last changed. The change list marks each as created or updated since `from`, and lists withdrawn entities as deleted.
+- As in Heratio, the change list reaches thirty days back unless asked, and both lists are paged by `?page=` at 1,000 a page, each page linking the next and the one before.
+- Changed from Heratio: an entity is named by its IRI rather than its slug, and a deletion comes from the deprecation record, so a removed entity is still announced as removed.
+
+### Not carried in 16e
+
+- Creating the Fuseki dataset and setting live's `.env`. These are an operator's steps (`INSTALL.md`, Optional parts), done on Dr Johan Pieterse's word.
+- A ResourceSync resource dump or change dump (ZIP packages). Heratio has none either.
+
+### Evidence (16e)
+
+- `tests/Feature/SparqlAndResourceSyncTest.php`:
+  - the store:
+    - a full sync puts the published repository and unit, each as its own graph signed in with the store's user, and never the draft;
+    - it drops the deprecated entity's graph and a graph no longer published;
+    - an incremental sync puts what changed and never the draft, and the console command reports each institution;
+  - the endpoint:
+    - a SELECT and an ASK are forwarded and answered, with CORS;
+    - INSERT DATA, DELETE WHERE, a query followed by DROP ALL, and an empty request are refused, and none of them reaches the store;
+    - with no store set up, the endpoint answers 503 and the explorer says the graph is not open;
+  - Sparnatural: the configuration parses as Turtle, with entities for Record, RecordSet, Person, CorporateBody, Place and Activity, a record named by its title and linked to a person, and is served from the cache;
+  - ResourceSync:
+    - the source description and capability list link each other;
+    - the resource list holds the published entities and not the draft;
+    - the change list holds the changed unit and the withdrawn entity as deleted, holds nothing from a moment later, reaches thirty days back by default, and refuses a date it cannot read;
+    - one entity a page links the next page and the one before.

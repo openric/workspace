@@ -1,0 +1,476 @@
+# Copyright (C) 2026 Johan Pieterse
+# Plain Sailing Information Systems
+# Email: johan@plainsailingisystems.co.za
+#
+# This file is part of OpenRiC.
+#
+# OpenRiC is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# OpenRiC SHACL shapes
+# ====================
+# Normative SHACL shapes for OpenRiC v0.1.0-draft.
+#
+# Validates instances of rico:RecordSet, rico:Record, rico:Person,
+# rico:CorporateBody, rico:Family, rico:Mechanism, rico:Activity (the only
+# canonical event class in RiC-O 1.1; production / accumulation / custody
+# kinds are distinguished via rico:hasActivityType IRIs from the OpenRiC
+# activity-type vocabulary), rico:Place, rico:Instantiation, rico:Rule,
+# openricx:Function, and openricx:DateRange.
+#
+# Jurisdictional extensions (SPECTRUM collections-management, GRAP 103
+# heritage-accounting, POPIA/GDPR privacy) are OUT OF SCOPE for core OpenRiC
+# and are defined in separate extension shape files, not loaded by default.
+#
+# Usage:
+#   pyshacl -s openric.shacl.ttl -d data.jsonld -f human
+
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rico: <https://www.ica.org/standards/RiC/ontology#> .
+@prefix openricx: <https://openric.org/ns/ext/v1#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix : <https://openric.org/shapes#> .
+
+
+# ============================================================================
+# RECORD SHAPES
+# ============================================================================
+
+:RecordSetShape a sh:NodeShape ;
+    sh:targetClass rico:RecordSet ;
+    sh:name "RecordSet Validation" ;
+    sh:description "Validates RecordSet entities (fonds, series, files)" ;
+
+    sh:property [
+        sh:path rico:title ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:or ( [ sh:datatype xsd:string ] [ sh:datatype rdf:langString ] ) ;
+        sh:minLength 1 ;
+        sh:message "RecordSet must have exactly one non-empty title"
+    ] ;
+
+    sh:property [
+        sh:path rico:identifier ;
+        sh:maxCount 1 ;
+        sh:or ( [ sh:datatype xsd:string ] [ sh:datatype rdf:langString ] ) ;
+        sh:severity sh:Warning ;
+        sh:message "RecordSet should have an identifier (reference code)"
+    ] ;
+
+    sh:property [
+        sh:path rico:scopeAndContent ;
+        sh:maxCount 1 ;
+        sh:or ( [ sh:datatype xsd:string ] [ sh:datatype rdf:langString ] ) ;
+        sh:severity sh:Warning ;
+        sh:message "RecordSet should have scope and content description"
+    ] ;
+
+    sh:property [
+        sh:path rico:isOrWasPartOf ;
+        sh:class rico:RecordSet ;
+        sh:severity sh:Info ;
+        sh:message "Parent should be a RecordSet"
+    ] ;
+
+    sh:property [
+        sh:path rico:hasOrHadHolder ;
+        sh:class rico:CorporateBody ;
+        sh:severity sh:Warning ;
+        sh:message "RecordSet should be held by a repository (CorporateBody)"
+    ] .
+
+
+:RecordShape a sh:NodeShape ;
+    sh:targetClass rico:Record ;
+    sh:name "Record Validation" ;
+    sh:description "Validates Record entities (items)" ;
+
+    sh:property [
+        sh:path rico:title ;
+        sh:minCount 1 ;
+        sh:or ( [ sh:datatype xsd:string ] [ sh:datatype rdf:langString ] ) ;
+        sh:minLength 1 ;
+        sh:message "Record must have a title"
+    ] ;
+
+    sh:property [
+        sh:path rico:isOrWasPartOf ;
+        sh:minCount 1 ;
+        sh:severity sh:Warning ;
+        sh:message "Record should be part of a RecordSet"
+    ] .
+
+
+# ============================================================================
+# AGENT SHAPES
+# ============================================================================
+
+# OpenRiC v0.1 accepts EITHER rico:name (shorthand, common in practice)
+# OR rico:hasOrHadAgentName (RiC-O canonical structured form). At least one must be present.
+
+:PersonShape a sh:NodeShape ;
+    sh:targetClass rico:Person ;
+    sh:name "Person Validation" ;
+
+    sh:or (
+        [ sh:property [ sh:path rico:name ; sh:minCount 1 ] ]
+        [ sh:property [ sh:path rico:hasOrHadAgentName ; sh:minCount 1 ] ]
+    ) ;
+
+    sh:property [
+        sh:path rico:hasOrHadAgentName ;
+        sh:node :AgentNameShape ;
+        sh:severity sh:Info ;
+        sh:message "When present, rico:hasOrHadAgentName must be properly structured"
+    ] .
+
+
+:CorporateBodyShape a sh:NodeShape ;
+    sh:targetClass rico:CorporateBody ;
+    sh:name "CorporateBody Validation" ;
+
+    sh:or (
+        [ sh:property [ sh:path rico:name ; sh:minCount 1 ] ]
+        [ sh:property [ sh:path rico:hasOrHadAgentName ; sh:minCount 1 ] ]
+    ) ;
+
+    sh:property [
+        sh:path rico:hasOrHadAgentName ;
+        sh:node :AgentNameShape ;
+        sh:severity sh:Info ;
+        sh:message "When present, rico:hasOrHadAgentName must be properly structured"
+    ] .
+
+
+:FamilyShape a sh:NodeShape ;
+    sh:targetClass rico:Family ;
+    sh:name "Family Validation" ;
+
+    sh:or (
+        [ sh:property [ sh:path rico:name ; sh:minCount 1 ] ]
+        [ sh:property [ sh:path rico:hasOrHadAgentName ; sh:minCount 1 ] ]
+    ) .
+
+
+:AgentNameShape a sh:NodeShape ;
+    sh:name "AgentName Structure" ;
+
+    sh:property [
+        sh:path rico:textualValue ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:or ( [ sh:datatype xsd:string ] [ sh:datatype rdf:langString ] ) ;
+        sh:minLength 1 ;
+        sh:message "AgentName must have exactly one non-empty textualValue"
+    ] .
+
+
+# ============================================================================
+# ACTIVITY SHAPES
+# ============================================================================
+
+:ProductionShape a sh:NodeShape ;
+    sh:target [
+        a sh:SPARQLTarget ;
+        sh:prefixes <https://openric.org/shapes#> ;
+        sh:select """
+            PREFIX rico: <https://www.ica.org/standards/RiC/ontology#>
+            SELECT ?this WHERE {
+                ?this a rico:Activity ;
+                      rico:hasActivityType <https://openric.org/vocab/activity-type/production> .
+            }
+        """ ;
+    ] ;
+    sh:name "Production Activity Validation" ;
+
+    # rico:resultsOrResultedIn is recommended but not required at v0.1 —
+    # many implementations emit the back-link from the Record instead, or
+    # leave cross-entity links to full-graph validation (see full-graph.shacl.ttl).
+    sh:property [
+        sh:path rico:resultsOrResultedIn ;
+        sh:severity sh:Warning ;
+        sh:message "Production should result in at least one record"
+    ] ;
+
+    sh:property [
+        sh:path rico:hasOrHadParticipant ;
+        sh:severity sh:Warning ;
+        sh:message "Production should have at least one participant (creator)"
+    ] ;
+
+    sh:property [
+        sh:path rico:isAssociatedWithDate ;
+        sh:severity sh:Warning ;
+        sh:message "Production should have an associated date"
+    ] .
+
+
+:AccumulationShape a sh:NodeShape ;
+    sh:target [
+        a sh:SPARQLTarget ;
+        sh:prefixes <https://openric.org/shapes#> ;
+        sh:select """
+            PREFIX rico: <https://www.ica.org/standards/RiC/ontology#>
+            SELECT ?this WHERE {
+                ?this a rico:Activity ;
+                      rico:hasActivityType <https://openric.org/vocab/activity-type/accumulation> .
+            }
+        """ ;
+    ] ;
+    sh:name "Accumulation Activity Validation" ;
+
+    sh:property [
+        sh:path rico:resultsOrResultedIn ;
+        sh:severity sh:Warning ;
+        sh:message "Accumulation should result in at least one record"
+    ] .
+
+
+:ActivityShape a sh:NodeShape ;
+    sh:targetClass rico:Activity ;
+    sh:name "General Activity Validation" ;
+
+    sh:property [
+        sh:path rico:hasActivityType ;
+        sh:maxCount 1 ;
+        sh:severity sh:Info ;
+        sh:message "Activity should have an activity type"
+    ] .
+
+
+# ============================================================================
+# DATE SHAPES
+# ============================================================================
+
+:DateRangeShape a sh:NodeShape ;
+    sh:targetClass openricx:DateRange ;
+    sh:name "DateRange Validation" ;
+
+    sh:or (
+        [ sh:property [ sh:path rico:beginningDate ; sh:minCount 1 ] ]
+        [ sh:property [ sh:path rico:endDate ; sh:minCount 1 ] ]
+        [ sh:property [ sh:path rico:expressedDate ; sh:minCount 1 ] ]
+    ) ;
+
+    sh:property [
+        sh:path rico:beginningDate ;
+        sh:maxCount 1 ;
+        sh:pattern "^\\d{4}(-\\d{2}(-\\d{2})?)?$" ;
+        sh:severity sh:Warning ;
+        sh:message "Beginning date should be in ISO format (YYYY, YYYY-MM, or YYYY-MM-DD)"
+    ] ;
+
+    sh:property [
+        sh:path rico:endDate ;
+        sh:maxCount 1 ;
+        sh:pattern "^\\d{4}(-\\d{2}(-\\d{2})?)?$" ;
+        sh:severity sh:Warning ;
+        sh:message "End date should be in ISO format"
+    ] .
+
+
+# ============================================================================
+# PLACE SHAPES
+# ============================================================================
+
+:PlaceShape a sh:NodeShape ;
+    sh:targetClass rico:Place ;
+    sh:name "Place Validation" ;
+
+    # Accept either rico:name (shorthand) OR rico:hasOrHadPlaceName (canonical).
+    sh:or (
+        [ sh:property [ sh:path rico:name ; sh:minCount 1 ] ]
+        [ sh:property [ sh:path rico:hasOrHadPlaceName ; sh:minCount 1 ] ]
+    ) ;
+
+    sh:property [
+        sh:path rico:hasOrHadPlaceName ;
+        sh:node :PlaceNameShape ;
+        sh:severity sh:Info ;
+        sh:message "When present, rico:hasOrHadPlaceName must be properly structured"
+    ] .
+
+
+:PlaceNameShape a sh:NodeShape ;
+    sh:property [
+        sh:path rico:textualValue ;
+        sh:minCount 1 ;
+        sh:or ( [ sh:datatype xsd:string ] [ sh:datatype rdf:langString ] ) ;
+        sh:minLength 1 ;
+        sh:message "PlaceName must have a textual value"
+    ] .
+
+
+# ============================================================================
+# INSTANTIATION SHAPES
+# ============================================================================
+
+:InstantiationShape a sh:NodeShape ;
+    sh:targetClass rico:Instantiation ;
+    sh:name "Instantiation (Digital / Physical Carrier) Validation" ;
+
+    sh:property [
+        sh:path rico:title ;
+        sh:minCount 1 ;
+        sh:or ( [ sh:datatype xsd:string ] [ sh:datatype rdf:langString ] ) ;
+        sh:minLength 1 ;
+        sh:message "Instantiation must have a title"
+    ] ;
+
+    sh:property [
+        sh:path openricx:hasMimeType ;
+        sh:maxCount 1 ;
+        sh:pattern "^[a-zA-Z0-9!#$&^_.+-]+/[a-zA-Z0-9!#$&^_.+-]+$" ;
+        sh:severity sh:Warning ;
+        sh:message "Digital instantiation should have a valid MIME type"
+    ] ;
+
+    # At least one of: carrier type, MIME type, content URL, or production
+    # technique should be present — otherwise the Instantiation is a shell
+    # with no way to identify what it actually carries.
+    sh:or (
+        [ sh:property [ sh:path rico:hasCarrierType ; sh:minCount 1 ] ]
+        [ sh:property [ sh:path openricx:hasMimeType ; sh:minCount 1 ] ]
+        [ sh:property [ sh:path rico:hasContentOfType ; sh:minCount 1 ] ]
+        [ sh:property [ sh:path rico:productionTechnique ; sh:minCount 1 ] ]
+    ) .
+
+# The cross-entity "Instantiation must be linked from a Record" check lives in
+# shapes/full-graph.shacl.ttl since it requires the full triple store.
+
+
+# ============================================================================
+# REPOSITORY SHAPES
+# ============================================================================
+# Repository = rico:CorporateBody acting as a custodial institution.
+# The generic CorporateBodyShape above handles name; this shape layers
+# the ISDIAH-specific recommendations.
+
+:RepositoryShape a sh:NodeShape ;
+    sh:targetSubjectsOf rico:hasOrHadHolder ;
+    sh:name "Repository (ISDIAH) Recommendations" ;
+    sh:description "Custodial institutions that hold records. Applied to any subject of isOrHasCurrentCustodian." ;
+
+    sh:property [
+        sh:path rico:identifier ;
+        sh:severity sh:Warning ;
+        sh:message "Repository should have an identifier (institution code)"
+    ] ;
+
+    sh:property [
+        sh:path rico:history ;
+        sh:severity sh:Info ;
+        sh:message "Repository should describe its history / founding context"
+    ] ;
+
+    sh:property [
+        sh:path rico:hasOrHadLocation ;
+        sh:severity sh:Info ;
+        sh:message "Repository should link to at least one Place"
+    ] .
+
+
+# ============================================================================
+# RULE SHAPES
+# ============================================================================
+
+:RuleShape a sh:NodeShape ;
+    sh:targetClass rico:Rule ;
+    sh:name "Rule (Mandate / Legislation / Policy) Validation" ;
+
+    sh:property [
+        sh:path rico:title ;
+        sh:minCount 1 ;
+        sh:or ( [ sh:datatype xsd:string ] [ sh:datatype rdf:langString ] ) ;
+        sh:minLength 1 ;
+        sh:message "Rule must have a title"
+    ] ;
+
+    sh:property [
+        sh:path rico:hasOrHadRuleType ;
+        sh:severity sh:Warning ;
+        sh:message "Rule should have a rule type"
+    ] ;
+
+    sh:property [
+        sh:path openricx:jurisdiction ;
+        sh:severity sh:Info ;
+        sh:message "Rule should specify the jurisdiction it applies to"
+    ] ;
+
+    sh:or (
+        [ sh:property [ sh:path openricx:descriptiveNote ; sh:minCount 1 ] ]
+        [ sh:property [ sh:path rico:hasOrHadRuleType ; sh:minCount 1 ] ]
+    ) .
+
+
+# ============================================================================
+# FUNCTION SHAPES
+# ============================================================================
+
+:FunctionShape a sh:NodeShape ;
+    sh:targetClass openricx:Function ;
+    sh:name "Function (ISDF) Validation" ;
+
+    # Accept either rico:name (shorthand) OR rico:hasOrHadName (canonical)
+    sh:or (
+        [ sh:property [ sh:path rico:name ; sh:minCount 1 ] ]
+        [ sh:property [ sh:path rico:hasOrHadName ; sh:minCount 1 ] ]
+    ) ;
+
+    sh:property [
+        sh:path rico:history ;
+        sh:severity sh:Info ;
+        sh:message "Function should have a history describing its origin and evolution"
+    ] ;
+
+    sh:property [
+        sh:path rico:classification ;
+        sh:severity sh:Info ;
+        sh:message "Function should have a classification (ISDF §5.2)"
+    ] .
+
+
+# ============================================================================
+# RELATION VALIDATION
+# ============================================================================
+
+:RelationConsistencyShape a sh:NodeShape ;
+    sh:targetSubjectsOf rico:isOrWasPartOf ;
+    sh:name "Hierarchy Consistency" ;
+
+    sh:property [
+        sh:path rico:isOrWasPartOf ;
+        sh:class rico:RecordSet ;
+        sh:severity sh:Warning ;
+        sh:message "Parent (isOrWasPartOf target) should be a RecordSet"
+    ] .
+
+
+:CreatorLinkShape a sh:NodeShape ;
+    sh:targetSubjectsOf rico:hasCreator ;
+    sh:name "Creator Link Validation" ;
+
+    sh:property [
+        sh:path rico:hasCreator ;
+        sh:or (
+            [ sh:class rico:Person ]
+            [ sh:class rico:CorporateBody ]
+            [ sh:class rico:Family ]
+        ) ;
+        sh:message "Creator must be a Person, CorporateBody, or Family"
+    ] .
+
+
+# ============================================================================
+# Cross-entity SPARQL shapes were moved to shapes/full-graph.shacl.ttl
+# ============================================================================
+# They require the full RiC-O graph to be loaded and produce false positives
+# on single-entity API responses. Load them only when validating a whole
+# triple store.

@@ -85,6 +85,7 @@ use App\Http\Controllers\ResearchFundingController;
 use App\Http\Controllers\ResearchNotesController;
 use App\Http\Controllers\ResearchToolsController;
 use App\Http\Controllers\ResearchWorkspaceController;
+use App\Http\Controllers\ResourceSyncController;
 use App\Http\Controllers\RetentionController;
 use App\Http\Controllers\RightsAdminController;
 use App\Http\Controllers\RightsController;
@@ -96,6 +97,7 @@ use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\ShareLinkController;
 use App\Http\Controllers\ShopController;
 use App\Http\Controllers\SignOnController;
+use App\Http\Controllers\SparqlController;
 use App\Http\Controllers\StorageController;
 use App\Http\Controllers\StudioController;
 use App\Http\Controllers\SubmissionController;
@@ -198,6 +200,15 @@ Route::middleware([ServeDiscovery::class, 'throttle:120,1'])->group(function () 
     Route::get('/discover/federated', [FederationController::class, 'publicSearch'])->name('discover.federated');
     Route::get('/union/records', [FederationController::class, 'unionRecords'])->name('federation.union-records');
     Route::get('/discover/union', [FederationController::class, 'unionSearch'])->name('discover.union');
+    // The public SPARQL endpoint over the published RiC-O, Sparnatural's configuration and the graph explorer (phase 16e).
+    Route::match(['get', 'post'], '/sparql', [SparqlController::class, 'query'])->name('sparql');
+    Route::get('/sparnatural/config.ttl', [SparqlController::class, 'config'])->name('sparnatural.config');
+    Route::get('/discover/explore', [SparqlController::class, 'explore'])->name('discover.explore');
+    // ResourceSync (ANSI/NISO Z39.99), after Heratio's ahg-resourcesync (phase 16e).
+    Route::get('/.well-known/resourcesync', [ResourceSyncController::class, 'description'])->name('resourcesync.description');
+    Route::get('/resourcesync/capabilitylist.xml', [ResourceSyncController::class, 'capabilities'])->name('resourcesync.capabilities');
+    Route::get('/resourcesync/resourcelist.xml', [ResourceSyncController::class, 'resources'])->name('resourcesync.resources');
+    Route::get('/resourcesync/changelist.xml', [ResourceSyncController::class, 'changes'])->name('resourcesync.changes');
     Route::get('/federation/vocabularies', [FederationController::class, 'vocabularies'])->name('federation.vocabularies');
     Route::get('/federation/vocabularies/{vocabulary}.ttl', [FederationController::class, 'vocabulary'])->whereUuid('vocabulary')->name('federation.vocabulary');
     Route::get('/federation/vocabularies/{vocabulary}/changes', [FederationController::class, 'vocabularyChanges'])->whereUuid('vocabulary')->name('federation.vocabulary-changes');

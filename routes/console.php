@@ -7,6 +7,7 @@ use App\Description\WorkflowSlaService;
 use App\Federation\Discovery;
 use App\Federation\FederatedSearch;
 use App\Federation\Harvest;
+use App\Federation\TripleStore;
 use App\Federation\UnionCatalogue;
 use App\Federation\VocabularySync;
 use App\Files\FileStore;
@@ -221,6 +222,20 @@ Artisan::command('workspace:federation:discover', function (Discovery $discovery
     }
 })->purpose('Probe every Workspace and Heratio peer\'s protocol descriptor (Heratio\'s PeerDiscoverCommand)');
 Schedule::command('workspace:federation:discover')->dailyAt('03:15');
+Artisan::command('workspace:sparql:sync {--full : put everything published and drop what is not}', function (TripleStore $store) {
+    if (! TripleStore::configured()) {
+        $this->warn(__('No SPARQL triple store is set up (WORKSPACE_SPARQL_URL).'));
+
+        return;
+    }
+    foreach (Institution::orderBy('name')->get() as $institution) {
+        $counts = $store->sync($institution, (bool) $this->option('full'));
+        $this->line("{$institution->name}: {$counts['put']} put, {$counts['dropped']} dropped");
+    }
+})->purpose('Bring the SPARQL triple store up to date with the published RiC-O (phase 16e)');
+// Only where a triple store is set up; the full pass each night drops what is no longer published.
+Schedule::command('workspace:sparql:sync')->everyTenMinutes()->withoutOverlapping(60)->when(fn () => TripleStore::configured());
+Schedule::command('workspace:sparql:sync --full')->dailyAt('03:40')->withoutOverlapping(240)->when(fn () => TripleStore::configured());
 Artisan::command('workspace:federation:vocabularies', function (VocabularySync $sync) {
     $this->info($sync->runDue().' vocabularies synced.');
 })->purpose('Take in the peers\' vocabularies whose sync interval has passed (Heratio\'s VocabSyncCommand)');

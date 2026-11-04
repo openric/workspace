@@ -257,7 +257,8 @@ A restore is complete only when `workspace:fixity` reports no failure and `works
 - Replication: Admin, Preservation, Replication. A target on another server needs an SSH key `www-data` can read, and the server's host key accepted once.
 - Metrics: set `WORKSPACE_METRICS_TOKEN` and point Prometheus at `/metrics`.
 - Federation: Admin, Federation. An institution chooses whether it answers peers, and which peers it searches. Peers verify its answers with the audit signing key's public half, published at `/.well-known/openric-federation-key`, so a restored server must keep the same key.
-- The SPARQL endpoint and Sparnatural (phase 16e): a Fuseki dataset of the Workspace's published RiC-O.
+- The SPARQL endpoint and Sparnatural (phase 16e): an Apache Jena Fuseki server holds the Workspace's published RiC-O, and the Workspace forwards public queries to it, so Fuseki listens on 127.0.0.1 only and nginx needs nothing new. Create a TDB2 dataset with Fuseki's admin user, for example `curl -u admin:PASSWORD -X POST http://127.0.0.1:3030/$/datasets -d dbName=openric-workspace -d dbType=tdb2`; set `WORKSPACE_SPARQL_URL=http://127.0.0.1:3030`, `WORKSPACE_SPARQL_DATASET=openric-workspace`, and `WORKSPACE_SPARQL_USER` and `WORKSPACE_SPARQL_PASSWORD` for a Fuseki user that may update it; then fill it once with `php artisan workspace:sparql:sync --full`. The scheduler keeps it current every ten minutes and in full each night. The endpoint is `/sparql`, the explorer `/discover/explore`; while `WORKSPACE_SPARQL_URL` is empty both say the graph is not open.
+- ResourceSync is always on, at `/.well-known/resourcesync`. `RESOURCESYNC_CHANGELIST_DAYS` (30) and `RESOURCESYNC_PAGE_SIZE` (1000) change its horizon and page size.
 
 ## Updating
 

@@ -1,0 +1,80 @@
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# OpenRiC SHACL shapes — profile: digital-object-linkage
+# ======================================================
+# Shapes for Instantiations (carriers of bitstreams — files, images) and
+# Functions (ISDF business functions).
+#
+# Shapes in this file:
+#   - InstantiationShape    — rico:Instantiation
+#   - FunctionShape         — openricx:Function
+#
+# The cross-entity "Instantiation must be linked from a Record" check lives
+# in profile: graph-traversal because it requires the full triple store
+# (false-positives on single-entity API responses).
+#
+# Usage:
+#   pyshacl -s always-on.shacl.ttl -s digital-object-linkage.shacl.ttl \
+#           -d data.jsonld -f human
+
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix sh:   <http://www.w3.org/ns/shacl#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix rico: <https://www.ica.org/standards/RiC/ontology#> .
+@prefix openricx: <https://openric.org/ns/ext/v1#> .
+@prefix :     <https://openric.org/shapes#> .
+
+
+:InstantiationShape a sh:NodeShape ;
+    sh:targetClass rico:Instantiation ;
+    sh:name "Instantiation (Digital / Physical Carrier) Validation" ;
+
+    sh:property [
+        sh:path rico:title ;
+        sh:minCount 1 ;
+        sh:or ( [ sh:datatype xsd:string ] [ sh:datatype rdf:langString ] ) ;
+        sh:minLength 1 ;
+        sh:message "Instantiation must have a title"
+    ] ;
+
+    sh:property [
+        sh:path openricx:hasMimeType ;
+        sh:maxCount 1 ;
+        sh:pattern "^[a-zA-Z0-9!#$&^_.+-]+/[a-zA-Z0-9!#$&^_.+-]+$" ;
+        sh:severity sh:Warning ;
+        sh:message "Digital instantiation should have a valid MIME type"
+    ] ;
+
+    # At least one of: carrier type, MIME type, content URL, or production
+    # technique should be present — otherwise the Instantiation is a shell
+    # with no way to identify what it actually carries.
+    sh:or (
+        [ sh:property [ sh:path rico:hasCarrierType ; sh:minCount 1 ] ]
+        [ sh:property [ sh:path openricx:hasMimeType ; sh:minCount 1 ] ]
+        [ sh:property [ sh:path rico:hasContentOfType ; sh:minCount 1 ] ]
+        [ sh:property [ sh:path rico:productionTechnique ; sh:minCount 1 ] ]
+    ) .
+
+
+:FunctionShape a sh:NodeShape ;
+    sh:targetClass openricx:Function ;
+    sh:name "Function (ISDF) Validation" ;
+
+    # Accept either rico:name (shorthand) OR rico:hasOrHadName (canonical).
+    sh:or (
+        [ sh:property [ sh:path rico:name ; sh:minCount 1 ] ]
+        [ sh:property [ sh:path rico:hasOrHadName ; sh:minCount 1 ] ]
+    ) ;
+
+    sh:property [
+        sh:path rico:history ;
+        sh:severity sh:Info ;
+        sh:message "Function should have a history describing its origin and evolution"
+    ] ;
+
+    sh:property [
+        sh:path rico:classification ;
+        sh:severity sh:Info ;
+        sh:message "Function should have a classification (ISDF §5.2)"
+    ] .

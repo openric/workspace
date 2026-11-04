@@ -1,0 +1,138 @@
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# OpenRiC SHACL shapes — profile: graph-traversal
+# ===============================================
+# Cross-entity / full-graph shapes. These assume the entire RiC-O graph is
+# loaded into the data graph before validation — they do SPARQL-based
+# queries like "is this Instantiation linked from any Record?" or "are
+# there duplicate identifiers anywhere in the graph?".
+#
+# They WILL produce false positives on single-document API responses
+# (e.g. `GET /records/{id}`). Run them only against a full triple-store
+# dump or a merged multi-endpoint capture.
+#
+# Shapes in this file:
+#   - RelationConsistencyShape          — parent type check on isOrWasPartOf
+#   - CreatorLinkShape                  — rico:hasCreator → Person/CB/Family
+#   - InstantiationLinkedFromRecordShape — every Instantiation is referenced
+#                                         by a Record via hasInstantiation
+#   - OrphanedRecordShape               — records without a parent
+#   - UnlinkedAgentShape                — agents not linked to anything
+#   - DuplicateIdentifierShape          — identifier collisions across records
+#
+# Usage:
+#   pyshacl -s always-on.shacl.ttl -s graph-traversal.shacl.ttl \
+#           -d full-store.nt -f human
+
+@prefix sh:   <http://www.w3.org/ns/shacl#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix rico: <https://www.ica.org/standards/RiC/ontology#> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix :     <https://openric.org/shapes/graph-traversal#> .
+
+
+# ----------------------------------------------------------------------------
+# Type-check shapes (property-shape style — moderately cheap)
+# ----------------------------------------------------------------------------
+
+:RelationConsistencyShape a sh:NodeShape ;
+    sh:targetSubjectsOf rico:isOrWasPartOf ;
+    sh:name "Hierarchy Consistency" ;
+
+    sh:property [
+        sh:path rico:isOrWasPartOf ;
+        sh:class rico:RecordSet ;
+        sh:severity sh:Warning ;
+        sh:message "Parent (isOrWasPartOf target) should be a RecordSet"
+    ] .
+
+
+:CreatorLinkShape a sh:NodeShape ;
+    sh:targetSubjectsOf rico:hasCreator ;
+    sh:name "Creator Link Validation" ;
+
+    sh:property [
+        sh:path rico:hasCreator ;
+        sh:or (
+            [ sh:class rico:Person ]
+            [ sh:class rico:CorporateBody ]
+            [ sh:class rico:Family ]
+        ) ;
+        sh:message "Creator must be a Person, CorporateBody, or Family"
+    ] .
+
+
+# ----------------------------------------------------------------------------
+# Full-graph SPARQL shapes (expensive; require the whole store)
+# ----------------------------------------------------------------------------
+
+:InstantiationLinkedFromRecordShape a sh:NodeShape ;
+    sh:targetClass rico:Instantiation ;
+    sh:name "Instantiation-Record Link Check" ;
+    sh:sparql [
+        sh:message "Instantiation should be linked from a Record via rico:hasOrHadInstantiation" ;
+        sh:severity sh:Warning ;
+        sh:select """
+            SELECT $this WHERE {
+                $this a rico:Instantiation .
+                FILTER NOT EXISTS {
+                    ?record rico:hasOrHadInstantiation $this .
+                }
+            }
+        """
+    ] .
+
+
+:OrphanedRecordShape a sh:NodeShape ;
+    sh:targetClass rico:Record ;
+    sh:name "Orphaned Record Detection" ;
+    sh:sparql [
+        sh:message "Record has no parent and is not a top-level fonds" ;
+        sh:severity sh:Warning ;
+        sh:select """
+            SELECT $this WHERE {
+                $this a rico:Record .
+                FILTER NOT EXISTS { $this rico:isOrWasPartOf ?parent }
+            }
+        """
+    ] .
+
+
+:UnlinkedAgentShape a sh:NodeShape ;
+    sh:targetClass rico:Person, rico:CorporateBody, rico:Family ;
+    sh:name "Unlinked Agent Detection" ;
+    sh:sparql [
+        sh:message "Agent is not linked to any records or activities" ;
+        sh:severity sh:Info ;
+        sh:select """
+            SELECT $this WHERE {
+                { $this a rico:Person } UNION
+                { $this a rico:CorporateBody } UNION
+                { $this a rico:Family }
+                FILTER NOT EXISTS {
+                    { ?record rico:hasCreator $this }
+                    UNION
+                    { ?record rico:hasAccumulator $this }
+                    UNION
+                    { ?activity rico:hasOrHadParticipant $this }
+                }
+            }
+        """
+    ] .
+
+
+:DuplicateIdentifierShape a sh:NodeShape ;
+    sh:targetClass rico:RecordSet, rico:Record ;
+    sh:name "Duplicate Identifier Detection" ;
+    sh:sparql [
+        sh:message "Multiple records share the same identifier" ;
+        sh:severity sh:Warning ;
+        sh:select """
+            SELECT $this WHERE {
+                $this rico:identifier ?id .
+                ?other rico:identifier ?id .
+                FILTER($this != ?other)
+            }
+        """
+    ] .
