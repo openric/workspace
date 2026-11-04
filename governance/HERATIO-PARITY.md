@@ -96,7 +96,7 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-ocfl` | 3106 | later: V1.0+ | Done | 15b | `ahgOcflPlugin` | OCFL 1.1 as the one object store from v0.0.115, laid out by extension 0004, each version the whole object, objects purged at destruction (ADR 0022); the mirror to a second root is replication, in 15c |
 | `ahg-pdf-tools` | 2093 | V0.1 candidate | Partial | 5 | `ahgTiffPdfMergePlugin` | A PDF's text layer proposed as its transcript (v0.0.64); merging TIFFs into a PDF with the scanning workflows, phase 22 |
 | `ahg-portable-export` | 3000 | later: V1.0+ | Planned | 11c, deferred | `ahgPortableExportPlugin` | Read PSIS ahgPortableExportPlugin too, which does more; deferred by Dr Johan Pieterse on 30 October 2026 |
-| `ahg-preservation` | 10211 | later: V1.0+ | Partial | 15a | `ahgPreservationPlugin` | PREMIS events, PRONOM formats by Siegfried and the PREMIS 3.0 export from v0.0.114 (ADR 0022); policies, migration, replication and packages in 15c and 15d |
+| `ahg-preservation` | 10211 | later: V1.0+ | Partial | 15a, 15c | `ahgPreservationPlugin` | PREMIS events, PRONOM formats by Siegfried and the PREMIS 3.0 export from v0.0.114; normalisation, migration plans, format risk, replication and PREMIS rights from v0.0.116 (ADR 0022); OAIS packages and BagIt in 15d |
 | `ahg-privacy` | 16854 | later: jurisdiction | Partial | 18a, 18b | `ahgPrivacyPlugin` | POPIA governance (registers, requests, compromises, assessments, controls, report) from v0.0.91 (18a, ADR 0016); PII scanning, field redaction and file screening from v0.0.94 (18b); not visual redaction of images, named-entity recognition, the Article 30 export or the autopilot |
 | `ahg-provenance-ai` | 2662 | out: AI (V2+) | Planned | 17 (last) | none |  |
 | `ahg-rad-manage` | 1233 | V0.1 candidate | Covered |  | `ahgRadManagePlugin`, `sfRadPlugin` | RAD display standard, from v0.0.76 |
@@ -784,7 +784,29 @@ Added on 4 November 2026 with 15a.
 | `preservation_event`: `digital_object_id`, `information_object_id`, `event_type`, `event_datetime`, `event_detail`, `event_outcome`, `event_outcome_detail`, `linking_agent_type`, `linking_agent_value` | The same; type, outcome and agent type as vocabulary rows matched to the Library of Congress preservation vocabulary | Same, from v0.0.114 |
 | `linking_object_type`, `linking_object_value` | The source file of a creation | Modelled |
 | `preservation_format`: `puid`, `mime_type`, `format_name`, `format_version`, `risk_level`, `preservation_action`, `is_preservation_format` | The same, identified by Siegfried | Same |
-| `extension`, `risk_notes`, `migration_target_id` | Notes; the migration target with 15c's migration plans | Partial |
+| `extension`, `risk_notes`, `migration_target_id` | The same, from v0.0.116; the extension from the first file found in the format | Same |
+| `preservation_normalization_rule`: `source_pronom`, `source_mime`, `purpose`, `target_format`, `target_ext`, `target_mime`, `tool`, `options`, `priority`, `is_active` | The same, purpose and tool as vocabulary rows; Heratio's default rules seeded | Same, from v0.0.116 |
+| `preservation_format_conversion`: `digital_object_id`, `source_format`, `source_mime_type`, `target_format`, `target_mime_type`, `conversion_tool`, `tool_version`, `status`, `source_size`, `source_checksum`, `output_size`, `output_checksum`, `conversion_options`, `started_at`, `completed_at`, `duration_ms`, `error_message`, `created_by` | The same, the source and output files by id | Same |
+| `source_path`, `output_path` | The source and output files' places in the OCFL object | Modelled |
+| `quality_score` | Not kept: nothing measures it | Not carried |
+| `preservation_migration_pathway`: `source_puid`, `target_puid`, `migration_tool`, `quality_impact`, `fidelity_score`, `is_recommended`, `is_automated`, `priority`, `notes` | The same, with the target's extension and type | Same |
+| `migration_command` | Built from the tool and its options, never kept as text to run | Modelled |
+| `preservation_format_obsolescence`: `current_risk_level`, `migration_urgency`, `affected_object_count`, `storage_size_bytes`, `recommended_action`, `recommended_pathway_id`, `last_assessed_at` | Worked out on the formats page from the format's risk, action, files and recommended pathway; `risk_assessed_at` on the format | Modelled |
+| `next_assessment_at` | Not kept: a format is assessed when its risk is changed | Not carried |
+| `preservation_migration_plan`: `name`, `description`, `source_puid`, `target_puid`, `pathway_id`, `status`, `created_by`, `approved_by`, `approved_at`, `started_at`, `completed_at`, `run_fixity_after`, `scheduled_start` | The same | Same |
+| `scope_type`, `scope_criteria` | The repository or the unit and what it includes | Modelled |
+| `total_objects`, `objects_queued`, `objects_processed`, `objects_succeeded`, `objects_failed`, `objects_skipped`, `original_size_bytes`, `converted_size_bytes` | Counted from the plan's files and their conversions | Modelled |
+| `keep_originals`, `create_preservation_copies` | Always: the master is never replaced, and the migration is a preservation master | Modelled |
+| `max_concurrent` | One worker, one file at a time | Not carried |
+| `preservation_migration_plan_object`: `plan_id`, `digital_object_id`, `status`, `queued_at`, `started_at`, `completed_at`, `error_message`, `retry_count` | The same | Same |
+| `source_path`, `source_size`, `source_checksum`, `output_path`, `output_size`, `output_checksum`, `duration_ms` | On the file's conversion | Modelled |
+| `preservation_replication_target`: `name`, `description`, `target_type`, `is_active`, `sync_schedule`, `last_sync_at`, `last_sync_status`, `last_sync_files`, `last_sync_bytes` | The same; local folder or rsync over SSH; the schedule daily, weekly or monthly | Same |
+| `connection_config` | Folder, host, user, port and SSH key file, as columns; no password is kept | Modelled |
+| `target_type` s3, azure, gcs, sftp | Not yet: each needs its SDK; rsync over SSH covers a second server | Not carried |
+| `preservation_replication_log`: `target_id`, `operation`, `status`, `files_total`, `files_synced`, `files_failed`, `bytes_transferred`, `started_at`, `completed_at`, `duration_ms`, `error_message`, `details` | The same; operation sync or verify | Same |
+| `preservation_policy`, `preservation_workflow_schedule`, `preservation_workflow_run` | Fixity schedules (12a), the replication targets' and plans' own schedules, and identification and scanning as each file is kept | Modelled |
+| `ahg_premis_rights`: `rights_basis`, `rights_granted_act`, `rights_granted_restriction`, `applicable_dates_start`, `applicable_dates_end` | The Workspace's rights and grants (phase 2), exported as PREMIS rights statements | Same, from v0.0.116 |
+| `source_xml` | PREMIS rights XML is not imported | Not carried |
 | `preservation_object_format` | The file's format, the basis of the match and any warning | Same |
 | `preservation_checksum` (md5, sha1, sha256, sha512) | SHA-256 on the file, every digest an event | Modelled |
 | `preservation_fixity_check` | The fixity ledger of phase 12a, each check an event | Same |

@@ -19,12 +19,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'watermark_type_id', 'watermark_position_id', 'watermark_opacity', 'watermark_min_size', 'watermark_image_path', 'accession_numbering_mask',
     'agreement_numbering_mask', 'accession_auto_assign', 'accession_requires_agreement', 'accession_default_priority_id', 'accession_checklist_template_id',
     'accession_requires_appraisal', 'accession_container_barcodes', 'accession_rights_inheritance', 'catalogue_heading', 'catalogue_show_counts', 'workflow_required_for_publish',
-    'two_factor_policy_id', 'two_factor_grace_days', 'two_factor_policy_since'])]
+    'two_factor_policy_id', 'two_factor_grace_days', 'two_factor_policy_since', 'normalise_on_ingest'])]
 class Institution extends Model
 {
     protected function casts(): array
     {
-        return ['registration_open' => 'boolean', 'interface_languages' => 'array', 'accession_auto_assign' => 'boolean', 'accession_requires_agreement' => 'boolean', 'accession_requires_appraisal' => 'boolean', 'accession_container_barcodes' => 'boolean', 'accession_rights_inheritance' => 'boolean', 'catalogue_show_counts' => 'boolean', 'workflow_required_for_publish' => 'boolean', 'two_factor_grace_days' => 'integer', 'two_factor_policy_since' => 'immutable_datetime'];
+        return ['registration_open' => 'boolean', 'interface_languages' => 'array', 'accession_auto_assign' => 'boolean', 'accession_requires_agreement' => 'boolean', 'accession_requires_appraisal' => 'boolean', 'accession_container_barcodes' => 'boolean', 'accession_rights_inheritance' => 'boolean', 'catalogue_show_counts' => 'boolean', 'workflow_required_for_publish' => 'boolean', 'two_factor_grace_days' => 'integer', 'two_factor_policy_since' => 'immutable_datetime', 'normalise_on_ingest' => 'boolean'];
     }
 
     use Audited, HasUuids;

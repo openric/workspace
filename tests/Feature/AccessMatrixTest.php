@@ -48,6 +48,8 @@ use App\Models\FileFormat;
 use App\Models\FixityFailure;
 use App\Models\Import;
 use App\Models\Institution;
+use App\Models\MigrationPathway;
+use App\Models\NormalisationRule;
 use App\Models\ReadingRoom;
 use App\Models\ReadingRoomSeat;
 use App\Models\ResearchDoi;
@@ -58,6 +60,8 @@ use App\Models\RetrievalSchedule;
 use App\Models\SignInProvider;
 use App\Models\User;
 use App\Models\WatchFolder;
+use App\Preservation\MigrationPlans;
+use App\Preservation\Replication;
 use App\Proposals\ProposalService;
 use App\Relations\RelationService;
 use App\Reports\ReportBuilder;
@@ -348,6 +352,15 @@ class AccessMatrixTest extends TestCase
             app(Compliance::class)->create($admin, ['framework' => 'iso-30300', 'reference' => 'CA-1', 'title' => 'Annual'])]);
         // Phase 15a: a file format.
         $make('file format', fn () => FileFormat::firstOrCreate(['puid' => 'fmt/11'], ['name' => 'Portable Network Graphics', 'version' => '1.0']));
+        // Phase 15c: a normalisation rule, a migration pathway and a plan following it, and a replication target.
+        $make('preservation planning', function () use ($institution, $admin) {
+            $rule = NormalisationRule::firstOrFail();
+            $pathway = MigrationPathway::create(['source_puid' => 'fmt/11', 'target_puid' => 'fmt/353', 'tool_id' => Concept::where('iri', Vocab::BASE.'conversion-tool/imagemagick')->value('id'),
+                'target_ext' => 'tif', 'target_mime' => 'image/tiff', 'quality_impact_id' => Concept::where('iri', Vocab::BASE.'migration-quality-impact/lossless')->value('id')]);
+
+            return [$rule, $pathway, app(MigrationPlans::class)->save($institution, ['name' => 'PNG to TIFF', 'pathway_id' => $pathway->id], $admin),
+                app(Replication::class)->save(['name' => 'Second disk', 'type' => 'local', 'path' => sys_get_temp_dir().'/matrix-replica', 'frequency' => 'weekly'])];
+        });
         // Phase 12b: an identity provider.
         $make('sign-in provider', fn () => SignInProvider::create(['institution_id' => $institution->id, 'label' => 'Staff', 'issuer_url' => 'https://idp.example.org',
             'client_id' => 'workspace', 'client_secret' => 'secret', 'scopes' => ['openid'], 'match_id' => Concept::where('iri', Vocab::BASE.'sign-in-match/subject')->value('id')]));

@@ -16,10 +16,13 @@
                     <select name="risk" aria-label="{{ __('Risk') }}"><option value="">{{ __('Not rated') }}</option>@foreach($risks as $r)<option value="{{ $r->notation }}" @selected($f->risk?->id === $r->id)>{{ $r->label($lang) }}</option>@endforeach</select>
                     <select name="action" aria-label="{{ __('Action') }}"><option value="">{{ __('Not set') }}</option>@foreach($actions as $a)<option value="{{ $a->notation }}" @selected($f->action?->id === $a->id)>{{ $a->label($lang) }}</option>@endforeach</select>
                     <label style="margin: 0"><input type="checkbox" name="is_preservation_format" value="1" @checked($f->is_preservation_format)> {{ __('Preservation format') }}</label>
+                    <select name="migration_target_id" aria-label="{{ __('Migrate to') }}"><option value="">{{ __('No migration target') }}</option>@foreach($targets->where('id', '!=', $f->id) as $t)<option value="{{ $t->id }}" @selected($f->migration_target_id === $t->id)>{{ $t->puid }} {{ $t->name }}</option>@endforeach</select>
+                    <input name="risk_notes" value="{{ $f->risk_notes }}" aria-label="{{ __('Why this risk') }}" placeholder="{{ __('Why this risk') }}">
                     <button type="submit" style="margin-top: 0; padding: .1rem .5rem">{{ __('Save') }}</button></form></td>
             @else
-                <td>{{ $f->risk?->label($lang) ?? __('not rated') }}</td><td>{{ $f->action?->label($lang) ?? __('not set') }}</td>
+                <td>{{ $f->risk?->label($lang) ?? __('not rated') }}@if($f->risk_notes)<br><small>{{ $f->risk_notes }}</small>@endif</td><td>{{ $f->action?->label($lang) ?? __('not set') }}@if($f->migrationTarget)<br><small>{{ __('to :format', ['format' => $f->migrationTarget->puid.' '.$f->migrationTarget->name]) }}</small>@endif</td>
             @endif</tr>
+            @if($p = $pathways->get($f->puid)?->first())<tr><td colspan="6"><small>{{ __('Migration pathway: to :target by :tool', ['target' => $p->target_puid, 'tool' => $p->tool->label($lang)]) }}@if($p->is_recommended) ({{ __('recommended') }})@endif · <a href="{{ route('preservation.index') }}#plans">{{ __('Plan a migration') }}</a></small></td></tr>@endif
         @empty<tr><td colspan="6">{{ __('None identified yet.') }}</td></tr>@endforelse</tbody></table>
     @unless($operator)<p class="meta">{{ __('A format\'s risk and action are set by the installation\'s operators, as they hold for every institution on it.') }}</p>@endunless
 @endsection

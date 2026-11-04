@@ -58,6 +58,7 @@ use App\Http\Controllers\NameController;
 use App\Http\Controllers\OperationsController;
 use App\Http\Controllers\PasswordController;
 use App\Http\Controllers\PlaceController;
+use App\Http\Controllers\PreservationController;
 use App\Http\Controllers\PrivacyController;
 use App\Http\Controllers\PrivacyScreeningController;
 use App\Http\Controllers\ProjectController;
@@ -596,6 +597,25 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/formats', [FormatController::class, 'index'])->name('formats.index');
         Route::post('/formats/identify', [FormatController::class, 'identify'])->name('formats.identify');
         Route::post('/formats/{format}', [FormatController::class, 'update'])->whereUuid('format')->name('formats.update');
+        // Preservation planning: normalisation, migration and replication (roadmap phase 15c).
+        Route::prefix('preservation')->name('preservation.')->whereUuid(['rule', 'pathway', 'plan', 'target', 'instantiation'])->group(function () {
+            Route::get('/', [PreservationController::class, 'index'])->name('index');
+            Route::post('/settings', [PreservationController::class, 'saveSettings'])->name('settings');
+            Route::post('/normalise', [PreservationController::class, 'normaliseAll'])->name('normalise-all');
+            Route::post('/instantiations/{instantiation}/normalise', [PreservationController::class, 'normalise'])->name('normalise');
+            Route::post('/rules', [PreservationController::class, 'saveRule'])->name('rules.store');
+            Route::post('/rules/{rule}', [PreservationController::class, 'saveRule'])->name('rules.update');
+            Route::post('/rules/{rule}/delete', [PreservationController::class, 'deleteRule'])->name('rules.delete');
+            Route::post('/pathways', [PreservationController::class, 'savePathway'])->name('pathways.store');
+            Route::post('/pathways/{pathway}', [PreservationController::class, 'savePathway'])->name('pathways.update');
+            Route::post('/plans', [PreservationController::class, 'savePlan'])->name('plans.store');
+            Route::get('/plans/{plan}', [PreservationController::class, 'plan'])->name('plans.show');
+            Route::post('/plans/{plan}', [PreservationController::class, 'savePlan'])->name('plans.update');
+            Route::post('/plans/{plan}/{action}', [PreservationController::class, 'planAction'])->whereIn('action', ['approve', 'start', 'cancel', 'retry'])->name('plans.action');
+            Route::post('/replication', [PreservationController::class, 'saveTarget'])->name('targets.store');
+            Route::post('/replication/{target}', [PreservationController::class, 'saveTarget'])->name('targets.update');
+            Route::post('/replication/{target}/{operation}', [PreservationController::class, 'runTarget'])->whereIn('operation', ['sync', 'verify'])->name('targets.run');
+        });
         Route::get('/fixity', [OperationsController::class, 'schedules'])->name('fixity.schedules');
         Route::post('/fixity', [OperationsController::class, 'saveSchedule'])->name('fixity.schedules.store');
         Route::post('/fixity/{schedule}', [OperationsController::class, 'saveSchedule'])->whereUuid('schedule')->name('fixity.schedules.update');

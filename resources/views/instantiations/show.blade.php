@@ -66,7 +66,7 @@
     @if($instantiation->files->isNotEmpty())
         {{-- What was done to its files, as PREMIS events, and each file's PRONOM format (phase 15a). --}}
         <h2 id="preservation">{{ __('Preservation') }}</h2>
-        @foreach($instantiation->files->sortBy(fn ($f) => array_search($f->use->notation, ['master', 'reference', 'thumbnail'])) as $file)
+        @foreach($instantiation->files->sortBy(fn ($f) => array_search($f->use->notation, ['master', 'preservation', 'access', 'reference', 'thumbnail'])) as $file)
             <p><strong>{{ $file->use->label(\App\Support\Vocab::languages()) }}</strong>:
                 @if($file->format)<a href="{{ $file->format->pronomUrl() }}" rel="noopener noreferrer">{{ $file->format->puid }}</a> {{ $file->format->name }}@if($file->format->risk) · {{ __('risk :risk', ['risk' => mb_strtolower($file->format->risk->label(\App\Support\Vocab::languages()))]) }}@endif
                 @elseif($file->format_identified_at){{ __('format not identified') }}@if($file->format_warning) ({{ $file->format_warning }})@endif
@@ -78,6 +78,10 @@
                 <td>{{ $e->file_label }}</td><td>{{ $e->outcome->label(\App\Support\Vocab::languages()) }}@if($e->outcome_detail)<br><small style="word-break: break-all">{{ \Illuminate\Support\Str::limit($e->outcome_detail, 120) }}</small>@endif</td><td>{{ $e->agent_name }}</td></tr>
             @empty<tr><td colspan="5">{{ __('None yet.') }}</td></tr>@endforelse</tbody></table>
         <p><a href="{{ route('records.export.download', [$unit, 'premis']) }}">{{ __('Download the PREMIS 3.0 preservation metadata of the unit') }}</a></p>
+        @if(auth()->user()?->hasPermission(\App\Support\Vocab::permission('manage-institution')) && $instantiation->file('master'))
+            {{-- A preservation master and access copy by the normalisation rules (phase 15c). --}}
+            <form method="post" action="{{ route('preservation.normalise', $instantiation) }}">@csrf<button type="submit">{{ __('Normalise the master by the rules') }}</button></form>
+        @endif
     @endif
 
     @if($instantiation->files->contains(fn ($f) => str_starts_with($f->mime_type, 'audio/') || str_starts_with($f->mime_type, 'video/')))

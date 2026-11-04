@@ -109,3 +109,77 @@ What was changed from Heratio:
   - a purged object gone with its folders;
   - files put back in the old layout moved into OCFL, the old layout removed, and the command run again moving nothing.
 - `tests/Feature/RetentionTest.php`: a destruction purges the instantiation's object, and a twin record keeps its own.
+
+## 15c: normalisation, migration, replication and PREMIS rights
+
+Copied from Heratio's `ahg-preservation`: its normalisation rules and `NormalizationService`, its conversions, its migration pathways and plans, its format obsolescence, its replication targets and log, and its PREMIS rights.
+
+**Normalisation.** A rule says that files of a PRONOM format, or of a MIME type, are normalised by a tool into another format, for preservation or for access. Heratio's 34 default rules are seeded: images to TIFF, PDF to PDF/A-2b, office documents to PDF, sound to WAV and video to FFV1 in Matroska for preservation; TIFF and PNG to JPEG, office documents to PDF, WAV to MP3 and Matroska to MP4 for access. A rule naming the file's PRONOM format comes before one naming its MIME type, then by priority.
+
+What is made goes into the instantiation's OCFL object, beside the master:
+
+- a preservation master under `files/preservation/`;
+- an access copy under `files/access/`.
+
+It is two new file uses. A preservation master is read as the master is (read-master, the download clearance, the master's embargo); an access copy as the reference copy is. Each is recorded as a conversion with its tool, the tool's version, sizes, checksums and time, and is a PREMIS normalisation event from the master. A tool that fails is a failed conversion and a failure event on the master.
+
+An institution normalises each master as it is kept only if it chooses to; this is off by default, where Heratio always normalises. Who manages the institution can normalise the masters kept before, all at once (`workspace:normalise`) or one instantiation at a time.
+
+What was changed from Heratio:
+
+- Each tool runs from an argument list in its own process with a time limit; Heratio built a shell string.
+- Its output is made in a folder of its own and only then kept; Heratio wrote beside the source.
+- The master is never replaced.
+- The tools are the same four: ImageMagick, FFmpeg, Ghostscript and LibreOffice.
+
+**Migration.** A migration pathway carries one PRONOM format into another by a tool, with what it loses (lossless, minimal, moderate, significant), a fidelity score, whether it is recommended and whether it may run without review. A format can name the format its files are to be migrated to, and why its risk is what it is. The formats page shows each format's files, their size, its risk and the pathway recommended for it, worked out when the page is shown. Heratio keeps that in its own `preservation_format_obsolescence` table, which goes stale.
+
+A migration plan takes the institution's files of the pathway's source format, or only those of a repository, or of a unit and what it includes. It is drawn up as a draft and approved by someone other than who drew it up. It is then run in the background, at once or from its scheduled start. Each file's migration is a conversion and a PREMIS migration event, its result a preservation master beside the master, checked for fixity after where the plan says so. A plan can be cancelled while it runs, and its failed files tried again.
+
+**Replication.** A replication target is a folder on this server or on another reached by rsync over SSH with a key file. It is copied to on its schedule (daily, weekly or monthly) or at once, and can be compared with the object store. The copy is the OCFL storage root as it stands, so an object purged by a disposal leaves the copy at its next run too.
+
+Two safeguards stand in front of every run:
+
+- A target folder must be empty, not yet made, or already hold an OCFL storage root; anything else is refused, so a target set to the wrong folder is not emptied.
+- The host, user, folder and key file are checked against narrow patterns before they reach rsync.
+
+Each file copied is a PREMIS replication event, and each run is kept with its counts, bytes and what it changed or found different.
+
+**PREMIS rights.** The rights in force on the unit and its instantiations, as every other export gives them, become PREMIS rights statements:
+
+- the basis: copyright, licence, statute, or other for donor and policy;
+- its copyright status, jurisdiction and determination date, its licence and terms, or its statute citation;
+- its applicable dates;
+- each act granted with its restriction and term;
+- the object it bears on;
+- its holder, as an agent.
+
+The export validates against the PREMIS 3.0 schema with them.
+
+### Not carried in 15c
+
+- Heratio's `preservation_policy` and `preservation_workflow_schedule` and runs:
+  - fixity is on its own schedules since 12a;
+  - replication and migration plans carry their own schedules;
+  - format identification and virus scanning run as each file is kept.
+- Heratio's S3, Azure and Google Cloud replication targets: each needs its SDK. A mounted share or another server by rsync covers a second copy now.
+- Heratio's `migration_command`: a pathway's command is built from its tool and options, never kept as text to run.
+- Heratio's `quality_score` on a conversion: nothing measures it.
+- Heratio's `max_concurrent` on a plan: one worker runs a plan's files one at a time.
+- Importing PREMIS rights XML (Heratio's `source_xml`): rights come in through the rights form and the imports that already carry them.
+- OAIS packages, BagIt, SWORD and Archivematica: 15d.
+
+### Evidence (15c)
+
+- `tests/Feature/PreservationPlanningTest.php`:
+  - a PNG master normalised on ingest into a TIFF preservation master and a JPEG access copy, in the instantiation's OCFL object, the viewing copies made as before;
+  - the conversion with its tool and version, the normalisation event from the master, not made twice, and readable with read-master;
+  - the preservation master's source and its outcome event in PREMIS;
+  - a tool that fails as a failed conversion and a failure event;
+  - rules, pathways and targets set by operators only, a rule naming neither a format nor a type refused;
+  - a migration plan refused approval by who drew it up, approved by a second administrator, run, its file migrated to TIFF as a migration event and checked for fixity;
+  - the object store replicated to a folder as a valid OCFL storage root, each file a replication event;
+  - a changed copy found by comparison, and a purge carried to the copy;
+  - a folder holding other files refused and left as it was;
+  - a folder inside the object store, and a host a shell would read, refused;
+  - the unit's copyright and statute rights as PREMIS rights statements, valid where `PREMIS_XSD` is set.

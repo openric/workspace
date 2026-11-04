@@ -1,0 +1,30 @@
+# OpenRiC Workspace - OpenRiC Workspace Replication Operations.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What a replication run did (Heratio's preservation_replication_log.operation).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/replication-operation/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Replication Operations"@en ;
+    dcterms:description "What a replication run did (Heratio's preservation_replication_log.operation)."@en ;
+    dcterms:issued "2026-11-04"^^xsd:date ;
+    skos:hasTopConcept v:sync, v:verify .
+
+v:sync a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Sync"@en, "Sinkroniseer"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's preservation planning, as Heratio's ahg-preservation keeps it."@en ;
+    skos:definition "The copy brought up to date with the object store."@en .
+
+v:verify a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Verify"@en, "Verifieer"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's preservation planning, as Heratio's ahg-preservation keeps it."@en ;
+    skos:definition "The copy compared with the object store."@en .

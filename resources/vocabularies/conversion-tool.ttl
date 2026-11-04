@@ -1,0 +1,44 @@
+# OpenRiC Workspace - OpenRiC Workspace Conversion Tools.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# The program a normalisation or migration runs (Heratio's preservation_normalization_rule.tool).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/conversion-tool/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Conversion Tools"@en ;
+    dcterms:description "The program a normalisation or migration runs (Heratio's preservation_normalization_rule.tool)."@en ;
+    dcterms:issued "2026-11-04"^^xsd:date ;
+    skos:hasTopConcept v:imagemagick, v:ffmpeg, v:ghostscript, v:libreoffice .
+
+v:imagemagick a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "ImageMagick"@en, "ImageMagick"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's preservation planning, as Heratio's ahg-preservation keeps it."@en ;
+    skos:definition "Images, to TIFF or JPEG."@en .
+
+v:ffmpeg a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "FFmpeg"@en, "FFmpeg"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's preservation planning, as Heratio's ahg-preservation keeps it."@en ;
+    skos:definition "Sound and video, to WAV, FLAC, Matroska or MP4."@en .
+
+v:ghostscript a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Ghostscript"@en, "Ghostscript"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's preservation planning, as Heratio's ahg-preservation keeps it."@en ;
+    skos:definition "PDF, to PDF/A-2b."@en .
+
+v:libreoffice a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "LibreOffice"@en, "LibreOffice"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's preservation planning, as Heratio's ahg-preservation keeps it."@en ;
+    skos:definition "Office documents, to PDF or the OpenDocument formats."@en .

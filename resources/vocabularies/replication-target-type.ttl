@@ -1,0 +1,30 @@
+# OpenRiC Workspace - OpenRiC Workspace Replication Target Types.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Where a copy of the object store is kept (Heratio's preservation_replication_target.target_type).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/replication-target-type/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Replication Target Types"@en ;
+    dcterms:description "Where a copy of the object store is kept (Heratio's preservation_replication_target.target_type)."@en ;
+    dcterms:issued "2026-11-04"^^xsd:date ;
+    skos:hasTopConcept v:local, v:rsync .
+
+v:local a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Local folder"@en, "Plaaslike vouer"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's preservation planning, as Heratio's ahg-preservation keeps it."@en ;
+    skos:definition "A folder on this server, such as another disk or a mounted share."@en .
+
+v:rsync a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Another server, by rsync over SSH"@en, "Ander bediener, met rsync oor SSH"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's preservation planning, as Heratio's ahg-preservation keeps it."@en ;
+    skos:definition "A folder on another server, reached by rsync over SSH with a key."@en .

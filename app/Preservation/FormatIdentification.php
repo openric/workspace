@@ -43,7 +43,9 @@ class FormatIdentification
             return null;
         }
         $format = FileFormat::firstOrCreate(['puid' => $match['id']], ['name' => $match['format'] ?: $match['id'], 'version' => ($match['version'] ?? '') ?: null,
-            'mime_type' => ($match['mime'] ?? '') ?: null, 'format_class' => ($match['class'] ?? '') ?: null]);
+            'mime_type' => ($match['mime'] ?? '') ?: null, 'format_class' => ($match['class'] ?? '') ?: null,
+            // The extension of the first file found in it, as Heratio's preservation_format.extension (phase 15c).
+            'extension' => mb_strtolower(pathinfo($file->original_name, PATHINFO_EXTENSION)) ?: null]);
         $file->update(['format_id' => $format->id, 'format_basis' => ($match['basis'] ?? '') ?: null, 'format_warning' => ($match['warning'] ?? '') ?: null, 'format_identified_at' => now()]);
         $this->events->record($file, 'format-identification', ($match['warning'] ?? '') === '' ? 'success' : 'warning',
             $format->puid.' '.$format->name, ($match['basis'] ?? '').(($match['warning'] ?? '') !== '' ? '; '.$match['warning'] : ''), null, $software);

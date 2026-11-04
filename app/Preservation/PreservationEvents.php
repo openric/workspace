@@ -48,7 +48,8 @@ class PreservationEvents
         $person = auth()->user();
         if ($file->use?->notation === 'master') {
             $this->record($file, 'ingestion', 'success', __('Received as :name and kept under its SHA-256.', ['name' => $file->original_name]), null, $person);
-        } else {
+        } elseif (! in_array($file->use?->notation, ['preservation', 'access'], true)) {
+            // A preservation master or access copy has its normalisation or migration event from what made it (phase 15c).
             $master = DigitalFile::where('instantiation_id', $file->instantiation_id)->whereHas('use', fn ($q) => $q->where('notation', 'master'))->first();
             $this->record($file, 'creation', 'success', __('A :use copy made from the master.', ['use' => (string) $file->use?->notation]), null, null, null, $master?->id);
         }

@@ -110,7 +110,7 @@ class InstantiationService
     public function makeCopies(Instantiation $instantiation, ?User $actor = null): int
     {
         $master = $instantiation->file('master');
-        if ($master === null || $instantiation->files()->where('id', '!=', $master->id)->exists()) {
+        if ($master === null || $instantiation->files()->whereHas('use', fn ($q) => $q->whereIn('notation', ['reference', 'thumbnail']))->exists()) {
             return 0;
         }
         $watermark = app(Watermark::class)->configFor(Institution::findOrFail($instantiation->institution_id), $instantiation->record);
@@ -129,8 +129,8 @@ class InstantiationService
 
     /**
      * Make the copies for viewing again, as Heratio's regenerateDerivatives: after the watermark changed, or
-     * when a copy is wrong. The old copies' records go; their files stay in the store, kept by checksum, where
-     * another record may share them. The number of copies made.
+     * when a copy is wrong. The old copies' records go; their files stay in the earlier versions of the
+     * instantiation's OCFL object. A preservation master or access copy is left as it is. The number of copies made.
      */
     public function remakeCopies(Instantiation $instantiation, ?User $actor = null): int
     {
@@ -138,7 +138,7 @@ class InstantiationService
         if ($master === null) {
             return 0;
         }
-        DB::transaction(fn () => AuditLog::actingAs($actor, fn () => $instantiation->files()->where('id', '!=', $master->id)->get()->each->delete()));
+        DB::transaction(fn () => AuditLog::actingAs($actor, fn () => $instantiation->files()->whereHas('use', fn ($q) => $q->whereIn('notation', ['reference', 'thumbnail']))->get()->each->delete()));
         $instantiation->unsetRelation('files');
 
         return $this->makeCopies($instantiation, $actor);
@@ -168,6 +168,24 @@ class InstantiationService
             $instantiation->unsetRelation('files');
 
             return $this->addFile($instantiation, $use, pathinfo($instantiation->file('master')->original_name, PATHINFO_FILENAME).'-'.$use.'.jpg', $copy);
+        }));
+    }
+
+    /**
+     * A file made from one of the instantiation's (a preservation master or access copy, roadmap phase 15c), kept in its
+     * OCFL object under files/<use>/<name>, in place of any file it already had of that use; the earlier one stays in
+     * the object's earlier versions.
+     */
+    public function keepDerived(Instantiation $instantiation, string $use, string $name, string $path, ?User $actor = null): DigitalFile
+    {
+        in_array($use, ['preservation', 'access'], true) || throw new InvalidArgumentException(__(':value is not in the list', ['value' => $use]));
+        $kept = $this->store->into($instantiation->iri)->ingest($instantiation->institution_id, $path, null, "files/$use/".self::logicalName($name));
+
+        return DB::transaction(fn () => AuditLog::actingAs($actor, function () use ($instantiation, $use, $name, $kept) {
+            $instantiation->files()->whereHas('use', fn ($q) => $q->where('notation', $use))->get()->each->delete();
+            $instantiation->unsetRelation('files');
+
+            return $this->addFile($instantiation, $use, $name, $kept);
         }));
     }
 
@@ -209,6 +227,8 @@ class InstantiationService
     {
         $instantiation = $file->instantiation;
         $unit = $instantiation->record;
+        // A preservation master is the master's, an access copy the reference copy's, to every rule below (phase 15c).
+        $use = ['preservation' => 'master', 'access' => 'reference'][$file->use->notation] ?? $file->use->notation;
         if ($instantiation->deleted_at !== null || $unit->deleted_at !== null || ($user !== null && $unit->institution_id !== $user->institution_id)) {
             return false;
         }
@@ -217,11 +237,11 @@ class InstantiationService
             return false;
         }
         // An embargo withholds the files its type says, an approved access request or not (phase 13a, ADR 0015).
-        if (! app(Embargoes::class)->allows($user, $unit, $file->use->notation)) {
+        if (! app(Embargoes::class)->allows($user, $unit, $use)) {
             return false;
         }
         // A classified record's files reach only who is cleared to it; its master only where its level allows downloads (phase 18c, ADR 0016).
-        if (! app(Clearances::class)->allows($user, $unit, $file->use->notation === 'master' ? 'download' : 'read')) {
+        if (! app(Clearances::class)->allows($user, $unit, $use === 'master' ? 'download' : 'read')) {
             return false;
         }
         // Where screening is required, the files wait until the record is screened and cleared (phase 18b, ADR 0016).
@@ -233,7 +253,7 @@ class InstantiationService
         if ($user !== null && $instantiation->availability->notation === 'on-request' && app(AccessRequestService::class)->grants($user, $instantiation)) {
             return true;
         }
-        if (! $may('read-'.$file->use->notation) || ! $may('read')) {
+        if (! $may('read-'.$use) || ! $may('read')) {
             return false;
         }
         if ($user === null && ! $instantiation->names()->whereHas('nameType', fn ($q) => $q->where('iri', Vocab::NAME_TYPES.'authorised'))

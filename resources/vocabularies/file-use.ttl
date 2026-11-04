@@ -2,7 +2,7 @@
 # Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
 # SPDX-License-Identifier: AGPL-3.0-or-later
 #
-# What a file of a digital instantiation is for. The master is the file as it was received; the reference and thumbnail copies are made from it, and each use has its own read permission (read-master, read-reference, read-thumbnail).
+# What a file of a digital instantiation is for. The master is the file as it was received; the reference and thumbnail copies are made from it, and each use has its own read permission (read-master, read-reference, read-thumbnail). A preservation master (roadmap phase 15c) is read with read-master, an access copy with read-reference.
 
 @prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
@@ -13,7 +13,7 @@ v: a skos:ConceptScheme ;
     dcterms:title "OpenRiC Workspace File Uses"@en ;
     dcterms:description "What each file of a digital instantiation is for."@en ;
     dcterms:issued "2026-10-20"^^xsd:date ;
-    skos:hasTopConcept v:master, v:reference, v:thumbnail .
+    skos:hasTopConcept v:master, v:reference, v:thumbnail, v:preservation, v:access .
 
 v:master a skos:Concept ;
     skos:inScheme v: ;
@@ -35,3 +35,17 @@ v:thumbnail a skos:Concept ;
     skos:prefLabel "Thumbnail"@en ;
     skos:scopeNote "A small image made from the master for lists. Delivered with the read-thumbnail permission. Exported as a rico:Instantiation that rico:isOrWasDerivedFromInstantiation the master."@en ;
     skos:definition "A small image for lists, made from the master."@en .
+
+v:preservation a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Preservation master"@en, "Bewaringsmeester"@af ;
+    skos:scopeNote "Made from the master by a normalisation rule or a migration plan, in an open, long-lived format (roadmap phase 15c); the master is kept beside it. Delivered with the read-master permission. Exported as a rico:Instantiation that rico:isOrWasDerivedFromInstantiation its source, and in PREMIS with its normalisation or migration event."@en ;
+    skos:definition "A copy of the master in an open, long-lived format, kept beside it."@en .
+
+v:access a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Access copy"@en, "Toegangskopie"@af ;
+    skos:scopeNote "Made from the master by a normalisation rule, in a format most readers can open, such as a PDF of a word-processing file (roadmap phase 15c). Delivered with the read-reference permission. Exported as a rico:Instantiation that rico:isOrWasDerivedFromInstantiation the master."@en ;
+    skos:definition "A copy of the master in a format most readers can open."@en .

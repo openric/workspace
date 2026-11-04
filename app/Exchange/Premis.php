@@ -4,18 +4,20 @@
 // ahg-preservation PremisXmlSerializer: the unit as an intellectual entity, each instantiation as a representation of
 // it, each file with its SHA-256, size, PRONOM format and original name, a viewing copy related to the master it was
 // made from, and every event done to them with the agents that did it, each event type with the Library of Congress
-// preservation vocabulary term it matches. Only instantiations the reader may read go in.
+// preservation vocabulary term it matches. Only instantiations the reader may read go in. From phase 15c, a preservation
+// master or access copy is related to the file it was normalised or migrated from, and the rights in force on the unit
+// and its instantiations are PREMIS rights statements (Heratio's PremisRightsService), each with its basis, its
+// copyright, licence or statute information, its grants and its holder, as every other export says them.
 // Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
 // SPDX-License-Identifier: AGPL-3.0-or-later
-//
-// ponytail: no rights statements yet: PREMIS copyright information needs a status and a jurisdiction the Workspace does not
-// keep in that form; they come with Heratio's PREMIS rights in phase 15c.
 
 namespace App\Exchange;
 
 use App\Models\DigitalFile;
 use App\Models\PreservationEvent;
 use App\Models\RecordResource;
+use App\Models\Right;
+use App\Rights\PublicRights;
 use XMLWriter;
 
 class Premis
@@ -27,6 +29,9 @@ class Premis
     private const AGENT_TYPES = 'http://id.loc.gov/vocabulary/preservation/agentType';
 
     /** The Library of Congress code of each event and agent type, as the vocabularies' skos:exactMatch give them. */
+    /** The events that make a file from another. */
+    private const MADE = ['creation', 'normalization', 'migration'];
+
     private const LOC = ['premis-event-type' => ['ingestion' => 'ing', 'creation' => 'cre', 'message-digest-calculation' => 'mes', 'virus-check' => 'vir',
         'format-identification' => 'for', 'metadata-extraction' => 'mee', 'fixity-check' => 'fix', 'validation' => 'val', 'migration' => 'mig',
         'normalization' => 'nor', 'replication' => 'rep', 'deletion' => 'del'], 'premis-agent-type' => ['person' => 'per', 'organization' => 'org', 'software' => 'sof']];
@@ -92,9 +97,11 @@ class Premis
                 $x->endElement();
                 $x->writeElement('originalName', $file->original_name);
                 $this->relationship($x, 'structural', 'is included in', $file->instantiation->iri);
-                $master = $masters->get($file->instantiation_id);
-                if ($master && $master->id !== $file->id) {
-                    $this->relationship($x, 'derivation', 'has source', self::fileId($master));
+                // Its source: the file its normalisation or migration was made from, or else the master.
+                $made = $events->first(fn ($e) => $e->digital_file_id === $file->id && $e->source_file_id && in_array($e->type->notation, self::MADE, true));
+                $source = $made?->source_file_id ? 'urn:uuid:'.$made->source_file_id : (($master = $masters->get($file->instantiation_id)) && $master->id !== $file->id ? self::fileId($master) : null);
+                if ($source) {
+                    $this->relationship($x, 'derivation', 'has source', $source);
                 }
                 foreach ($events->where('digital_file_id', $file->id) as $event) {
                     $this->identifier($x, 'linkingEventIdentifier', 'UUID', $event->id);
@@ -131,7 +138,7 @@ class Premis
             $x->startElement('linkingObjectIdentifier');
             $x->writeElement('linkingObjectIdentifierType', 'UUID');
             $x->writeElement('linkingObjectIdentifierValue', 'urn:uuid:'.$event->digital_file_id);
-            $x->writeElement('linkingObjectRole', $event->type->notation === 'creation' ? 'outcome' : 'source');
+            $x->writeElement('linkingObjectRole', in_array($event->type->notation, self::MADE, true) && $event->outcome->notation === 'success' && $event->source_file_id ? 'outcome' : 'source');
             $x->endElement();
             if ($event->source_file_id) {
                 $x->startElement('linkingObjectIdentifier');
@@ -142,7 +149,14 @@ class Premis
             }
             $x->endElement();
         }
-        // The agents, once each.
+        $rights = collect([$unit, ...$instantiations])->flatMap(fn ($subject) => (new PublicRights($view))->rights($subject)->map(fn (Right $r) => [$r, $subject]));
+        // The agents, once each, and the holders of its rights.
+        foreach ($rights->pluck(0)->pluck('holder')->filter()->unique('id') as $holder) {
+            $x->startElement('agent');
+            $this->identifier($x, 'agentIdentifier', 'URI', $holder->iri);
+            $x->writeElement('agentName', (string) $view->label($holder));
+            $x->endElement();
+        }
         foreach ($events->unique(fn ($e) => self::agentId($e)) as $event) {
             $x->startElement('agent');
             $this->identifier($x, 'agentIdentifier', 'local', self::agentId($event));
@@ -157,9 +171,89 @@ class Premis
             $x->endElement();
             $x->endElement();
         }
+        foreach ($rights as [$right, $subject]) {
+            $this->rights($x, $right, $subject->iri);
+        }
         $x->endElement();
 
         return $x->outputMemory();
+    }
+
+    /** A right as a PREMIS rights statement: the basis, then what that basis says, then each act granted and the object it bears on. */
+    private function rights(XMLWriter $x, Right $right, string $object): void
+    {
+        $basis = $right->basis->notation;
+        $dates = function (string $element) use ($x, $right) {
+            if ($right->starts_on) {
+                $x->startElement($element);
+                $x->writeElement('startDate', $right->starts_on->toDateString());
+                $right->ends_on && $x->writeElement('endDate', $right->ends_on->toDateString());
+                $x->endElement();
+            }
+        };
+        $x->startElement('rights');
+        $x->startElement('rightsStatement');
+        $this->identifier($x, 'rightsStatementIdentifier', 'URI', $right->iri);
+        $x->writeElement('rightsBasis', ['copyright' => 'Copyright', 'licence' => 'License', 'statute' => 'Statute'][$basis] ?? 'Other');
+        $jurisdiction = trim((string) $right->jurisdiction) ?: 'unknown';
+        if ($basis === 'copyright') {
+            $x->startElement('copyrightInformation');
+            $x->writeElement('copyrightStatus', ['copyrighted' => 'copyrighted', 'public-domain' => 'publicdomain'][$right->copyrightStatus?->notation] ?? 'unknown');
+            $x->writeElement('copyrightJurisdiction', $jurisdiction);
+            $right->determined_on && $x->writeElement('copyrightStatusDeterminationDate', $right->determined_on->toDateString());
+            $right->note && $x->writeElement('copyrightNote', $right->note);
+            $dates('copyrightApplicableDates');
+            $x->endElement();
+        } elseif ($basis === 'licence') {
+            $x->startElement('licenseInformation');
+            if ($right->licence) {
+                $this->identifier($x, 'licenseDocumentationIdentifier', 'URI', $right->licence->iri);
+            }
+            $x->writeElement('licenseTerms', trim((string) $right->licence_terms) ?: (string) $right->licence?->label(['en']) ?: PublicRights::summary($right));
+            $right->note && $x->writeElement('licenseNote', $right->note);
+            $dates('licenseApplicableDates');
+            $x->endElement();
+        } elseif ($basis === 'statute') {
+            $x->startElement('statuteInformation');
+            $x->writeElement('statuteJurisdiction', $jurisdiction);
+            $x->writeElement('statuteCitation', trim((string) $right->citation) ?: PublicRights::summary($right));
+            $right->determined_on && $x->writeElement('statuteInformationDeterminationDate', $right->determined_on->toDateString());
+            $right->note && $x->writeElement('statuteNote', $right->note);
+            $dates('statuteApplicableDates');
+            $x->endElement();
+        } else {
+            $x->startElement('otherRightsInformation');
+            $x->writeElement('otherRightsBasis', (string) $right->basis->label(['en']));
+            $dates('otherRightsApplicableDates');
+            $right->note && $x->writeElement('otherRightsNote', $right->note);
+            $x->endElement();
+        }
+        foreach ($right->grants as $grant) {
+            $x->startElement('rightsGranted');
+            $x->writeElement('act', (string) $grant->act->notation);
+            $grant->restriction && $x->writeElement('restriction', (string) $grant->restriction->notation);
+            if ($grant->starts_on) {
+                $x->startElement('termOfGrant');
+                $x->writeElement('startDate', $grant->starts_on->toDateString());
+                $grant->ends_on && $x->writeElement('endDate', $grant->ends_on->toDateString());
+                $x->endElement();
+            }
+            $grant->note && $x->writeElement('rightsGrantedNote', $grant->note);
+            $x->endElement();
+        }
+        $x->startElement('linkingObjectIdentifier');
+        $x->writeElement('linkingObjectIdentifierType', 'URI');
+        $x->writeElement('linkingObjectIdentifierValue', $object);
+        $x->endElement();
+        if ($right->holder) {
+            $x->startElement('linkingAgentIdentifier');
+            $x->writeElement('linkingAgentIdentifierType', 'URI');
+            $x->writeElement('linkingAgentIdentifierValue', $right->holder->iri);
+            $x->writeElement('linkingAgentRole', 'rightsholder');
+            $x->endElement();
+        }
+        $x->endElement();
+        $x->endElement();
     }
 
     public static function fileId(DigitalFile $file): string

@@ -12,6 +12,7 @@ use App\Jobs\IdentifyFormat;
 use App\Models\Concept;
 use App\Models\DigitalFile;
 use App\Models\FileFormat;
+use App\Models\MigrationPathway;
 use App\Operations\Health;
 use App\Support\Vocab;
 use Illuminate\Http\RedirectResponse;
@@ -26,7 +27,10 @@ class FormatController extends Controller
         $institution = $request->user()->institution_id;
         $counts = DigitalFile::where('institution_id', $institution)->whereNotNull('format_id')->select('format_id', DB::raw('count(*) as n'), DB::raw('sum(size_bytes) as bytes'))->groupBy('format_id')->get()->keyBy('format_id');
 
-        return view('formats.index', ['formats' => FileFormat::whereIn('id', $counts->keys())->with('risk.labels', 'action.labels')->orderBy('name')->get(), 'counts' => $counts,
+        // Heratio's format obsolescence, worked out as it is shown: each format's files, their size, its risk and the pathway recommended for it.
+        return view('formats.index', ['formats' => FileFormat::whereIn('id', $counts->keys())->with('risk.labels', 'action.labels', 'migrationTarget')->orderBy('name')->get(), 'counts' => $counts,
+            'pathways' => MigrationPathway::with('tool.labels')->orderByDesc('is_recommended')->orderBy('priority')->get()->groupBy('source_puid'),
+            'targets' => FileFormat::where('is_preservation_format', true)->orderBy('name')->get(),
             'unidentified' => DigitalFile::where('institution_id', $institution)->whereNull('format_id')->count(),
             'risks' => Concept::choices(Vocab::BASE.'format-risk/')->get(), 'actions' => Concept::choices(Vocab::BASE.'format-action/')->get(),
             'operator' => Health::operator($request->user())]);
@@ -36,8 +40,12 @@ class FormatController extends Controller
     {
         abort_unless(Health::operator($request->user()), 403);
         $concept = fn (string $vocabulary, ?string $notation) => $notation ? Concept::choices(Vocab::BASE.$vocabulary.'/')->where('notation', $notation)->value('id') : null;
-        $format->update(['risk_id' => $concept('format-risk', $request->input('risk')), 'action_id' => $concept('format-action', $request->input('action')),
-            'is_preservation_format' => $request->boolean('is_preservation_format'), 'notes' => trim((string) $request->input('notes')) ?: null]);
+        $risk = $concept('format-risk', $request->input('risk'));
+        $target = FileFormat::where('id', $request->input('migration_target_id'))->where('id', '!=', $format->id)->value('id');
+        $format->update(['risk_id' => $risk, 'action_id' => $concept('format-action', $request->input('action')),
+            'is_preservation_format' => $request->boolean('is_preservation_format'), 'notes' => trim((string) $request->input('notes')) ?: null,
+            'migration_target_id' => $target, 'risk_notes' => trim((string) $request->input('risk_notes')) ?: null,
+            'risk_assessed_at' => $risk !== $format->risk_id || $request->filled('risk_notes') ? now() : $format->risk_assessed_at]);
 
         return back()->with('status', __('Saved.'));
     }

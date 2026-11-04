@@ -1,0 +1,51 @@
+# OpenRiC Workspace - OpenRiC Workspace Conversion Statuses.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Where a normalisation or migration of one file stands (Heratio's preservation_format_conversion.status and preservation_migration_plan_object.status).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/conversion-status/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Conversion Statuses"@en ;
+    dcterms:description "Where a normalisation or migration of one file stands (Heratio's preservation_format_conversion.status and preservation_migration_plan_object.status)."@en ;
+    dcterms:issued "2026-11-04"^^xsd:date ;
+    skos:hasTopConcept v:pending, v:processing, v:completed, v:failed, v:skipped .
+
+v:pending a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Pending"@en, "Hangende"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's preservation planning, as Heratio's ahg-preservation keeps it."@en ;
+    skos:definition "Waiting to be made."@en .
+
+v:processing a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Processing"@en, "Word verwerk"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's preservation planning, as Heratio's ahg-preservation keeps it."@en ;
+    skos:definition "Being made."@en .
+
+v:completed a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Completed"@en, "Voltooi"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's preservation planning, as Heratio's ahg-preservation keeps it."@en ;
+    skos:definition "Made, checked and kept."@en .
+
+v:failed a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Failed"@en, "Misluk"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's preservation planning, as Heratio's ahg-preservation keeps it."@en ;
+    skos:definition "The tool did not make it; the reason is kept."@en .
+
+v:skipped a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Skipped"@en, "Oorgeslaan"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's preservation planning, as Heratio's ahg-preservation keeps it."@en ;
+    skos:definition "Not made: there was nothing to make it from, or it was made already."@en .

@@ -8,6 +8,7 @@ namespace App\Providers;
 
 use App\Access\AccessControl;
 use App\Jobs\IdentifyFormat;
+use App\Jobs\NormaliseFile;
 use App\Mail\EmailAuditListener;
 use App\Models\CustomFieldValue;
 use App\Models\DescriptionValue;
@@ -30,6 +31,7 @@ use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Mail\Events\MessageSending;
 use Illuminate\Mail\Events\MessageSent;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Queue;
@@ -66,6 +68,10 @@ class AppServiceProvider extends ServiceProvider
         DigitalFile::created(function (DigitalFile $file) {
             app(PreservationEvents::class)->kept($file);
             IdentifyFormat::dispatch($file->id)->afterCommit();
+            // Normalised by the rules, after its format is known, where its institution chose that (phase 15c).
+            if ($file->use?->notation === 'master' && DB::table('institutions')->where('id', $file->institution_id)->value('normalise_on_ingest')) {
+                NormaliseFile::dispatch($file->id, auth()->id())->afterCommit();
+            }
         });
         DigitalFile::deleted(fn (DigitalFile $file) => app(PreservationEvents::class)->removed($file));
         // Versions follow the same marks (roadmap phase 22b): a unit of description or authority record changed, or

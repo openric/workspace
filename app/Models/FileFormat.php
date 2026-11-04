@@ -14,14 +14,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['puid', 'name', 'version', 'mime_type', 'format_class', 'risk_id', 'action_id', 'is_preservation_format', 'notes'])]
+#[Fillable(['puid', 'name', 'version', 'mime_type', 'format_class', 'risk_id', 'action_id', 'is_preservation_format', 'notes', 'migration_target_id', 'extension', 'risk_notes', 'risk_assessed_at'])]
 class FileFormat extends Model
 {
     use Audited, HasUuids;
 
     protected function casts(): array
     {
-        return ['is_preservation_format' => 'boolean'];
+        return ['is_preservation_format' => 'boolean', 'risk_assessed_at' => 'immutable_datetime'];
     }
 
     public function risk(): BelongsTo
@@ -32,6 +32,12 @@ class FileFormat extends Model
     public function action(): BelongsTo
     {
         return $this->belongsTo(Concept::class, 'action_id');
+    }
+
+    /** The format its files are to be migrated to (phase 15c). */
+    public function migrationTarget(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'migration_target_id');
     }
 
     public function files(): HasMany

@@ -1,0 +1,30 @@
+# OpenRiC Workspace - OpenRiC Workspace Normalisation Purposes.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What a normalised copy is for (Heratio's preservation_normalization_rule.purpose).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/normalisation-purpose/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Normalisation Purposes"@en ;
+    dcterms:description "What a normalised copy is for (Heratio's preservation_normalization_rule.purpose)."@en ;
+    dcterms:issued "2026-11-04"^^xsd:date ;
+    skos:hasTopConcept v:preservation, v:access .
+
+v:preservation a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Preservation master"@en, "Bewaringsmeester"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's preservation planning, as Heratio's ahg-preservation keeps it."@en ;
+    skos:definition "A copy in an open, long-lived format, kept beside the master."@en .
+
+v:access a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Access copy"@en, "Toegangskopie"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's preservation planning, as Heratio's ahg-preservation keeps it."@en ;
+    skos:definition "A copy in a format most readers can open, given to those who may read the reference copy."@en .

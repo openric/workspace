@@ -12,7 +12,10 @@ use App\Jurisdiction\ExportPermits;
 use App\Jurisdiction\Naz;
 use App\Models\DigitalFile;
 use App\Models\Institution;
+use App\Preservation\Conversions;
 use App\Preservation\FormatIdentification;
+use App\Preservation\MigrationPlans;
+use App\Preservation\Replication;
 use App\Privacy\Registers;
 use App\Reports\ReportDelivery;
 use App\Reports\UsageService;
@@ -174,6 +177,32 @@ Artisan::command('workspace:fixity:scheduled', function (Fixity $fixity) {
 
 // Fixity schedules that are due (roadmap phase 12a), and the heartbeat that shows the scheduler is running.
 Schedule::command('workspace:fixity:scheduled')->everyFifteenMinutes()->withoutOverlapping(180);
+
+// Preservation planning (roadmap phase 15c): replication targets copied on their schedule, approved migration plans
+// started at their scheduled start, and the masters kept before a rule existed normalised on request.
+Artisan::command('workspace:replication:scheduled', function (Replication $replication) {
+    $this->info($replication->runDue().' replication targets copied.');
+})->purpose('Copy the object store to each replication target whose time has come (Heratio\'s replication targets)');
+Schedule::command('workspace:replication:scheduled')->everyFifteenMinutes()->withoutOverlapping(1440);
+Artisan::command('workspace:migration-plans:scheduled', function (MigrationPlans $plans) {
+    $this->info($plans->runDue().' migration plans started.');
+})->purpose('Start the approved migration plans whose scheduled start has come');
+Schedule::command('workspace:migration-plans:scheduled')->everyFifteenMinutes()->withoutOverlapping(60);
+Artisan::command('workspace:normalise {--institution= : only this institution\'s masters}', function (Conversions $conversions) {
+    $done = $failed = 0;
+    DigitalFile::whereHas('use', fn ($q) => $q->where('notation', 'master'))->whereHas('instantiation', fn ($q) => $q->whereNull('deleted_at'))
+        ->when($this->option('institution'), fn ($q, $id) => $q->where('institution_id', $id))->orderBy('id')
+        ->chunkById(100, function ($files) use ($conversions, &$done, &$failed) {
+            foreach ($files as $file) {
+                foreach (['preservation', 'access'] as $purpose) {
+                    if ($conversion = $conversions->normalise($file, $purpose)) {
+                        $conversion->status->notation === 'completed' ? $done++ : $failed++;
+                    }
+                }
+            }
+        });
+    $this->info("$done made, $failed failed.");
+})->purpose('Normalise by the rules every master that has no preservation master or access copy yet (Heratio\'s NormalizeExistingCommand)');
 Schedule::call(fn () => Cache::forever('workspace:scheduler:heartbeat', now()->getTimestamp()))->everyMinute()->name('scheduler-heartbeat');
 Artisan::command('workspace:research-digests', function (Notifications $notifications) {
     $this->info($notifications->digests().' digests of research notices sent.');
