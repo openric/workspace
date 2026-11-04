@@ -1,6 +1,6 @@
 # Deploying the OpenRiC Workspace
 
-The live instance at https://workspace.openric.org runs from `/usr/share/nginx/openric-workspace-live`, a clone that only ever holds a tagged release. Development and tests happen in a separate checkout; nothing there is live.
+To install the Workspace on a new server, follow `INSTALL.md` first. The live instance at https://workspace.openric.org runs from `/usr/share/nginx/openric-workspace-live`, a clone that only ever holds a tagged release. Development and tests happen in a separate checkout; nothing there is live.
 
 ## Release and deploy
 

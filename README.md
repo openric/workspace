@@ -6,6 +6,7 @@ OpenRiC Workspace will be an archival management application for archives starti
 
 This repository holds the application and its governance:
 
+- [INSTALL.md](INSTALL.md): installing it on a new server, and [deploy/README.md](deploy/README.md): releasing and deploying;
 - [ROADMAP.md](ROADMAP.md): releases, delivery gates and their status;
 - [SPECIFICATION.md](SPECIFICATION.md): the functional requirements, WS-001 onwards;
 - [architecture/adr/](architecture/adr/): architecture decision records;
