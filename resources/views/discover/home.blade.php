@@ -37,6 +37,10 @@
         @php($link = fn (array $change) => route('discover.home', array_filter([...['q' => $query, 'kind' => $kind] + $search['filters'], ...$change], fn ($v) => $v !== null && $v !== '')))
         <h1>{{ __('Search: :query', ['query' => $query]) }}</h1>
         <p role="status">{{ $search['total'] === 0 ? __('No results found.') : __(':count found.', ['count' => $search['total']]) }}</p>
+        @if(\App\Models\FederationPeer::where(['institution_id' => $institution->id, 'is_active' => true, 'search_enabled' => true])->exists())
+            {{-- The catalogues it federates with (phase 16a). --}}
+            <p><a href="{{ route('discover.federated', ['q' => $query]) }}">{{ __('Search other catalogues for this') }}</a></p>
+        @endif
         <div class="search-layout">
             <aside class="search-facets" aria-label="{{ __('Narrow the results') }}">
                 <h2>{{ __('Kind') }}</h2>

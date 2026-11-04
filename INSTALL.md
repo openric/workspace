@@ -256,6 +256,7 @@ A restore is complete only when `workspace:fixity` reports no failure and `works
 - Archivematica: Admin, Archivematica, set by an operator. Its transfer source must be a folder both Archivematica and this server can reach. Its DIP upload to the Workspace uses SWORD at `https://archives.example.org/sword/servicedocument`, signed in with an account's e-mail address and an API key with the write scope.
 - Replication: Admin, Preservation, Replication. A target on another server needs an SSH key `www-data` can read, and the server's host key accepted once.
 - Metrics: set `WORKSPACE_METRICS_TOKEN` and point Prometheus at `/metrics`.
+- Federation: Admin, Federation. An institution chooses whether it answers peers, and which peers it searches. Peers verify its answers with the audit signing key's public half, published at `/.well-known/openric-federation-key`, so a restored server must keep the same key.
 - The SPARQL endpoint and Sparnatural (phase 16e): a Fuseki dataset of the Workspace's published RiC-O.
 
 ## Updating

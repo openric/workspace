@@ -87,7 +87,8 @@ jobs:
           [ -n "$tag" ] || { echo "$GITHUB_REF_NAME is not an annotated tag"; exit 1; }
           [ "$(gh api "repos/$GITHUB_REPOSITORY/git/tags/$tag" --jq .verification.verified)" = true ] || { echo "$GITHUB_REF_NAME is not signed by a verified key"; exit 1; }
           commit=$(gh api "repos/$GITHUB_REPOSITORY/git/tags/$tag" --jq .object.sha)
-          passed=$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/ci.yml/runs?branch=main&head_sha=$commit&status=success" --jq .total_count)
+          # GitHub's list filtered by status as well as commit can miss a run that passed (v0.0.117): filter it here instead.
+          passed=$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/ci.yml/runs?head_sha=$commit" --jq '[.workflow_runs[] | select(.head_branch == "main" and .conclusion == "success")] | length')
           [ "$passed" -gt 0 ] || { echo "CI has not passed on main for $commit"; exit 1; }
           echo "$GITHUB_REF_NAME: signed, and $commit passed on main"
 

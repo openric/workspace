@@ -93,6 +93,7 @@
                 'formats.index' => [__('File formats'), $may('manage-institution'), 'formats.*'],
                 'preservation.index' => [__('Preservation'), $may('manage-institution'), 'preservation.*'],
                 'archivematica.index' => [__('Archivematica'), $may('manage-institution'), 'archivematica.*'],
+                'federation.admin' => [__('Federation'), $may('manage-institution'), 'federation.*'],
                 'webhooks.index' => [__('Webhooks'), $may('manage-institution'), 'webhooks.*'],
                 'labels.templates' => [__('Label templates'), $may('manage-institution'), 'labels.templates*'],
                 'custom-fields.index' => [__('Own fields and form templates'), $may('manage-institution'), 'custom-fields.index|custom-fields.template*|custom-fields.definitions*'],

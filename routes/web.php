@@ -35,6 +35,7 @@ use App\Http\Controllers\EmailController;
 use App\Http\Controllers\EmbargoController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\FavouritesController;
+use App\Http\Controllers\FederationController;
 use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\FormatController;
 use App\Http\Controllers\HistoryController;
@@ -185,6 +186,15 @@ Route::middleware([ServeDiscovery::class, 'throttle:120,1'])->group(function () 
     Route::get('/sitemap.xml', [PublishingController::class, 'index'])->name('sitemap');
     Route::get('/sitemap-{kind}.xml', [PublishingController::class, 'kind'])->whereIn('kind', ['records', 'agents', 'repositories', 'places', 'activities', 'rules'])->name('sitemap.kind');
     Route::get('/feed.atom', [PublishingController::class, 'feed'])->name('feed');
+});
+// Federation (roadmap phase 16a): the catalogue answering its peers, signed, its key, its protocol and its peers; and its
+// public search of its own peers.
+Route::middleware([ServeDiscovery::class, 'throttle:120,1'])->group(function () {
+    Route::get('/federation/search', [FederationController::class, 'answer'])->name('federation.answer');
+    Route::get('/.well-known/openric-federation-key', [FederationController::class, 'key'])->name('federation.key');
+    Route::get('/open-data/protocol', [FederationController::class, 'protocol'])->name('federation.protocol');
+    Route::get('/open-data/federation', [FederationController::class, 'peerIndex'])->name('federation.index-public');
+    Route::get('/discover/federated', [FederationController::class, 'publicSearch'])->name('discover.federated');
 });
 Route::middleware(ServeDiscovery::class)->prefix('discover')->name('discover.')->group(function () {
     Route::get('/', [DiscoverController::class, 'home'])->name('home');
@@ -605,6 +615,15 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/formats', [FormatController::class, 'index'])->name('formats.index');
         Route::post('/formats/identify', [FormatController::class, 'identify'])->name('formats.identify');
         Route::post('/formats/{format}', [FormatController::class, 'update'])->whereUuid('format')->name('formats.update');
+        // Federation with peers (roadmap phase 16a).
+        Route::prefix('federation')->name('federation.')->whereUuid('peer')->group(function () {
+            Route::get('/', [FederationController::class, 'index'])->name('admin');
+            Route::post('/share', [FederationController::class, 'saveShare'])->name('share');
+            Route::post('/peers', [FederationController::class, 'savePeer'])->name('peers.store');
+            Route::post('/peers/{peer}', [FederationController::class, 'savePeer'])->name('peers.update');
+            Route::post('/peers/{peer}/test', [FederationController::class, 'testPeer'])->name('peers.test');
+            Route::post('/peers/{peer}/clear-pin', [FederationController::class, 'clearPin'])->name('peers.clear-pin');
+        });
         // OAIS information packages and Archivematica (roadmap phase 15d).
         Route::whereUuid(['record', 'package'])->group(function () {
             Route::get('/records/{record}/packages', [PackageController::class, 'index'])->name('packages.index');

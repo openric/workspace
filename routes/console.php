@@ -4,6 +4,7 @@ use App\AccessRequests\AccessRequestService;
 use App\Dedupe\Duplicates;
 use App\Description\AgreementService;
 use App\Description\WorkflowSlaService;
+use App\Federation\FederatedSearch;
 use App\Files\FileStore;
 use App\Files\MediaDuration;
 use App\Fixity\Fixity;
@@ -189,6 +190,11 @@ Artisan::command('workspace:migration-plans:scheduled', function (MigrationPlans
     $this->info($plans->runDue().' migration plans started.');
 })->purpose('Start the approved migration plans whose scheduled start has come');
 Schedule::command('workspace:migration-plans:scheduled')->everyFifteenMinutes()->withoutOverlapping(60);
+// Federation (roadmap phase 16a): cached peer answers past their fifteen minutes removed each hour.
+Artisan::command('workspace:federation:cache-clean', function (FederatedSearch $federation) {
+    $this->info($federation->clearExpired().' cached peer answers removed.');
+})->purpose('Remove the cached federation answers that have expired (Heratio\'s SearchCacheCleanCommand)');
+Schedule::command('workspace:federation:cache-clean')->hourly();
 // Archivematica (roadmap phase 15d): transfers followed to their AIP every five minutes, DIPs fetched each hour, and a ping.
 Artisan::command('workspace:archivematica:poll', function (Transfers $transfers) {
     $this->info($transfers->poll().' transfers looked at.');

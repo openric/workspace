@@ -1,0 +1,58 @@
+# OpenRiC Workspace - OpenRiC Workspace Federation Peer Types.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What kind of catalogue a federation peer is, and so how it is searched (Heratio's federation_peer.peer_type).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/federation-peer-type/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Federation Peer Types"@en ;
+    dcterms:description "What kind of catalogue a federation peer is, and so how it is searched (Heratio's federation_peer.peer_type)."@en ;
+    dcterms:issued "2026-11-04"^^xsd:date ;
+    skos:hasTopConcept v:institution, v:workspace, v:heratio, v:oai-pmh, v:dspace, v:alma .
+
+v:institution a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Institution on this installation"@en, "Instelling op hierdie installasie"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's federation with its peers, as Heratio's ahg-federation keeps it."@en ;
+    skos:definition "Another institution on the same Workspace, searched in this server as its public catalogue."@en .
+
+v:workspace a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "OpenRiC Workspace"@en, "OpenRiC Workspace"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's federation with its peers, as Heratio's ahg-federation keeps it."@en ;
+    skos:definition "Another OpenRiC Workspace, searched by its signed federation API."@en .
+
+v:heratio a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Heratio"@en, "Heratio"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's federation with its peers, as Heratio's ahg-federation keeps it."@en ;
+    skos:definition "A Heratio instance, searched by its signed federation API."@en .
+
+v:oai-pmh a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "OAI-PMH repository"@en, "OAI-PMH-bewaarplek"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's federation with its peers, as Heratio's ahg-federation keeps it."@en ;
+    skos:definition "Any OAI-PMH 2.0 repository, harvested (phase 16b)."@en .
+
+v:dspace a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "DSpace"@en, "DSpace"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's federation with its peers, as Heratio's ahg-federation keeps it."@en ;
+    skos:definition "A DSpace 7 or later repository, searched by its REST discovery API (phase 16b)."@en .
+
+v:alma a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Ex Libris Alma"@en, "Ex Libris Alma"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's federation with its peers, as Heratio's ahg-federation keeps it."@en ;
+    skos:definition "An Alma library catalogue, searched by SRU (phase 16b)."@en .

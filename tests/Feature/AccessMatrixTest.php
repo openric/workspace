@@ -43,6 +43,7 @@ use App\Models\CaptionTrack;
 use App\Models\Concept;
 use App\Models\Container;
 use App\Models\DuplicateDetection;
+use App\Models\FederationPeer;
 use App\Models\Feedback;
 use App\Models\FileFormat;
 use App\Models\FixityFailure;
@@ -366,6 +367,9 @@ class AccessMatrixTest extends TestCase
         $make('information package', fn () => Package::create(['institution_id' => $institution->id, 'record_resource_id' => $fonds->id, 'name' => 'aip-matrix',
             'type_id' => Concept::where('iri', Vocab::BASE.'oais-package-type/aip')->value('id'), 'status_id' => Concept::where('iri', Vocab::BASE.'package-status/complete')->value('id'),
             'format_id' => Concept::where('iri', Vocab::BASE.'package-format/zip')->value('id'), 'created_by_id' => $admin->id]));
+        // Phase 16a: a federation peer.
+        $make('federation peer', fn () => FederationPeer::create(['institution_id' => $institution->id, 'name' => 'Peer', 'type_id' => Concept::where('iri', Vocab::BASE.'federation-peer-type/workspace')->value('id'),
+            'base_url' => 'https://peer.example.org', 'is_active' => false]));
         // Phase 12b: an identity provider.
         $make('sign-in provider', fn () => SignInProvider::create(['institution_id' => $institution->id, 'label' => 'Staff', 'issuer_url' => 'https://idp.example.org',
             'client_id' => 'workspace', 'client_secret' => 'secret', 'scopes' => ['openid'], 'match_id' => Concept::where('iri', Vocab::BASE.'sign-in-match/subject')->value('id')]));

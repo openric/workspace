@@ -1,0 +1,58 @@
+# OpenRiC Workspace - OpenRiC Workspace Federation Verification Outcomes.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Whether a peer's answer was signed by the key pinned for it (Heratio's FederationVerifier).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/federation-verification/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Federation Verification Outcomes"@en ;
+    dcterms:description "Whether a peer's answer was signed by the key pinned for it (Heratio's FederationVerifier)."@en ;
+    dcterms:issued "2026-11-04"^^xsd:date ;
+    skos:hasTopConcept v:verified, v:pinned, v:unsigned, v:mismatch, v:invalid, v:local .
+
+v:verified a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Verified"@en, "Geverifieer"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's federation with its peers, as Heratio's ahg-federation keeps it."@en ;
+    skos:definition "Signed with Ed25519 by the key pinned for the peer."@en .
+
+v:pinned a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Verified, key pinned"@en, "Geverifieer, sleutel vasgepen"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's federation with its peers, as Heratio's ahg-federation keeps it."@en ;
+    skos:definition "Signed, and the peer's key pinned now, on first use."@en .
+
+v:unsigned a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Unsigned"@en, "Ongeteken"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's federation with its peers, as Heratio's ahg-federation keeps it."@en ;
+    skos:definition "The answer carried no signature."@en .
+
+v:mismatch a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Key changed"@en, "Sleutel verander"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's federation with its peers, as Heratio's ahg-federation keeps it."@en ;
+    skos:definition "Signed by a key other than the one pinned: not trusted until an operator clears the pin."@en .
+
+v:invalid a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Signature wrong"@en, "Handtekening verkeerd"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's federation with its peers, as Heratio's ahg-federation keeps it."@en ;
+    skos:definition "The signature does not match the answer."@en .
+
+v:local a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "On this server"@en, "Op hierdie bediener"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's federation with its peers, as Heratio's ahg-federation keeps it."@en ;
+    skos:definition "An institution on this installation, read here: nothing to verify."@en .
