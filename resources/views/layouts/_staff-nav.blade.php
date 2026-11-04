@@ -87,6 +87,7 @@
                 'site.articles' => [__('Articles'), $user->mayAnywhere('publish', 'description'), 'site.articles*|site.attachments.*|site.links.*'],
                 'site.comments' => [__('Article comments'), $user->mayAnywhere('publish', 'description'), 'site.comments*'],
                 'site.landing' => [__('Landing pages'), $user->mayAnywhere('publish', 'description'), 'site.landing*|landing.*'],
+                'dois.index' => [__('DOIs'), $user->mayAnywhere('publish', 'description'), 'dois.*'],
                 'dashboards' => [__('My dashboards'), true, 'dashboards*'],
             ],
             'Admin' => [

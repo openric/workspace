@@ -1,0 +1,44 @@
+# OpenRiC Workspace - OpenRiC Workspace DOI Queue Statuses.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Where a request to DataCite waiting in the DOI queue stands (Heratio's ahg_doi_queue.status).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/doi-queue-status/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace DOI Queue Statuses"@en ;
+    dcterms:description "Where a request to DataCite waiting in the DOI queue stands (Heratio's ahg_doi_queue.status)."@en ;
+    dcterms:issued "2026-11-04"^^xsd:date ;
+    skos:hasTopConcept v:pending, v:processing, v:completed, v:failed .
+
+v:pending a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Pending"@en, "Hangende"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the DOIs the institution registers at DataCite for its units of description, as Heratio's ahg-doi-manage keeps them."@en ;
+    skos:definition "Waiting its turn."@en .
+
+v:processing a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Processing"@en, "Word verwerk"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the DOIs the institution registers at DataCite for its units of description, as Heratio's ahg-doi-manage keeps them."@en ;
+    skos:definition "Being sent to DataCite."@en .
+
+v:completed a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Completed"@en, "Voltooi"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the DOIs the institution registers at DataCite for its units of description, as Heratio's ahg-doi-manage keeps them."@en ;
+    skos:definition "Done."@en .
+
+v:failed a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Failed"@en, "Misluk"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the DOIs the institution registers at DataCite for its units of description, as Heratio's ahg-doi-manage keeps them."@en ;
+    skos:definition "Not done after every attempt."@en .

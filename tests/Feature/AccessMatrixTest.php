@@ -34,6 +34,7 @@ use App\Description\RepositoryService;
 use App\Description\RuleService;
 use App\Description\WorkflowService;
 use App\Description\WorkflowSlaService;
+use App\Dois\RecordDois;
 use App\Fixity\Fixity;
 use App\Iiif\CuratedCollections;
 use App\Jurisdiction\ExportPermits;
@@ -59,6 +60,8 @@ use App\Models\NormalisationRule;
 use App\Models\Package;
 use App\Models\ReadingRoom;
 use App\Models\ReadingRoomSeat;
+use App\Models\RecordDoi;
+use App\Models\RecordFunding;
 use App\Models\ResearchDoi;
 use App\Models\Researcher;
 use App\Models\ResearcherType;
@@ -451,6 +454,11 @@ class AccessMatrixTest extends TestCase
                 $articles->addAttachment($article, UploadedFile::fake()->createWithContent('guide.pdf', "%PDF-1.4\n"), ['kind' => 'guide'], $admin),
                 $articles->comment($article, ['body' => 'A fine article'], '10.0.0.9', null), $landing, app(LandingPages::class)->addBlock($landing, 'text-content', [], $admin)];
         });
+        // Phase 20c: a DOI, a request waiting in the DOI queue, and a funding reference.
+        $make('doi', fn () => [RecordDoi::create(['institution_id' => $institution->id, 'record_resource_id' => $fonds->id, 'doi' => '10.80000/matrix-1',
+            'state_id' => Concept::where('iri', Vocab::BASE.'doi-state/findable')->value('id'), 'test' => true, 'minted_at' => now()]),
+            app(RecordDois::class)->enqueue($letter, 'mint', $admin),
+            RecordFunding::create(['record_resource_id' => $letter->id, 'funder_name' => 'National Research Foundation'])]);
         // Phase 19j: lectures, training, notices, the inbox, documents, print templates, quotas and rights policies.
         $make('teaching', fn () => [$lecture = app(Teaching::class)->saveLecture($admin, ['title' => 'Minutes', 'institutional' => 1]),
             $course = app(Teaching::class)->saveCourse($admin, ['title' => 'Beginners', 'institutional' => 1]),

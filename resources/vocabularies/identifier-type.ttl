@@ -13,7 +13,7 @@ v: a skos:ConceptScheme ;
     dcterms:title "OpenRiC Workspace Identifier Types"@en ;
     dcterms:description "What kind of identifier an identifier is."@en ;
     dcterms:issued "2026-10-20"^^xsd:date ;
-    skos:hasTopConcept v:local, v:isil, v:previous, v:gazetteer, v:barcode, v:other .
+    skos:hasTopConcept v:local, v:isil, v:previous, v:gazetteer, v:barcode, v:other, v:doi, v:orcid, v:isni, v:ror .
 
 v:local a skos:Concept ;
     skos:inScheme v: ;
@@ -56,3 +56,32 @@ v:gazetteer a skos:Concept ;
     skos:prefLabel "Gazetteer identifier"@en ;
     skos:scopeNote "Exported as a rico:Identifier with rico:hasIdentifierType."@en ;
     skos:definition "The identifier of a place in a gazetteer, such as GeoNames, the Getty Thesaurus of Geographic Names or Wikidata."@en .
+
+v:doi a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "DOI"@en, "DOI"@af ;
+    skos:scopeNote "Exported as a rico:Identifier with rico:hasIdentifierType. Given to a unit of description when its DOI is registered at DataCite (roadmap phase 20c)."@en ;
+    skos:definition "A Digital Object Identifier (ISO 26324), such as 10.12345/ra-2026-1, resolving at https://doi.org/."@en .
+
+v:orcid a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "ORCID iD"@en, "ORCID iD"@af ;
+    skos:scopeNote "ISAAR(CPF) 5.1.6. Exported as a rico:Identifier with rico:hasIdentifierType; given to DataCite as a creator's nameIdentifier (roadmap phase 20c)."@en ;
+    skos:definition "A person's Open Researcher and Contributor ID, such as 0000-0002-1825-0097."@en .
+
+v:isni a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "ISNI"@en, "ISNI"@af ;
+    skos:scopeNote "ISAAR(CPF) 5.1.6. Exported as a rico:Identifier with rico:hasIdentifierType; given to DataCite as a creator's nameIdentifier (roadmap phase 20c)."@en ;
+    skos:definition "An International Standard Name Identifier (ISO 27729) of a person or body."@en .
+
+v:ror a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "ROR ID"@en, "ROR ID"@af ;
+    skos:scopeNote "ISAAR(CPF) 5.1.6, ISDIAH 5.1.1. Exported as a rico:Identifier with rico:hasIdentifierType; given to DataCite as an organisation's nameIdentifier or a funder's identifier (roadmap phase 20c)."@en ;
+    skos:definition "A Research Organization Registry identifier of a body, such as https://ror.org/03yrm5c26."@en .
+

@@ -23,7 +23,7 @@ class ReencryptFields extends Command
     public const FIELDS = ['researchers' => ['phone', 'id_number'], 'walk_in_visitors' => ['phone', 'id_number'], 'researcher_orcid_links' => ['access_token', 'refresh_token'],
         'research_service_settings' => ['orcid_client_secret', 'datacite_password'], 'shop_settings' => ['payfast_merchant_key', 'payfast_passphrase'], 'vendors' => ['bank_name', 'bank_branch',
             'bank_account_number', 'bank_branch_code', 'bank_account_type'], 'archivematica_settings' => ['dashboard_api_key', 'storage_api_key'],
-        'sign_in_providers' => ['client_secret'], 'users' => ['two_factor_secret'], 'federation_peers' => ['api_key']];
+        'sign_in_providers' => ['client_secret'], 'users' => ['two_factor_secret'], 'federation_peers' => ['api_key'], 'doi_settings' => ['events_token']];
 
     public function handle(): int
     {

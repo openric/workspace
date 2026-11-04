@@ -29,6 +29,7 @@ use App\Http\Controllers\CustomFieldController;
 use App\Http\Controllers\DateController;
 use App\Http\Controllers\DeletionController;
 use App\Http\Controllers\DiscoverController;
+use App\Http\Controllers\DoiController;
 use App\Http\Controllers\DuplicateController;
 use App\Http\Controllers\EmailBounceController;
 use App\Http\Controllers\EmailController;
@@ -672,6 +673,27 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::delete('/articles/{article}/links/{target}', [SiteAdminController::class, 'unlink'])->name('links.destroy');
         Route::get('/landing-pages', [SiteAdminController::class, 'landingPages'])->name('landing');
         Route::post('/landing-pages', [SiteAdminController::class, 'createLanding'])->name('landing.store');
+    });
+    // DOIs for units of description at DataCite (roadmap phase 20c): set up by who administers the institution, worked
+    // with by who may publish descriptions.
+    Route::middleware('can:'.Vocab::permission('manage-institution'))->group(function () {
+        Route::get('/dois/settings', [DoiController::class, 'settings'])->name('dois.settings');
+        Route::post('/dois/settings', [DoiController::class, 'saveSettings'])->name('dois.settings.save');
+    });
+    Route::middleware('access:publish,description')->prefix('dois')->name('dois.')->whereUuid(['doi', 'item'])->group(function () {
+        Route::get('/', [DoiController::class, 'index'])->name('index');
+        Route::get('/browse', [DoiController::class, 'browse'])->name('browse');
+        Route::get('/queue', [DoiController::class, 'queue'])->name('queue');
+        Route::post('/queue/process', [DoiController::class, 'process'])->name('process');
+        Route::post('/queue/{item}/{step}', [DoiController::class, 'queueStep'])->whereIn('step', ['retry', 'remove'])->name('queue.step');
+        Route::get('/report', [DoiController::class, 'report'])->name('report');
+        Route::match(['get', 'post'], '/batch', [DoiController::class, 'batch'])->name('batch');
+        Route::get('/{doi}', [DoiController::class, 'show'])->name('show');
+    });
+    Route::prefix('records/{record}')->whereUuid(['record', 'funding'])->group(function () {
+        Route::post('/doi/{step}', [DoiController::class, 'act'])->whereIn('step', ['mint', 'reserve', 'queue', 'update', 'publish', 'verify', 'hide'])->name('records.doi');
+        Route::post('/funding', [DoiController::class, 'addFunding'])->name('records.funding.store');
+        Route::post('/funding/{funding}/remove', [DoiController::class, 'removeFunding'])->name('records.funding.destroy');
     });
     // Landing pages built block by block: the institution's, by who may publish; a dashboard, by its owner (phase 20a).
     Route::prefix('landing-pages')->name('landing.')->whereUuid(['page', 'block'])->group(function () {

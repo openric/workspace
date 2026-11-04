@@ -79,6 +79,7 @@
     @include('records._embargoes', ['record' => $record, 'canUpdate' => $canUpdate])
     @if(auth()->user()->hasPermission(\App\Support\Vocab::permission('manage-privacy')))@include('records._privacy', ['record' => $record])@endif
     @if(app(\App\Research\ShareLinks::class)->mayIssue(auth()->user(), $record))@include('records._share-links', ['record' => $record])@endif
+    @include('records._doi', ['record' => $record])
     @if(auth()->user()->may('delete', 'description', $record))@include('records._retention', ['record' => $record]) @include('records._records-management', ['record' => $record]) @include('records._classification', ['record' => $record])@endif
     @include('description._community-labels', ['subject' => $record, 'kind' => 'records', 'canUpdate' => $canUpdate])
     @include('description._relations', ['subject' => $record, 'kind' => 'records', 'relations' => $relations, 'canUpdate' => $canUpdate])

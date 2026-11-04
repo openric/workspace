@@ -143,3 +143,53 @@ The guides and the map are in English. The screens of the Help Center are in Eng
   - linking guides by hand by an administrator, refused to a visitor;
   - the system map and breakdown shown, linking only to guides that exist;
   - the guides that ship: every one read in, in a known category, with a title, plain hyphens only, every link between them and every node of the map and breakdown naming a guide that exists, and the guide for units of description found for `records.show`.
+
+## 20c: DOIs
+
+**Minting**, after Heratio's `DoiService`, `DoiController` and `DataciteEventsService`:
+
+- **The account.** DOIs for units of description are registered at DataCite's REST API with the institution's own repository account and prefix. It is the account its research services already keep (phase 19h), on DataCite's test service unless it is for production.
+- **The DOI.** Its suffix comes from the institution's pattern (`{repository_code}`, `{reference_code}`, `{year}`, `{id}`), and it resolves to the unit's persistent IRI.
+- **Its metadata.** DataCite Metadata Schema 4, made from what the public reads of the unit:
+  - title, and creators with their ORCID iD, ISNI or ROR ID;
+  - publisher, publication year from its earliest date, and resource type (Collection for a unit with units inside it, else Text, unless the institution chooses one);
+  - descriptions, subjects and genres, dates, language and reference code;
+  - the record set it is part of, by its DOI or IRI;
+  - places with their coordinates, funding, and the rights in force.
+- **What can be done with it.** A DOI is minted findable or reserved as a draft, made findable, sent again, verified, or hidden (DataCite's hide event, leaving it registered and resolving).
+- **Its identifier.** A minted DOI becomes one of the unit's identifiers, of a new identifier type DOI, so it goes out in the unit's RiC-O. A findable DOI is shown on the public page and given in citations, including RIS, BibTeX and CSL-JSON. ORCID iD, ISNI and ROR ID join the identifier types, so creators carry them.
+- **The queue.** Requests to DataCite are queued. A failure is tried again after five minutes more each time, three times, then marked failed with DataCite's answer. The queue is sent every five minutes.
+- **Minting on publish.** Where the institution chooses, a unit is queued for a DOI when it is published, for chosen levels and only if it has a file. A unit with a DOI is queued to be sent again when it is published again.
+- **Batch minting.** It queues every published unit without a DOI, of a repository or level.
+- **Funding references.** Kept per unit, and taken in from a CSV.
+- **The log and the notice.** Every request is logged with its outcome, and the person who asked is told by e-mail.
+- **Usage events.** Where switched on, with a token from DataCite Fabrica (kept encrypted), public views and downloads of units with a findable DOI are reported to DataCite's Events API, once a DOI and day. Past usage can be backfilled.
+
+What was changed from Heratio:
+
+- **The account.** One DataCite account per institution, the research services' one, rather than a configuration per repository.
+- **Publishing first.** A unit must be published to be minted, since registering publishes it. A DOI keeps the service it was registered with: test cannot be changed through production, nor the other way round.
+- **The mapping table.** Heratio's `ahg_doi_mapping` table, which its code never reads, is not carried; the metadata follows the RiC description.
+- **Counting usage.** Once a DOI and day, rather than once a URL, and sent by a scheduled run rather than one queued job each.
+- **Who.** Who may publish descriptions works with DOIs, and who administers the institution sets them up, where Heratio asks for an administrator throughout.
+
+### Not carried in 20c
+
+- Heratio's `ahg_doi_mapping` table (see above).
+- DataCite's citation events from other systems (`is-referenced-by` reported by others): DataCite gathers those itself.
+
+### Evidence (20c)
+
+- `tests/Feature/RecordDoisTest.php`, against a DataCite answering as its test service does:
+  - minting refused until DataCite is set up and until the unit is published, nothing being sent for a draft;
+  - a fonds minted as a Collection under the prefix and pattern, and a letter minted with:
+    - its IRI as the address and its title;
+    - its creator with an ORCID iD, its scope and content, its place's coordinates and its funding;
+    - the fonds by its DOI as the record set it is part of;
+  - the DOI becomes a unit identifier, its maker is told, it is minted once, and it is shown on the public page and in the RIS citation;
+  - a contributor refused;
+  - a reserved draft made findable, verified and hidden, and a change of service refused;
+  - minting on publish for the chosen level only, with a refused request tried again later and failed after three attempts, then tried again by hand and minted, and publishing again queuing an update;
+  - views reported once a day only once switched on, sent with the token, which is kept encrypted;
+  - funding taken in from a CSV by IRI and reference code, a row with no unit passed over, and nothing taken twice.
+- `tests/Feature/AccessMatrixTest.php` builds a DOI, a queued request and a funding reference, and every new address refuses another institution.

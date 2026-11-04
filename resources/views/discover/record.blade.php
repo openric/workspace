@@ -46,6 +46,9 @@
     @include('favourites._button', ['entity' => $unit])
     @include('shop._add', ['unit' => $unit])
     <a href="{{ route('cite', $unit->id) }}" class="no-print" style="font-size: .85rem">{{ __('Cite') }}</a>
+    {{-- Its DOI, once findable (phase 20c). --}}
+    @php($unitDoi = \App\Models\RecordDoi::where('record_resource_id', $unit->id)->whereHas('state', fn ($q) => $q->where('notation', 'findable'))->first())
+    @if($unitDoi)<span style="font-size: .85rem"> · DOI <a href="{{ $unitDoi->url() }}">{{ $unitDoi->doi }}</a></span>@endif
     <a href="{{ route('feedback.create', ['record' => $unit->id]) }}" class="no-print" style="font-size: .85rem">{{ __('Feedback on this record') }}</a>
     <p class="meta">{{ $unit->level->label(\App\Support\Vocab::languages()) }} @include('description._ric', ['term' => \App\Relations\EntityKinds::ricClass($unit)])
         @if($unit->referenceCode()) · {{ $unit->referenceCode() }}@endif

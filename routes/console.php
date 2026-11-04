@@ -4,6 +4,9 @@ use App\AccessRequests\AccessRequestService;
 use App\Dedupe\Duplicates;
 use App\Description\AgreementService;
 use App\Description\WorkflowSlaService;
+use App\Dois\DataciteEvents;
+use App\Dois\FundingImport;
+use App\Dois\RecordDois;
 use App\Federation\Discovery;
 use App\Federation\FederatedSearch;
 use App\Federation\Harvest;
@@ -223,6 +226,27 @@ Artisan::command('workspace:federation:discover', function (Discovery $discovery
     }
 })->purpose('Probe every Workspace and Heratio peer\'s protocol descriptor (Heratio\'s PeerDiscoverCommand)');
 Schedule::command('workspace:federation:discover')->dailyAt('03:15');
+Artisan::command('workspace:doi:process {--limit=50}', function (RecordDois $dois) {
+    $result = $dois->process((int) $this->option('limit'));
+    $this->info("{$result['done']} done, {$result['failed']} failed.");
+})->purpose('Send the DOI requests whose time has come to DataCite (Heratio\'s doi queue)');
+Schedule::command('workspace:doi:process')->everyFiveMinutes()->withoutOverlapping(30)->when(fn () => DB::table('doi_queue')->exists());
+Artisan::command('workspace:doi:events', function (DataciteEvents $events) {
+    $result = $events->flush();
+    $this->info("{$result['sent']} sent, {$result['failed']} failed.");
+})->purpose('Report the waiting usage and citation events to DataCite (Heratio\'s DoiEventsFlushCommand)');
+Schedule::command('workspace:doi:events')->hourly()->withoutOverlapping(60)->when(fn () => DB::table('doi_settings')->where('events_enabled', true)->exists());
+Artisan::command('workspace:doi:metrics-backfill {institution : the institution\'s id} {--since= : a date; 30 days ago unless given}', function (DataciteEvents $events) {
+    $since = $this->option('since') ?: now()->subDays(30)->toDateString();
+    $this->info($events->backfill((string) $this->argument('institution'), $since).' events kept to report.');
+})->purpose('Keep the views and downloads already counted as events to report to DataCite (Heratio\'s MetricsBackfillCommand)');
+Artisan::command('workspace:doi:funding-import {file : a CSV with record, funder_name, funder_identifier, funder_identifier_type, award_number, award_uri, award_title}', function (FundingImport $import) {
+    $result = $import->run((string) $this->argument('file'));
+    $this->info("{$result['added']} added, {$result['skipped']} skipped.");
+    foreach ($result['problems'] as $problem) {
+        $this->warn($problem);
+    }
+})->purpose('Take in funding references for units of description from a CSV (Heratio\'s DoiFundingImportCommand)');
 Artisan::command('workspace:help:ingest', function (HelpLibrary $library) {
     $counts = $library->ingest();
     $this->info("{$counts['articles']} guides read in, {$counts['links']} links between them.");

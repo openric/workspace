@@ -19,6 +19,7 @@ use App\Description\InstantiationService;
 use App\Description\TreeService;
 use App\Discovery\Graph;
 use App\Discovery\Links;
+use App\Dois\DataciteEvents;
 use App\Files\FileResponse;
 use App\Iiif\Presentation;
 use App\Media\Captions;
@@ -90,6 +91,8 @@ class DiscoverController extends Controller
         $unit = $catalogue->find('records', $id, ['level.labels', 'repository.names.nameType', 'repository.names.state', 'instantiations.files.use', 'instantiations.names.nameType',
             'instantiations.names.state', 'instantiations.availability', 'instantiations.carrierType.labels']) ?? $this->gone($catalogue, 'record_resources', $id);
         app(UsageService::class)->record($request, $catalogue->institution, 'view', $unit);
+        // A view of a unit with a findable DOI is reported to DataCite, where the institution reports usage (phase 20c).
+        rescue(fn () => app(DataciteEvents::class)->used($unit, 'unique-dataset-investigations-regular'), report: false);
         $view = $catalogue->view;
         $ancestors = array_values(array_filter($unit->ancestors(), fn ($a) => $view->readable($a)));
         $children = $unit->children()->with('names.nameType', 'names.state', 'level.labels', 'identifiers.identifierType', 'dates.property')->get()->filter(fn ($c) => $view->readable($c))->values();
@@ -226,6 +229,7 @@ class DiscoverController extends Controller
         // A picture shown in a page is not a download; a file asked for as one, or opened on its own, is.
         if ($request->boolean('download') || ! str_starts_with($file->mime_type, 'image/')) {
             app(UsageService::class)->record($request, $this->catalogue($request)->institution, 'download', $file->instantiation->record, $file);
+            $file->instantiation->record && rescue(fn () => app(DataciteEvents::class)->used($file->instantiation->record, 'unique-dataset-requests-regular'), report: false);
         }
 
         return FileResponse::make($file, $path, $request->boolean('download'));

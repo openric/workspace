@@ -12,6 +12,7 @@
 namespace App\Research;
 
 use App\Exchange\ExportView;
+use App\Models\RecordDoi;
 use App\Models\RecordResource;
 use DOMDocument;
 use Illuminate\Support\Str;
@@ -42,7 +43,9 @@ class Citations
             'repository' => $unit->repository && $view->readable($unit->repository) ? $view->label($unit->repository) : null,
             'identifier' => $unit->referenceCode(),
             'extent' => $view->value($unit, 'extent'),
-            'url' => $unit->iri,
+            // Cited by its DOI once it has a findable one, else by its persistent IRI (phase 20c).
+            'doi' => $doi = RecordDoi::where('record_resource_id', $unit->id)->whereHas('state', fn ($q) => $q->where('notation', 'findable'))->value('doi'),
+            'url' => $doi ? 'https://doi.org/'.$doi : $unit->iri,
             'accessed' => now(config('workspace.timezone')),
         ];
     }
@@ -115,6 +118,7 @@ class Citations
         if ($f['extent']) {
             $lines[] = 'N1  - Extent: '.$f['extent'];
         }
+        $f['doi'] && $lines[] = 'DO  - '.$f['doi'];
         $lines[] = 'UR  - '.$f['url'];
         $lines[] = 'Y2  - '.$f['accessed']->format('Y-m-d');
         $lines[] = 'ER  - ';
@@ -152,6 +156,7 @@ class Citations
         if ($f['identifier']) {
             $fields[] = '  note = {Reference code: '.$this->escBib($f['identifier']).'}';
         }
+        $f['doi'] && $fields[] = '  doi = {'.$f['doi'].'}';
         $fields[] = '  url = {'.$f['url'].'}';
         $fields[] = '  urldate = {'.$f['accessed']->format('Y-m-d').'}';
 
@@ -201,7 +206,7 @@ class Citations
             'id' => $f['id'], 'type' => 'manuscript', 'title' => $f['title'] ?: null,
             'author' => array_map(fn ($a) => str_contains($a, ',') ? ['family' => trim(Str::before($a, ',')), 'given' => trim(Str::after($a, ','))] : ['literal' => $a], $f['creators']) ?: null,
             'issued' => $f['year'] ? ['date-parts' => [[(int) $f['year']]]] : null,
-            'archive' => $f['repository'], 'archive_location' => $f['identifier'], 'URL' => $f['url'],
+            'archive' => $f['repository'], 'archive_location' => $f['identifier'], 'DOI' => $f['doi'], 'URL' => $f['url'],
             'accessed' => ['date-parts' => [[(int) $f['accessed']->format('Y'), (int) $f['accessed']->format('n'), (int) $f['accessed']->format('j')]]],
         ], fn ($v) => $v !== null);
     }

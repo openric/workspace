@@ -1,0 +1,51 @@
+# OpenRiC Workspace - OpenRiC Workspace Funder Identifier Types.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# The scheme a funder's identifier is in (DataCite funderIdentifierType; Heratio's ahg_io_funding.funder_identifier_type).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/funder-identifier-type/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Funder Identifier Types"@en ;
+    dcterms:description "The scheme a funder's identifier is in (DataCite funderIdentifierType; Heratio's ahg_io_funding.funder_identifier_type)."@en ;
+    dcterms:issued "2026-11-04"^^xsd:date ;
+    skos:hasTopConcept v:ror, v:crossref-funder-id, v:isni, v:grid, v:other .
+
+v:ror a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "ROR"@en, "ROR"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the DOIs the institution registers at DataCite for its units of description, as Heratio's ahg-doi-manage keeps them."@en ;
+    skos:definition "A Research Organization Registry identifier."@en .
+
+v:crossref-funder-id a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Crossref Funder ID"@en, "Crossref-befondser-ID"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the DOIs the institution registers at DataCite for its units of description, as Heratio's ahg-doi-manage keeps them."@en ;
+    skos:definition "An identifier from the Crossref Funder Registry."@en .
+
+v:isni a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "ISNI"@en, "ISNI"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the DOIs the institution registers at DataCite for its units of description, as Heratio's ahg-doi-manage keeps them."@en ;
+    skos:definition "An International Standard Name Identifier."@en .
+
+v:grid a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "GRID"@en, "GRID"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the DOIs the institution registers at DataCite for its units of description, as Heratio's ahg-doi-manage keeps them."@en ;
+    skos:definition "A Global Research Identifier Database identifier."@en .
+
+v:other a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Other"@en, "Ander"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the DOIs the institution registers at DataCite for its units of description, as Heratio's ahg-doi-manage keeps them."@en ;
+    skos:definition "Another scheme."@en .

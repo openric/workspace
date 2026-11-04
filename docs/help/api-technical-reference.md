@@ -54,3 +54,7 @@ Nothing written through the API changes a description directly: a proposal waits
 ## Limits
 
 The API allows 600 requests a minute from one address. A harvester that needs everything should use OAI-PMH, ResourceSync or the dataset rather than walking every record.
+
+## Following an IRI
+
+A persistent IRI of a unit of description, an authority record or a repository resolves: a browser is sent to its public page, and a client asking for JSON-LD (`Accept: application/ld+json`) is sent by a 303 redirect to its RiC-O here, so the IRIs in every export can be followed by any linked-data tool.

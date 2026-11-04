@@ -1,0 +1,4 @@
+{{-- OpenRiC Workspace - the DOI screens' links (roadmap phase 20c). Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems. SPDX-License-Identifier: AGPL-3.0-or-later --}}
+<p class="meta"><a href="{{ route('dois.index') }}">{{ __('DOIs') }}</a> · <a href="{{ route('dois.browse') }}">{{ __('Every DOI') }}</a> · <a href="{{ route('dois.queue') }}">{{ __('Queue') }}</a> · <a href="{{ route('dois.batch') }}">{{ __('Mint many') }}</a> · <a href="{{ route('dois.report') }}">{{ __('Report') }}</a>@can(\App\Support\Vocab::permission('manage-institution')) · <a href="{{ route('dois.settings') }}">{{ __('Settings') }}</a>@endcan</p>
+@if(session('status'))<p role="status">{{ session('status') }}</p>@endif
+@if($errors->any())<p class="error" role="alert">{{ $errors->first() }}</p>@endif

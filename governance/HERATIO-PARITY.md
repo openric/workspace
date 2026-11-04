@@ -44,8 +44,8 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-dedupe` | 3144 | later: V1.0+ | Covered | 22b | `ahgDedupePlugin` | Rules, scan, review and merge of duplicate descriptions, from v0.0.107 (ADR 0020); authority records and places already had their own duplicates and merge |
 | `ahg-discovery` | 5836 | V0.1 candidate | Covered |  | `ahgDiscoveryPlugin` | Public catalogue, relationship graph, OAI-PMH |
 | `ahg-display` | 10111 | V0.1 candidate | Partial | 20 | `ahgDisplayPlugin` | Public catalogue display; display profiles later |
-| `ahg-doi` | 0 | later: V1.0+ | Planned | 20 | none |  |
-| `ahg-doi-manage` | 4884 | later: V1.0+ | Planned | 20 | `ahgDoiPlugin` |  |
+| `ahg-doi` | 0 | later: V1.0+ | Done | 20c | none | Its tables (`ahg_doi`, `ahg_doi_config`, `ahg_doi_queue`, `ahg_doi_log`) are carried with `ahg-doi-manage`, from v0.0.125 |
+| `ahg-doi-manage` | 4884 | later: V1.0+ | Done | 20c | `ahgDoiPlugin` | DOIs for units of description at DataCite: minting, drafts, updates, verification, hiding, the queue, minting on publish, batches, funding, usage events and the report, from v0.0.125 (ADR 0024) |
 | `ahg-donor-manage` | 3241 | later: V1.0+ | Partial | 9 | `ahgDonorAgreementPlugin`, `ahgDonorManagePlugin` | Donors as authority records with contact points, and the donor list, from v0.0.77 (9a); donor agreements with their rights, restrictions, reminders and documents from v0.0.78 (9b) |
 | `ahg-dropdown-manage` | 1744 | V0.1 candidate | Covered |  | none | Every list is a SKOS vocabulary, editable |
 | `ahg-exhibition` | 26806 | out: GLAM sector | Planned | 21 | `ahgExhibitionPlugin` |  |
@@ -1398,4 +1398,24 @@ Added on 4 November 2026 with 20b.
 | System breakdown (`system-breakdown.php`, Cytoscape) | `resources/help/system-breakdown.php`, as a nested list | Modelled |
 | Manage links (`/help/article/{slug}/links`) | The same | Same |
 | Heratio's 494 articles | 73 adapted for the Workspace's areas; each later phase adds its own | Partial |
+
+### DOIs (`ahg-doi`, `ahg-doi-manage`)
+
+Added on 4 November 2026 with 20c.
+
+| Heratio field | Workspace | Status |
+|---|---|---|
+| `ahg_doi`: `information_object_id`, `doi`, `status`, `minted_at`, `minted_by`, `datacite_response`, `metadata_json`, `last_sync_at` | `record_dois`: the same, the state a vocabulary row, with whether it was the test service | Same, from v0.0.125 |
+| `doi_url` | `RecordDoi::url()` | Same |
+| `ahg_doi_config`: `datacite_repo_id`, `datacite_prefix`, `datacite_password`, `datacite_url`, `environment` | The research services' DataCite account (`research_service_settings`), one per institution | Modelled |
+| `ahg_doi_config`: `auto_mint`, `auto_mint_levels`, `require_digital_object`, `default_publisher`, `default_resource_type`, `suffix_pattern` | `doi_settings`: the same, the levels and resource type vocabulary rows | Same |
+| `ahg_doi_config.repository_id` (a config per repository) | One per institution; `{repository_code}` in the suffix | Modelled |
+| `ahg_doi_queue`: `action`, `status`, `priority`, `attempts`, `max_attempts`, `last_error`, `scheduled_at`, `started_at`, `completed_at` | `doi_queue`: the same, with who asked | Same |
+| `ahg_doi_log`: `action`, `status_before`, `status_after`, `details`, `performed_by`, `performed_at` | `doi_log`: the same, with whether it succeeded | Same |
+| `ahg_doi_mapping` | Not carried: Heratio's code never reads it; the metadata follows the RiC description | Not carried |
+| `ahg_io_funding`: `funder_name`, `funder_identifier`, `funder_identifier_type`, `award_number`, `award_uri`, `award_title` | `record_funding`: the same | Same |
+| `ahg_datacite_event`: `dedupe_hash`, `subj_id`, `relation_type_id`, `obj_id`, `obj_id_type`, `source_id`, `payload_json`, `response_status`, `response_body`, `state`, `attempts`, `last_error`, `submitted_at` | `datacite_events`: the same | Same |
+| `ahg_actor_identifier` ORCID | Identifier types ORCID iD, ISNI and ROR ID on authority records | Modelled |
+| DoiMintedMail, DoiFailedMail | `DoiMail`, to who asked | Same |
+| `ahg:doi-events-flush`, `ahg:doi-funding-import`, `ahg:doi-metrics-backfill` | `workspace:doi:events`, `workspace:doi:funding-import`, `workspace:doi:metrics-backfill`, and `workspace:doi:process` | Same |
 

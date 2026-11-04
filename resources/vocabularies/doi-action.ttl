@@ -1,0 +1,44 @@
+# OpenRiC Workspace - OpenRiC Workspace DOI Actions.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What is asked of DataCite for a unit's DOI (Heratio's ahg_doi_queue.action and ahg_doi_log.action).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/doi-action/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace DOI Actions"@en ;
+    dcterms:description "What is asked of DataCite for a unit's DOI (Heratio's ahg_doi_queue.action and ahg_doi_log.action)."@en ;
+    dcterms:issued "2026-11-04"^^xsd:date ;
+    skos:hasTopConcept v:mint, v:update, v:verify, v:hide .
+
+v:mint a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Mint"@en, "Skep"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the DOIs the institution registers at DataCite for its units of description, as Heratio's ahg-doi-manage keeps them."@en ;
+    skos:definition "Register a DOI for the unit."@en .
+
+v:update a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Update"@en, "Bywerk"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the DOIs the institution registers at DataCite for its units of description, as Heratio's ahg-doi-manage keeps them."@en ;
+    skos:definition "Send the unit's metadata to DataCite again."@en .
+
+v:verify a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Verify"@en, "Verifieer"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the DOIs the institution registers at DataCite for its units of description, as Heratio's ahg-doi-manage keeps them."@en ;
+    skos:definition "Ask DataCite what state the DOI is in."@en .
+
+v:hide a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Hide"@en, "Versteek"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the DOIs the institution registers at DataCite for its units of description, as Heratio's ahg-doi-manage keeps them."@en ;
+    skos:definition "Take the DOI out of DataCite's search, leaving it resolving."@en .

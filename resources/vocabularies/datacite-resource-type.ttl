@@ -1,0 +1,226 @@
+# OpenRiC Workspace - OpenRiC Workspace DataCite Resource Types.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# The general type of a resource a DOI names (DataCite resourceTypeGeneral).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/datacite-resource-type/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace DataCite Resource Types"@en ;
+    dcterms:description "The general type of a resource a DOI names (DataCite resourceTypeGeneral)."@en ;
+    dcterms:issued "2026-11-04"^^xsd:date ;
+    skos:hasTopConcept v:Audiovisual, v:Book, v:BookChapter, v:Collection, v:ComputationalNotebook, v:ConferencePaper, v:ConferenceProceeding, v:DataPaper, v:Dataset, v:Dissertation, v:Event, v:Image, v:Instrument, v:InteractiveResource, v:Journal, v:JournalArticle, v:Model, v:OutputManagementPlan, v:PeerReview, v:PhysicalObject, v:Preprint, v:Report, v:Service, v:Software, v:Sound, v:Standard, v:StudyRegistration, v:Text, v:Workflow, v:Other .
+
+v:Audiovisual a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Audiovisual"@en, "Oudiovisueel"@af ;
+    skos:scopeNote "Not a RiC-O term: DataCite Metadata Schema 4.5 resourceTypeGeneral, given to DataCite with a unit's DOI (roadmap phase 20c)."@en ;
+    skos:definition "A series of visual representations, with or without sound."@en .
+
+v:Book a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Book"@en, "Boek"@af ;
+    skos:scopeNote "Not a RiC-O term: DataCite Metadata Schema 4.5 resourceTypeGeneral, given to DataCite with a unit's DOI (roadmap phase 20c)."@en ;
+    skos:definition "A book."@en .
+
+v:BookChapter a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Book chapter"@en, "Boekhoofstuk"@af ;
+    skos:scopeNote "Not a RiC-O term: DataCite Metadata Schema 4.5 resourceTypeGeneral, given to DataCite with a unit's DOI (roadmap phase 20c)."@en ;
+    skos:definition "A chapter of a book."@en .
+
+v:Collection a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Collection"@en, "Versameling"@af ;
+    skos:scopeNote "Not a RiC-O term: DataCite Metadata Schema 4.5 resourceTypeGeneral, given to DataCite with a unit's DOI (roadmap phase 20c)."@en ;
+    skos:definition "An aggregation of resources, such as a fonds or series."@en .
+
+v:ComputationalNotebook a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Computational notebook"@en, "Berekeningsnotaboek"@af ;
+    skos:scopeNote "Not a RiC-O term: DataCite Metadata Schema 4.5 resourceTypeGeneral, given to DataCite with a unit's DOI (roadmap phase 20c)."@en ;
+    skos:definition "A notebook of code, data and text."@en .
+
+v:ConferencePaper a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Conference paper"@en, "Konferensievoordrag"@af ;
+    skos:scopeNote "Not a RiC-O term: DataCite Metadata Schema 4.5 resourceTypeGeneral, given to DataCite with a unit's DOI (roadmap phase 20c)."@en ;
+    skos:definition "A paper given at a conference."@en .
+
+v:ConferenceProceeding a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Conference proceeding"@en, "Konferensieverrigtinge"@af ;
+    skos:scopeNote "Not a RiC-O term: DataCite Metadata Schema 4.5 resourceTypeGeneral, given to DataCite with a unit's DOI (roadmap phase 20c)."@en ;
+    skos:definition "The proceedings of a conference."@en .
+
+v:DataPaper a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Data paper"@en, "Datavoordrag"@af ;
+    skos:scopeNote "Not a RiC-O term: DataCite Metadata Schema 4.5 resourceTypeGeneral, given to DataCite with a unit's DOI (roadmap phase 20c)."@en ;
+    skos:definition "A paper describing a dataset."@en .
+
+v:Dataset a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Dataset"@en, "Datastel"@af ;
+    skos:scopeNote "Not a RiC-O term: DataCite Metadata Schema 4.5 resourceTypeGeneral, given to DataCite with a unit's DOI (roadmap phase 20c)."@en ;
+    skos:definition "Data in a defined structure."@en .
+
+v:Dissertation a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Dissertation"@en, "Proefskrif"@af ;
+    skos:scopeNote "Not a RiC-O term: DataCite Metadata Schema 4.5 resourceTypeGeneral, given to DataCite with a unit's DOI (roadmap phase 20c)."@en ;
+    skos:definition "A dissertation or thesis."@en .
+
+v:Event a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Event"@en, "Gebeurtenis"@af ;
+    skos:scopeNote "Not a RiC-O term: DataCite Metadata Schema 4.5 resourceTypeGeneral, given to DataCite with a unit's DOI (roadmap phase 20c)."@en ;
+    skos:definition "A non-persistent, time-based occurrence."@en .
+
+v:Image a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Image"@en, "Beeld"@af ;
+    skos:scopeNote "Not a RiC-O term: DataCite Metadata Schema 4.5 resourceTypeGeneral, given to DataCite with a unit's DOI (roadmap phase 20c)."@en ;
+    skos:definition "A visual representation other than text."@en .
+
+v:Instrument a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Instrument"@en, "Instrument"@af ;
+    skos:scopeNote "Not a RiC-O term: DataCite Metadata Schema 4.5 resourceTypeGeneral, given to DataCite with a unit's DOI (roadmap phase 20c)."@en ;
+    skos:definition "A device for measurement or observation."@en .
+
+v:InteractiveResource a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Interactive resource"@en, "Interaktiewe hulpbron"@af ;
+    skos:scopeNote "Not a RiC-O term: DataCite Metadata Schema 4.5 resourceTypeGeneral, given to DataCite with a unit's DOI (roadmap phase 20c)."@en ;
+    skos:definition "A resource that asks something of its user."@en .
+
+v:Journal a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Journal"@en, "Joernaal"@af ;
+    skos:scopeNote "Not a RiC-O term: DataCite Metadata Schema 4.5 resourceTypeGeneral, given to DataCite with a unit's DOI (roadmap phase 20c)."@en ;
+    skos:definition "A journal."@en .
+
+v:JournalArticle a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Journal article"@en, "Joernaalartikel"@af ;
+    skos:scopeNote "Not a RiC-O term: DataCite Metadata Schema 4.5 resourceTypeGeneral, given to DataCite with a unit's DOI (roadmap phase 20c)."@en ;
+    skos:definition "An article in a journal."@en .
+
+v:Model a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Model"@en, "Model"@af ;
+    skos:scopeNote "Not a RiC-O term: DataCite Metadata Schema 4.5 resourceTypeGeneral, given to DataCite with a unit's DOI (roadmap phase 20c)."@en ;
+    skos:definition "An abstract, conceptual or physical representation."@en .
+
+v:OutputManagementPlan a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Output management plan"@en, "Uitsetbestuursplan"@af ;
+    skos:scopeNote "Not a RiC-O term: DataCite Metadata Schema 4.5 resourceTypeGeneral, given to DataCite with a unit's DOI (roadmap phase 20c)."@en ;
+    skos:definition "A plan for managing research outputs."@en .
+
+v:PeerReview a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Peer review"@en, "Portuurbeoordeling"@af ;
+    skos:scopeNote "Not a RiC-O term: DataCite Metadata Schema 4.5 resourceTypeGeneral, given to DataCite with a unit's DOI (roadmap phase 20c)."@en ;
+    skos:definition "A review of another work."@en .
+
+v:PhysicalObject a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Physical object"@en, "Fisiese voorwerp"@af ;
+    skos:scopeNote "Not a RiC-O term: DataCite Metadata Schema 4.5 resourceTypeGeneral, given to DataCite with a unit's DOI (roadmap phase 20c)."@en ;
+    skos:definition "An inanimate, three-dimensional object."@en .
+
+v:Preprint a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Preprint"@en, "Voordruk"@af ;
+    skos:scopeNote "Not a RiC-O term: DataCite Metadata Schema 4.5 resourceTypeGeneral, given to DataCite with a unit's DOI (roadmap phase 20c)."@en ;
+    skos:definition "A version of a work before peer review."@en .
+
+v:Report a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Report"@en, "Verslag"@af ;
+    skos:scopeNote "Not a RiC-O term: DataCite Metadata Schema 4.5 resourceTypeGeneral, given to DataCite with a unit's DOI (roadmap phase 20c)."@en ;
+    skos:definition "A report."@en .
+
+v:Service a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Service"@en, "Diens"@af ;
+    skos:scopeNote "Not a RiC-O term: DataCite Metadata Schema 4.5 resourceTypeGeneral, given to DataCite with a unit's DOI (roadmap phase 20c)."@en ;
+    skos:definition "A system that provides a function of value."@en .
+
+v:Software a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Software"@en, "Sagteware"@af ;
+    skos:scopeNote "Not a RiC-O term: DataCite Metadata Schema 4.5 resourceTypeGeneral, given to DataCite with a unit's DOI (roadmap phase 20c)."@en ;
+    skos:definition "Software."@en .
+
+v:Sound a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Sound"@en, "Klank"@af ;
+    skos:scopeNote "Not a RiC-O term: DataCite Metadata Schema 4.5 resourceTypeGeneral, given to DataCite with a unit's DOI (roadmap phase 20c)."@en ;
+    skos:definition "A resource mostly to be heard."@en .
+
+v:Standard a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Standard"@en, "Standaard"@af ;
+    skos:scopeNote "Not a RiC-O term: DataCite Metadata Schema 4.5 resourceTypeGeneral, given to DataCite with a unit's DOI (roadmap phase 20c)."@en ;
+    skos:definition "A standard."@en .
+
+v:StudyRegistration a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Study registration"@en, "Studieregistrasie"@af ;
+    skos:scopeNote "Not a RiC-O term: DataCite Metadata Schema 4.5 resourceTypeGeneral, given to DataCite with a unit's DOI (roadmap phase 20c)."@en ;
+    skos:definition "A registration of a study."@en .
+
+v:Text a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Text"@en, "Teks"@af ;
+    skos:scopeNote "Not a RiC-O term: DataCite Metadata Schema 4.5 resourceTypeGeneral, given to DataCite with a unit's DOI (roadmap phase 20c)."@en ;
+    skos:definition "A resource mostly of words, such as a letter or a file of correspondence."@en .
+
+v:Workflow a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Workflow"@en, "Werkvloei"@af ;
+    skos:scopeNote "Not a RiC-O term: DataCite Metadata Schema 4.5 resourceTypeGeneral, given to DataCite with a unit's DOI (roadmap phase 20c)."@en ;
+    skos:definition "A structured series of steps."@en .
+
+v:Other a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Other"@en, "Ander"@af ;
+    skos:scopeNote "Not a RiC-O term: DataCite Metadata Schema 4.5 resourceTypeGeneral, given to DataCite with a unit's DOI (roadmap phase 20c)."@en ;
+    skos:definition "Of another type."@en .

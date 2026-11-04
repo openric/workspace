@@ -14,6 +14,7 @@
 namespace App\Description;
 
 use App\Audit\AuditLog;
+use App\Dois\RecordDois;
 use App\Models\Activity;
 use App\Models\Concept;
 use App\Models\DescriptionValue;
@@ -70,7 +71,7 @@ class PublicationService
             }
         }
 
-        return DB::transaction(fn () => AuditLog::actingAs($actor, function () use ($subjects, $fromIds, $toId, $language) {
+        $changed = DB::transaction(fn () => AuditLog::actingAs($actor, function () use ($subjects, $fromIds, $toId, $language) {
             $changed = 0;
             foreach ($subjects as $table => $subjectIds) {
                 foreach ([DescriptionValue::class, Name::class] as $class) {
@@ -84,6 +85,12 @@ class PublicationService
 
             return $changed;
         }));
+        // Units published are given their DOI, or have it brought up to date, where the institution mints them (phase 20c).
+        if ($action === 'publish' && ! empty($subjects['record_resources'])) {
+            rescue(fn () => app(RecordDois::class)->published($subjects['record_resources'], $actor));
+        }
+
+        return $changed;
     }
 
     /**

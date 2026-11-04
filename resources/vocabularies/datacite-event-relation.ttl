@@ -1,0 +1,58 @@
+# OpenRiC Workspace - OpenRiC Workspace DataCite Event Relations.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What a usage or citation event reported to DataCite says happened to a DOI (DataCite Event Data relation-type-id).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/datacite-event-relation/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace DataCite Event Relations"@en ;
+    dcterms:description "What a usage or citation event reported to DataCite says happened to a DOI (DataCite Event Data relation-type-id)."@en ;
+    dcterms:issued "2026-11-04"^^xsd:date ;
+    skos:hasTopConcept v:unique-dataset-investigations-regular, v:total-dataset-investigations-regular, v:unique-dataset-requests-regular, v:total-dataset-requests-regular, v:references, v:is-referenced-by .
+
+v:unique-dataset-investigations-regular a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Unique views"@en, "Unieke besigtigings"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the DOIs the institution registers at DataCite for its units of description, as Heratio's ahg-doi-manage keeps them."@en ;
+    skos:definition "Viewed, counted once a visitor and day (COUNTER)."@en .
+
+v:total-dataset-investigations-regular a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Total views"@en, "Totale besigtigings"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the DOIs the institution registers at DataCite for its units of description, as Heratio's ahg-doi-manage keeps them."@en ;
+    skos:definition "Viewed, counted each time (COUNTER)."@en .
+
+v:unique-dataset-requests-regular a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Unique downloads"@en, "Unieke aflaaie"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the DOIs the institution registers at DataCite for its units of description, as Heratio's ahg-doi-manage keeps them."@en ;
+    skos:definition "A file downloaded, counted once a visitor and day (COUNTER)."@en .
+
+v:total-dataset-requests-regular a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Total downloads"@en, "Totale aflaaie"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the DOIs the institution registers at DataCite for its units of description, as Heratio's ahg-doi-manage keeps them."@en ;
+    skos:definition "A file downloaded, counted each time (COUNTER)."@en .
+
+v:references a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "References"@en, "Verwys na"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the DOIs the institution registers at DataCite for its units of description, as Heratio's ahg-doi-manage keeps them."@en ;
+    skos:definition "It references the object."@en .
+
+v:is-referenced-by a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Is referenced by"@en, "Word na verwys deur"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the DOIs the institution registers at DataCite for its units of description, as Heratio's ahg-doi-manage keeps them."@en ;
+    skos:definition "The object references it, such as a citation."@en .

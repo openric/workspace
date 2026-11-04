@@ -42,4 +42,4 @@ For questions across the whole catalogue, such as every record created by someon
 
 ## RiC-O out
 
-Every published entity has a persistent IRI, and its RiC-O, as JSON-LD, is served by the OpenRiC API. The same RiC-O feeds the API, OAI-PMH, the RiC-O exports, the SPARQL endpoint and the federation. Each release is tested against the OpenRiC SHACL shapes, so the RiC-O the Workspace writes conforms to the OpenRiC profiles published at openric.org.
+Every published entity has a persistent IRI, and the IRI resolves: a browser is sent to the entity's public page, and a linked-data client asking for JSON-LD is sent, by a 303 redirect, to its RiC-O in the OpenRiC API. The same RiC-O feeds the API, OAI-PMH, the RiC-O exports, the SPARQL endpoint and the federation. Each release is tested against the OpenRiC SHACL shapes, so the RiC-O the Workspace writes conforms to the OpenRiC profiles published at openric.org.
