@@ -1,0 +1,3 @@
+# Findings gitleaks reports that are not secrets, each by its fingerprint (commit:file:rule:line).
+# INSTALL.md at v0.0.122 showed `curl -u admin:PASSWORD` as an example, with a placeholder, not a password; the line now has curl ask for it.
+4ee41a344d2e205565875396f6cf462dc7451d5e:INSTALL.md:curl-auth-user:260
