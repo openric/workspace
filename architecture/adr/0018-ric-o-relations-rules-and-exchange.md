@@ -29,3 +29,56 @@ The RiC scenarios of the gap assessment and two of the design review (`tests/Fea
 - `tests/Feature/GraphProfilesTest.php`: the place, rule, activity, list, subgraph, relation-list, relations-for and hierarchy schemas.
 - `tests/Feature/ShaclGateTest.php`: the pinned shapes of six profiles, Graph Traversal's on the whole published graph.
 - `tests/Feature/RuleTest.php`, `tests/Feature/RicScenariosTest.php`, `tests/Feature/ExportTest.php` (what each format leaves out), `tests/Feature/PortabilityTest.php`.
+
+## Amendment (roadmap step 12c), 3 November 2026
+
+Added on Dr Johan Pieterse's word of 3 November 2026, after the RiC-O converter of the Archives nationales de France and Sparna was assessed (ArchivesNationalesFR/rico-converter 3.0.0, CeCILL-B, the reference conversion of EAD 2002 and EAC-CPF to RiC-O 1.1).
+
+**The export gives RiC-O 1.1's specific relations beside the broad ones.** Every term was checked in the RiC-O 1.1 ontology file itself.
+
+- **Direct inclusion.** `rico:directlyIncludes` (a record set's current, direct members) and `rico:isDirectlyIncludedIn` (where a unit is arranged now), beside `rico:includesOrIncluded` and `rico:isOrWasIncludedIn`. They are given only where the including unit is a `rico:RecordSet`, as the properties' domain and range require.
+- **The kind of carrier.** `rico:hasOrHadDigitalInstantiation` and `rico:hasOrHadAnalogueInstantiation`, and on the instantiation `rico:isOrWasDigitalInstantiationOf` and `rico:isOrWasAnalogueInstantiationOf`, beside `rico:hasOrHadInstantiation`.
+  - Digital is a carrier of the digital-file type, or, with no carrier type, a carrier with files kept.
+  - Analogue is any other carrier type.
+  - With neither, only the broad property is given.
+- **Order.** `rico:directlyPrecedesInSequence` and `rico:directlyFollowsInSequence` between units arranged together, in their order, naming only units the reader may read: the public sees the units either side of one it may not read follow each other.
+
+**Reading them back.** The Workspace's own RiC-O import counts a specific relation as read wherever its broad one is given beside it, as the export always gives it, since the broad one carries what the import takes. Without the broad one, as in data from the converter, a specific relation is still reported as not read.
+
+**A development check against the converter.**
+
+- `tests/Feature/RicoConverterComparisonTest.php` builds a fonds, exports it as EAD 2002, runs the converter on it, and compares, unit by unit, the RiC-O properties each side uses.
+- Every difference is either fixed or written down as a choice, with its reason, in `tests/Fixtures/rico-converter-choices.txt`. One that is neither fails the test.
+- It runs where `RICO_CONVERTER_DIR` names an unpacked converter release and Java is installed, and is skipped elsewhere, as in CI.
+
+**What it found.** The relations above now match the converter. The choices recorded:
+
+- **Dates:** the Workspace keeps each date with its type in its own date range (ADR 0006); the converter writes the one EAD date as literals on the unit.
+- **Invented instantiations:** the converter makes an instantiation for every unit; the Workspace gives only the carriers it holds.
+- **The finding aid:** the converter makes it a `rico:Record` describing the fonds; in the Workspace it is an export of the description.
+- **The reference code:** the converter puts it on the instantiation it makes; the Workspace puts it on the unit (ISAD(G) 3.1.1).
+- **Only the Workspace gives:** the kind of each carrier, which its EAD does not carry; the holder on every unit; titles as `rico:Title` (ADR 0019); and the structured extent.
+- **About the converter itself, not properties:**
+  - it reads EAD 2002 only as the DTD writes it, with no namespace, so the check takes the schema's namespace off the Workspace's EAD;
+  - it tags every title and note as French, whatever the finding aid's language.
+
+**BoDi.** BoDi, the Born-Digital Ontology, extends RiC-O 1.1 (http://w3id.org/bodi, version 1.0, Lucia Giagnolini, CC BY 4.0). The extension ontology states its close matches to BoDi, in a spec patch:
+
+- `openricx:hasChecksum` to `bodi:hasHashCode`;
+- `openricx:confidence` to `bodi:confidenceScore`;
+- `openricx:humanConfirmed` to `bodi:hasHumanValidation`;
+- a related match from `openricx:technicalCharacteristics` to `bodi:hasTechnicalMetadata`.
+
+These are close matches, not equivalences: BoDi's confidence runs from 0 to 10 where ours runs from 0 to 1, its checksum is a PREMIS fixity, and its human validation is free text. Nothing in the Workspace depends on BoDi.
+
+**Shapes.** The OpenRiC shapes note, at `sh:Info` and not as a violation, a record whose instantiations are not said to be digital or analogue, and a record set that includes units but does not say which directly. The roadmap asked for the shapes to require the specific properties. They cannot, without failing good data: a carrier of unknown kind has no specific property to give, and a past inclusion, or one by proxy, is not a direct one.
+
+### Evidence (12c)
+
+- `tests/Feature/RicSpecificRelationsTest.php`:
+  - direct inclusion of record sets only;
+  - sequence across a unit the public may not read;
+  - digital and analogue carriers both ways, and the broad property kept.
+- `tests/Feature/RicoConverterComparisonTest.php` with `tests/Fixtures/rico-converter-choices.txt`: no unexplained difference from ricoconverter 3.0.0.
+- `tests/Feature/PortabilityTest.php`: the export read back with nothing left over.
+- `tests/Feature/RicTermsTest.php`, `RicMappingTest.php` and `ShaclGateTest.php` unchanged: every term exists in RiC-O 1.1, and the pinned shapes pass.

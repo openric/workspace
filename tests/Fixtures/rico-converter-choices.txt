@@ -1,0 +1,21 @@
+# Differences between the RiC-O the Workspace gives a unit and what the RiC-O converter of the Archives nationales de France
+# gives the same unit from its EAD 2002 (tests/Feature/RicoConverterComparisonTest.php, roadmap step 12c): each a choice, with its reason.
+# One a line: only-converter|only-workspace <property> <reason>.
+#
+# Checked against ricoconverter 3.0.0 on 3 November 2026. Two things of the converter itself, not properties: it reads EAD
+# 2002 only as the DTD writes it, with no namespace, so the test takes the schema's namespace off the Workspace's EAD;
+# and it tags every title and note xml:lang="fr", whatever the finding aid's language.
+#
+only-converter rico:beginningDate The Workspace keeps each date in its own openricx:DateRange with its type (creation, accumulation), since a unit can have several (ADR 0006); the converter writes the one EAD unitdate as literals on the unit.
+only-converter rico:endDate As rico:beginningDate.
+only-converter rico:date As rico:beginningDate; the date as written is rico:expressedDate in the Workspace's date range.
+only-converter rico:hasOrHadInstantiation On a fonds or series: the converter makes an instantiation for every unit from its EAD; the Workspace gives only the carriers it holds, and never invents one.
+only-converter rico:isOrWasDescribedBy The converter makes the finding aid a rico:Record that describes the fonds; in the Workspace the description is the entity itself, and the finding aid an export of it.
+only-workspace rico:identifier The reference code identifies the unit of description (ISAD(G) 3.1.1); the converter puts it on the instantiation it makes for the unit.
+only-workspace rico:hasOrHadDigitalInstantiation The Workspace knows each carrier is digital; the EAD it exports does not say so, so the converter cannot.
+only-workspace rico:hasOrHadAnalogueInstantiation As rico:hasOrHadDigitalInstantiation, for a carrier of paper or another analogue type.
+only-workspace rico:hasOrHadHolder The Workspace gives every unit its holder; the converter only the unit at the top of the finding aid.
+only-workspace rico:hasOrHadTitle Each title also as its own rico:Title, the original first, as Richard Williamson (EGAD) advised (ADR 0019).
+only-workspace rico:hasExtent The unit's extent as RiC-O's structured extent; the converter puts the EAD physdesc on its instantiation as rico:physicalCharacteristicsNote.
+only-workspace rico:includesOrIncluded Kept beside rico:directlyIncludes, for readers of the broader property and for the record sets a unit is also in (rico:Proxy, phase 24).
+only-workspace rico:isOrWasIncludedIn As rico:includesOrIncluded, beside rico:isDirectlyIncludedIn.

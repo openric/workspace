@@ -46,6 +46,12 @@ class RicReader
         'Activity' => ['activities', 'activity-name'], 'Production' => ['activities', 'activity-name'], 'Accumulation' => ['activities', 'activity-name']];
 
     /** What an entry already reads itself, so these are not read again as relations. */
+    /** RiC-O 1.1's specific relations the export gives beside a broad one (step 12c), with that broad one; order comes from the broad list. */
+    private const REFINES = ['directlyIncludes' => 'includesOrIncluded', 'isDirectlyIncludedIn' => 'isOrWasIncludedIn',
+        'hasOrHadDigitalInstantiation' => 'hasOrHadInstantiation', 'hasOrHadAnalogueInstantiation' => 'hasOrHadInstantiation',
+        'isOrWasDigitalInstantiationOf' => 'isOrWasInstantiationOf', 'isOrWasAnalogueInstantiationOf' => 'isOrWasInstantiationOf',
+        'directlyPrecedesInSequence' => 'isOrWasIncludedIn', 'directlyFollowsInSequence' => 'isOrWasIncludedIn'];
+
     private const OWN = ['rico:hasCreator', 'rico:hasOrHadHolder', 'rico:isOrWasIncludedIn', 'rico:includesOrIncluded', 'rico:isOrWasPartOf'];
 
     /** @var array<string, array<string, int>> a unit's IRI => the record sets it is also in, each with its place there (from rico:Proxy) */
@@ -519,6 +525,12 @@ class RicReader
                     $this->draft->nameDates[] = ['value' => $this->lexical($text), 'language' => $text->getLang(),
                         'from' => $from ? $this->lexical($from) : null, 'to' => $to ? $this->lexical($to) : null];
                 }
+            }
+        }
+        // RiC-O 1.1's specific relations repeat the broad ones the import reads (step 12c): read with them, where both are given.
+        foreach (self::REFINES as $specific => $broad) {
+            if (isset($this->read[self::RICO.$broad]) || $node->hasProperty('<'.self::RICO.$broad.'>')) {
+                $this->read[self::RICO.$specific] = true;
             }
         }
         foreach ($node->propertyUris() as $property) {

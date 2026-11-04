@@ -144,10 +144,17 @@ class JsonLd
         if ($creators !== []) {
             $out['rico:hasCreator'] = $creators;
         }
-        // Its carriers (Digital Object Linkage, roadmap phase 24), by IRI: each is described at its own address.
-        $carriers = $unit->instantiations->filter(fn ($i) => $this->view->readable($i))->map(fn ($i) => ['@id' => $i->iri])->values()->all();
-        if ($carriers !== []) {
-            $out['rico:hasOrHadInstantiation'] = $carriers;
+        // Its carriers (Digital Object Linkage, roadmap phase 24), by IRI: each is described at its own address. With RiC-O
+        // 1.1's specific properties beside the broad one, digital or analogue by the carrier (roadmap step 12c), as the
+        // Archives nationales de France's RiC-O converter gives them.
+        $readable = $unit->instantiations->filter(fn ($i) => $this->view->readable($i))->values();
+        if ($readable->isNotEmpty()) {
+            $out['rico:hasOrHadInstantiation'] = $readable->map(fn ($i) => ['@id' => $i->iri])->all();
+            foreach (['digital' => 'rico:hasOrHadDigitalInstantiation', 'analogue' => 'rico:hasOrHadAnalogueInstantiation'] as $kind => $property) {
+                if (($these = $readable->filter(fn ($i) => self::carrierKind($i) === $kind))->isNotEmpty()) {
+                    $out[$property] = $these->map(fn ($i) => ['@id' => $i->iri])->values()->all();
+                }
+            }
         }
         // Its place in the file plan, when that node is a function or activity of the institution (roadmap phase 13c).
         $documents = $unit->filePlanPlacement?->node?->activity;
@@ -159,6 +166,26 @@ class JsonLd
             ...$unit->memberships->filter(fn ($m) => $this->view->readable($m->recordSet))->map(fn ($m) => $this->stub($m->recordSet))->all()]);
         if ($in !== []) {
             $out['rico:isOrWasIncludedIn'] = count($in) === 1 ? reset($in) : array_values($in);
+        }
+        // Where it is arranged now, directly, as RiC-O 1.1 says it of a record set (rico:isDirectlyIncludedIn; step 12c).
+        if ($unit->parent && $this->view->readable($unit->parent) && $this->isRecordSet($unit->parent)) {
+            $out['rico:isDirectlyIncludedIn'] = $this->stub($unit->parent);
+        }
+        $direct = $unit->children->filter(fn ($c) => $this->view->readable($c))->values();
+        if ($direct->isNotEmpty() && str_ends_with((string) $out['@type'], 'RecordSet')) {
+            $out['rico:directlyIncludes'] = $direct->map(fn ($c) => $this->stub($c))->all();
+        }
+        // Its place among the units arranged beside it, in their order (rico:directlyPrecedesInSequence; step 12c).
+        if ($unit->parent_id) {
+            $siblings = RecordResource::where('parent_id', $unit->parent_id)->whereNull('deleted_at')->orderBy('position')->orderBy('id')->with(PublicCatalogue::WITH)->get()
+                ->filter(fn ($r) => $this->view->readable($r))->values();
+            $at = $siblings->search(fn ($r) => $r->id === $unit->id);
+            if ($at !== false && $at > 0) {
+                $out['rico:directlyFollowsInSequence'] = $this->stub($siblings[$at - 1]);
+            }
+            if ($at !== false && $at < $siblings->count() - 1) {
+                $out['rico:directlyPrecedesInSequence'] = $this->stub($siblings[$at + 1]);
+            }
         }
         $children = $unit->children->filter(fn ($c) => $this->view->readable($c))->map(fn ($c) => $this->stub($c))->values()->all();
         $proxies = $unit->memberProxies->filter(fn ($m) => $this->view->readable($m->record))->values();
@@ -401,6 +428,10 @@ class JsonLd
         }
         if ($instantiation->record && $this->view->readable($instantiation->record)) {
             $out['rico:isOrWasInstantiationOf'] = $this->stub($instantiation->record);
+            // RiC-O 1.1's specific inverse, digital or analogue by the carrier (step 12c).
+            if ($kind = self::carrierKind($instantiation)) {
+                $out[$kind === 'digital' ? 'rico:isOrWasDigitalInstantiationOf' : 'rico:isOrWasAnalogueInstantiationOf'] = $this->stub($instantiation->record);
+            }
         }
 
         return $out + $this->dates($instantiation->dates) + $this->relations($instantiation);
@@ -576,6 +607,23 @@ class JsonLd
         $names = method_exists($entity, 'namesOfType') ? $this->strings($name, $entity->namesOfType('authorised'))[$name] ?? null : null;
 
         return array_filter(['@id' => $entity->getAttribute('iri'), '@type' => $this->type($entity), $name => $names ?? $this->view->label($entity)], fn ($v) => $v !== null);
+    }
+
+    /** Digital (a digital-file carrier, or files kept), analogue (any other carrier), or null when neither is known. */
+    public static function carrierKind(Instantiation $instantiation): ?string
+    {
+        $carrier = $instantiation->carrierType?->notation;
+
+        return match (true) {
+            $carrier === 'digital-file', $carrier === null && $instantiation->files()->exists() => 'digital',
+            $carrier !== null => 'analogue',
+            default => null,
+        };
+    }
+
+    private function isRecordSet(Model $entity): bool
+    {
+        return in_array('rico:RecordSet', (array) $this->type($entity), true);
     }
 
     /** The RiC-O class: a unit's level, an agent's type (with rico:Agent where its own class is not one Core Discovery names), a repository's rico:CorporateBody. */
