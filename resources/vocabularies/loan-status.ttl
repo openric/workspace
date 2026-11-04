@@ -1,0 +1,58 @@
+# OpenRiC Workspace - OpenRiC Workspace Loan Statuses.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Where a request to borrow an item between members of a union stands (Heratio's federation_loan_request.status).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/loan-status/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Loan Statuses"@en ;
+    dcterms:description "Where a request to borrow an item between members of a union stands (Heratio's federation_loan_request.status)."@en ;
+    dcterms:issued "2026-11-04"^^xsd:date ;
+    skos:hasTopConcept v:requested, v:approved, v:declined, v:in-transit, v:returned, v:cancelled .
+
+v:requested a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Requested"@en, "Aangevra"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's loans between union members, as Heratio's ahg-federation keeps them."@en ;
+    skos:definition "Asked for, waiting for the holder."@en .
+
+v:approved a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Approved"@en, "Goedgekeur"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's loans between union members, as Heratio's ahg-federation keeps them."@en ;
+    skos:definition "The holder agreed to lend it."@en .
+
+v:declined a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Declined"@en, "Afgekeur"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's loans between union members, as Heratio's ahg-federation keeps them."@en ;
+    skos:definition "The holder will not lend it."@en .
+
+v:in-transit a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "In transit"@en, "Onderweg"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's loans between union members, as Heratio's ahg-federation keeps them."@en ;
+    skos:definition "On loan: sent, or with the borrower."@en .
+
+v:returned a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Returned"@en, "Terugbesorg"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's loans between union members, as Heratio's ahg-federation keeps them."@en ;
+    skos:definition "Back with the holder."@en .
+
+v:cancelled a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Cancelled"@en, "Gekanselleer"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's loans between union members, as Heratio's ahg-federation keeps them."@en ;
+    skos:definition "Withdrawn before it was lent."@en .

@@ -5,6 +5,7 @@
     @php($lang = \App\Support\Vocab::languages())
     @php($when = fn ($d) => $d ? \Illuminate\Support\Carbon::parse($d)->timezone(config('workspace.timezone'))->format('Y-m-d H:i') : '')
     <h1>{{ __('Federation') }}</h1>
+    <p><a href="#union">{{ __('Union catalogue') }}</a> · <a href="#vocabularies">{{ __('Vocabularies') }}</a> · <a href="#joins">{{ __('Requests to join') }}</a> · <a href="{{ route('federation.loans') }}">{{ __('Loans') }}</a> · <a href="{{ route('federation.europeana') }}">{{ __('Europeana') }}</a></p>
     @if(session('status'))<p role="status">{{ session('status') }}</p>@endif
     @if($errors->any())<p class="error" role="alert">{{ $errors->first() }}</p>@endif
     <p>{{ __('Peers are other catalogues the institution searches at once: another institution on this installation, another OpenRiC Workspace or a Heratio. Each answers with what it has published, signed with its key, which is pinned on first use. The institution answers its own peers at :url, signed, with only what it publishes.', ['url' => route('federation.answer')]) }}</p>

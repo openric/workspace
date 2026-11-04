@@ -52,7 +52,7 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-export` | 1256 | V0.1 candidate | Covered |  | `ahgExportPlugin` | EAD, Dublin Core, MODS, CSV and RiC-O export |
 | `ahg-extended-rights` | 7869 | V0.1 candidate | Partial | 13 | `ahgExtendedRightsPlugin` | Rights statements, licences, grants, batch rights and the rights report (v0.0.57 to v0.0.59); embargoes of records and their files, with exceptions, notices and the list from v0.0.89 (13a, ADR 0015); retention and disposal in 13b |
 | `ahg-favorites` | 2634 | later: V1.0+ | Covered | 19a | `ahgFavoritesPlugin` | Favourites of any entity, folders shared by a link, nine export formats, import by IRI (ADR 0017); sending to collections (with notes), projects (as their records) and bibliographies |
-| `ahg-federation` | 15815 | later: V1.0+ | Partial | 16a, 16b, 16c | `ahgFederationPlugin` | Peers and signed federated search from v0.0.118; OAI-PMH harvest, the union catalogue and the DSpace and Alma connectors from v0.0.119; governance, discovery, vocabulary sync, the network directory and join requests from v0.0.120 (ADR 0023); Europeana and loans in 16d |
+| `ahg-federation` | 15815 | later: V1.0+ | Done | 16a, 16b, 16c, 16d | `ahgFederationPlugin` | Peers and signed federated search from v0.0.118; OAI-PMH harvest, the union catalogue and the DSpace and Alma connectors from v0.0.119; governance, discovery, vocabulary sync, the network directory and join requests from v0.0.120; the Europeana EDM export and loans from v0.0.121 (ADR 0023) |
 | `ahg-feedback` | 879 | later: V1.0+ | Covered | 19a | `ahgFeedbackPlugin` | Feedback from anyone on the catalogue or a record, handled by staff (ADR 0017) |
 | `ahg-forms` | 2541 | later: V1.0+ | Covered | 22b | `ahgFormsPlugin` | Form templates of elements and own fields, assigned by repository, level or collection, from v0.0.107 (ADR 0020) |
 | `ahg-ftp-upload` | 2301 | later: V1.0+ | Covered | 22a | `ahgFtpPlugin` | An FTP or SFTP account kept to a watched folder, from v0.0.106 (ADR 0020): files go to the Workspace's own store, not to an FTP server for later fetching |
@@ -804,6 +804,11 @@ Added on 4 November 2026 with 16a.
 | `federation_term_mapping`: `local_term_id`, `remote_term_id`, `remote_term_name`, `mapping_status` | The concept's exact match to the peer's IRI | Modelled |
 | `federation_join_request`: `institution_name`, `contact_name`, `contact_email`, `base_url`, `what_they_share`, `notes`, `status`, `reviewed_by`, `reviewed_at` | The same, per institution, with the review note and the peer approval made | Same |
 | `NetworkDirectoryService` | `/open-data/network` | Same |
+| `ahg_europeana_export`: `started_at`, `finished_at`, `record_count`, `bundle_path`, `bundle_size_bytes`, `status`, `error` | The same, the bundle in OCFL with its SHA-256, and the since date | Same, from v0.0.121 |
+| Settings `europeana_data_provider`, `europeana_country`, `europeana_language`, `europeana_default_rights` | On the institution's share settings | Same |
+| `EdmSerializer`: ProvidedCHO, Aggregation, WebResource, Agent, Place, TimeSpan | The same, as the public reads the record | Same |
+| `federation_loan_request`: `requesting_member_id`, `holding_member_id`, `item_ref`, `item_title`, `purpose`, `status`, `needed_from`, `needed_to`, `notes`, `decided_by`, `decided_at` | The same, the institution's own unit where it holds the item | Same |
+| `LoanAnalyticsService` report | The same figures | Same |
 | `pinned_key_fingerprint`, `key_pinned_at` | The same | Same |
 | `federation_peer_search`: `search_api_url`, `search_api_key`, `search_enabled`, `search_timeout_ms`, `search_max_results`, `search_priority`, `last_search_at`, `last_search_status`, `avg_response_time_ms` | On the peer itself, one row | Same |
 | `federation_search_cache`: `query_hash`, `peer_id`, `results_json`, `result_count`, `created_at`, `expires_at` | The same, with the answer's verification | Same |

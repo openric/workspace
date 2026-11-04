@@ -43,7 +43,9 @@ use App\Models\CaptionTrack;
 use App\Models\Concept;
 use App\Models\Container;
 use App\Models\DuplicateDetection;
+use App\Models\EuropeanaExport;
 use App\Models\FederationJoinRequest;
+use App\Models\FederationLoanRequest;
 use App\Models\FederationMember;
 use App\Models\FederationPeer;
 use App\Models\FederationVocabularySync;
@@ -385,6 +387,10 @@ class AccessMatrixTest extends TestCase
                 FederationJoinRequest::create(['institution_id' => $institution->id, 'institution_name' => 'Joiner', 'contact_name' => 'J', 'contact_email' => 'j@example.org', 'base_url' => 'https://joiner.example.org',
                     'status_id' => Concept::where('iri', Vocab::BASE.'join-request-status/pending')->value('id')])];
         });
+        // Phase 16d: a loan between union members, and a Europeana export.
+        $make('loan and Europeana', fn () => [FederationLoanRequest::create(['institution_id' => $institution->id, 'item_ref' => 'x', 'item_title' => 'Loaned item',
+            'status_id' => Concept::where('iri', Vocab::BASE.'loan-status/requested')->value('id')]),
+            EuropeanaExport::create(['institution_id' => $institution->id, 'status_id' => Concept::where('iri', Vocab::BASE.'harvest-status/success')->value('id'), 'storage_path' => 'none', 'started_at' => now()])]);
         // Phase 12b: an identity provider.
         $make('sign-in provider', fn () => SignInProvider::create(['institution_id' => $institution->id, 'label' => 'Staff', 'issuer_url' => 'https://idp.example.org',
             'client_id' => 'workspace', 'client_secret' => 'secret', 'scopes' => ['openid'], 'match_id' => Concept::where('iri', Vocab::BASE.'sign-in-match/subject')->value('id')]));

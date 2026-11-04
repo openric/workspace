@@ -192,3 +192,46 @@ What was changed from Heratio:
     - taking theirs replacing a label, keeping ours leaving it;
     - the institution's shared vocabulary listed, given as Turtle with a new concept, and its change listed since a time;
   - joining: a robot's request kept from the queue, a request approved into a basic peer, and that peer listed in the network directory.
+
+## 16d: the Europeana export and loans
+
+**The Europeana export**, after Heratio's `EuropeanaExportService` and `EdmSerializer`. The institution's published units of description, or those changed since a day, are each written in the Europeana Data Model:
+
+- an `edm:ProvidedCHO`: title, reference code and IRI as identifiers, scope and content, creators, subjects and names, genres, languages, dates, places, the EDM type, rights, extent and the holding repository;
+- its `ore:Aggregation`: the data provider, `isShownAt` its persistent IRI, `isShownBy` its reference or access copy, `object` its thumbnail, and `edm:rights`;
+- an `edm:WebResource` for each file the public may receive;
+- the `edm:Agent`, the `edm:Place` with its WGS84 position, and the `edm:TimeSpan` it names.
+
+The EDM type follows Heratio's `deriveEdmType`: IMAGE, SOUND, VIDEO or 3D by the files' types, else TEXT. `edm:rights` is the RightsStatements.org or Creative Commons IRI of the right in force on the record (ADR 0008), else the institution's default.
+
+The files and a sitemap of them go in one ZIP bundle, kept in an OCFL object of its own and downloaded with its SHA-256. Each run is kept with its count and any error. The institution sets its data provider name (its own name unless set), country, language and default rights.
+
+What was changed from Heratio:
+
+- Only what the public reads goes in, decided by ExportView as every export is. Heratio leaves out a record's digital objects only where it has redactions; here files the public may not receive are never named.
+- The bundle is kept in OCFL, not left in a folder.
+
+**Loans**, after Heratio's `LoanRequestService` and `LoanAnalyticsService`. A loan is a request between two members of the institution's union, the institution among them, to borrow an item for a purpose and a window of dates.
+
+- **The item.** Where the institution holds it, the item is its own unit of description; otherwise the holder's reference and title.
+- **Transitions.** A loan moves only along Heratio's transitions: requested to approved, declined or cancelled; approved to in transit or cancelled; in transit to returned. Each move is recorded with who made it, when, and a note.
+- **The figures.** Loans by status; how many the institution asked of others and others of it; the share approved of those decided; the average days to a decision; and the members and items most asked for.
+
+What was changed from Heratio: only who administers the institution moves a loan, and the database keeps a loan's window in order and its two members apart.
+
+### Not carried in 16d
+
+- Heratio's EDM `dc:identifier` from the slug: the Workspace has no slugs; the persistent IRI is the identifier.
+- Delivery to Europeana itself: Europeana takes the bundle in through its own aggregator's ingestion, outside the Workspace.
+
+### Evidence (16d)
+
+- `tests/Feature/EuropeanaAndLoansTest.php`:
+  - Europeana:
+    - a published unit with its creator, a place with coordinates and an image exported as EDM, with its title, IMAGE type, creator and Agent, Place position, isShownAt its IRI and isShownBy its reference copy;
+    - the right in force given rather than the default;
+    - a draft left out, and the bundle with its sitemap downloaded with its SHA-256;
+  - loans:
+    - a loan of the institution's own unit requested by a member, a move out of turn refused, a member borrowing from itself refused, and a window ending before it begins refused;
+    - the loan approved with a note, sent and returned;
+    - a second declined, and the figures counting both, out and in, at half approved.

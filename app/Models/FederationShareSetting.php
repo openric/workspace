@@ -12,7 +12,8 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 
-#[Fillable(['institution_id', 'share_enabled', 'levels', 'require_verified', 'shared_vocabularies'])]
+#[Fillable(['institution_id', 'share_enabled', 'levels', 'require_verified', 'shared_vocabularies', 'europeana_data_provider', 'europeana_country', 'europeana_language',
+    'europeana_default_rights'])]
 class FederationShareSetting extends Model
 {
     use Audited, HasUuids;
