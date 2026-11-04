@@ -140,3 +140,55 @@ Their answers are unsigned, and say so.
     - the union served whole and as the institution's own, and found in the public and staff searches;
     - its records gone when it stops sharing;
   - a faked DSpace repository and Alma catalogue found beside each other by their own protocols, Alma's record address from its template, both unsigned.
+
+## 16c: governance, discovery, vocabulary sync and joining
+
+**Governance**, after Heratio's `FederationGovernance`. Each peer can have:
+
+- **A trust level.** An untrusted peer is never asked. A peer at the verified level must sign every answer, or the answer is dropped.
+- **A rate limit.** A peer asked again within its limit is skipped until the limit passes; a search it answered within fifteen minutes is still served from the cache.
+- **The surfaces it may be asked for:** search, the union, vocabularies.
+
+An institution can also require that every answer be signed by the peer's pinned key, dropping the rest, as Heratio's `require_verified` does.
+
+**Discovery**, after Heratio's `PeerDiscoveryService`. Each Workspace and Heratio peer's `/open-data/protocol` is probed each night or when asked. The probe keeps:
+
+- whether the peer answers the Federation Query Protocol, is not compliant, or is unreachable;
+- its protocol version, the surfaces it declares, and its maturity grade where it publishes one;
+- its whole federation block.
+
+The Workspace's own descriptor now names its surfaces and the addresses of its search, union, vocabularies, network directory and join form.
+
+**Vocabulary sync**, after Heratio's `VocabSyncService`.
+
+- **Offering ours.** An institution offers the vocabularies of its own it names, as SKOS Turtle at `/federation/vocabularies/{id}.ttl`, listed at `/federation/vocabularies`, with each change to them since a time at `/changes?since=` (created, updated, deprecated), as Heratio's `federation_vocab_change` keeps them.
+- **Taking a peer's.** A peer's vocabulary is taken into one of the institution's own, on the sync's interval or when asked, through the same SKOS import every local vocabulary has. A concept taken in gets the institution's IRI and keeps the peer's as an exact match: that exact match is Heratio's `federation_term_mapping`, kept where the Workspace already keeps concept matches.
+- **Conflicts.** A concept the institution has already keeps its labels (keep ours) or takes the peer's (take theirs). Each run is kept with what it added, updated and found the institution had.
+
+**The network directory and joining**, after Heratio's `NetworkDirectoryService` and `JoinRequestService`.
+
+- `/open-data/network` lists the institution, the peers it federates with that it does not distrust (with their trust level, discovery status, surfaces and maturity), its union's members, and the join form.
+- An archive asks to join at `/federation/join`; a field no person fills in turns robots away, and the form is limited to five requests a minute.
+- The institution's administrators approve a request, which makes the archive a peer trusted at the basic level, or decline it with a reason.
+
+What was changed from Heratio:
+
+- An institution offers only the vocabularies it names.
+- Term mappings are the concept matches the Workspace already keeps, so a mapping is visible on the concept itself and exported with it.
+- Vocabulary sync does not push changes to peers; each peer pulls them from the change list. This is Heratio's push direction, offered rather than sent.
+
+### Not carried in 16c
+
+- Heratio's trust dossier and authenticity addresses (`trustDossierUrl`, `authenticityUrl`): they point at Heratio's AI compliance pages, which are phase 17.
+- Heratio's `federation_enabled` switch: a peer's `is_active` does the same.
+
+### Evidence (16c)
+
+- `tests/Feature/FederationGovernanceTest.php`:
+  - governance: an untrusted peer not asked; a peer asked again within its rate limit skipped; an unsigned answer dropped once the institution requires verification;
+  - discovery: three peers probed, one answering the protocol with its version, surfaces and maturity grade, one not compliant, one unreachable;
+  - vocabulary sync:
+    - a peer's vocabulary taken into the institution's own, each concept with the institution's IRI and the peer's as an exact match;
+    - taking theirs replacing a label, keeping ours leaving it;
+    - the institution's shared vocabulary listed, given as Turtle with a new concept, and its change listed since a time;
+  - joining: a robot's request kept from the queue, a request approved into a basic peer, and that peer listed in the network directory.

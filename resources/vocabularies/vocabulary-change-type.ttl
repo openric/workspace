@@ -1,0 +1,37 @@
+# OpenRiC Workspace - OpenRiC Workspace Vocabulary Change Types.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What happened to a concept of a shared vocabulary (Heratio's federation_vocab_change.change_type).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/vocabulary-change-type/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Vocabulary Change Types"@en ;
+    dcterms:description "What happened to a concept of a shared vocabulary (Heratio's federation_vocab_change.change_type)."@en ;
+    dcterms:issued "2026-11-04"^^xsd:date ;
+    skos:hasTopConcept v:created, v:updated, v:deprecated .
+
+v:created a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Created"@en, "Geskep"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's federation with its peers, as Heratio's ahg-federation keeps it."@en ;
+    skos:definition "A new concept."@en .
+
+v:updated a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Updated"@en, "Bygewerk"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's federation with its peers, as Heratio's ahg-federation keeps it."@en ;
+    skos:definition "Its notation or standing changed."@en .
+
+v:deprecated a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Deprecated"@en, "Verouderd"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's federation with its peers, as Heratio's ahg-federation keeps it."@en ;
+    skos:definition "No longer to be used."@en .

@@ -76,14 +76,19 @@ class FederatedSearch
     {
         $started = microtime(true);
         $hash = hash('sha256', mb_strtolower(trim($query)));
-        $peers = FederationPeer::where(['institution_id' => $institution->id, 'is_active' => true, 'search_enabled' => true])->with('type', 'peerInstitution')->orderBy('priority')->get()
-            ->filter(fn ($p) => in_array($p->type->notation, ['institution', 'workspace', 'heratio', 'dspace', 'alma'], true))->values();
+        // Governance (phase 16c): an untrusted peer is not asked, nor one not allowed the search surface.
+        $peers = FederationPeer::where(['institution_id' => $institution->id, 'is_active' => true, 'search_enabled' => true])->with('type', 'peerInstitution', 'trustLevel')->orderBy('priority')->get()
+            ->filter(fn ($p) => in_array($p->type->notation, ['institution', 'workspace', 'heratio', 'dspace', 'alma'], true) && $p->trustLevel?->notation !== 'untrusted'
+                && ($p->allowed_surfaces === null || in_array('search', (array) $p->allowed_surfaces, true)))->values();
+        $requireVerified = (bool) FederationShareSetting::for($institution->id)->require_verified;
         $outcomes = [];
         $remote = [];
         foreach ($peers as $peer) {
             $cached = DB::table('federation_search_cache')->where(['peer_id' => $peer->id, 'query_hash' => $hash])->where('expires_at', '>', now())->first();
             if ($cached) {
                 $outcomes[$peer->id] = ['peer' => $peer, 'status' => 'success', 'verification' => $cached->verification, 'results' => json_decode($cached->results, true), 'ms' => 0, 'error' => null, 'cached' => true];
+            } elseif ($peer->rate_limit_seconds && $peer->last_search_at && $peer->last_search_at->addSeconds($peer->rate_limit_seconds)->isFuture()) {
+                $outcomes[$peer->id] = ['peer' => $peer, 'status' => 'skipped', 'verification' => null, 'results' => [], 'ms' => 0, 'error' => __('Asked too recently: it allows one search every :n seconds.', ['n' => $peer->rate_limit_seconds])];
             } elseif ($peer->type->notation === 'institution') {
                 $at = microtime(true);
                 $answer = $peer->peerInstitution ? $this->answer($peer->peerInstitution, $query, $peer->max_results) : null;
@@ -122,6 +127,10 @@ class FederatedSearch
         $results = [];
         foreach ($outcomes as $id => $o) {
             $this->record($o, $hash);
+            // An answer not signed by the pinned key is dropped where the institution requires it, or the peer's trust does (Heratio's shouldDropUnverified).
+            if (($requireVerified || $o['peer']->trustLevel?->notation === 'verified') && ! in_array($o['verification'], ['verified', 'pinned', 'local'], true)) {
+                continue;
+            }
             foreach ($o['results'] as $item) {
                 $results[] = ['title' => (string) ($item['title'] ?? $item['name'] ?? __('Untitled')), 'description' => $item['description'] ?? $item['scopeAndContent'] ?? null,
                     'referenceCode' => $item['referenceCode'] ?? $item['identifier'] ?? null, 'level' => $item['levelOfDescription'] ?? $item['level'] ?? null,

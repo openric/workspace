@@ -7,9 +7,11 @@
 namespace App\Providers;
 
 use App\Access\AccessControl;
+use App\Federation\VocabularySync;
 use App\Jobs\IdentifyFormat;
 use App\Jobs\NormaliseFile;
 use App\Mail\EmailAuditListener;
+use App\Models\Concept;
 use App\Models\CustomFieldValue;
 use App\Models\DescriptionValue;
 use App\Models\DigitalFile;
@@ -74,6 +76,15 @@ class AppServiceProvider extends ServiceProvider
             }
         });
         DigitalFile::deleted(fn (DigitalFile $file) => app(PreservationEvents::class)->removed($file));
+        // Changes to a vocabulary an institution shares with its peers, for them to see (phase 16c).
+        Concept::created(fn (Concept $concept) => VocabularySync::recordChange($concept, 'created', null, $concept->notation));
+        Concept::updated(function (Concept $concept) {
+            if ($concept->wasChanged('deprecated_at') && $concept->deprecated_at !== null) {
+                VocabularySync::recordChange($concept, 'deprecated', $concept->getOriginal('notation'), null);
+            } elseif ($concept->wasChanged('notation')) {
+                VocabularySync::recordChange($concept, 'updated', $concept->getOriginal('notation'), $concept->notation);
+            }
+        });
         // Versions follow the same marks (roadmap phase 22b): a unit of description or authority record changed, or
         // anything of it or a relation it takes part in, gets one new version when the request, command or job ends.
         foreach ([DescriptionValue::class, Name::class, Identifier::class, RicDate::class, CustomFieldValue::class] as $part) {

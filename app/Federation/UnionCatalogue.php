@@ -114,7 +114,7 @@ class UnionCatalogue
         $perPage = max(1, min(self::MAX_PER_PAGE, $perPage ?? 100));
         $page = max(1, $page);
         $members = DB::table('federation_members')->where(['institution_id' => $institution->id, 'is_enabled' => true])->when($selfOnly, fn ($q) => $q->where('is_self', true))->pluck('name', 'id');
-        $base = DB::table('federation_union_records')->whereIn('member_id', $members->keys()->all() ?: [''])
+        $base = DB::table('federation_union_records')->whereIn('member_id', $members->keys()->all())
             ->when($from && strtotime($from), fn ($q) => $q->where('indexed_at', '>=', date('c', strtotime($from))));
         $total = (clone $base)->count();
         $rows = $base->orderBy('id')->forPage($page, $perPage)->get();
@@ -128,7 +128,7 @@ class UnionCatalogue
     public function search(Institution $institution, string $query, int $page = 1, int $perPage = 20): array
     {
         $members = DB::table('federation_members')->where(['institution_id' => $institution->id, 'is_enabled' => true])->pluck('name', 'id');
-        $base = DB::table('federation_union_records')->whereIn('member_id', $members->keys()->all() ?: [''])
+        $base = DB::table('federation_union_records')->whereIn('member_id', $members->keys()->all())
             ->where(fn ($q) => $q->whereRaw("to_tsvector('simple', title) @@ websearch_to_tsquery('simple', ?)", [$query])->orWhere('title', 'ilike', '%'.addcslashes($query, '%_\\').'%'));
         $total = (clone $base)->count();
 

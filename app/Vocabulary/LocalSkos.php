@@ -192,7 +192,7 @@ class LocalSkos
     }
 
     /** The concept of this vocabulary the file's concept is: by its own IRI, or by an exact match to the file's IRI. */
-    private function existing(Vocabulary $vocabulary, string $iri): ?Concept
+    public function existing(Vocabulary $vocabulary, string $iri): ?Concept
     {
         return Concept::where(['vocabulary_id' => $vocabulary->id, 'iri' => $iri])->first()
             ?? Concept::where('vocabulary_id', $vocabulary->id)->whereHas('matches', fn ($q) => $q->where('target_iri', $iri)

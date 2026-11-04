@@ -17,7 +17,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[Fillable(['institution_id', 'name', 'type_id', 'base_url', 'search_url', 'peer_institution_id', 'api_key', 'description', 'contact_email', 'is_active', 'search_enabled',
     'timeout_ms', 'max_results', 'priority', 'last_search_at', 'last_search_status_id', 'avg_response_ms', 'pinned_key_id', 'key_pinned_at', 'last_verification_id',
-    'metadata_prefix', 'default_set', 'harvest_interval_hours', 'harvest_repository_id', 'last_harvest_at', 'last_harvest_status_id', 'last_harvest_records', 'config'])]
+    'metadata_prefix', 'default_set', 'harvest_interval_hours', 'harvest_repository_id', 'last_harvest_at', 'last_harvest_status_id', 'last_harvest_records', 'config',
+    'trust_level_id', 'rate_limit_seconds', 'allowed_surfaces', 'discovery_status_id', 'protocol_version', 'declared_surfaces', 'maturity_grade', 'capabilities', 'last_probed_at'])]
 #[Hidden(['api_key'])]
 class FederationPeer extends Model
 {
@@ -27,13 +28,14 @@ class FederationPeer extends Model
     {
         return ['api_key' => 'encrypted', 'is_active' => 'boolean', 'search_enabled' => 'boolean', 'timeout_ms' => 'integer', 'max_results' => 'integer', 'priority' => 'integer',
             'avg_response_ms' => 'integer', 'last_search_at' => 'immutable_datetime', 'key_pinned_at' => 'immutable_datetime',
-            'harvest_interval_hours' => 'integer', 'last_harvest_at' => 'immutable_datetime', 'last_harvest_records' => 'integer', 'config' => 'array'];
+            'harvest_interval_hours' => 'integer', 'last_harvest_at' => 'immutable_datetime', 'last_harvest_records' => 'integer', 'config' => 'array',
+            'rate_limit_seconds' => 'integer', 'allowed_surfaces' => 'array', 'declared_surfaces' => 'array', 'capabilities' => 'array', 'last_probed_at' => 'immutable_datetime'];
     }
 
     /** Searching or being searched changes no record of the peer worth an audit row. */
     public function notAudited(): array
     {
-        return ['last_search_at', 'last_search_status_id', 'avg_response_ms', 'last_verification_id', 'last_harvest_at', 'last_harvest_status_id', 'last_harvest_records'];
+        return ['last_search_at', 'last_search_status_id', 'avg_response_ms', 'last_verification_id', 'last_harvest_at', 'last_harvest_status_id', 'last_harvest_records', 'discovery_status_id', 'protocol_version', 'declared_surfaces', 'maturity_grade', 'capabilities', 'last_probed_at'];
     }
 
     public function type(): BelongsTo
@@ -44,6 +46,16 @@ class FederationPeer extends Model
     public function peerInstitution(): BelongsTo
     {
         return $this->belongsTo(Institution::class, 'peer_institution_id');
+    }
+
+    public function trustLevel(): BelongsTo
+    {
+        return $this->belongsTo(Concept::class, 'trust_level_id');
+    }
+
+    public function discoveryStatus(): BelongsTo
+    {
+        return $this->belongsTo(Concept::class, 'discovery_status_id');
     }
 
     public function lastHarvestStatus(): BelongsTo

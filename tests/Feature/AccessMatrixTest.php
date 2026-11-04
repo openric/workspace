@@ -43,8 +43,10 @@ use App\Models\CaptionTrack;
 use App\Models\Concept;
 use App\Models\Container;
 use App\Models\DuplicateDetection;
+use App\Models\FederationJoinRequest;
 use App\Models\FederationMember;
 use App\Models\FederationPeer;
+use App\Models\FederationVocabularySync;
 use App\Models\Feedback;
 use App\Models\FileFormat;
 use App\Models\FixityFailure;
@@ -373,6 +375,16 @@ class AccessMatrixTest extends TestCase
             'base_url' => 'https://peer.example.org', 'is_active' => false]));
         // Phase 16b: a member of the union catalogue.
         $make('union member', fn () => FederationMember::create(['institution_id' => $institution->id, 'name' => 'Member', 'base_url' => 'https://member.example.org']));
+        // Phase 16c: a vocabulary synced with a peer, and a request to join the network.
+        $make('federation governance', function () use ($institution, $admin) {
+            $peer = FederationPeer::firstOrFail();
+            $subjects = app(ConceptService::class)->createScheme($institution, 'subject', 'Matrix subjects', 'en', null, $admin);
+
+            return [FederationVocabularySync::create(['peer_id' => $peer->id, 'vocabulary_id' => $subjects->id, 'remote_vocabulary' => 'remote',
+                'direction_id' => Concept::where('iri', Vocab::BASE.'vocabulary-sync-direction/pull')->value('id'), 'conflict_rule_id' => Concept::where('iri', Vocab::BASE.'vocabulary-conflict-rule/prefer-local')->value('id')]),
+                FederationJoinRequest::create(['institution_id' => $institution->id, 'institution_name' => 'Joiner', 'contact_name' => 'J', 'contact_email' => 'j@example.org', 'base_url' => 'https://joiner.example.org',
+                    'status_id' => Concept::where('iri', Vocab::BASE.'join-request-status/pending')->value('id')])];
+        });
         // Phase 12b: an identity provider.
         $make('sign-in provider', fn () => SignInProvider::create(['institution_id' => $institution->id, 'label' => 'Staff', 'issuer_url' => 'https://idp.example.org',
             'client_id' => 'workspace', 'client_secret' => 'secret', 'scopes' => ['openid'], 'match_id' => Concept::where('iri', Vocab::BASE.'sign-in-match/subject')->value('id')]));

@@ -52,7 +52,7 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-export` | 1256 | V0.1 candidate | Covered |  | `ahgExportPlugin` | EAD, Dublin Core, MODS, CSV and RiC-O export |
 | `ahg-extended-rights` | 7869 | V0.1 candidate | Partial | 13 | `ahgExtendedRightsPlugin` | Rights statements, licences, grants, batch rights and the rights report (v0.0.57 to v0.0.59); embargoes of records and their files, with exceptions, notices and the list from v0.0.89 (13a, ADR 0015); retention and disposal in 13b |
 | `ahg-favorites` | 2634 | later: V1.0+ | Covered | 19a | `ahgFavoritesPlugin` | Favourites of any entity, folders shared by a link, nine export formats, import by IRI (ADR 0017); sending to collections (with notes), projects (as their records) and bibliographies |
-| `ahg-federation` | 15815 | later: V1.0+ | Partial | 16a, 16b | `ahgFederationPlugin` | Peers and signed federated search from v0.0.118; OAI-PMH harvest, the union catalogue and the DSpace and Alma connectors from v0.0.119 (ADR 0023); vocabulary sync and governance in 16c, Europeana and loans in 16d |
+| `ahg-federation` | 15815 | later: V1.0+ | Partial | 16a, 16b, 16c | `ahgFederationPlugin` | Peers and signed federated search from v0.0.118; OAI-PMH harvest, the union catalogue and the DSpace and Alma connectors from v0.0.119; governance, discovery, vocabulary sync, the network directory and join requests from v0.0.120 (ADR 0023); Europeana and loans in 16d |
 | `ahg-feedback` | 879 | later: V1.0+ | Covered | 19a | `ahgFeedbackPlugin` | Feedback from anyone on the catalogue or a record, handled by staff (ADR 0017) |
 | `ahg-forms` | 2541 | later: V1.0+ | Covered | 22b | `ahgFormsPlugin` | Form templates of elements and own fields, assigned by repository, level or collection, from v0.0.107 (ADR 0020) |
 | `ahg-ftp-upload` | 2301 | later: V1.0+ | Covered | 22a | `ahgFtpPlugin` | An FTP or SFTP account kept to a watched folder, from v0.0.106 (ADR 0020): files go to the Workspace's own store, not to an FTP server for later fetching |
@@ -792,6 +792,18 @@ Added on 4 November 2026 with 16a.
 | `peer_type` dspace, alma (`DSpaceConnector`, `AlmaConnector`) | The same | Same |
 | `peer_type` atom_local (`AtomElasticsearchConnector`) | Not carried: it reads AtoM's own index | Not carried |
 | `oai_heritage`, `oai_ead` harvest formats | Not carried: Dublin Core, and the signed API for Workspace and Heratio peers | Not carried |
+| Governance columns: `trust_level`, `rate_limit_seconds`, `allowed_entity_types` | The same, the surfaces a peer may be asked for (search, union, vocabularies) | Same, from v0.0.120 |
+| `federation_enabled` | The peer's `is_active` | Modelled |
+| Discovery columns: `discovery_status`, `protocol_version`, `declared_surfaces`, `maturity_grade`, `capabilities_json`, `last_probed_at` | The same | Same |
+| Governance `require_verified` | On the institution's share settings | Same |
+| `trustDossierUrl`, `authenticityUrl` | With the AI compliance pages, phase 17 | Not carried |
+| `federation_vocab_sync`: `peer_id`, `taxonomy_id`, `sync_direction`, `sync_enabled`, `conflict_resolution`, `sync_interval_hours`, `last_sync_at`, `last_sync_status`, `last_sync_terms_added`, `last_sync_terms_updated`, `last_sync_conflicts` | The same; the taxonomy the institution's local vocabulary, the peer's named by its identifier | Same |
+| `federation_vocab_sync_log`: `started_at`, `completed_at`, `status`, `terms_added`, `terms_updated`, `terms_skipped`, `conflicts`, `error_message`, `initiated_by` | The same | Same |
+| `federation_vocab_change`: `taxonomy_id`, `term_id`, `change_type`, `old_value`, `new_value`, `created_by`, `created_at` | The same, for the vocabularies the institution shares, listed for peers | Same |
+| `propagated_to_peers` | Peers pull the change list; nothing is pushed | Modelled |
+| `federation_term_mapping`: `local_term_id`, `remote_term_id`, `remote_term_name`, `mapping_status` | The concept's exact match to the peer's IRI | Modelled |
+| `federation_join_request`: `institution_name`, `contact_name`, `contact_email`, `base_url`, `what_they_share`, `notes`, `status`, `reviewed_by`, `reviewed_at` | The same, per institution, with the review note and the peer approval made | Same |
+| `NetworkDirectoryService` | `/open-data/network` | Same |
 | `pinned_key_fingerprint`, `key_pinned_at` | The same | Same |
 | `federation_peer_search`: `search_api_url`, `search_api_key`, `search_enabled`, `search_timeout_ms`, `search_max_results`, `search_priority`, `last_search_at`, `last_search_status`, `avg_response_time_ms` | On the peer itself, one row | Same |
 | `federation_search_cache`: `query_hash`, `peer_id`, `results_json`, `result_count`, `created_at`, `expires_at` | The same, with the answer's verification | Same |

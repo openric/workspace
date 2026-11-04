@@ -1,0 +1,44 @@
+# OpenRiC Workspace - OpenRiC Workspace Federation Discovery Statuses.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What the last probe of a peer's protocol descriptor found (Heratio's federation_discovery_status).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/federation-discovery-status/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Federation Discovery Statuses"@en ;
+    dcterms:description "What the last probe of a peer's protocol descriptor found (Heratio's federation_discovery_status)."@en ;
+    dcterms:issued "2026-11-04"^^xsd:date ;
+    skos:hasTopConcept v:ok, v:unreachable, v:non-compliant, v:unknown .
+
+v:ok a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Answers the protocol"@en, "Antwoord die protokol"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's federation with its peers, as Heratio's ahg-federation keeps it."@en ;
+    skos:definition "Its /open-data/protocol names its federation search and key."@en .
+
+v:unreachable a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Unreachable"@en, "Onbereikbaar"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's federation with its peers, as Heratio's ahg-federation keeps it."@en ;
+    skos:definition "It did not answer."@en .
+
+v:non-compliant a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Not compliant"@en, "Nie-nakomend"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's federation with its peers, as Heratio's ahg-federation keeps it."@en ;
+    skos:definition "It answered, but not with a federation block."@en .
+
+v:unknown a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Not probed"@en, "Nie getoets nie"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's federation with its peers, as Heratio's ahg-federation keeps it."@en ;
+    skos:definition "Not yet probed."@en .

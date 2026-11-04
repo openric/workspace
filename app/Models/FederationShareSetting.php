@@ -12,14 +12,14 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 
-#[Fillable(['institution_id', 'share_enabled', 'levels'])]
+#[Fillable(['institution_id', 'share_enabled', 'levels', 'require_verified', 'shared_vocabularies'])]
 class FederationShareSetting extends Model
 {
     use Audited, HasUuids;
 
     protected function casts(): array
     {
-        return ['share_enabled' => 'boolean', 'levels' => 'array'];
+        return ['share_enabled' => 'boolean', 'levels' => 'array', 'require_verified' => 'boolean', 'shared_vocabularies' => 'array'];
     }
 
     public static function for(string $institutionId): self

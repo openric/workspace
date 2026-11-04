@@ -197,6 +197,12 @@ Route::middleware([ServeDiscovery::class, 'throttle:120,1'])->group(function () 
     Route::get('/discover/federated', [FederationController::class, 'publicSearch'])->name('discover.federated');
     Route::get('/union/records', [FederationController::class, 'unionRecords'])->name('federation.union-records');
     Route::get('/discover/union', [FederationController::class, 'unionSearch'])->name('discover.union');
+    Route::get('/federation/vocabularies', [FederationController::class, 'vocabularies'])->name('federation.vocabularies');
+    Route::get('/federation/vocabularies/{vocabulary}.ttl', [FederationController::class, 'vocabulary'])->whereUuid('vocabulary')->name('federation.vocabulary');
+    Route::get('/federation/vocabularies/{vocabulary}/changes', [FederationController::class, 'vocabularyChanges'])->whereUuid('vocabulary')->name('federation.vocabulary-changes');
+    Route::get('/open-data/network', [FederationController::class, 'network'])->name('federation.network');
+    Route::get('/federation/join', [FederationController::class, 'joinForm'])->name('federation.join');
+    Route::post('/federation/join', [FederationController::class, 'join'])->middleware('throttle:5,1')->name('federation.join.submit');
 });
 Route::middleware(ServeDiscovery::class)->prefix('discover')->name('discover.')->group(function () {
     Route::get('/', [DiscoverController::class, 'home'])->name('home');
@@ -626,6 +632,12 @@ Route::middleware(['auth', 'active'])->group(function () {
             Route::post('/peers/{peer}/test', [FederationController::class, 'testPeer'])->name('peers.test');
             Route::post('/peers/{peer}/clear-pin', [FederationController::class, 'clearPin'])->name('peers.clear-pin');
             Route::post('/peers/{peer}/harvest', [FederationController::class, 'harvest'])->name('peers.harvest');
+            Route::post('/peers/{peer}/probe', [FederationController::class, 'probe'])->name('peers.probe');
+            Route::post('/probe', [FederationController::class, 'probe'])->name('probe-all');
+            Route::post('/syncs', [FederationController::class, 'saveSync'])->name('syncs.store');
+            Route::post('/syncs/{sync}', [FederationController::class, 'saveSync'])->whereUuid('sync')->name('syncs.update');
+            Route::post('/syncs/{sync}/run', [FederationController::class, 'runSync'])->whereUuid('sync')->name('syncs.run');
+            Route::post('/joins/{join}/{decision}', [FederationController::class, 'decideJoin'])->whereUuid('join')->whereIn('decision', ['approve', 'decline'])->name('joins.decide');
             Route::post('/members', [FederationController::class, 'saveMember'])->name('members.store');
             Route::post('/members/{member}', [FederationController::class, 'saveMember'])->whereUuid('member')->name('members.update');
             Route::post('/union/publish', [FederationController::class, 'publishUnion'])->name('union.publish');

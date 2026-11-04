@@ -1,0 +1,30 @@
+# OpenRiC Workspace - OpenRiC Workspace Vocabulary Conflict Rules.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Which wins when a concept taken in from a peer is one the institution has already (Heratio's federation_vocab_sync.conflict_resolution).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/vocabulary-conflict-rule/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Vocabulary Conflict Rules"@en ;
+    dcterms:description "Which wins when a concept taken in from a peer is one the institution has already (Heratio's federation_vocab_sync.conflict_resolution)."@en ;
+    dcterms:issued "2026-11-04"^^xsd:date ;
+    skos:hasTopConcept v:prefer-local, v:prefer-remote .
+
+v:prefer-local a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Keep ours"@en, "Behou ons s'n"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's federation with its peers, as Heratio's ahg-federation keeps it."@en ;
+    skos:definition "A concept the institution has stays as it is; only new concepts come in."@en .
+
+v:prefer-remote a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Take theirs"@en, "Neem hulle s'n"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's federation with its peers, as Heratio's ahg-federation keeps it."@en ;
+    skos:definition "A concept the institution has takes the peer's labels and notes."@en .

@@ -1,0 +1,44 @@
+# OpenRiC Workspace - OpenRiC Workspace Federation Trust Levels.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# How far an institution trusts a federation peer (Heratio's federation_trust_level).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/federation-trust-level/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Federation Trust Levels"@en ;
+    dcterms:description "How far an institution trusts a federation peer (Heratio's federation_trust_level)."@en ;
+    dcterms:issued "2026-11-04"^^xsd:date ;
+    skos:hasTopConcept v:untrusted, v:basic, v:trusted, v:verified .
+
+v:untrusted a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Untrusted"@en, "Onvertroud"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's federation with its peers, as Heratio's ahg-federation keeps it."@en ;
+    skos:definition "Not asked at all."@en .
+
+v:basic a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Basic"@en, "Basies"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's federation with its peers, as Heratio's ahg-federation keeps it."@en ;
+    skos:definition "Asked; what it answers is shown as unverified unless signed."@en .
+
+v:trusted a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Trusted"@en, "Vertrou"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's federation with its peers, as Heratio's ahg-federation keeps it."@en ;
+    skos:definition "Asked, and its answers shown beside the institution's own."@en .
+
+v:verified a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Verified"@en, "Geverifieer"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's federation with its peers, as Heratio's ahg-federation keeps it."@en ;
+    skos:definition "Trusted, and expected to sign every answer: an unsigned one is dropped."@en .

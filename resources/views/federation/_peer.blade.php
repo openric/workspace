@@ -21,3 +21,9 @@
 <label for="{{ $x }}-rest">{{ __('DSpace REST address (empty: /server/api under its address)') }}</label><input id="{{ $x }}-rest" name="rest_base_url" value="{{ $p?->config['rest_base_url'] ?? '' }}">
 <label for="{{ $x }}-tpl">{{ __('Alma record address, with {mms_id}') }}</label><input id="{{ $x }}-tpl" name="record_url_template" value="{{ $p?->config['record_url_template'] ?? '' }}">
 </details>
+<details><summary>{{ __('Governance') }}</summary>
+<label for="{{ $x }}-trust">{{ __('Trust') }}</label><select id="{{ $x }}-trust" name="trust_level"><option value="">{{ __('Not set') }}</option>@foreach($trustLevels as $t)<option value="{{ $t->notation }}" @selected($p?->trust_level_id === $t->id)>{{ $t->label($lang) }}</option>@endforeach</select>
+<label for="{{ $x }}-rate">{{ __('Ask it at most once every so many seconds') }}</label><input id="{{ $x }}-rate" name="rate_limit_seconds" type="number" min="1" value="{{ $p?->rate_limit_seconds }}">
+<fieldset><legend>{{ __('It may be asked for (none ticked: all it offers)') }}</legend>
+@foreach(['search' => __('Search'), 'union' => __('Union catalogue'), 'vocabularies' => __('Vocabularies')] as $surface => $label)<label style="display: inline-block; margin-right: 1rem"><input type="checkbox" name="allowed_surfaces[]" value="{{ $surface }}" @checked(in_array($surface, (array) $p?->allowed_surfaces, true))> {{ $label }}</label>@endforeach</fieldset>
+</details>

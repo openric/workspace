@@ -4,9 +4,11 @@ use App\AccessRequests\AccessRequestService;
 use App\Dedupe\Duplicates;
 use App\Description\AgreementService;
 use App\Description\WorkflowSlaService;
+use App\Federation\Discovery;
 use App\Federation\FederatedSearch;
 use App\Federation\Harvest;
 use App\Federation\UnionCatalogue;
+use App\Federation\VocabularySync;
 use App\Files\FileStore;
 use App\Files\MediaDuration;
 use App\Fixity\Fixity;
@@ -212,6 +214,17 @@ Artisan::command('workspace:federation:union', function (UnionCatalogue $union) 
     }
 })->purpose('Put each institution\'s records into its union catalogue and fetch its members\' (Heratio\'s UnionPublishCommand)');
 Schedule::command('workspace:federation:union')->dailyAt('02:30')->withoutOverlapping(240);
+// Governance and vocabulary sync (roadmap phase 16c): peers' protocol descriptors probed and vocabularies synced, each night.
+Artisan::command('workspace:federation:discover', function (Discovery $discovery) {
+    foreach ($discovery->probeAll() as $peer => $status) {
+        $this->line("$peer: $status");
+    }
+})->purpose('Probe every Workspace and Heratio peer\'s protocol descriptor (Heratio\'s PeerDiscoverCommand)');
+Schedule::command('workspace:federation:discover')->dailyAt('03:15');
+Artisan::command('workspace:federation:vocabularies', function (VocabularySync $sync) {
+    $this->info($sync->runDue().' vocabularies synced.');
+})->purpose('Take in the peers\' vocabularies whose sync interval has passed (Heratio\'s VocabSyncCommand)');
+Schedule::command('workspace:federation:vocabularies')->hourly()->withoutOverlapping(120);
 // Archivematica (roadmap phase 15d): transfers followed to their AIP every five minutes, DIPs fetched each hour, and a ping.
 Artisan::command('workspace:archivematica:poll', function (Transfers $transfers) {
     $this->info($transfers->poll().' transfers looked at.');
