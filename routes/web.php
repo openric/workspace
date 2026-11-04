@@ -39,6 +39,7 @@ use App\Http\Controllers\FavouritesController;
 use App\Http\Controllers\FederationController;
 use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\FormatController;
+use App\Http\Controllers\HelpController;
 use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\IdentifierController;
 use App\Http\Controllers\IiifAuthController;
@@ -218,6 +219,21 @@ Route::middleware([ServeDiscovery::class, 'throttle:120,1'])->group(function () 
     Route::get('/open-data/network', [FederationController::class, 'network'])->name('federation.network');
     Route::get('/federation/join', [FederationController::class, 'joinForm'])->name('federation.join');
     Route::post('/federation/join', [FederationController::class, 'join'])->middleware('throttle:5,1')->name('federation.join.submit');
+});
+// The Help Center (roadmap phase 20b): the public's guides, and the staff's too once signed in.
+Route::middleware('throttle:120,1')->prefix('help')->name('help.')->group(function () {
+    Route::get('/', [HelpController::class, 'index'])->name('index');
+    Route::get('/search', [HelpController::class, 'search'])->name('search');
+    Route::get('/context', [HelpController::class, 'context'])->name('context');
+    Route::get('/system-map', [HelpController::class, 'systemMap'])->name('system-map');
+    Route::get('/system-breakdown', [HelpController::class, 'systemBreakdown'])->name('system-breakdown');
+    Route::get('/category/{category}', [HelpController::class, 'category'])->where('category', '[a-z0-9-]+')->name('category');
+    Route::get('/article/{slug}', [HelpController::class, 'article'])->where('slug', '[a-z0-9][a-z0-9-]*')->name('article');
+    Route::middleware(['auth', 'active', 'can:'.Vocab::permission('manage-institution')])->where(['slug' => '[a-z0-9][a-z0-9-]*'])->group(function () {
+        Route::get('/article/{slug}/links', [HelpController::class, 'links'])->name('links');
+        Route::post('/article/{slug}/links', [HelpController::class, 'addLink'])->name('links.store');
+        Route::delete('/article/{slug}/links/{target}', [HelpController::class, 'removeLink'])->whereUuid('target')->name('links.destroy');
+    });
 });
 // The institution's own pages on its public site (roadmap phase 20a): static pages, articles and landing pages.
 Route::middleware([ServeDiscovery::class, 'throttle:120,1'])->group(function () {

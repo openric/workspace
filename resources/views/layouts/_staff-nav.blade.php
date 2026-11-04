@@ -118,6 +118,7 @@
             'Reports' => '<path d="M4 20V10M10 20V4M16 20v-7M2 20h20"/>',
             'Research' => '<path d="M2 5c3-1.5 7-1.5 10 1 3-2.5 7-2.5 10-1v14c-3-1.5-7-1.5-10 1-3-2.5-7-2.5-10-1z"/><path d="M12 6v14"/>',
             'Public site' => '<path d="M3 5h18v14H3z"/><path d="M3 9h18M8 13h8M8 16h5"/>',
+            'Help' => '<circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14"/><path d="M12 17.5v.5"/>',
             'Admin' => '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/>',
             'Public catalogue' => '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3.5 3.5 3.5 14.5 0 18M12 3c-3.5 3.5-3.5 14.5 0 18"/>',
         ];
@@ -145,6 +146,8 @@
                 </details></li>
             @endforeach
             <li><a href="{{ route('discover.home') }}">{{ $icon('Public catalogue') }}{{ __('Public catalogue') }}</a></li>
+            {{-- Help for the screen in hand, in a new tab (Heratio's contextual help; phase 20b). --}}
+            <li><a href="{{ route('help.context', ['route' => request()->route()?->getName()]) }}" target="_blank" rel="noopener" aria-label="{{ __('Help for this page (opens in a new tab)') }}">{{ $icon('Help') }}{{ __('Help') }}</a></li>
         </ul>
     </nav>
     <script>

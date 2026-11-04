@@ -62,7 +62,7 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-gis` | 280 | V0.1 candidate | Covered | 22c | `ahgGISPlugin` | Places have coordinates and containment; places within a box or radius as GeoJSON from v0.0.108 (ADR 0020) |
 | `ahg-graphql` | 764 | later: V1.0+ | Covered | 22c | `ahgGraphQLPlugin` | Read-only GraphQL over what the public may read, from v0.0.108 (ADR 0020) |
 | `ahg-harris-matrix` | 1343 | out: GLAM sector | Planned | 21 | none |  |
-| `ahg-help` | 5771 | later: V1.0+ | Planned | 20 | `ahgHelpPlugin` |  |
+| `ahg-help` | 5771 | later: V1.0+ | Done | 20b | `ahgHelpPlugin` | The Help Center: guides from Markdown with search, categories, sections, links, help in context, the system map and breakdown, from v0.0.124; 73 guides now, each phase adding its own (ADR 0024) |
 | `ahg-heritage-manage` | 12679 | V0.1 candidate | Planned | 21 | `ahgHeritagePlugin`, `ahgHeritageAccountingPlugin` | Heritage asset register and heritage accounting, with the museum domain |
 | `ahg-icip` | 6793 | later: jurisdiction | Partial | 18 | `ahgICIPPlugin` | Traditional Knowledge and Biocultural labels (v0.0.59); the rest of ICIP in phase 18 |
 | `ahg-iiif-collection` | 8745 | out: GLAM sector | Partial | 14 | `ahgIiifPlugin` | Presentation 3 manifests (PSIS's manifest, Heratio's audio and video canvases), fonds collections, curated collections, Change Discovery, Content State, the Mirador viewer and the IIIF-ready gate from v0.0.87 (14a, ADR 0014); Content Search 2.0, Auth Flow 2.0, saved viewer layouts and validation from v0.0.88 (14b); clearance levels on the probe from v0.0.101 (18c); sound and video lengths read by ffprobe and their viewing copies (Heratio's MediaDerivativeService) from v0.0.102; NER annotations in phase 17, 3D reports in phase 21 |
@@ -1378,4 +1378,24 @@ Added on 4 November 2026 with 20a.
 | Block types: rows of 1, 2 and 3 columns, hero banner, text, image carousel, search box, statistics, browse panels, recent items, holdings list, featured items, repository spotlight, map, header, footer, quick links, copyright bar, spacer, divider | The same 20 | Same |
 | Block types: GLAM browser, 2 column row public | Not carried: phase 21's other domains, and the same as the 2 column row | Not carried |
 | `BlockDataResolver` | `BlockData`, from what the public catalogue may read | Same |
+
+### Help (`ahg-help`)
+
+Added on 4 November 2026 with 20b.
+
+| Heratio field | Workspace | Status |
+|---|---|---|
+| `help_article`: `slug`, `title`, `category`, `subcategory`, `source_file`, `body_markdown`, `body_html`, `body_text`, `toc_json`, `word_count`, `sort_order`, `tags` | `help_articles`: the same | Same, from v0.0.124 |
+| `is_published` | A guide is published by its file being in `docs/help` | Modelled |
+| `related_plugin` | `heratio_source`, the Heratio guide it was adapted from | Modelled |
+| Admin categories (`Technical`, `Plugin Reference`) hidden from guests | `staff_only`, by each guide's header | Modelled |
+| `help_section`: `heading`, `anchor`, `level`, `body_text`, `sort_order` | `help_sections`: the same | Same |
+| `help_article_link`: `article_id`, `related_article_id`, `source` (markdown, manual) | `help_article_links`, with `manual` | Same |
+| FULLTEXT search of articles and sections | PostgreSQL full-text search, ranked, with highlighted snippets | Same |
+| `config/help-context.php`: routes and paths to slugs | Each guide's `routes` header, exact or by pattern | Modelled |
+| `ahg:help-ingest`, `ahg:help-ingest-all` | `workspace:help:ingest`, and read in by itself when the files change | Same |
+| System map (`system-map.php`, Cytoscape) | `resources/help/system-map.php`, as a nested list | Modelled |
+| System breakdown (`system-breakdown.php`, Cytoscape) | `resources/help/system-breakdown.php`, as a nested list | Modelled |
+| Manage links (`/help/article/{slug}/links`) | The same | Same |
+| Heratio's 494 articles | 73 adapted for the Workspace's areas; each later phase adds its own | Partial |
 

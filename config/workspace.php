@@ -218,6 +218,9 @@ return [
         'timeout_seconds' => (int) env('WORKSPACE_SPARQL_TIMEOUT', 15),
     ],
 
+    // The Help Center's guides (roadmap phase 20b): Markdown files read in whenever they change.
+    'help_directory' => env('WORKSPACE_HELP_DIRECTORY', ''),
+
     // ResourceSync (phase 16e), as Heratio's ahg-resourcesync: the change list's horizon in days, and the size of a page.
     'resourcesync' => ['changelist_days' => (int) env('RESOURCESYNC_CHANGELIST_DAYS', 30), 'page_size' => (int) env('RESOURCESYNC_PAGE_SIZE', 1000)],
 

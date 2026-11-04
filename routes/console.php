@@ -13,6 +13,7 @@ use App\Federation\VocabularySync;
 use App\Files\FileStore;
 use App\Files\MediaDuration;
 use App\Fixity\Fixity;
+use App\Help\HelpLibrary;
 use App\Ingest\WatchFolders;
 use App\Jurisdiction\ExportPermits;
 use App\Jurisdiction\Naz;
@@ -222,6 +223,10 @@ Artisan::command('workspace:federation:discover', function (Discovery $discovery
     }
 })->purpose('Probe every Workspace and Heratio peer\'s protocol descriptor (Heratio\'s PeerDiscoverCommand)');
 Schedule::command('workspace:federation:discover')->dailyAt('03:15');
+Artisan::command('workspace:help:ingest', function (HelpLibrary $library) {
+    $counts = $library->ingest();
+    $this->info("{$counts['articles']} guides read in, {$counts['links']} links between them.");
+})->purpose('Read the Help Center\'s guides in docs/help in again (Heratio\'s ahg:help-ingest-all); it is done by itself when they change');
 Artisan::command('workspace:sparql:sync {--full : put everything published and drop what is not}', function (TripleStore $store) {
     if (! TripleStore::configured()) {
         $this->warn(__('No SPARQL triple store is set up (WORKSPACE_SPARQL_URL).'));

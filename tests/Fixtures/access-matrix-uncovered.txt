@@ -90,3 +90,7 @@ accounts.permissions
 accounts.permissions.update
 # Phase 12a: a failed background job belongs to the installation, not an institution; OperationsController::failedJob lets only operators act on it (OperationsTest).
 operations.failed-job
+# Phase 20b: a help guide is the installation's, named by its slug, not an object of an institution.
+help.links
+help.links.store
+help.links.destroy

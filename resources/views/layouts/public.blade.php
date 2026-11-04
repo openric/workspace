@@ -51,15 +51,14 @@
     @yield('content')
 </main>
 <footer style="max-width: 60rem; margin: 2rem auto; padding: 1rem; border-top: 1px solid var(--line)" class="meta">
-    {{-- The institution's about, privacy and terms pages, and its articles, where it has them (phase 20a). --}}
+    {{-- The institution's about, privacy and terms pages and its articles, where it has them (phase 20a), and the Help Center (phase 20b). --}}
     @php($sitePages = app(\App\Site\StaticPages::class)->footer($institution))
     @php($hasArticles = app(\App\Site\Articles::class)->published($institution)->exists())
-    @if($sitePages || $hasArticles)
         <nav aria-label="{{ __('About the institution') }}" style="margin-bottom: .6rem; display: flex; gap: 1rem; flex-wrap: wrap">
             @foreach($sitePages as $sitePage)<a href="{{ route('site.'.$sitePage->slug) }}">{{ $sitePage->translation(\App\Support\Vocab::languages())?->title }}</a>@endforeach
             @if($hasArticles)<a href="{{ route('site.articles-public') }}">{{ __('Articles') }}</a>@endif
+            <a href="{{ route('help.index') }}">{{ __('Help') }}</a>
         </nav>
-    @endif
     {!! __('Described in RiC (Records in Contexts). The data is open through the :api and :oai.', ['api' => '<a href="'.e(route('api.service')).'">'.e(__('OpenRiC API')).'</a>', 'oai' => '<a href="'.e(route('api.oai')).'?verb=Identify">OAI-PMH</a>']) !!}
 </footer>
 </body>

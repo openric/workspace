@@ -99,3 +99,47 @@ What was changed from Heratio:
     - a hidden block left off, and a page not shown answering 404, with the catalogue's own home back;
   - dashboards: one made by a contributor, refused to an editor, and not served as a public page.
 - `tests/Feature/AccessMatrixTest.php` builds a static page, two linked articles with a file and a comment, and a landing page with a block. Every new address refuses another institution's administrator and an account with no role.
+
+## 20b: the Help Center
+
+On 4 November 2026, once the size of Heratio's help library was known (494 articles, 235 of them user guides), Dr Johan Pieterse chose to adapt the core guides now and to add each later phase's guides with that phase ("Core guides in tranches (Recommended)").
+
+**The engine**, after Heratio's `HelpArticleService`, `IngestHelpArticleCommand`, `IngestAllHelpCommand` and `HelpController`:
+
+- **Where guides live.** Each guide is a Markdown file in `docs/help` that ships with the Workspace, under a short header: its title, category, order, whether it is for staff, the screens it explains, and the Heratio guide it was adapted from.
+- **Reading them in.** Each guide is read into an article, its HTML escaped, its headings given anchors and kept as sections, its words counted. Articles and sections are searched by PostgreSQL full-text search, where Heratio uses MySQL's.
+- **The pages.** The Help Center shows the categories, a category's guides, a guide with its contents, related guides and the guides before and after it, and a search that gives whole guides and sections.
+- **Links.** A guide is linked to every guide its text links to, read from both ends. An administrator can link two guides by hand, and that link is kept when the guides are read in again.
+- **Help in context.** The **Help** link of the staff menu opens, in a new tab, the guide whose header names the screen's route exactly, else the one with the longest matching pattern, else the Help Center (Heratio's contextual help).
+- **The system map and breakdown**, as Heratio has them: how a record moves through the Workspace, three levels deep, and what it does for each kind of entity, four levels deep. Both are data in `resources/help`, written for the Workspace. A node links only to a guide the viewer may open.
+
+What was changed from Heratio:
+
+- **Updating.** The library is read in again whenever its files change, compared by a fingerprint of their names, sizes and times, rather than by a command run after a release. `workspace:help:ingest` does it at once.
+- **Staff guides.** A guide for staff is hidden from the public by its own header, where Heratio hides two whole categories.
+- **The map and breakdown.** They are nested lists any reader and keyboard can follow, rather than Cytoscape diagrams, and they hold the Workspace's own stages and entities.
+- **The help of a public page.** It is the public's guide for that screen; a guide for staff is never offered to a visitor.
+
+**The guides.** 73 guides in 14 categories, from Getting started to the Technical reference, 30 of them for staff. 72 are adapted from Heratio's guides and one, the API reference, from Heratio's API guide. Each was rewritten for the Workspace's screens, routes and RiC terms and checked against its code, not translated sentence by sentence. What Heratio's guide described that the Workspace does not have was left out.
+
+Heratio's related records (a semantic similarity search) and its natural-language discovery search are AI and go to phase 17. The relations guide takes their place, from Heratio's RiC guide.
+
+The guides and the map are in English. The screens of the Help Center are in English and Afrikaans, and a guide can be added in another language later as a guide of its own.
+
+### Not carried in 20b
+
+- Heratio's guides for areas the Workspace does not have: GLAM sectors other than archives (phase 21), AI (phase 17), the marketplace, 3D capture and multi-tenancy. Each later phase adds its guides.
+- Editing guides in the browser, which Heratio does not do either: guides are files, kept and released with the code.
+
+### Evidence (20b)
+
+- `tests/Feature/HelpCenterTest.php`:
+  - three guides read in from their headers, with:
+    - a guide's HTML escaped and its sections anchored;
+    - a guide for staff kept from the public in the guide, its category, the search and the related list, and shown once signed in;
+    - a search finding a section;
+  - the library following its files: a changed guide is read in again as the same article, a removed file takes its guide, and a link by hand is kept;
+  - help in context finding the guide by an exact route and by a pattern, falling back to the Help Center, and the staff menu offering it;
+  - linking guides by hand by an administrator, refused to a visitor;
+  - the system map and breakdown shown, linking only to guides that exist;
+  - the guides that ship: every one read in, in a known category, with a title, plain hyphens only, every link between them and every node of the map and breakdown naming a guide that exists, and the guide for units of description found for `records.show`.
