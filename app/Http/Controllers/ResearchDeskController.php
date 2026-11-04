@@ -32,6 +32,7 @@ use App\Research\RightsPolicies;
 use App\Support\Vocab;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use InvalidArgumentException;
 
@@ -149,7 +150,7 @@ class ResearchDeskController extends Controller
         $user = $this->mustRun($request);
         abort_if($template && $template->institution_id !== $user->institution_id, 404);
         $data = $request->validate(['name' => ['required', 'string', 'max:100'], 'code' => ['required', 'string', 'max:50'], 'template_type' => ['nullable', 'string', 'max:64'],
-            'description' => ['nullable', 'string', 'max:2000'], 'body' => ['required', 'string', 'max:20000'], 'page_size' => ['nullable', 'string', 'max:10'], 'orientation' => ['nullable', 'string', 'max:10'],
+            'description' => ['nullable', 'string', 'max:2000'], 'body' => ['required', 'string', 'max:20000'], 'page_size' => ['nullable', Rule::in(Vocab::notations('print-page-size'))], 'orientation' => ['nullable', Rule::in(Vocab::notations('page-orientation'))],
             'margin_mm' => ['nullable', 'integer'], 'copies_default' => ['nullable', 'integer'], 'is_default' => ['nullable', 'boolean'], 'is_active' => ['nullable', 'boolean']]);
 
         return $this->attempt(fn () => $this->documents->savePrintTemplate($user, $data, $template), __('Saved.'));

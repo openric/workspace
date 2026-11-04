@@ -33,8 +33,9 @@ class ProposalReviewController extends Controller
     {
         $user = $request->user();
         $filters = $request->validate([
-            'status' => ['nullable', Rule::in(['proposed', 'accepted', 'rejected'])],
-            'kind' => ['nullable', Rule::in(['agent', 'place', 'date', 'value', 'transcript', 'relation'])],
+            'status' => ['nullable', Rule::in(Vocab::notations('assertion-status'))],
+            // A kind of proposal, or relation, for the relation assertions shown with them.
+            'kind' => ['nullable', Rule::in([...Vocab::notations('proposal-kind'), 'relation'])],
             'record' => ['nullable', 'uuid'],
         ]);
         $status = $filters['status'] ?? 'proposed';

@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html lang="{{ app()->getLocale() }}"><head><meta charset="utf-8"><title>{{ __('Call slips') }}</title>
 <style>body { font-family: Arial, sans-serif; font-size: 11pt } .slip { border: 1px solid #000; padding: 8px; margin: 0 0 10px; page-break-inside: avoid } dt { font-weight: bold; float: left; width: 9em } dd { margin-left: 9.5em }
-@if($template) @page { size: {{ $template->page_size }} {{ $template->orientation }}; margin: {{ $template->margin_mm }}mm } @endif</style></head>
+@if($template) @page { size: {{ $template->cssPageSize() }}; margin: {{ $template->margin_mm }}mm } @endif</style></head>
 <body onload="window.print()">@foreach($requests as $r)
     @php($where = collect([$r->location_code, $r->shelf_location, $r->box_number ? __('box :n', ['n' => $r->box_number]) : null, $r->folder_number ? __('folder :n', ['n' => $r->folder_number]) : null])->filter()->join(' · ') ?: '-')
     @if($template)

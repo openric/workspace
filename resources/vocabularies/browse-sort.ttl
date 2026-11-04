@@ -1,0 +1,51 @@
+# OpenRiC Workspace - OpenRiC Workspace Browse Sorts.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What the browse list is sorted by (Heratio's sort_field).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/browse-sort/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Browse Sorts"@en ;
+    dcterms:description "What the browse list is sorted by (Heratio's sort_field)."@en ;
+    dcterms:issued "2026-11-04"^^xsd:date ;
+    skos:hasTopConcept v:title, v:identifier, v:updated, v:start-date, v:end-date .
+
+v:title a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Title"@en, "Titel"@af ;
+    skos:scopeNote "Not a RiC-O term: how the Workspace lists units of description when browsing, as Heratio's ahg-display browse settings do; not exported."@en ;
+    skos:definition "The authorised title."@en .
+
+v:identifier a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Reference code"@en, "Verwysingskode"@af ;
+    skos:scopeNote "Not a RiC-O term: how the Workspace lists units of description when browsing, as Heratio's ahg-display browse settings do; not exported."@en ;
+    skos:definition "The unit's own identifier."@en .
+
+v:updated a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Last changed"@en, "Laas verander"@af ;
+    skos:scopeNote "Not a RiC-O term: how the Workspace lists units of description when browsing, as Heratio's ahg-display browse settings do; not exported."@en ;
+    skos:definition "When the description was last changed."@en .
+
+v:start-date a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Earliest date"@en, "Vroegste datum"@af ;
+    skos:scopeNote "Not a RiC-O term: how the Workspace lists units of description when browsing, as Heratio's ahg-display browse settings do; not exported."@en ;
+    skos:definition "The earliest of its dates."@en .
+
+v:end-date a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Latest date"@en, "Jongste datum"@af ;
+    skos:scopeNote "Not a RiC-O term: how the Workspace lists units of description when browsing, as Heratio's ahg-display browse settings do; not exported."@en ;
+    skos:definition "The latest of its dates."@en .

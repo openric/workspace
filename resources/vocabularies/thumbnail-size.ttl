@@ -1,0 +1,44 @@
+# OpenRiC Workspace - OpenRiC Workspace Thumbnail Sizes.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# How large a unit's images are shown under a display profile and when browsing (Heratio's display_profile.thumbnail_size).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/thumbnail-size/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Thumbnail Sizes"@en ;
+    dcterms:description "How large a unit's images are shown under a display profile and when browsing (Heratio's display_profile.thumbnail_size)."@en ;
+    dcterms:issued "2026-11-04"^^xsd:date ;
+    skos:hasTopConcept v:none, v:small, v:medium, v:large .
+
+v:none a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "None"@en, "Geen"@af ;
+    skos:scopeNote "Not a RiC-O term: how the Workspace shows a description to the public under a display profile, as Heratio's ahg-display does; not exported."@en ;
+    skos:definition "No image is shown."@en .
+
+v:small a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Small"@en, "Klein"@af ;
+    skos:scopeNote "Not a RiC-O term: how the Workspace shows a description to the public under a display profile, as Heratio's ahg-display does; not exported."@en ;
+    skos:definition "About 100 pixels wide."@en .
+
+v:medium a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Medium"@en, "Medium"@af ;
+    skos:scopeNote "Not a RiC-O term: how the Workspace shows a description to the public under a display profile, as Heratio's ahg-display does; not exported."@en ;
+    skos:definition "About 200 pixels wide."@en .
+
+v:large a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Large"@en, "Groot"@af ;
+    skos:scopeNote "Not a RiC-O term: how the Workspace shows a description to the public under a display profile, as Heratio's ahg-display does; not exported."@en ;
+    skos:definition "About 400 pixels wide."@en .

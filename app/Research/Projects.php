@@ -264,7 +264,7 @@ class Projects
                 return [$record->id, $title ?: EntityKinds::label($record)];
             })(),
             'external-link' => filter_var($data['external_url'] ?? '', FILTER_VALIDATE_URL) && preg_match('#^https?://#i', $data['external_url']) && $title !== ''
-                ? [$fields['external_url'], $fields['link_type_id']] = [$data['external_url'], ($data['link_type'] ?? '') !== '' ? $this->concept(Vocab::BASE.'link-type/', $data['link_type']) : null]
+                ? [$fields['external_url'], $fields['link_type_id']] = [$data['external_url'], ($data['link_type'] ?? '') !== '' ? (Concept::notated(Vocab::BASE.'link-type/', $data['link_type'])?->id ?? throw new InvalidArgumentException(__(':value is not in the list', ['value' => $data['link_type']]))) : null]
                 : throw new InvalidArgumentException(__('Give a web address and a title.')),
             'document' => $upload ? [$fields['file_id'], $title] = [$this->files->keep($upload, $project->institution_id, $actor)->id, $title ?: mb_substr($upload->getClientOriginalName(), 0, 255)]
                 : throw new InvalidArgumentException(__('Choose a file.')),
@@ -592,6 +592,6 @@ class Projects
 
     private function concept(string $scheme, string $notation): string
     {
-        return Concept::where('iri', $scheme.$notation)->value('id') ?? throw new InvalidArgumentException(__(':value is not in the list', ['value' => $notation]));
+        return Concept::notated($scheme, $notation)?->id ?? throw new InvalidArgumentException(__(':value is not in the list', ['value' => $notation]));
     }
 }

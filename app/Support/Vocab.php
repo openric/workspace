@@ -10,6 +10,8 @@
 
 namespace App\Support;
 
+use App\Models\Concept;
+
 final class Vocab
 {
     public const BASE = 'https://workspace.openric.org/vocab/';
@@ -78,6 +80,17 @@ final class Vocab
     public static function element(string $notation): string
     {
         return self::DESCRIPTION_ELEMENTS.$notation;
+    }
+
+    /**
+     * The notations of a bundled vocabulary's current concepts, for checking what a form sends against the vocabulary
+     * itself rather than a copy of it (roadmap phase 20d).
+     *
+     * @return list<string>
+     */
+    public static function notations(string $vocabulary): array
+    {
+        return Concept::choices(self::BASE.$vocabulary.'/')->pluck('notation')->all();
     }
 
     public static function valueState(string $notation): string

@@ -8,6 +8,7 @@
 // requires a signed-in account,
 // and each action that needs more names its permission IRI.
 
+use App\Help\FunctionsDocs;
 use App\Http\Controllers\AccessionAppraisalController;
 use App\Http\Controllers\AccessionController;
 use App\Http\Controllers\AccessionIntakeController;
@@ -29,7 +30,9 @@ use App\Http\Controllers\CustomFieldController;
 use App\Http\Controllers\DateController;
 use App\Http\Controllers\DeletionController;
 use App\Http\Controllers\DiscoverController;
+use App\Http\Controllers\DisplayController;
 use App\Http\Controllers\DoiController;
+use App\Http\Controllers\DropdownController;
 use App\Http\Controllers\DuplicateController;
 use App\Http\Controllers\EmailBounceController;
 use App\Http\Controllers\EmailController;
@@ -40,6 +43,7 @@ use App\Http\Controllers\FavouritesController;
 use App\Http\Controllers\FederationController;
 use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\FormatController;
+use App\Http\Controllers\FunctionsDocsController;
 use App\Http\Controllers\HelpController;
 use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\IdentifierController;
@@ -385,6 +389,7 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/', [RecordController::class, 'index'])->name('index');
         Route::get('/new', [RecordController::class, 'create'])->name('create');
         Route::get('/export', [ExportController::class, 'everything'])->name('export-all');
+        Route::post('/browse-settings', [RecordController::class, 'browseSettings'])->name('browse-settings');
         Route::post('/', [RecordController::class, 'store'])->name('store');
         Route::get('/{record}', [RecordController::class, 'show'])->name('show');
         Route::get('/{record}/edit', [RecordController::class, 'edit'])->name('edit');
@@ -677,6 +682,27 @@ Route::middleware(['auth', 'active'])->group(function () {
     // DOIs for units of description at DataCite (roadmap phase 20c): set up by who administers the institution, worked
     // with by who may publish descriptions.
     Route::middleware('can:'.Vocab::permission('manage-institution'))->group(function () {
+        // The code reference, read from the code (roadmap phase 20d).
+        Route::get('/admin/code-reference', [FunctionsDocsController::class, 'index'])->name('functions-docs.index');
+        Route::get('/admin/code-reference/{kind}', [FunctionsDocsController::class, 'show'])->name('functions-docs.kind')->where('kind', implode('|', array_keys(FunctionsDocs::KINDS)));
+        // Display profiles and how staff browse (roadmap phase 20d).
+        Route::prefix('admin/display')->name('display.')->whereUuid('profile')->group(function () {
+            Route::get('/', [DisplayController::class, 'index'])->name('index');
+            Route::post('/browse', [DisplayController::class, 'saveBrowse'])->name('browse');
+            Route::get('/profiles/new', [DisplayController::class, 'edit'])->name('create');
+            Route::post('/profiles', [DisplayController::class, 'save'])->name('store');
+            Route::get('/profiles/{profile}', [DisplayController::class, 'edit'])->name('edit');
+            Route::post('/profiles/{profile}', [DisplayController::class, 'save'])->name('update');
+            Route::post('/profiles/{profile}/delete', [DisplayController::class, 'destroy'])->name('destroy');
+        });
+        // The Dropdown manager: the institution's own take on the bundled vocabularies (roadmap phase 20d).
+        Route::prefix('admin/dropdowns')->name('dropdowns.')->whereUuid(['vocabulary', 'concept'])->group(function () {
+            Route::get('/', [DropdownController::class, 'index'])->name('index');
+            Route::get('/{vocabulary}', [DropdownController::class, 'edit'])->name('edit');
+            Route::post('/{vocabulary}', [DropdownController::class, 'save'])->name('save');
+            Route::post('/{vocabulary}/terms', [DropdownController::class, 'add'])->name('add');
+            Route::post('/{vocabulary}/terms/{concept}/remove', [DropdownController::class, 'remove'])->name('remove');
+        });
         Route::get('/dois/settings', [DoiController::class, 'settings'])->name('dois.settings');
         Route::post('/dois/settings', [DoiController::class, 'saveSettings'])->name('dois.settings.save');
     });

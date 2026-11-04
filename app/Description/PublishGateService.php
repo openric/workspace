@@ -112,7 +112,8 @@ final class PublishGateService
             $passed = $this->check($rule, $record);
             $severity = $rule->severity->notation;
             $status = $passed ? 'passed' : ($severity === 'warning' ? 'warning' : 'failed');
-            PublishGateResult::create(['institution_id' => $record->institution_id, 'record_resource_id' => $record->id, 'rule_id' => $rule->id, 'status' => $status,
+            PublishGateResult::create(['institution_id' => $record->institution_id, 'record_resource_id' => $record->id, 'rule_id' => $rule->id,
+                'outcome_id' => Concept::where('iri', Vocab::BASE.'publish-gate-outcome/'.$status)->value('id'),
                 'details' => $passed ? null : $rule->error_message, 'evaluated_at' => now(), 'evaluated_by_id' => $actor?->id]);
             $results[] = ['rule' => $rule, 'name' => $rule->name, 'status' => $status, 'severity' => $severity, 'message' => $passed ? null : $rule->error_message];
         }
@@ -145,7 +146,7 @@ final class PublishGateService
     /** PSIS's getResultHistory: the latest evaluations of the description. */
     public function history(RecordResource $record, int $limit = 50): Collection
     {
-        return PublishGateResult::where('record_resource_id', $record->id)->with('rule')->orderByDesc('evaluated_at')->limit($limit)->get();
+        return PublishGateResult::where('record_resource_id', $record->id)->with('rule', 'outcome.labels')->orderByDesc('evaluated_at')->limit($limit)->get();
     }
 
     /**

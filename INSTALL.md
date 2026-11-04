@@ -261,6 +261,7 @@ A restore is complete only when `workspace:fixity` reports no failure and `works
 - The public site (phase 20a): static pages, articles and landing pages are written under Public site in the menu, by anyone who may publish descriptions. Their files are kept in the object store like every other. A landing page's map draws OpenStreetMap's tiles, which the visitor's browser fetches from tile.openstreetmap.org.
 - The Help Center (phase 20b) is at `/help`, with its guides in `docs/help`; it reads them in by itself when they change. `WORKSPACE_HELP_DIRECTORY` points it at another folder of guides.
 - DOIs (phase 20c): give the institution's DataCite repository ID, password and prefix under Research, ORCID and DataCite, on the test service first, then set how DOIs are minted under DOIs, Settings. The scheduler sends the queue every five minutes. Nothing is sent to DataCite until the account is given.
+- Lists and display (phase 20d): under Admin, the Dropdown manager words and orders the bundled lists for the institution, and Display sets the public page's profiles by level and how staff browse. Both work with nothing set. Which lists take an institution's own terms is `open_vocabularies` in `config/workspace.php`.
 - ResourceSync is always on, at `/.well-known/resourcesync`. `RESOURCESYNC_CHANGELIST_DAYS` (30) and `RESOURCESYNC_PAGE_SIZE` (1000) change its horizon and page size.
 
 ## Updating

@@ -33,7 +33,7 @@
                 @endphp
                 <li style="display: flex; gap: 1rem; flex-wrap: wrap">
                     @if($thumbnail && app(\App\Description\InstantiationService::class)->deliverable($user, $thumbnail))
-                        <img src="{{ route('files.show', $thumbnail) }}" alt="" width="{{ $thumbnail->width }}" height="{{ $thumbnail->height }}" loading="lazy" style="max-width: 160px; height: auto; border: 1px solid var(--line)">
+                        <img src="{{ route('files.show', $thumbnail) }}" alt="" width="{{ $thumbnail->width }}" height="{{ $thumbnail->height }}" loading="lazy" style="max-width: 160px; height: auto; flex: none; align-self: flex-start; object-fit: contain; border: 1px solid var(--line)">
                     @endif
                     <div style="flex: 1 1 18rem; min-width: 0">
                         <a href="{{ route('instantiations.show', $instantiation) }}"><strong>{{ $instantiation->described('instantiation-title', [app()->getLocale(), 'en']) }}</strong></a>

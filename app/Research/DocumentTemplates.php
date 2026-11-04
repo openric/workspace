@@ -116,8 +116,8 @@ class DocumentTemplates
         }
         $type = $this->concept('print-template-type', (string) ($data['template_type'] ?? 'call-slip'));
         $values = ['name' => mb_substr(trim($data['name']), 0, 100), 'code' => mb_substr($code, 0, 50), 'template_type_id' => $type, 'description' => trim((string) ($data['description'] ?? '')) ?: null,
-            'body' => (string) $data['body'], 'page_size' => in_array($data['page_size'] ?? '', ['A4', 'A5', 'A6', 'Letter'], true) ? $data['page_size'] : 'A4',
-            'orientation' => ($data['orientation'] ?? '') === 'landscape' ? 'landscape' : 'portrait', 'margin_mm' => max(0, min(50, (int) ($data['margin_mm'] ?? 10))),
+            'body' => (string) $data['body'], 'page_size_id' => $this->concept('print-page-size', (string) ($data['page_size'] ?? '') ?: 'a4'),
+            'orientation_id' => $this->concept('page-orientation', (string) ($data['orientation'] ?? '') ?: 'portrait'), 'margin_mm' => max(0, min(50, (int) ($data['margin_mm'] ?? 10))),
             'copies_default' => max(1, min(10, (int) ($data['copies_default'] ?? 1))), 'is_default' => ! empty($data['is_default']), 'is_active' => ! empty($data['is_active'])];
 
         return DB::transaction(fn () => AuditLog::actingAs($actor, function () use ($actor, $template, $values, $type) {

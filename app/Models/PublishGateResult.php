@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['institution_id', 'record_resource_id', 'rule_id', 'status', 'details', 'evaluated_at', 'evaluated_by_id'])]
+#[Fillable(['institution_id', 'record_resource_id', 'rule_id', 'outcome_id', 'details', 'evaluated_at', 'evaluated_by_id'])]
 class PublishGateResult extends Model
 {
     use HasUuids;
@@ -22,6 +22,12 @@ class PublishGateResult extends Model
     protected function casts(): array
     {
         return ['evaluated_at' => 'immutable_datetime'];
+    }
+
+    /** Passed, failed or warning: the publish gate outcome vocabulary (phase 20d). */
+    public function outcome(): BelongsTo
+    {
+        return $this->belongsTo(Concept::class, 'outcome_id');
     }
 
     public function rule(): BelongsTo

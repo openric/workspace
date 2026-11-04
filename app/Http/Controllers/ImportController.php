@@ -64,7 +64,7 @@ class ImportController extends Controller
             'repository' => [Rule::requiredIf(fn () => ImportService::permission((string) $request->input('format')) === 'description'), 'nullable', 'uuid'],
             'parent' => ['nullable', 'uuid'],
             'language' => ['required', 'string', fn ($a, $v, $fail) => Bcp47::valid((string) $v) || $fail(__('Give a BCP 47 language tag, such as en or af.'))],
-            'agent_type' => ['nullable', Rule::in(['person', 'family', 'corporate-body'])],
+            'agent_type' => ['nullable', Rule::in(Vocab::notations('agent-type'))],
             'create_terms' => ['nullable', 'boolean'],
             'match_identifier' => ['nullable', 'boolean'],
             'default_level' => ['nullable', Rule::in(Concept::choices(self::LEVELS)->pluck('notation')->all())],

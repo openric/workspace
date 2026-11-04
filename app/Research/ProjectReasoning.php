@@ -178,6 +178,6 @@ class ProjectReasoning
 
     private function concept(string $vocabulary, string $notation): string
     {
-        return Concept::where('iri', Vocab::BASE.$vocabulary.'/'.$notation)->value('id') ?? throw new InvalidArgumentException(__(':value is not in the list', ['value' => $notation]));
+        return Concept::notated(Vocab::BASE.$vocabulary.'/', $notation)?->id ?? throw new InvalidArgumentException(__(':value is not in the list', ['value' => $notation]));
     }
 }

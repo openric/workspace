@@ -166,7 +166,7 @@ class ReadingRoomController extends Controller
             'filter_room_id' => ['nullable', 'uuid'], 'filter_priority' => ['nullable', 'in:normal,high,rush'], 'sort_field' => ['nullable', 'in:created_at,retrieval_scheduled_for,sla_due_on'],
             'sort_direction' => ['nullable', 'in:asc,desc'], 'is_default' => ['nullable', 'boolean'], 'is_active' => ['nullable', 'boolean']]);
         $fields = ['name' => $data['name'], 'code' => $data['code'] ?? null, 'description' => $data['description'] ?? null,
-            'queue_type_id' => Concept::where('iri', Vocab::BASE.'request-queue-type/'.$data['queue_type'])->value('id') ?? abort(422), 'filter_statuses' => $data['filter_statuses'] ?? ['requested'],
+            'queue_type_id' => Concept::notated(Vocab::BASE.'request-queue-type/', $data['queue_type'])?->id ?? abort(422), 'filter_statuses' => $data['filter_statuses'] ?? ['requested'],
             'filter_room_id' => ReadingRoom::where('institution_id', $institution)->find($data['filter_room_id'] ?? null)?->id, 'filter_priority' => $data['filter_priority'] ?? null,
             'sort_field' => $data['sort_field'] ?? 'created_at', 'sort_direction' => $data['sort_direction'] ?? 'asc', 'is_default' => $request->boolean('is_default'), 'is_active' => $request->boolean('is_active', true)];
         DB::transaction(fn () => AuditLog::actingAs($request->user(), function () use ($queue, $fields, $institution) {
@@ -241,7 +241,7 @@ class ReadingRoomController extends Controller
         abort_unless($room->institution_id === $this->authorise($request), 404);
         $data = $request->validate(['prefix' => ['nullable', 'string', 'max:20'], 'count' => ['required', 'integer', 'min:1', 'max:200'], 'seat_type' => ['required', 'string', 'max:64'],
             'zone' => ['nullable', 'string', 'max:100'], 'has_power' => ['nullable', 'boolean'], 'has_lamp' => ['nullable', 'boolean'], 'has_computer' => ['nullable', 'boolean'], 'has_magnifier' => ['nullable', 'boolean']]);
-        $type = Concept::where('iri', Vocab::BASE.'seat-type/'.$data['seat_type'])->value('id') ?? abort(422);
+        $type = Concept::notated(Vocab::BASE.'seat-type/', $data['seat_type'])?->id ?? abort(422);
         DB::transaction(fn () => AuditLog::actingAs($request->user(), function () use ($room, $data, $type, $request) {
             $next = (int) ReadingRoomSeat::where('reading_room_id', $room->id)->count();
             for ($i = 1; $i <= $data['count']; $i++) {
@@ -292,7 +292,7 @@ class ReadingRoomController extends Controller
             'booking_increment_minutes' => ['required', 'integer', 'min:5', 'max:240'], 'condition' => ['required', 'string', 'max:64'], 'next_maintenance_on' => ['nullable', 'date_format:Y-m-d'],
             'is_available' => ['nullable', 'boolean'], 'notes' => ['nullable', 'string', 'max:2000']]);
         $fields = array_diff_key($data, ['equipment_type' => 1, 'condition' => 1]) + [
-            'equipment_type_id' => Concept::where('iri', Vocab::BASE.'equipment-type/'.$data['equipment_type'])->value('id') ?? abort(422),
+            'equipment_type_id' => Concept::notated(Vocab::BASE.'equipment-type/', $data['equipment_type'])?->id ?? abort(422),
             'condition_id' => Concept::where('iri', Vocab::BASE.'equipment-condition/'.$data['condition'])->value('id') ?? abort(422),
             'requires_training' => $request->boolean('requires_training'), 'is_available' => $request->boolean('is_available', true)];
         DB::transaction(fn () => AuditLog::actingAs($request->user(), fn () => $equipment ? $equipment->update($fields) : ReadingRoomEquipment::create($fields + ['reading_room_id' => $room->id])));

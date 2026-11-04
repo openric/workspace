@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['institution_id', 'name', 'code', 'template_type_id', 'description', 'body', 'page_size', 'orientation', 'margin_mm', 'copies_default', 'is_default', 'is_active', 'created_by_id'])]
+#[Fillable(['institution_id', 'name', 'code', 'template_type_id', 'description', 'body', 'page_size_id', 'orientation_id', 'margin_mm', 'copies_default', 'is_default', 'is_active', 'created_by_id'])]
 class ResearchPrintTemplate extends Model
 {
     use Audited, HasUuids;
@@ -27,5 +27,24 @@ class ResearchPrintTemplate extends Model
     public function templateType(): BelongsTo
     {
         return $this->belongsTo(Concept::class);
+    }
+
+    /** The paper it is set for, from the print page size vocabulary (phase 20d). */
+    public function pageSize(): BelongsTo
+    {
+        return $this->belongsTo(Concept::class, 'page_size_id');
+    }
+
+    public function pageOrientation(): BelongsTo
+    {
+        return $this->belongsTo(Concept::class, 'orientation_id');
+    }
+
+    /** The CSS @page size: the paper in millimetres, the wider side across for landscape. */
+    public function cssPageSize(): string
+    {
+        [$w, $h] = ['a4' => [210, 297], 'a5' => [148, 210], 'a6' => [105, 148], 'letter' => [215.9, 279.4]][$this->pageSize?->notation] ?? [210, 297];
+
+        return $this->pageOrientation?->notation === 'landscape' ? "{$h}mm {$w}mm" : "{$w}mm {$h}mm";
     }
 }

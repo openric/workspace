@@ -14,6 +14,7 @@ namespace App\Models;
 
 use App\Audit\Audited;
 use App\Support\Vocab;
+use App\Vocabulary\Dropdowns;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
@@ -103,10 +104,35 @@ class Concept extends Model
         return $query->whereNull('deprecated_at');
     }
 
-    /** The current concepts of one vocabulary (its IRI), with their labels, in vocabulary order. */
+    /**
+     * A vocabulary's current concepts as a form offers them: the bundled ones and the institution's own, in vocabulary
+     * order, or as the institution ordered them in the Dropdown manager, its default first and the terms it hid left
+     * out (phase 20d). The institution is the signed-in account's, else the public catalogue's; with none, the
+     * vocabulary as it was bundled. Subqueries rather than a join, so a caller's own conditions stay unambiguous.
+     */
     public function scopeChoices(Builder $query, string $vocabularyIri): Builder
     {
-        return $query->whereNull('deprecated_at')->whereHas('vocabulary', fn ($q) => $q->where('iri', $vocabularyIri))->with('labels')->orderBy('id');
+        $institution = Dropdowns::current();
+
+        return $query->whereNull('concepts.deprecated_at')->whereHas('vocabulary', fn ($q) => $q->where('iri', $vocabularyIri))
+            ->where(fn ($q) => $q->whereNull('concepts.institution_id')->when($institution, fn ($q) => $q->orWhere('concepts.institution_id', $institution)))
+            ->when($institution, fn ($q) => $q
+                ->whereNotIn('concepts.id', fn ($s) => $s->select('concept_id')->from('vocabulary_overlays')->where(['institution_id' => $institution, 'hidden' => true]))
+                ->orderByRaw('(SELECT o.is_default FROM vocabulary_overlays o WHERE o.concept_id = concepts.id AND o.institution_id = ?) IS TRUE DESC', [$institution])
+                ->orderByRaw('(SELECT o.sort_order FROM vocabulary_overlays o WHERE o.concept_id = concepts.id AND o.institution_id = ?) ASC NULLS LAST', [$institution]))
+            ->with('labels')->orderBy('concepts.id');
+    }
+
+    /**
+     * The term a form chose by its code: the bundled one, else, in a list the Dropdown manager opened, a current term of
+     * the institution's own (phase 20d). What resolves a code from a form into an open list goes through here.
+     */
+    public static function notated(string $vocabularyIri, string $notation): ?self
+    {
+        $institution = Dropdowns::current();
+
+        return static::where('iri', $vocabularyIri.$notation)->first() ?? ($institution === null ? null : static::where(['institution_id' => $institution, 'notation' => $notation])
+            ->whereNull('deprecated_at')->whereHas('vocabulary', fn ($q) => $q->whereNull('institution_id')->where('iri', $vocabularyIri))->first());
     }
 
     /**
@@ -125,6 +151,10 @@ class Concept extends Model
     /** The label in the first of the given languages that has one, or null. */
     public function label(array $languages): ?string
     {
+        // The institution's own label for it, where it gave one in the Dropdown manager (phase 20d).
+        if (($own = Dropdowns::label($this->id, $languages)) !== null) {
+            return $own;
+        }
         $labels = $this->labels->keyBy('language');
         foreach ($languages as $language) {
             if (isset($labels[$language])) {

@@ -43,11 +43,11 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-dc-manage` | 639 | V0.1 candidate | Covered |  | `ahgDcManagePlugin`, `sfDcPlugin` | Dublin Core export, and the Dublin Core display standard from v0.0.76 |
 | `ahg-dedupe` | 3144 | later: V1.0+ | Covered | 22b | `ahgDedupePlugin` | Rules, scan, review and merge of duplicate descriptions, from v0.0.107 (ADR 0020); authority records and places already had their own duplicates and merge |
 | `ahg-discovery` | 5836 | V0.1 candidate | Covered |  | `ahgDiscoveryPlugin` | Public catalogue, relationship graph, OAI-PMH |
-| `ahg-display` | 10111 | V0.1 candidate | Partial | 20 | `ahgDisplayPlugin` | Public catalogue display; display profiles later |
+| `ahg-display` | 10111 | V0.1 candidate | Done | 20d | `ahgDisplayPlugin` | The archival part: display profiles by level of description (elements, order, labels, tree, pictures, actions) on the public page; browse settings for the institution and each account (view, sort and direction, page size, images); sorting by earliest and latest date; print and CSV of the browse list, from v0.0.126 (ADR 0024). The museum, library and gallery collection types are phase 21 |
 | `ahg-doi` | 0 | later: V1.0+ | Done | 20c | none | Its tables (`ahg_doi`, `ahg_doi_config`, `ahg_doi_queue`, `ahg_doi_log`) are carried with `ahg-doi-manage`, from v0.0.125 |
 | `ahg-doi-manage` | 4884 | later: V1.0+ | Done | 20c | `ahgDoiPlugin` | DOIs for units of description at DataCite: minting, drafts, updates, verification, hiding, the queue, minting on publish, batches, funding, usage events and the report, from v0.0.125 (ADR 0024) |
 | `ahg-donor-manage` | 3241 | later: V1.0+ | Partial | 9 | `ahgDonorAgreementPlugin`, `ahgDonorManagePlugin` | Donors as authority records with contact points, and the donor list, from v0.0.77 (9a); donor agreements with their rights, restrictions, reminders and documents from v0.0.78 (9b) |
-| `ahg-dropdown-manage` | 1744 | V0.1 candidate | Covered |  | none | Every list is a SKOS vocabulary, editable |
+| `ahg-dropdown-manage` | 1744 | V0.1 candidate | Done | 20d | none | Every list is a bundled SKOS vocabulary; an institution words, orders and defaults any of them for itself, and adds and hides terms in the open ones, from v0.0.126 (ADR 0024). Before 20d this row said the lists were editable, which they were not |
 | `ahg-exhibition` | 26806 | out: GLAM sector | Planned | 21 | `ahgExhibitionPlugin` |  |
 | `ahg-export` | 1256 | V0.1 candidate | Covered |  | `ahgExportPlugin` | EAD, Dublin Core, MODS, CSV and RiC-O export |
 | `ahg-extended-rights` | 7869 | V0.1 candidate | Partial | 13 | `ahgExtendedRightsPlugin` | Rights statements, licences, grants, batch rights and the rights report (v0.0.57 to v0.0.59); embargoes of records and their files, with exceptions, notices and the list from v0.0.89 (13a, ADR 0015); retention and disposal in 13b |
@@ -57,7 +57,7 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-forms` | 2541 | later: V1.0+ | Covered | 22b | `ahgFormsPlugin` | Form templates of elements and own fields, assigned by repository, level or collection, from v0.0.107 (ADR 0020) |
 | `ahg-ftp-upload` | 2301 | later: V1.0+ | Covered | 22a | `ahgFtpPlugin` | An FTP or SFTP account kept to a watched folder, from v0.0.106 (ADR 0020): files go to the Workspace's own store, not to an FTP server for later fetching |
 | `ahg-function-manage` | 2606 | V0.1 candidate | Covered |  | `ahgFunctionManagePlugin` | Activities with ISDF elements |
-| `ahg-functions-docs` | 716 | later: V1.0+ | Planned | 20 | `ahgFunctionsDocsPlugin` |  |
+| `ahg-functions-docs` | 716 | later: V1.0+ | Done | 20d | `ahgFunctionsDocsPlugin` | The code reference, read from the code: PHP classes and methods, Blade templates, routes, console commands and bundled vocabularies, from v0.0.126 (ADR 0024) |
 | `ahg-gallery` | 7210 | out: GLAM sector | Planned | 21 | `ahgGalleryPlugin` |  |
 | `ahg-gis` | 280 | V0.1 candidate | Covered | 22c | `ahgGISPlugin` | Places have coordinates and containment; places within a box or radius as GeoJSON from v0.0.108 (ADR 0020) |
 | `ahg-graphql` | 764 | later: V1.0+ | Covered | 22c | `ahgGraphQLPlugin` | Read-only GraphQL over what the public may read, from v0.0.108 (ADR 0020) |
@@ -1419,3 +1419,55 @@ Added on 4 November 2026 with 20c.
 | DoiMintedMail, DoiFailedMail | `DoiMail`, to who asked | Same |
 | `ahg:doi-events-flush`, `ahg:doi-funding-import`, `ahg:doi-metrics-backfill` | `workspace:doi:events`, `workspace:doi:funding-import`, `workspace:doi:metrics-backfill`, and `workspace:doi:process` | Same |
 
+### Dropdowns (`ahg-dropdown-manage`)
+
+Added on 4 November 2026 with 20d.
+
+| Heratio field | Workspace | Status |
+|---|---|---|
+| `ahg_dropdown`: `taxonomy`, `taxonomy_label`, `code`, `label` | A bundled vocabulary (`vocabularies`, `concepts`, `concept_labels`), one Turtle file a list | Modelled |
+| `ahg_dropdown.label` and its translations, per culture | `vocabulary_overlays.labels`, the institution's wording by language | Same, for the institution alone |
+| `ahg_dropdown.sort_order` | `vocabulary_overlays.sort_order` | Same |
+| `ahg_dropdown.is_default` | `vocabulary_overlays.is_default` | Same |
+| `ahg_dropdown.is_active` | `vocabulary_overlays.hidden`, in open lists only | Same |
+| A new term added | A concept of the institution's own (`concepts.institution_id`) under its base IRI, perhaps narrowing a bundled one | Modelled |
+| A term deleted | The institution's own term deprecated | Modelled |
+| `ahg_dropdown.color`, `icon` | Not carried: the Workspace's lists show no colours or icons | Not carried |
+| `taxonomy_section`, create, rename and delete a taxonomy | Not carried: lists come with the Workspace; an institution's own lists are local vocabularies | Not carried |
+| `ahg_dropdown_column_map`, `strict` | The `concept_in_vocabulary` triggers on every column that takes a term | Modelled |
+| The `term` and `setting` sources | Not carried: there is no AtoM taxonomy table | Not carried |
+
+### Display (`ahg-display`)
+
+Added on 4 November 2026 with 20d.
+
+| Heratio field | Workspace | Status |
+|---|---|---|
+| `display_profile`: `code`, `domain`, `is_default`, `is_active`, `sort_order` | `display_profiles.name`, for one level of description or the institution's default | Modelled |
+| `display_profile`: `identity_fields`, `description_fields`, `context_fields`, `access_fields`, `technical_fields`, `hidden_fields` | `display_profiles.elements`: the ISAD(G) elements shown, in order, grouped by their area | Modelled |
+| `display_profile.field_labels` | `display_profiles.labels`, by element and language | Same |
+| `display_profile.available_actions` | `display_profile_actions`, a vocabulary row each | Same |
+| `display_profile.thumbnail_size` | `display_profiles.thumbnail_size_id`, a vocabulary row | Same |
+| `display_profile.layout_mode` (`detail`, `hierarchy`) | `display_profiles.show_tree` | Modelled |
+| `display_profile.thumbnail_position`, `css_class` | Not carried: the public theme places pictures | Not carried |
+| `display_object_profile`, `display_object_config` (a profile for each object) | A profile is chosen by the unit's level | Modelled |
+| `display_level`: `code`, `parent_code`, `valid_parent_codes`, `valid_child_codes` | The level-of-description vocabulary and its broader terms | Modelled |
+| `display_field`: `code`, `field_group`, `isad_element`, `dc_element` | The description-element vocabulary and its areas | Modelled |
+| `display_collection_type`, GLAM domains, `spectrum_unit` | Phase 21 (other GLAM domains) | Not yet |
+| `display_mode_global`: `display_mode`, `items_per_page`, `sort_field`, `sort_direction`, `show_thumbnails`, `allow_user_override` | `browse_settings` with no account: the same, each choice a vocabulary row | Same |
+| `user_display_preference`, `user_browse_settings`: `display_mode`, `items_per_page`, `sort_field`, `sort_direction`, `show_thumbnails` | `browse_settings` for one account | Same |
+| `show_descriptions`, `card_size`, `show_facets`, `remember_filters`, `last_filters`, `use_glam_browse` | Not carried: the list always shows a summary, and filters stay in the address | Not carried |
+| `information_object_title_sort`: `title_sort`, `identifier_sort`, `start_date_sort`, `end_date_sort` | Sorting by title, reference code, earliest and latest date, done by PostgreSQL directly | Modelled |
+| `display_facet_cache` | Not carried: the staff browse has no facet counts to cache | Not carried |
+| `/glam/print`, `/glam/exportCsv` (at most 5000) | The browse list with `format=print` or `format=csv`, at most 5000 | Same |
+
+### The code reference (`ahg-functions-docs`)
+
+Added on 4 November 2026 with 20d.
+
+| Heratio field | Workspace | Status |
+|---|---|---|
+| The `php`, `blade` and `routes` catalogues | The same, read from the code by reflection | Same |
+| The `js` and `py` catalogues | Not carried: the Workspace has hardly any JavaScript and no Python | Not carried |
+| | Console commands and bundled vocabularies | Added |
+| The catalogue files in `/opt/ai/km` and their modification times | Built from the code, cached until a source file changes | Modelled |

@@ -193,3 +193,60 @@ What was changed from Heratio:
   - views reported once a day only once switched on, sent with the token, which is kept encrypted;
   - funding taken in from a CSV by IRI and reference code, a row with no unit passed over, and nothing taken twice.
 - `tests/Feature/AccessMatrixTest.php` builds a DOI, a queued request and a funding reference, and every new address refuses another institution.
+
+## 20d: the lists, display and the code reference
+
+**The last fixed lists become vocabularies.** These choices were still kept as text with a check constraint, and now each is a vocabulary row with its trigger:
+
+- what a publish gate found (`publish-gate-outcome`);
+- a print template's page size (`print-page-size`) and orientation (`page-orientation`).
+
+Validation lists that had copied a vocabulary's codes now read the vocabulary through `Vocab::notations()`: funder identifier types, article and comment statuses, agent types, assertion statuses, proposal kinds, page sizes and orientations. Lists that a standard defines stay fixed in code: HTML5 caption kinds, BagIt algorithms and DataCite's `obj_id_type`.
+
+**The Dropdown manager**, after Heratio's `ahg-dropdown-manage`, is at `/admin/dropdowns`. What it changes, it changes for one institution alone, and it works over the bundled vocabularies themselves rather than a table of codes:
+
+- **Wording, order and default.** Any bundled list can take the institution's own wording in each language, its own order and a default (`vocabulary_overlays`). `Concept::choices()` applies them for the signed-in account's institution, or the public catalogue's, and `Concept::label()` gives the institution's wording first.
+- **Open lists.** A list named in `workspace.open_vocabularies` also takes terms of the institution's own and has terms hidden.
+- **Own terms.** These are concepts of the bundled vocabulary with the institution's `institution_id` and an IRI under its base IRI. So that they can exist, the concept guard now lets such a concept sit in a bundled vocabulary. A code is unique among the bundled terms and among each institution's own.
+- **What stays fixed.** A bundled term keeps its IRI, code and RiC-O mapping, and the published vocabularies at `/vocab/` keep their bundled labels.
+- **What makes a list open.** A list may be open only when no code names one of its terms, and when every lookup of a posted code goes through `Concept::notated()`, which finds the institution's own terms too. A test reads the code and checks both. Relation certainty and date qualifiers were taken off the open list for that reason: they are exchanged in RiC-O and EAD.
+
+**Display profiles**, after Heratio's `ahg-display`, choose how the public page of a unit of description of a level appears, or of every level without its own:
+
+- the ISAD(G) elements shown, in order, under the institution's labels;
+- whether the hierarchy stands beside the page;
+- the size of the pictures of the units inside;
+- the actions offered, which are clipboard, favourites, ordering a copy, citing, feedback and download.
+
+With no profile a page shows everything, as before. Heratio's GLAM collection types and its profiles assigned object by object are not carried; other GLAM domains are phase 21.
+
+**Browse settings** set how staff list archival descriptions, as a list, a table or cards, and are kept for the institution and, where it allows, for each account:
+
+- the sort, by title, reference code, last change, earliest date or latest date, and its direction;
+- the page size, from 10 to 200;
+- whether images show.
+
+The same list prints, or downloads as CSV with a byte order mark, up to 5000 units, as Heratio's GLAM print view and CSV export do. Heratio's title-sort sidecar exists because MySQL could not sort its 454,393 records by title and date on an index; PostgreSQL sorts the subqueries directly, so only the date sorts are carried.
+
+**The code reference**, after Heratio's `ahg-functions-docs`, is at `/admin/code-reference`. It catalogues the PHP classes and their public methods, the Blade templates, the routes, the console commands and the bundled vocabularies, each with its own comment and place. Heratio displays files that a KM generator writes. The Workspace reads its own code by reflection instead, and caches each catalogue until a source file changes.
+
+**The /alt-text images** keep their proportions in the flex row (`flex: none; object-fit: contain`).
+
+**Tests.**
+
+- `tests/Feature/DropdownsTest.php`:
+  - a list worded, ordered and defaulted for one institution only, and its IRI unchanged;
+  - an own term added, found by its code, unseen by another institution, which may add the same code;
+  - a term hidden, and the own term removed but kept for what uses it;
+  - a fixed list worded but never added to or hidden;
+  - only administrators managing lists;
+  - no code relying on an open list's terms, and no lookup into one bypassing `Concept::notated()`.
+- `tests/Feature/DisplayTest.php`:
+  - a level's profile choosing the public page's elements, order, labels, tree and actions, while another level shows everything;
+  - one profile per level;
+  - browsing as the institution sets or as an account sets, until the institution takes the choice away;
+  - sorting by date both ways;
+  - the print view and CSV as filtered and sorted;
+  - the code reference read from the code, for administrators only.
+- `tests/Feature/AccessMatrixTest.php` builds a display profile, and every new address refuses another institution.
+

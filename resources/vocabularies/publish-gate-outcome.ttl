@@ -1,0 +1,37 @@
+# OpenRiC Workspace - OpenRiC Workspace Publish Gate Outcomes.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What a publish gate found when a unit was checked before publishing (Heratio's ahg_publish_gate_result.status).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/publish-gate-outcome/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Publish Gate Outcomes"@en ;
+    dcterms:description "What a publish gate found when a unit was checked before publishing (Heratio's ahg_publish_gate_result.status)."@en ;
+    dcterms:issued "2026-11-04"^^xsd:date ;
+    skos:hasTopConcept v:passed, v:failed, v:warning .
+
+v:passed a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Passed"@en, "Geslaag"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the checks a unit must pass before it is published, as Heratio's ahg-workflow keeps them."@en ;
+    skos:definition "The unit meets the rule."@en .
+
+v:failed a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Failed"@en, "Misluk"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the checks a unit must pass before it is published, as Heratio's ahg-workflow keeps them."@en ;
+    skos:definition "The unit does not meet the rule, and may not be published until it does."@en .
+
+v:warning a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Warning"@en, "Waarskuwing"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the checks a unit must pass before it is published, as Heratio's ahg-workflow keeps them."@en ;
+    skos:definition "The unit does not meet the rule, which only warns."@en .

@@ -1,0 +1,44 @@
+# OpenRiC Workspace - OpenRiC Workspace Print Page Sizes.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# The paper a print template is set for (Heratio's research print template page_size).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/print-page-size/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Print Page Sizes"@en ;
+    dcterms:description "The paper a print template is set for (Heratio's research print template page_size)."@en ;
+    dcterms:issued "2026-11-04"^^xsd:date ;
+    skos:hasTopConcept v:a4, v:a5, v:a6, v:letter .
+
+v:a4 a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "A4"@en, "A4"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's print templates for the reading room, as Heratio's ahg-research keeps them."@en ;
+    skos:definition "210 by 297 millimetres."@en .
+
+v:a5 a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "A5"@en, "A5"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's print templates for the reading room, as Heratio's ahg-research keeps them."@en ;
+    skos:definition "148 by 210 millimetres."@en .
+
+v:a6 a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "A6"@en, "A6"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's print templates for the reading room, as Heratio's ahg-research keeps them."@en ;
+    skos:definition "105 by 148 millimetres."@en .
+
+v:letter a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Letter"@en, "Letter"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's print templates for the reading room, as Heratio's ahg-research keeps them."@en ;
+    skos:definition "8.5 by 11 inches."@en .

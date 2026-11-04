@@ -1,0 +1,30 @@
+# OpenRiC Workspace - OpenRiC Workspace Sort Directions.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Which way a browse list is sorted (Heratio's sort_direction).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/sort-direction/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Sort Directions"@en ;
+    dcterms:description "Which way a browse list is sorted (Heratio's sort_direction)."@en ;
+    dcterms:issued "2026-11-04"^^xsd:date ;
+    skos:hasTopConcept v:ascending, v:descending .
+
+v:ascending a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Ascending"@en, "Stygend"@af ;
+    skos:scopeNote "Not a RiC-O term: how the Workspace lists units of description when browsing, as Heratio's ahg-display browse settings do; not exported."@en ;
+    skos:definition "A to Z, oldest first."@en .
+
+v:descending a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Descending"@en, "Dalend"@af ;
+    skos:scopeNote "Not a RiC-O term: how the Workspace lists units of description when browsing, as Heratio's ahg-display browse settings do; not exported."@en ;
+    skos:definition "Z to A, newest first."@en .

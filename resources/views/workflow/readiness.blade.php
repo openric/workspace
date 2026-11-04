@@ -7,7 +7,7 @@
     @php($failed = collect($results)->where('status', 'failed'))
     <p><strong>{{ $failed->isEmpty() ? __('Ready to publish.') : __('Not ready: :count blocker(s).', ['count' => $failed->count()]) }}</strong></p>
     @forelse($results as $r)
-        <p style="margin: .2rem 0">{{ ['passed' => __('Passed'), 'failed' => __('Failed'), 'warning' => __('Warning')][$r['status']] }}: {{ $r['name'] }}@if($r['message']) - {{ $r['message'] }}@endif</p>
+        <p style="margin: .2rem 0">{{ \App\Models\Concept::where('iri', \App\Support\Vocab::BASE.'publish-gate-outcome/'.$r['status'])->first()?->label(\App\Support\Vocab::languages()) }}: {{ $r['name'] }}@if($r['message']) - {{ $r['message'] }}@endif</p>
     @empty
         <p>{{ __('No publish gate applies to it.') }}</p>
     @endforelse
@@ -23,5 +23,5 @@
         <dt>{{ __('Rights in force') }}</dt><dd>{{ implode('; ', $simulation['rights']) ?: __('none') }}</dd>
     </dl>
     <h2>{{ __('Earlier checks') }}</h2>
-    @foreach($history as $h)<p style="margin: .1rem 0">{{ $h->evaluated_at->setTimezone(config('workspace.timezone'))->format('Y-m-d H:i') }} {{ $h->rule?->name }}: {{ $h->status }}</p>@endforeach
+    @foreach($history as $h)<p style="margin: .1rem 0">{{ $h->evaluated_at->setTimezone(config('workspace.timezone'))->format('Y-m-d H:i') }} {{ $h->rule?->name }}: {{ $h->outcome?->label(\App\Support\Vocab::languages()) }}</p>@endforeach
 @endsection

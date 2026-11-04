@@ -96,7 +96,7 @@ class SiteAdminController extends Controller
         $article && $this->own($request, $article->institution_id);
         $data = $request->validate(['title' => ['required', 'string', 'max:255'], 'slug' => ['nullable', 'string', 'max:200'], 'article_group' => ['nullable', 'string', 'max:100'],
             'author' => ['nullable', 'string', 'max:150'], 'excerpt' => ['nullable', 'string', 'max:500'], 'body' => ['nullable', 'string', 'max:500000'],
-            'attachments_label' => ['nullable', 'string', 'max:255'], 'status' => ['required', Rule::in(['draft', 'published'])], 'published_at' => ['nullable', 'date'],
+            'attachments_label' => ['nullable', 'string', 'max:255'], 'status' => ['required', Rule::in(Vocab::notations('site-article-status'))], 'published_at' => ['nullable', 'date'],
             'cover' => ['nullable', 'image', 'mimes:jpg,jpeg,png,gif,webp', 'max:5120']]);
         try {
             $article = app(Articles::class)->save($request->user()->institution, $data, $request->user(), $article, $request->file('cover'));
@@ -214,7 +214,7 @@ class SiteAdminController extends Controller
     public function commentStatus(Request $request, ArticleComment $comment): RedirectResponse
     {
         $this->own($request, $comment->article->institution_id);
-        $request->validate(['status' => ['required', Rule::in(['approved', 'pending', 'spam'])]]);
+        $request->validate(['status' => ['required', Rule::in(Vocab::notations('article-comment-status'))]]);
         app(Articles::class)->setCommentStatus($comment, $request->input('status'), $request->user());
 
         return back()->with('status', __('Comment updated.'));

@@ -34,6 +34,7 @@ use App\Description\RepositoryService;
 use App\Description\RuleService;
 use App\Description\WorkflowService;
 use App\Description\WorkflowSlaService;
+use App\Display\Displays;
 use App\Dois\RecordDois;
 use App\Fixity\Fixity;
 use App\Iiif\CuratedCollections;
@@ -459,6 +460,8 @@ class AccessMatrixTest extends TestCase
             'state_id' => Concept::where('iri', Vocab::BASE.'doi-state/findable')->value('id'), 'test' => true, 'minted_at' => now()]),
             app(RecordDois::class)->enqueue($letter, 'mint', $admin),
             RecordFunding::create(['record_resource_id' => $letter->id, 'funder_name' => 'National Research Foundation'])]);
+        // Phase 20d: a display profile for items.
+        $make('display profile', fn () => app(Displays::class)->saveProfile($institution, null, ['name' => 'Items', 'level' => 'item', 'elements' => ['scope-and-content']], $admin));
         // Phase 19j: lectures, training, notices, the inbox, documents, print templates, quotas and rights policies.
         $make('teaching', fn () => [$lecture = app(Teaching::class)->saveLecture($admin, ['title' => 'Minutes', 'institutional' => 1]),
             $course = app(Teaching::class)->saveCourse($admin, ['title' => 'Beginners', 'institutional' => 1]),

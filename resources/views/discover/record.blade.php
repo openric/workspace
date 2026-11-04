@@ -3,19 +3,21 @@
 @section('title', $view->label($unit))
 @section('head')<link rel="alternate" type="application/ld+json" href="{{ route('api.record', $unit->id) }}">@endsection
 @section('content')
-    @php $withTree = $tree['ancestors'] !== [] || $tree['children'] !== []; @endphp
+    {{-- Its display profile (phase 20d): the elements, labels, tree, image size and actions the institution chose for its level. --}}
+    @php $display = app(\App\Display\Displays::class); $profile = $display->profileFor($unit); $thumb = $display->thumbnailWidth($profile);
+        $withTree = ($tree['ancestors'] !== [] || $tree['children'] !== []) && ($profile?->show_tree ?? true); @endphp
     @if($withTree)<div class="with-tree"><aside class="tree-aside">@include('records._tree', ['tree' => $tree, 'branch' => 'discover.record.tree'])</aside><div class="with-tree-main">@endif
     @if($ancestors)<nav aria-label="{{ __('Hierarchy') }}" class="meta">@foreach($ancestors as $above)<a href="{{ route('discover.record', $above->id) }}">{{ $view->label($above) }}</a> / @endforeach</nav>@endif
     @php($alsoIn = $unit->memberships()->with('recordSet')->get()->filter(fn ($m) => $view->readable($m->recordSet)))
     @if($alsoIn->isNotEmpty())<p class="meta">{{ __('Also in') }}: @foreach($alsoIn as $m)<a href="{{ route('discover.record', $m->record_set_id) }}">{{ $view->label($m->recordSet) }}</a>@if(! $loop->last), @endif @endforeach</p>@endif
     {{-- The images first, as AtoM shows the digital object above the description. --}}
     {{-- Heratio's imageflow: the pictures of the units inside, each opening its unit. --}}
-    @if($childThumbnails->isNotEmpty())
+    @if($childThumbnails->isNotEmpty() && $thumb !== 0)
         <section aria-label="{{ __('Pictures of the units inside') }}" class="imageflow">
             <ul>
                 @foreach($childThumbnails as ['unit' => $child, 'file' => $file])
                     <li><a href="{{ route('discover.record', $child->id) }}" title="{{ $view->label($child) }}">
-                        <img src="{{ route('discover.file', $file) }}" alt="" width="{{ $file->width }}" height="{{ $file->height }}" loading="lazy">
+                        <img src="{{ route('discover.file', $file) }}" alt="" width="{{ $file->width }}" height="{{ $file->height }}" loading="lazy" @if($thumb) style="width: {{ $thumb }}px; height: auto" @endif>
                         <span>{{ \Illuminate\Support\Str::limit((string) $view->label($child), 28) }}</span></a></li>
                 @endforeach
             </ul>
@@ -35,21 +37,21 @@
                     <span class="meta">{{ collect([$instantiation->carrierType?->label(\App\Support\Vocab::languages())])->filter()->join('') }}</span>
                     @include('discover._rights', ['subject' => $instantiation, 'view' => $view, 'compact' => true])
                     @if($instantiation->availability->notation === 'on-request') · <a href="{{ route('access-requests.create', $instantiation) }}">{{ __('Available on request: ask for access') }}</a>@endif
-                    @if($files->has('master')) · <a href="{{ route('discover.file', [$files['master'], 'download' => 1]) }}">{{ __('Download the master (:type, :size, SHA-256 :sha...)', ['type' => $files['master']->mime_type, 'size' => \Illuminate\Support\Number::fileSize($files['master']->size_bytes, 1), 'sha' => substr($files['master']->sha256, 0, 12)]) }}</a>@endif</figcaption>
+                    @if($files->has('master') && $display->allows($profile, 'download')) · <a href="{{ route('discover.file', [$files['master'], 'download' => 1]) }}">{{ __('Download the master (:type, :size, SHA-256 :sha...)', ['type' => $files['master']->mime_type, 'size' => \Illuminate\Support\Number::fileSize($files['master']->size_bytes, 1), 'sha' => substr($files['master']->sha256, 0, 12)]) }}</a>@endif</figcaption>
             </figure>
         @endforeach
         </section>
     @endif
     @php([$title, $titleLanguage] = $view->valueWithLanguage($unit, 'title') ?? ['', 'en'])
     <h1 lang="{{ $titleLanguage }}">{{ $title }}</h1>
-    @include('clipboard._button', ['type' => 'records', 'id' => $unit->id])
-    @include('favourites._button', ['entity' => $unit])
-    @include('shop._add', ['unit' => $unit])
-    <a href="{{ route('cite', $unit->id) }}" class="no-print" style="font-size: .85rem">{{ __('Cite') }}</a>
+    @if($display->allows($profile, 'clipboard'))@include('clipboard._button', ['type' => 'records', 'id' => $unit->id])@endif
+    @if($display->allows($profile, 'favourites'))@include('favourites._button', ['entity' => $unit])@endif
+    @if($display->allows($profile, 'order'))@include('shop._add', ['unit' => $unit])@endif
+    @if($display->allows($profile, 'cite'))<a href="{{ route('cite', $unit->id) }}" class="no-print" style="font-size: .85rem">{{ __('Cite') }}</a>@endif
     {{-- Its DOI, once findable (phase 20c). --}}
     @php($unitDoi = \App\Models\RecordDoi::where('record_resource_id', $unit->id)->whereHas('state', fn ($q) => $q->where('notation', 'findable'))->first())
     @if($unitDoi)<span style="font-size: .85rem"> · DOI <a href="{{ $unitDoi->url() }}">{{ $unitDoi->doi }}</a></span>@endif
-    <a href="{{ route('feedback.create', ['record' => $unit->id]) }}" class="no-print" style="font-size: .85rem">{{ __('Feedback on this record') }}</a>
+    @if($display->allows($profile, 'feedback'))<a href="{{ route('feedback.create', ['record' => $unit->id]) }}" class="no-print" style="font-size: .85rem">{{ __('Feedback on this record') }}</a>@endif
     <p class="meta">{{ $unit->level->label(\App\Support\Vocab::languages()) }} @include('description._ric', ['term' => \App\Relations\EntityKinds::ricClass($unit)])
         @if($unit->referenceCode()) · {{ $unit->referenceCode() }}@endif
         @if($unit->repository && $view->readable($unit->repository)) · {{ __('Held by') }} <a href="{{ route('discover.repository', $unit->repository->id) }}">{{ $view->label($unit->repository) }}</a>@endif</p>
@@ -62,7 +64,7 @@
         <ul>@foreach($creators as $relation)<li>@php($url = \App\Discovery\Links::page($relation->other))@if($url)<a href="{{ $url }}">{{ $view->label($relation->other) }}</a>@else{{ $view->label($relation->other) }}@endif @include('description._ric', ['term' => $relation->ricTerm()])</li>@endforeach</ul>
     @endif
 
-    @include('discover._values', ['subject' => $unit, 'standard' => \App\Description\Elements::ISAD_G, 'view' => $view])
+    @include('discover._values', ['subject' => $unit, 'standard' => \App\Description\Elements::ISAD_G, 'view' => $view, 'display' => $display, 'profile' => $profile])
     @include('discover._relations', ['relations' => $relations, 'view' => $view, 'heading' => __('Access points'), 'types' => ['subject', 'place']])
     @include('discover._relations', ['relations' => $relations, 'view' => $view, 'heading' => __('Documentary form types'), 'types' => ['documentary-form']])
     @include('discover._relations', ['relations' => $relations, 'view' => $view, 'heading' => __('Related'), 'except' => ['subject', 'place', 'documentary-form', 'creation', 'accumulation']])

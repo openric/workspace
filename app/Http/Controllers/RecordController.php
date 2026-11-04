@@ -16,6 +16,7 @@ use App\Description\Elements;
 use App\Description\InstantiationService;
 use App\Description\RecordService;
 use App\Description\TreeService;
+use App\Display\Displays;
 use App\Models\Concept;
 use App\Models\DigitalFile;
 use App\Models\Name;
@@ -37,6 +38,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use InvalidArgumentException;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class RecordController extends Controller
 {
@@ -45,21 +47,29 @@ class RecordController extends Controller
     public function __construct(private RecordService $records) {}
 
     /**
-     * Browse units of description: search titles, other names and identifiers; filter by
-     * repository, level and publication; the top level only unless a search is given;
-     * sort by title, identifier or last change.
+     * Browse units of description: search titles, other names and identifiers; filter by repository, level and
+     * publication; the top level only unless a search is given; sort by title, identifier, last change or earliest or
+     * latest date, either way; as a list, a table or cards, so many a page, as the account's browse settings say
+     * (phase 20d). The same list prints, or downloads as CSV (Heratio's GLAM print view and CSV export).
      */
-    public function index(Request $request): View
+    public function index(Request $request, Displays $displays): View|StreamedResponse
     {
         $user = $request->user();
+        $settings = $displays->browse($user);
         $query = trim((string) $request->query('q', ''));
+        $sorts = Vocab::notations('browse-sort');
         $filters = ['repository' => (string) $request->query('repository', ''), 'level' => (string) $request->query('level', ''),
-            'publication' => (string) $request->query('publication', ''), 'sort' => in_array($request->query('sort'), ['identifier', 'updated'], true) ? $request->query('sort') : 'title',
+            'publication' => (string) $request->query('publication', ''), 'sort' => in_array($request->query('sort'), $sorts, true) ? $request->query('sort') : $settings['sort'],
+            'direction' => in_array($request->query('direction'), Vocab::notations('sort-direction'), true) ? $request->query('direction') : $settings['direction'],
+            'view' => in_array($request->query('view'), Vocab::notations('browse-view'), true) ? $request->query('view') : $settings['view'],
             'top' => $request->has('top') ? $request->boolean('top') : $query === ''];
+        $format = (string) $request->query('format');
         $like = '%'.addcslashes($query, '%_\\').'%';
         $published = Concept::where('iri', Vocab::valueState('published'))->value('id');
         $title = Name::select('value')->whereColumn('subject_id', 'record_resources.id')->where('subject_table', 'record_resources')
             ->whereHas('nameType', fn ($q) => $q->where('iri', Vocab::NAME_TYPES.'authorised'))->orderBy('created_at')->limit(1);
+        $dates = fn (string $aggregate) => DB::table('dates')->selectRaw($aggregate)->whereColumn('subject_id', 'record_resources.id')->where('subject_table', 'record_resources');
+        $direction = $filters['direction'] === 'descending' ? 'desc' : 'asc';
         $units = RecordResource::where('institution_id', $user->institution_id)->whereNull('deleted_at')
             ->with('descriptionValues.element', 'names.nameType', 'identifiers.identifierType', 'level.labels', 'repository.names.nameType', 'repository.descriptionValues.element',
                 'repository.identifiers.identifierType', 'parent.names.nameType', 'parent.descriptionValues.element', 'dates.qualifier.labels')
@@ -72,16 +82,77 @@ class RecordController extends Controller
             ->when($filters['level'] !== '', fn ($q) => $q->where('level_id', $filters['level']))
             ->when($filters['publication'] === 'published', fn ($q) => $q->whereIn('id', Name::where(['subject_table' => 'record_resources', 'state_id' => $published])->select('subject_id')))
             ->when($filters['publication'] === 'unpublished', fn ($q) => $q->whereNotIn('id', Name::where(['subject_table' => 'record_resources', 'state_id' => $published])->select('subject_id')))
-            ->when($filters['sort'] === 'updated', fn ($q) => $q->orderByDesc('updated_at'))
-            ->when($filters['sort'] === 'identifier', fn ($q) => $q->orderBy(DB::table('identifiers')->select('value')->whereColumn('subject_id', 'record_resources.id')->where('subject_table', 'record_resources')->limit(1)))
-            ->when($filters['sort'] === 'title', fn ($q) => $q->orderBy($title))
-            ->paginate(50)->withQueryString();
+            ->when($filters['sort'] === 'updated', fn ($q) => $q->orderBy('updated_at', $direction))
+            ->when($filters['sort'] === 'identifier', fn ($q) => $q->orderBy(DB::table('identifiers')->select('value')->whereColumn('subject_id', 'record_resources.id')->where('subject_table', 'record_resources')->limit(1), $direction))
+            ->when($filters['sort'] === 'title', fn ($q) => $q->orderBy($title, $direction))
+            // As Heratio's title-sort sidecar does for MIN(start_date) and MAX(end_date); PostgreSQL needs no sidecar for it.
+            ->when($filters['sort'] === 'start-date', fn ($q) => $q->orderByRaw('('.$dates('min(earliest)')->toSql().') '.$direction.' NULLS LAST', $dates('min(earliest)')->getBindings()))
+            ->when($filters['sort'] === 'end-date', fn ($q) => $q->orderByRaw('('.$dates('max(latest)')->toSql().') '.$direction.' NULLS LAST', $dates('max(latest)')->getBindings()))
+            ->orderBy('id');
         // Permissions can be set on a single unit, so the page shows only what the account may read.
-        $units->setCollection($units->getCollection()->filter(fn (RecordResource $r) => $user->may('read', 'description', $r) && app(CommunityProtocols::class)->allows($user, $r, 'description')
-            && app(Embargoes::class)->allows($user, $r, 'record') && app(Clearances::class)->allows($user, $r))->values());
+        $readable = fn (RecordResource $r) => $user->may('read', 'description', $r) && app(CommunityProtocols::class)->allows($user, $r, 'description')
+            && app(Embargoes::class)->allows($user, $r, 'record') && app(Clearances::class)->allows($user, $r);
+        if ($format === 'csv' || $format === 'print') {
+            // ponytail: one list of at most 5000 (Heratio's limit) read whole; a bigger export is the CSV export of everything.
+            $rows = $units->limit(5000)->get()->filter($readable)->values();
+
+            return $format === 'csv' ? $this->browseCsv($rows) : view('records.browse-print', ['units' => $rows, 'query' => $query, 'filters' => $filters]);
+        }
+        $units = $units->paginate($settings['per_page'])->withQueryString();
+        $units->setCollection($units->getCollection()->filter($readable)->values());
 
         return view('records.index', ['units' => $units, 'query' => $query, 'filters' => $filters, 'levels' => $this->levels($request),
-            'repositories' => $this->repositories($request)]);
+            'repositories' => $this->repositories($request), 'settings' => $settings, 'sorts' => Concept::choices(Vocab::BASE.'browse-sort/')->get(),
+            'views' => Concept::choices(Vocab::BASE.'browse-view/')->get(), 'directions' => Concept::choices(Vocab::BASE.'sort-direction/')->get(),
+            'thumbnails' => $settings['show_thumbnails'] && $filters['view'] !== 'list' ? $this->firstImages($units->getCollection(), $user) : collect()]);
+    }
+
+    /** The browse list as CSV, with a byte order mark for spreadsheets, under Heratio's GLAM export columns. */
+    private function browseCsv(Collection $units): StreamedResponse
+    {
+        $lang = [app()->getLocale(), 'en'];
+
+        return response()->streamDownload(function () use ($units, $lang) {
+            $out = fopen('php://output', 'w');
+            fwrite($out, "\u{FEFF}");
+            fputcsv($out, ['IRI', 'Reference code', 'Title', 'Level', 'Repository', 'Dates', 'Extent', 'Scope and content']);
+            foreach ($units as $unit) {
+                fputcsv($out, [$unit->iri, $unit->referenceCode(), $unit->described('title', $lang), $unit->level->label(Vocab::languages()),
+                    $unit->repository?->described('authorised-name', $lang), $unit->described('dates-expressed', $lang) ?: $unit->dates->map->display()->filter()->join('; '),
+                    $unit->described('extent', $lang), strip_tags((string) $unit->described('scope-and-content', $lang))]);
+            }
+            fclose($out);
+        }, 'descriptions-'.now()->format('Y-m-d-His').'.csv', ['Content-Type' => 'text/csv; charset=utf-8']);
+    }
+
+    /** Each unit's first thumbnail this account may receive, for the table and the cards. @return Collection<string, DigitalFile> unit id => file */
+    private function firstImages(Collection $units, User $user): Collection
+    {
+        $service = app(InstantiationService::class);
+
+        return DigitalFile::query()->whereHas('use', fn ($q) => $q->where('notation', 'thumbnail'))
+            ->whereHas('instantiation', fn ($q) => $q->whereIn('record_resource_id', $units->pluck('id'))->whereNull('deleted_at'))
+            ->with('use', 'instantiation.availability')->orderBy('created_at')->get()->filter(fn ($file) => $service->deliverable($user, $file))
+            ->unique(fn ($file) => $file->instantiation->record_resource_id)->keyBy(fn ($file) => $file->instantiation->record_resource_id);
+    }
+
+    /** The account's own browse settings, or back to the institution's (phase 20d). */
+    public function browseSettings(Request $request, Displays $displays): RedirectResponse
+    {
+        if ($request->boolean('reset')) {
+            $displays->resetBrowse($request->user());
+
+            return back()->with('status', __('You browse as the institution does.'));
+        }
+        $data = $request->validate(['view' => ['required', Rule::in(Vocab::notations('browse-view'))], 'sort' => ['required', Rule::in(Vocab::notations('browse-sort'))],
+            'direction' => ['required', Rule::in(Vocab::notations('sort-direction'))], 'per_page' => ['required', 'integer', 'between:10,200'], 'show_thumbnails' => ['nullable', 'boolean']]);
+        try {
+            $displays->saveBrowse($request->user()->institution, $request->user(), $data, $request->user());
+        } catch (InvalidArgumentException $e) {
+            return back()->withErrors(['view' => $e->getMessage()]);
+        }
+
+        return redirect()->route('records.index')->with('status', __('Saved as how you browse.'));
     }
 
     /** A branch of the hierarchy tree, the next page of it (Heratio's treeview-data). */

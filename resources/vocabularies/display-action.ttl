@@ -1,0 +1,58 @@
+# OpenRiC Workspace - OpenRiC Workspace Display Actions.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What a reader may do from a unit's public page under a display profile (Heratio's display_profile.available_actions).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/display-action/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Display Actions"@en ;
+    dcterms:description "What a reader may do from a unit's public page under a display profile (Heratio's display_profile.available_actions)."@en ;
+    dcterms:issued "2026-11-04"^^xsd:date ;
+    skos:hasTopConcept v:clipboard, v:favourites, v:order, v:cite, v:feedback, v:download .
+
+v:clipboard a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Add to the clipboard"@en, "Voeg by die knipbord"@af ;
+    skos:scopeNote "Not a RiC-O term: how the Workspace shows a description to the public under a display profile, as Heratio's ahg-display does; not exported."@en ;
+    skos:definition "Put the unit on the reader's clipboard, to export or print with others."@en .
+
+v:favourites a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Keep as a favourite"@en, "Hou as gunsteling"@af ;
+    skos:scopeNote "Not a RiC-O term: how the Workspace shows a description to the public under a display profile, as Heratio's ahg-display does; not exported."@en ;
+    skos:definition "Keep the unit among the reader's favourites."@en .
+
+v:order a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Order a copy"@en, "Bestel 'n kopie"@af ;
+    skos:scopeNote "Not a RiC-O term: how the Workspace shows a description to the public under a display profile, as Heratio's ahg-display does; not exported."@en ;
+    skos:definition "Order a reproduction from the shop, where the institution sells them."@en .
+
+v:cite a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Cite"@en, "Haal aan"@af ;
+    skos:scopeNote "Not a RiC-O term: how the Workspace shows a description to the public under a display profile, as Heratio's ahg-display does; not exported."@en ;
+    skos:definition "Show how to cite the unit."@en .
+
+v:feedback a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Give feedback"@en, "Gee terugvoer"@af ;
+    skos:scopeNote "Not a RiC-O term: how the Workspace shows a description to the public under a display profile, as Heratio's ahg-display does; not exported."@en ;
+    skos:definition "Send the institution feedback on the record."@en .
+
+v:download a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Download the files"@en, "Laai die lêers af"@af ;
+    skos:scopeNote "Not a RiC-O term: how the Workspace shows a description to the public under a display profile, as Heratio's ahg-display does; not exported."@en ;
+    skos:definition "Download the files the reader may have."@en .

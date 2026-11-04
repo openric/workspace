@@ -211,7 +211,7 @@ class Researchers
             throw new InvalidArgumentException(__('Give your first name and surname.'));
         }
         $affiliation = Concept::where('iri', Vocab::BASE.'researcher-affiliation/'.($data['affiliation'] ?? 'independent'))->value('id') ?? throw new InvalidArgumentException(__('Choose your affiliation from the list.'));
-        $idType = $text('id_type') ? (Concept::where('iri', Vocab::BASE.'identity-document-type/'.$data['id_type'])->value('id') ?? throw new InvalidArgumentException(__('Choose an identity document from the list.'))) : null;
+        $idType = $text('id_type') ? (Concept::notated(Vocab::BASE.'identity-document-type/', $data['id_type'])?->id ?? throw new InvalidArgumentException(__('Choose an identity document from the list.'))) : null;
         if (($type?->requires_id_verification ?? false) && (! $idType || ! $text('id_number'))) {
             throw new InvalidArgumentException(__('Give your identity document and its number.'));
         }

@@ -7,7 +7,7 @@
     @include('research._head')
     <p>{{ __('A template is plain text with placeholders in braces. A call slip or paging slip may hold:') }} @foreach($placeholders as $p)<code>{{ '{'.$p.'}' }}</code> @endforeach</p>
     @forelse($templates as $t)
-        <p><strong>{{ $t->name }}</strong> ({{ $t->code }}) · {{ $t->templateType->label($lang) }} · {{ $t->page_size }} {{ __($t->orientation) }}@if($t->is_default) · {{ __('default') }}@endif @unless($t->is_active) · {{ __('not in use') }}@endunless</p>
+        <p><strong>{{ $t->name }}</strong> ({{ $t->code }}) · {{ $t->templateType->label($lang) }} · {{ $t->pageSize?->label($lang) }} {{ $t->pageOrientation?->label($lang) }}@if($t->is_default) · {{ __('default') }}@endif @unless($t->is_active) · {{ __('not in use') }}@endunless</p>
         <details><summary>{{ __('Change') }}</summary><form method="post" action="{{ route('research.print-templates.save', $t) }}">@csrf @include('research._print-fields', ['t' => $t, 'x' => 'p'.$loop->index])<button type="submit">{{ __('Save') }}</button></form></details>
     @empty
         <p>{{ __('None: call slips are laid out as the Workspace lays them out.') }}</p>

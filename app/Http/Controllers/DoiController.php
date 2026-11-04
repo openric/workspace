@@ -174,7 +174,7 @@ class DoiController extends Controller
     {
         abort_unless($record->institution_id === $request->user()->institution_id && $request->user()->may('update', 'description', $record), 404);
         $data = $request->validate(['funder_name' => ['required', 'string', 'max:500'], 'funder_identifier' => ['nullable', 'string', 'max:500'],
-            'funder_identifier_type' => ['nullable', Rule::in(['ror', 'crossref-funder-id', 'isni', 'grid', 'other'])], 'award_number' => ['nullable', 'string', 'max:255'],
+            'funder_identifier_type' => ['nullable', Rule::in(Vocab::notations('funder-identifier-type'))], 'award_number' => ['nullable', 'string', 'max:255'],
             'award_uri' => ['nullable', 'url', 'max:1000'], 'award_title' => ['nullable', 'string', 'max:1000']]);
         $type = ($data['funder_identifier_type'] ?? null) ? $this->dois->concept('funder-identifier-type', $data['funder_identifier_type']) : null;
         unset($data['funder_identifier_type']);
