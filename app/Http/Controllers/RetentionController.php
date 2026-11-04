@@ -56,7 +56,7 @@ class RetentionController extends Controller
         abort_unless($this->manages($request), 403);
         $schedule && $this->own($request, $schedule->institution_id);
         $data = $request->validate(['reference' => ['required', 'string', 'max:100'], 'title' => ['required', 'string', 'max:255'], 'description' => ['nullable', 'string', 'max:5000'],
-            'authority' => ['nullable', 'string', 'max:500'], 'jurisdiction' => ['nullable', 'string', 'max:100'], 'effective_on' => ['nullable', 'date_format:Y-m-d'],
+            'authority' => ['nullable', 'string', 'max:500'], 'authority_rule_id' => ['nullable', 'uuid'], 'jurisdiction' => ['nullable', 'string', 'max:100'], 'effective_on' => ['nullable', 'date_format:Y-m-d'],
             'review_on' => ['nullable', 'date_format:Y-m-d'], 'expires_on' => ['nullable', 'date_format:Y-m-d']]);
         $saved = $this->retention->saveSchedule(Institution::findOrFail($request->user()->institution_id), $data, $schedule, $request->user());
 

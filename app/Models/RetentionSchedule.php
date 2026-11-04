@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['institution_id', 'reference', 'title', 'description', 'authority', 'jurisdiction', 'effective_on', 'review_on', 'expires_on', 'status_id', 'version', 'previous_id', 'approved_by', 'approved_at', 'created_by_id'])]
+#[Fillable(['institution_id', 'reference', 'title', 'description', 'authority', 'authority_rule_id', 'jurisdiction', 'effective_on', 'review_on', 'expires_on', 'status_id', 'version', 'previous_id', 'approved_by', 'approved_at', 'created_by_id'])]
 class RetentionSchedule extends Model
 {
     use Audited, HasUuids;
@@ -36,5 +36,11 @@ class RetentionSchedule extends Model
     public function classes(): HasMany
     {
         return $this->hasMany(DisposalClass::class, 'retention_schedule_id');
+    }
+
+    /** The rule it is issued under, such as a disposal authority described as a rule (step 12d). */
+    public function authorityRule(): BelongsTo
+    {
+        return $this->belongsTo(Rule::class, 'authority_rule_id');
     }
 }

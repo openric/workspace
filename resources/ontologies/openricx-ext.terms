@@ -21,6 +21,7 @@ accessibility
 accrualsNote
 algorithm
 alternativeForm
+amendsOrAmended
 appliesToDescendants
 arrangement
 assertionStatus
@@ -52,6 +53,7 @@ hasNarrowerGeographicalContext
 hasOccupation
 hasOrHadPolicy
 hasPhysicalCharacteristics
+hasRuleStatus
 hasSparqlContextBinding
 humanConfirmed
 inferenceReceipt
@@ -60,9 +62,11 @@ isCarrierOf
 isContainerTypeOf
 isCurrent
 isOrWasAdoptedChildOf
+isOrWasAmendedBy
 isOrWasFosterChildOf
 isOrWasGuardianOf
 isOrWasStoredIn
+isOrWasSupersededBy
 isOrWasUnderGuardianshipOf
 jurisdiction
 languageCode
@@ -83,5 +87,6 @@ securityLevelCode
 size
 storesOrStored
 streetAddress
+supersedesOrSuperseded
 technicalCharacteristics
 telephone

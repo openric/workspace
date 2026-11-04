@@ -1,6 +1,9 @@
 {{-- OpenRiC Workspace - the fields of a retention schedule (Heratio's rm_retention_schedule). Needs: $s. Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems. SPDX-License-Identifier: AGPL-3.0-or-later --}}
 <p><label for="s-ref">{{ __('Reference') }}</label> @include('description._ric', ['term' => null]) <input id="s-ref" name="reference" required maxlength="100" value="{{ $s?->reference }}">
     <label for="s-title">{{ __('Title') }}</label> @include('description._ric', ['term' => null]) <input id="s-title" name="title" required maxlength="255" size="40" value="{{ $s?->title }}"></p>
+<p><label for="s-rule">{{ __('The rule it is issued under') }}</label> @include('description._ric', ['term' => 'rico:isOrWasRegulatedBy'])<br>
+    <select id="s-rule" name="authority_rule_id"><option value="">{{ __('None described as a rule') }}</option>@foreach(\App\Models\Rule::where('institution_id', auth()->user()->institution_id)->whereNull('deleted_at')->with('names.nameType')->get()->sortBy(fn ($r) => mb_strtolower((string) $r->described('rule-name', ['en']))) as $r)<option value="{{ $r->id }}" @selected($s?->authority_rule_id === $r->id)>{{ $r->described('rule-name', [app()->getLocale(), 'en']) }}</option>@endforeach</select>
+    <small>{{ __('Its name is the authority below when that is left empty.') }}</small></p>
 <p><label for="s-auth">{{ __('Disposal authority (such as a NARSSA standing disposal authority)') }}</label> @include('description._ric', ['term' => null])<br><input id="s-auth" name="authority" size="70" value="{{ $s?->authority }}"></p>
 <p><label for="s-jur">{{ __('Jurisdiction') }}</label> @include('description._ric', ['term' => null]) <input id="s-jur" name="jurisdiction" value="{{ $s?->jurisdiction }}">
     <label for="s-eff">{{ __('In effect from') }}</label> @include('description._ric', ['term' => null]) <input id="s-eff" type="date" name="effective_on" value="{{ $s?->effective_on?->format('Y-m-d') }}">

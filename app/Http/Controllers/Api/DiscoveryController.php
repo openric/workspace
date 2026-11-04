@@ -249,7 +249,7 @@ class DiscoveryController extends Controller
 
     public function rule(Request $request, string $key): JsonResponse|Response
     {
-        $rule = $this->catalogue($request)->find('rules', $key, ['ruleType']);
+        $rule = $this->catalogue($request)->find('rules', $key, ['ruleType', 'status']);
 
         return $rule ? $this->json($this->jsonLd($request)->rule($rule)) : $this->missing($request, 'Rule', $key);
     }

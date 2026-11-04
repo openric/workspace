@@ -54,7 +54,7 @@ class RuleController extends Controller
     {
         abort_unless($request->user()->may('create', 'authority'), 403);
 
-        return view('rules.create', ['types' => $this->rules->types($request->user()->institution_id)]);
+        return view('rules.create', ['types' => $this->rules->types($request->user()->institution_id), 'ruleStatuses' => Concept::choices(Vocab::BASE.'rule-status/')->get()]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -64,14 +64,24 @@ class RuleController extends Controller
             'name' => ['required', 'string', 'max:2000'],
             'language' => ['required', 'string', fn ($a, $v, $fail) => Bcp47::valid((string) $v) || $fail(__('Give a BCP 47 language tag, such as en or af.'))],
             'type' => ['nullable', 'uuid'],
+            'status' => ['nullable', 'string', 'max:64'],
+            'identifier' => ['nullable', 'string', 'max:255'],
+            'commencement' => ['nullable', 'string', 'max:64'],
+            'repeal' => ['nullable', 'string', 'max:64'],
+            'history' => ['nullable', 'string', 'max:65535'],
         ]);
         try {
-            $rule = $this->rules->create($request->user()->institution, $data['name'], $data['language'], $data['type'] ?? null, $request->user());
+            $rule = DB::transaction(function () use ($request, $data) {
+                $rule = $this->rules->create($request->user()->institution, $data['name'], $data['language'], $data['type'] ?? null, $request->user());
+                $this->rules->establish($rule, $data, $data['language'], $request->user());
+
+                return $rule;
+            });
         } catch (InvalidArgumentException $e) {
             return back()->withInput()->withErrors(['type' => $e->getMessage()]);
         }
 
-        return redirect()->route('rules.show', $rule)->with('status', __('Rule created. Add whom it gives authority to and what it regulates.'));
+        return redirect()->route('rules.show', $rule)->with('status', __('Rule created. Add who issued and enforces it, the record that carries its text, whom it gives authority to and what it regulates.'));
     }
 
     public function show(Request $request, Rule $rule): View
@@ -91,7 +101,7 @@ class RuleController extends Controller
         abort_unless(Bcp47::valid($language), 404);
         $rule->load('descriptionValues.element', 'names.nameType', 'ruleType');
 
-        return view('rules.edit', ['rule' => $rule, 'language' => $language, 'types' => $this->rules->types($rule->institution_id),
+        return view('rules.edit', ['rule' => $rule->load('status'), 'language' => $language, 'types' => $this->rules->types($rule->institution_id), 'ruleStatuses' => Concept::choices(Vocab::BASE.'rule-status/')->get(),
             'statuses' => Concept::choices(Vocab::DESCRIPTION_STATUSES)->with('labels')->get(), 'details' => Concept::choices(Vocab::DESCRIPTION_DETAILS)->with('labels')->get()]);
     }
 
@@ -103,6 +113,7 @@ class RuleController extends Controller
             'values' => ['array'],
             'values.*' => ['nullable', 'max:65535'], 'values.*.*' => ['nullable', 'string', 'max:8'],
             'type' => ['nullable', 'uuid'],
+            'status' => ['nullable', 'string', 'max:64'],
             'authority_iri' => ['nullable', 'string', 'max:2048'],
             'description_identifier' => ['nullable', 'string', 'max:255'],
             'description_status' => ['nullable', 'string', ValidationRule::in(Concept::choices(Vocab::DESCRIPTION_STATUSES)->pluck('iri'))],
@@ -112,6 +123,7 @@ class RuleController extends Controller
         try {
             DB::transaction(function () use ($rule, $data, $values, $request) {
                 $this->rules->updateType($rule, $data['type'] ?? null, $request->user());
+                $this->rules->updateStatus($rule, $data['status'] ?? null, $request->user());
                 $this->rules->updateAuthority($rule, $data['authority_iri'] ?? null, $request->user());
                 $this->rules->updateControl($rule, $data['description_identifier'] ?? null, $data['description_status'] ?? null, $data['description_detail'] ?? null, $request->user());
                 $this->rules->describe($rule, $values, $data['language'], $request->user());

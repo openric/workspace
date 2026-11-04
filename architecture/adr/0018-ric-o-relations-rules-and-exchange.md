@@ -82,3 +82,46 @@ These are close matches, not equivalences: BoDi's confidence runs from 0 to 10 w
 - `tests/Feature/RicoConverterComparisonTest.php` with `tests/Fixtures/rico-converter-choices.txt`: no unexplained difference from ricoconverter 3.0.0.
 - `tests/Feature/PortabilityTest.php`: the export read back with nothing left over.
 - `tests/Feature/RicTermsTest.php`, `RicMappingTest.php` and `ShaclGateTest.php` unchanged: every term exists in RiC-O 1.1, and the pinned shapes pass.
+
+## Amendment (roadmap step 12d: rules and mandates in full), 4 November 2026
+
+Added on Dr Johan Pieterse's word of 3 November 2026: the rule form asked too little.
+
+**A new rule asks up front** for its number (an act's number and year, kept as an identifier), its status, when it came into force and was repealed (its beginning and end dates), and its history.
+
+**Its status** is a vocabulary: draft, in force, in force and amended, and repealed. RiC-O 1.1 has no property for whether a rule is in force, so it is exported as `openricx:hasRuleStatus`, a term the extension ontology adds in 1.7.0.
+
+**Its history** is a description element, exported as `rico:history`, which RiC-O 1.1 gives a `rico:Rule`.
+
+**Five relation types,** each a `rico:RuleRelation`, kept as rows like every relation type, with English and Afrikaans phrases:
+
+| Type | From, to | Property, inverse |
+|---|---|---|
+| Issuance | rule, agent | `rico:issuedBy`, `rico:isResponsibleForIssuing` |
+| Enforcement | rule, agent | `rico:isOrWasEnforcedBy`, `rico:isOrWasResponsibleForEnforcing` |
+| Expression | rule, record (the record that carries its text, such as the Government Gazette) | `rico:isOrWasExpressedBy`, `rico:expressesOrExpressed` |
+| Amendment | rule, rule | `openricx:amendsOrAmended`, `openricx:isOrWasAmendedBy` |
+| Supersession | rule, rule | `openricx:supersedesOrSuperseded`, `openricx:isOrWasSupersededBy` |
+
+: The rule relation types of step 12d
+
+The first three are RiC-O 1.1's own, each checked in its ontology file. RiC-O 1.1 has only `rico:isRuleAssociatedWith` between rules, so the last two are extension terms, subproperties of it, added in 1.7.0.
+
+**The section that gives a mandate its authority** is the basis of the mandate relation, which every relation already has: "section 13(2) of the National Archives and Records Service of South Africa Act". No new field was needed.
+
+**A retention schedule names the rule it is issued under,** as well as its authority as text.
+
+- Where the text is left empty, the rule's name fills it, so a destruction certificate made under the schedule, which copies the text, still names it.
+- A new version of the schedule keeps the rule.
+
+**Not done, and why.** The roadmap also asked for the rule's own language. RiC-O 1.1's `rico:hasOrHadLanguage` is defined for agents, records and record parts, not rules, so it has no place to go. The language of a rule's text belongs to the record that expresses it, which can carry its language.
+
+### Evidence (12d)
+
+- `tests/Feature/RulesInFullTest.php`:
+  - an act made with its number, status, date and history;
+  - issued by Parliament, enforced by the National Archives, expressed in a Government Gazette, amended by another act;
+  - its mandate citing its section;
+  - all of it in the rule's RiC-O both ways;
+  - a retention schedule issued under it, the rule kept by its next version.
+- `tests/Feature/RicTermsTest.php`: every term the new vocabulary rows name is in RiC-O 1.1 or the extension ontology's term list.

@@ -70,6 +70,36 @@ class RuleService
         DB::transaction(fn () => AuditLog::actingAs($actor, fn () => $rule->update(['authority_iri' => $iri])));
     }
 
+    /** Its status, a concept of the rule-status vocabulary by notation, or none (step 12d). */
+    public function updateStatus(Rule $rule, ?string $notation, ?User $actor = null): void
+    {
+        $status = ($notation = trim((string) $notation)) === '' ? null
+            : (Concept::choices(Vocab::BASE.'rule-status/')->where('notation', $notation)->first() ?? throw new InvalidArgumentException(__(':value is not in the list', ['value' => $notation])));
+        DB::transaction(fn () => AuditLog::actingAs($actor, fn () => $rule->update(['status_id' => $status?->id])));
+    }
+
+    /**
+     * What a new rule needs up front (step 12d): its number, such as an act's number and year, its status, and when it came
+     * into force and was repealed. Who issued it and the record that carries its text are relations on its page.
+     */
+    public function establish(Rule $rule, array $data, string $language, ?User $actor = null): void
+    {
+        DB::transaction(function () use ($rule, $data, $language, $actor) {
+            $this->updateStatus($rule, $data['status'] ?? null, $actor);
+            if (($number = trim((string) ($data['identifier'] ?? ''))) !== '') {
+                app(IdentifierService::class)->add($rule, ['type' => 'local', 'value' => $number], $actor);
+            }
+            foreach (['commencement' => 'beginning', 'repeal' => 'end'] as $field => $property) {
+                if (($date = trim((string) ($data[$field] ?? ''))) !== '') {
+                    app(DateService::class)->add($rule, ['property' => $property, 'normalized' => $date, 'expressed' => $date, 'language' => $language], $actor);
+                }
+            }
+            if (($history = trim((string) ($data['history'] ?? ''))) !== '') {
+                $this->describe($rule, ['rule-history' => $history], $language, $actor);
+            }
+        });
+    }
+
     public function updateType(Rule $rule, ?string $typeId, ?User $actor = null): void
     {
         $type = $this->type($rule->institution_id, $typeId);

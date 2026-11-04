@@ -1,0 +1,44 @@
+# OpenRiC Workspace - OpenRiC Workspace Rule Statuses.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Whether a rule or mandate is in force (roadmap step 12d).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/rule-status/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Rule Statuses"@en ;
+    dcterms:description "Whether a rule or mandate is in force (roadmap step 12d)."@en ;
+    dcterms:issued "2026-11-03"^^xsd:date ;
+    skos:hasTopConcept v:draft, v:in-force, v:amended, v:repealed .
+
+v:draft a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Draft"@en, "Konsep"@af ;
+    skos:scopeNote "Not a RiC-O term: exported as openricx:hasRuleStatus, as RiC-O 1.1 has no property for whether a rule is in force."@en ;
+    skos:definition "Not yet in force: a bill, a draft policy, or a regulation published for comment."@en .
+
+v:in-force a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "In force"@en, "Van krag"@af ;
+    skos:scopeNote "Not a RiC-O term: exported as openricx:hasRuleStatus, as RiC-O 1.1 has no property for whether a rule is in force."@en ;
+    skos:definition "In force as first made."@en .
+
+v:amended a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "In force, amended"@en, "Van krag, gewysig"@af ;
+    skos:scopeNote "Not a RiC-O term: exported as openricx:hasRuleStatus, as RiC-O 1.1 has no property for whether a rule is in force."@en ;
+    skos:definition "In force, with amendments since it was first made."@en .
+
+v:repealed a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Repealed"@en, "Herroep"@af ;
+    skos:scopeNote "Not a RiC-O term: exported as openricx:hasRuleStatus, as RiC-O 1.1 has no property for whether a rule is in force."@en ;
+    skos:definition "No longer in force: repealed, revoked or lapsed."@en .

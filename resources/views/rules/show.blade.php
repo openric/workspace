@@ -8,6 +8,7 @@
     @if(session('status'))<p role="status">{{ session('status') }}</p>@endif
     @if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif
     <p><strong>{{ __('Persistent IRI') }}:</strong> <code>{{ $rule->iri }}</code>
+        <br><strong>{{ __('Status') }}:</strong> {{ $rule->status?->label(\App\Support\Vocab::languages()) ?? __('not set') }} @include('description._ric', ['term' => 'openricx:hasRuleStatus'])
         <br><strong>{{ __('Rule type') }}:</strong> {{ $rule->ruleType ? $rule->ruleType->anyLabel(['en']).' ('.$rule->ruleType->vocabulary->title.')' : __('not set') }} @include('description._ric', ['term' => 'rico:hasOrHadRuleType'])
         @if($rule->authority_iri)<br><strong>{{ __('The rule elsewhere') }}:</strong> <a href="{{ $rule->authority_iri }}" rel="noopener noreferrer">{{ $rule->authority_iri }}</a> @include('description._ric', ['term' => 'owl:sameAs'])@endif</p>
     @if($canUpdate)
@@ -16,6 +17,17 @@
     @include('description._view', ['subject' => $rule, 'standard' => \App\Description\Elements::RULE, 'drafts' => $canUpdate])
 
     @include('description._dates', ['subject' => $rule, 'kind' => 'rules', 'heading' => 'Dates', 'canUpdate' => $canUpdate, 'choices' => $dateChoices])
+    @include('description._relations', ['subject' => $rule, 'kind' => 'rules', 'relations' => $relations, 'canUpdate' => $canUpdate,
+        'heading' => 'Issued by', 'types' => ['issuance'], 'section' => 'is', 'add' => 'issuance|source', 'addLabel' => 'Add the agent that issued it, such as Parliament, a minister or the council'])
+    @include('description._relations', ['subject' => $rule, 'kind' => 'rules', 'relations' => $relations, 'canUpdate' => $canUpdate,
+        'heading' => 'Enforced by', 'types' => ['enforcement'], 'section' => 'en', 'add' => 'enforcement|source', 'addLabel' => 'Add the agent that enforces it, such as the National Archives or the Information Regulator'])
+    @include('description._relations', ['subject' => $rule, 'kind' => 'rules', 'relations' => $relations, 'canUpdate' => $canUpdate,
+        'heading' => 'Its text', 'types' => ['expression'], 'section' => 'ex', 'add' => 'expression|source', 'addLabel' => 'Add the record that carries its text, such as the Government Gazette that published it'])
+    @include('description._relations', ['subject' => $rule, 'kind' => 'rules', 'relations' => $relations, 'canUpdate' => $canUpdate,
+        'heading' => 'Amendments', 'types' => ['amendment'], 'section' => 'am', 'add' => 'amendment|source', 'addLabel' => 'Add a rule this one amends'])
+    @include('description._relations', ['subject' => $rule, 'kind' => 'rules', 'relations' => $relations, 'canUpdate' => $canUpdate,
+        'heading' => 'Supersedes or superseded', 'types' => ['supersession'], 'section' => 'su', 'add' => 'supersession|source', 'addLabel' => 'Add a rule this one replaced'])
+    <p class="meta">{{ __('For a mandate, give the section that gives the authority, such as section 13(2) of the National Archives and Records Service of South Africa Act, as the basis of the relation.') }}</p>
     @include('description._relations', ['subject' => $rule, 'kind' => 'rules', 'relations' => $relations, 'canUpdate' => $canUpdate,
         'heading' => 'Gives authority to', 'types' => ['mandate'], 'section' => 'md', 'add' => 'mandate|source', 'addLabel' => 'Add an agent this mandate gives authority to'])
     @include('description._relations', ['subject' => $rule, 'kind' => 'rules', 'relations' => $relations, 'canUpdate' => $canUpdate,

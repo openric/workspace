@@ -18,7 +18,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['institution_id', 'iri', 'rule_type_id', 'authority_iri', 'description_identifier', 'description_status_id', 'description_detail_id'])]
+#[Fillable(['institution_id', 'iri', 'rule_type_id', 'status_id', 'authority_iri', 'description_identifier', 'description_status_id', 'description_detail_id'])]
 class Rule extends Model
 {
     use Audited, Describable, HasDates, HasIdentifiers, HasUuids;
@@ -35,6 +35,12 @@ class Rule extends Model
     }
 
     /** rico:hasOrHadRuleType */
+    /** Whether it is in force: draft, in force, amended, repealed (step 12d). */
+    public function status(): BelongsTo
+    {
+        return $this->belongsTo(Concept::class, 'status_id');
+    }
+
     public function ruleType(): BelongsTo
     {
         return $this->belongsTo(Concept::class, 'rule_type_id');

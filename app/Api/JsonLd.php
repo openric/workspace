@@ -357,6 +357,13 @@ class JsonLd
         if ($rule->authority_iri) {
             $out['owl:sameAs'] = $rule->authority_iri;
         }
+        // Whether it is in force, and how it came about and changed (step 12d).
+        if ($rule->status) {
+            $out['openricx:hasRuleStatus'] = ['@id' => $rule->status->iri];
+        }
+        if ($history = $this->text($rule, 'rule-history')) {
+            $out['rico:history'] = $history;
+        }
 
         return $out + $this->dates($rule->dates) + $this->relations($rule);
     }

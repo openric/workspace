@@ -30,7 +30,7 @@ return [
         'narssa-transfer-status.ttl', 'export-permit-status.ttl',
         'naz-closure-type.ttl', 'naz-protection-type.ttl', 'naz-permit-type.ttl', 'naz-permit-status.ttl', 'naz-schedule-status.ttl', 'naz-records-class.ttl', 'naz-access-restriction.ttl', 'naz-transfer-type.ttl', 'naz-transfer-status.ttl', 'cdpa-licence-tier.ttl', 'licence-status.ttl', 'jurisdiction-pack.ttl', 'label-page-size.ttl', 'label-barcode-source.ttl', 'label-qr-target.ttl', 'intake-outcome.ttl', 'duplicate-rule-type.ttl', 'duplicate-status.ttl', 'custom-field-type.ttl',
         'vendor-type.ttl', 'vendor-status.ttl', 'vendor-service-type.ttl', 'vendor-transaction-status.ttl', 'vendor-payment-status.ttl', 'condition-grade.ttl', 'vendor-attachment-type.ttl',
-        'fixity-frequency.ttl', 'fixity-scope.ttl', 'fixity-run-status.ttl', 'fixity-trigger.ttl', 'fixity-outcome.ttl', 'fixity-failure-status.ttl', 'sign-in-match.ttl', 'two-factor-policy.ttl', 'webhook-event.ttl', 'webhook-delivery-status.ttl'],
+        'fixity-frequency.ttl', 'fixity-scope.ttl', 'fixity-run-status.ttl', 'fixity-trigger.ttl', 'fixity-outcome.ttl', 'fixity-failure-status.ttl', 'sign-in-match.ttl', 'two-factor-policy.ttl', 'rule-status.ttl', 'webhook-event.ttl', 'webhook-delivery-status.ttl'],
 
     // API keys (ADR 0007, Heratio's ApiKeyService): what an account must hold, anywhere, for a key it
     // owns to carry each scope (api-scope vocabulary), as [action, kind] pairs of which any one will do.

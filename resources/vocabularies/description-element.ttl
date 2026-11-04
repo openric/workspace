@@ -1202,3 +1202,10 @@ v:rule-sources a skos:Concept ;
     skos:prefLabel "Sources"@en ;
     skos:scopeNote "Where the text of the rule is published, such as a government gazette; Heratio's sources. Exported in rico:generalDescription, as RiC-O 1.1 has no property for it."@en ;
     skos:definition "Where the rule is published or can be read."@en .
+
+v:rule-history a skos:Concept ;
+    skos:inScheme v: ;
+    skos:broader v:rule ;
+    skos:prefLabel "History"@en, "Geskiedenis"@af ;
+    skos:scopeNote "Exported as rico:history, which RiC-O 1.1 gives a rico:Rule. How the rule came to be made, and how it was amended, superseded or repealed (roadmap step 12d)."@en ;
+    skos:definition "How the rule came about and changed."@en .

@@ -25,6 +25,7 @@ use App\Models\RecordDisposalClass;
 use App\Models\RecordResource;
 use App\Models\RetentionReview;
 use App\Models\RetentionSchedule;
+use App\Models\Rule;
 use App\Models\User;
 use App\Support\Vocab;
 use Carbon\CarbonImmutable;
@@ -42,7 +43,12 @@ class RetentionService
     /** @param array{reference: string, title: string, description?: ?string, authority?: ?string, jurisdiction?: ?string, effective_on?: ?string, review_on?: ?string, expires_on?: ?string} $data */
     public function saveSchedule(Institution $institution, array $data, ?RetentionSchedule $schedule, User $actor): RetentionSchedule
     {
-        $fields = ['reference' => trim($data['reference']), 'title' => trim($data['title']), 'description' => $this->text($data, 'description'), 'authority' => $this->text($data, 'authority'),
+        // The disposal authority as a rule of the institution (step 12d): its name is the authority's text where none is given,
+        // so a certificate made under the schedule still names it.
+        $rule = ($ruleId = $this->text($data, 'authority_rule_id')) === null ? null
+            : (Rule::where(['id' => $ruleId, 'institution_id' => $institution->id])->whereNull('deleted_at')->first() ?? throw new InvalidArgumentException(__('Choose one of the institution\'s rules.')));
+        $fields = ['reference' => trim($data['reference']), 'title' => trim($data['title']), 'description' => $this->text($data, 'description'),
+            'authority' => $this->text($data, 'authority') ?? ($rule ? (string) $rule->described('rule-name', ['en']) : null), 'authority_rule_id' => $rule?->id,
             'jurisdiction' => $this->text($data, 'jurisdiction'), 'effective_on' => $this->text($data, 'effective_on'), 'review_on' => $this->text($data, 'review_on'),
             'expires_on' => $this->text($data, 'expires_on')];
 
@@ -62,7 +68,7 @@ class RetentionService
     public function newVersion(RetentionSchedule $schedule, User $actor): RetentionSchedule
     {
         return DB::transaction(fn () => AuditLog::actingAs($actor, function () use ($schedule, $actor) {
-            $next = RetentionSchedule::create([...$schedule->only(['institution_id', 'reference', 'title', 'description', 'authority', 'jurisdiction', 'effective_on', 'review_on', 'expires_on']),
+            $next = RetentionSchedule::create([...$schedule->only(['institution_id', 'reference', 'title', 'description', 'authority', 'authority_rule_id', 'jurisdiction', 'effective_on', 'review_on', 'expires_on']),
                 'status_id' => self::concept('retention-schedule-status', 'draft')->id, 'version' => $schedule->version + 1, 'previous_id' => $schedule->id, 'created_by_id' => $actor->id]);
             foreach ($schedule->classes as $class) {
                 DisposalClass::create([...$class->only(['reference', 'title', 'description', 'retention_years', 'retention_months', 'trigger_id', 'action_id', 'review_required', 'citation', 'is_active', 'position']),

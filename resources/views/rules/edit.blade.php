@@ -11,6 +11,7 @@
         <label for="language">{{ __('Language of these values (BCP 47)') }}</label> @include('description._ric', ['term' => 'xml:lang'])
         <input id="language" name="language" required value="{{ old('language', $language) }}">
         @include('rules._type-field', ['types' => $types, 'current' => $rule->rule_type_id])
+        @include('rules._status-field', ['current' => old('status', $rule->status?->notation)])
         <label for="authority_iri">{{ __('The rule elsewhere') }}</label> @include('description._ric', ['term' => 'owl:sameAs'])
         <input id="authority_iri" name="authority_iri" type="url" maxlength="2048" value="{{ old('authority_iri', $rule->authority_iri) }}" aria-describedby="authority-help">
         <small id="authority-help">{{ __('The address of the same rule in a legal database or a government gazette, if it has one.') }}</small>
