@@ -5,7 +5,8 @@
 // and it searches its own peers at once, each within its time limit, an institution on this installation read here and
 // any other by its federation API, merges what they answer by score and priority, and keeps each peer's answer for
 // fifteen minutes and every search in its log. A peer whose address is not a public one is not asked (Heratio's SSRF
-// guard); each answer is verified against the peer's key.
+// guard); each answer is verified against the peer's key. From phase 16b, DSpace and Alma catalogues are searched by
+// their own protocols (Connectors), and their answers are unsigned.
 // Changed from Heratio: an institution on the same installation is a peer like any other, and is read as the public
 // sees it, so no institution ever sees another's drafts; and a peer's API key is encrypted, never kept as text.
 // Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
@@ -76,7 +77,7 @@ class FederatedSearch
         $started = microtime(true);
         $hash = hash('sha256', mb_strtolower(trim($query)));
         $peers = FederationPeer::where(['institution_id' => $institution->id, 'is_active' => true, 'search_enabled' => true])->with('type', 'peerInstitution')->orderBy('priority')->get()
-            ->filter(fn ($p) => in_array($p->type->notation, ['institution', 'workspace', 'heratio'], true))->values();
+            ->filter(fn ($p) => in_array($p->type->notation, ['institution', 'workspace', 'heratio', 'dspace', 'alma'], true))->values();
         $outcomes = [];
         $remote = [];
         foreach ($peers as $peer) {
@@ -88,6 +89,20 @@ class FederatedSearch
                 $answer = $peer->peerInstitution ? $this->answer($peer->peerInstitution, $query, $peer->max_results) : null;
                 $outcomes[$peer->id] = ['peer' => $peer, 'status' => $answer === null ? 'error' : 'success', 'verification' => 'local', 'results' => $answer['results'] ?? [],
                     'ms' => (int) ((microtime(true) - $at) * 1000), 'error' => $answer === null ? __('It does not share its catalogue.') : null];
+            } elseif (in_array($peer->type->notation, ['dspace', 'alma'], true)) {
+                // A catalogue with its own protocol (phase 16b): asked in turn, within its time limit; it signs nothing.
+                $at = microtime(true);
+                if (! $peer->base_url || ! Webhooks::publicUrl($peer->base_url)) {
+                    $outcomes[$peer->id] = ['peer' => $peer, 'status' => 'skipped', 'verification' => null, 'results' => [], 'ms' => 0, 'error' => __('Its address is not a public one.')];
+                } else {
+                    try {
+                        $outcomes[$peer->id] = ['peer' => $peer, 'status' => 'success', 'verification' => 'unsigned', 'results' => app(Connectors::class)->search($peer, $query),
+                            'ms' => (int) ((microtime(true) - $at) * 1000), 'error' => null];
+                    } catch (Throwable $e) {
+                        $outcomes[$peer->id] = ['peer' => $peer, 'status' => str_contains(strtolower($e->getMessage()), 'timed out') ? 'timeout' : 'error', 'verification' => null,
+                            'results' => [], 'ms' => (int) ((microtime(true) - $at) * 1000), 'error' => mb_substr($e->getMessage(), 0, 300)];
+                    }
+                }
             } elseif (! ($address = $peer->searchAddress()) || ! Webhooks::publicUrl($address)) {
                 $outcomes[$peer->id] = ['peer' => $peer, 'status' => 'skipped', 'verification' => null, 'results' => [], 'ms' => 0, 'error' => __('Its address is not a public one.')];
             } else {

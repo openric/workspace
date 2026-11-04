@@ -43,6 +43,7 @@ use App\Models\CaptionTrack;
 use App\Models\Concept;
 use App\Models\Container;
 use App\Models\DuplicateDetection;
+use App\Models\FederationMember;
 use App\Models\FederationPeer;
 use App\Models\Feedback;
 use App\Models\FileFormat;
@@ -370,6 +371,8 @@ class AccessMatrixTest extends TestCase
         // Phase 16a: a federation peer.
         $make('federation peer', fn () => FederationPeer::create(['institution_id' => $institution->id, 'name' => 'Peer', 'type_id' => Concept::where('iri', Vocab::BASE.'federation-peer-type/workspace')->value('id'),
             'base_url' => 'https://peer.example.org', 'is_active' => false]));
+        // Phase 16b: a member of the union catalogue.
+        $make('union member', fn () => FederationMember::create(['institution_id' => $institution->id, 'name' => 'Member', 'base_url' => 'https://member.example.org']));
         // Phase 12b: an identity provider.
         $make('sign-in provider', fn () => SignInProvider::create(['institution_id' => $institution->id, 'label' => 'Staff', 'issuer_url' => 'https://idp.example.org',
             'client_id' => 'workspace', 'client_secret' => 'secret', 'scopes' => ['openid'], 'match_id' => Concept::where('iri', Vocab::BASE.'sign-in-match/subject')->value('id')]));

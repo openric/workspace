@@ -85,3 +85,58 @@ What was changed from Heratio:
     - verified and its key pinned on first use, its API key sent, the same search answered from the cache;
     - an answer signed with another key refused, and the pin cleared by the institution;
   - a peer at a private address refused when added, and an institution refused as its own peer.
+
+## 16b: OAI-PMH harvest, the union catalogue, DSpace and Alma
+
+**Harvest**, after Heratio's `HarvestClient` and `HarvestService`. An OAI-PMH peer is harvested on its interval, each hour, or when asked: from its last harvest, or in full. Its records are listed by ListRecords, page after page by resumption token, in its metadata format (`oai_dc` unless set) and set.
+
+Each record is taken in as a draft unit of description, at item level, in a repository the harvest makes for the peer ("Harvested from <peer>"). The Dublin Core is mapped as Heratio maps it, onto the ISAD(G) elements:
+
+- the title, and the description as scope and content;
+- the rights as conditions governing access, and the format as extent;
+- the date as the dates expressed, and the source as a note;
+- the first identifier that is not an address as the unit's identifier.
+
+A record harvested before is brought up to date. One the peer marks deleted is deleted here, as any unit is, its IRI answering 410. A busy repository's 503 is waited for as its Retry-After says.
+
+Each run is kept with its counts and any error, and each record's action is in the harvest log. Each unit is tied to the record it came from by peer and OAI identifier.
+
+What was changed from Heratio:
+
+- The peer must be at a public address, checked before the first request, and redirects are not followed.
+- The tie between a unit and its source record is a table, not properties on the unit.
+- Only a unit the harvest made is ever changed or deleted by it.
+- A harvested unit stays a draft until someone publishes it, so nothing harvested reaches the public catalogue or a peer unseen.
+
+**The union catalogue**, after Heratio's `UnionCatalogueService` and `UnionHarvestService`. An institution's union has members, itself among them; each is opted in, off by default.
+
+- **Its own records.** Its published units of description, of the levels it shares, become its self member's union records, each night or when asked. They leave the union when it stops sharing.
+- **Its members' records.** Each other member's are fetched from that member's `/union/records`, asking only for its own (`self=1`), so two unions that list each other do not copy each other's copies.
+- **Serving it.** The union is served at `/union/records` as paged JSON, Heratio's shape, CORS-open: every enabled member's records, or only the institution's own with `self=1`.
+- **Searching it.** By title in the public catalogue and on the federation page.
+
+**DSpace and Alma**, after Heratio's `DSpaceConnector` and `AlmaConnector`, are searched beside the other peers:
+
+- **DSpace 7 or later**, by its REST discovery API: `/server/api/discover/search/objects`, or the REST address given.
+- **Alma**, by SRU 1.2 in MARCXML: 245 for the title, 100, 110 or 700 for the author, 264, 260 or the 008 for the date, 520 for the summary, and 001 as the MMS id in the record address the peer gives.
+
+Their answers are unsigned, and say so.
+
+### Not carried in 16b
+
+- Heratio's `oai_heritage` and `oai_ead` formats: they are Heratio's own; Dublin Core is what every repository gives. A Workspace or Heratio peer is better searched by the signed federation API (16a).
+- Heratio's AtoM Elasticsearch connector: it reads AtoM's index on the same server, which the Workspace never does.
+
+### Evidence (16b)
+
+- `tests/Feature/HarvestAndUnionTest.php`:
+  - harvest:
+    - a faked OAI-PMH peer harvested over two pages into three draft units in the peer's repository, mapped from Dublin Core, none public;
+    - the next harvest asking from the last, bringing one up to date and deleting one as the peer says, each action in the log;
+    - an OAI-PMH error failing the run with its reason;
+  - the union:
+    - nothing in it until the institution shares and opts in, then its published unit and not its draft;
+    - a member's records fetched with `self=1`;
+    - the union served whole and as the institution's own, and found in the public and staff searches;
+    - its records gone when it stops sharing;
+  - a faked DSpace repository and Alma catalogue found beside each other by their own protocols, Alma's record address from its template, both unsigned.

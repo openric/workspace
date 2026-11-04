@@ -52,7 +52,7 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-export` | 1256 | V0.1 candidate | Covered |  | `ahgExportPlugin` | EAD, Dublin Core, MODS, CSV and RiC-O export |
 | `ahg-extended-rights` | 7869 | V0.1 candidate | Partial | 13 | `ahgExtendedRightsPlugin` | Rights statements, licences, grants, batch rights and the rights report (v0.0.57 to v0.0.59); embargoes of records and their files, with exceptions, notices and the list from v0.0.89 (13a, ADR 0015); retention and disposal in 13b |
 | `ahg-favorites` | 2634 | later: V1.0+ | Covered | 19a | `ahgFavoritesPlugin` | Favourites of any entity, folders shared by a link, nine export formats, import by IRI (ADR 0017); sending to collections (with notes), projects (as their records) and bibliographies |
-| `ahg-federation` | 15815 | later: V1.0+ | Partial | 16a | `ahgFederationPlugin` | Peers and signed federated search from v0.0.118 (ADR 0023); harvest and union catalogue in 16b, vocabulary sync and governance in 16c, Europeana and loans in 16d |
+| `ahg-federation` | 15815 | later: V1.0+ | Partial | 16a, 16b | `ahgFederationPlugin` | Peers and signed federated search from v0.0.118; OAI-PMH harvest, the union catalogue and the DSpace and Alma connectors from v0.0.119 (ADR 0023); vocabulary sync and governance in 16c, Europeana and loans in 16d |
 | `ahg-feedback` | 879 | later: V1.0+ | Covered | 19a | `ahgFeedbackPlugin` | Feedback from anyone on the catalogue or a record, handled by staff (ADR 0017) |
 | `ahg-forms` | 2541 | later: V1.0+ | Covered | 22b | `ahgFormsPlugin` | Form templates of elements and own fields, assigned by repository, level or collection, from v0.0.107 (ADR 0020) |
 | `ahg-ftp-upload` | 2301 | later: V1.0+ | Covered | 22a | `ahgFtpPlugin` | An FTP or SFTP account kept to a watched folder, from v0.0.106 (ADR 0020): files go to the Workspace's own store, not to an FTP server for later fetching |
@@ -782,7 +782,16 @@ Added on 4 November 2026 with 16a.
 | Heratio field | Workspace | Status |
 |---|---|---|
 | `federation_peer`: `name`, `peer_type`, `base_url`, `api_key`, `description`, `contact_email`, `is_active` | The same, per institution; the type a vocabulary row, the key encrypted | Same, from v0.0.118 |
-| `config`, `oai_identifier`, `default_metadata_prefix`, `default_set`, `harvest_interval_hours`, `last_harvest_*` | With OAI-PMH harvest | 16b |
+| `config`, `default_metadata_prefix`, `default_set`, `harvest_interval_hours`, `last_harvest_at`, `last_harvest_status`, `last_harvest_records` | The same, from v0.0.119; the repository harvested records are kept in | Same |
+| `oai_identifier` | The OAI-PMH address is the peer's base address | Modelled |
+| `federation_harvest_session`: `peer_id`, `started_at`, `completed_at`, `status`, `metadata_prefix`, `harvest_from`, `harvest_until`, `harvest_set`, `is_full_harvest`, `records_total`, `records_created`, `records_updated`, `records_deleted`, `records_skipped`, `records_errors`, `error_message`, `initiated_by` | The same | Same |
+| `federation_harvest_log`: `peer_id`, `information_object_id`, `source_oai_identifier`, `harvest_date`, `metadata_format`, `action` | The same, with its session and a note | Same |
+| Federation provenance properties on the description (`FederationProvenance`) | A table tying each harvested unit to its peer, OAI identifier and datestamp | Modelled |
+| `federation_member`: `name`, `base_url`, `contact`, `share_scope`, `is_self`, `is_enabled` | The same, per institution, with when it was last fetched | Same |
+| `federation_union_record`: `member_id`, `record_ref`, `title`, `level`, `dates`, `repository`, `url`, `indexed_at` | The same | Same |
+| `peer_type` dspace, alma (`DSpaceConnector`, `AlmaConnector`) | The same | Same |
+| `peer_type` atom_local (`AtomElasticsearchConnector`) | Not carried: it reads AtoM's own index | Not carried |
+| `oai_heritage`, `oai_ead` harvest formats | Not carried: Dublin Core, and the signed API for Workspace and Heratio peers | Not carried |
 | `pinned_key_fingerprint`, `key_pinned_at` | The same | Same |
 | `federation_peer_search`: `search_api_url`, `search_api_key`, `search_enabled`, `search_timeout_ms`, `search_max_results`, `search_priority`, `last_search_at`, `last_search_status`, `avg_response_time_ms` | On the peer itself, one row | Same |
 | `federation_search_cache`: `query_hash`, `peer_id`, `results_json`, `result_count`, `created_at`, `expires_at` | The same, with the answer's verification | Same |

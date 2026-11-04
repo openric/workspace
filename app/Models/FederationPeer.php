@@ -16,7 +16,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[Fillable(['institution_id', 'name', 'type_id', 'base_url', 'search_url', 'peer_institution_id', 'api_key', 'description', 'contact_email', 'is_active', 'search_enabled',
-    'timeout_ms', 'max_results', 'priority', 'last_search_at', 'last_search_status_id', 'avg_response_ms', 'pinned_key_id', 'key_pinned_at', 'last_verification_id'])]
+    'timeout_ms', 'max_results', 'priority', 'last_search_at', 'last_search_status_id', 'avg_response_ms', 'pinned_key_id', 'key_pinned_at', 'last_verification_id',
+    'metadata_prefix', 'default_set', 'harvest_interval_hours', 'harvest_repository_id', 'last_harvest_at', 'last_harvest_status_id', 'last_harvest_records', 'config'])]
 #[Hidden(['api_key'])]
 class FederationPeer extends Model
 {
@@ -25,13 +26,14 @@ class FederationPeer extends Model
     protected function casts(): array
     {
         return ['api_key' => 'encrypted', 'is_active' => 'boolean', 'search_enabled' => 'boolean', 'timeout_ms' => 'integer', 'max_results' => 'integer', 'priority' => 'integer',
-            'avg_response_ms' => 'integer', 'last_search_at' => 'immutable_datetime', 'key_pinned_at' => 'immutable_datetime'];
+            'avg_response_ms' => 'integer', 'last_search_at' => 'immutable_datetime', 'key_pinned_at' => 'immutable_datetime',
+            'harvest_interval_hours' => 'integer', 'last_harvest_at' => 'immutable_datetime', 'last_harvest_records' => 'integer', 'config' => 'array'];
     }
 
     /** Searching or being searched changes no record of the peer worth an audit row. */
     public function notAudited(): array
     {
-        return ['last_search_at', 'last_search_status_id', 'avg_response_ms', 'last_verification_id'];
+        return ['last_search_at', 'last_search_status_id', 'avg_response_ms', 'last_verification_id', 'last_harvest_at', 'last_harvest_status_id', 'last_harvest_records'];
     }
 
     public function type(): BelongsTo
@@ -42,6 +44,16 @@ class FederationPeer extends Model
     public function peerInstitution(): BelongsTo
     {
         return $this->belongsTo(Institution::class, 'peer_institution_id');
+    }
+
+    public function lastHarvestStatus(): BelongsTo
+    {
+        return $this->belongsTo(Concept::class, 'last_harvest_status_id');
+    }
+
+    public function harvestRepository(): BelongsTo
+    {
+        return $this->belongsTo(Repository::class, 'harvest_repository_id');
     }
 
     public function lastStatus(): BelongsTo

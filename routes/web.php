@@ -195,6 +195,8 @@ Route::middleware([ServeDiscovery::class, 'throttle:120,1'])->group(function () 
     Route::get('/open-data/protocol', [FederationController::class, 'protocol'])->name('federation.protocol');
     Route::get('/open-data/federation', [FederationController::class, 'peerIndex'])->name('federation.index-public');
     Route::get('/discover/federated', [FederationController::class, 'publicSearch'])->name('discover.federated');
+    Route::get('/union/records', [FederationController::class, 'unionRecords'])->name('federation.union-records');
+    Route::get('/discover/union', [FederationController::class, 'unionSearch'])->name('discover.union');
 });
 Route::middleware(ServeDiscovery::class)->prefix('discover')->name('discover.')->group(function () {
     Route::get('/', [DiscoverController::class, 'home'])->name('home');
@@ -623,6 +625,11 @@ Route::middleware(['auth', 'active'])->group(function () {
             Route::post('/peers/{peer}', [FederationController::class, 'savePeer'])->name('peers.update');
             Route::post('/peers/{peer}/test', [FederationController::class, 'testPeer'])->name('peers.test');
             Route::post('/peers/{peer}/clear-pin', [FederationController::class, 'clearPin'])->name('peers.clear-pin');
+            Route::post('/peers/{peer}/harvest', [FederationController::class, 'harvest'])->name('peers.harvest');
+            Route::post('/members', [FederationController::class, 'saveMember'])->name('members.store');
+            Route::post('/members/{member}', [FederationController::class, 'saveMember'])->whereUuid('member')->name('members.update');
+            Route::post('/union/publish', [FederationController::class, 'publishUnion'])->name('union.publish');
+            Route::post('/members/{member}/fetch', [FederationController::class, 'fetchMember'])->whereUuid('member')->name('members.fetch');
         });
         // OAIS information packages and Archivematica (roadmap phase 15d).
         Route::whereUuid(['record', 'package'])->group(function () {

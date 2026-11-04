@@ -41,6 +41,10 @@
             {{-- The catalogues it federates with (phase 16a). --}}
             <p><a href="{{ route('discover.federated', ['q' => $query]) }}">{{ __('Search other catalogues for this') }}</a></p>
         @endif
+        @if(\Illuminate\Support\Facades\DB::table('federation_members')->where(['institution_id' => $institution->id, 'is_enabled' => true, 'is_self' => false])->exists())
+            {{-- Its union catalogue (phase 16b). --}}
+            <p><a href="{{ route('discover.union', ['q' => $query]) }}">{{ __('Search the union catalogue for this') }}</a></p>
+        @endif
         <div class="search-layout">
             <aside class="search-facets" aria-label="{{ __('Narrow the results') }}">
                 <h2>{{ __('Kind') }}</h2>

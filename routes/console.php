@@ -5,6 +5,8 @@ use App\Dedupe\Duplicates;
 use App\Description\AgreementService;
 use App\Description\WorkflowSlaService;
 use App\Federation\FederatedSearch;
+use App\Federation\Harvest;
+use App\Federation\UnionCatalogue;
 use App\Files\FileStore;
 use App\Files\MediaDuration;
 use App\Fixity\Fixity;
@@ -195,6 +197,21 @@ Artisan::command('workspace:federation:cache-clean', function (FederatedSearch $
     $this->info($federation->clearExpired().' cached peer answers removed.');
 })->purpose('Remove the cached federation answers that have expired (Heratio\'s SearchCacheCleanCommand)');
 Schedule::command('workspace:federation:cache-clean')->hourly();
+// Harvest and the union catalogue (roadmap phase 16b): OAI-PMH peers harvested on their interval, each hour; each sharing
+// institution's records put into its union and its members' fetched, each night.
+Artisan::command('workspace:federation:harvest', function (Harvest $harvest) {
+    $this->info($harvest->runDue().' peers harvested.');
+})->purpose('Harvest the OAI-PMH peers whose interval has passed (Heratio\'s HarvestCommand)');
+Schedule::command('workspace:federation:harvest')->hourly()->withoutOverlapping(720);
+Artisan::command('workspace:federation:union', function (UnionCatalogue $union) {
+    foreach (Institution::all() as $institution) {
+        $this->line($institution->name.': '.$union->publish($institution).' records in the union');
+        foreach (DB::table('federation_members')->where(['institution_id' => $institution->id, 'is_enabled' => true, 'is_self' => false])->get() as $member) {
+            $this->line('  '.$member->name.': '.rescue(fn () => $union->fetch($member).' fetched', fn ($e) => $e->getMessage(), false));
+        }
+    }
+})->purpose('Put each institution\'s records into its union catalogue and fetch its members\' (Heratio\'s UnionPublishCommand)');
+Schedule::command('workspace:federation:union')->dailyAt('02:30')->withoutOverlapping(240);
 // Archivematica (roadmap phase 15d): transfers followed to their AIP every five minutes, DIPs fetched each hour, and a ping.
 Artisan::command('workspace:archivematica:poll', function (Transfers $transfers) {
     $this->info($transfers->poll().' transfers looked at.');
