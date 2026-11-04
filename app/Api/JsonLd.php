@@ -469,7 +469,7 @@ class JsonLd
      */
     private function appellations(Model $entity, string $class): array
     {
-        return $entity->names->filter(fn ($n) => $this->view->visible($n))->sortBy(fn ($n) => [! $n->is_original, $n->language])->values()
+        return $entity->names->filter(fn ($n) => $this->view->visible($n))->sortBy(fn ($n) => [! $n->is_original, $n->language, $n->id])->values()
             ->map(function ($name) use ($entity, $class) {
                 $dated = fn (string $property) => $name->dates->first(fn ($d) => $d->property?->notation === $property);
                 [$from, $to] = [$dated('used-from'), $dated('used-to')];
@@ -662,7 +662,7 @@ class JsonLd
     /** @return array<string, mixed> the property with the published names, or nothing */
     private function strings(string $property, Collection $names): array
     {
-        $names = $names->filter(fn ($n) => $this->view->visible($n))->sortBy(fn ($n) => [! $n->is_original, $n->language])->values();
+        $names = $names->filter(fn ($n) => $this->view->visible($n))->sortBy(fn ($n) => [! $n->is_original, $n->language, $n->id])->values();
 
         return $names->isEmpty() ? [] : [$property => $this->languageStrings($names)];
     }
