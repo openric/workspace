@@ -36,6 +36,7 @@ use App\Http\Controllers\EmbargoController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\FavouritesController;
 use App\Http\Controllers\FeedbackController;
+use App\Http\Controllers\FormatController;
 use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\IdentifierController;
 use App\Http\Controllers\IiifAuthController;
@@ -331,7 +332,7 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/{record}/export', [ExportController::class, 'form'])->name('export');
         // What each format leaves out of the unit (roadmap phase 23b).
         Route::get('/{record}/export/left-out.json', [ExportController::class, 'loss'])->name('export.loss');
-        Route::get('/{record}/export/{format}', [ExportController::class, 'download'])->where('format', 'ead|ead3|csv|dc|mods|mets')->name('export.download');
+        Route::get('/{record}/export/{format}', [ExportController::class, 'download'])->where('format', 'ead|ead3|csv|dc|mods|mets|premis')->name('export.download');
         // Provenance and custody history (roadmap phase 9e; Heratio's provenance); the controller checks update to change it.
         Route::get('/{record}/publish-readiness', [WorkflowQueueController::class, 'readiness'])->name('publish-readiness');
         Route::get('/{record}/provenance', [ProvenanceController::class, 'index'])->name('provenance');
@@ -591,6 +592,10 @@ Route::middleware(['auth', 'active'])->group(function () {
         // Operations and fixity on a schedule (roadmap phase 12a).
         Route::get('/operations', [OperationsController::class, 'index'])->name('operations.index');
         Route::post('/operations/failed-jobs/{uuid}/{action}', [OperationsController::class, 'failedJob'])->whereUuid('uuid')->whereIn('action', ['retry', 'forget'])->name('operations.failed-job');
+        // File formats as PRONOM identifies them (roadmap phase 15a).
+        Route::get('/formats', [FormatController::class, 'index'])->name('formats.index');
+        Route::post('/formats/identify', [FormatController::class, 'identify'])->name('formats.identify');
+        Route::post('/formats/{format}', [FormatController::class, 'update'])->whereUuid('format')->name('formats.update');
         Route::get('/fixity', [OperationsController::class, 'schedules'])->name('fixity.schedules');
         Route::post('/fixity', [OperationsController::class, 'saveSchedule'])->name('fixity.schedules.store');
         Route::post('/fixity/{schedule}', [OperationsController::class, 'saveSchedule'])->whereUuid('schedule')->name('fixity.schedules.update');

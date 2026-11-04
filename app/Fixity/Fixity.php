@@ -26,6 +26,7 @@ use App\Models\FixitySchedule;
 use App\Models\Institution;
 use App\Models\RecordResource;
 use App\Models\User;
+use App\Preservation\PreservationEvents;
 use App\Support\Vocab;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
@@ -59,6 +60,9 @@ class Fixity
                     'status_id' => $this->term('fixity-failure-status', 'open')->id, 'first_failed_at' => now(), 'last_failed_at' => now(), 'last_run_id' => $run?->id]);
             }
         });
+        // The check as a PREMIS fixity check (phase 15a).
+        app(PreservationEvents::class)->record($file, 'fixity-check', $outcome === 'pass' ? 'success' : 'failure', 'SHA-256',
+            $outcome === 'pass' ? $file->sha256 : __('Expected :expected, found :found.', ['expected' => $file->sha256, 'found' => $sha ?? __('no file')]), $actor);
         if ($run) {
             $run->increment('files_checked');
             $run->increment(['pass' => 'files_passed', 'mismatch' => 'files_changed', 'missing' => 'files_missing'][$outcome]);

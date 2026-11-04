@@ -12,6 +12,7 @@ use App\Jurisdiction\ExportPermits;
 use App\Jurisdiction\Naz;
 use App\Models\DigitalFile;
 use App\Models\Institution;
+use App\Preservation\FormatIdentification;
 use App\Privacy\Registers;
 use App\Reports\ReportDelivery;
 use App\Reports\UsageService;
@@ -158,6 +159,14 @@ Artisan::command('workspace:webhooks:retry', function (Webhooks $webhooks) {
     $this->info($webhooks->retryDue().' webhook deliveries tried again.');
 })->purpose('Send again the webhook deliveries that failed and whose next try is due (Heratio\'s webhook retry)');
 Schedule::command('workspace:webhooks:retry')->everyMinute()->withoutOverlapping();
+
+Artisan::command('workspace:formats:identify', function (FormatIdentification $identification) {
+    $done = 0;
+    DigitalFile::whereNull('format_identified_at')->orderBy('id')->each(function (DigitalFile $file) use ($identification, &$done) {
+        $identification->identify($file) && $done++;
+    });
+    $this->info("$done files identified.");
+})->purpose('Identify against PRONOM the formats of the files not yet identified (phase 15a)');
 
 Artisan::command('workspace:fixity:scheduled', function (Fixity $fixity) {
     $this->info($fixity->runDue().' fixity schedules run.');

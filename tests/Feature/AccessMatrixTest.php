@@ -44,6 +44,7 @@ use App\Models\Concept;
 use App\Models\Container;
 use App\Models\DuplicateDetection;
 use App\Models\Feedback;
+use App\Models\FileFormat;
 use App\Models\FixityFailure;
 use App\Models\Import;
 use App\Models\Institution;
@@ -345,6 +346,8 @@ class AccessMatrixTest extends TestCase
             app(EmailCaptures::class)->capture($admin, UploadedFile::fake()->createWithContent('minutes.eml', file_get_contents(base_path('tests/Fixtures/mail/minutes.eml')))),
             app(Declarations::class)->request($admin, $fonds), app(Declarations::class)->flagVital($admin, $fonds, 'Proves ownership', 365),
             app(Compliance::class)->create($admin, ['framework' => 'iso-30300', 'reference' => 'CA-1', 'title' => 'Annual'])]);
+        // Phase 15a: a file format.
+        $make('file format', fn () => FileFormat::firstOrCreate(['puid' => 'fmt/11'], ['name' => 'Portable Network Graphics', 'version' => '1.0']));
         // Phase 12b: an identity provider.
         $make('sign-in provider', fn () => SignInProvider::create(['institution_id' => $institution->id, 'label' => 'Staff', 'issuer_url' => 'https://idp.example.org',
             'client_id' => 'workspace', 'client_secret' => 'secret', 'scopes' => ['openid'], 'match_id' => Concept::where('iri', Vocab::BASE.'sign-in-match/subject')->value('id')]));

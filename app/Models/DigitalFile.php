@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[Fillable(['institution_id', 'instantiation_id', 'use_id', 'original_name', 'mime_type', 'size_bytes', 'sha256', 'storage_path', 'width', 'height',
-    'scanned_with', 'scanned_at', 'fixity_checked_at', 'fixity_failed_at', 'embedded_metadata', 'duration_seconds'])]
+    'scanned_with', 'scanned_at', 'fixity_checked_at', 'fixity_failed_at', 'embedded_metadata', 'duration_seconds', 'format_id', 'format_basis', 'format_warning', 'format_identified_at'])]
 class DigitalFile extends Model
 {
     use Audited, HasUuids;
@@ -29,7 +29,7 @@ class DigitalFile extends Model
 
     protected function casts(): array
     {
-        return ['scanned_at' => 'immutable_datetime', 'fixity_checked_at' => 'immutable_datetime', 'fixity_failed_at' => 'immutable_datetime', 'size_bytes' => 'integer', 'embedded_metadata' => 'array', 'duration_seconds' => 'float'];
+        return ['scanned_at' => 'immutable_datetime', 'fixity_checked_at' => 'immutable_datetime', 'fixity_failed_at' => 'immutable_datetime', 'size_bytes' => 'integer', 'embedded_metadata' => 'array', 'duration_seconds' => 'float', 'format_identified_at' => 'immutable_datetime'];
     }
 
     public function instantiation(): BelongsTo
@@ -40,5 +40,11 @@ class DigitalFile extends Model
     public function use(): BelongsTo
     {
         return $this->belongsTo(Concept::class, 'use_id');
+    }
+
+    /** Its format as PRONOM identifies it (phase 15a). */
+    public function format(): BelongsTo
+    {
+        return $this->belongsTo(FileFormat::class, 'format_id');
     }
 }

@@ -7,15 +7,18 @@
 namespace App\Providers;
 
 use App\Access\AccessControl;
+use App\Jobs\IdentifyFormat;
 use App\Mail\EmailAuditListener;
 use App\Models\CustomFieldValue;
 use App\Models\DescriptionValue;
+use App\Models\DigitalFile;
 use App\Models\Identifier;
 use App\Models\Name;
 use App\Models\RecordRedaction;
 use App\Models\Relation;
 use App\Models\RicDate;
 use App\Models\User;
+use App\Preservation\PreservationEvents;
 use App\Privacy\Redaction;
 use App\Research\Shop;
 use App\Search\SearchIndex;
@@ -58,6 +61,13 @@ class AppServiceProvider extends ServiceProvider
         RecordRedaction::saved(fn ($model) => SearchIndex::mark('record_resources', (string) $model->record_resource_id));
         RecordRedaction::deleted(fn ($model) => SearchIndex::mark('record_resources', (string) $model->record_resource_id));
         $this->app->terminating(fn () => app(SearchIndex::class)->flush());
+        // What is done to each file, as PREMIS events (phase 15a): kept (ingested or made from the master), and removed; its
+        // format identified in the background once it is kept.
+        DigitalFile::created(function (DigitalFile $file) {
+            app(PreservationEvents::class)->kept($file);
+            IdentifyFormat::dispatch($file->id)->afterCommit();
+        });
+        DigitalFile::deleted(fn (DigitalFile $file) => app(PreservationEvents::class)->removed($file));
         // Versions follow the same marks (roadmap phase 22b): a unit of description or authority record changed, or
         // anything of it or a relation it takes part in, gets one new version when the request, command or job ends.
         foreach ([DescriptionValue::class, Name::class, Identifier::class, RicDate::class, CustomFieldValue::class] as $part) {

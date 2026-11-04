@@ -6,7 +6,7 @@
     @php($tz = config('workspace.timezone'))
     <h1>{{ __('Operations') }}</h1>
     @if(session('status'))<p role="status">{{ session('status') }}</p>@endif
-    <p><a href="{{ route('fixity.schedules') }}">{{ __('Fixity schedules and runs') }}</a> · <a href="{{ route('fixity.failures') }}">{{ trans_choice(':count fixity failure open|:count fixity failures open', $openFailures, ['count' => $openFailures]) }}</a> · <a href="{{ route('jobs.index') }}">{{ __('Jobs') }}</a></p>
+    <p><a href="{{ route('fixity.schedules') }}">{{ __('Fixity schedules and runs') }}</a> · <a href="{{ route('formats.index') }}">{{ __('File formats') }}</a> · <a href="{{ route('fixity.failures') }}">{{ trans_choice(':count fixity failure open|:count fixity failures open', $openFailures, ['count' => $openFailures]) }}</a> · <a href="{{ route('jobs.index') }}">{{ __('Jobs') }}</a></p>
     @if($operator)
         <h2>{{ __('The installation') }}</h2>
         @forelse($problems as $problem)<p class="error" role="alert">{{ $problem }}</p>@empty<p role="status">{{ __('Nothing needs attention.') }}</p>@endforelse

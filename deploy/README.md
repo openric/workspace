@@ -38,6 +38,14 @@ Admin, Operations shows how the installation is doing and what needs attention: 
 
 A monitor reads the same figures as Prometheus text at `/metrics`, sending `Authorization: Bearer <WORKSPACE_METRICS_TOKEN>`; `WORKSPACE_METRICS_IPS` (comma-separated addresses or ranges) limits where it may come from. With no token set, `/metrics` is not served. Alert on `openric_workspace_scheduler_heartbeat_age_seconds` over 300, `openric_workspace_fixity_open_failures` above 0 and `openric_workspace_audit_signing_key_present` at 0.
 
+## Preservation events and file formats
+
+Every action on a kept file is a PREMIS event (roadmap phase 15a): its ingestion or creation, its digest, virus check, format identification, metadata extraction, fixity checks and deletion. Formats are identified against PRONOM by Siegfried (`sf`, package `siegfried`; set `WORKSPACE_SIEGFRIED=` where there is none, and files are left unidentified). A file is identified in the background when it is kept; files kept before are identified with:
+
+    sudo -n -u www-data /usr/bin/php /usr/share/nginx/openric-workspace-live/artisan workspace:formats:identify
+
+Admin, File formats lists the institution's formats; a unit's preservation metadata downloads as PREMIS 3.0 from its export page.
+
 ## Single sign-on and two-factor sign-in
 
 Under Admin, Sign-in settings, an institution adds its identity providers (roadmap phase 12b): Microsoft Entra ID, Google Workspace, Keycloak or any OpenID Connect provider. Register the Workspace at the provider as a web application with the redirect address the settings page shows for the provider (`https://<host>/sign-in/provider/<id>/callback`), and give the provider's issuer, client ID and client secret. The sign-in page then shows a "Sign in with" button for it. A sign-in that matches no account becomes a request for one under Users, Requests; approving it links the account to the provider. The Workspace must reach the provider's discovery, key and token addresses over https.

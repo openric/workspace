@@ -23,7 +23,7 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-api` | 30902 | V0.1 candidate | Covered | 22c | `ahgAPIPlugin`, `arRestApiPlugin` | Read API, keys, proposals, files (ADR 0007); webhooks, OpenAPI, sitemaps, Atom feed and METS from v0.0.108 (ADR 0020); API writes stay proposals |
 | `ahg-api-plugin` | 179 | V0.1 candidate | Covered |  | none | The proposals contract the MCP uses (v0.0.47) |
 | `ahg-archaeology` | 4291 | out: GLAM sector | Planned | 21 | `ahgArchaeologyPlugin` |  |
-| `ahg-archivematica` | 4049 | later: V1.0+ | Planned | 15 | `arStorageServicePlugin` |  |
+| `ahg-archivematica` | 4049 | later: V1.0+ | Planned | 15d | `arStorageServicePlugin` | Built against its API, last in phase 15 (ADR 0022) |
 | `ahg-articles` | 2447 | later: V1.0+ | Planned | 20 | none |  |
 | `ahg-artwork-request` | 1844 | out: GLAM sector | Planned | 21 | none |  |
 | `ahg-audit-trail` | 4072 | V0.1 candidate | Covered |  | `ahgAuditTrailPlugin` | Tamper-evident audit log (ADR 0004) |
@@ -93,10 +93,10 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-nmmz` | 2666 | later: jurisdiction | Planned | 21 | `ahgNMMZPlugin` | Moved to phase 21 with the heritage objects it registers, by Dr Johan Pieterse on 2 November 2026 |
 | `ahg-oai` | 1847 | V0.1 candidate | Covered |  | `arOaiPlugin` | OAI-PMH, Export-Only profile |
 | `ahg-observability` | 1903 | later: V1.0+ | Covered | 12a | `ahgObservabilityPlugin` | Health figures as a page and Prometheus text from v0.0.110 (ADR 0021); no tracing or latency histograms |
-| `ahg-ocfl` | 3106 | later: V1.0+ | Planned | 15 | `ahgOcflPlugin` |  |
+| `ahg-ocfl` | 3106 | later: V1.0+ | Planned | 15b | `ahgOcflPlugin` | OCFL as the one object store (ADR 0022) |
 | `ahg-pdf-tools` | 2093 | V0.1 candidate | Partial | 5 | `ahgTiffPdfMergePlugin` | A PDF's text layer proposed as its transcript (v0.0.64); merging TIFFs into a PDF with the scanning workflows, phase 22 |
 | `ahg-portable-export` | 3000 | later: V1.0+ | Planned | 11c, deferred | `ahgPortableExportPlugin` | Read PSIS ahgPortableExportPlugin too, which does more; deferred by Dr Johan Pieterse on 30 October 2026 |
-| `ahg-preservation` | 10211 | later: V1.0+ | Planned | 15 | `ahgPreservationPlugin` |  |
+| `ahg-preservation` | 10211 | later: V1.0+ | Partial | 15a | `ahgPreservationPlugin` | PREMIS events, PRONOM formats by Siegfried and the PREMIS 3.0 export from v0.0.114 (ADR 0022); policies, migration, replication and packages in 15c and 15d |
 | `ahg-privacy` | 16854 | later: jurisdiction | Partial | 18a, 18b | `ahgPrivacyPlugin` | POPIA governance (registers, requests, compromises, assessments, controls, report) from v0.0.91 (18a, ADR 0016); PII scanning, field redaction and file screening from v0.0.94 (18b); not visual redaction of images, named-entity recognition, the Article 30 export or the autopilot |
 | `ahg-provenance-ai` | 2662 | out: AI (V2+) | Planned | 17 (last) | none |  |
 | `ahg-rad-manage` | 1233 | V0.1 candidate | Covered |  | `ahgRadManagePlugin`, `sfRadPlugin` | RAD display standard, from v0.0.76 |
@@ -763,6 +763,25 @@ Added on 2 November 2026 with 18e.
 | none | Each pack switched on or off in the settings | Workspace only |
 
 : The National Archives of Zimbabwe and the CDPA, field by field
+
+### PREMIS events and file formats (`ahg-preservation`)
+
+Added on 4 November 2026 with 15a.
+
+| Heratio field | Workspace | Status |
+|---|---|---|
+| `preservation_event`: `digital_object_id`, `information_object_id`, `event_type`, `event_datetime`, `event_detail`, `event_outcome`, `event_outcome_detail`, `linking_agent_type`, `linking_agent_value` | The same; type, outcome and agent type as vocabulary rows matched to the Library of Congress preservation vocabulary | Same, from v0.0.114 |
+| `linking_object_type`, `linking_object_value` | The source file of a creation | Modelled |
+| `preservation_format`: `puid`, `mime_type`, `format_name`, `format_version`, `risk_level`, `preservation_action`, `is_preservation_format` | The same, identified by Siegfried | Same |
+| `extension`, `risk_notes`, `migration_target_id` | Notes; the migration target with 15c's migration plans | Partial |
+| `preservation_object_format` | The file's format, the basis of the match and any warning | Same |
+| `preservation_checksum` (md5, sha1, sha256, sha512) | SHA-256 on the file, every digest an event | Modelled |
+| `preservation_fixity_check` | The fixity ledger of phase 12a, each check an event | Same |
+| `preservation_virus_scan` | The scan on the file, an event | Modelled |
+| PremisXmlSerializer: intellectual entity, representation, files, events, agents | The same, valid PREMIS 3.0 | Same |
+| `ahg_premis_rights` | none | Not carried in 15a; 15c |
+
+: PREMIS events and file formats, field by field
 
 ### Single sign-on and two-factor sign-in (`arOidcPlugin`, `ahg-security-clearance`)
 

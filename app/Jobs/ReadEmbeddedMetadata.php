@@ -17,6 +17,7 @@ use App\Files\EmbeddedMetadata;
 use App\Files\MediaDuration;
 use App\Models\BackgroundJob;
 use App\Models\Instantiation;
+use App\Preservation\PreservationEvents;
 use App\Proposals\ProposalService;
 
 class ReadEmbeddedMetadata extends TrackedJob
@@ -41,6 +42,9 @@ class ReadEmbeddedMetadata extends TrackedJob
         $raw = $reader->extract($path);
         // A sound or video file's length, for its IIIF canvas (phase 14, choice 1A).
         $master->update(['embedded_metadata' => $raw] + (MediaDuration::timed($master->mime_type) ? ['duration_seconds' => app(MediaDuration::class)->read($path)] : []));
+        // Kept as a PREMIS metadata extraction (phase 15a).
+        app(PreservationEvents::class)->record($master, 'metadata-extraction', $raw ? 'success' : 'warning', $raw ? trans_choice(':count tag read|:count tags read', count($raw), ['count' => count($raw)]) : null,
+            $raw ? null : __('No embedded metadata found.'), null, 'exiftool');
         $values = $reader->normalise($raw);
         $from = fn (string $field) => ['evidence' => 'Embedded in '.$master->original_name.' as '.$values[$field]['tag'].'.'];
 

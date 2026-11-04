@@ -1,0 +1,37 @@
+# OpenRiC Workspace - OpenRiC Workspace PREMIS Event Outcomes.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# How an event ended (Heratio's preservation_event.event_outcome).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/premis-event-outcome/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace PREMIS Event Outcomes"@en ;
+    dcterms:description "How an event ended (Heratio's preservation_event.event_outcome)."@en ;
+    dcterms:issued "2026-11-03"^^xsd:date ;
+    skos:hasTopConcept v:success, v:failure, v:warning .
+
+v:success a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Success"@en, "Sukses"@af ;
+    skos:scopeNote "Not a RiC-O term: a PREMIS 3 event type, exported in PREMIS with the Library of Congress preservation vocabulary term it matches."@en ;
+    skos:definition "It did what it set out to do."@en .
+
+v:failure a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Failure"@en, "Mislukking"@af ;
+    skos:scopeNote "Not a RiC-O term: a PREMIS 3 event type, exported in PREMIS with the Library of Congress preservation vocabulary term it matches."@en ;
+    skos:definition "It did not."@en .
+
+v:warning a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Warning"@en, "Waarskuwing"@af ;
+    skos:scopeNote "Not a RiC-O term: a PREMIS 3 event type, exported in PREMIS with the Library of Congress preservation vocabulary term it matches."@en ;
+    skos:definition "It did, with something to look at."@en .

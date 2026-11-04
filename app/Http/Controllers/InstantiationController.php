@@ -68,7 +68,7 @@ class InstantiationController extends Controller
     {
         $unit = $this->own($request, $instantiation);
         $instantiation->load('descriptionValues.element.labels', 'descriptionValues.state.labels', 'names.nameType.labels', 'names.state.labels', 'names.dates.property',
-            'identifiers.identifierType.labels', 'dates.property.labels', 'dates.dateType.labels', 'dates.qualifier.labels', 'carrierType.labels', 'availability.labels', 'files.use.labels');
+            'identifiers.identifierType.labels', 'dates.property.labels', 'dates.dateType.labels', 'dates.qualifier.labels', 'carrierType.labels', 'availability.labels', 'files.use.labels', 'files.format.risk.labels');
         $user = $request->user();
 
         return view('instantiations.show', ['instantiation' => $instantiation, 'unit' => $unit, 'canUpdate' => $user->may('update', 'description', $unit),

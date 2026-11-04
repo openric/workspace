@@ -1,0 +1,112 @@
+# OpenRiC Workspace - OpenRiC Workspace PREMIS Event Types.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What was done to a file, as PREMIS 3 names it (Heratio's preservation_event.event_type; the Library of Congress preservation vocabulary).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/premis-event-type/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace PREMIS Event Types"@en ;
+    dcterms:description "What was done to a file, as PREMIS 3 names it (Heratio's preservation_event.event_type; the Library of Congress preservation vocabulary)."@en ;
+    dcterms:issued "2026-11-03"^^xsd:date ;
+    skos:hasTopConcept v:ingestion, v:creation, v:message-digest-calculation, v:virus-check, v:format-identification, v:metadata-extraction, v:fixity-check, v:validation, v:migration, v:normalization, v:replication, v:deletion .
+
+v:ingestion a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Ingestion"@en, "Inname"@af ;
+    skos:exactMatch <http://id.loc.gov/vocabulary/preservation/eventType/ing> ;
+    skos:scopeNote "Not a RiC-O term: a PREMIS 3 event type, exported in PREMIS with the Library of Congress preservation vocabulary term it matches."@en ;
+    skos:definition "A file taken into the institution's keeping."@en .
+
+v:creation a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Creation"@en, "Skepping"@af ;
+    skos:exactMatch <http://id.loc.gov/vocabulary/preservation/eventType/cre> ;
+    skos:scopeNote "Not a RiC-O term: a PREMIS 3 event type, exported in PREMIS with the Library of Congress preservation vocabulary term it matches."@en ;
+    skos:definition "A new file made from another, such as a viewing copy made from a master."@en .
+
+v:message-digest-calculation a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Message digest calculation"@en, "Berekening van boodskapopsomming"@af ;
+    skos:exactMatch <http://id.loc.gov/vocabulary/preservation/eventType/mes> ;
+    skos:scopeNote "Not a RiC-O term: a PREMIS 3 event type, exported in PREMIS with the Library of Congress preservation vocabulary term it matches."@en ;
+    skos:definition "Its SHA-256 worked out."@en .
+
+v:virus-check a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Virus check"@en, "Viruskontrole"@af ;
+    skos:exactMatch <http://id.loc.gov/vocabulary/preservation/eventType/vir> ;
+    skos:scopeNote "Not a RiC-O term: a PREMIS 3 event type, exported in PREMIS with the Library of Congress preservation vocabulary term it matches."@en ;
+    skos:definition "Scanned for viruses."@en .
+
+v:format-identification a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Format identification"@en, "Formaatidentifikasie"@af ;
+    skos:exactMatch <http://id.loc.gov/vocabulary/preservation/eventType/for> ;
+    skos:scopeNote "Not a RiC-O term: a PREMIS 3 event type, exported in PREMIS with the Library of Congress preservation vocabulary term it matches."@en ;
+    skos:definition "Its file format identified against PRONOM."@en .
+
+v:metadata-extraction a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Metadata extraction"@en, "Metadata-onttrekking"@af ;
+    skos:exactMatch <http://id.loc.gov/vocabulary/preservation/eventType/mee> ;
+    skos:scopeNote "Not a RiC-O term: a PREMIS 3 event type, exported in PREMIS with the Library of Congress preservation vocabulary term it matches."@en ;
+    skos:definition "Its embedded metadata read."@en .
+
+v:fixity-check a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Fixity check"@en, "Fixiteitskontrole"@af ;
+    skos:exactMatch <http://id.loc.gov/vocabulary/preservation/eventType/fix> ;
+    skos:scopeNote "Not a RiC-O term: a PREMIS 3 event type, exported in PREMIS with the Library of Congress preservation vocabulary term it matches."@en ;
+    skos:definition "Its size and SHA-256 compared with what came in."@en .
+
+v:validation a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Validation"@en, "Validering"@af ;
+    skos:exactMatch <http://id.loc.gov/vocabulary/preservation/eventType/val> ;
+    skos:scopeNote "Not a RiC-O term: a PREMIS 3 event type, exported in PREMIS with the Library of Congress preservation vocabulary term it matches."@en ;
+    skos:definition "Checked against the specification of its format."@en .
+
+v:migration a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Migration"@en, "Migrasie"@af ;
+    skos:exactMatch <http://id.loc.gov/vocabulary/preservation/eventType/mig> ;
+    skos:scopeNote "Not a RiC-O term: a PREMIS 3 event type, exported in PREMIS with the Library of Congress preservation vocabulary term it matches."@en ;
+    skos:definition "Its content carried into another format."@en .
+
+v:normalization a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Normalisation"@en, "Normalisering"@af ;
+    skos:exactMatch <http://id.loc.gov/vocabulary/preservation/eventType/nor> ;
+    skos:scopeNote "Not a RiC-O term: a PREMIS 3 event type, exported in PREMIS with the Library of Congress preservation vocabulary term it matches."@en ;
+    skos:definition "A preservation copy made in a format the institution prefers."@en .
+
+v:replication a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Replication"@en, "Replikasie"@af ;
+    skos:exactMatch <http://id.loc.gov/vocabulary/preservation/eventType/rep> ;
+    skos:scopeNote "Not a RiC-O term: a PREMIS 3 event type, exported in PREMIS with the Library of Congress preservation vocabulary term it matches."@en ;
+    skos:definition "A copy kept in another place."@en .
+
+v:deletion a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Deletion"@en, "Skrapping"@af ;
+    skos:exactMatch <http://id.loc.gov/vocabulary/preservation/eventType/del> ;
+    skos:scopeNote "Not a RiC-O term: a PREMIS 3 event type, exported in PREMIS with the Library of Congress preservation vocabulary term it matches."@en ;
+    skos:definition "Removed from the institution's keeping."@en .
