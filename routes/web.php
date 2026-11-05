@@ -113,6 +113,7 @@ use App\Http\Controllers\StudioController;
 use App\Http\Controllers\SubmissionController;
 use App\Http\Controllers\SwordController;
 use App\Http\Controllers\TeachingController;
+use App\Http\Controllers\TranslationController;
 use App\Http\Controllers\TwoFactorController;
 use App\Http\Controllers\VendorController;
 use App\Http\Controllers\VersionController;
@@ -392,6 +393,8 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/new', [RecordController::class, 'create'])->name('create');
         Route::get('/export', [ExportController::class, 'everything'])->name('export-all');
         Route::post('/browse-settings', [RecordController::class, 'browseSettings'])->name('browse-settings');
+        Route::get('/{record}/translate', [TranslationController::class, 'form'])->name('translate')->whereUuid('record');
+        Route::post('/{record}/translate', [TranslationController::class, 'start'])->name('translate.start')->whereUuid('record');
         Route::post('/', [RecordController::class, 'store'])->name('store');
         Route::get('/{record}', [RecordController::class, 'show'])->name('show');
         Route::get('/{record}/edit', [RecordController::class, 'edit'])->name('edit');
@@ -567,6 +570,15 @@ Route::middleware(['auth', 'active'])->group(function () {
 
     // Imports of archival description: a dry run, its report, then the import (WS-015).
     // The review queue of proposals sent through the API (ADR 0007); each proposal is checked against its record.
+    // The institution's own wording of the interface (roadmap phase 17c).
+    Route::middleware('access:translate,description')->prefix('interface-strings')->name('translation.')->group(function () {
+        Route::get('/', [TranslationController::class, 'strings'])->name('strings');
+        Route::post('/', [TranslationController::class, 'save'])->name('save');
+        Route::get('/history', [TranslationController::class, 'history'])->name('history');
+        Route::get('/suggest', [TranslationController::class, 'suggest'])->name('suggest');
+        Route::post('/changes/{change}/{decision}', [TranslationController::class, 'review'])->name('review')->whereUuid('change')->where('decision', 'accept|reject');
+    });
+
     // Resolving names to authority records and places (roadmap phase 17b2).
     Route::middleware('access:review-proposals,description')->prefix('authority')->name('authority.')->whereUuid(['mention', 'candidate'])->group(function () {
         Route::get('/', [AuthorityResolutionController::class, 'queue'])->name('queue');

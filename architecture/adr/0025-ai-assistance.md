@@ -168,3 +168,29 @@ A place's own dates may contradict it, where Heratio's place conflict check is a
 
 `tests/Feature/AccessMatrixTest.php` builds a mention and its candidate.
 
+## 17c: translation
+
+Heratio's `ahg-translation` comes across in two parts.
+
+**Descriptions.** **Translate with AI** sends the chosen ISAD(G) text elements of a unit, each in the language chosen, to the gateway's NLLB-200 route (`/ai/v1/translate`, `{text, source, target}`) in the background.
+
+- **Each translation** is proposed as the element in the target language, naming its receipt.
+- **Accepting it** writes the element as a translation, and the original stays.
+- **What is left alone.** An element already in the target language, or the same translation already waiting, is not sent.
+- **Exact language.** `Describable::describedIn()` gives an element in exactly one language, where `described()` falls back to another. The translate service uses it.
+- **Choices.** The targets are Heratio's 21 languages, shown by their own names. The institution's default target and elements sit on the AI page.
+- **What it replaces.** Heratio's drafts, their dedupe and their log are the review queue and the log of inferences.
+
+**The interface.** `OverlayLoader`, copied from Heratio's DbAwareLoader, lays an institution's own wording over the JSON translations, for its staff and its public catalogue only.
+
+- `InterfaceStrings`, after UiStringService, lists every string (the keys of `lang/af.json`) in each interface language, as shipped and as reworded.
+- A wording is proposed by whoever may translate and accepted or rejected by whoever administers the institution, who may also set it at once. An empty wording goes back to the shipped one.
+- Every change is kept, with its status from the assertion-status vocabulary.
+- The gateway suggests a translation of a string on request.
+
+**Tests.** `tests/Feature/TranslationTest.php`:
+
+- the chosen elements translated one by one, an element already in the target language left, a corrected translation accepted beside the original, and an unknown target refused;
+- an interface wording proposed by a translator and accepted by an administrator, seen by that institution only, kept in the history, and put back when emptied;
+- a machine suggestion for a string.
+

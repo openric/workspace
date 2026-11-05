@@ -26,6 +26,7 @@ use App\Privacy\Redaction;
 use App\Research\Shop;
 use App\Search\SearchIndex;
 use App\Support\Vocab;
+use App\Translation\OverlayLoader;
 use App\Versions\Versions;
 use App\Webhooks\Webhooks;
 use Illuminate\Auth\Events\Login;
@@ -48,6 +49,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->scoped(AccessControl::class);
         // And its cache of which fields of a record are redacted (phase 18b).
         $this->app->scoped(Redaction::class);
+        // The interface in the institution's own wording, over the JSON translations (phase 17c).
+        $this->app->extend('translation.loader', fn ($loader) => new OverlayLoader($loader));
     }
 
     public function boot(): void

@@ -15,6 +15,11 @@
         <label for="ai-ocr">{{ __('Vision model that reads printed pages') }}</label><input id="ai-ocr" name="ocr_model" maxlength="200" value="{{ $settings->ocr_model }}" placeholder="{{ config('workspace.ai.ocr_model') }}">
         <label for="ai-ocr2">{{ __('Model that reads a strip again when the first disagrees with Tesseract') }}</label><input id="ai-ocr2" name="ocr_fallback_model" maxlength="200" value="{{ $settings->ocr_fallback_model }}" placeholder="{{ config('workspace.ai.ocr_fallback_model') }}">
         <label for="ai-chat">{{ __('Language model that writes summaries') }}</label><input id="ai-chat" name="chat_model" maxlength="200" value="{{ $settings->chat_model }}" placeholder="{{ config('workspace.ai.chat_model') }}">
+        <label for="ai-tr">{{ __('Language descriptions are translated into by default') }}</label>
+        <select id="ai-tr" name="translation_target"><option value="">{{ __('The other of English and Afrikaans') }}</option>@foreach((array) config('workspace.ai.translation_targets') as $code)<option value="{{ $code }}" @selected($settings->translation_target === $code)>{{ \App\Support\InterfaceLanguages::name($code) }} ({{ $code }})</option>@endforeach</select>
+        <fieldset><legend>{{ __('Elements offered for translation') }}</legend>
+            @foreach(app(\App\Ai\Translate::class)->elements() as $e)<label><input type="checkbox" name="translation_elements[]" value="{{ $e->notation }}" style="width: auto" @checked(in_array($e->notation, $settings->translation_elements ?: \App\Ai\Translate::DEFAULT_ELEMENTS, true))> {{ $e->label(\App\Support\Vocab::languages()) }}</label>@endforeach
+        </fieldset>
         <button type="submit">{{ __('Save') }}</button></form>
 
     <h2>{{ __('This month') }}</h2>

@@ -26,6 +26,7 @@
                 'storage.places' => [__('Physical storage'), $user->mayAnywhere('read', 'storage'), 'storage.*'],
                 'rights.index' => [__('Rights'), $user->mayAnywhere('read', 'description'), 'rights.*'],
                 'proposals.index' => [__('Proposals to review'), $user->mayAnywhere('review-proposals', 'description'), 'proposals.*'],
+                'translation.strings' => [__('Interface wording'), $user->mayAnywhere('translate', 'description'), 'translation.*'],
                 'authority.queue' => [__('Names to resolve'), $user->mayAnywhere('review-proposals', 'description'), 'authority.queue|authority.review|authority.parked|authority.create-form'],
                 'agents.duplicates' => [__('Duplicate authority records'), $user->may('update', 'authority'), 'agents.duplicates'],
                 'alt-text.index' => [__('Alternative text'), $user->mayAnywhere('update', 'description'), 'alt-text.*'],

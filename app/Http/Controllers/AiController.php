@@ -12,6 +12,7 @@ namespace App\Http\Controllers;
 
 use App\Ai\Gateway;
 use App\Ai\Inferences;
+use App\Ai\Translate;
 use App\Audit\AuditLog;
 use App\Jobs\AskModel;
 use App\Jobs\JobsService;
@@ -23,6 +24,7 @@ use App\Models\RecordResource;
 use App\Support\Vocab;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class AiController extends Controller
@@ -44,10 +46,13 @@ class AiController extends Controller
     {
         $data = $request->validate(['enabled' => ['nullable', 'boolean'], 'monthly_limit' => ['nullable', 'integer', 'between:0,10000000'],
             'ocr_model' => ['nullable', 'string', 'max:200', 'regex:/^[A-Za-z0-9._:\/-]+$/'], 'ocr_fallback_model' => ['nullable', 'string', 'max:200', 'regex:/^[A-Za-z0-9._:\/-]+$/'],
-            'chat_model' => ['nullable', 'string', 'max:200', 'regex:/^[A-Za-z0-9._:\/-]+$/']]);
+            'chat_model' => ['nullable', 'string', 'max:200', 'regex:/^[A-Za-z0-9._:\/-]+$/'],
+            'translation_target' => ['nullable', Rule::in((array) config('workspace.ai.translation_targets'))], 'translation_elements' => ['nullable', 'array'],
+            'translation_elements.*' => [Rule::in(app(Translate::class)->elements()->pluck('notation'))]]);
         $settings = $this->gateway->settings($request->user()->institution_id);
         $settings->fill(['enabled' => $request->boolean('enabled'), 'monthly_limit' => $data['monthly_limit'] ?? null, 'ocr_model' => $data['ocr_model'] ?? null,
-            'ocr_fallback_model' => $data['ocr_fallback_model'] ?? null, 'chat_model' => $data['chat_model'] ?? null, 'updated_by_id' => $request->user()->id]);
+            'ocr_fallback_model' => $data['ocr_fallback_model'] ?? null, 'chat_model' => $data['chat_model'] ?? null,
+            'translation_target' => $data['translation_target'] ?? null, 'translation_elements' => array_values($data['translation_elements'] ?? []), 'updated_by_id' => $request->user()->id]);
         AuditLog::actingAs($request->user(), fn () => $settings->save());
 
         return back()->with('status', __('Saved.'));

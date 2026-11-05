@@ -58,6 +58,7 @@ use App\Models\FileFormat;
 use App\Models\FixityFailure;
 use App\Models\Import;
 use App\Models\Institution;
+use App\Models\InterfaceStringChange;
 use App\Models\MigrationPathway;
 use App\Models\NormalisationRule;
 use App\Models\Package;
@@ -121,6 +122,7 @@ use App\Site\Articles;
 use App\Site\LandingPages;
 use App\Site\StaticPages;
 use App\Support\Vocab;
+use App\Translation\InterfaceStrings;
 use App\Vendors\Vendors;
 use App\Vocabulary\ConceptService;
 use App\Vocabulary\SkosImporter;
@@ -463,6 +465,8 @@ class AccessMatrixTest extends TestCase
             'state_id' => Concept::where('iri', Vocab::BASE.'doi-state/findable')->value('id'), 'test' => true, 'minted_at' => now()]),
             app(RecordDois::class)->enqueue($letter, 'mint', $admin),
             RecordFunding::create(['record_resource_id' => $letter->id, 'funder_name' => 'National Research Foundation'])]);
+        // Phase 17c: a proposed change to the interface's wording.
+        $make('interface string change', fn () => InterfaceStringChange::findOrFail(app(InterfaceStrings::class)->propose($admin, 'af', 'Archival descriptions', 'Argiefbeskrywings (ons s\'n)')));
         // Phase 17b2: a name to resolve, with its candidate (the agent made above).
         $make('mention', function () use ($letter, $admin) {
             app(ProposalService::class)->propose($letter, $admin, null, ['source' => 'matrix', 'entities' => [['type' => 'PERSON', 'value' => 'Anna Botha']]]);

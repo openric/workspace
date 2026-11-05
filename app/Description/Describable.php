@@ -80,6 +80,12 @@ trait Describable
         return $values->first()?->value;
     }
 
+    /** The element's value in exactly this language, with no other in its place (phase 17c). */
+    public function describedIn(string $elementNotation, string $language): ?string
+    {
+        return $this->valuesByNotation($elementNotation)->firstWhere('language', $language)?->value;
+    }
+
     private function valuesByNotation(string $notation): Collection
     {
         $type = Elements::nameType($notation);

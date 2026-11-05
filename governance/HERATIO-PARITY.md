@@ -125,7 +125,7 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-storage-manage` | 7645 | V0.1 candidate | Covered |  | `ahgStorageManagePlugin` | Containers and storage places, with movements |
 | `ahg-term-taxonomy` | 6138 | V0.1 candidate | Covered |  | `ahgTermTaxonomyPlugin` | SKOS vocabularies: bundled, local, imported, matched |
 | `ahg-theme-b5` | 4574 | V0.1 candidate | Covered |  | `ahgThemeB5Plugin`, `ahgUiOverridesPlugin` | Interface written fresh |
-| `ahg-translation` | 5726 | out: AI (V2+) | Planned | 17 (last) | `ahgTranslationPlugin` |  |
+| `ahg-translation` | 5726 | out: AI (V2+) | Done | 17c | none | Machine translation of a unit's elements through the gateway's NLLB-200 route, each proposed for review in the target language; the institution's own wording of the interface, proposed, accepted and kept in its history, with machine suggestions, from v0.0.130 (ADR 0025) |
 | `ahg-user-manage` | 5651 | V0.1 candidate | Covered | 12b | `ahgUserManagePlugin`, `ahgUserRegistrationPlugin`, `arOidcPlugin` | Accounts, registration, roles; written fresh; OpenID Connect single sign-on after AtoM's `arOidcPlugin`, which Heratio did not carry, and TOTP two-factor sign-in from v0.0.111 (ADR 0021) |
 | `ahg-vendor` | 6980 | later: V1.0+ | Covered | 22d | `ahgVendorPlugin` | Vendors on authority records, services, transactions with records, condition, history and documents, from v0.0.109 (ADR 0020); contracts not carried |
 | `ahg-version-control` | 3142 | later: V1.0+ | Covered | 22b | `ahgVersionControlPlugin` | Versions of descriptions and authority records, compared and restored, from v0.0.107 (ADR 0020) |
@@ -1521,4 +1521,25 @@ Added on 5 November 2026 with 17b2.
 | AuthorityCreator (ISAAR(CPF) name, dates, history required) | Decisions::createNew, a RiC agent or place | Same |
 | Commands: promote-sample, generate-candidates, score-evidence, reprocess, reprocess-parked, scan-parked, export-ner-feedback, cache-clear, cache-stats, status, write-provenance | `workspace:authority:promote`, `rescore`, `scan-parked` (nightly), `export-feedback`, `cache-clear`, `status`; write-provenance not needed | Modelled |
 | The review, queue, park, create-new and settings screens | The same, rendered without script | Same |
+
+### Translation (`ahg-translation`)
+
+Added on 5 November 2026 with 17c.
+
+| Heratio field | Workspace | Status |
+|---|---|---|
+| `ahg_translation_draft`: `object_id`, `field_name`, `source_culture`, `target_culture`, `source_text`, `translated_text`, `status`, `created_by_user_id`, `applied_at` | A proposal of the review queue: the unit, the element, its language, the translation, its status, who proposed it and who reviewed it, and its receipt | Modelled, from v0.0.130 |
+| `uk_draft_dedupe` (`source_hash`) | The same translation already waiting is not proposed again; an element already in the target language is left | Modelled |
+| `ahg_translation_log` | The log of inferences (service translate) | Modelled |
+| `ahg_translation_settings`: `mt.endpoint`, `mt.timeout_seconds`, `mt.api_key` | The AI gateway's address, timeout and key (`workspace.ai`) | Same |
+| `translation_target_lang`, `translation_fields` | `ai_settings.translation_target`, `translation_elements` | Same |
+| `translation_overwrite`, `translation_save_culture` | Not carried: a translation is always proposed in its own language, and never overwrites without review | Not carried |
+| LanguageOptions::translationTargets | `workspace.ai.translation_targets`, the same 21 languages | Same |
+| `ui_string`: `key`, `culture`, `value` | `interface_strings`, per institution | Modelled |
+| `ui_string_change`: `locale`, `key_text`, `old_value`, `new_value`, `status`, `submitted_by_user_id`, `reviewed_by_user_id`, `reviewed_at`, `review_note` | `interface_string_changes`, the status a vocabulary row | Same |
+| DbAwareLoader | `App\Translation\OverlayLoader`, by institution | Same |
+| UiStringService: matrix, set, submit, apply, reject, history, pending | `App\Translation\InterfaceStrings` | Same |
+| The strings' machine suggestion (`mt-suggest`) | `translation.suggest` | Same |
+| `cco` values and the ICIP sensitivity badges | Not carried: museum values are phase 21, and ICIP protocols are in phase 2 | Not carried |
+| `translate:import-json` | Not needed: the shipped strings are the JSON files, read directly | Not carried |
 
