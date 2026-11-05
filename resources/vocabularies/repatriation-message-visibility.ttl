@@ -1,0 +1,30 @@
+# OpenRiC Workspace - OpenRiC Workspace Repatriation Message Visibilities.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Who sees a message in the dialogue on a repatriation claim (Heratio's repatriation_claim_message.visibility).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/repatriation-message-visibility/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Repatriation Message Visibilities"@en ;
+    dcterms:description "Who sees a message in the dialogue on a repatriation claim (Heratio's repatriation_claim_message.visibility)."@en ;
+    dcterms:issued "2026-11-05"^^xsd:date ;
+    skos:hasTopConcept v:shared, v:internal .
+
+v:shared a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Shared on the joint record"@en, "Gedeel op die gesamentlike rekord"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's repatriation claims, as Heratio's ahg-semantic-search keeps them. A claim documents a request and where the dialogue around it stands; it is not a legal determination."@en ;
+    skos:definition "Seen by the staff and by everyone holding a link to the shared record."@en .
+
+v:internal a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Internal (staff only)"@en, "Intern (slegs personeel)"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's repatriation claims, as Heratio's ahg-semantic-search keeps them. A claim documents a request and where the dialogue around it stands; it is not a legal determination."@en ;
+    skos:definition "Seen by the staff who manage repatriation claims only."@en .

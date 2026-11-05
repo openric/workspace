@@ -80,6 +80,7 @@
                 'research.print-templates' => [__('Print templates'), $may('manage-reading-room'), 'research.print-templates*'],
                 'feedback.index' => [__('Feedback received'), $user->mayAnywhere('update', 'description'), 'feedback.*'],
                 'share-links.index' => [__('Share links'), $user->mayAnywhere('update', 'description'), 'share-links.*'],
+                'repatriation.index' => [__('Repatriation claims'), $may('manage-repatriation'), 'repatriation.*'],
                 'shop.orders' => [__('Orders'), $may('manage-shop'), 'shop.orders*'],
                 'shop.settings' => [__('Shop settings'), $may('manage-shop'), 'shop.settings*'],
             ],

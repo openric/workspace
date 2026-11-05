@@ -14,6 +14,7 @@ namespace App\Mail;
 
 use App\Models\User;
 use App\Research\Notifications;
+use Illuminate\Mail\Mailable;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Throwable;
@@ -33,6 +34,23 @@ class Outbox
         }
         try {
             Mail::to($to)->queue($mail);
+
+            return true;
+        } catch (Throwable $e) {
+            Log::warning('mail could not be queued', ['mailable' => $mail::class, 'error' => $e->getMessage()]);
+
+            return false;
+        }
+    }
+
+    /** Mail someone without an account (a repatriation claimant, phase 17d2), past the same suppression gate. */
+    public function address(string $email, Mailable $mail, ?string $institutionId = null): bool
+    {
+        if (filter_var($email, FILTER_VALIDATE_EMAIL) === false || ! EmailSuppressionGate::canSend($email, $mail::class, null, $institutionId)) {
+            return false;
+        }
+        try {
+            Mail::to($email)->queue($mail);
 
             return true;
         } catch (Throwable $e) {

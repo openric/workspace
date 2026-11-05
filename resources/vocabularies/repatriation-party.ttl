@@ -1,0 +1,44 @@
+# OpenRiC Workspace - OpenRiC Workspace Repatriation Parties.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Who speaks in the dialogue on a repatriation claim, or holds a link to its shared record (Heratio's author_role and grantee_role).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/repatriation-party/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Repatriation Parties"@en ;
+    dcterms:description "Who speaks in the dialogue on a repatriation claim, or holds a link to its shared record (Heratio's author_role and grantee_role)."@en ;
+    dcterms:issued "2026-11-05"^^xsd:date ;
+    skos:hasTopConcept v:institution, v:claimant, v:mediator, v:observer .
+
+v:institution a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Holding institution"@en, "Bewarende instelling"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's repatriation claims, as Heratio's ahg-semantic-search keeps them. A claim documents a request and where the dialogue around it stands; it is not a legal determination."@en ;
+    skos:definition "The institution that holds the object, through its staff."@en .
+
+v:claimant a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Claimant or origin community"@en, "Eiser of oorsprongsgemeenskap"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's repatriation claims, as Heratio's ahg-semantic-search keeps them. A claim documents a request and where the dialogue around it stands; it is not a legal determination."@en ;
+    skos:definition "The community, institution or nation making the claim, or its representative."@en .
+
+v:mediator a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Mediator"@en, "Bemiddelaar"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's repatriation claims, as Heratio's ahg-semantic-search keeps them. A claim documents a request and where the dialogue around it stands; it is not a legal determination."@en ;
+    skos:definition "Someone helping the two sides talk."@en .
+
+v:observer a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Observer (read only)"@en, "Waarnemer (slegs lees)"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's repatriation claims, as Heratio's ahg-semantic-search keeps them. A claim documents a request and where the dialogue around it stands; it is not a legal determination."@en ;
+    skos:definition "Someone who may read the shared record but not write in it."@en .

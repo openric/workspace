@@ -115,7 +115,7 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-scan` | 7065 | later: V1.0+ | Partial | 22a | `ahgScanPlugin` | Watched folders, Heratio's sidecars, BagIt intake and the scan API, from v0.0.106 (ADR 0020); not its sector routing, rights enforcement or web archiving |
 | `ahg-search` | 7659 | V0.1 candidate | Partial | 17 | `ahgSearchPlugin` | Full-text search with facets, staff search and statistics (v0.0.60, v0.0.61, ADR 0009); search by meaning from v0.0.131 (17d1) |
 | `ahg-security-clearance` | 9206 | later: jurisdiction | Covered | 18c, 12b | `ahgSecurityClearancePlugin` | Levels, compartments, clearances, classified records with inheritance and declassification, requests for access, all in the one read check, from v0.0.101 (ADR 0016); TOTP two-factor sign-in and its policy from v0.0.111 (ADR 0021); WebAuthn and codes by email not carried |
-| `ahg-semantic-search` | 29749 | out: AI (V2+) | Partial | 17d1 to 17d4 | none | Search by meaning on pgvector with gateway embeddings, widening by SKOS labels and a model, reranking, related records, /ground and the ways into the collection, from v0.0.131 (ADR 0025); repatriation 17d2, displaced and endangered heritage 17d3, language corpus, scholarship and research leads 17d4 |
+| `ahg-semantic-search` | 29749 | out: AI (V2+) | Partial | 17d1 to 17d4 | none | Search by meaning on pgvector with gateway embeddings, widening by SKOS labels and a model, reranking, related records, /ground and the ways into the collection, from v0.0.131 (ADR 0025); repatriation claims, dialogue, shared records, community knowledge and virtual return from v0.0.132 (17d2); displaced and endangered heritage 17d3, language corpus, scholarship and research leads 17d4 |
 | `ahg-settings` | 16789 | V0.1 candidate | Covered |  | `ahgSettingsPlugin` | Institution settings, written fresh |
 | `ahg-share-link` | 2659 | later: V1.0+ | Covered | 19a | `ahgTimeLimitedShareLinkPlugin` | Share links that never open more than their issuer may read, with their log and prune (ADR 0017); clearance with 18c |
 | `ahg-sharepoint` | 6045 | later: V1.0+ | Planned | 22, pilot | `ahgSharePointPlugin` | When a pilot with a Microsoft tenant needs it (choice 2B, ADR 0020) |
@@ -1564,4 +1564,29 @@ Added on 5 November 2026 with 17d1.
 | The saved search templates | The saved searches of phase 19c | Modelled |
 | DiscoveriesController (scholarship discoveries) | 17d4, with scholarship | Not yet |
 | KmExportGraphCommand, GraphKmBridgeService | Not carried: KM reads the Workspace through its public API and /ground | Not carried |
+
+### Repatriation (`ahg-semantic-search`, part two)
+
+Added on 5 November 2026 with 17d2.
+
+| Heratio field | Workspace | Status |
+|---|---|---|
+| `displaced_heritage_claim.item_ref` | `repatriation_claims.record_resource_id`, a foreign key in the institution | Modelled, from v0.0.132 |
+| `claimant_community` | Claimant community or nation, and its authority record (`claimant_agent_id`) | Same, and modelled |
+| `origin_place` | Place / region of origin, and its place (`origin_place_id`) | Same, and modelled |
+| `current_holder` | Current holder, the description's repository when left empty | Same |
+| `claim_status` (registered, under_review, acknowledged, virtual_return, returned, disputed) | Stage of dialogue, the repatriation-claim-status vocabulary | Same |
+| `evidence_summary`, `contact`, `notes`, `created_by` | Documented evidence, Contact, Notes, the account | Same |
+| The email found in `contact` | Contact email, its own field | Modelled |
+| `repatriation_claim_status_log` | `repatriation_status_changes`, the first status too | Same |
+| `repatriation_claim_message` (author_role, author_name, author_user, access_id, body, visibility) | `repatriation_messages`, the party and visibility vocabularies | Same |
+| `repatriation_claim_access` (token, grantee_name, grantee_role, can_message, status, expires_at, last_seen_at) | `repatriation_shares`: the token's SHA-256, revoked_at for the status | Modelled |
+| `repatriation_knowledge_contribution` (claim, item, type, body, source, contributor_name, credit_consent, contributed_by, moderation_status, moderated_by, moderated_at) | `repatriation_knowledge`, the claim's institution, the knowledge type and status vocabularies | Same |
+| The `repatriation_notifications` setting | `repatriation_settings.notify` | Same |
+| RepatriationNotifier (in-app to administrators, mail to the claimant) | Mail to those who manage claims, and to the claimant | Modelled |
+| The public dashboard and `/repatriation.json` | `/discover/repatriation` and its JSON, where the institution shows its register | Modelled |
+| `/virtual-return/{id}` | `/discover/repatriation/{id}`, for a published description, where the institution shows its register | Modelled |
+| PublicClaimLodgeController (from a traced object) | Lodge a repatriation claim, from any published description, where the institution allows it | Modelled |
+| VirtualReturnSpaceService, the 3D walk | Phase 21, with the exhibitions | Not yet |
+| The prefill from DisplacedHeritageService | 17d3, with the register | Not yet |
 

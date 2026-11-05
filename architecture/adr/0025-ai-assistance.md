@@ -239,3 +239,31 @@ He creates pgvector himself in the dev, test and live databases. The migration o
 - the ways in counting only what is published;
 - the settings.
 
+### 17d2: repatriation claims, dialogue, shared records and virtual return
+
+Repatriation is not AI. It is here because it is part of `ahg-semantic-search`.
+
+**A claim is a request, not a verdict.** Every page that shows claims carries Heratio's disclaimer. The statuses (registered, under review, acknowledged, virtual return, returned, disputed) are a vocabulary of neutral stages. Every change is kept in `repatriation_status_changes`, the first included, with who made it and the note.
+
+**Claims belong to a description.** Heratio's soft `item_ref` becomes a foreign key to the record resource, in the claim's institution. The claimant may also be an authority record, and the place of origin a place, beside their names as given.
+
+**Who may.** A new permission, **Manage repatriation claims** (`manage-repatriation`, on the institution), granted to administrators. Heratio gave it to administrators only.
+
+**Links to the shared record.** A claimant's representative reads the claim and writes in the dialogue through a link, without an account. The token is 48 random characters, shown once; only its SHA-256 is kept, as for the share links of 19a. Heratio kept the token. An observer's link never writes.
+
+**Public pages are off until chosen.** `repatriation_settings` holds three choices:
+
+- `public_register`: the dashboard, its JSON and each claim's virtual return. Heratio showed them always. A claim about an unpublished description is counted but never shown.
+- `public_lodging`: anyone may lodge a claim about a published description. Heratio allowed it only for an object its displaced-heritage register traces. That register is 17d3, and it finds few objects (it needs a recognisable origin and holding country), while a community often knows its object when the catalogue does not. The claim arrives as registered and is reviewed like any other. A hidden field, three seconds and five a minute keep robots out, as in Heratio.
+- `notify`: those who manage claims are mailed of a new claim and each change of status (Heratio told administrators in the application); the claimant is mailed at the claim's own email field (Heratio searched the contact text for one). Mail to someone without an account goes through `Outbox::address`, past the same suppression gate.
+
+**Community knowledge** is pending until reviewed, and the contributor's name is kept only with consent (a check constraint).
+
+**Not yet.** The 3D walk of a virtual return waits for the exhibitions of phase 21. The displaced-heritage register that prefills a claim is 17d3.
+
+**Tests.** `tests/Feature/RepatriationTest.php`:
+
+- registering and moving a claim on, with its history and the mail;
+- the dialogue and the shared record by its link, until revoked;
+- the public register and virtual returns, with knowledge shown once approved;
+- public lodging only where allowed, with the robot guards.

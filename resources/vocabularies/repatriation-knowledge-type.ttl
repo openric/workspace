@@ -1,0 +1,51 @@
+# OpenRiC Workspace - OpenRiC Workspace Repatriation Knowledge Types.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What kind of knowledge someone contributes about an object a repatriation claim concerns (Heratio's repatriation_knowledge_contribution.contribution_type).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/repatriation-knowledge-type/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Repatriation Knowledge Types"@en ;
+    dcterms:description "What kind of knowledge someone contributes about an object a repatriation claim concerns (Heratio's repatriation_knowledge_contribution.contribution_type)."@en ;
+    dcterms:issued "2026-11-05"^^xsd:date ;
+    skos:hasTopConcept v:provenance, v:oral-history, v:correction, v:source-community, v:other .
+
+v:provenance a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Provenance knowledge"@en, "Herkomskennis"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's repatriation claims, as Heratio's ahg-semantic-search keeps them. A claim documents a request and where the dialogue around it stands; it is not a legal determination."@en ;
+    skos:definition "Documented history of how, when and by whom this object moved."@en .
+
+v:oral-history a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Oral history"@en, "Mondelinge geskiedenis"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's repatriation claims, as Heratio's ahg-semantic-search keeps them. A claim documents a request and where the dialogue around it stands; it is not a legal determination."@en ;
+    skos:definition "Testimony, memory or story connected to this object."@en .
+
+v:correction a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Correction"@en, "Regstelling"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's repatriation claims, as Heratio's ahg-semantic-search keeps them. A claim documents a request and where the dialogue around it stands; it is not a legal determination."@en ;
+    skos:definition "Correct something the record currently gets wrong."@en .
+
+v:source-community a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Source community"@en, "Brongemeenskap"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's repatriation claims, as Heratio's ahg-semantic-search keeps them. A claim documents a request and where the dialogue around it stands; it is not a legal determination."@en ;
+    skos:definition "Identify, or point to, the community this object belongs with."@en .
+
+v:other a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Other knowledge"@en, "Ander kennis"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's repatriation claims, as Heratio's ahg-semantic-search keeps them. A claim documents a request and where the dialogue around it stands; it is not a legal determination."@en ;
+    skos:definition "Any other knowledge that helps understand this object."@en .

@@ -52,6 +52,10 @@
     @php($unitDoi = \App\Models\RecordDoi::where('record_resource_id', $unit->id)->whereHas('state', fn ($q) => $q->where('notation', 'findable'))->first())
     @if($unitDoi)<span style="font-size: .85rem"> · DOI <a href="{{ $unitDoi->url() }}">{{ $unitDoi->doi }}</a></span>@endif
     @if($display->allows($profile, 'feedback'))<a href="{{ route('feedback.create', ['record' => $unit->id]) }}" class="no-print" style="font-size: .85rem">{{ __('Feedback on this record') }}</a>@endif
+    {{-- Repatriation (phase 17d2): the claims about it, where the register is shown, and lodging one, where the institution allows it. --}}
+    @php($repatriation = \App\Models\RepatriationSetting::for($institution->id))
+    @if($repatriation->public_register)@foreach(\App\Models\RepatriationClaim::where('record_resource_id', $unit->id)->get() as $rc)<a href="{{ route('discover.repatriation.show', $rc->id) }}" class="no-print" style="font-size: .85rem">{{ __('Virtual return') }}</a> @endforeach @endif
+    @if($repatriation->public_lodging)<a href="{{ route('discover.repatriation.lodge', $unit->id) }}" class="no-print" style="font-size: .85rem">{{ __('Lodge a repatriation claim') }}</a>@endif
     <p class="meta">{{ $unit->level->label(\App\Support\Vocab::languages()) }} @include('description._ric', ['term' => \App\Relations\EntityKinds::ricClass($unit)])
         @if($unit->referenceCode()) · {{ $unit->referenceCode() }}@endif
         @if($unit->repository && $view->readable($unit->repository)) · {{ __('Held by') }} <a href="{{ route('discover.repository', $unit->repository->id) }}">{{ $view->label($unit->repository) }}</a>@endif</p>

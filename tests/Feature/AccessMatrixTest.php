@@ -79,6 +79,8 @@ use App\Preservation\MigrationPlans;
 use App\Preservation\Replication;
 use App\Proposals\ProposalService;
 use App\Relations\RelationService;
+use App\Repatriation\Dialogue;
+use App\Repatriation\Knowledge;
 use App\Reports\ReportBuilder;
 use App\Research\Annotations;
 use App\Research\Bibliographies;
@@ -465,6 +467,13 @@ class AccessMatrixTest extends TestCase
             'state_id' => Concept::where('iri', Vocab::BASE.'doi-state/findable')->value('id'), 'test' => true, 'minted_at' => now()]),
             app(RecordDois::class)->enqueue($letter, 'mint', $admin),
             RecordFunding::create(['record_resource_id' => $letter->id, 'funder_name' => 'National Research Foundation'])]);
+        // Phase 17d2: a repatriation claim, a link to its shared record, and knowledge contributed about it.
+        $make('repatriation claim', function () use ($letter, $admin) {
+            $claim = app(\App\Repatriation\Claims::class)->register($letter, ['claimant_community' => 'Valley people'], $admin);
+
+            return [$claim, app(Dialogue::class)->grant($claim, ['grantee_role' => 'claimant'], $admin)[0],
+                app(Knowledge::class)->contribute($claim, ['type' => 'oral-history', 'body' => 'Remembered at harvest.'], null)];
+        });
         // Phase 17c: a proposed change to the interface's wording.
         $make('interface string change', fn () => InterfaceStringChange::findOrFail(app(InterfaceStrings::class)->propose($admin, 'af', 'Archival descriptions', 'Argiefbeskrywings (ons s\'n)')));
         // Phase 17b2: a name to resolve, with its candidate (the agent made above).

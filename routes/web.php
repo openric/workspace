@@ -77,6 +77,7 @@ use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProposalReviewController;
 use App\Http\Controllers\ProvenanceController;
 use App\Http\Controllers\PublicationController;
+use App\Http\Controllers\PublicRepatriationController;
 use App\Http\Controllers\PublishingController;
 use App\Http\Controllers\ReadingRoomController;
 use App\Http\Controllers\ReasoningController;
@@ -85,6 +86,7 @@ use App\Http\Controllers\RecordMembershipController;
 use App\Http\Controllers\RecordsManagementController;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\RelationController;
+use App\Http\Controllers\RepatriationController;
 use App\Http\Controllers\ReportBuilderController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RepositoryController;
@@ -267,6 +269,15 @@ Route::middleware(ServeDiscovery::class)->prefix('discover')->name('discover.')-
     Route::get('/ways-in/{facet}', [ExploreController::class, 'facet'])->name('ways-in.facet')->where('facet', 'themes|places|people|genres');
     Route::get('/ways-in/{facet}/{id}', [ExploreController::class, 'units'])->name('ways-in.units')->where('facet', 'themes|places|people|genres')->whereUuid('id');
     Route::get('/records/{id}/tree', [DiscoverController::class, 'treeChildren'])->name('record.tree');
+    // Repatriation (roadmap phase 17d2): the register of claims and each claim's virtual return, where the institution
+    // shows them; lodging a claim about a description, where it allows it.
+    Route::get('/repatriation', [PublicRepatriationController::class, 'dashboard'])->name('repatriation');
+    Route::get('/repatriation/data.json', [PublicRepatriationController::class, 'json'])->name('repatriation.json');
+    Route::get('/repatriation/thanks', [PublicRepatriationController::class, 'thanks'])->name('repatriation.thanks');
+    Route::get('/repatriation/{id}', [PublicRepatriationController::class, 'show'])->whereUuid('id')->name('repatriation.show');
+    Route::post('/repatriation/{id}/knowledge', [PublicRepatriationController::class, 'contribute'])->whereUuid('id')->middleware('throttle:5,1')->name('repatriation.contribute');
+    Route::get('/records/{id}/repatriation-claim', [PublicRepatriationController::class, 'lodge'])->name('repatriation.lodge');
+    Route::post('/records/{id}/repatriation-claim', [PublicRepatriationController::class, 'submit'])->middleware('throttle:5,1')->name('repatriation.submit');
     Route::get('/agents/{id}', [DiscoverController::class, 'agent'])->name('agent');
     Route::get('/repositories/{id}', [DiscoverController::class, 'repository'])->name('repository');
     Route::get('/repositories/{id}/theme/{part}', [DiscoverController::class, 'repositoryImage'])->whereIn('part', ['banner', 'logo'])->name('repository.image');
@@ -321,6 +332,11 @@ Route::middleware('throttle:60,1')->prefix('sword')->name('sword.')->whereUuid('
 // Citing a record, and a bibliography opened by its link (roadmap phase 19c, ADR 0017): for anyone.
 Route::get('/cite/{record}', [ResearchToolsController::class, 'cite'])->middleware('throttle:120,1')->whereUuid('record')->name('cite');
 Route::get('/bibliographies/shared/{token}', [ResearchToolsController::class, 'sharedBibliography'])->middleware('throttle:60,1')->where('token', '[A-Za-z0-9]{48}')->name('research.bibliographies.shared');
+// A repatriation claim's shared record, opened by its link (roadmap phase 17d2): for the claimant holding it.
+Route::middleware('throttle:60,1')->prefix('repatriation/shared')->where(['token' => '[A-Za-z0-9]{48}'])->group(function () {
+    Route::get('/{token}', [PublicRepatriationController::class, 'shared'])->name('repatriation.shared');
+    Route::post('/{token}', [PublicRepatriationController::class, 'sharedMessage'])->middleware('throttle:10,1')->name('repatriation.shared.message');
+});
 // Feedback on the catalogue or a record (roadmap phase 19a, ADR 0017): for anyone, rate limited.
 Route::get('/feedback', [FeedbackController::class, 'create'])->name('feedback.create');
 Route::post('/feedback', [FeedbackController::class, 'store'])->middleware('throttle:5,1')->name('feedback.store');
@@ -1224,6 +1240,22 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/{feedback}', [FeedbackController::class, 'show'])->name('show');
         Route::post('/{feedback}', [FeedbackController::class, 'update'])->name('update');
         Route::post('/{feedback}/delete', [FeedbackController::class, 'destroy'])->name('destroy');
+    });
+    // Repatriation claims (roadmap phase 17d2): for accounts that may manage them.
+    Route::prefix('repatriation')->name('repatriation.')->whereUuid(['claim', 'share', 'contribution'])->group(function () {
+        Route::get('/', [RepatriationController::class, 'index'])->name('index');
+        Route::post('/settings', [RepatriationController::class, 'settings'])->name('settings');
+        Route::get('/claims/create', [RepatriationController::class, 'create'])->name('create');
+        Route::post('/claims', [RepatriationController::class, 'store'])->name('store');
+        Route::get('/claims/{claim}', [RepatriationController::class, 'dialogue'])->name('dialogue');
+        Route::get('/claims/{claim}/edit', [RepatriationController::class, 'edit'])->name('edit');
+        Route::post('/claims/{claim}', [RepatriationController::class, 'update'])->name('update');
+        Route::post('/claims/{claim}/message', [RepatriationController::class, 'message'])->name('message');
+        Route::post('/claims/{claim}/status', [RepatriationController::class, 'status'])->name('status');
+        Route::post('/claims/{claim}/links', [RepatriationController::class, 'grant'])->name('grant');
+        Route::post('/claims/{claim}/links/{share}/revoke', [RepatriationController::class, 'revoke'])->name('revoke');
+        Route::get('/knowledge', [RepatriationController::class, 'knowledgeQueue'])->name('knowledge');
+        Route::post('/knowledge/{contribution}', [RepatriationController::class, 'moderate'])->name('moderate');
     });
     // Share links (roadmap phase 19a, ADR 0017): issued on a record's page by who may change it.
     Route::get('/share-links', [ShareLinkController::class, 'index'])->name('share-links.index');

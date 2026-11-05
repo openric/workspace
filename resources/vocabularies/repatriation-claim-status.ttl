@@ -1,0 +1,58 @@
+# OpenRiC Workspace - OpenRiC Workspace Repatriation Claim Statuses.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Where a repatriation claim and the dialogue around it stand (Heratio's displaced_heritage_claim.claim_status). None asserts a legal outcome.
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/repatriation-claim-status/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Repatriation Claim Statuses"@en ;
+    dcterms:description "Where a repatriation claim and the dialogue around it stand (Heratio's displaced_heritage_claim.claim_status). None asserts a legal outcome."@en ;
+    dcterms:issued "2026-11-05"^^xsd:date ;
+    skos:hasTopConcept v:registered, v:under-review, v:acknowledged, v:virtual-return, v:returned, v:disputed .
+
+v:registered a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Registered"@en, "Geregistreer"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's repatriation claims, as Heratio's ahg-semantic-search keeps them. A claim documents a request and where the dialogue around it stands; it is not a legal determination."@en ;
+    skos:definition "A claim has been recorded and is awaiting review."@en .
+
+v:under-review a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Under review"@en, "In hersiening"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's repatriation claims, as Heratio's ahg-semantic-search keeps them. A claim documents a request and where the dialogue around it stands; it is not a legal determination."@en ;
+    skos:definition "The claim and its documented evidence are being examined."@en .
+
+v:acknowledged a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Acknowledged"@en, "Erken"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's repatriation claims, as Heratio's ahg-semantic-search keeps them. A claim documents a request and where the dialogue around it stands; it is not a legal determination."@en ;
+    skos:definition "The holding institution has acknowledged the claim and the dialogue is open."@en .
+
+v:virtual-return a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Virtual return"@en, "Virtuele terugkeer"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's repatriation claims, as Heratio's ahg-semantic-search keeps them. A claim documents a request and where the dialogue around it stands; it is not a legal determination."@en ;
+    skos:definition "The object is made accessible in its origin context digitally, independent of any physical transfer."@en .
+
+v:returned a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Returned"@en, "Teruggegee"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's repatriation claims, as Heratio's ahg-semantic-search keeps them. A claim documents a request and where the dialogue around it stands; it is not a legal determination."@en ;
+    skos:definition "A physical return has been recorded."@en .
+
+v:disputed a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Disputed"@en, "Betwis"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's repatriation claims, as Heratio's ahg-semantic-search keeps them. A claim documents a request and where the dialogue around it stands; it is not a legal determination."@en ;
+    skos:definition "The facts or the claim are contested and remain under discussion."@en .

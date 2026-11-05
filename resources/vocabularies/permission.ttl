@@ -14,7 +14,7 @@ v: a skos:ConceptScheme ;
     dcterms:title "OpenRiC Workspace Permissions"@en ;
     dcterms:description "Actions a role or an account may be granted or denied, on a kind of record, at the scope of everything, one repository or one record. Anything not granted is denied, and a denial wins over a grant at the same scope (ADR 0005)."@en ;
     dcterms:issued "2026-10-19"^^xsd:date ;
-    skos:hasTopConcept v:manage-institution, v:manage-accounts, v:view-audit-log, v:describe, v:review, v:publish, v:manage-roles, v:manage-workflows, v:manage-privacy, v:manage-shop, v:manage-reading-room, v:review-submissions, v:read, v:create, v:update, v:delete, v:view-draft, v:read-master, v:read-reference, v:read-thumbnail, v:translate, v:review-proposals, v:review-access-requests .
+    skos:hasTopConcept v:manage-institution, v:manage-accounts, v:view-audit-log, v:describe, v:review, v:publish, v:manage-roles, v:manage-workflows, v:manage-privacy, v:manage-shop, v:manage-reading-room, v:review-submissions, v:read, v:create, v:update, v:delete, v:view-draft, v:read-master, v:read-reference, v:read-thumbnail, v:translate, v:review-proposals, v:review-access-requests, v:manage-repatriation .
 
 v:manage-institution a skos:Concept ;
     skos:inScheme v: ;
@@ -174,3 +174,10 @@ v:review-access-requests a skos:Concept ;
     skos:prefLabel "Review access requests"@en ;
     skos:scopeNote "Heratio's access request approvers (access_request_approver, ahg-access-request): those who hold it are told of each new request for a file of the records they may review, and approve or refuse it (roadmap phase 7)."@en ;
     skos:definition "See the requests for files that are available on request, and approve them for a time or refuse them."@en .
+
+v:manage-repatriation a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Manage repatriation claims"@en, "Bestuur repatriasie-eise"@af ;
+    skos:scopeNote "Administrative; Heratio's repatriation claims, dialogue and community knowledge (ahg-semantic-search, admin only). Those who hold it are told of each new claim (roadmap phase 17d2)."@en ;
+    skos:definition "Register and update repatriation claims, hold the dialogue with claimants, give and revoke links to a claim's shared record, and review the knowledge people contribute."@en .

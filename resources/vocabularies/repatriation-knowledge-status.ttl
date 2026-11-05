@@ -1,0 +1,37 @@
+# OpenRiC Workspace - OpenRiC Workspace Repatriation Knowledge Statuses.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Whether knowledge contributed about an object a repatriation claim concerns is shown (Heratio's repatriation_knowledge_contribution.moderation_status).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/repatriation-knowledge-status/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Repatriation Knowledge Statuses"@en ;
+    dcterms:description "Whether knowledge contributed about an object a repatriation claim concerns is shown (Heratio's repatriation_knowledge_contribution.moderation_status)."@en ;
+    dcterms:issued "2026-11-05"^^xsd:date ;
+    skos:hasTopConcept v:pending, v:approved, v:rejected .
+
+v:pending a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Pending review"@en, "Wag op hersiening"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's repatriation claims, as Heratio's ahg-semantic-search keeps them. A claim documents a request and where the dialogue around it stands; it is not a legal determination."@en ;
+    skos:definition "Not yet reviewed, and not shown."@en .
+
+v:approved a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Approved"@en, "Goedgekeur"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's repatriation claims, as Heratio's ahg-semantic-search keeps them. A claim documents a request and where the dialogue around it stands; it is not a legal determination."@en ;
+    skos:definition "Reviewed and shown with the virtual return."@en .
+
+v:rejected a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Not published"@en, "Nie gepubliseer nie"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's repatriation claims, as Heratio's ahg-semantic-search keeps them. A claim documents a request and where the dialogue around it stands; it is not a legal determination."@en ;
+    skos:definition "Reviewed and not shown."@en .
