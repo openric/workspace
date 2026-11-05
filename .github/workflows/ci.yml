@@ -55,7 +55,7 @@ jobs:
       # and pdftotext reads its text (App\Files\FileStore, PdfText, Watermark); exiftool reads embedded metadata (EmbeddedMetadata);
       # ffprobe reads the length of sound and video (MediaDuration).
       - name: Image and PDF tools
-        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends imagemagick poppler-utils libimage-exiftool-perl ffmpeg fonts-dejavu-core
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends imagemagick poppler-utils libimage-exiftool-perl ffmpeg fonts-dejavu-core tesseract-ocr
       # SHACL is the gate (Governance profile 5, ADR 0013): tests/Feature/ShaclGateTest checks every kind of published RiC-O
       # against the pinned OpenRiC shapes with pySHACL, and fails here rather than skip if it is missing.
       - name: SHACL validator

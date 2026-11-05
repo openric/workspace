@@ -195,6 +195,8 @@ class AiFoundationTest extends TestCase
         $image = new Imagick;
         $image->newImage(1400, 220, new ImagickPixel('white'));
         $draw = new ImagickDraw;
+        // DejaVu, as CI installs it (fonts-dejavu-core); Imagick has no default font there.
+        $draw->setFont('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf');
         $draw->setFontSize(30);
         $draw->setFillColor(new ImagickPixel('black'));
         $image->annotateImage($draw, 30, 110, 0, self::PAGE);
