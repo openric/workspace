@@ -64,7 +64,10 @@ final class ReviewService
         return DB::transaction(fn () => AuditLog::actingAs($reviewer, function () use ($proposal, $reviewer, $edits, $record, $value, $language) {
             $kind = $proposal->kind->notation;
             $written = match ($kind) {
-                'value' => tap($record, fn () => app(RecordService::class)->describe($record, [$proposal->element->notation => $value], $language, $reviewer)),
+                // A value of an instantiation's element when it names one (a condition a model assessed, phase 17b), else of the record's.
+                'value' => $proposal->instantiation_id
+                    ? tap($proposal->instantiation, fn ($i) => app(InstantiationService::class)->describe($i, [$proposal->element->notation => $value], $language, $reviewer))
+                    : tap($record, fn () => app(RecordService::class)->describe($record, [$proposal->element->notation => $value], $language, $reviewer)),
                 'transcript' => tap($proposal->instantiation, fn ($i) => app(InstantiationService::class)->describe($i, ['instantiation-transcript' => $value], $language, $reviewer)),
                 'date' => tap($record, fn () => app(DateService::class)->add($record, ['property' => 'associated', 'expressed' => $value, 'language' => $language,
                     'normalized' => $edits['normalized'] ?? null], $reviewer)),

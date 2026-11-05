@@ -431,6 +431,8 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::post('/instantiations/{instantiation}', [InstantiationController::class, 'update'])->name('instantiations.update');
     Route::post('/instantiations/{instantiation}/copies', [WatermarkController::class, 'remake'])->name('instantiations.remake-copies');
     Route::post('/instantiations/{instantiation}/read-text', [AiController::class, 'readText'])->name('instantiations.read-text');
+    Route::post('/instantiations/{instantiation}/assess-condition', [AiController::class, 'condition'])->name('instantiations.assess-condition');
+    Route::post('/records/{record}/ask/{task}', [AiController::class, 'ask'])->name('records.ask')->where('task', 'names|summary');
     Route::post('/instantiations/{instantiation}/own-copy', [InstantiationController::class, 'replaceCopy'])->name('instantiations.replace-copy');
     Route::get('/files/{file}', [InstantiationController::class, 'file'])->name('files.show');
     // WebVTT caption tracks of a sound or video instantiation (roadmap phase 22c).

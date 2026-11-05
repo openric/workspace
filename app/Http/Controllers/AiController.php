@@ -13,11 +13,13 @@ namespace App\Http\Controllers;
 use App\Ai\Gateway;
 use App\Ai\Inferences;
 use App\Audit\AuditLog;
+use App\Jobs\AskModel;
 use App\Jobs\JobsService;
 use App\Jobs\ReadPageText;
 use App\Models\AiInference;
 use App\Models\Concept;
 use App\Models\Instantiation;
+use App\Models\RecordResource;
 use App\Support\Vocab;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -41,10 +43,11 @@ class AiController extends Controller
     public function save(Request $request): RedirectResponse
     {
         $data = $request->validate(['enabled' => ['nullable', 'boolean'], 'monthly_limit' => ['nullable', 'integer', 'between:0,10000000'],
-            'ocr_model' => ['nullable', 'string', 'max:200', 'regex:/^[A-Za-z0-9._:\/-]+$/'], 'ocr_fallback_model' => ['nullable', 'string', 'max:200', 'regex:/^[A-Za-z0-9._:\/-]+$/']]);
+            'ocr_model' => ['nullable', 'string', 'max:200', 'regex:/^[A-Za-z0-9._:\/-]+$/'], 'ocr_fallback_model' => ['nullable', 'string', 'max:200', 'regex:/^[A-Za-z0-9._:\/-]+$/'],
+            'chat_model' => ['nullable', 'string', 'max:200', 'regex:/^[A-Za-z0-9._:\/-]+$/']]);
         $settings = $this->gateway->settings($request->user()->institution_id);
         $settings->fill(['enabled' => $request->boolean('enabled'), 'monthly_limit' => $data['monthly_limit'] ?? null, 'ocr_model' => $data['ocr_model'] ?? null,
-            'ocr_fallback_model' => $data['ocr_fallback_model'] ?? null, 'updated_by_id' => $request->user()->id]);
+            'ocr_fallback_model' => $data['ocr_fallback_model'] ?? null, 'chat_model' => $data['chat_model'] ?? null, 'updated_by_id' => $request->user()->id]);
         AuditLog::actingAs($request->user(), fn () => $settings->save());
 
         return back()->with('status', __('Saved.'));
@@ -74,6 +77,39 @@ class AiController extends Controller
         return view('ai.inference', ['inference' => $inference->load('service.labels', 'user'), 'subject' => $inference->subject(),
             'proposals' => $inference->proposals()->with('kind.labels', 'status.labels', 'reviewedBy', 'proposedBy')->get(),
             'siblings' => $reading ? AiInference::where('details->reading', $reading)->whereKeyNot($inference->id)->orderBy('seq')->get() : collect()]);
+    }
+
+    /** Ask a model to find a unit's names or summarise its pages (phase 17b1); its answers wait for review. */
+    public function ask(Request $request, RecordResource $record, string $task): RedirectResponse
+    {
+        $user = $request->user();
+        abort_unless($record->institution_id === $user->institution_id && $record->deleted_at === null && in_array($task, ['names', 'summary'], true), 404);
+        abort_unless($user->may('update', 'description', $record), 403);
+
+        return $this->queue($request, $task, $record, $task === 'names' ? __('Finding names in :title', ['title' => $record->described('title', ['en'])])
+            : __('Summarising the pages of :title', ['title' => $record->described('title', ['en'])]));
+    }
+
+    /** Ask a vision model to assess the condition of the object an instantiation pictures (phase 17b1). */
+    public function condition(Request $request, Instantiation $instantiation): RedirectResponse
+    {
+        $user = $request->user();
+        abort_unless($instantiation->institution_id === $user->institution_id && $instantiation->deleted_at === null, 404);
+        abort_unless($user->may('update', 'description', $instantiation->record), 403);
+        abort_if(ReadPageText::image($instantiation) === null, 404);
+
+        return $this->queue($request, 'condition', $instantiation, __('Assessing the condition shown in :name', ['name' => $instantiation->file('master')?->original_name ?? $instantiation->id]));
+    }
+
+    private function queue(Request $request, string $task, RecordResource|Instantiation $subject, string $name): RedirectResponse
+    {
+        if ($reason = $this->gateway->refusal($request->user()->institution_id)) {
+            return back()->withErrors(['ai' => $reason]);
+        }
+        $job = app(JobsService::class)->create($request->user()->institution_id, 'ai-assist', $name, $request->user(), $subject);
+        AskModel::dispatch($job->id, $task, $subject->id);
+
+        return back()->with('status', __('The model has been asked. What it answers will wait for review in the proposals queue.'));
     }
 
     /** Read the text of an instantiation's page image, as a proposed transcript. */

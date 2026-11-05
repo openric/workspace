@@ -18,7 +18,7 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-actor-manage` | 13061 | V0.1 candidate | Covered |  | `ahgActorManagePlugin`, `ahgAuthorityPlugin`, `ahgContactPlugin` | Authority records: ISAAR(CPF), merge, split, duplicates, completeness |
 | `ahg-ai-chatbot` | 4924 | out: AI (V2+) | Planned | 17 (last) | `ahgChatbotPlugin` |  |
 | `ahg-ai-compliance` | 4043 | out: AI (V2+) | Planned | 17 (last) | `ahgAiCompliancePlugin` |  |
-| `ahg-ai-services` | 30242 | out: AI (V2+) | Partial | 17a to 17b | `ahgAIPlugin`, `ahgAiConditionPlugin` | Proposals and their review queue (v0.0.47, v0.0.48); the gateway client and OCR of printed pages by a vision model checked against Tesseract (heratio#1522), from v0.0.127 (ADR 0025); names, summaries, condition and handwriting in 17b |
+| `ahg-ai-services` | 30242 | out: AI (V2+) | Partial | 17a to 17b | `ahgAIPlugin`, `ahgAiConditionPlugin` | Proposals and their review queue (v0.0.47, v0.0.48); the gateway client and OCR of printed pages by a vision model checked against Tesseract (heratio#1522), from v0.0.127; names found by spaCy, summaries and a vision model's condition assessment, each proposed for review, from v0.0.128 (ADR 0025); handwriting once a gateway key lets its answer be checked |
 | `ahg-annotations` | 1286 | V0.1 candidate | Planned | 14 | `ahgAnnotationsPlugin` | As IIIF annotations |
 | `ahg-api` | 30902 | V0.1 candidate | Covered | 22c | `ahgAPIPlugin`, `arRestApiPlugin` | Read API, keys, proposals, files (ADR 0007); webhooks, OpenAPI, sitemaps, Atom feed and METS from v0.0.108 (ADR 0020); API writes stay proposals |
 | `ahg-api-plugin` | 179 | V0.1 candidate | Covered |  | none | The proposals contract the MCP uses (v0.0.47) |
@@ -1492,5 +1492,10 @@ Added on 5 November 2026 with 17a.
 | `ahg_ai_settings` for OCR: `ocr_vision_model`, `ocr_vision_fallback_model` | `ai_settings.ocr_model`, `ocr_fallback_model` | Same |
 | QuotaService | `ai_settings.monthly_limit`, beside the gateway's own quota | Modelled |
 | VisionOcrService, Tesseract cross-check | `App\Ai\Ocr\VisionReader`, `App\Ai\Ocr\Tesseract` | Same |
-| HtrService | 17b | Not yet |
+| HtrService | Once a gateway key lets its answer be checked | Not yet |
+| NerService: `/ner/extract`, `entities_v2` (value, type, offsets, score), the PERSON, ORG, GPE and DATE buckets | `App\Ai\Assist::names()`, proposals through the API's path | Same, from v0.0.128 |
+| NerService's fallback to a language model | Not carried: names come from one known model | Not carried |
+| `ahg_ner_entity` and its review | The proposals queue | Modelled |
+| LlmService::summarize and its prompt, `summarizer_min_length`, `summarizer_max_length` | `Assist::summary()`, 30 to 200 words, the model in `ai_settings.chat_model` | Same |
+| The AI condition assessment (`ai_condition_service_url`) | `Assist::condition()`, a vision model through the gateway until a trained one has a route (ArchiveHeritageGroup/ahg-ai#5) | Modelled |
 

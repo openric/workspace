@@ -33,6 +33,8 @@
         @if(\App\Jobs\ReadPageText::image($instantiation) && app(\App\Ai\Gateway::class)->available(auth()->user()->institution_id))
             <form method="post" action="{{ route('instantiations.read-text', $instantiation) }}">@csrf<button type="submit" style="margin-top: 0">{{ __('Read the text with AI') }}</button>
                 <small>{{ __('A vision model reads the page through the AI gateway, checked against Tesseract. Its text is a proposal you review.') }}</small></form>
+            <form method="post" action="{{ route('instantiations.assess-condition', $instantiation) }}">@csrf<button type="submit" style="margin-top: 0">{{ __('Assess its condition with AI') }}</button>
+                <small>{{ __('A vision model looks at the picture and proposes its physical characteristics: a condition grade and the damage it sees, for you to check against the object.') }}</small></form>
         @endif
         <form method="post" action="{{ route('instantiations.replace-copy', $instantiation) }}" enctype="multipart/form-data">
             @csrf

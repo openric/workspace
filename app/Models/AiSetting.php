@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 
-#[Fillable(['institution_id', 'enabled', 'monthly_limit', 'ocr_model', 'ocr_fallback_model', 'updated_by_id'])]
+#[Fillable(['institution_id', 'enabled', 'monthly_limit', 'ocr_model', 'ocr_fallback_model', 'chat_model', 'updated_by_id'])]
 class AiSetting extends Model
 {
     use Audited, HasUuids;

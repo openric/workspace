@@ -88,7 +88,7 @@ final class ProposalService
      *
      * @return array{created: bool, body: array<string, mixed>}
      */
-    public function propose(RecordResource $record, User $user, ?ApiKey $key, array $input): array
+    public function propose(RecordResource $record, User $user, ?ApiKey $key, array $input, ?string $inferenceId = null): array
     {
         $list = fn (string $name) => is_array($input[$name] ?? null) ? array_values($input[$name]) : [];
         [$entities, $fields, $transcripts, $relationships] = [$list('entities'), $list('fields'), $list('transcripts'), $list('relationships')];
@@ -106,9 +106,9 @@ final class ProposalService
         $values = [...$this->fields($record, $fields), ...$this->transcripts($record, $transcripts)];
         $relations = $this->relationships($user, $relationships);
 
-        return DB::transaction(fn () => AuditLog::actingAs($user, function () use ($record, $user, $key, $label, $names, $values, $relations) {
+        return DB::transaction(fn () => AuditLog::actingAs($user, function () use ($record, $user, $key, $label, $names, $values, $relations, $inferenceId) {
             $base = ['institution_id' => $record->institution_id, 'record_resource_id' => $record->id, 'status_id' => $this->concept(Vocab::ASSERTION_STATUSES.'proposed')->id,
-                'origin_label' => $label, 'proposed_by_id' => $user->id, 'api_key_id' => $key?->id];
+                'origin_label' => $label, 'proposed_by_id' => $user->id, 'api_key_id' => $key?->id, 'inference_id' => $inferenceId];
             $queued = [];
             $skipped = 0;
             foreach ($names as $name) {

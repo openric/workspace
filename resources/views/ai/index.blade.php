@@ -14,6 +14,7 @@
         <label for="ai-limit">{{ __('At most so many calls a month') }}</label><input id="ai-limit" name="monthly_limit" type="number" min="0" value="{{ $settings->monthly_limit }}" placeholder="{{ __('No limit beyond the gateway\'s') }}">
         <label for="ai-ocr">{{ __('Vision model that reads printed pages') }}</label><input id="ai-ocr" name="ocr_model" maxlength="200" value="{{ $settings->ocr_model }}" placeholder="{{ config('workspace.ai.ocr_model') }}">
         <label for="ai-ocr2">{{ __('Model that reads a strip again when the first disagrees with Tesseract') }}</label><input id="ai-ocr2" name="ocr_fallback_model" maxlength="200" value="{{ $settings->ocr_fallback_model }}" placeholder="{{ config('workspace.ai.ocr_fallback_model') }}">
+        <label for="ai-chat">{{ __('Language model that writes summaries') }}</label><input id="ai-chat" name="chat_model" maxlength="200" value="{{ $settings->chat_model }}" placeholder="{{ config('workspace.ai.chat_model') }}">
         <button type="submit">{{ __('Save') }}</button></form>
 
     <h2>{{ __('This month') }}</h2>
