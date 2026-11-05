@@ -267,3 +267,34 @@ Repatriation is not AI. It is here because it is part of `ahg-semantic-search`.
 - the dialogue and the shared record by its link, until revoked;
 - the public register and virtual returns, with knowledge shown once approved;
 - public lodging only where allowed, with the robot guards.
+
+### 17d3: heritage at risk and displaced heritage
+
+Neither is AI. Both are here because they are part of `ahg-semantic-search`.
+
+**The displaced-heritage register** is Heratio's heuristic, copied with its table of countries, peoples and cultures, its whole-word matching (longest first) and its rule: flag only where both sides are known and differ. Heratio reads its museum fields, which the Workspace has only from phase 21. Until then:
+
+- **Origin** is the location of the earliest owner in the description's provenance chain, which is already RiC data.
+- **Holding** is the country in the repository's contact details, else the latest owner's location.
+
+The register keeps nothing; it is read each time, as in Heratio. It prefills a repatriation claim (17d2) with the origin it traced.
+
+**Heritage at risk.**
+
+- **A flag.** `endangered_items` holds one flag a description: risk, urgency and capture status as vocabularies, and a reason.
+- **The score.** Heratio's weights (1000, 100, 10, 1, and 5 for a digitisation gap) are kept in code by notation.
+- **Who may.** Whoever may change the description may flag it. Heratio limited flagging to administrators, but deciding what is fragile is cataloguing work.
+
+**The network.**
+
+- **Reading.** The published register answers peers signed with the installation's key, at `/federation/endangered` and at Heratio's `/api/v1/endangered`, so a Heratio reads a Workspace unchanged. Codes travel in Heratio's form (`digitisation_gap`, `in_progress`).
+- **Pushing.** A peer pushes to `/federation/endangered/inbound` or `/api/v1/endangered/inbound`. It must be an active peer of the institution, not untrusted, and allowed the new `endangered` surface. Its signature is checked against the pinned key and required where the institution or the peer's trust requires it. The push is kept in `endangered_inbound_flags` until a curator accepts it.
+- **The board.** It merges the institution's published register, each peer's register (in parallel, public addresses only) and the accepted pushes.
+
+**Off until chosen.** `endangered_settings` holds `public_register`, `share_with_peers` and `accept_pushes`. Heratio showed its register and answered peers always. The public displaced-heritage register follows the repatriation register's switch (17d2).
+
+**Tests.** `tests/Feature/HeritageAtRiskTest.php`:
+
+- tracing, and the prefill;
+- flags, the worklist and the public register;
+- the signed answer, a peer's register on the board, and a push from receipt to acceptance.

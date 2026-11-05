@@ -6,12 +6,13 @@
     <h1>{{ $claim ? __('Edit repatriation claim') : __('Register a repatriation claim') }}</h1>
     <p>{{ __('Object') }}: <a href="{{ route('records.show', $record) }}">{{ \App\Relations\EntityKinds::label($record, $lang) }}</a></p>
     <p class="meta">{{ __(\App\Repatriation\Claims::DISCLAIMER) }}</p>
+    @if($trace)<p>{{ __('The displaced-heritage register traces its origin to :origin and its holding to :holding.', ['origin' => $trace['origin_region'], 'holding' => $trace['holding_region']]) }}</p>@endif
     @if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif
     <form method="post" action="{{ $claim ? route('repatriation.update', $claim) : route('repatriation.store') }}">@csrf
         @unless($claim)<input type="hidden" name="record" value="{{ $record->id }}">@endunless
         <p><label for="rc-community">{{ __('Claimant community or nation') }}</label><br><input id="rc-community" name="claimant_community" maxlength="512" size="60" value="{{ old('claimant_community', $claim?->claimant_community) }}">
             <label for="rc-agent">{{ __('Its authority record') }}</label> <select id="rc-agent" name="claimant_agent_id"><option value="">{{ __('None') }}</option>@foreach($agents as $a)<option value="{{ $a['id'] }}" @selected(old('claimant_agent_id', $claim?->claimant_agent_id) === $a['id'])>{{ $a['name'] }}</option>@endforeach</select></p>
-        <p><label for="rc-origin">{{ __('Place / region of origin') }}</label><br><input id="rc-origin" name="origin_place" maxlength="512" size="60" value="{{ old('origin_place', $claim?->origin_place) }}">
+        <p><label for="rc-origin">{{ __('Place / region of origin') }}</label><br><input id="rc-origin" name="origin_place" maxlength="512" size="60" value="{{ old('origin_place', $claim?->origin_place ?? ($trace ? $trace['origin']['value'] : null)) }}">
             <label for="rc-place">{{ __('Its place') }}</label> <select id="rc-place" name="origin_place_id"><option value="">{{ __('None') }}</option>@foreach($places as $p)<option value="{{ $p['id'] }}" @selected(old('origin_place_id', $claim?->origin_place_id) === $p['id'])>{{ $p['name'] }}</option>@endforeach</select></p>
         <p><label for="rc-holder">{{ __('Current holder') }}</label><br><input id="rc-holder" name="current_holder" maxlength="512" size="60" value="{{ old('current_holder', $claim?->current_holder) }}" placeholder="{{ __('The description\'s repository, when left empty') }}"></p>
         <p><label for="rc-status">{{ __('Stage of dialogue') }}</label> <select id="rc-status" name="status">@foreach($statuses as $s)<option value="{{ $s->notation }}" title="{{ $s->labels->whereIn('language', $lang)->first()?->definition }}" @selected(old('status', $claim?->status->notation ?? 'registered') === $s->notation)>{{ $s->label($lang) }}</option>@endforeach</select></p>

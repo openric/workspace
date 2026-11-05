@@ -39,6 +39,7 @@ use App\Description\WorkflowSlaService;
 use App\Display\Displays;
 use App\Dois\RecordDois;
 use App\Fixity\Fixity;
+use App\Heritage\Endangered;
 use App\Iiif\CuratedCollections;
 use App\Jurisdiction\ExportPermits;
 use App\Jurisdiction\NarssaTransfers;
@@ -47,6 +48,7 @@ use App\Models\CaptionTrack;
 use App\Models\Concept;
 use App\Models\Container;
 use App\Models\DuplicateDetection;
+use App\Models\EndangeredInboundFlag;
 use App\Models\EuropeanaExport;
 use App\Models\FederationJoinRequest;
 use App\Models\FederationLoanRequest;
@@ -467,6 +469,12 @@ class AccessMatrixTest extends TestCase
             'state_id' => Concept::where('iri', Vocab::BASE.'doi-state/findable')->value('id'), 'test' => true, 'minted_at' => now()]),
             app(RecordDois::class)->enqueue($letter, 'mint', $admin),
             RecordFunding::create(['record_resource_id' => $letter->id, 'funder_name' => 'National Research Foundation'])]);
+        // Phase 17d3: a description flagged at risk, and a flag a peer pushed.
+        $make('heritage at risk', fn () => [app(Endangered::class)->flag($letter, ['risk' => 'decay', 'urgency' => 'high'], $admin),
+            EndangeredInboundFlag::create(['institution_id' => $institution->id, 'source_peer_base_url' => 'https://far.example.net', 'reference' => 'far-1',
+                'dedupe_key' => hash('sha256', 'https://far.example.net|far-1'), 'risk_id' => Concept::where('iri', Vocab::BASE.'endangered-risk/other')->value('id'),
+                'urgency_id' => Concept::where('iri', Vocab::BASE.'endangered-urgency/medium')->value('id'), 'capture_status_id' => Concept::where('iri', Vocab::BASE.'capture-status/flagged')->value('id'),
+                'payload' => [], 'review_status_id' => Concept::where('iri', Vocab::BASE.'inbound-flag-status/pending')->value('id'), 'received_at' => now()])]);
         // Phase 17d2: a repatriation claim, a link to its shared record, and knowledge contributed about it.
         $make('repatriation claim', function () use ($letter, $admin) {
             $claim = app(\App\Repatriation\Claims::class)->register($letter, ['claimant_community' => 'Valley people'], $admin);

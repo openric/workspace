@@ -23,6 +23,7 @@ use App\Files\FileStore;
 use App\Files\MediaDuration;
 use App\Fixity\Fixity;
 use App\Help\HelpLibrary;
+use App\Heritage\Displaced;
 use App\Ingest\WatchFolders;
 use App\Jurisdiction\ExportPermits;
 use App\Jurisdiction\Naz;
@@ -376,3 +377,19 @@ Artisan::command('workspace:search:embed {--institution=} {--limit=500}', functi
     $this->info("$done entries turned into vectors.");
 })->purpose('Turn the search index\'s new and changed entries into vectors through the AI gateway, for search by meaning (Heratio\'s semantic index)');
 Schedule::command('workspace:search:embed')->everyTenMinutes()->withoutOverlapping(30)->when(fn () => DB::table('search_settings')->where('by_meaning', true)->exists());
+
+// The displaced-heritage register (roadmap phase 17d3), as Heratio's ahg:displaced-heritage-scan prints it: a review aid,
+// never a claim.
+Artisan::command('workspace:heritage:displaced {--institution=} {--limit=20}', function () {
+    $displaced = app(Displaced::class);
+    $this->line(Displaced::DISCLAIMER);
+    Institution::when($this->option('institution'), fn ($q, $id) => $q->whereKey($id))->get()->each(function ($institution) use ($displaced) {
+        $report = $displaced->scan($institution, null, (int) $this->option('limit'));
+        $this->info("{$institution->name}: {$report['scanned']} with provenance, {$report['evaluated']} placed on both sides, {$report['flagged_count']} traced.");
+        foreach ($report['by_origin'] as $o) {
+            $this->line("  {$o['region']}: {$o['count']}");
+        }
+        $report['records'] === [] || $this->table(['Record', 'Origin', 'Holding'], array_map(fn ($r) => [$r['title'], $r['origin_region'].' ('.$r['origin']['value'].')',
+            $r['holding_region'].' ('.$r['holding']['value'].')'], $report['records']));
+    });
+})->purpose('Print the displaced-heritage register: descriptions whose recorded origin and holding resolve to different regions, for review (Heratio\'s displaced-heritage scan)');

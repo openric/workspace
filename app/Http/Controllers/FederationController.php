@@ -138,7 +138,7 @@ class FederationController extends Controller
             'metadata_prefix' => ['nullable', 'regex:/^[A-Za-z0-9_.-]{1,64}$/'], 'default_set' => ['nullable', 'string', 'max:255'], 'harvest_interval_hours' => ['nullable', 'integer', 'between:1,8760'],
             'rest_base_url' => ['nullable', 'url:http,https', 'max:500'], 'record_url_template' => ['nullable', 'string', 'max:500', 'regex:#^https?://#'],
             'trust_level' => ['nullable', 'string'], 'rate_limit_seconds' => ['nullable', 'integer', 'between:1,86400'], 'allowed_surfaces' => ['nullable', 'array'],
-            'allowed_surfaces.*' => ['in:search,union,vocabularies']]);
+            'allowed_surfaces.*' => ['in:search,union,vocabularies,endangered']]);
         $type = Concept::choices(Vocab::BASE.'federation-peer-type/')->where('notation', $data['type'])->first() ?? abort(422);
         $local = $type->notation === 'institution';
         if ($local && (! ($data['peer_institution_id'] ?? null) || $data['peer_institution_id'] === $request->user()->institution_id || ! Institution::find($data['peer_institution_id']))) {

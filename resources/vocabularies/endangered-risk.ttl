@@ -1,0 +1,65 @@
+# OpenRiC Workspace - OpenRiC Workspace Heritage Risk Categories.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What threatens an item flagged for prioritised capture (Heratio's endangered_heritage_item.risk_category).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/endangered-risk/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Heritage Risk Categories"@en ;
+    dcterms:description "What threatens an item flagged for prioritised capture (Heratio's endangered_heritage_item.risk_category)."@en ;
+    dcterms:issued "2026-11-05"^^xsd:date ;
+    skos:hasTopConcept v:conflict, v:climate, v:decay, v:funding, v:displacement, v:digitisation-gap, v:other .
+
+v:conflict a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Conflict or unrest"@en, "Konflik of onrus"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's register of heritage at risk, as Heratio's ahg-semantic-search keeps it. A flag is a prioritisation aid, not a prediction of loss."@en ;
+    skos:definition "Armed conflict, civil unrest or instability threatens the item or its holding site."@en .
+
+v:climate a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Climate or environment"@en, "Klimaat of omgewing"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's register of heritage at risk, as Heratio's ahg-semantic-search keeps it. A flag is a prioritisation aid, not a prediction of loss."@en ;
+    skos:definition "Flood, fire, drought, sea-level rise or other environmental pressure threatens the item."@en .
+
+v:decay a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Material decay"@en, "Materiaalverval"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's register of heritage at risk, as Heratio's ahg-semantic-search keeps it. A flag is a prioritisation aid, not a prediction of loss."@en ;
+    skos:definition "The physical carrier is degrading: fragile media, obsolete formats, mould, corrosion or embrittlement."@en .
+
+v:funding a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Funding or stewardship risk"@en, "Befondsings- of bewaringsrisiko"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's register of heritage at risk, as Heratio's ahg-semantic-search keeps it. A flag is a prioritisation aid, not a prediction of loss."@en ;
+    skos:definition "Loss of funding or custodial capacity puts ongoing care and access at risk."@en .
+
+v:displacement a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Displacement"@en, "Verplasing"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's register of heritage at risk, as Heratio's ahg-semantic-search keeps it. A flag is a prioritisation aid, not a prediction of loss."@en ;
+    skos:definition "The item or community of origin is displaced, threatening continuity of context and care."@en .
+
+v:digitisation-gap a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Digitisation gap"@en, "Digitaliseringsgaping"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's register of heritage at risk, as Heratio's ahg-semantic-search keeps it. A flag is a prioritisation aid, not a prediction of loss."@en ;
+    skos:definition "No durable digital surrogate exists yet, so the only record is the vulnerable original."@en .
+
+v:other a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Other risk"@en, "Ander risiko"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's register of heritage at risk, as Heratio's ahg-semantic-search keeps it. A flag is a prioritisation aid, not a prediction of loss."@en ;
+    skos:definition "Another documented risk to the item that warrants prioritised capture."@en .

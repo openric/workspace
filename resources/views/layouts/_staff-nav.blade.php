@@ -81,6 +81,8 @@
                 'feedback.index' => [__('Feedback received'), $user->mayAnywhere('update', 'description'), 'feedback.*'],
                 'share-links.index' => [__('Share links'), $user->mayAnywhere('update', 'description'), 'share-links.*'],
                 'repatriation.index' => [__('Repatriation claims'), $may('manage-repatriation'), 'repatriation.*'],
+                'heritage.displaced' => [__('Displaced heritage'), $may('manage-repatriation'), 'heritage.displaced'],
+                'heritage.at-risk' => [__('Heritage at risk'), $user->mayAnywhere('update', 'description'), 'heritage.at-risk|heritage.flag|heritage.inbound'],
                 'shop.orders' => [__('Orders'), $may('manage-shop'), 'shop.orders*'],
                 'shop.settings' => [__('Shop settings'), $may('manage-shop'), 'shop.settings*'],
             ],

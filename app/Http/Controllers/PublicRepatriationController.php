@@ -19,6 +19,7 @@
 namespace App\Http\Controllers;
 
 use App\Api\PublicCatalogue;
+use App\Heritage\Displaced;
 use App\Models\Concept;
 use App\Models\Institution;
 use App\Models\RecordResource;
@@ -90,7 +91,8 @@ class PublicRepatriationController extends Controller
     {
         [$catalogue, $unit] = $this->lodging($request, $id);
 
-        return view('discover.repatriation.lodge', ['view' => $catalogue->view, 'unit' => $unit, 'disclaimer' => Claims::DISCLAIMER, 'renderedAt' => time()]);
+        return view('discover.repatriation.lodge', ['view' => $catalogue->view, 'unit' => $unit, 'disclaimer' => Claims::DISCLAIMER, 'renderedAt' => time(),
+            'trace' => app(Displaced::class)->find($unit)]);
     }
 
     public function submit(Request $request, string $id): RedirectResponse

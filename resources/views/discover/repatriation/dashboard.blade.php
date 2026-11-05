@@ -22,5 +22,5 @@
     <h2>{{ __('Recent activity') }}</h2>
     <ul>@forelse($dashboard['recent'] as $c)<li><a href="{{ route('discover.repatriation.show', $c->id) }}">{{ $view->label($c->record) ?? __('Claim') }}</a> · {{ $c->claimant_community ?: __('Unnamed') }} · {{ $c->status->label($lang) }}</li>@empty<li>{{ __('None.') }}</li>@endforelse</ul>
     @endif
-    <p><a href="{{ route('discover.repatriation.json') }}">{{ __('Open data (JSON)') }}</a></p>
+    <p><a href="{{ route('discover.displaced') }}">{{ __('Displaced heritage') }}</a> · <a href="{{ route('discover.repatriation.json') }}">{{ __('Open data (JSON)') }}</a></p>
 @endsection

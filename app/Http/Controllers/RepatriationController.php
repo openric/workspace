@@ -17,6 +17,7 @@
 namespace App\Http\Controllers;
 
 use App\Audit\AuditLog;
+use App\Heritage\Displaced;
 use App\Models\Agent;
 use App\Models\Concept;
 use App\Models\Place;
@@ -57,7 +58,8 @@ class RepatriationController extends Controller
         $this->authorise($request);
         $record = RecordResource::where('institution_id', $request->user()->institution_id)->whereNull('deleted_at')->findOrFail((string) $request->query('record'));
 
-        return view('repatriation.form', $this->form($request) + ['claim' => null, 'record' => $record]);
+        // From the displaced-heritage register (phase 17d3): the origin it traced, as Heratio prefills it.
+        return view('repatriation.form', $this->form($request) + ['claim' => null, 'record' => $record, 'trace' => app(Displaced::class)->find($record)]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -73,7 +75,7 @@ class RepatriationController extends Controller
     {
         $this->authorise($request, $claim);
 
-        return view('repatriation.form', $this->form($request) + ['claim' => $claim, 'record' => $claim->record]);
+        return view('repatriation.form', $this->form($request) + ['claim' => $claim, 'record' => $claim->record, 'trace' => null]);
     }
 
     public function update(Request $request, RepatriationClaim $claim): RedirectResponse

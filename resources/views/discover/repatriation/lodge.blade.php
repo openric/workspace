@@ -15,7 +15,7 @@
         <p><label for="rl-name">{{ __('Your name (optional)') }}</label> <input id="rl-name" name="claimant_name" maxlength="255" value="{{ old('claimant_name') }}">
             <label for="rl-email">{{ __('Contact email') }} *</label> <input id="rl-email" name="contact_email" type="email" required maxlength="255" value="{{ old('contact_email') }}"></p>
         <p class="meta">{{ __('We use this only to confirm receipt and update you on the claim.') }}</p>
-        <p><label for="rl-origin">{{ __('Place of origin (optional)') }}</label> <input id="rl-origin" name="origin_place" maxlength="512" size="50" value="{{ old('origin_place') }}"></p>
+        <p><label for="rl-origin">{{ __('Place of origin (optional)') }}</label> <input id="rl-origin" name="origin_place" maxlength="512" size="50" value="{{ old('origin_place', $trace ? $trace['origin']['value'] : null) }}"></p>
         <p><label for="rl-evidence">{{ __('Grounds for the claim and any evidence (optional)') }}</label><br><textarea id="rl-evidence" name="evidence_summary" rows="6" cols="70">{{ old('evidence_summary') }}</textarea></p>
         <p><label><input type="checkbox" name="consent" value="1" required @checked(old('consent'))> {{ __('I understand this records a documented request to open a dialogue and is not a legal determination, and I consent to staff contacting me about it.') }} *</label></p>
         <button type="submit">{{ __('Lodge claim') }}</button>

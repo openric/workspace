@@ -48,6 +48,7 @@ use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\FormatController;
 use App\Http\Controllers\FunctionsDocsController;
 use App\Http\Controllers\HelpController;
+use App\Http\Controllers\HeritageController;
 use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\IdentifierController;
 use App\Http\Controllers\IiifAuthController;
@@ -77,6 +78,7 @@ use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProposalReviewController;
 use App\Http\Controllers\ProvenanceController;
 use App\Http\Controllers\PublicationController;
+use App\Http\Controllers\PublicHeritageController;
 use App\Http\Controllers\PublicRepatriationController;
 use App\Http\Controllers\PublishingController;
 use App\Http\Controllers\ReadingRoomController;
@@ -209,6 +211,11 @@ Route::middleware([ServeDiscovery::class, 'throttle:120,1'])->group(function () 
 // public search of its own peers.
 Route::middleware([ServeDiscovery::class, 'throttle:120,1'])->group(function () {
     Route::get('/federation/search', [FederationController::class, 'answer'])->name('federation.answer');
+    // The register of heritage at risk for peers, signed, and their pushes (phase 17d3); also at Heratio's paths.
+    Route::get('/federation/endangered', [PublicHeritageController::class, 'peerRegister'])->name('federation.endangered');
+    Route::get('/api/v1/endangered', [PublicHeritageController::class, 'peerRegister'])->name('federation.endangered.heratio');
+    Route::post('/federation/endangered/inbound', [PublicHeritageController::class, 'inbound'])->withoutMiddleware(PreventRequestForgery::class)->middleware('throttle:30,1')->name('federation.endangered.inbound');
+    Route::post('/api/v1/endangered/inbound', [PublicHeritageController::class, 'inbound'])->withoutMiddleware(PreventRequestForgery::class)->middleware('throttle:30,1')->name('federation.endangered.inbound.heratio');
     Route::get('/.well-known/openric-federation-key', [FederationController::class, 'key'])->name('federation.key');
     Route::get('/open-data/protocol', [FederationController::class, 'protocol'])->name('federation.protocol');
     Route::get('/open-data/federation', [FederationController::class, 'peerIndex'])->name('federation.index-public');
@@ -277,6 +284,12 @@ Route::middleware(ServeDiscovery::class)->prefix('discover')->name('discover.')-
     Route::get('/repatriation/{id}', [PublicRepatriationController::class, 'show'])->whereUuid('id')->name('repatriation.show');
     Route::post('/repatriation/{id}/knowledge', [PublicRepatriationController::class, 'contribute'])->whereUuid('id')->middleware('throttle:5,1')->name('repatriation.contribute');
     Route::get('/records/{id}/repatriation-claim', [PublicRepatriationController::class, 'lodge'])->name('repatriation.lodge');
+    // Heritage at risk and displaced heritage (roadmap phase 17d3), where the institution shows them.
+    Route::get('/at-risk', [PublicHeritageController::class, 'atRisk'])->name('at-risk');
+    Route::get('/at-risk/data.json', [PublicHeritageController::class, 'json'])->name('at-risk.json');
+    Route::get('/at-risk/network', [PublicHeritageController::class, 'network'])->middleware('throttle:20,1')->name('at-risk.network');
+    Route::get('/displaced-heritage', [PublicHeritageController::class, 'displaced'])->name('displaced');
+    Route::get('/displaced-heritage/{id}', [PublicHeritageController::class, 'displacedOne'])->whereUuid('id')->name('displaced.show');
     Route::post('/records/{id}/repatriation-claim', [PublicRepatriationController::class, 'submit'])->middleware('throttle:5,1')->name('repatriation.submit');
     Route::get('/agents/{id}', [DiscoverController::class, 'agent'])->name('agent');
     Route::get('/repositories/{id}', [DiscoverController::class, 'repository'])->name('repository');
@@ -1240,6 +1253,17 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/{feedback}', [FeedbackController::class, 'show'])->name('show');
         Route::post('/{feedback}', [FeedbackController::class, 'update'])->name('update');
         Route::post('/{feedback}/delete', [FeedbackController::class, 'destroy'])->name('destroy');
+    });
+    // Heritage at risk and the displaced-heritage register (roadmap phase 17d3).
+    Route::prefix('heritage')->name('heritage.')->whereUuid(['item', 'flag'])->group(function () {
+        Route::get('/at-risk', [HeritageController::class, 'atRisk'])->name('at-risk');
+        Route::get('/at-risk/flag', [HeritageController::class, 'flagForm'])->name('flag');
+        Route::post('/at-risk/flag', [HeritageController::class, 'flag'])->name('flag.store');
+        Route::post('/at-risk/{item}/capture-status', [HeritageController::class, 'captureStatus'])->name('capture-status');
+        Route::post('/at-risk/settings', [HeritageController::class, 'settings'])->name('settings');
+        Route::get('/at-risk/pushed', [HeritageController::class, 'inbound'])->name('inbound');
+        Route::post('/at-risk/pushed/{flag}', [HeritageController::class, 'review'])->name('review');
+        Route::get('/displaced', [HeritageController::class, 'displaced'])->name('displaced');
     });
     // Repatriation claims (roadmap phase 17d2): for accounts that may manage them.
     Route::prefix('repatriation')->name('repatriation.')->whereUuid(['claim', 'share', 'contribution'])->group(function () {

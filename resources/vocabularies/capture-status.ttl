@@ -1,0 +1,44 @@
+# OpenRiC Workspace - OpenRiC Workspace Capture Statuses.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Where the capture of an item at risk stands (Heratio's endangered_heritage_item.capture_status).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/capture-status/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Capture Statuses"@en ;
+    dcterms:description "Where the capture of an item at risk stands (Heratio's endangered_heritage_item.capture_status)."@en ;
+    dcterms:issued "2026-11-05"^^xsd:date ;
+    skos:hasTopConcept v:flagged, v:in-progress, v:captured, v:unflagged .
+
+v:flagged a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Flagged"@en, "Gemerk"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's register of heritage at risk, as Heratio's ahg-semantic-search keeps it. A flag is a prioritisation aid, not a prediction of loss."@en ;
+    skos:definition "Identified as at-risk and awaiting capture."@en .
+
+v:in-progress a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Capture in progress"@en, "Vaslegging aan die gang"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's register of heritage at risk, as Heratio's ahg-semantic-search keeps it. A flag is a prioritisation aid, not a prediction of loss."@en ;
+    skos:definition "Digitisation or capture work is under way."@en .
+
+v:captured a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Captured"@en, "Vasgelê"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's register of heritage at risk, as Heratio's ahg-semantic-search keeps it. A flag is a prioritisation aid, not a prediction of loss."@en ;
+    skos:definition "A durable digital surrogate has been produced."@en .
+
+v:unflagged a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Unflagged"@en, "Ongemerk"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's register of heritage at risk, as Heratio's ahg-semantic-search keeps it. A flag is a prioritisation aid, not a prediction of loss."@en ;
+    skos:definition "No longer treated as at-risk for capture purposes."@en .

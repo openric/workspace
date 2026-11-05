@@ -115,7 +115,7 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-scan` | 7065 | later: V1.0+ | Partial | 22a | `ahgScanPlugin` | Watched folders, Heratio's sidecars, BagIt intake and the scan API, from v0.0.106 (ADR 0020); not its sector routing, rights enforcement or web archiving |
 | `ahg-search` | 7659 | V0.1 candidate | Partial | 17 | `ahgSearchPlugin` | Full-text search with facets, staff search and statistics (v0.0.60, v0.0.61, ADR 0009); search by meaning from v0.0.131 (17d1) |
 | `ahg-security-clearance` | 9206 | later: jurisdiction | Covered | 18c, 12b | `ahgSecurityClearancePlugin` | Levels, compartments, clearances, classified records with inheritance and declassification, requests for access, all in the one read check, from v0.0.101 (ADR 0016); TOTP two-factor sign-in and its policy from v0.0.111 (ADR 0021); WebAuthn and codes by email not carried |
-| `ahg-semantic-search` | 29749 | out: AI (V2+) | Partial | 17d1 to 17d4 | none | Search by meaning on pgvector with gateway embeddings, widening by SKOS labels and a model, reranking, related records, /ground and the ways into the collection, from v0.0.131 (ADR 0025); repatriation claims, dialogue, shared records, community knowledge and virtual return from v0.0.132 (17d2); displaced and endangered heritage 17d3, language corpus, scholarship and research leads 17d4 |
+| `ahg-semantic-search` | 29749 | out: AI (V2+) | Partial | 17d1 to 17d4 | none | Search by meaning on pgvector with gateway embeddings, widening by SKOS labels and a model, reranking, related records, /ground and the ways into the collection, from v0.0.131 (ADR 0025); repatriation claims, dialogue, shared records, community knowledge and virtual return from v0.0.132 (17d2); heritage at risk, its network and the displaced-heritage register from v0.0.133 (17d3); displaced and endangered heritage 17d3, language corpus, scholarship and research leads 17d4 |
 | `ahg-settings` | 16789 | V0.1 candidate | Covered |  | `ahgSettingsPlugin` | Institution settings, written fresh |
 | `ahg-share-link` | 2659 | later: V1.0+ | Covered | 19a | `ahgTimeLimitedShareLinkPlugin` | Share links that never open more than their issuer may read, with their log and prune (ADR 0017); clearance with 18c |
 | `ahg-sharepoint` | 6045 | later: V1.0+ | Planned | 22, pilot | `ahgSharePointPlugin` | When a pilot with a Microsoft tenant needs it (choice 2B, ADR 0020) |
@@ -1588,5 +1588,25 @@ Added on 5 November 2026 with 17d2.
 | `/virtual-return/{id}` | `/discover/repatriation/{id}`, for a published description, where the institution shows its register | Modelled |
 | PublicClaimLodgeController (from a traced object) | Lodge a repatriation claim, from any published description, where the institution allows it | Modelled |
 | VirtualReturnSpaceService, the 3D walk | Phase 21, with the exhibitions | Not yet |
-| The prefill from DisplacedHeritageService | 17d3, with the register | Not yet |
+| The prefill from DisplacedHeritageService | The origin the displaced-heritage register traced, from v0.0.133 | Same |
+
+### Heritage at risk and displaced heritage (`ahg-semantic-search`, part three)
+
+Added on 5 November 2026 with 17d3.
+
+| Heratio field | Workspace | Status |
+|---|---|---|
+| DisplacedHeritageService (regionTokens, countryCodes, scan, regionFor) | `Heritage\Displaced`, the same tables and rule | Same, from v0.0.133 |
+| `museum_metadata` creation_place, discovery_place, cultural_group, cultural_context (origin) | The location of the earliest owner in the provenance chain; the museum fields come with phase 21 | Modelled |
+| current_location_geography, current_location_repository, current_location, the repository's country_code (holding) | The repository's contact point country, else the latest owner's location | Modelled |
+| The confidence band | Well documented, documented or indicative | Same |
+| `/displaced-heritage`, `/displaced-heritage/{id}`, the scan command | `/discover/displaced-heritage`, the staff register, `workspace:heritage:displaced` | Same |
+| `endangered_heritage_item` (item_ref, risk_category, urgency, reason, capture_status, flagged_by) | `endangered_items`, one a description, the risk, urgency and capture-status vocabularies | Same |
+| priorityScore, priorityList, the worklist, the flag form | `Heritage\Endangered`, `/heritage/at-risk` | Same |
+| The public register `/at-risk`, the dashboard and its JSON | `/discover/at-risk` and its JSON, where the institution shows them | Modelled |
+| `/api/v1/endangered`, signed | `/federation/endangered` and `/api/v1/endangered`, where the institution shares | Modelled |
+| `endangered_inbound_flag`, `/api/v1/endangered/inbound`, the review | `endangered_inbound_flags`, both addresses, the review under Pushed at-risk flags | Same |
+| FederatedEndangeredService::globalRegister, `/at-risk/global` | `Heritage\EndangeredNetwork::board`, `/discover/at-risk/network` | Same |
+| The `endangered` surface of FederationGovernance | The peer's allowed surfaces | Same |
+| The lost-place reconstruction and exhibition-space links | Phase 21, with the exhibitions | Not yet |
 

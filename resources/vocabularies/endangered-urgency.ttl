@@ -1,0 +1,44 @@
+# OpenRiC Workspace - OpenRiC Workspace Heritage Risk Urgencies.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# How soon an item at risk should be captured (Heratio's endangered_heritage_item.urgency).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/endangered-urgency/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Heritage Risk Urgencies"@en ;
+    dcterms:description "How soon an item at risk should be captured (Heratio's endangered_heritage_item.urgency)."@en ;
+    dcterms:issued "2026-11-05"^^xsd:date ;
+    skos:hasTopConcept v:critical, v:high, v:medium, v:low .
+
+v:critical a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Critical"@en, "Kritiek"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's register of heritage at risk, as Heratio's ahg-semantic-search keeps it. A flag is a prioritisation aid, not a prediction of loss."@en ;
+    skos:definition "Capture now: loss could come at any time."@en .
+
+v:high a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "High"@en, "Hoog"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's register of heritage at risk, as Heratio's ahg-semantic-search keeps it. A flag is a prioritisation aid, not a prediction of loss."@en ;
+    skos:definition "Capture soon."@en .
+
+v:medium a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Medium"@en, "Medium"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's register of heritage at risk, as Heratio's ahg-semantic-search keeps it. A flag is a prioritisation aid, not a prediction of loss."@en ;
+    skos:definition "Capture in the normal course of work."@en .
+
+v:low a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Low"@en, "Laag"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's register of heritage at risk, as Heratio's ahg-semantic-search keeps it. A flag is a prioritisation aid, not a prediction of loss."@en ;
+    skos:definition "Capture when there is time."@en .
