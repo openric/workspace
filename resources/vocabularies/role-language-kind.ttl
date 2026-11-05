@@ -1,0 +1,51 @@
+# OpenRiC Workspace - OpenRiC Workspace Role Language Kinds.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What a word near a name says of the role of the one named (Heratio's role_language_tokens).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/role-language-kind/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Role Language Kinds"@en ;
+    dcterms:description "What a word near a name says of the role of the one named (Heratio's role_language_tokens)."@en ;
+    dcterms:issued "2026-11-04"^^xsd:date ;
+    skos:hasTopConcept v:kinship, v:witness, v:location, v:movement, v:other .
+
+v:kinship a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Kinship"@en, "Verwantskap"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the review of a name a description mentions, as Heratio's ahg-authority-resolution keeps it; what is decided is exported as the relation it makes, with its assertions."@en ;
+    skos:definition "Son of, daughter of, widow of, and the like."@en .
+
+v:witness a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Witness"@en, "Getuie"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the review of a name a description mentions, as Heratio's ahg-authority-resolution keeps it; what is decided is exported as the relation it makes, with its assertions."@en ;
+    skos:definition "Witnessed by, in the presence of."@en .
+
+v:location a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Location"@en, "Ligging"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the review of a name a description mentions, as Heratio's ahg-authority-resolution keeps it; what is decided is exported as the relation it makes, with its assertions."@en ;
+    skos:definition "Of, residing at, born in."@en .
+
+v:movement a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Movement"@en, "Beweging"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the review of a name a description mentions, as Heratio's ahg-authority-resolution keeps it; what is decided is exported as the relation it makes, with its assertions."@en ;
+    skos:definition "Moved to, arrived from, emigrated."@en .
+
+v:other a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Other"@en, "Ander"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the review of a name a description mentions, as Heratio's ahg-authority-resolution keeps it; what is decided is exported as the relation it makes, with its assertions."@en ;
+    skos:definition "Any other role."@en .

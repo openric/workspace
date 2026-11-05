@@ -1,6 +1,11 @@
 <?php
 
 use App\AccessRequests\AccessRequestService;
+use App\Authority\Candidates;
+use App\Authority\Mentions;
+use App\Authority\NerFeedback;
+use App\Authority\ParkQueue;
+use App\Authority\Scorer;
 use App\Dedupe\Duplicates;
 use App\Description\AgreementService;
 use App\Description\WorkflowSlaService;
@@ -20,8 +25,10 @@ use App\Help\HelpLibrary;
 use App\Ingest\WatchFolders;
 use App\Jurisdiction\ExportPermits;
 use App\Jurisdiction\Naz;
+use App\Models\AuthorityMention;
 use App\Models\DigitalFile;
 use App\Models\Institution;
+use App\Models\Proposal;
 use App\Preservation\Archivematica\Transfers;
 use App\Preservation\Conversions;
 use App\Preservation\FormatIdentification;
@@ -38,6 +45,7 @@ use App\Research\SavedSearches;
 use App\Research\ShareLinks;
 use App\Rights\Clearances;
 use App\Rights\Embargoes;
+use App\Support\Vocab;
 use App\Versions\Versions;
 use App\Webhooks\Webhooks;
 use Carbon\CarbonImmutable;
@@ -305,3 +313,48 @@ Artisan::command('workspace:research-digests', function (Notifications $notifica
 })->purpose('Mail each researcher the notices held for their hourly, daily or weekly digest');
 Schedule::command('workspace:research-digests')->hourly()->withoutOverlapping();
 Schedule::command('workspace:share-links:prune')->dailyAt('03:20')->timezone(config('workspace.timezone'))->withoutOverlapping();
+
+// Resolving names to authority records and places (roadmap phase 17b2), after Heratio's ahg-authority-resolution commands.
+Artisan::command('workspace:authority:promote {--limit=500}', function () {
+    $made = 0;
+    Proposal::whereHas('status', fn ($q) => $q->where('iri', Vocab::ASSERTION_STATUSES.'proposed'))
+        ->whereHas('kind', fn ($q) => $q->whereIn('notation', ['agent', 'place']))->whereNotIn('id', AuthorityMention::select('proposal_id'))
+        ->orderBy('created_at')->limit((int) $this->option('limit'))->get()->each(function ($proposal) use (&$made) {
+            app(Mentions::class)->promote($proposal);
+            $made++;
+        });
+    $this->info("$made names brought into the queue.");
+})->purpose('Make mentions to resolve of the proposed people, organisations and places not yet in the queue (Heratio\'s PromoteSampleCommand)');
+Artisan::command('workspace:authority:rescore {--institution=}', function () {
+    $count = 0;
+    AuthorityMention::whereHas('state', fn ($q) => $q->where('notation', 'pending'))->when($this->option('institution'), fn ($q, $id) => $q->where('institution_id', $id))
+        ->with('proposal.kind', 'proposal.agentType', 'record')->get()->each(function ($mention) use (&$count) {
+            app(Candidates::class)->generate($mention);
+            app(Scorer::class)->scoreAll($mention);
+            $count++;
+        });
+    $this->info("$count mentions given their candidates and evidence afresh.");
+})->purpose('Find and score the candidates of every waiting mention again (Heratio\'s GenerateCandidatesCommand, ScoreEvidenceCommand and ReprocessCommand)');
+Artisan::command('workspace:authority:scan-parked', function () {
+    $this->info(app(ParkQueue::class)->scan().' parked names now have a new candidate.');
+})->purpose('Look again for the candidates of every parked name and flag those with a new one (Heratio\'s ScanParkedCommand)');
+Schedule::command('workspace:authority:scan-parked')->dailyAt('02:40')->timezone(config('workspace.timezone'))->withoutOverlapping(120)
+    ->when(fn () => DB::table('authority_parks')->exists());
+Artisan::command('workspace:authority:export-feedback {--format=jsonl : jsonl or conll} {--institution=}', function () {
+    $result = app(NerFeedback::class)->export((string) $this->option('format'), $this->option('institution') ?: null);
+    $this->info("{$result['count']} rejected names written to {$result['path']}.");
+})->purpose('Write the rejected names not yet exported, for training the named-entity model again (Heratio\'s ExportNerFeedbackCommand)');
+Artisan::command('workspace:authority:cache-clear {--source= : one source, such as viaf} {--expired : only answers past their time}', function () {
+    $q = DB::table('authority_lookup_cache')->when($this->option('source'), fn ($q, $s) => $q->whereIn('source_id', DB::table('concepts')->where('iri', Vocab::BASE.'lookup-source/'.$s)->select('id')))
+        ->when($this->option('expired'), fn ($q) => $q->whereRaw("retrieved_at + (ttl || ' seconds')::interval < now()"));
+    $this->info($q->delete().' cached answers removed.');
+})->purpose('Remove the cached answers of outside authorities (Heratio\'s CacheClearCommand)');
+Artisan::command('workspace:authority:status', function () {
+    $states = DB::table('authority_mentions as m')->join('concepts as c', 'c.id', '=', 'm.state_id')->selectRaw('c.notation, count(*) AS n')->groupBy('c.notation')->pluck('n', 'notation');
+    foreach ($states as $state => $n) {
+        $this->line("$state: $n");
+    }
+    $this->line('parked with a new candidate: '.DB::table('authority_parks')->where('new_candidate_available', true)->count());
+    $this->line('feedback not yet exported: '.DB::table('ner_feedback')->whereNull('exported_at')->count());
+    $this->line('cached outside answers: '.DB::table('authority_lookup_cache')->count());
+})->purpose('How many names wait, are linked, parked or rejected, and what is cached (Heratio\'s StatusCommand and CacheStatsCommand)');

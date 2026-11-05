@@ -79,7 +79,7 @@ class NameAndIdentifierTest extends TestCase
         $this->assertCount(4, $this->repository->names()->get());
 
         $this->actingAs($this->archivist)->post($url, ['language' => 'en', 'identifier' => 'ZA-RPC', 'values' => ['other-name' => 'RPCA', 'parallel-name' => '']]);
-        $this->assertSame(['Riverside Parish Council Archives', 'RPCA'], $this->repository->names()->pluck('value')->all());
+        $this->assertEqualsCanonicalizing(['Riverside Parish Council Archives', 'RPCA'], $this->repository->names()->pluck('value')->all(), 'names have no order of their own');
         $this->assertSame($kept->iri, $this->repository->names()->where('value', 'RPCA')->sole()->iri, 'a name that stays keeps its IRI');
 
         $this->actingAs($this->archivist)->post($url, ['language' => 'en', 'values' => ['authorised-name' => "Two\nLines"]])->assertSessionHasErrors('values');

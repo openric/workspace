@@ -27,7 +27,7 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-articles` | 2447 | later: V1.0+ | Done | 20a | none | Articles with their files, sections, related articles, comments and moderation, and reads, from v0.0.123 (ADR 0024) |
 | `ahg-artwork-request` | 1844 | out: GLAM sector | Planned | 21 | none |  |
 | `ahg-audit-trail` | 4072 | V0.1 candidate | Covered |  | `ahgAuditTrailPlugin` | Tamper-evident audit log (ADR 0004) |
-| `ahg-authority-resolution` | 12466 | V0.1 candidate | Partial | 17 (last) | `ahgAuthorityResolutionPlugin` | A proposal may name the existing record; candidate ranking in phase 17 |
+| `ahg-authority-resolution` | 12466 | V0.1 candidate | Done | 17b2 | `ahgAuthorityResolutionPlugin` | All of it, on RiC: mentions from every proposed agent and place with their context, candidates ranked by name and nine kinds of evidence, decisions kept as seen, the park queue with its nightly scan, NER feedback, outside authorities (VIAF, Wikidata, GeoNames; TGN, GND, ISNI and SAGNC listed as Heratio's stubs) filling new records with each field's source, and assignment, from v0.0.129 (ADR 0025) |
 | `ahg-backup` | 5683 | later: V1.0+ | Partial | 3 (last) | `ahgBackupPlugin` | Database backup before each deploy; deferred to the end |
 | `ahg-biblio-bf` | 3060 | out: GLAM sector | Planned | 21 | none |  |
 | `ahg-biblio-frbr` | 2006 | out: GLAM sector | Planned | 21 | none |  |
@@ -1498,4 +1498,27 @@ Added on 5 November 2026 with 17a.
 | `ahg_ner_entity` and its review | The proposals queue | Modelled |
 | LlmService::summarize and its prompt, `summarizer_min_length`, `summarizer_max_length` | `Assist::summary()`, 30 to 200 words, the model in `ai_settings.chat_model` | Same |
 | The AI condition assessment (`ai_condition_service_url`) | `Assist::condition()`, a vision model through the gateway until a trained one has a route (ArchiveHeritageGroup/ahg-ai#5) | Modelled |
+
+### Authority resolution (`ahg-authority-resolution`)
+
+Added on 5 November 2026 with 17b2.
+
+| Heratio field | Workspace | Status |
+|---|---|---|
+| `ahg_mention`: `ner_entity_id`, `object_id`, `entity_type`, `state`, `promoted_at` | `authority_mentions`: the proposal (its kind and agent type give the label), the unit, the state a vocabulary row | Modelled, from v0.0.129 |
+| `ahg_mention`: `assigned_to_user_id`, `assigned_by_user_id`, `assigned_at`, `workflow_task_id` | `assigned_to_id`, `assigned_by_id`, `assigned_at`, `assignment_note`, and a mail; no workflow task, which is Heratio's path without its workflow | Modelled |
+| `ahg_mention_context`: offsets, paragraph offsets, `surrounding_text_before`, `surrounding_text_after`, `ner_model_version`, `real_confidence`, `co_occurring_entities`, `nearby_dates`, `nearby_places`, `role_language_tokens` | The same columns on `authority_mentions`, offsets in characters, with the count of occurrences | Same |
+| `ahg_mention_candidate`: `rank_position`, `candidate_source`, `candidate_authority_id`, `candidate_display_name`, `name_similarity_score`, `evidence_signals`, `evidence_data`, `composite_score` | `authority_candidates`: the same, the candidate an agent or a place | Same |
+| `candidate_fuseki_uri` and the Fuseki adapters | Not carried: the Workspace's triplestore is fed from these records | Not carried |
+| `ahg_mention_decision`: `decision_type`, `chosen_candidate_id`, `chosen_authority_id`, `original_system_top_score`, `archivist_user_id`, `decided_at`, `evidence_snapshot`, `candidates_visible_snapshot` | `authority_decisions`: the same, the decision a vocabulary row, append-only, with its reason | Same |
+| `fuseki_graph_uri` and DecisionProvenanceWriter | The decision row, and the relation's assertions in the RiC-O export (a model's assertion, reviewed) | Modelled |
+| `ahg_mention_park`: `parked_by_user_id`, `parked_at`, `reason`, `new_candidate_available`, `new_candidate_check_at` | `authority_parks`: the same, with the candidates' fingerprint | Same |
+| `ahg_ner_feedback`: source text, value, type, offsets, reason, user, model, `training_exported` | `ner_feedback`: the same, `exported_at` | Same |
+| `ahg_authority_lookup_cache`: `source`, `entity_type`, `query_text`, `payload`, `license_note`, `retrieved_at`, `ttl_seconds` | `authority_lookup_cache`, the source a vocabulary row | Same |
+| `lookup.*.enabled`, `rate_limit`, `cache_ttl`, `license_note`, `license_url`, `lookup.geonames.username`, `lookup.precedence`, `lookup.http_timeout` | `authority_lookup_settings` per institution and source; licences with the source | Same |
+| `authority_resolution.candidate_top_n`, `role_language_tokens` | `authority_settings`, per institution; the words of role with Afrikaans added | Same |
+| FieldProvenanceWriter | `authority_field_sources`, and the new record's ISAAR(CPF) sources | Modelled |
+| AuthorityCreator (ISAAR(CPF) name, dates, history required) | Decisions::createNew, a RiC agent or place | Same |
+| Commands: promote-sample, generate-candidates, score-evidence, reprocess, reprocess-parked, scan-parked, export-ner-feedback, cache-clear, cache-stats, status, write-provenance | `workspace:authority:promote`, `rescore`, `scan-parked` (nightly), `export-feedback`, `cache-clear`, `status`; write-provenance not needed | Modelled |
+| The review, queue, park, create-new and settings screens | The same, rendered without script | Same |
 

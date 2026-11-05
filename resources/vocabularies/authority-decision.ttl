@@ -1,0 +1,51 @@
+# OpenRiC Workspace - OpenRiC Workspace Authority Decisions.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What an archivist decided about a name a description mentions (Heratio's ahg_mention_decision.decision_type).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/authority-decision/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Authority Decisions"@en ;
+    dcterms:description "What an archivist decided about a name a description mentions (Heratio's ahg_mention_decision.decision_type)."@en ;
+    dcterms:issued "2026-11-04"^^xsd:date ;
+    skos:hasTopConcept v:link, v:link-different, v:create-new, v:park, v:reject .
+
+v:link a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Linked to a candidate"@en, "Aan kandidaat gekoppel"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the review of a name a description mentions, as Heratio's ahg-authority-resolution keeps it; what is decided is exported as the relation it makes, with its assertions."@en ;
+    skos:definition "Linked to one of the candidates the Workspace ranked."@en .
+
+v:link-different a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Linked to another record"@en, "Aan ander rekord gekoppel"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the review of a name a description mentions, as Heratio's ahg-authority-resolution keeps it; what is decided is exported as the relation it makes, with its assertions."@en ;
+    skos:definition "Linked to an authority record or place the Workspace did not rank."@en .
+
+v:create-new a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Made a new record"@en, "Nuwe rekord gemaak"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the review of a name a description mentions, as Heratio's ahg-authority-resolution keeps it; what is decided is exported as the relation it makes, with its assertions."@en ;
+    skos:definition "A new authority record or place was made, perhaps filled from an outside authority."@en .
+
+v:park a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Parked"@en, "Geparkeer"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the review of a name a description mentions, as Heratio's ahg-authority-resolution keeps it; what is decided is exported as the relation it makes, with its assertions."@en ;
+    skos:definition "Set aside with a reason."@en .
+
+v:reject a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Rejected"@en, "Verwerp"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the review of a name a description mentions, as Heratio's ahg-authority-resolution keeps it; what is decided is exported as the relation it makes, with its assertions."@en ;
+    skos:definition "Not a name of an agent or place."@en .

@@ -15,6 +15,7 @@ use App\Accounts\AccountService;
 use App\Accounts\ApiKeyService;
 use App\Accounts\RegistrationService;
 use App\Ai\Inferences;
+use App\Authority\Mentions;
 use App\CustomFields\CustomFields;
 use App\CustomFields\FormTemplates;
 use App\Dedupe\Duplicates;
@@ -60,6 +61,7 @@ use App\Models\Institution;
 use App\Models\MigrationPathway;
 use App\Models\NormalisationRule;
 use App\Models\Package;
+use App\Models\Proposal;
 use App\Models\ReadingRoom;
 use App\Models\ReadingRoomSeat;
 use App\Models\RecordDoi;
@@ -461,6 +463,13 @@ class AccessMatrixTest extends TestCase
             'state_id' => Concept::where('iri', Vocab::BASE.'doi-state/findable')->value('id'), 'test' => true, 'minted_at' => now()]),
             app(RecordDois::class)->enqueue($letter, 'mint', $admin),
             RecordFunding::create(['record_resource_id' => $letter->id, 'funder_name' => 'National Research Foundation'])]);
+        // Phase 17b2: a name to resolve, with its candidate (the agent made above).
+        $make('mention', function () use ($letter, $admin) {
+            app(ProposalService::class)->propose($letter, $admin, null, ['source' => 'matrix', 'entities' => [['type' => 'PERSON', 'value' => 'Anna Botha']]]);
+            $mention = app(Mentions::class)->promote(Proposal::where(['record_resource_id' => $letter->id, 'value' => 'Anna Botha'])->sole());
+
+            return [$mention, $mention->candidates()->firstOrFail()];
+        });
         // Phase 17a: a receipt in the log of inferences.
         $make('inference', fn () => app(Inferences::class)->record(['institution_id' => $institution->id, 'service' => 'ocr', 'endpoint' => 'https://ai.example.org/ai/v1/ollama/api/chat',
             'input' => 'page', 'output' => 'text', 'succeeded' => true, 'subject' => $letter]));

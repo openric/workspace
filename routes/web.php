@@ -22,6 +22,7 @@ use App\Http\Controllers\AltTextController;
 use App\Http\Controllers\AnalysisController;
 use App\Http\Controllers\ApiKeyController;
 use App\Http\Controllers\AuditLogController;
+use App\Http\Controllers\AuthorityResolutionController;
 use App\Http\Controllers\CaptionController;
 use App\Http\Controllers\ClearanceController;
 use App\Http\Controllers\ClipboardController;
@@ -566,6 +567,23 @@ Route::middleware(['auth', 'active'])->group(function () {
 
     // Imports of archival description: a dry run, its report, then the import (WS-015).
     // The review queue of proposals sent through the API (ADR 0007); each proposal is checked against its record.
+    // Resolving names to authority records and places (roadmap phase 17b2).
+    Route::middleware('access:review-proposals,description')->prefix('authority')->name('authority.')->whereUuid(['mention', 'candidate'])->group(function () {
+        Route::get('/', [AuthorityResolutionController::class, 'queue'])->name('queue');
+        Route::post('/promote', [AuthorityResolutionController::class, 'promote'])->name('promote');
+        Route::post('/assign', [AuthorityResolutionController::class, 'assign'])->name('assign');
+        Route::get('/parked', [AuthorityResolutionController::class, 'parked'])->name('parked');
+        Route::get('/{mention}', [AuthorityResolutionController::class, 'review'])->name('review');
+        Route::get('/{mention}/lookup', [AuthorityResolutionController::class, 'lookup'])->name('lookup');
+        Route::post('/{mention}/link/{candidate}', [AuthorityResolutionController::class, 'link'])->name('link');
+        Route::post('/{mention}/link-different', [AuthorityResolutionController::class, 'linkDifferent'])->name('link-different');
+        Route::get('/{mention}/new', [AuthorityResolutionController::class, 'createForm'])->name('create-form');
+        Route::post('/{mention}/new', [AuthorityResolutionController::class, 'create'])->name('create');
+        Route::post('/{mention}/park', [AuthorityResolutionController::class, 'park'])->name('park');
+        Route::post('/{mention}/unpark', [AuthorityResolutionController::class, 'unpark'])->name('unpark');
+        Route::post('/{mention}/reject', [AuthorityResolutionController::class, 'reject'])->name('reject');
+    });
+
     Route::middleware('access:review-proposals,description')->prefix('proposals')->name('proposals.')->group(function () {
         Route::get('/', [ProposalReviewController::class, 'index'])->name('index');
         Route::post('/{proposal}/accept', [ProposalReviewController::class, 'accept'])->name('accept');
@@ -686,6 +704,9 @@ Route::middleware(['auth', 'active'])->group(function () {
     // DOIs for units of description at DataCite (roadmap phase 20c): set up by who administers the institution, worked
     // with by who may publish descriptions.
     Route::middleware('can:'.Vocab::permission('manage-institution'))->group(function () {
+        // The outside authorities and words of role for resolving names (roadmap phase 17b2).
+        Route::get('/admin/authority-resolution', [AuthorityResolutionController::class, 'settings'])->name('authority.settings');
+        Route::post('/admin/authority-resolution', [AuthorityResolutionController::class, 'saveSettings'])->name('authority.settings.save');
         // AI: the gateway, the institution's settings and the log of inferences (roadmap phase 17a).
         Route::prefix('admin/ai')->name('ai.')->whereUuid('inference')->group(function () {
             Route::get('/', [AiController::class, 'index'])->name('index');

@@ -1,0 +1,65 @@
+# OpenRiC Workspace - OpenRiC Workspace Authority Lookup Sources.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# The outside authorities a new authority record or place may be filled from (Heratio's lookup adapters).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/lookup-source/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Authority Lookup Sources"@en ;
+    dcterms:description "The outside authorities a new authority record or place may be filled from (Heratio's lookup adapters)."@en ;
+    dcterms:issued "2026-11-04"^^xsd:date ;
+    skos:hasTopConcept v:viaf, v:wikidata, v:geonames, v:tgn, v:gnd, v:isni, v:sagnc .
+
+v:viaf a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "VIAF"@en, "VIAF"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the review of a name a description mentions, as Heratio's ahg-authority-resolution keeps it; what is decided is exported as the relation it makes, with its assertions."@en ;
+    skos:definition "The Virtual International Authority File. Its data is dedicated to the public domain under CC0 1.0."@en .
+
+v:wikidata a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Wikidata"@en, "Wikidata"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the review of a name a description mentions, as Heratio's ahg-authority-resolution keeps it; what is decided is exported as the relation it makes, with its assertions."@en ;
+    skos:definition "Wikidata. Its structured data is released under CC0 1.0."@en .
+
+v:geonames a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "GeoNames"@en, "GeoNames"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the review of a name a description mentions, as Heratio's ahg-authority-resolution keeps it; what is decided is exported as the relation it makes, with its assertions."@en ;
+    skos:definition "GeoNames, for places. Its data is licensed under CC BY 4.0, and the API needs a registered username."@en .
+
+v:tgn a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Getty TGN"@en, "Getty TGN"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the review of a name a description mentions, as Heratio's ahg-authority-resolution keeps it; what is decided is exported as the relation it makes, with its assertions."@en ;
+    skos:definition "The Getty Thesaurus of Geographic Names, under ODC-BY 1.0. Not yet searched."@en .
+
+v:gnd a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "GND"@en, "GND"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the review of a name a description mentions, as Heratio's ahg-authority-resolution keeps it; what is decided is exported as the relation it makes, with its assertions."@en ;
+    skos:definition "The Gemeinsame Normdatei of the Deutsche Nationalbibliothek, under CC0 1.0. Not yet searched."@en .
+
+v:isni a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "ISNI"@en, "ISNI"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the review of a name a description mentions, as Heratio's ahg-authority-resolution keeps it; what is decided is exported as the relation it makes, with its assertions."@en ;
+    skos:definition "The International Standard Name Identifier, under ODC-BY 1.0. Not yet searched."@en .
+
+v:sagnc a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "SAGNC"@en, "SAGNC"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the review of a name a description mentions, as Heratio's ahg-authority-resolution keeps it; what is decided is exported as the relation it makes, with its assertions."@en ;
+    skos:definition "The South African Geographical Names Council gazetteer. Not yet searched."@en .
