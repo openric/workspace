@@ -113,9 +113,9 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-rights` | 0 | V0.1 candidate | Covered |  | `ahgRightsPlugin` | Rights as rico:Rule on records and files (v0.0.57 to v0.0.59, ADR 0008) |
 | `ahg-rights-holder-manage` | 5215 | V0.1 candidate | Covered |  | `ahgRightsHolderManagePlugin` | Rights holders are agents, linked by rico:hasOrHadIntellectualPropertyRightsHolder (v0.0.57) |
 | `ahg-scan` | 7065 | later: V1.0+ | Partial | 22a | `ahgScanPlugin` | Watched folders, Heratio's sidecars, BagIt intake and the scan API, from v0.0.106 (ADR 0020); not its sector routing, rights enforcement or web archiving |
-| `ahg-search` | 7659 | V0.1 candidate | Partial | 17 | `ahgSearchPlugin` | Full-text search with facets, staff search and statistics (v0.0.60, v0.0.61, ADR 0009); search by meaning in phase 17 |
+| `ahg-search` | 7659 | V0.1 candidate | Partial | 17 | `ahgSearchPlugin` | Full-text search with facets, staff search and statistics (v0.0.60, v0.0.61, ADR 0009); search by meaning from v0.0.131 (17d1) |
 | `ahg-security-clearance` | 9206 | later: jurisdiction | Covered | 18c, 12b | `ahgSecurityClearancePlugin` | Levels, compartments, clearances, classified records with inheritance and declassification, requests for access, all in the one read check, from v0.0.101 (ADR 0016); TOTP two-factor sign-in and its policy from v0.0.111 (ADR 0021); WebAuthn and codes by email not carried |
-| `ahg-semantic-search` | 29749 | out: AI (V2+) | Planned | 17 (last) | `ahgSemanticSearchPlugin` |  |
+| `ahg-semantic-search` | 29749 | out: AI (V2+) | Partial | 17d1 to 17d4 | none | Search by meaning on pgvector with gateway embeddings, widening by SKOS labels and a model, reranking, related records, /ground and the ways into the collection, from v0.0.131 (ADR 0025); repatriation 17d2, displaced and endangered heritage 17d3, language corpus, scholarship and research leads 17d4 |
 | `ahg-settings` | 16789 | V0.1 candidate | Covered |  | `ahgSettingsPlugin` | Institution settings, written fresh |
 | `ahg-share-link` | 2659 | later: V1.0+ | Covered | 19a | `ahgTimeLimitedShareLinkPlugin` | Share links that never open more than their issuer may read, with their log and prune (ADR 0017); clearance with 18c |
 | `ahg-sharepoint` | 6045 | later: V1.0+ | Planned | 22, pilot | `ahgSharePointPlugin` | When a pilot with a Microsoft tenant needs it (choice 2B, ADR 0020) |
@@ -1542,4 +1542,26 @@ Added on 5 November 2026 with 17c.
 | The strings' machine suggestion (`mt-suggest`) | `translation.suggest` | Same |
 | `cco` values and the ICIP sensitivity badges | Not carried: museum values are phase 21, and ICIP protocols are in phase 2 | Not carried |
 | `translate:import-json` | Not needed: the shipped strings are the JSON files, read directly | Not carried |
+
+### Search by meaning (`ahg-semantic-search`, part one)
+
+Added on 5 November 2026 with 17d1.
+
+| Heratio field | Workspace | Status |
+|---|---|---|
+| The Qdrant collection of record vectors | `search_vectors`: one vector of 768 dimensions per search entry (public and staff), with its model and text hash, under an HNSW index | Modelled, from v0.0.131 |
+| VectorSearchService, `/api/search/semantic` | SearchService mode `meaning`, and `both` by reciprocal rank fusion | Modelled |
+| `ahg_thesaurus_term`, `ahg_thesaurus_synonym`, `ahg_thesaurus_sync_log`, syncTerms | The SKOS preferred and alternative labels of the institution's descriptive vocabularies | Modelled |
+| `ahg_thesaurus_embedding` | `search_vectors` | Modelled |
+| SemanticSearchService::expandQuery (`semantic_min_weight`, `semantic_expansion_limit`) | `Search\Expansion::synonyms`, `search_settings.expansion_limit` | Modelled |
+| QueryExpansionService (model, prompt, parseTerms) | `Search\Expansion::fromModel`, Heratio's prompt and parser | Same |
+| HistoryRerankService (`ahg_search_query_log`) | `Search\HistoryRerank`, the account's own `search_history`, the last 25, kept only while reranking is on | Modelled |
+| RelatedRecordsService | `Meaning::related`, on the public and the staff page | Same |
+| GraphGroundingService, `/api/ric/ground` | `Api\Grounding`, `/ground` in the RiC API | Same |
+| ThemeService, PlaceService, PersonService, GenreService, TimelineService, ExploreCollectionController | `Discovery\Explore`, `/discover/ways-in` | Same |
+| `ahg_semantic_search_settings`, the config page | `search_settings`, on the AI page | Same |
+| `ahg_semantic_search_log`, the search and sync logs | The search statistics (phase 6) and the log of inferences | Modelled |
+| The saved search templates | The saved searches of phase 19c | Modelled |
+| DiscoveriesController (scholarship discoveries) | 17d4, with scholarship | Not yet |
+| KmExportGraphCommand, GraphKmBridgeService | Not carried: KM reads the Workspace through its public API and /ground | Not carried |
 

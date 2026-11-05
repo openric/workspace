@@ -82,6 +82,7 @@
         @include('records._custody', ['steps' => $custody, 'languages' => \App\Support\Vocab::languages(), 'public' => true, 'view' => $view])
     @endif
     @include('discover._identifiers', ['entity' => $unit])
+    @include('search._related', ['unit' => $unit, 'public' => true, 'route' => 'discover.record'])
     <h2>{{ __('Cite and reuse') }}</h2>
     <p>{{ collect([$title, $unit->referenceCode(), $unit->repository ? $view->label($unit->repository) : null])->filter()->join(', ') }}. <code>{{ $unit->iri }}</code></p>
     <p class="meta">{{ __('This description as RiC-O') }}: <a href="{{ route('api.record', $unit->id) }}">JSON-LD</a> · <a href="{{ route('api.export', [$unit->id, 'format' => 'ttl']) }}">Turtle</a> · <a href="{{ route('api.export', [$unit->id, 'format' => 'rdf']) }}">RDF/XML</a></p>

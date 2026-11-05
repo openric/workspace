@@ -25,7 +25,8 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres:16
+        # PostgreSQL 16 with pgvector, for search by meaning (phase 17d1); the version this host runs.
+        image: pgvector/pgvector:0.6.0-pg16
         env:
           POSTGRES_USER: workspace
           POSTGRES_PASSWORD: workspace
@@ -66,6 +67,8 @@ jobs:
         run: cp .env.example .env && php artisan key:generate
       - name: Code style
         run: vendor/bin/pint --test
+      - name: pgvector in the test database
+        run: PGPASSWORD=workspace psql -h 127.0.0.1 -U workspace -d openric_workspace_test -c 'CREATE EXTENSION IF NOT EXISTS vector'
       - name: Tests
         run: php artisan test
         env:

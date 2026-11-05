@@ -10,9 +10,9 @@
             @if($institution->catalogue_show_counts)<p class="catalogue-counts">{{ __(':records archival descriptions, :agents people, families and organisations, :activities activities and :places places are published here, described in Records in Contexts.', $counts->all()) }}</p>@endif
             <form method="get" action="{{ route('discover.home') }}" role="search" class="catalogue-search">
                 <label for="q">{{ __('Search names, titles and reference codes') }}</label>
-                <div><input id="q" name="q" required><button type="submit">{{ __('Search') }}</button></div>
+                <div><input id="q" name="q" required>@include('search._mode', ['institutionId' => $institution->id, 'search' => null])<button type="submit">{{ __('Search') }}</button></div>
             </form>
-            @if(\App\Federation\TripleStore::configured())<p><a href="{{ route('discover.explore') }}">{{ __('Explore the graph') }}</a></p>@endif
+            <p><a href="{{ route('discover.ways-in') }}">{{ __('Ways into the collection') }}</a>@if(\App\Federation\TripleStore::configured()) · <a href="{{ route('discover.explore') }}">{{ __('Explore the graph') }}</a>@endif</p>
         </section>
         @if($featured->isNotEmpty())
             <h2>{{ __('Explore the collections') }}</h2>
@@ -76,6 +76,7 @@
                 </form>
             </aside>
             <div>
+                @include('search._expanded')
                 <ul>
                     @foreach($search['results'] as $row)
                         <li><a href="{{ \App\Discovery\Links::page($row['entity']) }}">{{ $row['title'] }}</a>

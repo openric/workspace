@@ -13,6 +13,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Api\GraphQl;
+use App\Api\Grounding;
 use App\Api\JsonLd;
 use App\Api\OpenApi;
 use App\Api\Problem;
@@ -101,6 +102,20 @@ class DiscoveryController extends Controller
     public function repositories(Request $request): JsonResponse
     {
         return $this->list($request, 'repositories', fn ($r) => $this->jsonLd($request)->stub($r));
+    }
+
+    /**
+     * The Graph-Grounding profile (roadmap phase 17d1), after Heratio's GroundingController: the public entities a query
+     * names, each as a pack of the facts its RiC-O holds, and a block an agent may put before its prompt.
+     */
+    public function ground(Request $request): JsonResponse
+    {
+        $q = trim((string) $request->query('q', ''));
+        if ($q === '') {
+            return response()->json(['error' => 'missing required query parameter: q'], 422);
+        }
+
+        return response()->json((new Grounding($this->catalogue($request)))->groundQuery($q, max(1, min(20, (int) $request->query('max', 5)))));
     }
 
     public function record(Request $request, string $key): JsonResponse|Response

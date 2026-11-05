@@ -20,6 +20,17 @@
         <fieldset><legend>{{ __('Elements offered for translation') }}</legend>
             @foreach(app(\App\Ai\Translate::class)->elements() as $e)<label><input type="checkbox" name="translation_elements[]" value="{{ $e->notation }}" style="width: auto" @checked(in_array($e->notation, $settings->translation_elements ?: \App\Ai\Translate::DEFAULT_ELEMENTS, true))> {{ $e->label(\App\Support\Vocab::languages()) }}</label>@endforeach
         </fieldset>
+        <fieldset><legend>{{ __('Search') }}</legend>
+            @foreach(['by_meaning' => __('Search by meaning as well as by the words (each entry of the index turned into a vector by the gateway)'),
+                'expand_synonyms' => __('Widen a search with the other labels of the concepts its words name'), 'expand_with_model' => __('Widen a search with terms a language model suggests'),
+                'rerank_history' => __('Put first, for a signed-in account, what matches its recent searches')] as $key => $label)
+                <label><input type="hidden" name="search[{{ $key }}]" value="0"><input type="checkbox" name="search[{{ $key }}]" value="1" style="width: auto" @checked($search->{$key})> {{ $label }}</label>
+            @endforeach
+            <label for="ai-exp">{{ __('At most so many terms added to a search') }}</label><input id="ai-exp" name="search[expansion_limit]" type="number" min="0" max="20" value="{{ $search->expansion_limit }}">
+            <label for="ai-sim">{{ __('How alike an entry must be to be found by meaning (0 to 0.99)') }}</label><input id="ai-sim" name="search[min_similarity]" type="number" min="0" max="0.99" step="0.01" value="{{ $search->min_similarity }}">
+            <label for="ai-emb">{{ __('Embedding model') }}</label><input id="ai-emb" name="search[embedding_model]" maxlength="200" value="{{ $search->embedding_model }}" placeholder="{{ \App\Search\Meaning::DEFAULT_MODEL }}">
+            <p class="meta">{{ __(':vectors of :entries entries of the search index are turned into vectors; the rest are every ten minutes, while search by meaning is on.', ['vectors' => $vectors, 'entries' => $entries]) }}</p>
+        </fieldset>
         <button type="submit">{{ __('Save') }}</button></form>
 
     <h2>{{ __('This month') }}</h2>

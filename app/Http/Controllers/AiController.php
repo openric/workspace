@@ -21,9 +21,11 @@ use App\Models\AiInference;
 use App\Models\Concept;
 use App\Models\Instantiation;
 use App\Models\RecordResource;
+use App\Search\Meaning;
 use App\Support\Vocab;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
@@ -39,7 +41,9 @@ class AiController extends Controller
             'refusal' => $this->gateway->refusal($institution), 'used' => $this->inferences->thisMonth($institution),
             'byService' => AiInference::where('ai_inferences.institution_id', $institution)->where('occurred_at', '>=', now()->startOfMonth())
                 ->join('concepts as c', 'c.id', '=', 'ai_inferences.service_id')->selectRaw('c.notation, count(*) as n, sum(case when succeeded then 0 else 1 end) as failed')
-                ->groupBy('c.notation')->get(), 'chain' => session('chain')]);
+                ->groupBy('c.notation')->get(), 'chain' => session('chain'), 'search' => app(Meaning::class)->settings($institution),
+            'entries' => DB::table('search_entries')->where('institution_id', $institution)->count(),
+            'vectors' => DB::table('search_vectors')->where('institution_id', $institution)->count()]);
     }
 
     public function save(Request $request): RedirectResponse
@@ -54,6 +58,12 @@ class AiController extends Controller
             'ocr_fallback_model' => $data['ocr_fallback_model'] ?? null, 'chat_model' => $data['chat_model'] ?? null,
             'translation_target' => $data['translation_target'] ?? null, 'translation_elements' => array_values($data['translation_elements'] ?? []), 'updated_by_id' => $request->user()->id]);
         AuditLog::actingAs($request->user(), fn () => $settings->save());
+        // Search by meaning (phase 17d1).
+        $search = $request->validate(['search.min_similarity' => ['nullable', 'numeric', 'between:0,0.99'], 'search.expansion_limit' => ['nullable', 'integer', 'between:0,20'], 'search.embedding_model' => ['nullable', 'string', 'max:200', 'regex:/^[A-Za-z0-9._:\/-]+$/']]);
+        app(Meaning::class)->saveSettings($request->user()->institution_id, ['by_meaning' => $request->boolean('search.by_meaning'),
+            'expand_synonyms' => $request->boolean('search.expand_synonyms'), 'expand_with_model' => $request->boolean('search.expand_with_model'),
+            'rerank_history' => $request->boolean('search.rerank_history'), 'expansion_limit' => $search['search']['expansion_limit'] ?? 5,
+            'embedding_model' => $search['search']['embedding_model'] ?? null, 'min_similarity' => $search['search']['min_similarity'] ?? 0.40]);
 
         return back()->with('status', __('Saved.'));
     }

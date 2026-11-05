@@ -40,6 +40,7 @@ use App\Http\Controllers\EmailBounceController;
 use App\Http\Controllers\EmailController;
 use App\Http\Controllers\EmbargoController;
 use App\Http\Controllers\EuropeanaLoanController;
+use App\Http\Controllers\ExploreController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\FavouritesController;
 use App\Http\Controllers\FederationController;
@@ -259,6 +260,12 @@ Route::middleware([ServeDiscovery::class, 'throttle:120,1'])->group(function () 
 Route::middleware(ServeDiscovery::class)->prefix('discover')->name('discover.')->group(function () {
     Route::get('/', [DiscoverController::class, 'home'])->name('home');
     Route::get('/records/{id}', [DiscoverController::class, 'record'])->name('record');
+    // Ways into the collection (roadmap phase 17d1).
+    Route::get('/ways-in', [ExploreController::class, 'hub'])->name('ways-in');
+    Route::get('/ways-in/timeline', [ExploreController::class, 'timeline'])->name('ways-in.timeline');
+    Route::get('/ways-in/timeline/{from}', [ExploreController::class, 'decade'])->name('ways-in.decade')->where('from', '[0-9]{3,4}');
+    Route::get('/ways-in/{facet}', [ExploreController::class, 'facet'])->name('ways-in.facet')->where('facet', 'themes|places|people|genres');
+    Route::get('/ways-in/{facet}/{id}', [ExploreController::class, 'units'])->name('ways-in.units')->where('facet', 'themes|places|people|genres')->whereUuid('id');
     Route::get('/records/{id}/tree', [DiscoverController::class, 'treeChildren'])->name('record.tree');
     Route::get('/agents/{id}', [DiscoverController::class, 'agent'])->name('agent');
     Route::get('/repositories/{id}', [DiscoverController::class, 'repository'])->name('repository');

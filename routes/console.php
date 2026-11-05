@@ -1,6 +1,7 @@
 <?php
 
 use App\AccessRequests\AccessRequestService;
+use App\Ai\AiUnavailable;
 use App\Authority\Candidates;
 use App\Authority\Mentions;
 use App\Authority\NerFeedback;
@@ -45,6 +46,7 @@ use App\Research\SavedSearches;
 use App\Research\ShareLinks;
 use App\Rights\Clearances;
 use App\Rights\Embargoes;
+use App\Search\Meaning;
 use App\Support\Vocab;
 use App\Versions\Versions;
 use App\Webhooks\Webhooks;
@@ -358,3 +360,19 @@ Artisan::command('workspace:authority:status', function () {
     $this->line('feedback not yet exported: '.DB::table('ner_feedback')->whereNull('exported_at')->count());
     $this->line('cached outside answers: '.DB::table('authority_lookup_cache')->count());
 })->purpose('How many names wait, are linked, parked or rejected, and what is cached (Heratio\'s StatusCommand and CacheStatsCommand)');
+
+// Search by meaning (roadmap phase 17d1): the index's entries turned into vectors through the AI gateway.
+Artisan::command('workspace:search:embed {--institution=} {--limit=500}', function () {
+    $meaning = app(Meaning::class);
+    $done = 0;
+    Institution::when($this->option('institution'), fn ($q, $id) => $q->whereKey($id))->get()
+        ->filter(fn ($i) => $meaning->available($i->id))->each(function ($institution) use ($meaning, &$done) {
+            try {
+                $done += $meaning->index($institution, (int) $this->option('limit'));
+            } catch (AiUnavailable $e) {
+                $this->warn($institution->name.': '.$e->getMessage());
+            }
+        });
+    $this->info("$done entries turned into vectors.");
+})->purpose('Turn the search index\'s new and changed entries into vectors through the AI gateway, for search by meaning (Heratio\'s semantic index)');
+Schedule::command('workspace:search:embed')->everyTenMinutes()->withoutOverlapping(30)->when(fn () => DB::table('search_settings')->where('by_meaning', true)->exists());

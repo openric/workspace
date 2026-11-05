@@ -194,3 +194,48 @@ Heratio's `ahg-translation` comes across in two parts.
 - an interface wording proposed by a translator and accepted by an administrator, seen by that institution only, kept in the history, and put back when emptied;
 - a machine suggestion for a string.
 
+## 17d: all of ahg-semantic-search
+
+On 5 November 2026 Dr Johan Pieterse chose to take all of `ahg-semantic-search`, 30,000 lines, in phase 17, split into four releases:
+
+- 17d1: search by meaning;
+- 17d2: repatriation;
+- 17d3: displaced and endangered heritage;
+- 17d4: language corpus, scholarship and research leads.
+
+He creates pgvector himself in the dev, test and live databases. The migration only checks that it is there, and CI uses the `pgvector/pgvector:0.6.0-pg16` image.
+
+### 17d1: search by meaning, widening, reranking, related records, grounding and ways in
+
+**Vectors.**
+
+- **What is embedded.** Every entry of the search index, public and staff, is embedded through the gateway's Ollama embed route (`nomic-embed-text`, 768 dimensions, in batches of 32).
+- **Where it is kept.** The vectors are in `search_vectors` with an HNSW cosine index, re-embedded when the hashed text or the model changes, by `workspace:search:embed` every ten minutes while an institution searches by meaning.
+- **Receipts.** Every batch and every query is a receipt.
+
+**Search.** `SearchService::search()` takes a mode and an account.
+
+- **Words** is the full-text search. The query and each widening term are OR'd as separate tsqueries, since `websearch_to_tsquery` would AND appended words.
+- **Meaning** is the 200 nearest vectors at least as alike as the institution's floor (`search_settings.min_similarity`, 0.40 by default), under the same filters in the same SQL. Without a floor the nearest entries would always be "found", however unrelated.
+- **Both** fuses the two lists by reciprocal rank (k = 60).
+- **The rest.** Facets are counted over what matched. A page may be reranked by the account's recent searches (Heratio's HistoryRerankService). Those searches are kept in `search_history` only while reranking is on, and only the last 25, because the search statistics of phase 6 deliberately keep no one's name.
+
+**Widening.** A word of the query that names a concept by a preferred or alternative label brings in the concept's other labels. Only descriptive vocabularies (those with a kind) count, never the operational lists. A language model may add terms, with Heratio's prompt and parser. Five terms at most unless the institution sets another number.
+
+**Related records** are a unit's nearest entries for the same audience. On the staff page they are filtered by the reader's permissions.
+
+**Grounding.** `/ground` (the Graph-Grounding profile) finds public entities by the public search and builds Heratio's pack from each one's public JSON-LD, with Heratio's grounding text.
+
+**Ways in.** `/discover/ways-in` counts themes, places, people and genres from the RiC relations, and the timeline from the units' dates. It counts over the public search index only.
+
+**Tests.** `tests/Feature/SearchByMeaningTest.php`:
+
+- a fake embedding model where words of one meaning share a dimension;
+- found by meaning where not by the words, and both fused;
+- embedding again only on change;
+- widening by a concept's labels, and switching it off;
+- reranking by recent searches;
+- related records and grounding;
+- the ways in counting only what is published;
+- the settings.
+

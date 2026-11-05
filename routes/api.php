@@ -22,6 +22,7 @@ Route::middleware([ServeRicApi::class, 'throttle:600,1', AuthenticateApiKey::cla
     Route::get('/health', [DiscoveryController::class, 'health'])->name('api.health');
     Route::get('/openapi.json', [DiscoveryController::class, 'openapi'])->name('api.openapi');
     Route::get('/vocabulary', [DiscoveryController::class, 'vocabulary'])->name('api.vocabulary');
+    Route::get('/ground', [DiscoveryController::class, 'ground'])->name('api.ground');
     Route::get('/records', [DiscoveryController::class, 'records'])->name('api.records');
     Route::get('/records/{key}', [DiscoveryController::class, 'record'])->name('api.record');
     Route::get('/records/{key}/export', [DiscoveryController::class, 'export'])->name('api.export');

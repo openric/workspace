@@ -9,11 +9,13 @@
     <form method="get" action="{{ route('search') }}" role="search" style="display: flex; gap: .5rem; flex-wrap: wrap; max-width: 40rem">
         <label for="search-q" style="position: absolute; left: -999px">{{ __('Search') }}</label>
         <input id="search-q" name="q" value="{{ $query }}" style="flex: 1 1 16rem" autofocus>
+        @include('search._mode', ['institutionId' => auth()->user()->institution_id])
         <button type="submit" style="margin: 0">{{ __('Search') }}</button>
     </form>
     <p class="meta">{{ $drafts ? __('Drafts are included.') : __('Published values only.') }} {{ __('Use quotes for a phrase, such as "town council"; a minus sign leaves a word out, such as council -minutes; OR finds either word.') }}</p>
     @if($query !== '')
         <p role="status">{{ $search['total'] === 0 ? __('No results found.') : __(':count found.', ['count' => $search['total']]) }}</p>
+        @include('search._expanded')
         <div class="search-layout">
             <aside class="search-facets" aria-label="{{ __('Narrow the results') }}">
                 <h2>{{ __('Kind') }}</h2>

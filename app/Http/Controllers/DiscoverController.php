@@ -68,7 +68,7 @@ class DiscoverController extends Controller
         if ($query !== '') {
             $filters = ['kind' => $kind, 'level' => $this->uuidOrNull($request->query('level')), 'repository' => $this->uuidOrNull($request->query('repository')),
                 'from' => $this->yearOrNull($request->query('from')), 'to' => $this->yearOrNull($request->query('to'))];
-            $search = app(SearchService::class)->search($catalogue->institution, $query, true, $filters, max(1, (int) $request->query('page', 1)));
+            $search = app(SearchService::class)->search($catalogue->institution, $query, true, $filters, max(1, (int) $request->query('page', 1)), 20, ['mode' => (string) $request->query('mode', 'words')]);
             $search['filters'] = $filters;
             $search['page'] = max(1, (int) $request->query('page', 1));
             $byTable = collect($search['results'])->groupBy('table');

@@ -32,7 +32,7 @@ class SearchController extends Controller
         $page = max(1, (int) $request->query('page', 1));
         // Drafts only for an account that may see drafts somewhere; each result is then checked against what it may read.
         $public = ! $user->mayAnywhere('view-draft', 'description');
-        $found = $search->search($user->institution, $query, $public, $filters, $page, self::PER_PAGE);
+        $found = $search->search($user->institution, $query, $public, $filters, $page, self::PER_PAGE, ['mode' => (string) $request->query('mode', 'words'), 'user' => $user]);
         // ponytail: results the account may not read are dropped after paging, so a page can be short; filter in SQL when per-record denials are common.
         $results = collect($found['results'])->groupBy('table')
             ->flatMap(fn ($rows, $table) => collect(SearchIndex::KINDS)->first(fn ($c) => (new $c)->getTable() === $table)::whereIn('id', $rows->pluck('id'))->get())
