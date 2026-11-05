@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[Fillable(['institution_id', 'record_resource_id', 'kind_id', 'status_id', 'value', 'element_id', 'language', 'agent_type_id', 'instantiation_id',
     'linked_table', 'linked_id', 'link_reason', 'authority', 'confidence', 'evidence', 'sources', 'origin_label', 'proposed_by_id', 'api_key_id',
-    'reviewed_by_id', 'reviewed_at', 'review_note'])]
+    'reviewed_by_id', 'reviewed_at', 'review_note', 'inference_id', 'accepted_value'])]
 class Proposal extends Model
 {
     use Audited, HasUuids;
@@ -62,5 +62,11 @@ class Proposal extends Model
     public function reviewedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'reviewed_by_id');
+    }
+
+    /** The call a model answered that made it, when a model did (phase 17a). */
+    public function inference(): BelongsTo
+    {
+        return $this->belongsTo(AiInference::class, 'inference_id');
     }
 }

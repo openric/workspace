@@ -106,6 +106,7 @@
                 'webhooks.index' => [__('Webhooks'), $may('manage-institution'), 'webhooks.*'],
                 'labels.templates' => [__('Label templates'), $may('manage-institution'), 'labels.templates*'],
                 'functions-docs.index' => [__('Code reference'), $may('manage-institution'), 'functions-docs.*'],
+                'ai.index' => [__('AI'), $may('manage-institution'), 'ai.*'],
                 'display.index' => [__('Display'), $may('manage-institution'), 'display.*'],
                 'dropdowns.index' => [__('Dropdown manager'), $may('manage-institution'), 'dropdowns.*'],
                 'custom-fields.index' => [__('Own fields and form templates'), $may('manage-institution'), 'custom-fields.index|custom-fields.template*|custom-fields.definitions*'],

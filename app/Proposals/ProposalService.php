@@ -200,10 +200,12 @@ final class ProposalService
      * Propose text read from a file of the instantiation as its transcript, on behalf of the
      * account that gave the file; null when the same text is waiting already.
      */
-    public function proposeTranscript(Instantiation $instantiation, User $user, string $text, string $label, ?string $evidence = null): ?Proposal
+    /** $extra: what a model adds (inference_id, confidence, language), phase 17a. */
+    public function proposeTranscript(Instantiation $instantiation, User $user, string $text, string $label, ?string $evidence = null, array $extra = []): ?Proposal
     {
         $record = $instantiation->record;
-        $row = ['kind_id' => $this->concept(Vocab::PROPOSAL_KINDS.'transcript')->id, 'value' => $text, 'instantiation_id' => $instantiation->id, 'evidence' => $evidence];
+        $row = ['kind_id' => $this->concept(Vocab::PROPOSAL_KINDS.'transcript')->id, 'value' => $text, 'instantiation_id' => $instantiation->id, 'evidence' => $evidence,
+            ...array_intersect_key($extra, array_flip(['inference_id', 'confidence', 'language']))];
 
         return DB::transaction(fn () => AuditLog::actingAs($user, fn () => $this->waiting($record, $row, true) ? null : Proposal::create([...$row,
             'institution_id' => $record->institution_id, 'record_resource_id' => $record->id, 'status_id' => $this->concept(Vocab::ASSERTION_STATUSES.'proposed')->id,

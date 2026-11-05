@@ -34,6 +34,8 @@
                     $p->confidence !== null ? 'confidence '.number_format($p->confidence, 2) : null, $p->language ? 'language '.$p->language : null]))
                 <p><small>{{ implode('; ', $facts) }}
                     @if($k === 'transcript' && $p->instantiation); {{ __('of') }} <a href="{{ route('instantiations.show', $p->instantiation) }}">{{ $p->instantiation->described('instantiation-title', ['en']) ?? __('the instantiation') }}</a> @endif
+                    {{-- A model made it (phase 17a): the call it came from, with its receipt. --}}
+                    @if($p->inference_id); {{ __('made by :model', ['model' => $p->inference?->model]) }}@if(auth()->user()->hasPermission(\App\Support\Vocab::permission('manage-institution'))), <a href="{{ route('ai.inference', $p->inference_id) }}">{{ __('receipt :n', ['n' => $p->inference?->seq]) }}</a>@endif @endif
                 </small></p>
                 @if($p->evidence)<p><strong>{{ __('Evidence') }}:</strong> {{ $p->evidence }}</p>@endif
                 @if($p->sources)<p><strong>{{ __('Sources') }}:</strong> @foreach($p->sources as $url) <a href="{{ $url }}" rel="noopener noreferrer nofollow">{{ $url }}</a> @endforeach</p>@endif

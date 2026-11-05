@@ -133,7 +133,7 @@ final class AuditChain
         return (string) config('workspace.audit_signing_key');
     }
 
-    private static function signer(): Signer
+    public static function signer(): Signer
     {
         $path = self::keyPath();
         if (self::$signer === null || self::$signerPath !== $path) {

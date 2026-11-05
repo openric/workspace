@@ -340,6 +340,11 @@ Progress:
 
 These came from ArchiveHeritageGroup/OpenRiC #4 and #5. Done when every machine output in the Workspace can be traced to its proposal and its reviewer.
 
+On 4 and 5 November 2026 Dr Johan Pieterse chose the split 17a to 17g, one release each, AI off until a gateway key is given, Annif behind the gateway (ArchiveHeritageGroup/ahg-ai#4) and pgvector for search by meaning (ADR 0025).
+
+Progress:
+- **v0.0.127** (17a): the AI gateway client, off until the installation has a key and the institution switches AI on, with a monthly limit; every call a receipt in a chained, signed, append-only log of inferences, checked by `workspace:ai:verify`; proposals naming the call that made them and keeping the reviewer's correction; printed pages read by a vision model in strips checked against Tesseract, after Heratio (heratio#1522); relations a model asserted exported as `prov:wasGeneratedBy` it (ADR 0025).
+
 **18. Privacy and jurisdiction packs.** Copy `ahg-privacy` (POPIA: personal information in descriptions, requests for access and correction), `ahg-security-clearance` and national packs such as `ahg-narssa`, `ahg-naz` and `ahg-nmmz`, `ahg-cdpa`, `ahg-ipsas` and the rest of `ahg-icip` (Traditional Knowledge labels came in phase 2). SAHRA heritage permits under the National Heritage Resources Act follow PSIS's `ahgSAHRAPlugin`, which has no Heratio twin: a researcher applies, a supervisor endorses, the authority decides. Each is enabled per institution and decided by ADR. Done when a South African institution can show POPIA compliance for its catalogue.
 
 On 31 October 2026 Dr Johan Pieterse split the phase: 18a POPIA governance; 18b privacy in the catalogue (personal information found and redacted); 18c security clearance; 18d South Africa's NARSSA and SAHRA packs; 18e Zimbabwe's NAZ, NMMZ and CDPA packs. IPSAS goes with heritage accounting in phase 21, and two-factor sign-in with single sign-on in phase 12.

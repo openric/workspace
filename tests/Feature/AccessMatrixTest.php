@@ -14,6 +14,7 @@ use App\AccessRequests\AccessRequestService;
 use App\Accounts\AccountService;
 use App\Accounts\ApiKeyService;
 use App\Accounts\RegistrationService;
+use App\Ai\Inferences;
 use App\CustomFields\CustomFields;
 use App\CustomFields\FormTemplates;
 use App\Dedupe\Duplicates;
@@ -460,6 +461,9 @@ class AccessMatrixTest extends TestCase
             'state_id' => Concept::where('iri', Vocab::BASE.'doi-state/findable')->value('id'), 'test' => true, 'minted_at' => now()]),
             app(RecordDois::class)->enqueue($letter, 'mint', $admin),
             RecordFunding::create(['record_resource_id' => $letter->id, 'funder_name' => 'National Research Foundation'])]);
+        // Phase 17a: a receipt in the log of inferences.
+        $make('inference', fn () => app(Inferences::class)->record(['institution_id' => $institution->id, 'service' => 'ocr', 'endpoint' => 'https://ai.example.org/ai/v1/ollama/api/chat',
+            'input' => 'page', 'output' => 'text', 'succeeded' => true, 'subject' => $letter]));
         // Phase 20d: a display profile for items.
         $make('display profile', fn () => app(Displays::class)->saveProfile($institution, null, ['name' => 'Items', 'level' => 'item', 'elements' => ['scope-and-content']], $admin));
         // Phase 19j: lectures, training, notices, the inbox, documents, print templates, quotas and rights policies.

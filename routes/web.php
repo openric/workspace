@@ -17,6 +17,7 @@ use App\Http\Controllers\AccountController;
 use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\AgentController;
 use App\Http\Controllers\AgreementController;
+use App\Http\Controllers\AiController;
 use App\Http\Controllers\AltTextController;
 use App\Http\Controllers\AnalysisController;
 use App\Http\Controllers\ApiKeyController;
@@ -429,6 +430,7 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::get('/instantiations/{instantiation}/edit', [InstantiationController::class, 'edit'])->name('instantiations.edit');
     Route::post('/instantiations/{instantiation}', [InstantiationController::class, 'update'])->name('instantiations.update');
     Route::post('/instantiations/{instantiation}/copies', [WatermarkController::class, 'remake'])->name('instantiations.remake-copies');
+    Route::post('/instantiations/{instantiation}/read-text', [AiController::class, 'readText'])->name('instantiations.read-text');
     Route::post('/instantiations/{instantiation}/own-copy', [InstantiationController::class, 'replaceCopy'])->name('instantiations.replace-copy');
     Route::get('/files/{file}', [InstantiationController::class, 'file'])->name('files.show');
     // WebVTT caption tracks of a sound or video instantiation (roadmap phase 22c).
@@ -682,6 +684,14 @@ Route::middleware(['auth', 'active'])->group(function () {
     // DOIs for units of description at DataCite (roadmap phase 20c): set up by who administers the institution, worked
     // with by who may publish descriptions.
     Route::middleware('can:'.Vocab::permission('manage-institution'))->group(function () {
+        // AI: the gateway, the institution's settings and the log of inferences (roadmap phase 17a).
+        Route::prefix('admin/ai')->name('ai.')->whereUuid('inference')->group(function () {
+            Route::get('/', [AiController::class, 'index'])->name('index');
+            Route::post('/', [AiController::class, 'save'])->name('save');
+            Route::post('/verify', [AiController::class, 'verify'])->name('verify');
+            Route::get('/inferences', [AiController::class, 'inferences'])->name('inferences');
+            Route::get('/inferences/{inference}', [AiController::class, 'inference'])->name('inference');
+        });
         // The code reference, read from the code (roadmap phase 20d).
         Route::get('/admin/code-reference', [FunctionsDocsController::class, 'index'])->name('functions-docs.index');
         Route::get('/admin/code-reference/{kind}', [FunctionsDocsController::class, 'show'])->name('functions-docs.kind')->where('kind', implode('|', array_keys(FunctionsDocs::KINDS)));

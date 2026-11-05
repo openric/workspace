@@ -18,7 +18,7 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-actor-manage` | 13061 | V0.1 candidate | Covered |  | `ahgActorManagePlugin`, `ahgAuthorityPlugin`, `ahgContactPlugin` | Authority records: ISAAR(CPF), merge, split, duplicates, completeness |
 | `ahg-ai-chatbot` | 4924 | out: AI (V2+) | Planned | 17 (last) | `ahgChatbotPlugin` |  |
 | `ahg-ai-compliance` | 4043 | out: AI (V2+) | Planned | 17 (last) | `ahgAiCompliancePlugin` |  |
-| `ahg-ai-services` | 30242 | out: AI (V2+) | Partial | 17 (last) | `ahgAIPlugin`, `ahgAiConditionPlugin` | Proposals and their review queue (v0.0.47, v0.0.48); all AI work deferred to the end |
+| `ahg-ai-services` | 30242 | out: AI (V2+) | Partial | 17a to 17b | `ahgAIPlugin`, `ahgAiConditionPlugin` | Proposals and their review queue (v0.0.47, v0.0.48); the gateway client and OCR of printed pages by a vision model checked against Tesseract (heratio#1522), from v0.0.127 (ADR 0025); names, summaries, condition and handwriting in 17b |
 | `ahg-annotations` | 1286 | V0.1 candidate | Planned | 14 | `ahgAnnotationsPlugin` | As IIIF annotations |
 | `ahg-api` | 30902 | V0.1 candidate | Covered | 22c | `ahgAPIPlugin`, `arRestApiPlugin` | Read API, keys, proposals, files (ADR 0007); webhooks, OpenAPI, sitemaps, Atom feed and METS from v0.0.108 (ADR 0020); API writes stay proposals |
 | `ahg-api-plugin` | 179 | V0.1 candidate | Covered |  | none | The proposals contract the MCP uses (v0.0.47) |
@@ -67,7 +67,7 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-icip` | 6793 | later: jurisdiction | Partial | 18 | `ahgICIPPlugin` | Traditional Knowledge and Biocultural labels (v0.0.59); the rest of ICIP in phase 18 |
 | `ahg-iiif-collection` | 8745 | out: GLAM sector | Partial | 14 | `ahgIiifPlugin` | Presentation 3 manifests (PSIS's manifest, Heratio's audio and video canvases), fonds collections, curated collections, Change Discovery, Content State, the Mirador viewer and the IIIF-ready gate from v0.0.87 (14a, ADR 0014); Content Search 2.0, Auth Flow 2.0, saved viewer layouts and validation from v0.0.88 (14b); clearance levels on the probe from v0.0.101 (18c); sound and video lengths read by ffprobe and their viewing copies (Heratio's MediaDerivativeService) from v0.0.102; NER annotations in phase 17, 3D reports in phase 21 |
 | `ahg-image-ar` | 896 | out: GLAM sector | Planned | 21 | `ahgImageArPlugin` |  |
-| `ahg-inference-receipts` | 1569 | out: AI (V2+) | Partial | 17 (last) | none | Its signing code is copied for the audit chain |
+| `ahg-inference-receipts` | 1569 | out: AI (V2+) | Done | 17a | none | Its signing code is copied for the audit chain; every call a model answers is a receipt in a chained, signed, append-only log, from v0.0.127 (ADR 0025) |
 | `ahg-information-object-manage` | 47506 | V0.1 candidate | Covered | 9 | `ahgInformationObjectManagePlugin`, `ahgProvenancePlugin` | Records and record sets: ISAD(G), hierarchy, levels, instantiations, publication; provenance and custody history from v0.0.81 (9e) |
 | `ahg-ingest` | 5338 | later: V1.0+ | Covered | 22a | `ahgIngestPlugin` | The import with PSIS's ingest steps: spreadsheets, column mapping with kept mappings, ZIPs with their files, classification, undo, a BagIt bag, grid entry, from v0.0.106 (ADR 0020); OCR and AI processing in phase 17 |
 | `ahg-integrity` | 3078 | later: V1.0+ | Covered | 12a | `ahgIntegrityPlugin` | Fixity schedules, runs, the ledger and failures from v0.0.110 (ADR 0021); retention, holds and disposition are phase 13b's |
@@ -98,7 +98,7 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-portable-export` | 3000 | later: V1.0+ | Planned | 11c, deferred | `ahgPortableExportPlugin` | Read PSIS ahgPortableExportPlugin too, which does more; deferred by Dr Johan Pieterse on 30 October 2026 |
 | `ahg-preservation` | 10211 | later: V1.0+ | Done | 15a, 15c, 15d | `ahgPreservationPlugin` | PREMIS events, PRONOM formats by Siegfried and the PREMIS 3.0 export from v0.0.114; normalisation, migration plans, format risk, replication and PREMIS rights from v0.0.116; OAIS packages as BagIt bags from v0.0.117 (ADR 0022); backup verification in phase 3 |
 | `ahg-privacy` | 16854 | later: jurisdiction | Partial | 18a, 18b | `ahgPrivacyPlugin` | POPIA governance (registers, requests, compromises, assessments, controls, report) from v0.0.91 (18a, ADR 0016); PII scanning, field redaction and file screening from v0.0.94 (18b); not visual redaction of images, named-entity recognition, the Article 30 export or the autopilot |
-| `ahg-provenance-ai` | 2662 | out: AI (V2+) | Planned | 17 (last) | none |  |
+| `ahg-provenance-ai` | 2662 | out: AI (V2+) | Done | 17a | none | The log of inferences with each call's trace to its proposals and reviewers, the reviewer's correction kept, and the Inferred-Provenance profile in RiC-O, from v0.0.127 (ADR 0025) |
 | `ahg-rad-manage` | 1233 | V0.1 candidate | Covered |  | `ahgRadManagePlugin`, `sfRadPlugin` | RAD display standard, from v0.0.76 |
 | `ahg-rdm` | 2739 | later: V1.0+ | Planned | 17 (last) | `ahgRdmPlugin` | Moved to phase 17: it orchestrates ingest, research and the AI services (choice 1B, ADR 0020) |
 | `ahg-records-manage` | 10687 | later: V1.0+ | Covered | 13b, 13c | `ahgRecordsManagePlugin` | Retention schedules, disposal classes, reviews, the disposal workflow and destruction certificates from v0.0.90 (13b, ADR 0015); file plans and their imports, e-mail capture, classification rules, declaration, vital records and compliance assessments from v0.0.100 (13c, Dr Johan Pieterse's choices 1A and 2A of 2 November 2026); IMAP polling not yet |
@@ -1471,3 +1471,26 @@ Added on 4 November 2026 with 20d.
 | The `js` and `py` catalogues | Not carried: the Workspace has hardly any JavaScript and no Python | Not carried |
 | | Console commands and bundled vocabularies | Added |
 | The catalogue files in `/opt/ai/km` and their modification times | Built from the code, cached until a source file changes | Modelled |
+
+### AI provenance and receipts (`ahg-provenance-ai`, `ahg-inference-receipts`)
+
+Added on 5 November 2026 with 17a.
+
+| Heratio field | Workspace | Status |
+|---|---|---|
+| `ahg_ai_inference`: `uuid`, `service_name`, `model_name`, `model_version`, `endpoint` | `ai_inferences`: the same, the service a vocabulary row | Same, from v0.0.127 |
+| `input_hash`, `input_excerpt`, `output_hash`, `output_excerpt`, `confidence` | The same | Same |
+| `target_entity_type`, `target_entity_id`, `target_field` | `subject_table`, `subject_id`, `field` | Same |
+| `elapsed_ms`, `user_id`, `occurred_at` | The same, with whether the call was answered and its error | Same |
+| `model_manifest`, `guardrail` | `details`, what the model reported | Modelled |
+| `standard` | Not carried: the field says what it was for | Not carried |
+| `fuseki_graph_uri` and the RDF-star replay | The Inferred-Provenance profile in the RiC-O export, which reaches Fuseki with it | Modelled |
+| `signature`, `signer_key_id` (heratio#136) and the receipt chain (`seq`, `prev_hash`, `entry_hash`, `kid`, `alg`, JCS, Ed25519) | One row: `seq`, `prev_hash`, `entry_hash`, `signature`, `kid`, under the audit log's key | Same |
+| `ahg_ai_override`: `inference_id`, `reviewer_user_id`, `reason`, `original_value`, `override_value`, `status` | The proposal: `inference_id`, `reviewed_by_id`, `review_note`, `value`, `accepted_value`, `status_id` | Modelled |
+| The provenance trace endpoint | `/admin/ai/inferences/{inference}` | Modelled |
+| Chain verification | `workspace:ai:verify` and Check every receipt | Same |
+| `ahg_ai_settings` for OCR: `ocr_vision_model`, `ocr_vision_fallback_model` | `ai_settings.ocr_model`, `ocr_fallback_model` | Same |
+| QuotaService | `ai_settings.monthly_limit`, beside the gateway's own quota | Modelled |
+| VisionOcrService, Tesseract cross-check | `App\Ai\Ocr\VisionReader`, `App\Ai\Ocr\Tesseract` | Same |
+| HtrService | 17b | Not yet |
+

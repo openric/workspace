@@ -29,6 +29,11 @@
     @endif
     @if($canUpdate && $instantiation->file('master'))
         <form method="post" action="{{ route('instantiations.remake-copies', $instantiation) }}">@csrf<button type="submit" style="margin-top: 0">{{ __('Make the viewing copies again') }}</button></form>
+        {{-- Phase 17a: a vision model reads the page through the AI gateway; the text waits for review as a proposal. --}}
+        @if(\App\Jobs\ReadPageText::image($instantiation) && app(\App\Ai\Gateway::class)->available(auth()->user()->institution_id))
+            <form method="post" action="{{ route('instantiations.read-text', $instantiation) }}">@csrf<button type="submit" style="margin-top: 0">{{ __('Read the text with AI') }}</button>
+                <small>{{ __('A vision model reads the page through the AI gateway, checked against Tesseract. Its text is a proposal you review.') }}</small></form>
+        @endif
         <form method="post" action="{{ route('instantiations.replace-copy', $instantiation) }}" enctype="multipart/form-data">
             @csrf
             <label for="own-copy-use">{{ __('Give your own copy') }}</label>

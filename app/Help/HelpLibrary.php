@@ -24,7 +24,7 @@ class HelpLibrary
     /** The categories in the order the Help Center shows them; a guide of another category comes after. */
     public const CATEGORIES = ['Getting started', 'Describing', 'Digital objects and viewers', 'Accessions and storage', 'Search and discovery', 'Import and export',
         'Rights and access', 'Preservation', 'Records management and workflow', 'Research and the reading room', 'Federation and open data', 'Public site',
-        'Administration', 'Technical reference'];
+        'AI assistance', 'Administration', 'Technical reference'];
 
     public function directory(): string
     {

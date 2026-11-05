@@ -46,7 +46,7 @@ class ProposalReviewController extends Controller
             ->whereHas('status', fn ($q) => $q->where('iri', Vocab::ASSERTION_STATUSES.$status))
             ->when($kind, fn ($q) => $q->whereHas('kind', fn ($q) => $q->where('iri', Vocab::PROPOSAL_KINDS.$kind)))
             ->when($record, fn ($q) => $q->where('record_resource_id', $record))
-            ->with(['kind', 'status', 'element.labels', 'agentType', 'record', 'instantiation', 'proposedBy', 'reviewedBy'])
+            ->with(['kind', 'status', 'element.labels', 'agentType', 'record', 'instantiation', 'proposedBy', 'reviewedBy', 'inference'])
             ->orderByDesc('created_at')->limit(self::SHOWN)->get()
             ->filter(fn (Proposal $p) => $this->mayReview($user, $p->record))->values();
 

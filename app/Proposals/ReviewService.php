@@ -72,7 +72,7 @@ final class ReviewService
             };
             $proposal->update([
                 'status_id' => $this->concept(Vocab::ASSERTION_STATUSES.'accepted')->id, 'reviewed_by_id' => $reviewer->id, 'reviewed_at' => now(),
-                'review_note' => $this->note($edits),
+                'review_note' => $this->note($edits), 'accepted_value' => $value,
                 ...(in_array($kind, ['agent', 'place'], true) ? ['linked_table' => $written->getTable(), 'linked_id' => $written->getKey()] : []),
             ]);
 
