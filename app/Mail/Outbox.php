@@ -8,7 +8,8 @@
 // first, so an address that bounced or complained is not written to again, and a
 // mailer that fails is logged, never thrown, so it cannot undo what the message tells
 // of. A disabled account gets no mail. A research notice goes through the researcher's notices first (phase 19j),
-// which keep it in the Workspace and mail it now, later in a digest, or not, as the researcher prefers.
+// which keep it in the Workspace and mail it now, later in a digest, or not, as the researcher prefers. A staff member
+// who asked also has the notice on WhatsApp (Mail\WhatsApp).
 
 namespace App\Mail;
 
@@ -34,13 +35,15 @@ class Outbox
         }
         try {
             Mail::to($to)->queue($mail);
-
-            return true;
         } catch (Throwable $e) {
             Log::warning('mail could not be queued', ['mailable' => $mail::class, 'error' => $e->getMessage()]);
 
             return false;
         }
+        // And on WhatsApp, for staff who asked (5 November 2026); it never fails the mail.
+        rescue(fn () => app(WhatsApp::class)->notify($to, $mail), report: false);
+
+        return true;
     }
 
     /** Mail someone without an account (a repatriation claimant, phase 17d2), past the same suppression gate. */

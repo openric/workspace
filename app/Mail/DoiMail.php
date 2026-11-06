@@ -30,4 +30,9 @@ class DoiMail extends WorkspaceMail
     {
         return new Content(view: 'mail.doi');
     }
+
+    public function whatsappLink(): string
+    {
+        return route('records.show', $this->unit);
+    }
 }

@@ -392,6 +392,7 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::get('/account/access', [AccountController::class, 'profileAccess'])->name('account.access');
     Route::post('/account', [AccountController::class, 'updateProfile'])->name('account.update');
     Route::post('/account/contact', [AccountController::class, 'updateProfileContact'])->name('account.contact');
+    Route::post('/account/whatsapp', [AccountController::class, 'updateWhatsapp'])->name('account.whatsapp');
     // Heratio's /api/keys: an account's own API keys (ADR 0007).
     Route::get('/account/api-keys', [ApiKeyController::class, 'index'])->name('account.api-keys');
     Route::post('/account/api-keys', [ApiKeyController::class, 'store'])->name('account.api-keys.store');

@@ -17,7 +17,9 @@ namespace App\Http\Controllers;
 use App\Access\AccessControl;
 use App\Accounts\AccountException;
 use App\Accounts\AccountService;
+use App\Audit\AuditLog;
 use App\Description\ContactPointService;
+use App\Mail\WhatsApp;
 use App\Models\Agent;
 use App\Models\Concept;
 use App\Models\ContactPoint;
@@ -33,6 +35,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class AccountController extends Controller
@@ -120,6 +123,25 @@ class AccountController extends Controller
     public function updateProfileContact(Request $request): RedirectResponse
     {
         return $this->saveContact($request, $request->user(), true);
+    }
+
+    /** The account's own WhatsApp number and whether its notices go there too (5 November 2026; staff only). */
+    public function updateWhatsapp(Request $request): RedirectResponse
+    {
+        $account = $request->user();
+        abort_unless(WhatsApp::enabled() && WhatsApp::isStaff($account), 404);
+        $data = $request->validate(['whatsapp_number' => ['nullable', 'string', 'max:32']]);
+        $number = trim((string) ($data['whatsapp_number'] ?? ''));
+        $on = $request->boolean('whatsapp_notices');
+        if (($number !== '' || $on) && WhatsApp::e164($number) === null) {
+            throw ValidationException::withMessages(['whatsapp_number' => __('Give a mobile number, such as 082 123 4567 or +27 82 123 4567.')]);
+        }
+        if ($number !== '' && WhatsApp::e164($number) === WhatsApp::e164(config('workspace.whatsapp.sender'))) {
+            throw ValidationException::withMessages(['whatsapp_number' => __('That is the number the notices are sent from; give your own.')]);
+        }
+        AuditLog::actingAs($account, fn () => $account->update(['whatsapp_number' => $number === '' ? null : $number, 'whatsapp_notices' => $on]));
+
+        return redirect()->to(route('account.profile').'#whatsapp')->with('whatsapp', __('Saved.'));
     }
 
     private function editForm(User $account, bool $own): View

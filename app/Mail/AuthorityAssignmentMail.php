@@ -28,4 +28,9 @@ class AuthorityAssignmentMail extends WorkspaceMail
     {
         return new Content(view: 'mail.authority-assignment');
     }
+
+    public function whatsappLink(): string
+    {
+        return route('authority.review', $this->mention);
+    }
 }

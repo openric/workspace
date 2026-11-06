@@ -24,7 +24,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['institution_id', 'name', 'email', 'password', 'disabled_at', 'interface_language', 'email_bounced_at'])]
+#[Fillable(['institution_id', 'name', 'email', 'password', 'disabled_at', 'interface_language', 'email_bounced_at', 'whatsapp_number', 'whatsapp_notices'])]
 #[Hidden(['password', 'remember_token', 'two_factor_secret', 'two_factor_recovery_codes'])]
 class User extends Authenticatable implements HasLocalePreference
 {
@@ -36,6 +36,7 @@ class User extends Authenticatable implements HasLocalePreference
             'email_verified_at' => 'immutable_datetime',
             'disabled_at' => 'immutable_datetime',
             'email_bounced_at' => 'immutable_datetime',
+            'whatsapp_notices' => 'boolean',
             'password' => 'hashed',
             // Two-factor sign-in (phase 12b): the secret encrypted, the recovery codes as hashes.
             'two_factor_secret' => 'encrypted',

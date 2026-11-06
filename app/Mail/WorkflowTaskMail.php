@@ -34,4 +34,9 @@ class WorkflowTaskMail extends WorkspaceMail
     {
         return new Content(view: 'mail.workflow-task');
     }
+
+    public function whatsappLink(): string
+    {
+        return route('workflow.tasks.show', $this->task);
+    }
 }

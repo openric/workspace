@@ -29,6 +29,12 @@ abstract class WorkspaceMail extends Mailable implements ShouldQueue
         $this->afterCommit();
     }
 
+    /** Where a WhatsApp notice of this mail leads (Mail\WhatsApp): the Workspace, unless the mail names a page. */
+    public function whatsappLink(): string
+    {
+        return url('/');
+    }
+
     public function headers(): Headers
     {
         return new Headers(text: [EmailAuditListener::MAILABLE_HEADER => static::class]);

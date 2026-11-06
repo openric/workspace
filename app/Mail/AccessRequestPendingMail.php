@@ -37,4 +37,9 @@ class AccessRequestPendingMail extends WorkspaceMail
     {
         return new Content(view: 'mail.access-request.pending', with: ['file' => $this->request->target()]);
     }
+
+    public function whatsappLink(): string
+    {
+        return route('access-requests.show', $this->request);
+    }
 }

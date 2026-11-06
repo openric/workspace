@@ -41,6 +41,20 @@ return [
         'write' => [['create', 'description'], ['update', 'description'], ['create', 'authority'], ['update', 'authority']],
     ],
 
+    // Staff notices on WhatsApp, after CallHub: the Workspace holds no WhatsApp credential. It writes each message into
+    // the estate's spool and ahg-whatsapp-watcher (root, holding the token) sends it. Off until switched on. Meta lets a
+    // business open a conversation only with an approved template, so every notice is the one template, its parameters
+    // in the order Meta approved: the institution, the mail's subject, the link.
+    'whatsapp' => [
+        'enabled' => (bool) env('WHATSAPP_ENABLED', false),
+        'spool' => env('WHATSAPP_SPOOL', '/var/spool/ahg-whatsapp'),
+        // The number messages are sent from, in E.164 digits: never sent to, as a message to it reaches nobody.
+        'sender' => env('WHATSAPP_SENDER', '27648830533'),
+        'country_code' => env('WHATSAPP_COUNTRY_CODE', '27'),
+        'template' => env('WHATSAPP_TEMPLATE', 'ahg_system_notice'),
+        'language' => env('WHATSAPP_TEMPLATE_LANGUAGE', 'en'),
+    ],
+
     // Requests a key may make per hour unless it says otherwise (Heratio's default rate limit).
     'api_key_hourly_limit' => (int) env('WORKSPACE_API_KEY_HOURLY_LIMIT', 1000),
 

@@ -6812,5 +6812,11 @@
     "no answer": "geen antwoord nie",
     "peer inbound": "van 'n vennoot ontvang",
     "unverified": "ongeverifieer",
-    "verified": "geverifieer"
+    "verified": "geverifieer",
+    "WhatsApp": "WhatsApp",
+    "The notices the Workspace mails you can also come to WhatsApp, as a short message with a link. Mail still comes as before.": "Die kennisgewings wat die Workspace aan u e-pos, kan ook na WhatsApp kom, as 'n kort boodskap met 'n skakel. E-pos kom steeds soos voorheen.",
+    "Your WhatsApp number": "U WhatsApp-nommer",
+    "Send my notices to WhatsApp too": "Stuur my kennisgewings ook na WhatsApp",
+    "Give a mobile number, such as 082 123 4567 or +27 82 123 4567.": "Gee 'n selfoonnommer, soos 082 123 4567 of +27 82 123 4567.",
+    "That is the number the notices are sent from; give your own.": "Dit is die nommer waarvandaan die kennisgewings gestuur word; gee u eie."
 }

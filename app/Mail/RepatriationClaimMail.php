@@ -29,4 +29,9 @@ class RepatriationClaimMail extends WorkspaceMail
     {
         return new Content(view: 'mail.repatriation-claim');
     }
+
+    public function whatsappLink(): string
+    {
+        return route('repatriation.dialogue', $this->claim);
+    }
 }

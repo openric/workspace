@@ -32,4 +32,9 @@ class EmbargoMail extends WorkspaceMail
     {
         return new Content(view: 'mail.embargo');
     }
+
+    public function whatsappLink(): string
+    {
+        return route('records.show', $this->embargo->record);
+    }
 }

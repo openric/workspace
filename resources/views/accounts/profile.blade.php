@@ -22,4 +22,17 @@
     @else
         <p>{{ __('None given yet.') }}</p>
     @endif
+
+    {{-- Staff notices on WhatsApp (5 November 2026), where the installation has switched them on. --}}
+    @if(\App\Mail\WhatsApp::enabled() && \App\Mail\WhatsApp::isStaff($account))
+    <h2 id="whatsapp">{{ __('WhatsApp') }}</h2>
+    @if(session('whatsapp'))<p role="status">{{ session('whatsapp') }}</p>@endif
+    @error('whatsapp_number')<p class="error" role="alert">{{ $message }}</p>@enderror
+    <form method="post" action="{{ route('account.whatsapp') }}">@csrf
+        <p>{{ __('The notices the Workspace mails you can also come to WhatsApp, as a short message with a link. Mail still comes as before.') }}</p>
+        <p><label for="wa-number">{{ __('Your WhatsApp number') }}</label> <input id="wa-number" name="whatsapp_number" type="tel" maxlength="32" value="{{ old('whatsapp_number', $account->whatsapp_number) }}" placeholder="082 123 4567"></p>
+        <p><label><input type="checkbox" name="whatsapp_notices" value="1" @checked($account->whatsapp_notices)> {{ __('Send my notices to WhatsApp too') }}</label></p>
+        <button type="submit">{{ __('Save') }}</button>
+    </form>
+    @endif
 @endsection

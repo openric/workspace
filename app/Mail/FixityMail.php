@@ -27,4 +27,9 @@ class FixityMail extends WorkspaceMail
     {
         return new Content(view: 'mail.fixity');
     }
+
+    public function whatsappLink(): string
+    {
+        return route('fixity.failures');
+    }
 }
