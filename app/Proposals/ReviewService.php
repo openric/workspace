@@ -72,6 +72,7 @@ final class ReviewService
                 'date' => tap($record, fn () => app(DateService::class)->add($record, ['property' => 'associated', 'expressed' => $value, 'language' => $language,
                     'normalized' => $edits['normalized'] ?? null], $reviewer)),
                 'agent', 'place' => $this->accessPoint($proposal, $reviewer, $edits, $value, $language),
+                'subject' => $this->subject($proposal, $reviewer),
             };
             $proposal->update([
                 'status_id' => $this->concept(Vocab::ASSERTION_STATUSES.'accepted')->id, 'reviewed_by_id' => $reviewer->id, 'reviewed_at' => now(),
@@ -90,6 +91,28 @@ final class ReviewService
             'status_id' => $this->concept(Vocab::ASSERTION_STATUSES.'rejected')->id, 'reviewed_by_id' => $reviewer->id, 'reviewed_at' => now(),
             'review_note' => $this->note(['note' => $note]),
         ])));
+    }
+
+    /**
+     * The concept a subject proposal names (Annif, phase 17e), related to the record as its subject unless it is already;
+     * a model's proposal keeps the model's assertion, which the reviewer accepts, as for names (phase 17b2).
+     */
+    private function subject(Proposal $proposal, User $reviewer): Concept
+    {
+        $record = $proposal->record;
+        $concept = Concept::whereNull('deprecated_at')->where(fn ($q) => $q->whereNull('institution_id')->orWhere('institution_id', $record->institution_id))
+            ->find($proposal->linked_id) ?? throw new InvalidArgumentException(__('That subject no longer exists.'));
+        $exists = Relation::whereHas('relationType', fn ($q) => $q->where('iri', Vocab::BASE.'relation-type/subject'))
+            ->where(['source_table' => $record->getTable(), 'source_id' => $record->id, 'target_table' => 'concepts', 'target_id' => $concept->id])
+            ->with('assertions.status')->get()->contains(fn (Relation $r) => $r->standing() !== 'rejected');
+        if (! $exists && $proposal->inference_id) {
+            $relation = $this->relations->create($record, 'subject', $concept, [], null, ['origin' => 'model', 'label' => $proposal->inference->model, 'user' => $proposal->proposedBy]);
+            $this->relations->review($relation->assertions()->firstOrFail(), true, $reviewer);
+        } elseif (! $exists) {
+            $this->relations->create($record, 'subject', $concept, [], $reviewer);
+        }
+
+        return $concept;
     }
 
     /** The agent or place the proposal names, chosen or made, related to the record as an access point unless it is already. */

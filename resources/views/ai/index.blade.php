@@ -31,6 +31,14 @@
             <label for="ai-emb">{{ __('Embedding model') }}</label><input id="ai-emb" name="search[embedding_model]" maxlength="200" value="{{ $search->embedding_model }}" placeholder="{{ \App\Search\Meaning::DEFAULT_MODEL }}">
             <p class="meta">{{ __(':vectors of :entries entries of the search index are turned into vectors; the rest are every ten minutes, while search by meaning is on.', ['vectors' => $vectors, 'entries' => $entries]) }}</p>
         </fieldset>
+        {{-- Annif (phase 17e): subjects suggested from the institution's vocabulary, each waiting for review. --}}
+        <fieldset id="annif"><legend>{{ __('Subjects suggested by Annif') }}</legend>
+            <p class="meta">{{ __('Annif runs behind the AI gateway. Each subject it suggests for a record waits in the review queue; the subjects reviewers accept are taught back to it each night.') }}</p>
+            <p><label for="ai-annif-project">{{ __('Annif project') }}</label> <input id="ai-annif-project" name="annif_project" maxlength="100" value="{{ old('annif_project', $settings->annif_project) }}" placeholder="openric-institution-subjects">
+                <label for="ai-annif-vocabulary">{{ __('The vocabulary it suggests from') }}</label> <select id="ai-annif-vocabulary" name="annif_vocabulary_id"><option value="">{{ __('None') }}</option>@foreach($annifVocabularies as $v)<option value="{{ $v->id }}" @selected($settings->annif_vocabulary_id === $v->id)>{{ $v->title }}</option>@endforeach</select></p>
+            <p><label for="ai-annif-limit">{{ __('At most so many subjects a record') }}</label> <input id="ai-annif-limit" name="annif_limit" type="number" min="1" max="20" value="{{ $settings->annif_limit ?? 5 }}" style="width: 5rem">
+                <label for="ai-annif-threshold">{{ __('How sure it must be (0 to 0.99)') }}</label> <input id="ai-annif-threshold" name="annif_threshold" type="number" step="0.01" min="0" max="0.99" value="{{ $settings->annif_threshold ?? 0.2 }}" style="width: 5rem"></p>
+        </fieldset>
         <button type="submit">{{ __('Save') }}</button></form>
 
     <h2>{{ __('This month') }}</h2>
@@ -43,4 +51,11 @@
     <h2>{{ __('The chain') }}</h2>
     @if($chain)<p role="status">{{ $chain['intact'] ? __('The log of inferences is intact: :n receipts, each hash and signature checked.', ['n' => $chain['rows']]) : __('The log of inferences is broken: :problem.', ['problem' => $chain['problem']]) }}</p>@endif
     <form method="post" action="{{ route('ai.verify') }}">@csrf<button type="submit">{{ __('Check every receipt') }}</button></form>
+    <h2>{{ __('Annif trials') }}</h2>
+    <p>{{ __('Before its suggestions are relied on, try the project on published records that already have subjects of the vocabulary: precision is how many of its first five were subjects the record has, recall how many of the subjects it has it found.') }}</p>
+    @if($settings->annif_project && $settings->annif_vocabulary_id)<form method="post" action="{{ route('ai.annif-trial') }}">@csrf<button type="submit">{{ __('Try Annif now') }}</button></form>@endif
+    @if($annifTrials->isEmpty())<p>{{ __('None yet.') }}</p>@else
+    <table><thead><tr><th scope="col">{{ __('When') }}</th><th scope="col">{{ __('Project') }}</th><th scope="col">{{ __('Records') }}</th><th scope="col">{{ __('Precision') }}</th><th scope="col">{{ __('Recall') }}</th></tr></thead>
+        <tbody>@foreach($annifTrials as $t)<tr><td>{{ \Illuminate\Support\Carbon::parse($t->run_at)->format('Y-m-d H:i') }}</td><td>{{ $t->project }}</td><td>{{ $t->records }}</td><td>{{ number_format($t->precision, 2) }}</td><td>{{ number_format($t->recall, 2) }}</td></tr>@endforeach</tbody></table>
+    @endif
 @endsection

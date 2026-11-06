@@ -15,7 +15,7 @@ v: a skos:ConceptScheme ;
     dcterms:title "OpenRiC Workspace Proposal Kinds"@en ;
     dcterms:description "What a proposal asks to add to a record, for an archivist to review."@en ;
     dcterms:issued "2026-10-26"^^xsd:date ;
-    skos:hasTopConcept v:agent, v:place, v:date, v:value, v:transcript .
+    skos:hasTopConcept v:agent, v:place, v:date, v:value, v:transcript, v:subject .
 
 v:agent a skos:Concept ;
     skos:inScheme v: ;
@@ -51,3 +51,10 @@ v:transcript a skos:Concept ;
     skos:prefLabel "Transcript"@en ;
     skos:scopeNote "Heratio and PSIS transcript proposals."@en ;
     skos:definition "The text of a file of the record, read from it."@en .
+
+v:subject a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Subject"@en, "Onderwerp"@af ;
+    skos:scopeNote "A concept of the institution's vocabularies proposed as a subject access point, as Annif suggests it (roadmap phase 17e); accepted, it is exported as rico:hasOrHadSubject."@en ;
+    skos:definition "A subject the record is about, a concept of one of the institution's vocabularies."@en .

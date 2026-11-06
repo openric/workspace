@@ -60,6 +60,10 @@
                         @if($k === 'date')
                             <label>{{ __('Normalised (EDTF, optional)') }} <input name="normalized" placeholder="{{ __('such as 1901-05-03') }}" size="16"></label>
                         @endif
+                        {{-- A subject Annif suggested (phase 17e): the concept it is, from the institution's vocabulary. --}}
+                        @if($k === 'subject' && ($subjectConcept = \App\Models\Concept::with('vocabulary')->find($p->linked_id)))
+                            <p>{{ __('The subject') }}: <a href="{{ route('concepts.show', $subjectConcept) }}">{{ $subjectConcept->anyLabel(\App\Support\Vocab::languages()) }}</a> <small>({{ $subjectConcept->vocabulary->title }})</small></p>
+                        @endif
                         @if(in_array($k, ['agent', 'place'], true))
                             <fieldset>
                                 <legend>{{ __('Link it to') }}</legend>

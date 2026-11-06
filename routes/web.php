@@ -484,7 +484,7 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::post('/instantiations/{instantiation}/copies', [WatermarkController::class, 'remake'])->name('instantiations.remake-copies');
     Route::post('/instantiations/{instantiation}/read-text', [AiController::class, 'readText'])->name('instantiations.read-text');
     Route::post('/instantiations/{instantiation}/assess-condition', [AiController::class, 'condition'])->name('instantiations.assess-condition');
-    Route::post('/records/{record}/ask/{task}', [AiController::class, 'ask'])->name('records.ask')->where('task', 'names|summary');
+    Route::post('/records/{record}/ask/{task}', [AiController::class, 'ask'])->name('records.ask')->where('task', 'names|summary|subjects');
     Route::post('/instantiations/{instantiation}/own-copy', [InstantiationController::class, 'replaceCopy'])->name('instantiations.replace-copy');
     Route::get('/files/{file}', [InstantiationController::class, 'file'])->name('files.show');
     // WebVTT caption tracks of a sound or video instantiation (roadmap phase 22c).
@@ -771,6 +771,7 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::prefix('admin/ai')->name('ai.')->whereUuid('inference')->group(function () {
             Route::get('/', [AiController::class, 'index'])->name('index');
             Route::post('/', [AiController::class, 'save'])->name('save');
+            Route::post('/annif-trial', [AiController::class, 'annifTrial'])->name('annif-trial');
             Route::post('/verify', [AiController::class, 'verify'])->name('verify');
             Route::get('/inferences', [AiController::class, 'inferences'])->name('inferences');
             Route::get('/inferences/{inference}', [AiController::class, 'inference'])->name('inference');

@@ -328,3 +328,18 @@ Languages are BCP 47 primary subtags and are named as the interface names them. 
 - the federated search.
 
 **Test database.** The test case now drops the old tables in batches of fifty before `migrate:fresh`. Its single drop of every table outgrew the lock table that all databases on the server share.
+
+## 17e: subjects suggested by Annif
+
+Annif (NatLibFi/Annif, Apache 2.0) was chosen by Dr Johan Pieterse on 3 November 2026 as the subject engine. It runs behind the gateway only (`/ai/v1/annif/...`, gateway issue ahg-ai#4). The Workspace sends JSON (`text`, `limit` and `threshold` to suggest; `documents`, each with its text and subjects, to learn), and the gateway's route turns these into Annif's own form and document calls.
+
+- **Settings.** The institution names its project and the descriptive vocabulary the project suggests from, with a limit and a threshold (`ai_settings`).
+- **Suggestions are proposals.** Each suggestion whose IRI is a concept of that vocabulary becomes a proposal of the new kind `subject`, linked to the concept, with Annif's score and the inference (ADR 0007). One the record already has, or a reviewer rejected, is left out.
+- **Acceptance.** Accepted, the proposal becomes a `subject` relation from the record to the concept, with the model's assertion reviewed, as names are (17b2).
+- **Learning.** `workspace:annif:learn` sends the accepted subjects each night, since the last time.
+- **Trials.** `annif_trials` keeps each trial on up to 50 published records that have subjects of the vocabulary: precision at five, and recall. Johan asked for a precision trial before Annif is relied on.
+
+**Tests.** `tests/Feature/AnnifTest.php`:
+
+- configuration, suggestion, the filtering, acceptance as a model's subject, and teaching once;
+- the trial.

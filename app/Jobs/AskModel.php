@@ -3,13 +3,14 @@
 // OpenRiC Workspace - asking a model, in the background, to find names in a unit, summarise its pages or assess the
 // condition of an object from its picture (roadmap phase 17b1), or translate it (phase 17c). What it answers waits for review as proposals.
 // From phase 17d4, discover around a record, refresh the institution's discoveries, or promote them to research leads: what it
-// draws waits for a curator.
+// draws waits for a curator. From phase 17e, suggest a record's subjects with Annif, each waiting for review.
 // Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 namespace App\Jobs;
 
 use App\Ai\AiUnavailable;
+use App\Ai\Annif;
 use App\Ai\Assist;
 use App\Ai\Translate;
 use App\Models\BackgroundJob;
@@ -22,7 +23,7 @@ use InvalidArgumentException;
 
 class AskModel extends TrackedJob
 {
-    public const TASKS = ['names', 'summary', 'condition', 'translate', 'discover', 'discoveries', 'leads'];
+    public const TASKS = ['names', 'summary', 'condition', 'translate', 'discover', 'discoveries', 'leads', 'subjects'];
 
     /** @param  array{source?: string, target?: string, elements?: list<string>}  $options  for translate (phase 17c) */
     public function __construct(string $jobId, public string $task, public string $subjectId, public array $options = [])
@@ -40,6 +41,7 @@ class AskModel extends TrackedJob
                 'condition' => ['proposed' => $assist->condition(Instantiation::findOrFail($this->subjectId), $job->user) ? 1 : 0],
                 'translate' => ['proposed' => app(Translate::class)->record(RecordResource::findOrFail($this->subjectId), $job->user,
                     (string) $this->options['source'], (string) $this->options['target'], (array) ($this->options['elements'] ?? []))],
+                'subjects' => ['proposed' => app(Annif::class)->propose(RecordResource::findOrFail($this->subjectId), $job->user)],
                 'discover' => ['proposed' => app(Scholarship::class)->persist(RecordResource::findOrFail($this->subjectId), $job->user) ? 1 : 0],
                 'discoveries' => app(Scholarship::class)->generate(Institution::findOrFail($this->subjectId), (int) ($this->options['limit'] ?? 25), $job->user),
                 'leads' => app(ResearchLeads::class)->generate(Institution::findOrFail($this->subjectId), (int) ($this->options['limit'] ?? 25), (bool) ($this->options['enrich'] ?? false), $job->user),

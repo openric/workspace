@@ -10,6 +10,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Ai\AiUnavailable;
+use App\Ai\Annif;
 use App\Ai\Gateway;
 use App\Ai\Inferences;
 use App\Ai\Translate;
@@ -21,6 +23,7 @@ use App\Models\AiInference;
 use App\Models\Concept;
 use App\Models\Instantiation;
 use App\Models\RecordResource;
+use App\Models\Vocabulary;
 use App\Search\Meaning;
 use App\Support\Vocab;
 use Illuminate\Http\RedirectResponse;
@@ -28,6 +31,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use InvalidArgumentException;
 
 class AiController extends Controller
 {
@@ -43,7 +47,24 @@ class AiController extends Controller
                 ->join('concepts as c', 'c.id', '=', 'ai_inferences.service_id')->selectRaw('c.notation, count(*) as n, sum(case when succeeded then 0 else 1 end) as failed')
                 ->groupBy('c.notation')->get(), 'chain' => session('chain'), 'search' => app(Meaning::class)->settings($institution),
             'entries' => DB::table('search_entries')->where('institution_id', $institution)->count(),
-            'vectors' => DB::table('search_vectors')->where('institution_id', $institution)->count()]);
+            'vectors' => DB::table('search_vectors')->where('institution_id', $institution)->count(),
+            // Annif (phase 17e): the descriptive vocabularies it may suggest from, and its trials.
+            'annifVocabularies' => Vocabulary::whereNotNull('kind_id')->where(fn ($q) => $q->whereNull('institution_id')->orWhere('institution_id', $institution))->orderBy('title')->get(),
+            'annifTrials' => DB::table('annif_trials')->where('institution_id', $institution)->orderByDesc('run_at')->limit(10)->get()]);
+    }
+
+    /** Try the institution's Annif project on the subjects its published records already have (phase 17e). */
+    public function annifTrial(Request $request): RedirectResponse
+    {
+        $institution = $request->user()->institution;
+        try {
+            $r = app(Annif::class)->trial($institution, $request->user());
+        } catch (AiUnavailable|InvalidArgumentException $e) {
+            return back()->withErrors(['ai' => $e->getMessage()]);
+        }
+
+        return back()->with('status', __('Annif tried on :records records: precision :precision, recall :recall.', ['records' => $r['records'],
+            'precision' => number_format($r['precision'], 2), 'recall' => number_format($r['recall'], 2)]));
     }
 
     public function save(Request $request): RedirectResponse
@@ -64,6 +85,14 @@ class AiController extends Controller
             'expand_synonyms' => $request->boolean('search.expand_synonyms'), 'expand_with_model' => $request->boolean('search.expand_with_model'),
             'rerank_history' => $request->boolean('search.rerank_history'), 'expansion_limit' => $search['search']['expansion_limit'] ?? 5,
             'embedding_model' => $search['search']['embedding_model'] ?? null, 'min_similarity' => $search['search']['min_similarity'] ?? 0.40]);
+
+        // Annif (phase 17e).
+        $annif = $request->validate(['annif_project' => ['nullable', 'string', 'max:100', 'regex:/^[A-Za-z0-9._-]+$/'], 'annif_vocabulary_id' => ['nullable', 'uuid'],
+            'annif_limit' => ['nullable', 'integer', 'between:1,20'], 'annif_threshold' => ['nullable', 'numeric', 'between:0,0.99']]);
+        $vocabulary = ($annif['annif_vocabulary_id'] ?? null) ? Vocabulary::whereNotNull('kind_id')->where(fn ($q) => $q->whereNull('institution_id')->orWhere('institution_id', $request->user()->institution_id))
+            ->find($annif['annif_vocabulary_id'])?->id : null;
+        AuditLog::actingAs($request->user(), fn () => $settings->update(['annif_project' => $annif['annif_project'] ?? null, 'annif_vocabulary_id' => $vocabulary,
+            'annif_limit' => $annif['annif_limit'] ?? 5, 'annif_threshold' => $annif['annif_threshold'] ?? 0.20]));
 
         return back()->with('status', __('Saved.'));
     }
@@ -98,11 +127,17 @@ class AiController extends Controller
     public function ask(Request $request, RecordResource $record, string $task): RedirectResponse
     {
         $user = $request->user();
-        abort_unless($record->institution_id === $user->institution_id && $record->deleted_at === null && in_array($task, ['names', 'summary'], true), 404);
+        abort_unless($record->institution_id === $user->institution_id && $record->deleted_at === null && in_array($task, ['names', 'summary', 'subjects'], true), 404);
         abort_unless($user->may('update', 'description', $record), 403);
+        if ($task === 'subjects' && ! app(Annif::class)->configured($record->institution_id)) {
+            return back()->withErrors(['ai' => __('Choose the Annif project and the vocabulary it suggests from under Admin, AI.')]);
+        }
 
-        return $this->queue($request, $task, $record, $task === 'names' ? __('Finding names in :title', ['title' => $record->described('title', ['en'])])
-            : __('Summarising the pages of :title', ['title' => $record->described('title', ['en'])]));
+        return $this->queue($request, $task, $record, match ($task) {
+            'names' => __('Finding names in :title', ['title' => $record->described('title', ['en'])]),
+            'summary' => __('Summarising the pages of :title', ['title' => $record->described('title', ['en'])]),
+            'subjects' => __('Suggesting the subjects of :title', ['title' => $record->described('title', ['en'])]),
+        });
     }
 
     /** Ask a vision model to assess the condition of the object an instantiation pictures (phase 17b1). */

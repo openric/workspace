@@ -2,6 +2,7 @@
 
 use App\AccessRequests\AccessRequestService;
 use App\Ai\AiUnavailable;
+use App\Ai\Annif;
 use App\Authority\Candidates;
 use App\Authority\Mentions;
 use App\Authority\NerFeedback;
@@ -429,3 +430,22 @@ Artisan::command('workspace:scholarship:federated {--institution=} {--limit=10}'
         });
     $this->info("$done records searched across the federation.");
 })->purpose('Refresh what federation peers hold that shares the access points of the records with the strongest discoveries (Heratio\'s refresh-federated-discoveries)');
+
+// Annif (roadmap phase 17e): the subjects reviewers accepted taught back to each institution's project, each night;
+// and a trial against the subjects published records already have.
+Artisan::command('workspace:annif:learn {--institution=}', function () {
+    Institution::when($this->option('institution'), fn ($q, $id) => $q->whereKey($id))->get()->filter(fn ($i) => app(Annif::class)->configured($i->id))->each(function ($institution) {
+        try {
+            $this->info("{$institution->name}: ".app(Annif::class)->learn($institution).' records taught.');
+        } catch (AiUnavailable $e) {
+            $this->warn("{$institution->name}: ".$e->getMessage());
+        }
+    });
+})->purpose('Teach each institution\'s Annif project the subjects reviewers accepted since it was last taught');
+Schedule::command('workspace:annif:learn')->dailyAt('02:30')->withoutOverlapping(60)->when(fn () => DB::table('ai_settings')->whereNotNull('annif_project')->exists());
+Artisan::command('workspace:annif:trial {--institution=}', function () {
+    Institution::when($this->option('institution'), fn ($q, $id) => $q->whereKey($id))->get()->filter(fn ($i) => app(Annif::class)->configured($i->id))->each(function ($institution) {
+        $r = app(Annif::class)->trial($institution);
+        $this->info(sprintf('%s: %d records, precision %.2f, recall %.2f.', $institution->name, $r['records'], $r['precision'], $r['recall']));
+    });
+})->purpose('Try each institution\'s Annif project on the subjects its published records already have, and keep the result');

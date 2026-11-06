@@ -12,13 +12,14 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 
-#[Fillable(['institution_id', 'enabled', 'monthly_limit', 'ocr_model', 'ocr_fallback_model', 'chat_model', 'translation_target', 'translation_elements', 'updated_by_id'])]
+#[Fillable(['institution_id', 'enabled', 'monthly_limit', 'ocr_model', 'ocr_fallback_model', 'chat_model', 'translation_target', 'translation_elements',
+    'annif_project', 'annif_vocabulary_id', 'annif_limit', 'annif_threshold', 'annif_learned_at', 'updated_by_id'])]
 class AiSetting extends Model
 {
     use Audited, HasUuids;
 
     protected function casts(): array
     {
-        return ['enabled' => 'boolean', 'monthly_limit' => 'integer', 'translation_elements' => 'array'];
+        return ['enabled' => 'boolean', 'monthly_limit' => 'integer', 'translation_elements' => 'array', 'annif_limit' => 'integer', 'annif_threshold' => 'float', 'annif_learned_at' => 'immutable_datetime'];
     }
 }

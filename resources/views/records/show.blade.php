@@ -58,6 +58,7 @@
             <form method="post" action="{{ route('records.ask', [$record, 'names']) }}" style="display: inline">@csrf<button type="submit" style="margin-top: 0">{{ __('Find names with AI') }}</button></form>
             <form method="post" action="{{ route('records.ask', [$record, 'summary']) }}" style="display: inline">@csrf<button type="submit" style="margin-top: 0">{{ __('Summarise its pages with AI') }}</button></form>
             <a href="{{ route('records.translate', $record) }}">{{ __('Translate with AI') }}</a>
+            @if(app(\App\Ai\Annif::class)->configured($record->institution_id))<form method="post" action="{{ route('records.ask', [$record, 'subjects']) }}" style="display: inline">@csrf<button type="submit" style="margin-top: 0">{{ __('Suggest subjects with Annif') }}</button></form>@endif
             <small>{{ __('People, organisations, places and dates found in its description and the transcripts of its pages, or a summary of those transcripts, proposed for you to review.') }}</small></div>
     @endif
     @if($record->resourceTypes->isNotEmpty())<p><strong>{{ __('Types') }}:</strong> {{ $record->resourceTypes->map(fn ($t) => $t->type->label(\App\Support\Vocab::languages()))->join(', ') }}</p>@endif
