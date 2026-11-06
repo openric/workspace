@@ -79,6 +79,7 @@ use App\Http\Controllers\ProposalReviewController;
 use App\Http\Controllers\ProvenanceController;
 use App\Http\Controllers\PublicationController;
 use App\Http\Controllers\PublicHeritageController;
+use App\Http\Controllers\PublicLanguageController;
 use App\Http\Controllers\PublicRepatriationController;
 use App\Http\Controllers\PublishingController;
 use App\Http\Controllers\ReadingRoomController;
@@ -104,6 +105,7 @@ use App\Http\Controllers\RightsAdminController;
 use App\Http\Controllers\RightsController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\RuleController;
+use App\Http\Controllers\ScholarshipController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\SettingsController;
@@ -284,6 +286,15 @@ Route::middleware(ServeDiscovery::class)->prefix('discover')->name('discover.')-
     Route::get('/repatriation/{id}', [PublicRepatriationController::class, 'show'])->whereUuid('id')->name('repatriation.show');
     Route::post('/repatriation/{id}/knowledge', [PublicRepatriationController::class, 'contribute'])->whereUuid('id')->middleware('throttle:5,1')->name('repatriation.contribute');
     Route::get('/records/{id}/repatriation-claim', [PublicRepatriationController::class, 'lodge'])->name('repatriation.lodge');
+    // The languages of the collection, transcribing a record, and research leads (roadmap phase 17d4).
+    Route::get('/languages', [PublicLanguageController::class, 'index'])->name('languages');
+    Route::get('/languages/{code}', [PublicLanguageController::class, 'show'])->where('code', '[a-z]{2,3}')->name('languages.show');
+    Route::post('/languages/{code}/glossary', [PublicLanguageController::class, 'contributeGlossary'])->where('code', '[a-z]{2,3}')->middleware('throttle:5,1')->name('languages.glossary');
+    Route::post('/languages/{code}/translate', [PublicLanguageController::class, 'translate'])->where('code', '[a-z]{2,3}')->middleware('throttle:10,1')->name('languages.translate');
+    Route::get('/records/{id}/transcribe', [PublicLanguageController::class, 'transcribe'])->name('transcribe');
+    Route::post('/records/{id}/transcribe', [PublicLanguageController::class, 'contribute'])->middleware('throttle:5,1')->name('transcribe.store');
+    Route::get('/research-leads', [PublicLanguageController::class, 'leads'])->name('research-leads');
+    Route::get('/research-leads/{id}', [PublicLanguageController::class, 'lead'])->whereUuid('id')->name('research-leads.show');
     // Heritage at risk and displaced heritage (roadmap phase 17d3), where the institution shows them.
     Route::get('/at-risk', [PublicHeritageController::class, 'atRisk'])->name('at-risk');
     Route::get('/at-risk/data.json', [PublicHeritageController::class, 'json'])->name('at-risk.json');
@@ -1255,6 +1266,20 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::post('/{feedback}', [FeedbackController::class, 'update'])->name('update');
         Route::post('/{feedback}/delete', [FeedbackController::class, 'destroy'])->name('destroy');
     });
+    // Generative scholarship, research leads and the review of language contributions (roadmap phase 17d4).
+    Route::prefix('scholarship')->name('scholarship.')->whereUuid(['record', 'lead'])->group(function () {
+        Route::get('/', [ScholarshipController::class, 'index'])->name('index');
+        Route::post('/generate', [ScholarshipController::class, 'generate'])->name('generate');
+        Route::get('/records/{record}', [ScholarshipController::class, 'show'])->name('show');
+        Route::post('/records/{record}/discover', [ScholarshipController::class, 'discover'])->name('discover');
+        Route::post('/records/{record}/federated', [ScholarshipController::class, 'federated'])->name('federated');
+        Route::get('/leads', [ScholarshipController::class, 'leads'])->name('leads');
+        Route::post('/leads/generate', [ScholarshipController::class, 'generateLeads'])->name('leads.generate');
+        Route::post('/leads/{lead}/{status}', [ScholarshipController::class, 'curate'])->whereIn('status', ['published', 'dismissed', 'pending'])->name('leads.curate');
+    });
+    Route::get('/languages/review', [ScholarshipController::class, 'languageQueue'])->name('languages.review');
+    Route::post('/languages/review/contributions/{contribution}', [ScholarshipController::class, 'moderateContribution'])->whereUuid('contribution')->name('languages.moderate.contribution');
+    Route::post('/languages/review/glossary/{entry}', [ScholarshipController::class, 'moderateEntry'])->whereUuid('entry')->name('languages.moderate.glossary');
     // Heritage at risk and the displaced-heritage register (roadmap phase 17d3).
     Route::prefix('heritage')->name('heritage.')->whereUuid(['item', 'flag'])->group(function () {
         Route::get('/at-risk', [HeritageController::class, 'atRisk'])->name('at-risk');

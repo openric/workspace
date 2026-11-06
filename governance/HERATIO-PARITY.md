@@ -115,7 +115,7 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-scan` | 7065 | later: V1.0+ | Partial | 22a | `ahgScanPlugin` | Watched folders, Heratio's sidecars, BagIt intake and the scan API, from v0.0.106 (ADR 0020); not its sector routing, rights enforcement or web archiving |
 | `ahg-search` | 7659 | V0.1 candidate | Partial | 17 | `ahgSearchPlugin` | Full-text search with facets, staff search and statistics (v0.0.60, v0.0.61, ADR 0009); search by meaning from v0.0.131 (17d1) |
 | `ahg-security-clearance` | 9206 | later: jurisdiction | Covered | 18c, 12b | `ahgSecurityClearancePlugin` | Levels, compartments, clearances, classified records with inheritance and declassification, requests for access, all in the one read check, from v0.0.101 (ADR 0016); TOTP two-factor sign-in and its policy from v0.0.111 (ADR 0021); WebAuthn and codes by email not carried |
-| `ahg-semantic-search` | 29749 | out: AI (V2+) | Partial | 17d1 to 17d4 | none | Search by meaning on pgvector with gateway embeddings, widening by SKOS labels and a model, reranking, related records, /ground and the ways into the collection, from v0.0.131 (ADR 0025); repatriation claims, dialogue, shared records, community knowledge and virtual return from v0.0.132 (17d2); heritage at risk, its network and the displaced-heritage register from v0.0.133 (17d3); displaced and endangered heritage 17d3, language corpus, scholarship and research leads 17d4 |
+| `ahg-semantic-search` | 29749 | out: AI (V2+) | Done | 17d1 to 17d4 | none | Search by meaning on pgvector with gateway embeddings, widening by SKOS labels and a model, reranking, related records, /ground and the ways into the collection, from v0.0.131 (ADR 0025); repatriation claims, dialogue, shared records, community knowledge and virtual return from v0.0.132 (17d2); heritage at risk, its network and the displaced-heritage register from v0.0.133 (17d3); the languages of the collection, discoveries and research leads from v0.0.135 (17d4); displaced and endangered heritage 17d3, language corpus, scholarship and research leads 17d4 |
 | `ahg-settings` | 16789 | V0.1 candidate | Covered |  | `ahgSettingsPlugin` | Institution settings, written fresh |
 | `ahg-share-link` | 2659 | later: V1.0+ | Covered | 19a | `ahgTimeLimitedShareLinkPlugin` | Share links that never open more than their issuer may read, with their log and prune (ADR 0017); clearance with 18c |
 | `ahg-sharepoint` | 6045 | later: V1.0+ | Planned | 22, pilot | `ahgSharePointPlugin` | When a pilot with a Microsoft tenant needs it (choice 2B, ADR 0020) |
@@ -1562,7 +1562,7 @@ Added on 5 November 2026 with 17d1.
 | `ahg_semantic_search_settings`, the config page | `search_settings`, on the AI page | Same |
 | `ahg_semantic_search_log`, the search and sync logs | The search statistics (phase 6) and the log of inferences | Modelled |
 | The saved search templates | The saved searches of phase 19c | Modelled |
-| DiscoveriesController (scholarship discoveries) | 17d4, with scholarship | Not yet |
+| DiscoveriesController (scholarship discoveries) | Discoveries for staff, published research leads for the public, from v0.0.135 | Modelled |
 | KmExportGraphCommand, GraphKmBridgeService | Not carried: KM reads the Workspace through its public API and /ground | Not carried |
 
 ### Repatriation (`ahg-semantic-search`, part two)
@@ -1609,4 +1609,23 @@ Added on 5 November 2026 with 17d3.
 | FederatedEndangeredService::globalRegister, `/at-risk/global` | `Heritage\EndangeredNetwork::board`, `/discover/at-risk/network` | Same |
 | The `endangered` surface of FederationGovernance | The peer's allowed surfaces | Same |
 | The lost-place reconstruction and exhibition-space links | Phase 21, with the exhibitions | Not yet |
+
+### Languages, discoveries and research leads (`ahg-semantic-search`, part four)
+
+Added on 6 November 2026 with 17d4.
+
+| Heratio field | Workspace | Status |
+|---|---|---|
+| LanguageCorpusService::languages, describedRecords, terms, transcriptions (AtoM i18n by culture) | `Language\Corpus`, the Workspace's language-tagged names, labels and page transcripts, published only | Modelled, from v0.0.135 |
+| `language_revival_glossary` (culture, term, meaning, usage_example, source, contributor_name, moderation_status) | `language_glossary`, the community-contribution-status vocabulary | Same |
+| `language_transcription_contribution` (item, culture, type, body, source, contributor_name, credit_consent, moderation_status) | `language_contributions`, the language-contribution-type vocabulary | Same |
+| translateSnippet (LlmService) | `Corpus::translate`, the gateway's translate route, labelled | Same |
+| The language and transcription moderation screens | Language contributions to review | Same |
+| ScholarshipService::discover (crossCollectionNeighbours, second hop, prompt, insights) | `Scholarship\Scholarship::discover`, the public relationship graph, two steps | Modelled |
+| `ahg_scholarship_discovery`, ahg:generate-discoveries, the confidence score | `scholarship_discoveries`, `workspace:scholarship:generate`, the same score | Same |
+| The public Discoveries page | Discoveries for staff; published research leads for the public | Modelled |
+| discoverFederated, `ahg_scholarship_federated_discovery`, ahg:refresh-federated-discoveries | `Scholarship::federated`, `scholarship_federated_discoveries`, `workspace:scholarship:federated` | Same |
+| `research_lead` (headline, lead_text, why_it_matters, connection_count, confidence, evidence, status, ai_labelled, curated_by, published_at) | `research_leads`, the research-lead-status vocabulary, with the receipt | Same |
+| ResearchLeadService::generate, aiWhyItMatters, publicFeed, publish, dismiss, repend | `Scholarship\ResearchLeads`, Research leads | Same |
+| ahg:scholarship-discover, ahg:generate-research-leads | `workspace:scholarship:discover`, `workspace:scholarship:leads` | Same |
 

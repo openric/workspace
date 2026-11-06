@@ -31,6 +31,8 @@ use App\Models\AuthorityMention;
 use App\Models\DigitalFile;
 use App\Models\Institution;
 use App\Models\Proposal;
+use App\Models\RecordResource;
+use App\Models\ScholarshipDiscovery;
 use App\Preservation\Archivematica\Transfers;
 use App\Preservation\Conversions;
 use App\Preservation\FormatIdentification;
@@ -47,6 +49,8 @@ use App\Research\SavedSearches;
 use App\Research\ShareLinks;
 use App\Rights\Clearances;
 use App\Rights\Embargoes;
+use App\Scholarship\ResearchLeads;
+use App\Scholarship\Scholarship;
 use App\Search\Meaning;
 use App\Support\Vocab;
 use App\Versions\Versions;
@@ -393,3 +397,35 @@ Artisan::command('workspace:heritage:displaced {--institution=} {--limit=20}', f
             $r['holding_region'].' ('.$r['holding']['value'].')'], $report['records']));
     });
 })->purpose('Print the displaced-heritage register: descriptions whose recorded origin and holding resolve to different regions, for review (Heratio\'s displaced-heritage scan)');
+
+// Generative scholarship (roadmap phase 17d4), as Heratio's ahg:scholarship-discover, ahg:generate-discoveries,
+// ahg:generate-research-leads and ahg:refresh-federated-discoveries run it: explicit, never on a page load.
+Artisan::command('workspace:scholarship:discover {record}', function () {
+    $record = RecordResource::findOrFail($this->argument('record'));
+    $d = app(Scholarship::class)->discover($record);
+    $this->info("{$d['title']}: {$d['total']} connections, {$d['second_hop_count']} reached through them".($d['ai_available'] ? '' : '; no model answered'));
+    foreach ($d['insights'] as $insight) {
+        $this->line('- '.$insight);
+    }
+})->purpose('Show the connections around one record and what a model draws from them (Heratio\'s scholarship discover)');
+Artisan::command('workspace:scholarship:generate {--institution=} {--limit=25}', function () {
+    Institution::when($this->option('institution'), fn ($q, $id) => $q->whereKey($id))->get()->each(function ($institution) {
+        $r = app(Scholarship::class)->generate($institution, (int) $this->option('limit'));
+        $this->info("{$institution->name}: {$r['examined']} examined, {$r['stored']} stored ({$r['with_lead']} with a lead), {$r['skipped']} skipped; the gateway ".($r['ai_reached'] ? 'answered' : 'did not answer').'.');
+    });
+})->purpose('Refresh the discoveries of the most connected published records (Heratio\'s generate-discoveries)');
+Artisan::command('workspace:scholarship:leads {--institution=} {--limit=25} {--enrich}', function () {
+    Institution::when($this->option('institution'), fn ($q, $id) => $q->whereKey($id))->get()->each(function ($institution) {
+        $r = app(ResearchLeads::class)->generate($institution, (int) $this->option('limit'), (bool) $this->option('enrich'));
+        $this->info("{$institution->name}: {$r['promoted']} promoted, {$r['refreshed']} refreshed, {$r['enriched']} written by a model.");
+    });
+})->purpose('Promote the strongest discoveries into research leads for curators (Heratio\'s generate-research-leads)');
+Artisan::command('workspace:scholarship:federated {--institution=} {--limit=10}', function () {
+    $done = 0;
+    ScholarshipDiscovery::when($this->option('institution'), fn ($q, $id) => $q->where('institution_id', $id))->orderByDesc('confidence')->limit((int) $this->option('limit'))
+        ->with('record')->get()->each(function ($d) use (&$done) {
+            app(Scholarship::class)->federated($d->record, true);
+            $done++;
+        });
+    $this->info("$done records searched across the federation.");
+})->purpose('Refresh what federation peers hold that shares the access points of the records with the strongest discoveries (Heratio\'s refresh-federated-discoveries)');

@@ -88,6 +88,7 @@
     @if(auth()->user()->hasPermission(\App\Support\Vocab::permission('manage-privacy')))@include('records._privacy', ['record' => $record])@endif
     @if(app(\App\Research\ShareLinks::class)->mayIssue(auth()->user(), $record))@include('records._share-links', ['record' => $record])@endif
     @if($canUpdate)@include('records._at-risk', ['record' => $record])@endif
+    @if(auth()->user()->may('publish', 'description', $record))@include('records._scholarship', ['record' => $record])@endif
     @if(auth()->user()->hasPermission(\App\Support\Vocab::permission('manage-repatriation')))@include('records._repatriation', ['record' => $record])@endif
     @include('records._doi', ['record' => $record])
     @include('search._related', ['unit' => $record, 'public' => false, 'route' => 'records.show'])

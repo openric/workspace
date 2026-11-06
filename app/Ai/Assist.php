@@ -179,7 +179,7 @@ TXT;
     }
 
     /** A reasoning model's thinking, which is not its answer. */
-    private static function withoutThinking(string $text): string
+    public static function withoutThinking(string $text): string
     {
         return trim((string) preg_replace('/<think>.*?<\/think>/s', '', $text));
     }

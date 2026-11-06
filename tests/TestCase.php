@@ -30,6 +30,7 @@ abstract class TestCase extends BaseTestCase
     protected function setUpTraits()
     {
         if (! RefreshDatabaseState::$migrated && isset(($this->traitsUsedByTest ?? class_uses_recursive(static::class))[RefreshDatabase::class])) {
+            $this->dropTablesInBatches();
             $this->artisan('migrate:fresh', $this->migrateFreshUsing());
             $this->importBundledVocabularies();
             $this->app[Kernel::class]->setArtisan(null);
@@ -37,6 +38,23 @@ abstract class TestCase extends BaseTestCase
         }
 
         return parent::setUpTraits();
+    }
+
+    /**
+     * The old tables dropped fifty at a time, each batch its own transaction, so that migrate:fresh finds nothing to
+     * drop. Its one DROP TABLE of every table locks every table, index and constraint at once, and with phase 17d4 that
+     * outgrew PostgreSQL's lock table (max_locks_per_transaction 64 x max_connections 100), which every database on the
+     * server shares.
+     */
+    private function dropTablesInBatches(): void
+    {
+        if (DB::getDriverName() !== 'pgsql') {
+            return;
+        }
+        $tables = DB::table('pg_tables')->where('schemaname', 'public')->pluck('tablename');
+        foreach ($tables->chunk(50) as $batch) {
+            DB::statement('DROP TABLE IF EXISTS '.$batch->map(fn ($t) => '"public"."'.str_replace('"', '""', $t).'"')->join(', ').' CASCADE');
+        }
     }
 
     protected function setUp(): void

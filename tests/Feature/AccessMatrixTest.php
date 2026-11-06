@@ -44,6 +44,8 @@ use App\Iiif\CuratedCollections;
 use App\Jurisdiction\ExportPermits;
 use App\Jurisdiction\NarssaTransfers;
 use App\Labels\Labels;
+use App\Language\Contributions;
+use App\Language\Corpus;
 use App\Models\CaptionTrack;
 use App\Models\Concept;
 use App\Models\Container;
@@ -72,8 +74,10 @@ use App\Models\RecordFunding;
 use App\Models\ResearchDoi;
 use App\Models\Researcher;
 use App\Models\ResearcherType;
+use App\Models\ResearchLead;
 use App\Models\ResearchNotification;
 use App\Models\RetrievalSchedule;
+use App\Models\ScholarshipDiscovery;
 use App\Models\SignInProvider;
 use App\Models\User;
 use App\Models\WatchFolder;
@@ -122,6 +126,7 @@ use App\Retention\FilePlan;
 use App\Retention\RetentionService;
 use App\Rights\Embargoes;
 use App\Rights\RightsService;
+use App\Scholarship\ResearchLeads;
 use App\Site\Articles;
 use App\Site\LandingPages;
 use App\Site\StaticPages;
@@ -469,6 +474,15 @@ class AccessMatrixTest extends TestCase
             'state_id' => Concept::where('iri', Vocab::BASE.'doi-state/findable')->value('id'), 'test' => true, 'minted_at' => now()]),
             app(RecordDois::class)->enqueue($letter, 'mint', $admin),
             RecordFunding::create(['record_resource_id' => $letter->id, 'funder_name' => 'National Research Foundation'])]);
+        // Phase 17d4: a research lead promoted from a discovery, and what people contributed about a language.
+        $make('scholarship and languages', function () use ($institution, $letter, $admin) {
+            $discovery = ScholarshipDiscovery::create(['institution_id' => $institution->id, 'record_resource_id' => $letter->id, 'title' => 'Letter', 'connection_count' => 1,
+                'confidence' => 10, 'evidence' => ['connections' => []], 'generated_at' => now()]);
+            app(ResearchLeads::class)->generate($institution, 5, false, $admin);
+
+            return [$discovery, ResearchLead::firstOrFail(), app(Contributions::class)->contribute($letter, ['body' => 'Liewe Ma', 'language' => 'af'], null),
+                app(Corpus::class)->contribute($institution, ['language' => 'af', 'term' => 'brug', 'meaning' => 'bridge'], null)];
+        });
         // Phase 17d3: a description flagged at risk, and a flag a peer pushed.
         $make('heritage at risk', fn () => [app(Endangered::class)->flag($letter, ['risk' => 'decay', 'urgency' => 'high'], $admin),
             EndangeredInboundFlag::create(['institution_id' => $institution->id, 'source_peer_base_url' => 'https://far.example.net', 'reference' => 'far-1',

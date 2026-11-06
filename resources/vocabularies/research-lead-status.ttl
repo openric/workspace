@@ -1,0 +1,37 @@
+# OpenRiC Workspace - OpenRiC Workspace Research Lead Statuses.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Where a research lead stands with its curators (Heratio's research_lead.status).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/research-lead-status/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Research Lead Statuses"@en ;
+    dcterms:description "Where a research lead stands with its curators (Heratio's research_lead.status)."@en ;
+    dcterms:issued "2026-11-06"^^xsd:date ;
+    skos:hasTopConcept v:pending, v:published, v:dismissed .
+
+v:pending a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Pending review"@en, "Wag op hersiening"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the research leads an institution curates from what a model found in its catalogue, as Heratio's ahg-semantic-search keeps them."@en ;
+    skos:definition "Promoted from a discovery and awaiting a curator decision. Not shown publicly."@en .
+
+v:published a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Published"@en, "Gepubliseer"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the research leads an institution curates from what a model found in its catalogue, as Heratio's ahg-semantic-search keeps them."@en ;
+    skos:definition "Approved by a curator and visible on the public research leads."@en .
+
+v:dismissed a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Dismissed"@en, "Ter syde gestel"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the research leads an institution curates from what a model found in its catalogue, as Heratio's ahg-semantic-search keeps them."@en ;
+    skos:definition "Set aside by a curator. Kept for the record but not shown publicly."@en .

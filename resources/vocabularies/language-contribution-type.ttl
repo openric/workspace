@@ -1,0 +1,44 @@
+# OpenRiC Workspace - OpenRiC Workspace Language Contribution Types.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What someone contributes about a record in a language (Heratio's language_transcription_contribution.contribution_type).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/language-contribution-type/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Language Contribution Types"@en ;
+    dcterms:description "What someone contributes about a record in a language (Heratio's language_transcription_contribution.contribution_type)."@en ;
+    dcterms:issued "2026-11-06"^^xsd:date ;
+    skos:hasTopConcept v:transcription, v:correction, v:translation, v:note .
+
+v:transcription a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Transcription"@en, "Transkripsie"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with what people contribute about the languages of a collection, as Heratio's ahg-semantic-search keeps it; shown once reviewed."@en ;
+    skos:definition "Type out the text of this item in its own language."@en .
+
+v:correction a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Correction"@en, "Regstelling"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with what people contribute about the languages of a collection, as Heratio's ahg-semantic-search keeps it; shown once reviewed."@en ;
+    skos:definition "Correct an existing transcription, scan or machine reading."@en .
+
+v:translation a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Translation"@en, "Vertaling"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with what people contribute about the languages of a collection, as Heratio's ahg-semantic-search keeps it; shown once reviewed."@en ;
+    skos:definition "Offer a translation of this item into another language."@en .
+
+v:note a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Note"@en, "Nota"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with what people contribute about the languages of a collection, as Heratio's ahg-semantic-search keeps it; shown once reviewed."@en ;
+    skos:definition "Add context only a speaker of the language would know."@en .

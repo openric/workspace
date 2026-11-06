@@ -55,6 +55,10 @@
     {{-- Repatriation (phase 17d2): the claims about it, where the register is shown, and lodging one, where the institution allows it. --}}
     @php($repatriation = \App\Models\RepatriationSetting::for($institution->id))
     @if($repatriation->public_register)@foreach(\App\Models\RepatriationClaim::where('record_resource_id', $unit->id)->get() as $rc)<a href="{{ route('discover.repatriation.show', $rc->id) }}" class="no-print" style="font-size: .85rem">{{ __('Virtual return') }}</a> @endforeach @endif
+    {{-- Languages and research leads (phase 17d4). --}}
+    <a href="{{ route('discover.transcribe', $unit->id) }}" class="no-print" style="font-size: .85rem">{{ __('Transcribe or translate') }}</a>
+    @php($publishedLead = \App\Models\ResearchLead::where(['record_resource_id' => $unit->id, 'status_id' => \App\Scholarship\ResearchLeads::status('published')])->first())
+    @if($publishedLead)<a href="{{ route('discover.research-leads.show', $publishedLead->id) }}" class="no-print" style="font-size: .85rem">{{ __('Research lead') }}</a>@endif
     @if($repatriation->public_lodging)<a href="{{ route('discover.repatriation.lodge', $unit->id) }}" class="no-print" style="font-size: .85rem">{{ __('Lodge a repatriation claim') }}</a>@endif
     <p class="meta">{{ $unit->level->label(\App\Support\Vocab::languages()) }} @include('description._ric', ['term' => \App\Relations\EntityKinds::ricClass($unit)])
         @if($unit->referenceCode()) · {{ $unit->referenceCode() }}@endif

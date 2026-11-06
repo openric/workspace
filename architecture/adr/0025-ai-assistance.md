@@ -298,3 +298,33 @@ The register keeps nothing; it is read each time, as in Heratio. It prefills a r
 - tracing, and the prefill;
 - flags, the worklist and the public register;
 - the signed answer, a peer's register on the board, and a push from receipt to acceptance.
+
+### 17d4: the languages of a collection, discoveries and research leads
+
+**The language corpus.** Heratio reads AtoM's i18n rows by culture. The Workspace reads its own data:
+
+- **Records:** the published authorised names of records, by language, counted where the public search index holds them.
+- **Terms:** the labels of the institution's descriptive vocabularies, and the published names of its places.
+- **Text:** the published transcripts of the pages of published records.
+
+Languages are BCP 47 primary subtags and are named as the interface names them. Heratio's order is kept, Afrikaans moved to just before Dutch. A machine translation of a passage goes through the gateway's translate route, with its receipt, where AI is on.
+
+**Contributions.** Glossary entries (`language_glossary`) and transcriptions, corrections, translations and notes (`language_contributions`) are pending until reviewed. A contributor's name is kept only with consent (a check constraint on contributions). Those who may change descriptions review them; Heratio limited that to administrators.
+
+**Discoveries.** Heratio's crossCollectionNeighbours and its second hop become the public relationship graph (`Discovery\Graph`, two steps), so a discovery never rests on anything the public may not see. Heratio's prompt and parser are kept. The call goes through the gateway's chat route with a receipt. `scholarship_discoveries` keeps the links, the leads and Heratio's confidence score.
+
+**Discoveries are staff's alone.** Heratio's public Discoveries page showed model output unreviewed. Under ADR 0007, model output in the Workspace waits for a person, so the public sees only the research leads a curator published.
+
+**Federated discoveries.** The institution's own federated search (phase 16a) is searched for the record's access points, joined with "or" so that any one may match. Heratio joined them with spaces, which the Workspace's search would read as all at once. The answer is kept a day in `scholarship_federated_discoveries`.
+
+**Research leads.** `research_leads` holds one lead a record, promoted from a discovery. The "why it matters" is factual, or written by a model on request (Heratio's prompt). A lead is pending, published or dismissed; only a published lead on a published record is public.
+
+**Background work.** Discovering, refreshing and enriching run through `AskModel` (tasks `discover`, `discoveries`, `leads`).
+
+**Tests.** `tests/Feature/LanguagesAndScholarshipTest.php`:
+
+- languages, glossary and contributions, from receipt to approval;
+- a discovery from the published links only, with AI off and on, and leads to publication;
+- the federated search.
+
+**Test database.** The test case now drops the old tables in batches of fifty before `migrate:fresh`. Its single drop of every table outgrew the lock table that all databases on the server share.
