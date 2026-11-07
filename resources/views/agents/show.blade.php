@@ -25,6 +25,7 @@
             @if($canUpdate && auth()->user()->may('create', 'authority')) · <a href="{{ route('agents.split-form', $agent) }}">{{ __('Split into two') }}</a>@endif
             @if(auth()->user()->may('delete', 'authority', $agent)) · <a href="{{ route('agents.merge-form', $agent) }}">{{ __('Merge into another') }}</a>@endif
             @if($canUpdate) · <a href="{{ route('versions.index', ['agents', $agent->id]) }}">{{ __('Versions') }}</a>@endif</p>
+        @if(($leftOut ?? null) !== null)@include('exports._left-out', ['lost' => $leftOut, 'format' => 'EAC-CPF', 'json' => route('agents.eac.loss', $agent)])@endif
     @endunless
     @include('description._view', ['subject' => $agent, 'standard' => \App\Description\Elements::ISAAR_CPF, 'drafts' => auth()->user()->may('update', 'authority', $agent)])
 

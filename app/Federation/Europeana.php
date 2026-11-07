@@ -11,6 +11,7 @@ namespace App\Federation;
 
 use App\Description\RecordService;
 use App\Exchange\Edm;
+use App\Exchange\ExportLoss;
 use App\Exchange\ExportView;
 use App\Files\FileStore;
 use App\Models\Concept;
@@ -26,7 +27,7 @@ use ZipArchive;
 
 class Europeana
 {
-    public function __construct(private Edm $edm, private FileStore $store) {}
+    public function __construct(private Edm $edm, private FileStore $store, private ExportLoss $loss) {}
 
     public function run(Institution $institution, ?string $since = null, ?User $actor = null): object
     {
@@ -41,13 +42,15 @@ class Europeana
             $ids = DB::table('search_entries')->where(['institution_id' => $institution->id, 'public' => true, 'subject_table' => 'record_resources'])
                 ->when($since && strtotime($since), fn ($q) => $q->where('updated_at', '>=', date('c', strtotime($since))))->orderBy('subject_id')->pluck('subject_id');
             $files = [];
+            $lost = [];
             foreach ($ids->chunk(200) as $chunk) {
                 foreach (RecordResource::whereIn('id', $chunk)->whereNull('deleted_at')->with(RecordService::DESCRIBED)->get() as $unit) {
                     if (! $view->readable($unit)) {
                         continue;
                     }
-                    file_put_contents($work.'/records/'.$unit->id.'.xml', $this->edm->export($unit, $view, $institution));
+                    file_put_contents($work.'/records/'.$unit->id.'.xml', $xml = $this->edm->export($unit, $view, $institution));
                     $files[] = $unit->id;
+                    $lost = [...$lost, ...$this->loss->ofEach($xml, [$unit], $view)];
                 }
             }
             // A sitemap of the files, as Heratio writes one beside them.
@@ -58,6 +61,8 @@ class Europeana
             $bundle = $work.'/europeana.zip';
             $zip->open($bundle, ZipArchive::CREATE) === true || throw new RuntimeException(__('The package file could not be written.'));
             $zip->addFile($work.'/sitemap.xml', 'sitemap.xml');
+            // What EDM leaves out of each record, beside the files (roadmap phase 23).
+            $zip->addFromString('left-out.csv', ExportLoss::csv($lost));
             foreach ($files as $f) {
                 $zip->addFile($work.'/records/'.$f.'.xml', 'records/'.$f.'.xml');
             }

@@ -250,4 +250,17 @@ class ExportTest extends TestCase
         }
         $this->actingAs($this->editor)->get(route('records.export', $this->fonds))->assertOk()->assertSee('of this unit');
     }
+
+    public function test_the_whole_export_says_what_it_leaves_out(): void
+    {
+        $leftOut = $this->actingAs($this->editor)->get('/records/export?download=1&drafts=1&language=en&left-out=1')->assertOk()
+            ->assertHeader('Content-Disposition', 'attachment; filename="archival-descriptions-left-out-'.now()->format('Y-m-d').'.csv"')->getContent();
+        $rows = $this->rows($leftOut);
+        $this->assertSame(['entity', 'identifier', 'kind', 'what', 'value'], $rows[0]);
+        // One language per row: the Afrikaans of the fonds is not in an English file.
+        $this->assertContains('Scope and content (af)', array_column($rows, 3));
+        $this->assertContains($this->fonds->iri, array_column($rows, 0));
+        $this->assertNotContains('Riverside Parish Council records', array_column($rows, 4), 'the title is carried');
+        $this->actingAs($this->editor)->get('/records/export')->assertSee('Download what the CSV leaves out');
+    }
 }

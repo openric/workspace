@@ -187,12 +187,18 @@ class ContextExchangeTest extends TestCase
     public function test_a_zip_of_every_record_imports_whole_and_what_has_no_place_is_listed(): void
     {
         [, $council, $committee] = $this->relations();
+        // EAC-CPF is written in the record's original language: the Afrikaans history is not in it, and the ZIP says so.
+        app(AgentService::class)->describe($council, ['agent-history' => 'Gestig in 1850.'], 'af');
         $zip = file_get_contents($this->actingAs($this->editor)->get('/exports/eac-cpf.zip')->assertOk()->baseResponse->getFile()->getPathname());
         $path = tempnam(sys_get_temp_dir(), 'zip');
         file_put_contents($path, $zip);
         $archive = new \ZipArchive;
         $archive->open($path);
-        $this->assertSame(2, $archive->numFiles);
+        $this->assertSame(3, $archive->numFiles, 'two records and what they leave out');
+        $leftOut = (string) $archive->getFromName('left-out.csv');
+        $this->assertStringContainsString($council->iri, $leftOut);
+        $this->assertStringContainsString('Gestig in 1850.', $leftOut);
+        $this->assertStringNotContainsString('Riverside Town Council', $leftOut, 'the authorised name is carried');
         // One file a stranger wrote, with an element the Workspace has no place for, and one that is not EAC-CPF at all.
         $archive->addFromString('stranger.xml', '<eac-cpf xmlns="urn:isbn:1-931666-33-4"><control><recordId>X1</recordId></control><cpfDescription><identity><entityType>person</entityType>'
             .'<nameEntry><part>Botha, Anna</part><authorizedForm>local</authorizedForm></nameEntry></identity><description><languagesUsed><languageUsed><language languageCode="afr">Afrikaans</language></languageUsed></languagesUsed></description></cpfDescription></eac-cpf>');
@@ -205,5 +211,20 @@ class ContextExchangeTest extends TestCase
         $this->assertTrue($issues->contains(fn ($i) => $i['location'] === 'notes.xml' && $i['kind'] === 'rejected'));
         $this->assertSame(2, Agent::count(), 'a dry run writes nothing');
         $this->actingAs($this->editor)->get('/exports/eac-f.zip')->assertOk();
+    }
+
+    public function test_an_authority_record_and_an_activity_say_what_eac_leaves_out(): void
+    {
+        [, $council] = $this->relations();
+        app(AgentService::class)->describe($council, ['agent-history' => 'Gestig in 1850.'], 'af');
+        $report = $this->actingAs($this->editor)->getJson(route('agents.eac.loss', $council))->assertOk()->json('left_out.eac-cpf');
+        $this->assertSame(['Gestig in 1850.'], array_column($report, 'value'));
+        $this->actingAs($this->editor)->get(route('agents.show', $council))->assertOk()->assertSee('1 thing of this record is not in the EAC-CPF export.');
+
+        $activity = app(ActivityService::class)->create($this->institution, 'Licensing of traders', 'en', null, $this->editor);
+        $this->actingAs($this->editor)->get(route('activities.show', $activity))->assertOk()->assertSee('Everything of this record you may read is in the EAC-F export.');
+        app(ActivityService::class)->describe($activity, ['activity-description' => 'Die toestaan van handelslisensies.'], 'af', $this->editor);
+        $report = $this->actingAs($this->editor)->getJson(route('activities.eac.loss', $activity))->assertOk()->json('left_out.eac-f');
+        $this->assertSame(['Die toestaan van handelslisensies.'], array_column($report, 'value'));
     }
 }

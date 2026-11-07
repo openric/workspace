@@ -15,12 +15,15 @@ use App\Description\Bcp47;
 use App\Description\DateService;
 use App\Description\Elements;
 use App\Exchange\EacF;
+use App\Exchange\ExportLoss;
+use App\Exchange\ExportView;
 use App\Models\Activity;
 use App\Models\Concept;
 use App\Models\Name;
 use App\Relations\RelationService;
 use App\Support\Vocab;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -84,7 +87,22 @@ class ActivityController extends Controller
             'identifiers.identifierType.labels', 'activityType.labels', 'activityType.vocabulary', 'dates.property.labels', 'dates.dateType.labels', 'dates.qualifier.labels');
 
         return view('activities.show', ['activity' => $activity, 'dateChoices' => app(DateService::class)->choices('activity'),
-            'relations' => app(RelationService::class)->of($activity), 'canUpdate' => $request->user()->may('update', 'authority', $activity)]);
+            'relations' => app(RelationService::class)->of($activity), 'canUpdate' => $request->user()->may('update', 'authority', $activity),
+            'leftOut' => $this->leftOut($request, $activity)]);
+    }
+
+    /** What EAC-F leaves out of the activity, as JSON (roadmap phase 23: a loss report for every export). */
+    public function loss(Request $request, Activity $activity): JsonResponse
+    {
+        $this->own($request, $activity);
+
+        return response()->json(['activity' => $activity->iri, 'left_out' => ['eac-f' => $this->leftOut($request, $activity)]], 200, [], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    }
+
+    /** @return list<array{kind: string, what: string, value: string}> */
+    private function leftOut(Request $request, Activity $activity): array
+    {
+        return app(ExportLoss::class)->of(app(EacF::class)->export($activity), $activity, new ExportView($request->user(), true));
     }
 
     public function edit(Request $request, Activity $activity): View

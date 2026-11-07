@@ -98,6 +98,7 @@ class EuropeanaAndLoansTest extends TestCase
         $zip = new ZipArchive;
         $zip->open(app(FileStore::class)->path($run->storage_path));
         $this->assertNotFalse($zip->locateName('sitemap.xml'));
+        $this->assertStringStartsWith('entity,identifier,kind,what,value', (string) $zip->getFromName('left-out.csv'), 'what EDM leaves out, beside the files');
         $this->assertFalse($zip->locateName('records/'.$draft->id.'.xml'), 'a draft never');
         $edm = new DOMDocument;
         $edm->loadXML($zip->getFromName('records/'.$letter->id.'.xml'));

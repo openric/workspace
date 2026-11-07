@@ -6911,5 +6911,12 @@
     "There is nothing to suggest subjects from: describe its scope and content, or read the text of its pages.": "Daar is niks om onderwerpe uit voor te stel nie: beskryf sy omvang en inhoud, of lees die teks van sy bladsye.",
     "Try Annif now": "Toets Annif nou",
     ":count call|:count calls": ":count oproep|:count oproepe",
-    "That subject no longer exists.": "Daardie onderwerp bestaan nie meer nie."
+    "That subject no longer exists.": "Daardie onderwerp bestaan nie meer nie.",
+    "Everything of this record you may read is in the :format export.": "Alles van hierdie rekord wat u mag lees, is in die :format-uitvoer.",
+    "{1} :count thing of this record is not in the :format export.|[2,*] :count things of this record are not in the :format export.": "{1} :count ding van hierdie rekord is nie in die :format-uitvoer nie.|[2,*] :count dinge van hierdie rekord is nie in die :format-uitvoer nie.",
+    "{1} :count thing of this unit is not in it.|[2,*] :count things of this unit are not in it.": "{1} :count ding van hierdie eenheid is nie daarin nie.|[2,*] :count dinge van hierdie eenheid is nie daarin nie.",
+    "Found by reading the export itself.": "Gevind deur die uitvoer self te lees.",
+    "The same as JSON": "Dieselfde as JSON",
+    "Download what the CSV leaves out": "Laai af wat die CSV uitlaat",
+    "With the same choices, one row for each value, name, identifier, date or relation of a unit that the CSV does not carry, found by reading the CSV itself.": "Met dieselfde keuses, een ry vir elke waarde, naam, identifiseerder, datum of verhouding van 'n eenheid wat die CSV nie dra nie, gevind deur die CSV self te lees."
 }

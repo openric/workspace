@@ -501,6 +501,7 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/{activity}', [ActivityController::class, 'show'])->name('show');
         Route::get('/{activity}/edit', [ActivityController::class, 'edit'])->name('edit');
         Route::get('/{activity}/eac-f', [ActivityController::class, 'eac'])->name('eac');
+        Route::get('/{activity}/eac-f/left-out.json', [ActivityController::class, 'loss'])->name('eac.loss');
         Route::post('/{activity}', [ActivityController::class, 'update'])->name('update');
     });
     // Rules and mandates (rico:Rule, rico:Mandate; roadmap phase 23b); the controller checks the authority permissions.
@@ -679,6 +680,7 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/{agent}', [AgentController::class, 'show'])->name('show');
         Route::get('/{agent}/print', [AgentController::class, 'print'])->name('print');
         Route::get('/{agent}/eac-cpf', [AgentController::class, 'eac'])->name('eac');
+        Route::get('/{agent}/eac-cpf/left-out.json', [AgentController::class, 'loss'])->name('eac.loss');
         Route::get('/{agent}/edit', [AgentController::class, 'edit'])->name('edit');
         Route::post('/{agent}', [AgentController::class, 'update'])->name('update');
         Route::post('/{agent}/contacts', [AgentController::class, 'storeContact'])->name('contacts.store');

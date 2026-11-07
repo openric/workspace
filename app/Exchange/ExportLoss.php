@@ -1,6 +1,6 @@
 <?php
 
-// OpenRiC Workspace - what an export leaves out of a unit of description (roadmap phase 23b).
+// OpenRiC Workspace - what an export leaves out of a unit of description, authority record or activity (roadmap phase 23).
 // Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
 // SPDX-License-Identifier: AGPL-3.0-or-later
 //
@@ -18,15 +18,59 @@ use App\Models\RecordResource;
 use App\Relations\EntityKinds;
 use App\Relations\RelationService;
 use App\Relations\RelationTypes;
+use Illuminate\Database\Eloquent\Model;
 
 class ExportLoss
 {
     public function __construct(private RelationService $relations) {}
 
-    /** @return list<array{kind: string, what: string, value: string}> what of the unit the output does not hold */
-    public function of(string $output, RecordResource $unit, ExportView $view): array
+    /**
+     * What of the entity the output does not hold: a unit of description, an authority record or an activity, each
+     * described the same way (Describable, HasDates, HasIdentifiers).
+     *
+     * @return list<array{kind: string, what: string, value: string}>
+     */
+    public function of(string $output, Model $unit, ExportView $view): array
+    {
+        return $this->in($this->plain($output), $unit, $view);
+    }
+
+    /**
+     * What of each entity a file of many does not hold (the institution's CSV, a package of EAC or EDM files), the
+     * output read once. A value found anywhere in the file counts as carried, so the list can miss, never invent.
+     *
+     * @param  iterable<Model>  $entities
+     * @return list<array{entity: Model, kind: string, what: string, value: string}>
+     */
+    public function ofEach(string $output, iterable $entities, ExportView $view): array
     {
         $haystack = $this->plain($output);
+        $rows = [];
+        foreach ($entities as $entity) {
+            foreach ($this->in($haystack, $entity, $view) as $item) {
+                $rows[] = ['entity' => $entity, ...$item];
+            }
+        }
+
+        return $rows;
+    }
+
+    /** The same as CSV, one row for each thing left out, for a package to carry beside its files. */
+    public static function csv(array $rows): string
+    {
+        $out = fopen('php://temp', 'r+');
+        fputcsv($out, ['entity', 'identifier', 'kind', 'what', 'value'], escape: '');
+        foreach ($rows as $row) {
+            fputcsv($out, [$row['entity']->getAttribute('iri') ?? $row['entity']->getKey(), $row['entity']->getAttribute('description_identifier') ?? '', $row['kind'], $row['what'], $row['value']], escape: '');
+        }
+        rewind($out);
+
+        return (string) stream_get_contents($out);
+    }
+
+    /** @return list<array{kind: string, what: string, value: string}> */
+    private function in(string $haystack, Model $unit, ExportView $view): array
+    {
         $missing = [];
         $absent = fn (?string $text) => $text !== null && trim($text) !== '' && ! str_contains($haystack, $this->plain($text));
         $unit->loadMissing('descriptionValues.element.labels', 'names.nameType.labels', 'identifiers.identifierType', 'dates.property.labels');
@@ -71,7 +115,7 @@ class ExportLoss
         }
 
         // Its place in the file plan travels only as the function or activity it documents (roadmap phase 13c).
-        if (($node = $unit->filePlanPlacement?->node) && $absent($node->code)) {
+        if ($unit instanceof RecordResource && ($node = $unit->filePlanPlacement?->node) && $absent($node->code)) {
             $missing[] = ['kind' => 'file plan', 'what' => 'Place in the file plan', 'value' => $node->code.' '.$node->title];
         }
 

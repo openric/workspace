@@ -20,5 +20,7 @@
             <p><label><input type="checkbox" name="drafts" value="1"> {{ __('Include draft records') }}</label> <small>{{ __('Only if you may see the drafts of every unit; otherwise only published values and names.') }}</small></p>
         @endif
         <button type="submit">{{ __('Download CSV') }}</button>
+        <button type="submit" name="left-out" value="1">{{ __('Download what the CSV leaves out') }}</button>
+        <small>{{ __('With the same choices, one row for each value, name, identifier, date or relation of a unit that the CSV does not carry, found by reading the CSV itself.') }}</small>
     </form>
 @endsection

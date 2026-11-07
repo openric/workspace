@@ -174,7 +174,7 @@ class AccessMatrixTest extends TestCase
      */
     private const ANY_ACCOUNT_READS = ['repositories.show', 'records.show', 'records.tree', 'records.tree-branch', 'records.inventory', 'records.finding-aid',
         'records.print', 'records.export', 'records.publish-readiness', 'records.provenance', 'records.provenance.csv', 'instantiations.show',
-        'agents.show', 'agents.print', 'agents.eac', 'activities.show', 'activities.eac', 'places.show',
+        'agents.show', 'agents.print', 'agents.eac', 'agents.eac.loss', 'activities.show', 'activities.eac', 'activities.eac.loss', 'places.show',
         'vocabularies.show', 'vocabularies.export', 'concepts.show', 'records.export.loss', 'rules.show'];
 
     private string $store;

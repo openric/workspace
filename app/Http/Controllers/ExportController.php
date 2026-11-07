@@ -47,7 +47,7 @@ class ExportController extends Controller
         'mets' => ['METS 1.12', 'This unit and every unit inside it, each described in Dublin Core, with the files you may receive and their SHA-256.', 'xml', 'application/xml'],
     ];
 
-    public function __construct(private RecordService $records) {}
+    public function __construct(private RecordService $records, private ExportLoss $loss) {}
 
     public function form(Request $request, RecordResource $record): View
     {
@@ -123,9 +123,13 @@ class ExportController extends Controller
         // Drafts only when the account may see the drafts of every unit in the file.
         $view = new ExportView($user, $request->boolean('drafts') && $units !== [] && collect($units)->every(fn ($u) => $user->may('view-draft', 'description', $u)), $this->language($request));
 
-        return response(app(DescriptionCsv::class)->export($units, $view, $request->query('rows') === 'every-language'), 200, [
+        $csv = app(DescriptionCsv::class)->export($units, $view, $request->query('rows') === 'every-language');
+        // What the file leaves out, one row for each value of each unit (roadmap phase 23), in place of the file itself.
+        $leftOut = $request->boolean('left-out');
+
+        return response($leftOut ? ExportLoss::csv(app(ExportLoss::class)->ofEach($csv, $units, $view)) : $csv, 200, [
             'Content-Type' => 'text/csv; charset=UTF-8',
-            'Content-Disposition' => 'attachment; filename="archival-descriptions-'.now()->format('Y-m-d').'.csv"',
+            'Content-Disposition' => 'attachment; filename="archival-descriptions-'.($leftOut ? 'left-out-' : '').now()->format('Y-m-d').'.csv"',
         ]);
     }
 
@@ -140,18 +144,22 @@ class ExportController extends Controller
         [$class, $exporter, $usable] = $format === 'eac-cpf' ? [Agent::class, app(EacCpf::class), fn (Agent $a) => EacCpf::exportable($a)]
             : [Activity::class, app(EacF::class), fn () => true];
         $path = tempnam(sys_get_temp_dir(), 'eac');
+        $lost = [];
+        $view = new ExportView($user, true);
         $zip = new \ZipArchive;
         $zip->open($path, \ZipArchive::OVERWRITE);
         $class::where('institution_id', $user->institution_id)->whereNull('deleted_at')
             ->when($class === Agent::class, fn ($q) => $q->whereNull('merged_into_id'))->orderBy('id')
-            ->chunk(200, function ($entities) use ($zip, $exporter, $usable, $user, $format) {
+            ->chunk(200, function ($entities) use ($zip, $exporter, $usable, $user, $format, $view, &$lost) {
                 foreach ($entities as $entity) {
                     if ($usable($entity) && $user->may('read', 'authority', $entity)) {
-                        $zip->addFromString($format.'-'.$entity->id.'.xml', $exporter->export($entity));
+                        $zip->addFromString($format.'-'.$entity->id.'.xml', $xml = $exporter->export($entity));
+                        $lost = [...$lost, ...$this->loss->ofEach($xml, [$entity], $view)];
                     }
                 }
             });
-        $zip->numFiles > 0 || $zip->addFromString('README.txt', 'Nothing to export.');
+        // What the files leave out, beside them (roadmap phase 23).
+        $zip->numFiles > 0 ? $zip->addFromString('left-out.csv', ExportLoss::csv($lost)) : $zip->addFromString('README.txt', 'Nothing to export.');
         $zip->close();
 
         return response()->download($path, ($format === 'eac-cpf' ? 'authority-records' : 'activities').'-'.$format.'-'.now()->format('Y-m-d').'.zip',

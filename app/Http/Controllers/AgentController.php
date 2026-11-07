@@ -16,6 +16,8 @@ use App\Description\ContactPointService;
 use App\Description\DateService;
 use App\Description\EacCpf;
 use App\Description\Elements;
+use App\Exchange\ExportLoss;
+use App\Exchange\ExportView;
 use App\Models\Agent;
 use App\Models\Concept;
 use App\Models\ContactPoint;
@@ -25,6 +27,7 @@ use App\Models\Repository;
 use App\Relations\RelationService;
 use App\Support\Vocab;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -94,7 +97,23 @@ class AgentController extends Controller
         }
         $this->own($request, $agent);
 
-        return view('agents.show', $this->page($agent) + ['print' => false]);
+        return view('agents.show', $this->page($agent) + ['print' => false, 'leftOut' => $this->leftOut($request, $agent)]);
+    }
+
+    /** What EAC-CPF leaves out of the authority record, as JSON (roadmap phase 23: a loss report for every export). */
+    public function loss(Request $request, Agent $agent): JsonResponse
+    {
+        $this->own($request, $agent);
+        abort_unless(EacCpf::exportable($agent), 404);
+
+        return response()->json(['agent' => $agent->iri, 'left_out' => ['eac-cpf' => $this->leftOut($request, $agent)]], 200, [], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    }
+
+    /** @return list<array{kind: string, what: string, value: string}>|null null where EAC-CPF has no entity type for the agent */
+    private function leftOut(Request $request, Agent $agent): ?array
+    {
+        // EAC-CPF writes every value of the record, draft or not, so the comparison is with all the account may read.
+        return EacCpf::exportable($agent) ? app(ExportLoss::class)->of(app(EacCpf::class)->export($agent), $agent, new ExportView($request->user(), true)) : null;
     }
 
     /** The authority record on one page, without its forms. */
