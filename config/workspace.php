@@ -62,7 +62,7 @@ return [
     // vocabulary), the actions that apply to it (permission vocabulary), as
     // Heratio has one action list per class (ADR 0005).
     'permission_matrix' => [
-        'institution' => ['manage-institution', 'manage-accounts', 'manage-roles', 'view-audit-log', 'manage-workflows', 'manage-privacy', 'manage-shop', 'manage-reading-room', 'review-submissions', 'manage-repatriation'],
+        'institution' => ['manage-institution', 'manage-accounts', 'manage-roles', 'view-audit-log', 'manage-workflows', 'manage-privacy', 'manage-shop', 'manage-reading-room', 'review-submissions', 'manage-repatriation', 'make-offline-catalogues'],
         'repository' => ['read', 'create', 'update', 'delete', 'publish'],
         'description' => ['read', 'create', 'update', 'delete', 'view-draft', 'publish', 'read-master', 'read-reference', 'read-thumbnail', 'translate', 'review-proposals', 'review-access-requests'],
         'vocabulary' => ['create', 'update', 'delete', 'publish'],
@@ -164,6 +164,7 @@ return [
         'signed-in' => ['parent' => 'public', 'grants' => []],
         'administrator' => ['parent' => 'signed-in', 'grants' => '*'],
         'editor' => ['parent' => 'signed-in', 'grants' => [
+            'institution' => ['make-offline-catalogues'],
             'repository' => ['read', 'create', 'update', 'publish'],
             'description' => ['read', 'create', 'update', 'delete', 'view-draft', 'publish', 'read-master', 'read-reference', 'read-thumbnail', 'review-proposals', 'review-access-requests'],
             'vocabulary' => ['create', 'update', 'publish'],

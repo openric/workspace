@@ -45,6 +45,7 @@
             'Import and export' => [
                 'imports.index' => [__('Import'), $mayImport, 'imports.*'],
                 'records.export-all' => [__('Export descriptions'), $user->mayAnywhere('read', 'description'), 'records.export-all'],
+                'offline-catalogues.index' => [__('Offline catalogues'), $user->hasPermission(\App\Support\Vocab::permission('make-offline-catalogues')), 'offline-catalogues.*'],
             ],
             'Reports' => [
                 'reports.index' => [__('Overview'), $user->mayAnywhere('read', 'description'), 'reports.index'],

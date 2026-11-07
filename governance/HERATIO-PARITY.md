@@ -95,7 +95,7 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-observability` | 1903 | later: V1.0+ | Covered | 12a | `ahgObservabilityPlugin` | Health figures as a page and Prometheus text from v0.0.110 (ADR 0021); no tracing or latency histograms |
 | `ahg-ocfl` | 3106 | later: V1.0+ | Done | 15b | `ahgOcflPlugin` | OCFL 1.1 as the one object store from v0.0.115, laid out by extension 0004, each version the whole object, objects purged at destruction (ADR 0022); the mirror to a second root is replication, in 15c |
 | `ahg-pdf-tools` | 2093 | V0.1 candidate | Partial | 5 | `ahgTiffPdfMergePlugin` | A PDF's text layer proposed as its transcript (v0.0.64); merging TIFFs into a PDF with the scanning workflows, phase 22 |
-| `ahg-portable-export` | 3000 | later: V1.0+ | Planned | 11c, deferred | `ahgPortableExportPlugin` | Read PSIS ahgPortableExportPlugin too, which does more; deferred by Dr Johan Pieterse on 30 October 2026 |
+| `ahg-portable-export` | 3000 | later: V1.0+ | Done | 11c | `ahgPortableExportPlugin` | Offline catalogues from v0.0.139: read-only, editable and archive packages with a viewer that opens from disk, RiC-O, checksums and links; PSIS's import of a package is the RiC-O import of its `catalogue.jsonld`; deferred on 30 October 2026, unparked by Dr Johan Pieterse on 7 November 2026 |
 | `ahg-preservation` | 10211 | later: V1.0+ | Done | 15a, 15c, 15d | `ahgPreservationPlugin` | PREMIS events, PRONOM formats by Siegfried and the PREMIS 3.0 export from v0.0.114; normalisation, migration plans, format risk, replication and PREMIS rights from v0.0.116; OAIS packages as BagIt bags from v0.0.117 (ADR 0022); backup verification in phase 3 |
 | `ahg-privacy` | 16854 | later: jurisdiction | Partial | 18a, 18b | `ahgPrivacyPlugin` | POPIA governance (registers, requests, compromises, assessments, controls, report) from v0.0.91 (18a, ADR 0016); PII scanning, field redaction and file screening from v0.0.94 (18b); not visual redaction of images, named-entity recognition, the Article 30 export or the autopilot |
 | `ahg-provenance-ai` | 2662 | out: AI (V2+) | Done | 17a | none | The log of inferences with each call's trace to its proposals and reviewers, the reviewer's correction kept, and the Inferred-Provenance profile in RiC-O, from v0.0.127 (ADR 0025) |
@@ -1326,7 +1326,7 @@ Added with 19j.
 | `research_document_template` (`name`, `document_type`, `description`, `fields_json`) | Document templates, and the documents filled in from them | Same; Heratio filled in nothing |
 | `research_print_template` (`name`, `code`, `template_type`, `description`, `template_html`, `css_styles`, `page_size`, `orientation`, margins, `copies_default`, `variables`, `is_default`, `is_active`) | Print templates | Text with placeholders instead of HTML and CSS; one margin |
 | `research_rights_policy` (`target_type`, `target_id`, `policy_type`, `action_type`, `constraints_json`, `policy_json`) and `research_access_decision` | Rights policies on records, and decisions | Records only (Heratio's other targets had no check); guarding the record's files |
-| `research_offline_sync_log`, `researcher_offline_sync_targets` | none yet | With the offline catalogue, phase 11c (parked) |
+| `research_offline_sync_log`, `researcher_offline_sync_targets` | An editable offline catalogue's `researcher-exchange.json`, imported as a draft submission | PSIS's exchange format instead of Heratio's sync file, from v0.0.139; no separate log, as the submission keeps its source file |
 
 : Lectures, training, quotas, notices and the rest, field by field
 
@@ -1628,4 +1628,33 @@ Added on 6 November 2026 with 17d4.
 | `research_lead` (headline, lead_text, why_it_matters, connection_count, confidence, evidence, status, ai_labelled, curated_by, published_at) | `research_leads`, the research-lead-status vocabulary, with the receipt | Same |
 | ResearchLeadService::generate, aiWhyItMatters, publicFeed, publish, dismiss, repend | `Scholarship\ResearchLeads`, Research leads | Same |
 | ahg:scholarship-discover, ahg:generate-research-leads | `workspace:scholarship:discover`, `workspace:scholarship:leads` | Same |
+
+### Offline catalogues (`ahg-portable-export`)
+
+Added on 7 November 2026 with 11c.
+
+| Heratio field | Workspace | Status |
+|---|---|---|
+| `portable_export.title`, `user_id`, `created_at` | `offline_catalogues.title`, `user_id`, `created_at` | Same, from v0.0.139 |
+| `scope_type` (all, fonds, repository, custom), `scope_slug`, `scope_repository_id`, `scope_items` | Every description, one repository (`repository_id`), one unit and everything inside it (`record_resource_id`), the clipboard (`scope_items`) | Same; a unit by its id, not a slug |
+| `mode` (read_only, editable, archive) | Mode, the offline-catalogue-mode vocabulary | Same; read-only and editable read as the public, an archive as its maker |
+| `include_objects`, `include_thumbnails`, `include_references` | Include files (thumbnails and reference copies) | One choice |
+| `include_masters` | Include masters | An archive only, for an account that may download masters |
+| `culture` | Language (a BCP 47 tag) | Same |
+| `branding` | none | Not carried: the institution's name is the viewer's subtitle |
+| `status`, `progress`, `error_message`, `started_at`, `completed_at` | The job-status vocabulary, the background job, `error`, `started_at`, `finished_at` | Same |
+| `total_descriptions`, `total_objects` | `record_count`, `agent_count`, `file_count`, `withheld_count` | Same, and more |
+| `output_path`, `output_size` | `storage_path` in the object store, `size_bytes`, `sha256` | Same, and its checksum |
+| `disclosure_summary` | `data/disclosure-summary.json` and `withheld_count` | Same |
+| `destination`, `destination_path` | none | Not carried: a package is downloaded or given a link |
+| `expires_at` | none | Not carried: a package is kept until deleted |
+| `portable_export_share_token` (`token`, `download_count`, `max_downloads`, `expires_at`, `revoked_at`) | `offline_catalogue_shares` (`token_hash`, `label`, `download_count`, `max_downloads`, `expires_at`, `revoked_at`) | Only the token's hash kept; never for an archive |
+| The bundle: `index.html`, `data/*.json`, `assets/`, `SHA256SUMS`, `data/fixity.json`, `verify.sh`, `verify.html`, `README.txt`, `USER-MANUAL.txt` | The same, with `data/catalogue.jsonld` (RiC-O) and `left-out.csv` | Data read as scripts and the folder picked in `verify.html`, so both work from disk |
+| `data/c2pa/` | none yet | With C2PA, phase 17g |
+| The editable viewer's `researcher-sync-<id>.json` | `researcher-exchange.json`, PSIS's format 1.0 | Imported by the existing submission import (phase 19j) |
+| PSIS ApiImportList, ApiImportValidate, ApiStartImport | The RiC-O import of `data/catalogue.jsonld` | Same, with its dry run |
+| ApiEstimate, ApiFondsSearch, ApiQuickStart, ApiClipboardExport | The page's scope choices; the unit's export page; the clipboard | No size estimate before it is made |
+| `ahg:portable-export-worker` | `BuildOfflineCatalogue`, on the queue | Same |
+
+: Offline catalogues, field by field
 

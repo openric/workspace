@@ -1,0 +1,52 @@
+<!doctype html>
+<!-- OpenRiC Workspace - check an offline catalogue against its checksums (roadmap phase 11c), after Heratio's verify.html. Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems. SPDX-License-Identifier: AGPL-3.0-or-later -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Check this package</title>
+<style>
+body{font-family:Arial,Helvetica,sans-serif;max-width:900px;margin:2rem auto;padding:0 1rem;color:#262626}
+h1{color:#10373E;font-size:1.4rem}
+table{border-collapse:collapse;width:100%;font-size:.85rem}
+td,th{border:1px solid #ccc;padding:.35rem .5rem;text-align:left}
+th{background:#10373E;color:#fff}
+.ok{color:#176b2c}.bad{color:#a00;font-weight:bold}
+label{font-weight:bold}
+</style>
+</head>
+<body>
+<h1>Check that nothing in this package was changed</h1>
+<p>Choose the package folder (the one holding this page). Every file in <code>assets/</code> is read on this computer, its SHA-256 worked out and compared with the one recorded when the package was made. Nothing leaves your computer.</p>
+<p><label for="folder">Package folder</label><br><input type="file" id="folder" webkitdirectory directory multiple></p>
+<p id="summary" role="status"></p>
+<table><thead><tr><th scope="col">File</th><th scope="col">Result</th></tr></thead><tbody id="out"></tbody></table>
+<p><a href="index.html">Back to the catalogue</a></p>
+<script src="data/fixity.js"></script>
+<script>
+(function () {
+  var out = document.getElementById('out'), summary = document.getElementById('summary');
+  if (!window.FIXITY) { summary.innerHTML = '<span class="bad">data/fixity.js is missing: keep the folder together.</span>'; return; }
+  function hex(buf) { return Array.prototype.map.call(new Uint8Array(buf), function (b) { return ('0' + b.toString(16)).slice(-2); }).join(''); }
+  document.getElementById('folder').addEventListener('change', async function () {
+    var byPath = {};
+    Array.prototype.forEach.call(this.files, function (f) {
+      var rel = (f.webkitRelativePath || f.name).split('/').slice(1).join('/');
+      byPath[rel] = f;
+    });
+    out.innerHTML = ''; summary.textContent = 'Checking...';
+    var ok = 0, bad = 0;
+    for (var i = 0; i < FIXITY.files.length; i++) {
+      var f = FIXITY.files[i], tr = document.createElement('tr'), td1 = document.createElement('td'), td2 = document.createElement('td');
+      td1.textContent = f.path; tr.append(td1, td2); out.append(tr);
+      var file = byPath[f.path];
+      if (!file) { td2.innerHTML = '<span class="bad">missing</span>'; bad++; continue; }
+      var h = hex(await crypto.subtle.digest('SHA-256', await file.arrayBuffer()));
+      if (h === f.sha256) { td2.innerHTML = '<span class="ok">unchanged</span>'; ok++; } else { td2.innerHTML = '<span class="bad">changed</span>'; bad++; }
+    }
+    summary.innerHTML = ok + ' unchanged, ' + (bad ? '<span class="bad">' + bad + ' changed or missing</span>' : '0 changed or missing') + ', of ' + FIXITY.files.length + ' files.';
+  });
+})();
+</script>
+</body>
+</html>

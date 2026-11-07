@@ -67,6 +67,7 @@ use App\Http\Controllers\JurisdictionController;
 use App\Http\Controllers\LabelController;
 use App\Http\Controllers\LocalVocabularyController;
 use App\Http\Controllers\NameController;
+use App\Http\Controllers\OfflineCatalogueController;
 use App\Http\Controllers\OperationsController;
 use App\Http\Controllers\PackageController;
 use App\Http\Controllers\PasswordController;
@@ -370,6 +371,8 @@ Route::middleware('throttle:60,1')->prefix('shared')->name('share-links.')->wher
     Route::get('/{token}', [ShareLinkController::class, 'open'])->name('open');
     Route::get('/{token}/files/{file}', [ShareLinkController::class, 'file'])->whereUuid('file')->name('file');
 });
+// An offline catalogue downloaded by its link (roadmap phase 11c): for anyone holding it, while it opens.
+Route::get('/offline-catalogues/shared/{token}', [OfflineCatalogueController::class, 'shared'])->middleware('throttle:30,1')->where('token', '[A-Za-z0-9]{48}')->name('offline-catalogues.shared');
 // A folder of favourites opened by its link (roadmap phase 19a): for anyone holding it.
 Route::get('/favourites/shared/{token}', [FavouritesController::class, 'shared'])->middleware('throttle:60,1')->where('token', '[A-Za-z0-9]{48}')->name('favourites.shared');
 // A researcher's collection opened by its link (roadmap phase 19d): for anyone holding it.
@@ -1293,6 +1296,15 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/at-risk/pushed', [HeritageController::class, 'inbound'])->name('inbound');
         Route::post('/at-risk/pushed/{flag}', [HeritageController::class, 'review'])->name('review');
         Route::get('/displaced', [HeritageController::class, 'displaced'])->name('displaced');
+    });
+    // Offline catalogues (roadmap phase 11c): for accounts that may make them.
+    Route::middleware('can:'.Vocab::permission('make-offline-catalogues'))->prefix('offline-catalogues')->name('offline-catalogues.')->whereUuid(['catalogue', 'share'])->group(function () {
+        Route::get('/', [OfflineCatalogueController::class, 'index'])->name('index');
+        Route::post('/', [OfflineCatalogueController::class, 'store'])->name('store');
+        Route::get('/{catalogue}/download', [OfflineCatalogueController::class, 'download'])->name('download');
+        Route::post('/{catalogue}/delete', [OfflineCatalogueController::class, 'destroy'])->name('destroy');
+        Route::post('/{catalogue}/links', [OfflineCatalogueController::class, 'share'])->name('share');
+        Route::post('/{catalogue}/links/{share}/revoke', [OfflineCatalogueController::class, 'revoke'])->name('revoke');
     });
     // Repatriation claims (roadmap phase 17d2): for accounts that may manage them.
     Route::prefix('repatriation')->name('repatriation.')->whereUuid(['claim', 'share', 'contribution'])->group(function () {

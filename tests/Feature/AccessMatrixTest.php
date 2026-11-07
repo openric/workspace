@@ -65,6 +65,8 @@ use App\Models\Institution;
 use App\Models\InterfaceStringChange;
 use App\Models\MigrationPathway;
 use App\Models\NormalisationRule;
+use App\Models\OfflineCatalogue;
+use App\Models\OfflineCatalogueShare;
 use App\Models\Package;
 use App\Models\Proposal;
 use App\Models\ReadingRoom;
@@ -495,6 +497,13 @@ class AccessMatrixTest extends TestCase
 
             return [$claim, app(Dialogue::class)->grant($claim, ['grantee_role' => 'claimant'], $admin)[0],
                 app(Knowledge::class)->contribute($claim, ['type' => 'oral-history', 'body' => 'Remembered at harvest.'], null)];
+        });
+        // Phase 11c: an offline catalogue and a link to it.
+        $make('offline catalogue', function () use ($institution, $admin) {
+            $catalogue = OfflineCatalogue::create(['institution_id' => $institution->id, 'user_id' => $admin->id, 'title' => 'Everything',
+                'mode_id' => Concept::where('iri', Vocab::BASE.'offline-catalogue-mode/read-only')->value('id'), 'status_id' => Concept::where('iri', Vocab::BASE.'job-status/completed')->value('id')]);
+
+            return [$catalogue, OfflineCatalogueShare::create(['offline_catalogue_id' => $catalogue->id, 'token_hash' => hash('sha256', 'matrix'), 'created_by_id' => $admin->id])];
         });
         // Phase 17c: a proposed change to the interface's wording.
         $make('interface string change', fn () => InterfaceStringChange::findOrFail(app(InterfaceStrings::class)->propose($admin, 'af', 'Archival descriptions', 'Argiefbeskrywings (ons s\'n)')));

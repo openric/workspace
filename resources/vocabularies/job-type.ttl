@@ -13,7 +13,7 @@ v: a skos:ConceptScheme ;
     dcterms:title "OpenRiC Workspace Job Types"@en ;
     dcterms:description "The kinds of work the Workspace runs in the background."@en ;
     dcterms:issued "2026-10-27"^^xsd:date ;
-    skos:hasTopConcept v:import, v:viewing-copies, v:file-text, v:embedded-metadata, v:read-page-text, v:ai-assist .
+    skos:hasTopConcept v:import, v:viewing-copies, v:file-text, v:embedded-metadata, v:read-page-text, v:ai-assist, v:offline-catalogue .
 
 v:import a skos:Concept ;
     skos:inScheme v: ;
@@ -56,3 +56,10 @@ v:ai-assist a skos:Concept ;
     skos:prefLabel "Asking a model"@en ;
     skos:scopeNote "Operational: the work of a background job, not part of any RiC description."@en ;
     skos:definition "Asking a model through the AI gateway to find names in a description, summarise its pages or assess the condition of an object from its picture, each answer proposed for review (phase 17b)."@en .
+
+v:offline-catalogue a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Making an offline catalogue"@en, "Maak 'n aflyn-katalogus"@af ;
+    skos:scopeNote "Operational: the work of a background job, not part of any RiC description."@en ;
+    skos:definition "Writing descriptions, authority records, repositories and files into a package with a viewer that opens without a server, as Heratio's ahg-portable-export does (phase 11c)."@en .

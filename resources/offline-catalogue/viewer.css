@@ -1,0 +1,47 @@
+/* OpenRiC Workspace - the offline catalogue's viewer (roadmap phase 11c), after Heratio's ahg-portable-export. Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems. SPDX-License-Identifier: AGPL-3.0-or-later */
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#f7f7f7;color:#262626;line-height:1.45}
+a{color:#653332}
+header{background:#10373E;color:#F2EDE6;padding:1rem 1.25rem}
+header h1{margin:0;font-size:1.4rem;color:#E1B34F}
+header .meta{margin:.2rem 0 0;font-size:.85rem}
+header a{color:#F2EDE6}
+main{display:grid;grid-template-columns:minmax(260px,340px) 1fr;min-height:calc(100vh - 7rem)}
+.list{background:#fff;border-right:1px solid #ddd;overflow-y:auto;max-height:calc(100vh - 5rem)}
+.list .search{position:sticky;top:0;background:#fff;padding:.6rem;border-bottom:1px solid #eee}
+.list .search label{display:block;font-size:.8rem;font-weight:bold}
+.list .search input{width:100%;padding:.4rem .55rem;border:1px solid #999;border-radius:.25rem;font-size:.95rem}
+.list ul{list-style:none;margin:0;padding:0}
+.list li button{display:block;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid #f1f1f1;padding:.55rem .8rem;cursor:pointer;font:inherit;font-size:.92rem;color:inherit}
+.list li button:hover,.list li button:focus{background:#f3efe6}
+.list li button[aria-current="true"]{background:#F2EDE6;border-left:4px solid #E1B34F}
+.list .ident{display:block;font-size:.78rem;color:#555}
+.detail{padding:1.5rem 2rem;overflow-y:auto;max-height:calc(100vh - 5rem)}
+.detail h2{margin-top:0;color:#10373E}
+.detail .ident{color:#555;font-family:monospace}
+.detail dl{display:grid;grid-template-columns:minmax(140px,220px) 1fr;gap:.4rem 1rem}
+.detail dt{font-weight:bold;color:#10373E}
+.detail dd{margin:0;white-space:pre-wrap}
+.detail .files{display:flex;flex-wrap:wrap;gap:.6rem;margin:1rem 0}
+.detail .files figure{margin:0;max-width:260px}
+.detail .files img{max-width:260px;max-height:260px;border:1px solid #ddd;background:#fff;padding:.25rem}
+.detail .files figcaption{font-size:.8rem;color:#555}
+.empty{padding:2rem;color:#555;font-style:italic}
+.cap{margin-top:1.5rem;border-top:2px solid #e3e3e3;padding-top:1rem}
+.cap h3{color:#10373E}
+.cap [role=tablist]{display:flex;gap:.3rem;flex-wrap:wrap;margin-bottom:.6rem}
+.cap [role=tab]{border:1px solid #10373E;background:#fff;padding:.3rem .7rem;border-radius:1rem;cursor:pointer;color:#10373E}
+.cap [role=tab][aria-selected=true]{background:#10373E;color:#F2EDE6}
+.cap label{display:block;font-size:.85rem;font-weight:bold;margin-top:.3rem}
+.cap textarea,.cap input{width:100%;padding:.4rem .5rem;border:1px solid #999;border-radius:.25rem;font:inherit;font-size:.9rem;margin-bottom:.4rem}
+.cap textarea{min-height:100px}
+.cap .btn{padding:.4rem .9rem;background:#10373E;color:#F2EDE6;border:0;border-radius:.25rem;cursor:pointer}
+.cap .entry{background:#f6f8fa;border:1px solid #e2e6ea;padding:.45rem .6rem;margin-bottom:.35rem;display:flex;justify-content:space-between;gap:.5rem}
+.cap .entry button{background:none;border:0;color:#653332;cursor:pointer;font-weight:bold}
+.syncbar{position:sticky;bottom:0;background:#10373E;color:#F2EDE6;display:flex;align-items:center;gap:1rem;padding:.6rem 1.25rem;flex-wrap:wrap}
+.syncbar[hidden]{display:none}
+.syncbar .grow{flex:1;font-size:.85rem}
+.syncbar button{padding:.45rem 1rem;border:0;border-radius:.25rem;cursor:pointer;font-weight:bold}
+.syncbar .save{background:#E1B34F;color:#262626}
+.syncbar .reset{background:#C3CDCE;color:#262626}
+@media (max-width:700px){main{grid-template-columns:1fr}.list,.detail{max-height:none}.detail{padding:1rem}.detail dl{grid-template-columns:1fr}}

@@ -6,6 +6,9 @@
     <h1>{{ __('Export :name', ['name' => $record->described('title', ['en'])]) }}</h1>
     <p>{{ __('Only the units inside it that you may read are exported. Only accepted or disputed relations are exported, and only those whose other end you may read.') }}</p>
     <p>{{ __('Each format carries part of a description. Under each, what of this unit it does not carry, found by reading the export itself;') }} <a href="{{ route('records.export.loss', $record) }}">{{ __('the same for every format and RiC-O, as JSON') }}</a>.</p>
+    @if(auth()->user()->hasPermission(\App\Support\Vocab::permission('make-offline-catalogues')))
+        <p><a href="{{ route('offline-catalogues.index', ['record' => $record->id]) }}">{{ __('Offline catalogue of this unit and everything inside it') }}</a></p>
+    @endif
     @foreach($formats as $format => [$name, $holds])
         <form method="get" action="{{ route('records.export.download', [$record, $format]) }}">
             <fieldset>

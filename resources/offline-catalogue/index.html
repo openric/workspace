@@ -1,0 +1,35 @@
+<!doctype html>
+<!-- OpenRiC Workspace - the offline catalogue's viewer (roadmap phase 11c), after Heratio's ahg-portable-export. Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems. SPDX-License-Identifier: AGPL-3.0-or-later -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{title}}</title>
+<link rel="stylesheet" href="viewer.css">
+</head>
+<body>
+<header>
+  <h1>{{title}}</h1>
+  <p class="meta" id="institution"></p>
+  <p class="meta">{{counts}} · <a href="verify.html">Check that nothing was changed</a></p>
+</header>
+<main>
+  <nav class="list" aria-label="Descriptions">
+    <div class="search"><label for="q">Search</label><input type="search" id="q" placeholder="Title, reference code or text"></div>
+    <ul id="records"></ul>
+  </nav>
+  <section class="detail" id="detail" aria-live="polite">
+    <p class="empty">Choose a description from the list to see it here.</p>
+  </section>
+</main>
+<div class="syncbar" id="syncbar" hidden>
+  <span class="grow"><strong>Working offline.</strong> What you add is kept in this browser. When you can reach the Workspace again, click <em>Save for return</em> and import the file under Research, Submissions.</span>
+  <span class="count" id="synccount">0 changes</span>
+  <button class="reset" id="syncreset" type="button">Clear</button>
+  <button class="save" id="syncsave" type="button">Save for return</button>
+</div>
+<noscript><p class="empty">The viewer needs JavaScript. The descriptions are also in data/catalogue.json and data/catalogue.jsonld.</p></noscript>
+<script src="data/catalogue.js"></script>
+<script src="viewer.js"></script>
+</body>
+</html>

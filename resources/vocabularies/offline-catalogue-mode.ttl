@@ -1,0 +1,37 @@
+# OpenRiC Workspace - OpenRiC Workspace Offline Catalogue Modes.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What an offline catalogue is for (Heratio's portable_export.mode, roadmap phase 11c).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/offline-catalogue-mode/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Offline Catalogue Modes"@en ;
+    dcterms:description "What an offline catalogue is for (Heratio's portable_export.mode, roadmap phase 11c)."@en ;
+    dcterms:issued "2026-11-07"^^xsd:date ;
+    skos:hasTopConcept v:read-only, v:editable, v:archive .
+
+v:read-only a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Read only"@en, "Slegs lees"@af ;
+    skos:scopeNote "Not a RiC-O term: how the institution hands its catalogue out, as Heratio's ahg-portable-export does. Built as the public sees the catalogue: published descriptions and the files the public may receive, never a master."@en ;
+    skos:definition "A catalogue to browse and search offline, on a USB stick or a reading-room computer."@en .
+
+v:editable a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Editable"@en, "Wysigbaar"@af ;
+    skos:scopeNote "Not a RiC-O term: how the institution hands its catalogue out, as Heratio's ahg-portable-export does. Built as the public sees the catalogue; what a researcher writes is saved as PSIS's researcher exchange file (format 1.0), which the Workspace takes back as a draft submission (phase 19j)."@en ;
+    skos:definition "A read-only catalogue in which a researcher may also write notes, sources, suggested corrections and files about each record, offline, and save them to bring back."@en .
+
+v:archive a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Archive"@en, "Argief"@af ;
+    skos:scopeNote "Not a RiC-O term: how the institution hands its catalogue out, as Heratio's ahg-portable-export does. Built as the account that makes it may read the catalogue, drafts too where it may see them, and with masters where it may download them; never shared by link."@en ;
+    skos:definition "A copy for the institution's own staff, as the account that made it reads the catalogue."@en .
