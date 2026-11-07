@@ -37,3 +37,24 @@ Richard Williamson (EGAD) answered on the Records in Contexts users list on 3 No
 - RiC-O has no way to say that a title translates another. An extension term (`openricx:isTranslationOf`) is asked of the specification in [openric/spec#74](https://github.com/openric/spec/issues/74); until it is defined, the order is the only sign of the original.
 
 Evidence: `tests/Feature/RicScenariosTest.php` (scenario S5: a record titled in English and Afrikaans publishes two `rico:Title` nodes, the original first, beside its two `rico:title` values).
+
+## Amendment of 6 November 2026: an authority record is a record too; the extension declared
+
+Richard Williamson answered again on 6 November 2026. There are two ways to treat an authority record, and they can stand together:
+
+- **As a network of entities.** Migrate it into the network RiC-AG §5 maps out. The Workspace does this already: the agent, its names, its dates and its relations.
+- **As a record in its own right.** It documents how an agent was described. Its documentary form is set to Authority record, and the activity it documents is named.
+
+On names and titles, his "at least one `rico:Title`" was deliberate. One name or title per language, which is what the Workspace publishes, and a single one with structured language variants are both open to an implementation, and RiC will likely allow both. Where RiC stops, he advises an implementation to say which extension it uses, so that consumers can take it into account. Dr Johan Pieterse chose the same day to do both.
+
+- **The authority record.** An agent with any of its ISAAR(CPF) control area (5.4) is published with `rico:isOrWasDescribedBy` a `rico:Record` (`{agent}#authority-record`) that carries:
+  - its documentary form, Authority record (the record-documentary-form vocabulary);
+  - `rico:describesOrDescribed` the agent;
+  - the description identifier, its status as `rico:hasRecordState`, and the maintaining repository as its holder;
+  - the rules and conventions as a `rico:Rule`, the dates of description as `rico:hasModificationDate`, and the institution identifiers, languages, sources, maintenance notes and level of detail as notes;
+  - `rico:resultsOrResultedFrom` the activity of describing the agent (`{agent}#description`), performed by the maintaining repository, under those rules and dated.
+- **Its title.** It takes the agent's authorised name, as the shapes ask of a record. Before this, the control area was not published at all.
+- **The extension declared.** The dataset description (`/api/ric/v1/dataset`) lists the vocabularies its data uses (`void:vocabulary`) and says what `openricx:` adds where RiC-O 1.1 stops, including the title and name nodes of the 3 November amendment. The federation protocol document (`/open-data/protocol`) names the ontologies and that `openricx` extends `rico`.
+
+Evidence: `tests/Feature/ShaclGateTest.php` (the council's authority record, conforming to all seven OpenRiC shapes).
+

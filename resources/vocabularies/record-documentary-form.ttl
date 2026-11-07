@@ -1,0 +1,23 @@
+# OpenRiC Workspace - OpenRiC Workspace Documentary Forms of the Workspace's Own Records.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# The documentary form of a record the Workspace keeps about its own description, such as an authority record, exported with it as a rico:Record.
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/record-documentary-form/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Documentary Forms of the Workspace's Own Records"@en ;
+    dcterms:description "The documentary form of a record the Workspace keeps about its own description, such as an authority record, exported with it as a rico:Record."@en ;
+    dcterms:issued "2026-11-06"^^xsd:date ;
+    skos:hasTopConcept v:authority-record .
+
+v:authority-record a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Authority record"@en, "Gesagsrekord"@af ;
+    skos:scopeNote "Kept as a rico:DocumentaryFormType: the documentary form of a record the Workspace itself makes, such as the authority record that describes an agent (Richard Williamson, EGAD, on the Records in Contexts users list, 6 November 2026)."@en ;
+    skos:definition "A record that describes an agent: its names, existence and relations, and how, when and by whom it was described (ISAAR(CPF) 5.4)."@en .

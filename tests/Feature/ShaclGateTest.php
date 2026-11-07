@@ -68,6 +68,11 @@ class ShaclGateTest extends TestCase
         app(DateService::class)->add($fonds, ['property' => 'creation', 'normalized' => '1902/1950-06', 'expressed' => '1902 to 1950', 'language' => 'en']);
         $item = $records->create($institution, self::LEVEL.'item', 'Minute book', 'en', $fonds, null, '1');
         $council = app(AgentService::class)->create($institution, 'corporate-body', 'Riverside Parish Council', 'en');
+        // Its authority record, from its ISAAR(CPF) control area: a rico:Record of its own (6 November 2026).
+        app(AgentService::class)->describe($council, ['agent-rules-conventions' => 'ISAAR(CPF), second edition', 'agent-description-dates' => 'Created 12 May 2026.',
+            'agent-sources' => 'Council minute books, 1902-1960.'], 'en');
+        $council->update(['description_identifier' => 'RA-AR-001', 'maintainer_id' => $holder->id,
+            'description_status_id' => Concept::where('iri', 'https://workspace.openric.org/vocab/description-status/final')->value('id')]);
         $person = app(AgentService::class)->create($institution, 'person', 'Engelbrecht, Johanna', 'en');
         app(DateService::class)->add($person, ['property' => 'birth', 'normalized' => '1871']);
         app(RelationService::class)->create($fonds, 'creation', $council, [], $editor);
@@ -108,6 +113,14 @@ class ShaclGateTest extends TestCase
             'instantiation' => $this->get(self::API."/instantiations/{$paper->id}")->assertOk()->getContent(),
             'function' => $this->get(self::API."/functions/{$keeping->id}")->assertOk()->getContent(),
         ];
+        // The council's authority record is a rico:Record of the documentary form Authority record, resulting from describing it.
+        $record = json_decode($documents['corporate body'], true)['rico:isOrWasDescribedBy'];
+        $this->assertSame(['rico:Record', 'https://workspace.openric.org/vocab/record-documentary-form/authority-record', $council->iri, 'RA-AR-001', $holder->iri, 'rico:Activity'],
+            [$record['@type'], $record['rico:hasDocumentaryFormType']['@id'], $record['rico:describesOrDescribed']['@id'], $record['rico:identifier'], $record['rico:hasOrHadHolder']['@id'],
+                $record['rico:resultsOrResultedFrom']['@type']]);
+        $this->assertSame('ISAAR(CPF), second edition', $record['rico:isOrWasRegulatedBy']['rico:name']['@value']);
+        $this->assertArrayNotHasKey('rico:isOrWasDescribedBy', json_decode($documents['person'], true), 'no control area, no authority record');
+        $this->assertContains(['@id' => 'https://openric.org/ns/ext/v1#'], $this->get(self::API.'/dataset')->json('void:vocabulary'));
         foreach ($documents as $what => $json) {
             $data = tempnam(sys_get_temp_dir(), 'shacl').'.jsonld';
             file_put_contents($data, $json);

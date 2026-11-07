@@ -26,6 +26,12 @@ class DatasetController extends Controller
         'https://openric.org/ns/ext/v1' => 'OpenRiC extension ontology 1.6.0',
     ];
 
+    /** The namespaces the published data uses. */
+    public const VOCABULARIES = ['https://www.ica.org/standards/RiC/ontology#', 'https://openric.org/ns/ext/v1#', 'https://openric.org/ns/v1#',
+        'http://www.w3.org/2004/02/skos/core#', 'http://purl.org/dc/terms/', 'http://www.w3.org/ns/prov#'];
+
+    public const EXTENSION_NOTE = 'The data is RiC-O 1.1, extended where RiC-O stops by the OpenRiC extension ontology (openricx:, https://openric.org/ns/ext/v1#): date ranges and their sets, other and alternative forms of names, contact points, containers and carriers, checksums, the status of an assertion and the receipt of a model\'s inference, among others. Each title and name is also a rico:Title or rico:AgentName node of its own, one a language, beside its language-tagged rico:title or rico:name. An agent\'s authority record is a rico:Record of its own, of the documentary form Authority record, resulting from the activity of describing the agent. A consumer reading only RiC-O 1.1 loses the openricx: statements and nothing else.';
+
     public function dataset(Request $request): JsonResponse
     {
         $institution = $request->attributes->get('institution');
@@ -44,6 +50,10 @@ class DatasetController extends Controller
             'dcterms:publisher' => ['@type' => 'foaf:Organization', 'foaf:name' => $institution->name],
             'dcat:version' => trim((string) @file_get_contents(base_path('VERSION'))) ?: 'unknown',
             'dcterms:conformsTo' => collect(self::PINNED)->map(fn ($label, $iri) => ['@id' => $iri, 'rdfs:label' => $label])->values()->all(),
+            // The vocabularies the data uses, and what the extension adds, so a consumer can take it into account where
+            // RiC-O 1.1 stops (Richard Williamson, EGAD, Records in Contexts users list, 6 November 2026).
+            'void:vocabulary' => array_map(fn ($iri) => ['@id' => $iri], self::VOCABULARIES),
+            'rdfs:comment' => self::EXTENSION_NOTE,
             'void:uriSpace' => rtrim($institution->base_iri, '/').'/',
             'void:rootResource' => ['@id' => route('api.records')],
             'dcat:distribution' => [

@@ -16,6 +16,7 @@ use App\Federation\Harvest;
 use App\Federation\Trust;
 use App\Federation\UnionCatalogue;
 use App\Federation\VocabularySync;
+use App\Http\Controllers\Api\DatasetController;
 use App\Models\Concept;
 use App\Models\FederationJoinRequest;
 use App\Models\FederationMember;
@@ -64,7 +65,11 @@ class FederationController extends Controller
             'federation' => ['surfaces' => ['search', 'union', 'vocabularies'], 'search_url' => route('federation.answer'), 'public_key_url' => route('federation.key'),
                 'peer_index' => route('federation.index-public'), 'union_url' => route('federation.union-records'), 'vocabularies_url' => route('federation.vocabularies'),
                 'network_url' => route('federation.network'), 'join_url' => route('federation.join'),
-                'signature' => Trust::SCHEME, 'shares' => FederationShareSetting::for($institution->id)->share_enabled]], 200, [], JSON_UNESCAPED_SLASHES)
+                'signature' => Trust::SCHEME, 'shares' => FederationShareSetting::for($institution->id)->share_enabled],
+            // The ontologies its data uses, the extension declared (6 November 2026).
+            'ontologies' => ['rico' => ['namespace' => 'https://www.ica.org/standards/RiC/ontology#', 'version' => '1.1'],
+                'openricx' => ['namespace' => 'https://openric.org/ns/ext/v1#', 'extends' => 'rico', 'document' => 'https://openric.org/ns/ext/v1'],
+                'note' => DatasetController::EXTENSION_NOTE, 'dataset' => route('api.dataset')]], 200, [], JSON_UNESCAPED_SLASHES)
             ->header('Access-Control-Allow-Origin', '*');
     }
 

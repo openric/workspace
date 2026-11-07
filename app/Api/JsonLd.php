@@ -35,6 +35,7 @@ use App\Relations\EntityKinds;
 use App\Relations\RelationService;
 use App\Relations\RelationTypes;
 use App\Rights\PublicRights;
+use App\Support\Vocab;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 
@@ -239,8 +240,50 @@ class JsonLd
         if ($names = $this->appellations($agent, 'rico:AgentName')) {
             $out['rico:hasOrHadAgentName'] = $names;
         }
+        if ($record = $this->authorityRecord($agent, $out['rico:name'] ?? null)) {
+            $out['rico:isOrWasDescribedBy'] = $record;
+        }
 
         return $out + $this->relations($agent);
+    }
+
+    /**
+     * The authority record that describes an agent, its ISAAR(CPF) control area (5.4), as a rico:Record beside the
+     * network of entities the agent is: of the documentary form Authority record, resulting from the activity of
+     * describing it, which its maintaining repository performed under its rules and conventions. Richard Williamson
+     * (EGAD), Records in Contexts users list, 6 November 2026: an authority record may be judged a record in its own
+     * right, its documentary form set and the activity it documents named. Nothing where the control area is empty.
+     */
+    private function authorityRecord(Agent $agent, mixed $title): ?array
+    {
+        $notes = collect(['agent-institution-identifiers', 'agent-languages-scripts', 'agent-sources', 'agent-maintenance-notes'])
+            ->map(fn ($n) => $this->text($agent, $n))->filter()->flatMap(fn ($v) => isset($v['@value']) ? [$v] : $v);
+        if ($agent->descriptionDetail) {
+            $notes->push(['@value' => 'Level of detail: '.$agent->descriptionDetail->label(['en']), '@language' => 'en']);
+        }
+        $rules = $this->text($agent, 'agent-rules-conventions');
+        $dates = $this->text($agent, 'agent-description-dates');
+        $maintainer = $agent->maintainer && $this->view->readable($agent->maintainer) ? ['@id' => $agent->maintainer->iri] : null;
+        if ($notes->isEmpty() && ! $rules && ! $dates && ! $maintainer && ! $agent->description_identifier && ! $agent->descriptionStatus) {
+            return null;
+        }
+        $iri = $agent->iri.'#authority-record';
+        $activity = array_filter(['@id' => $agent->iri.'#description', '@type' => 'rico:Activity',
+            'rico:name' => ['@value' => 'Description of the agent', '@language' => 'en'], 'rico:isOrWasPerformedBy' => $maintainer,
+            // The rules or conventions it followed: a rule titled as written, as the OpenRiC shapes ask of a rule.
+            'rico:isOrWasRegulatedBy' => $rules ? ['@type' => 'rico:Rule', 'rico:title' => $rules, 'rico:name' => $rules,
+                'openricx:descriptiveNote' => ['@value' => 'The rules or conventions the description of the agent followed (ISAAR(CPF) 5.4.3).', '@language' => 'en']] : null,
+            // When it was described: the dates as written, else the day the Workspace's record of it was made.
+            'rico:isAssociatedWithDate' => ['@type' => 'rico:Date'] + ($dates ? ['rico:expressedDate' => $dates] : ['rico:normalizedDateValue' => $agent->created_at?->toDateString()])]);
+
+        return array_filter(['@id' => $iri, '@type' => 'rico:Record', 'rico:title' => $title,
+            'rico:hasDocumentaryFormType' => ['@id' => Vocab::BASE.'record-documentary-form/authority-record'],
+            'rico:describesOrDescribed' => ['@id' => $agent->iri], 'rico:identifier' => $agent->description_identifier,
+            'rico:hasRecordState' => $agent->descriptionStatus ? ['@id' => $agent->descriptionStatus->iri] : null,
+            'rico:hasOrHadHolder' => $maintainer, 'rico:isOrWasRegulatedBy' => $activity['rico:isOrWasRegulatedBy'] ?? null,
+            'rico:hasModificationDate' => $dates ? ['@type' => 'rico:Date', 'rico:expressedDate' => $dates] : null,
+            'rico:note' => $notes->isEmpty() ? null : ($notes->count() === 1 ? $notes->first() : $notes->values()->all()),
+            'rico:resultsOrResultedFrom' => $activity]);
     }
 
     public function repository(Repository $repository, bool $withContext = true): array

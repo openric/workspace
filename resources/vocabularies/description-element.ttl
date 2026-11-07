@@ -479,42 +479,42 @@ v:agent-institution-identifiers a skos:Concept ;
     skos:inScheme v: ;
     skos:broader v:isaar-cpf ;
     skos:prefLabel "Institution identifiers"@en ;
-    skos:scopeNote "ISAAR(CPF) 5.4.2; description control, exported as rico:note; the maintaining repository is kept as a link."@en ;
+    skos:scopeNote "ISAAR(CPF) 5.4.2; description control, exported as rico:note of the agent's authority record (a rico:Record, its documentary form Authority record); the maintaining repository is kept as a link, the record's rico:hasOrHadHolder."@en ;
     skos:definition "The agency or agencies responsible for the authority record."@en .
 
 v:agent-rules-conventions a skos:Concept ;
     skos:inScheme v: ;
     skos:broader v:isaar-cpf ;
     skos:prefLabel "Rules or conventions"@en ;
-    skos:scopeNote "ISAAR(CPF) 5.4.3; description control, exported as rico:isOrWasRegulatedBy a rico:Rule."@en ;
+    skos:scopeNote "ISAAR(CPF) 5.4.3; description control, exported as rico:isOrWasRegulatedBy a rico:Rule, of the agent's authority record (a rico:Record) and of the activity of describing it."@en ;
     skos:definition "The national or international conventions or rules the authority record follows."@en .
 
 v:agent-description-dates a skos:Concept ;
     skos:inScheme v: ;
     skos:broader v:isaar-cpf ;
     skos:prefLabel "Dates of creation, revision or deletion"@en ;
-    skos:scopeNote "ISAAR(CPF) 5.4.6; description control, the dates as written, exported as rico:expressedDate of the rico:Date linked by rico:hasModificationDate."@en ;
+    skos:scopeNote "ISAAR(CPF) 5.4.6; description control, the dates as written, exported as rico:expressedDate of the rico:Date linked by rico:hasModificationDate from the agent's authority record (a rico:Record)."@en ;
     skos:definition "When the authority record was prepared, revised or deleted."@en .
 
 v:agent-languages-scripts a skos:Concept ;
     skos:inScheme v: ;
     skos:broader v:isaar-cpf ;
     skos:prefLabel "Languages and scripts"@en ;
-    skos:scopeNote "ISAAR(CPF) 5.4.7; description control, exported as rico:note until the languages are linked as rico:Language entities (rico:hasOrHadLanguage)."@en ;
+    skos:scopeNote "ISAAR(CPF) 5.4.7; description control, exported as rico:note of the agent's authority record (a rico:Record) until the languages are linked as rico:Language entities (rico:hasOrHadLanguage)."@en ;
     skos:definition "The languages and scripts the authority record is written in."@en .
 
 v:agent-sources a skos:Concept ;
     skos:inScheme v: ;
     skos:broader v:isaar-cpf ;
     skos:prefLabel "Sources"@en ;
-    skos:scopeNote "ISAAR(CPF) 5.4.8; description control, exported as rico:note."@en ;
+    skos:scopeNote "ISAAR(CPF) 5.4.8; description control, exported as rico:note of the agent's authority record (a rico:Record)."@en ;
     skos:definition "The sources consulted in writing the authority record."@en .
 
 v:agent-maintenance-notes a skos:Concept ;
     skos:inScheme v: ;
     skos:broader v:isaar-cpf ;
     skos:prefLabel "Maintenance notes"@en ;
-    skos:scopeNote "ISAAR(CPF) 5.4.9; description control, exported as rico:note."@en ;
+    skos:scopeNote "ISAAR(CPF) 5.4.9; description control, exported as rico:note of the agent's authority record (a rico:Record)."@en ;
     skos:definition "Notes on how the authority record was made and changed."@en .
 
 v:activity a skos:Concept ;
