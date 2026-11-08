@@ -8,7 +8,7 @@
         @continue
     @endunless
     <details>
-        <summary>{{ $summary }} @include('description._ric', ['term' => $date->property]) <small lang="en">{{ __('- edit or remove') }}</small></summary>
+        <summary>{{ $summary }} @include('description._ric', ['term' => $date->property, 'plain' => true]) <small lang="en">{{ __('- edit or remove') }}</small></summary>
         <form method="post" action="{{ route('dates.update', [$kind, $subject->getKey(), $date]) }}">
             @csrf
             @include('description._date-fields', ['date' => $date, 'prefix' => 'd'.$loop->index])

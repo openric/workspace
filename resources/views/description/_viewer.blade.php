@@ -69,6 +69,19 @@
         </script>
     @endonce
     <script>document.addEventListener('DOMContentLoaded', () => initIiifViewer(@json($viewerId), @json($url($image)), @json($title), @json($mode), []));</script>
+    @once
+        {{-- OpenSeadragon 6 marks its navigator's container, a div, as aria-pressed; only a button may be (WCAG 4.1.2, axe
+             aria-allowed-attr). Taken off wherever OpenSeadragon puts it, as often as it does, without changing its file. --}}
+        <script>
+            (() => {
+                const fix = (el) => { if (el.tagName !== 'BUTTON' && el.getAttribute('role') !== 'button' && el.closest('.openseadragon-container, [id^="navigator"]')) el.removeAttribute('aria-pressed'); };
+                new MutationObserver((changes) => changes.forEach((c) => {
+                    if (c.type === 'attributes') { fix(c.target); return; }
+                    c.addedNodes.forEach((n) => n.nodeType === 1 && [n, ...n.querySelectorAll('[aria-pressed]')].forEach((el) => el.hasAttribute('aria-pressed') && fix(el)));
+                })).observe(document.documentElement, {subtree: true, childList: true, attributes: true, attributeFilter: ['aria-pressed']});
+            })();
+        </script>
+    @endonce
 @elseif($kind === 'pdf')
     <div class="file-viewer pdf-viewer" id="{{ $viewerId }}" data-src="{{ $url($master) }}">
         <div class="viewer-modes" role="group" aria-label="{{ __('Pages') }}">

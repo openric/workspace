@@ -1690,3 +1690,18 @@ Added on 8 November 2026 with phase 21, 3D only.
 
 : 3D models, field by field
 
+### Accessibility (`ahg-core` statement, Heratio's tests/e2e)
+
+Added on 8 November 2026 with the R1 accessibility check, after the external production-readiness assessment of 7 November.
+
+| Heratio | Workspace | Status |
+|---|---|---|
+| `/accessibility-statement` (W3C model: commitment, conformance, what is accessible, known limitations, report a barrier, preparation) | `/accessibility-statement`, in the catalogue's footer | Same, from v0.0.142; the barrier is reported through the catalogue's feedback form, so it needs no settings of its own |
+| `accessibility_*` settings (institution, contact email and URL, conformance label, WCAG version, statement date, response days) | The institution's name and the Workspace version | Narrower: the statement describes the software as checked; an institution's own wording waits for a settings page |
+| tests/e2e/05-ui-components/accessibility.spec.ts and a11y-baseline.json (axe-core, WCAG 2.2 AA, critical and serious) | tests/browser/accessibility.spec.ts and a11y-baseline.json, run in CI on the demonstration dataset | Same; empty baseline |
+| none | tests/browser/keyboard.spec.ts: the demonstration scenario's main steps by keyboard alone, focus always shown | New |
+| none | `php artisan workspace:demo`: the V0.1 demonstration dataset | New |
+| `/admin/accessibility` (coverage report over the metadata), `/admin/alt-text` (alt-text worklist) | none yet | Later |
+
+: Accessibility, field by field
+

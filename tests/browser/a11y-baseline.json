@@ -1,0 +1,20 @@
+{
+  "_note": "Known axe violations (critical or serious) per page: rule id -> node count. The check fails on a new rule or a higher count. Keep these at zero; never raise them to make a run pass (as Heratio's heratio#1532 baseline).",
+  "catalogue": {},
+  "search": {},
+  "sign-in": {},
+  "accessibility statement": {},
+  "record": {},
+  "authority record": {},
+  "staff dashboard": {},
+  "staff records": {},
+  "staff authority records": {},
+  "staff import": {},
+  "staff export": {},
+  "staff offline catalogues": {},
+  "staff search": {},
+  "staff record": {},
+  "staff record form": {},
+  "staff authority record form": {},
+  "staff 3d model": {}
+}

@@ -49,6 +49,7 @@
         .long > details > summary::-webkit-details-marker { display: none; }
         .long > details[open] .long-more, .long > details:not([open]) .long-less { display: none; }
         :focus-visible { outline: 3px solid var(--link); outline-offset: 2px; border-radius: 3px; }
+        .skip { position: absolute; left: -999px; } .skip:focus { left: 1rem; top: .5rem; z-index: 10; background: var(--bg); padding: .5rem; }
 
         /* Header: the institution's name and logo, with "Workspace" as the product label, as on every OpenRiC surface. */
         /* Full-width bars, their content on the same 1180px column as openric.org's navigation. */

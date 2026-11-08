@@ -22,7 +22,7 @@
         .(($from || $to) ? ', '.($from ?? '?').' to '.($to ?? '?') : '')
         .' ('.$standingLabels[$relation->standing()].')')
     <details>
-        <summary>{{ $summary }} @include('description._ric', ['term' => $relation->ricTerm()])@if($canUpdate) <small lang="en">{{ __('- assert, edit or remove') }}</small>@endif</summary>
+        <summary>{{ $summary }} @include('description._ric', ['term' => $relation->ricTerm(), 'plain' => true])@if($canUpdate) <small lang="en">{{ __('- assert, edit or remove') }}</small>@endif</summary>
         <p><a href="{{ \App\Relations\EntityKinds::route($relation->other) }}">{{ \App\Relations\EntityKinds::label($relation->other) }}</a>.
            {{ collect([$relation->relationType->label(\App\Support\Vocab::languages()), $relation->state?->label(\App\Support\Vocab::languages()), $relation->certainty ? mb_strtolower($relation->certainty->label(\App\Support\Vocab::languages())) : null])->filter()->join(', ') }}.
            @if($relation->description)<br><span lang="{{ $relation->language }}">{{ $relation->description }}</span>@endif

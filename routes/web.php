@@ -133,6 +133,7 @@ use App\Http\Controllers\WorkflowController;
 use App\Http\Controllers\WorkflowQueueController;
 use App\Http\Middleware\ServeDiscovery;
 use App\Http\Middleware\SetLocale;
+use App\Models\Institution;
 use App\Privacy\Registers;
 use App\Relations\EntityKinds;
 use App\Reports\ReportService;
@@ -368,6 +369,9 @@ Route::middleware('throttle:60,1')->prefix('repatriation/shared')->where(['token
     Route::post('/{token}', [PublicRepatriationController::class, 'sharedMessage'])->middleware('throttle:10,1')->name('repatriation.shared.message');
 });
 // Feedback on the catalogue or a record (roadmap phase 19a, ADR 0017): for anyone, rate limited.
+// The accessibility statement (roadmap R1 hardening, after Heratio's /accessibility-statement): public, read only.
+Route::get('/accessibility-statement', fn () => view('accessibility-statement', ['institution' => Institution::current() ?? Institution::orderBy('created_at')->first()]))
+    ->middleware(ServeDiscovery::class)->name('accessibility.statement');
 Route::get('/feedback', [FeedbackController::class, 'create'])->name('feedback.create');
 Route::post('/feedback', [FeedbackController::class, 'store'])->middleware('throttle:5,1')->name('feedback.store');
 Route::get('/feedback/thanks', [FeedbackController::class, 'thanks'])->name('feedback.thanks');

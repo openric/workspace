@@ -58,6 +58,7 @@
             @foreach($sitePages as $sitePage)<a href="{{ route('site.'.$sitePage->slug) }}">{{ $sitePage->translation(\App\Support\Vocab::languages())?->title }}</a>@endforeach
             @if($hasArticles)<a href="{{ route('site.articles-public') }}">{{ __('Articles') }}</a>@endif
             <a href="{{ route('help.index') }}">{{ __('Help') }}</a>
+            <a href="{{ route('accessibility.statement') }}">{{ __('Accessibility') }}</a>
         </nav>
     {!! __('Described in RiC (Records in Contexts). The data is open through the :api and :oai.', ['api' => '<a href="'.e(route('api.service')).'">'.e(__('OpenRiC API')).'</a>', 'oai' => '<a href="'.e(route('api.oai')).'?verb=Identify">OAI-PMH</a>']) !!}
 </footer>

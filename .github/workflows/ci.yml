@@ -74,6 +74,65 @@ jobs:
         env:
           SHACL_REQUIRED: '1'
 
+  # Roadmap R1 hardening (external assessment of 7 November 2026): WCAG 2.2 AA with axe-core on the main public and staff
+  # pages, and the demonstration scenario's main steps by keyboard alone, against a Workspace holding the demonstration
+  # dataset. A new critical or serious violation fails the run, so the tag check refuses the release.
+  accessibility:
+    name: Accessibility (WCAG 2.2 AA)
+    if: github.ref_type != 'tag'
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: pgvector/pgvector:0.6.0-pg16
+        env:
+          POSTGRES_USER: workspace
+          POSTGRES_PASSWORD: workspace
+          POSTGRES_DB: openric_workspace_a11y
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U workspace"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DB_CONNECTION: pgsql
+      DB_HOST: 127.0.0.1
+      DB_PORT: 5432
+      DB_DATABASE: openric_workspace_a11y
+      DB_USERNAME: workspace
+      DB_PASSWORD: workspace
+      DEMO_PASSWORD: demonstration-password
+      WORKSPACE_URL: http://127.0.0.1:8000
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # v2
+        with:
+          php-version: '8.3'
+          extensions: pdo_pgsql, intl, mbstring, xmlreader, dom, imagick, gd, fileinfo, zip
+          coverage: none
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '20'
+      - name: Image and PDF tools
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends imagemagick poppler-utils fonts-dejavu-core
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress && npm ci
+      - name: A Workspace with the demonstration dataset
+        run: |
+          cp .env.example .env && php artisan key:generate
+          PGPASSWORD=workspace psql -h 127.0.0.1 -U workspace -d openric_workspace_a11y -c 'CREATE EXTENSION IF NOT EXISTS vector'
+          php artisan migrate --force
+          php artisan workspace:install --institution="Riverside Demonstration Archive (synthetic)" --base-iri=https://demo.example.org \
+            --admin-name="Demonstration administrator" --admin-email=admin@demo.invalid --skip-openric-vocabularies --no-interaction
+          php artisan workspace:demo --password="$DEMO_PASSWORD"
+          php artisan serve --host=127.0.0.1 --port=8000 > storage/logs/serve.log 2>&1 &
+          for i in $(seq 1 30); do curl -fsS -o /dev/null http://127.0.0.1:8000/sign-in && break; sleep 1; done
+      - name: Chromium for Playwright
+        run: npx playwright install --with-deps chromium
+      - name: WCAG 2.2 AA and the keyboard walkthrough
+        run: npx playwright test
+
   release-tag:
     name: The tag is signed and its commit passed on main
     if: github.ref_type == 'tag'
@@ -97,9 +156,15 @@ jobs:
 
   # Roadmap phase 23 (hardening): known vulnerabilities in the locked dependencies, secrets anywhere in the history,
   # and a software bill of materials kept with every run, so each release tag has its own.
+  # Release downloads come with the job's own token and are retried: GitHub throttles anonymous downloads in an incident
+  # (8 November 2026, when this job failed for hours on v0.0.141), and each file is checked against its published SHA-256.
   security:
     name: Dependencies, secrets and SBOM
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      GH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
@@ -112,10 +177,17 @@ jobs:
         run: composer audit --locked --no-interaction
       - name: Secrets in the history (gitleaks)
         run: |
-          curl -sSfL https://github.com/gitleaks/gitleaks/releases/download/v8.21.2/gitleaks_8.21.2_linux_x64.tar.gz | tar -xz gitleaks
+          for i in 1 2 3 4 5; do gh release download v8.21.2 -R gitleaks/gitleaks -p 'gitleaks_8.21.2_linux_x64.tar.gz' -p 'gitleaks_8.21.2_checksums.txt' --clobber && break; sleep $((i * 15)); done
+          sha256sum -c --ignore-missing gitleaks_8.21.2_checksums.txt
+          tar -xzf gitleaks_8.21.2_linux_x64.tar.gz gitleaks
           ./gitleaks detect --source . --no-banner --redact
       - name: Software bill of materials (CycloneDX)
-        uses: anchore/sbom-action@61119d458adab75f756bc0b9e4bde25725f86a7a # v0.17.2
+        run: |
+          for i in 1 2 3 4 5; do gh release download v1.11.1 -R anchore/syft -p 'syft_1.11.1_linux_amd64.tar.gz' -p 'syft_1.11.1_checksums.txt' --clobber && break; sleep $((i * 15)); done
+          sha256sum -c --ignore-missing syft_1.11.1_checksums.txt
+          tar -xzf syft_1.11.1_linux_amd64.tar.gz syft
+          ./syft dir:. -o cyclonedx-json=sbom.cdx.json
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          format: cyclonedx-json
-          artifact-name: sbom.cdx.json
+          name: sbom.cdx.json
+          path: sbom.cdx.json

@@ -1,0 +1,13 @@
+{
+  "name": "openric-workspace-checks",
+  "description": "The OpenRiC Workspace's browser checks: WCAG 2.2 AA with axe-core and a keyboard-only walkthrough (roadmap R1 hardening). Used in tests only; the Workspace itself needs no Node.",
+  "private": true,
+  "license": "AGPL-3.0-or-later",
+  "scripts": {
+    "a11y": "playwright test"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.13.0",
+    "@playwright/test": "1.58.2"
+  }
+}

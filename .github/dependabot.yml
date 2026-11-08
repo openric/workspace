@@ -7,3 +7,8 @@ updates:
     directory: /
     schedule:
       interval: weekly
+  # The browser checks' test tools (package.json), pinned to exact versions with a lockfile.
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly

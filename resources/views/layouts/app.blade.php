@@ -9,6 +9,8 @@
     @stack('head')
 </head>
 <body>
+{{-- WCAG 2.4.1: past the header and the menu to the page's own content, as the public layout already does. --}}
+<a class="skip" href="#content">{{ __('Skip to the content') }}</a>
 <header>
     @php $brand = \App\Models\Institution::current(); @endphp
     <a href="{{ route('discover.home') }}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: .75rem">
@@ -20,7 +22,7 @@
     @include('layouts._language')
 </header>
 @include('layouts._staff-nav')
-<main>
+<main id="content" tabindex="-1">
     @yield('content')
 </main>
 </body>
