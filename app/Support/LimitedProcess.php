@@ -23,13 +23,53 @@ class LimitedProcess
     {
         $limits = self::limits($tool);
         if ($limits !== null) {
-            // sh stays the direct child: setsid passes a fatal signal on by raising it on itself, which Process would throw
-            // for; sh outlives it and exits 128 + the signal, a failure like any other.
-            $command = ['sh', '-c', 'setsid --wait prlimit --as='.($limits['memory_mb'] * 1048576).' --cpu='.$limits['cpu_seconds']
-                .' --fsize='.($limits['file_mb'] * 1048576).' -- "$@"', 'limited', ...$command];
+            // sh stays the direct child and the program leads a process group of its own (setsid, with no fork for a
+            // background job): a signal the program raises stays in its group, a fatal one is an exit of 128 + it, and
+            // when sh is told to stop (a timeout) it kills the whole group, so nothing the program started is left.
+            $limit = 'prlimit --as='.($limits['memory_mb'] * 1048576).' --cpu='.$limits['cpu_seconds'].' --fsize='.($limits['file_mb'] * 1048576);
+            $command = ['sh', '-c', 'setsid '.$limit.' -- "$@" & c=$!; trap \'kill -KILL -- -$c 2>/dev/null; exit 143\' TERM INT HUP; wait $c', 'limited', ...$command];
         }
 
-        return new Process($command, $cwd, ['OPENBLAS_NUM_THREADS' => '1', 'OMP_NUM_THREADS' => '1']);
+        return new class($command, $cwd, ['OPENBLAS_NUM_THREADS' => '1', 'OMP_NUM_THREADS' => '1']) extends Process
+        {
+            /**
+             * Stopped (a timeout stops with SIGKILL, which no shell can catch), everything it started goes too: the
+             * program is in a session of its own, so killing its parent alone would leave it running.
+             */
+            public function stop(float $timeout = 10, ?int $signal = null): ?int
+            {
+                if ($this->isRunning() && ($pid = $this->getPid())) {
+                    foreach (LimitedProcess::descendants($pid) as $child) {
+                        @posix_kill($child, 9);
+                    }
+                }
+
+                return parent::stop($timeout, $signal);
+            }
+        };
+    }
+
+    /** @return list<int> every process below this one, read from /proc */
+    public static function descendants(int $pid): array
+    {
+        $children = [];
+        foreach (glob('/proc/[0-9]*/stat') ?: [] as $stat) {
+            // pid (comm) state ppid: the name may hold spaces and brackets, so read after its last ')'.
+            $line = (string) @file_get_contents($stat);
+            $after = substr($line, (int) strrpos($line, ')') + 2);
+            $parent = (int) (explode(' ', $after)[1] ?? 0);
+            $children[$parent][] = (int) basename(dirname($stat));
+        }
+        $out = [];
+        $queue = [$pid];
+        while ($queue) {
+            foreach ($children[array_shift($queue)] ?? [] as $child) {
+                $out[] = $child;
+                $queue[] = $child;
+            }
+        }
+
+        return $out;
     }
 
     /** @return array{memory_mb: int, cpu_seconds: int, file_mb: int}|null */

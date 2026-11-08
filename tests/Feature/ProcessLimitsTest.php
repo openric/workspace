@@ -16,6 +16,7 @@ use App\Support\Archives;
 use App\Support\LimitedProcess;
 use Illuminate\Support\Facades\Queue;
 use InvalidArgumentException;
+use Symfony\Component\Process\Exception\ProcessTimedOutException;
 use Tests\TestCase;
 use ZipArchive;
 
@@ -66,10 +67,29 @@ class ProcessLimitsTest extends TestCase
         if (LimitedProcess::limits('anything') === null) {
             $this->markTestSkipped('setsid and prlimit are not on this machine');
         }
-        $process = LimitedProcess::make('anything', ['sh', '-c', 'kill -INT 0']);
+        $process = LimitedProcess::make('anything', ['sh', '-c', 'kill -INT 0; echo after']);
         $process->run();
-        // Had the interrupt reached this process group, the test would not get here.
-        $this->assertFalse($process->isSuccessful());
+        // Had the interrupt reached this process group, the test would not get here; it does not even reach the program.
+        $this->assertSame("after\n", $process->getOutput());
+    }
+
+    public function test_a_program_stopped_by_its_timeout_is_not_left_running(): void
+    {
+        if (LimitedProcess::limits('anything') === null) {
+            $this->markTestSkipped('setsid and prlimit are not on this machine');
+        }
+        // A program in a session of its own outlives a signal to its parent unless the parent passes it on.
+        $process = LimitedProcess::make('anything', ['sh', '-c', 'echo $$ > pid; sleep 60 & echo $! > child; wait'], $this->work);
+        try {
+            $process->setTimeout(2)->run();
+            $this->fail('it should have timed out');
+        } catch (ProcessTimedOutException) {
+        }
+        usleep(300_000);
+        foreach (['pid', 'child'] as $file) {
+            $pid = (int) file_get_contents($this->work.'/'.$file);
+            $this->assertFalse(posix_kill($pid, 0), "$file $pid is still running");
+        }
     }
 
     public function test_an_archive_past_its_limits_is_refused_before_it_is_unpacked(): void
