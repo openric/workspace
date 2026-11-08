@@ -248,7 +248,11 @@ class Builder
     private function viewer(OfflineCatalogue $catalogue, array $stats): void
     {
         $dir = resource_path('offline-catalogue');
+        // A package that holds a 3D model shows it with model-viewer, written into the page: a browser refuses to load
+        // a module script from disk, never one inline (roadmap phase 21).
+        $models = collect($this->fixity)->contains(fn ($f) => str_ends_with($f['path'], '.glb'));
         $html = strtr((string) file_get_contents($dir.'/index.html'), [
+            '{{model_viewer}}' => $models ? '<script type="module">'."\n".file_get_contents(public_path('vendor/model-viewer/model-viewer.min.js'))."\n</script>" : '',
             '{{title}}' => e($catalogue->title),
             '{{counts}}' => e(__(':records descriptions, :agents authority records, :files files', ['records' => $stats['record_count'], 'agents' => $stats['agent_count'], 'files' => $stats['file_count']])),
         ]);

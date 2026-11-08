@@ -1,0 +1,30 @@
+# OpenRiC Workspace - OpenRiC Workspace AR Placements.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Where augmented reality puts a 3D model (model-viewer's ar-placement, Heratio's object_3d_model.ar_placement, roadmap phase 21).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/ar-placement/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace AR Placements"@en ;
+    dcterms:description "Where augmented reality puts a 3D model (model-viewer's ar-placement, Heratio's object_3d_model.ar_placement, roadmap phase 21)."@en ;
+    dcterms:issued "2026-11-08"^^xsd:date ;
+    skos:hasTopConcept v:floor, v:wall .
+
+v:floor a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "On the floor"@en, "Op die vloer"@af ;
+    skos:scopeNote "Not a RiC-O term: how the viewer shows a 3D model in augmented reality."@en ;
+    skos:definition "The model stands on a floor or table."@en .
+
+v:wall a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "On a wall"@en, "Teen 'n muur"@af ;
+    skos:scopeNote "Not a RiC-O term: how the viewer shows a 3D model in augmented reality."@en ;
+    skos:definition "The model hangs on a wall, as a painting or a panel does."@en .

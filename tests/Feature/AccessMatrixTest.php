@@ -64,6 +64,8 @@ use App\Models\Import;
 use App\Models\Institution;
 use App\Models\InterfaceStringChange;
 use App\Models\MigrationPathway;
+use App\Models\ModelBookmark;
+use App\Models\ModelHotspot;
 use App\Models\NormalisationRule;
 use App\Models\OfflineCatalogue;
 use App\Models\OfflineCatalogueShare;
@@ -498,6 +500,11 @@ class AccessMatrixTest extends TestCase
             return [$claim, app(Dialogue::class)->grant($claim, ['grantee_role' => 'claimant'], $admin)[0],
                 app(Knowledge::class)->contribute($claim, ['type' => 'oral-history', 'body' => 'Remembered at harvest.'], null)];
         });
+        // Phase 21: a hotspot on the scan and a saved view of it (the routes need only their ids and the instantiation's).
+        $make('3d model', fn () => [ModelHotspot::create(['institution_id' => $institution->id, 'instantiation_id' => $this->objects['Instantiation']->id,
+            'type_id' => Concept::where('iri', Vocab::BASE.'hotspot-type/annotation')->value('id'), 'position_x' => 0, 'position_y' => 0, 'position_z' => 0]),
+            ModelBookmark::create(['institution_id' => $institution->id, 'instantiation_id' => $this->objects['Instantiation']->id, 'user_id' => $admin->id,
+                'name' => 'Front', 'camera_orbit' => '0deg 75deg 105%'])]);
         // Phase 11c: an offline catalogue and a link to it.
         $make('offline catalogue', function () use ($institution, $admin) {
             $catalogue = OfflineCatalogue::create(['institution_id' => $institution->id, 'user_id' => $admin->id, 'title' => 'Everything',

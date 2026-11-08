@@ -11,6 +11,7 @@ use App\Accounts\AccountService;
 use App\Description\InstantiationService;
 use App\Description\RecordService;
 use App\Description\RepositoryService;
+use App\Files\Models3d;
 use App\Files\Ocfl\StorageRoot;
 use App\Models\DigitalFile;
 use App\Models\Instantiation;
@@ -144,12 +145,12 @@ class InstantiationTest extends TestCase
         $this->assertSame('model/gltf-binary', $master->mime_type);
         $this->assertSame([$master->sha256, $master->storage_path, 'model/gltf-binary', 'helmet-reference.glb'],
             [$reference->sha256, $reference->storage_path, $reference->mime_type, $reference->original_name], 'the same bytes, kept once');
-        $this->assertNull($instantiation->file('thumbnail'), 'a model is not drawn on the server');
+        $this->assertNull($instantiation->file('thumbnail'), 'a model with no mesh has nothing for Blender to draw (phase 21)');
 
         // Seen by one who may read reference copies but not masters, through the viewer the Workspace serves itself.
         $this->actingAs($this->contributor)->get(route('files.show', $reference))->assertOk()->assertHeader('Content-Type', 'model/gltf-binary');
         $page = $this->actingAs($this->contributor)->get("/records/{$this->item->id}")->assertOk()
-            ->assertSee('<model-viewer src="'.route('files.show', $reference).'"', false)->assertSee('vendor/model-viewer/model-viewer.min.js')
+            ->assertSee('<model-viewer id="m3d-'.$instantiation->id.'" src="'.route('files.show', $reference).'"', false)->assertSee('vendor/model-viewer/model-viewer.min.js')
             ->assertSee('dracoDecoderLocation')->assertDontSee('gstatic.com');
         $this->assertSame(1, substr_count($page->getContent(), 'model-viewer.min.js'), 'the viewer loads once');
         $this->actingAs($this->contributor)->get("/instantiations/{$instantiation->id}")->assertOk()->assertSee('<model-viewer', false);
@@ -185,7 +186,8 @@ class InstantiationTest extends TestCase
         $this->assertStringStartsWith('audio/', $mp3->mime_type);
         $this->assertStringContainsString('vendor/plyr/plyr.min.js', $html);
         $this->assertStringContainsString('class="waveform"', $html);
-        $this->assertStringContainsString('three/addons/loaders/OBJLoader.js', $html);
+        // With Blender an OBJ is given a GLB and shown in model-viewer (phase 21); without it, in Heratio's three.js viewer.
+        $this->assertStringContainsString(app(Models3d::class)->blender() ? 'vendor/model-viewer/model-viewer.min.js' : 'three/addons/loaders/OBJLoader.js', $html);
         $this->assertSame(1, substr_count($html, 'pdf.min.js"'), 'each viewer\'s scripts load once');
 
         // Heratio's Mirador asks for saved workspaces; none are kept on the server, and it is told so, not 404.

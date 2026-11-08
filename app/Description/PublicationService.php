@@ -19,6 +19,8 @@ use App\Models\Activity;
 use App\Models\Concept;
 use App\Models\DescriptionValue;
 use App\Models\Instantiation;
+use App\Models\ModelHotspot;
+use App\Models\ModelHotspotText;
 use App\Models\Name;
 use App\Models\RecordResource;
 use App\Models\User;
@@ -82,6 +84,11 @@ class PublicationService
                     $changed += $rows->count();
                 }
             }
+            // A 3D model's hotspots are part of its instantiation's description (roadmap phase 21).
+            $hotspots = ModelHotspotText::whereIn('hotspot_id', ModelHotspot::whereIn('instantiation_id', $subjects['instantiations'] ?? [])->select('id'))
+                ->whereIn('state_id', $fromIds)->when($language, fn ($q) => $q->where('language', $language))->get();
+            $hotspots->each(fn (Model $row) => $row->update(['state_id' => $toId]));
+            $changed += $hotspots->count();
 
             return $changed;
         }));

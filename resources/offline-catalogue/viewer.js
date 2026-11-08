@@ -60,9 +60,12 @@
   function show(id) {
     var r = byId[id];
     if (!r) { detailEl.innerHTML = '<p class="empty">Not found.</p>'; return; }
+    // A 3D model, where the package carries model-viewer (it does whenever it holds one).
+    var models = window.customElements && customElements.get('model-viewer') !== undefined || document.querySelector('script[type=module]')
+      ? r.files.filter(function (f) { return f.mime === 'model/gltf-binary'; }) : [];
     var images = r.files.filter(function (f) { return f.use === 'reference' && /^image\//.test(f.mime || ''); });
     if (!images.length) images = r.files.filter(function (f) { return f.use === 'thumbnail'; });
-    var others = r.files.filter(function (f) { return images.indexOf(f) === -1 && f.use !== 'thumbnail'; });
+    var others = r.files.filter(function (f) { return images.indexOf(f) === -1 && models.indexOf(f) === -1 && f.use !== 'thumbnail'; });
     var rows = [];
     if (r.ref) rows.push(['Reference code', esc(r.ref)]);
     if (r.level) rows.push(['Level of description', esc(r.level)]);
@@ -74,6 +77,7 @@
     var children = C.records.filter(function (c) { return c.parent === r.id; });
     if (children.length) rows.push(['Contains', children.map(function (c) { return '<a href="#" data-record="' + esc(c.id) + '">' + esc(c.title) + '</a>'; }).join('<br>')]);
     detailEl.innerHTML = '<h2>' + esc(r.title) + '</h2>'
+      + models.map(function (f) { return '<model-viewer src="' + esc(f.path) + '" alt="' + esc(r.title) + '" camera-controls touch-action="pan-y" style="display:block;width:100%;height:24rem;background:#f5f5f5"></model-viewer>'; }).join('')
       + (images.length ? '<div class="files">' + images.map(function (f) { return '<figure><a href="' + esc(f.path) + '"><img src="' + esc(f.path) + '" alt="' + esc(f.name) + '"></a><figcaption>' + esc(f.name) + '</figcaption></figure>'; }).join('') + '</div>' : '')
       + (others.length ? '<p>Files: ' + others.map(function (f) { return '<a href="' + esc(f.path) + '">' + esc(f.name) + '</a> (' + esc(f.use) + ', ' + Math.round((f.size || 0) / 1024) + ' KB)'; }).join(', ') + '</p>' : '')
       + dl(rows) + '<p class="ident">' + esc(r.iri) + '</p>'

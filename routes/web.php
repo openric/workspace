@@ -66,6 +66,7 @@ use App\Http\Controllers\JournalController;
 use App\Http\Controllers\JurisdictionController;
 use App\Http\Controllers\LabelController;
 use App\Http\Controllers\LocalVocabularyController;
+use App\Http\Controllers\Model3dController;
 use App\Http\Controllers\NameController;
 use App\Http\Controllers\OfflineCatalogueController;
 use App\Http\Controllers\OperationsController;
@@ -270,6 +271,8 @@ Route::middleware([ServeDiscovery::class, 'throttle:120,1'])->group(function () 
     Route::get('/landing/{slug?}', [SiteController::class, 'landing'])->where('slug', '[a-z0-9]+(-[a-z0-9]+)*')->name('site.landing-page');
 });
 Route::middleware(ServeDiscovery::class)->prefix('discover')->name('discover.')->group(function () {
+    // A published 3D model alone, to embed in another page (roadmap phase 21).
+    Route::get('/models/{instantiation}/embed', [Model3dController::class, 'embed'])->whereUuid('instantiation')->name('models.embed');
     Route::get('/', [DiscoverController::class, 'home'])->name('home');
     Route::get('/records/{id}', [DiscoverController::class, 'record'])->name('record');
     // Ways into the collection (roadmap phase 17d1).
@@ -317,6 +320,8 @@ Route::middleware(ServeDiscovery::class)->prefix('discover')->name('discover.')-
 
 // IIIF Presentation 3, Change Discovery and Content State (roadmap phase 14a, ADR 0014): what the public catalogue shows.
 Route::middleware([ServeDiscovery::class, 'throttle:600,1'])->prefix('iiif')->name('iiif.')->group(function () {
+    // A 3D model's manifest, after the IIIF 3D group's release candidate (roadmap phase 21).
+    Route::get('/3d/{instantiation}/manifest', [Model3dController::class, 'manifest'])->whereUuid('instantiation')->name('model3d');
     Route::get('/collection', [IiifController::class, 'top'])->name('top');
     Route::get('/records/{id}/manifest', [IiifController::class, 'manifest'])->name('manifest');
     Route::get('/records/{id}/collection', [IiifController::class, 'collection'])->name('collection');
@@ -373,6 +378,12 @@ Route::middleware('throttle:60,1')->prefix('shared')->name('share-links.')->wher
 });
 // An offline catalogue downloaded by its link (roadmap phase 11c): for anyone holding it, while it opens.
 Route::get('/offline-catalogues/shared/{token}', [OfflineCatalogueController::class, 'shared'])->middleware('throttle:30,1')->where('token', '[A-Za-z0-9]{48}')->name('offline-catalogues.shared');
+// A 3D model's saved views (roadmap phase 21): published ones for any reader of its record, and a signed-in reader's own.
+Route::middleware('throttle:60,1')->prefix('models/{instantiation}/bookmarks')->name('models.bookmarks')->whereUuid(['instantiation', 'bookmark'])->group(function () {
+    Route::get('/', [Model3dController::class, 'bookmarks']);
+    Route::post('/', [Model3dController::class, 'storeBookmark'])->name('.store');
+    Route::post('/{bookmark}/delete', [Model3dController::class, 'deleteBookmark'])->name('.destroy');
+});
 // A folder of favourites opened by its link (roadmap phase 19a): for anyone holding it.
 Route::get('/favourites/shared/{token}', [FavouritesController::class, 'shared'])->middleware('throttle:60,1')->where('token', '[A-Za-z0-9]{48}')->name('favourites.shared');
 // A researcher's collection opened by its link (roadmap phase 19d): for anyone holding it.
@@ -489,6 +500,17 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::post('/instantiations/{instantiation}/assess-condition', [AiController::class, 'condition'])->name('instantiations.assess-condition');
     Route::post('/records/{record}/ask/{task}', [AiController::class, 'ask'])->name('records.ask')->where('task', 'names|summary|subjects');
     Route::post('/instantiations/{instantiation}/own-copy', [InstantiationController::class, 'replaceCopy'])->name('instantiations.replace-copy');
+    // A 3D model's page (roadmap phase 21): how it is shown, its hotspots, its turntable; and the institution's defaults.
+    Route::prefix('instantiations/{instantiation}/model')->name('models.')->whereUuid(['instantiation', 'hotspot'])->group(function () {
+        Route::get('/', [Model3dController::class, 'edit'])->name('edit');
+        Route::post('/settings', [Model3dController::class, 'saveSettings'])->name('settings');
+        Route::post('/hotspots', [Model3dController::class, 'storeHotspot'])->name('hotspots.store');
+        Route::post('/hotspots/{hotspot}', [Model3dController::class, 'updateHotspot'])->name('hotspots.update');
+        Route::post('/hotspots/{hotspot}/delete', [Model3dController::class, 'deleteHotspot'])->name('hotspots.destroy');
+        Route::post('/turntable', [Model3dController::class, 'turntable'])->name('turntable');
+    });
+    Route::get('/model-defaults', [Model3dController::class, 'defaults'])->name('models.defaults');
+    Route::post('/model-defaults', [Model3dController::class, 'saveDefaults'])->name('models.defaults.save');
     Route::get('/files/{file}', [InstantiationController::class, 'file'])->name('files.show');
     // WebVTT caption tracks of a sound or video instantiation (roadmap phase 22c).
     Route::post('/instantiations/{instantiation}/captions', [CaptionController::class, 'store'])->name('captions.store');

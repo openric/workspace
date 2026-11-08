@@ -19,6 +19,7 @@ use App\Access\AccessControl;
 use App\AccessRequests\AccessRequestService;
 use App\Audit\AuditLog;
 use App\Files\FileStore;
+use App\Files\Models3d;
 use App\Files\Watermark;
 use App\Fixity\Fixity;
 use App\Jobs\ExtractFileText;
@@ -114,10 +115,39 @@ class InstantiationService
             return 0;
         }
         $watermark = app(Watermark::class)->configFor(Institution::findOrFail($instantiation->institution_id), $instantiation->record);
-        $copies = $this->store->into($instantiation->iri)->copies($instantiation->institution_id, $this->store->path($master->storage_path), $master->mime_type, $watermark);
+        $copies = $this->store->into($instantiation->iri)->copies($instantiation->institution_id, $this->store->path($master->storage_path), $master->mime_type, $watermark, $master->original_name);
+        // What a 3D model is made of, read from its master once (roadmap phase 21).
+        if ($format = app(Models3d::class)->format($this->store->path($master->storage_path), $master->original_name, $master->mime_type)) {
+            $master->update(['model_properties' => ['format' => $format] + app(Models3d::class)->properties($this->store->path($master->storage_path), $format)]);
+        }
         DB::transaction(fn () => AuditLog::actingAs($actor, fn () => $this->addCopies($instantiation, $master->original_name, $copies)));
 
         return count($copies);
+    }
+
+    /**
+     * A turntable video of a 3D model (roadmap phase 21, after Heratio's ahg:3d-multiangle): rendered all round its
+     * GLB by Blender, joined by FFmpeg and kept as its access copy, in place of an earlier one. Whether one was made.
+     */
+    public function makeTurntable(Instantiation $instantiation, ?User $actor = null): bool
+    {
+        $source = collect([$instantiation->file('reference'), $instantiation->file('master')])->first(fn ($f) => $f?->mime_type === FileStore::MODEL);
+        $video = $source ? app(Models3d::class)->turntable($this->store->path($source->storage_path)) : null;
+        if ($video === null) {
+            return false;
+        }
+        try {
+            $kept = $this->store->into($instantiation->iri)->keepMade($instantiation->institution_id, $video, 'files/access/turntable.mp4');
+            DB::transaction(fn () => AuditLog::actingAs($actor, function () use ($instantiation, $kept) {
+                $instantiation->files()->whereHas('use', fn ($q) => $q->where('notation', 'access'))->where('mime_type', 'video/mp4')->get()->each->delete();
+                $this->addFile($instantiation, 'access', pathinfo((string) $instantiation->file('master')?->original_name, PATHINFO_FILENAME).'-turntable.mp4',
+                    ['storage_path' => $kept['storage_path'], 'size_bytes' => $kept['size_bytes'], 'sha256' => $kept['sha256'], 'mime_type' => 'video/mp4']);
+            }));
+
+            return true;
+        } finally {
+            @unlink($video);
+        }
     }
 
     /** Make the copies for viewing again in the background, as a job the account can follow. */

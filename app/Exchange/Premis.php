@@ -71,6 +71,13 @@ class Premis
         $masters = $files->filter(fn ($f) => $f->use?->notation === 'master')->keyBy('instantiation_id');
         foreach ($files as $file) {
             $this->object($x, 'file', self::fileId($file), function () use ($x, $file, $masters, $events) {
+                // A 3D model's significant properties (roadmap phase 21, after Heratio's ahg:3d-preserve), read from it.
+                foreach (self::modelProperties($file) as $type => $value) {
+                    $x->startElement('significantProperties');
+                    $x->writeElement('significantPropertiesType', $type);
+                    $x->writeElement('significantPropertiesValue', $value);
+                    $x->endElement();
+                }
                 $x->startElement('objectCharacteristics');
                 $x->writeElement('compositionLevel', '0');
                 $x->startElement('fixity');
@@ -293,5 +300,21 @@ class Premis
         $x->writeElement('relatedObjectIdentifierValue', $related);
         $x->endElement();
         $x->endElement();
+    }
+
+    /** @return array<string, string> what a 3D model is made of, as PREMIS significant properties */
+    public static function modelProperties($file): array
+    {
+        $p = (array) ($file->model_properties ?? []);
+        $names = ['format_version' => 'format', 'vertex_count' => 'vertices', 'face_count' => 'faces', 'texture_count' => 'textures', 'animation_count' => 'animations',
+            'has_materials' => 'materials', 'has_rig' => 'rig', 'compression' => 'compression', 'bounding_box' => 'bounding box (model units)', 'pbr_maps' => 'material maps'];
+        $out = [];
+        foreach ($names as $key => $name) {
+            if (isset($p[$key]) && $p[$key] !== '') {
+                $out['3D '.$name] = in_array($key, ['has_materials', 'has_rig'], true) ? ($p[$key] ? 'yes' : 'no') : (string) $p[$key];
+            }
+        }
+
+        return $out;
     }
 }

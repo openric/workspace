@@ -109,6 +109,7 @@
                 'intake.index' => [__('Intake'), $may('manage-institution'), 'intake.*'],
                 'operations.index' => [__('Operations'), $may('manage-institution'), 'operations.*|fixity.*'],
                 'formats.index' => [__('File formats'), $may('manage-institution'), 'formats.*'],
+                'models.defaults' => [__('3D models'), $may('manage-institution'), 'models.defaults*'],
                 'preservation.index' => [__('Preservation'), $may('manage-institution'), 'preservation.*'],
                 'archivematica.index' => [__('Archivematica'), $may('manage-institution'), 'archivematica.*'],
                 'federation.admin' => [__('Federation'), $may('manage-institution'), 'federation.*'],

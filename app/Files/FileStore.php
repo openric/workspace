@@ -74,8 +74,14 @@ class FileStore
      *
      * @return array<string, array> use => what ingest() returns
      */
-    public function copies(string $institutionId, string $masterPath, string $mime, ?array $watermark = null): array
+    public function copies(string $institutionId, string $masterPath, string $mime, ?array $watermark = null, ?string $name = null): array
     {
+        // A 3D model other than a GLB, or any model where Blender can render its thumbnail (roadmap phase 21).
+        $models = app(Models3d::class);
+        $format = $models->format($masterPath, $name, $mime);
+        if ($format !== null && $format !== 'splat' && ($format !== 'glb' || $models->blender() !== null)) {
+            return $this->modelCopies($institutionId, $masterPath, $format);
+        }
         if ($mime === self::MODEL) {
             // ponytail: a browser needs the whole model to show it, so the reference copy of a GLB is the master itself,
             // kept once under the same checksum; a reduced copy needs a mesh simplifier (gltf-transform) on the server.
@@ -232,6 +238,44 @@ class FileStore
      * @return array{storage_path: string} the file kept as a new version of its OCFL object: the object given by into(), or
      *                                     else one of its own named by the institution and the file's checksum
      */
+    /**
+     * A 3D model's copies (roadmap phase 21): its GLB as the reference copy, a GLB kept as it is and any other format
+     * written as one by Blender, no larger than MODEL_REFERENCE_MEGABYTES; and a thumbnail Blender renders from it.
+     * A model Blender cannot read keeps no copies and stays a download.
+     */
+    private function modelCopies(string $institutionId, string $masterPath, string $format): array
+    {
+        $models = app(Models3d::class);
+        $glb = $thumbnail = null;
+        try {
+            $glb = $models->glb($masterPath, $format);
+            if ($glb === null) {
+                return [];
+            }
+            $copies = [];
+            $size = (int) filesize($glb);
+            if ($size <= self::MODEL_REFERENCE_MEGABYTES * 1024 * 1024) {
+                $sha = hash_file('sha256', $glb);
+                $copies['reference'] = [...$this->keep($institutionId, $glb, $sha, 'files/reference/model.glb'), 'sha256' => $sha, 'size_bytes' => $size, 'mime_type' => self::MODEL,
+                    'width' => null, 'height' => null, 'scanned_with' => null, 'scanned_at' => null];
+            }
+            if ($thumbnail = $models->thumbnail($glb, self::COPIES['thumbnail'])) {
+                $sha = hash_file('sha256', $thumbnail);
+                $copies['thumbnail'] = [...$this->keep($institutionId, $thumbnail, $sha, 'files/thumbnail/thumbnail.png'), 'sha256' => $sha, 'size_bytes' => (int) filesize($thumbnail),
+                    'mime_type' => 'image/png', ...$this->dimensions($thumbnail), 'scanned_with' => null, 'scanned_at' => null];
+            }
+
+            return $copies;
+        } catch (Throwable $e) {
+            Log::warning('no copies made of a 3D model', ['format' => $format, 'error' => $e->getMessage()]);
+
+            return [];
+        } finally {
+            $glb && @unlink($glb);
+            $thumbnail && @unlink($thumbnail);
+        }
+    }
+
     private function keep(string $institutionId, string $path, string $sha, ?string $logical = null): array
     {
         $object = $this->object ?? rtrim((string) DB::table('institutions')->where('id', $institutionId)->value('base_iri'), '/').'/file/'.$sha;

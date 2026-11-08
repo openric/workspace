@@ -19,6 +19,7 @@
     $isTimed = fn ($file) => $file && (str_starts_with($file->mime_type, 'video/') || str_starts_with($file->mime_type, 'audio/'));
     $timed = $isTimed($reference) ? $reference : ($isTimed($master) ? $master : null);
     $kind = match (true) {
+        ($master?->model_properties['format'] ?? null) === 'splat' => 'splat',
         $reference?->mime_type === \App\Files\FileStore::MODEL || ($master?->mime_type === \App\Files\FileStore::MODEL) => 'glb',
         $master && in_array($extension($master), ['obj', 'stl'], true) => 'mesh',
         $master && $master->mime_type === 'application/pdf' => 'pdf',
@@ -34,7 +35,9 @@
     $alt = ($alt ?? null) ?: $title;
 @endphp
 @if($kind === 'glb')
-    @include('description._model', ['src' => $url($reference ?? $master), 'alt' => $alt])
+    @include('description._model', ['src' => $url($reference ?? $master), 'alt' => $alt, 'instantiation' => $instantiation, 'fileRoute' => $fileRoute, 'public' => $fileRoute === 'discover.file'])
+@elseif($kind === 'splat')
+    @include('description._splat', ['src' => $url($master), 'alt' => $alt, 'extension' => $extension($master)])
 @elseif($kind === 'image')
     @php
         $image = $browserImage($reference) ? $reference : ($browserImage($master) ? $master : $thumbnail);

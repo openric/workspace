@@ -11,7 +11,7 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 
 | Package | Lines | G1 scope | Status | Phase | PSIS plugins | Workspace today |
 |---|---|---|---|---|---|---|
-| `ahg-3d-model` | 7687 | out: GLAM sector | Planned | 21 | `ahg3DModelPlugin` |  |
+| `ahg-3d-model` | 7687 | out: GLAM sector | Done | 21 (3D only) | `ahg3DModelPlugin` | From v0.0.141, chosen by Dr Johan Pieterse on 7 November 2026 ahead of the rest of phase 21: GLB, glTF, OBJ, STL, PLY and USDZ with Blender viewing copies, thumbnails and turntables; settings, hotspots, saved views, measuring, cross-section, splats, embed and the IIIF 3D manifest; TripoSR (image to 3D) goes to phase 17 |
 | `ahg-access-request` | 1928 | V0.1 candidate | Partial | 7 | `ahgAccessRequestPlugin` | Requests for files on request, approved for some days or refused, each step emailed (v0.0.65); security clearance requests in phase 18 |
 | `ahg-accession-manage` | 6795 | later: V1.0+ | Partial | 9 | `ahgAccessionManagePlugin`, `qtAccessionPlugin` | Accessions, CAAIS, deaccessions, CSV and CAAIS export from v0.0.77 (9a); intake from v0.0.79 (9c); appraisal, valuation, containers, rights and the whole add form from v0.0.80 (9d) |
 | `ahg-acl` | 9750 | V0.1 candidate | Covered |  | `qbAclPlugin` | Roles and permissions with default deny (ADR 0005), written fresh |
@@ -1657,4 +1657,36 @@ Added on 7 November 2026 with 11c.
 | `ahg:portable-export-worker` | `BuildOfflineCatalogue`, on the queue | Same |
 
 : Offline catalogues, field by field
+
+### 3D models (`ahg-3d-model`)
+
+Added on 8 November 2026 with phase 21, 3D only.
+
+| Heratio field | Workspace | Status |
+|---|---|---|
+| `object_3d_model` (`object_id`, `filename`, `file_path`, `file_size`, `mime_type`, `format`) | A file of an instantiation (`digital_files`), its master kept as received | Modelled: a model is a rico:Instantiation's file, not a record of its own, from v0.0.141 |
+| `vertex_count`, `face_count`, `texture_count`, `animation_count`, `has_materials` (and ModelMetadataExtractor's `format_version`, `compression`, `bounding_box`, `pbr_maps`, `has_rig`) | `digital_files.model_properties`, PREMIS significant properties, openricx:technicalCharacteristics | Same, copied |
+| `auto_rotate`, `rotation_speed`, `camera_orbit`, `min_camera_orbit`, `max_camera_orbit`, `field_of_view`, `exposure`, `shadow_intensity`, `shadow_softness`, `background_color` | `model_settings`, over `model_viewer_defaults` | Same |
+| `environment_image`, `skybox_image` | Neutral lighting (on or off) | Narrower: no image of the institution's own |
+| `ar_enabled`, `ar_scale`, `ar_placement` | `ar_enabled`, `ar_fixed_scale`, the ar-placement vocabulary | Same; Android only until a USDZ copy is made |
+| `poster_image`, `thumbnail` | The thumbnail Blender renders | Same |
+| `is_primary`, `display_order`, `is_public` | The instantiation's order and its publication | Modelled |
+| `object_3d_model_i18n` (`title`, `description`, `alt_text`) | The instantiation's title, description and alternative text, in every language | Modelled |
+| `object_3d_hotspot` (`hotspot_type`, `position_*`, `normal_*`, `icon`, `color`, `link_url`, `link_target`, `display_order`, `is_visible`) | `model_hotspots`, the hotspot-type vocabulary | Same; `icon` and `link_target` not carried; visibility is the text's publication |
+| `object_3d_hotspot_i18n` (`culture`, `title`, `description`) | `model_hotspot_texts`, each with its state | Same, published with the record |
+| `object_3d_camera_bookmark` (name, camera orbit, target, field of view, default) | `model_bookmarks`, a reader's own or published by staff | Same |
+| `object_3d_texture` | none | Not carried: textures travel inside the GLB |
+| `object_3d_settings`, `viewer_3d_settings` | `model_viewer_defaults` | Same |
+| `object_3d_audit_log` | The audit log | Same |
+| `iiif_3d_manifest`, Iiif3dManifestBuilder | `App\Iiif\Model3dManifest`, `/iiif/3d/{instantiation}/manifest` | Same, built when asked, not stored |
+| ThreeDThumbnailService, blender_thumbnail.py | `App\Files\Models3d`, `tools/blender/model3d.py` | Same; Workbench, which needs no GPU |
+| ahg:3d-multiangle, render_multiangle.py | The turntable video (`MakeTurntable`) | Same |
+| ahg:3d-preserve | PREMIS significant properties of every model | Same, for every model as it arrives |
+| The measuring and cross-section tools, the animation player, share-view, reduced motion | `public/vendor/openric/model3d` | Same, copied |
+| The Gaussian splat viewer | `description._splat`, GaussianSplats3D 0.4.7 | Same |
+| The embed view | `/discover/models/{instantiation}/embed` | Same |
+| TripoSR, GatewayImageTo3dService | none yet | AI: phase 17 |
+| GlbBuilder (parametric reconstructions), the 3D walk of a virtual return | none | Not carried; the walk waits for exhibitions |
+
+: 3D models, field by field
 

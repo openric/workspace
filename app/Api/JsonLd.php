@@ -19,6 +19,7 @@
 namespace App\Api;
 
 use App\Exchange\ExportView;
+use App\Exchange\Premis;
 use App\Iiif\Presentation;
 use App\Models\Activity;
 use App\Models\Agent;
@@ -472,7 +473,9 @@ class JsonLd
             $out += array_filter(['openricx:hasMimeType' => $file->mime_type,
                 'rico:hasExtent' => $file->size_bytes !== null ? ['@id' => $instantiation->iri.'#extent', '@type' => 'rico:InstantiationExtent', 'rico:quantity' => (int) $file->size_bytes,
                     'rico:hasUnitOfMeasurement' => ['@id' => $instantiation->iri.'#bytes', '@type' => 'rico:UnitOfMeasurement', 'rico:name' => 'bytes']] : null,
-                'openricx:technicalCharacteristics' => $file->sha256 ? 'Checksum (sha256): '.$file->sha256 : null]);
+                // A 3D model's significant properties travel with its checksum (roadmap phase 21).
+                'openricx:technicalCharacteristics' => $file->sha256 ? implode('; ', ['Checksum (sha256): '.$file->sha256,
+                    ...array_map(fn ($k, $v) => "$k: $v", array_keys($m = Premis::modelProperties($file)), $m)]) : null]);
         }
         if ($instantiation->availability) {
             $out['rico:conditionsOfAccess'] ??= (string) $instantiation->availability->anyLabel(['en']);

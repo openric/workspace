@@ -1,0 +1,51 @@
+# OpenRiC Workspace - OpenRiC Workspace 3D Hotspot Types.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What a labelled point on a 3D model marks (Heratio's object_3d_hotspot.hotspot_type, roadmap phase 21).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/hotspot-type/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace 3D Hotspot Types"@en ;
+    dcterms:description "What a labelled point on a 3D model marks (Heratio's object_3d_hotspot.hotspot_type, roadmap phase 21)."@en ;
+    dcterms:issued "2026-11-08"^^xsd:date ;
+    skos:hasTopConcept v:annotation, v:info, v:link, v:damage, v:detail .
+
+v:annotation a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Annotation"@en, "Aantekening"@af ;
+    skos:scopeNote "Not a RiC-O term: a hotspot is written as a Web Annotation in the IIIF manifest, as Heratio's ahg-3d-model shows it; RiC-O 1.1 has no annotation of a part of an instantiation."@en ;
+    skos:definition "A note about this part of the object."@en .
+
+v:info a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Information"@en, "Inligting"@af ;
+    skos:scopeNote "Not a RiC-O term: a hotspot is written as a Web Annotation in the IIIF manifest, as Heratio's ahg-3d-model shows it; RiC-O 1.1 has no annotation of a part of an instantiation."@en ;
+    skos:definition "A fact about this part of the object."@en .
+
+v:link a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Link"@en, "Skakel"@af ;
+    skos:scopeNote "Not a RiC-O term: a hotspot is written as a Web Annotation in the IIIF manifest, as Heratio's ahg-3d-model shows it; RiC-O 1.1 has no annotation of a part of an instantiation."@en ;
+    skos:definition "A link to more about this part of the object."@en .
+
+v:damage a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Damage"@en, "Skade"@af ;
+    skos:scopeNote "Not a RiC-O term: a hotspot is written as a Web Annotation in the IIIF manifest, as Heratio's ahg-3d-model shows it; RiC-O 1.1 has no annotation of a part of an instantiation."@en ;
+    skos:definition "Damage seen on this part of the object."@en .
+
+v:detail a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Detail"@en, "Besonderheid"@af ;
+    skos:scopeNote "Not a RiC-O term: a hotspot is written as a Web Annotation in the IIIF manifest, as Heratio's ahg-3d-model shows it; RiC-O 1.1 has no annotation of a part of an instantiation."@en ;
+    skos:definition "A detail worth looking at closely."@en .
