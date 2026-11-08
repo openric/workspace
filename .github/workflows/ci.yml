@@ -115,7 +115,7 @@ jobs:
           curl -sSfL https://github.com/gitleaks/gitleaks/releases/download/v8.21.2/gitleaks_8.21.2_linux_x64.tar.gz | tar -xz gitleaks
           ./gitleaks detect --source . --no-banner --redact
       - name: Software bill of materials (CycloneDX)
-        uses: anchore/sbom-action@61119d458adab75f756bc0b9e4bde25725f86a7a # v0.17.2
+        uses: anchore/sbom-action@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c # v0.24.3
         with:
           format: cyclonedx-json
           artifact-name: sbom.cdx.json
