@@ -63,6 +63,7 @@ use App\Relations\EntityKinds;
 use App\Relations\RelationService;
 use App\Relations\RelationTypes;
 use App\Rights\Clearances;
+use App\Support\Archives;
 use App\Support\Vocab;
 use App\Vocabulary\ConceptService;
 use Illuminate\Database\Eloquent\Model;
@@ -136,6 +137,7 @@ class ImportService
     {
         $zip = new \ZipArchive;
         $zip->open($path, \ZipArchive::RDONLY) === true || throw new InvalidArgumentException(__('the file is not a ZIP the Workspace can open'));
+        Archives::zip($zip);
         $files = [];
         for ($i = 0; $i < $zip->numFiles; $i++) {
             $name = (string) $zip->getNameIndex($i);

@@ -1,0 +1,41 @@
+# OpenRiC Workspace - the files worker: the queue of jobs that run file converters (viewing copies, normalisation,
+# format identification, text and metadata extraction, migration plans, offline catalogues), without network beyond
+# this machine (roadmap R1 hardening, after the external production-readiness assessment of 7 November 2026).
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Install (as root), then set WORKSPACE_FILES_WORKER=true in the live .env so the scheduler's worker leaves this queue:
+#   cp deploy/systemd/openric-workspace-files.service /etc/systemd/system/
+#   systemctl daemon-reload && systemctl enable --now openric-workspace-files
+# A deploy restarts it (php artisan queue:restart), as it restarts any worker.
+
+[Unit]
+Description=OpenRiC Workspace files worker (converters, no outside network)
+After=network.target postgresql.service
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/usr/share/nginx/openric-workspace-live
+ExecStart=/usr/bin/php8.3 artisan queue:work --queue=files --tries=1 --timeout=7200 --max-time=3600 --sleep=5
+Restart=always
+RestartSec=5
+
+# No address but this machine's own: the database and cache on 127.0.0.1, ClamAV's socket. A converter tricked into
+# fetching a URL, or a file that phones home, reaches nothing outside.
+IPAddressDeny=any
+IPAddressAllow=localhost
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+
+# Nothing a converter does needs more rights than this.
+NoNewPrivileges=yes
+PrivateDevices=yes
+ProtectSystem=full
+ProtectHome=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+ReadWritePaths=/usr/share/nginx/openric-workspace-live/storage /usr/share/nginx/openric-workspace-live/bootstrap/cache
+
+[Install]
+WantedBy=multi-user.target

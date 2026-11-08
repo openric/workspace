@@ -26,10 +26,10 @@
 
 namespace App\Files;
 
+use App\Support\LimitedProcess;
 use Illuminate\Support\Facades\Log;
 use RuntimeException;
 use Symfony\Component\Process\ExecutableFinder;
-use Symfony\Component\Process\Process;
 
 class PdfText
 {
@@ -45,7 +45,7 @@ class PdfText
         if (! $this->isPdftotextAvailable()) {
             throw new RuntimeException('pdftotext is not installed. Install with: sudo apt install poppler-utils');
         }
-        $process = new Process(['pdftotext', '-enc', 'UTF-8', $pdfPath, '-']);
+        $process = LimitedProcess::make('pdftotext', ['pdftotext', '-enc', 'UTF-8', $pdfPath, '-']);
         $process->setTimeout(300)->run();
         if (! $process->isSuccessful()) {
             Log::warning('pdftotext failed', ['path' => $pdfPath, 'code' => $process->getExitCode(), 'error' => mb_substr($process->getErrorOutput(), 0, 300)]);
@@ -69,7 +69,7 @@ class PdfText
         if (! $this->isPdftotextAvailable()) {
             return null;
         }
-        $process = new Process(['pdftotext', '-v']);
+        $process = LimitedProcess::make('pdftotext', ['pdftotext', '-v']);
         $process->run();
 
         return preg_match('/(\d+\.\d+\.\d+)/', $process->getErrorOutput().$process->getOutput(), $m) ? $m[1] : null;

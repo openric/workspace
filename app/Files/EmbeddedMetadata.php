@@ -30,10 +30,10 @@
 
 namespace App\Files;
 
+use App\Support\LimitedProcess;
 use Illuminate\Support\Facades\Log;
 use RuntimeException;
 use Symfony\Component\Process\ExecutableFinder;
-use Symfony\Component\Process\Process;
 
 class EmbeddedMetadata
 {
@@ -68,7 +68,7 @@ class EmbeddedMetadata
         if (! $this->isExifToolAvailable()) {
             throw new RuntimeException('exiftool is not installed. Install with: sudo apt install libimage-exiftool-perl');
         }
-        $process = new Process(['exiftool', '-json', '-a', '-G1', '-charset', 'filename=utf8', $filePath]);
+        $process = LimitedProcess::make('exiftool', ['exiftool', '-json', '-a', '-G1', '-charset', 'filename=utf8', $filePath]);
         $process->setTimeout(120)->run();
         $data = json_decode($process->getOutput(), true);
         if (! is_array($data[0] ?? null)) {

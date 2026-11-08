@@ -12,7 +12,7 @@ namespace App\Preservation;
 use App\Files\FileStore;
 use App\Models\DigitalFile;
 use App\Models\FileFormat;
-use Symfony\Component\Process\Process;
+use App\Support\LimitedProcess;
 
 class FormatIdentification
 {
@@ -26,7 +26,7 @@ class FormatIdentification
         if (! is_file($path) || $binary === '') {
             return null;
         }
-        $process = new Process([$binary, '-json', $path]);
+        $process = LimitedProcess::make('siegfried', [$binary, '-json', $path]);
         $process->setTimeout(120)->run();
         $answer = json_decode($process->getOutput(), true);
         $match = collect($answer['files'][0]['matches'] ?? [])->first(fn ($m) => ($m['ns'] ?? '') === 'pronom');

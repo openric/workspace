@@ -15,7 +15,11 @@ class IdentifyFormat implements ShouldQueue
 {
     use Queueable;
 
-    public function __construct(public string $fileId) {}
+    public function __construct(public string $fileId)
+    {
+        // A file job: the files worker runs it, without outside network where it is installed (R1 hardening).
+        $this->onQueue('files');
+    }
 
     public function handle(FormatIdentification $identification): void
     {

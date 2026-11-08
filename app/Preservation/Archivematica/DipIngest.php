@@ -22,11 +22,12 @@ use App\Models\Concept;
 use App\Models\RecordResource;
 use App\Models\User;
 use App\Preservation\PreservationEvents;
+use App\Support\Archives;
+use App\Support\LimitedProcess;
 use App\Support\Vocab;
 use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
 use RuntimeException;
-use Symfony\Component\Process\Process;
 use Throwable;
 use ZipArchive;
 
@@ -127,6 +128,7 @@ class DipIngest
         if (str_starts_with($head, "PK\x03\x04")) {
             $zip = new ZipArchive;
             $zip->open($archive) === true || throw new RuntimeException(__('The package file cannot be opened.'));
+            Archives::zip($zip);
             for ($i = 0; $i < $zip->numFiles; $i++) {
                 ! preg_match('#(^|/)\.\.(/|$)|^/#', (string) $zip->getNameIndex($i)) || throw new InvalidArgumentException(__('The package names a file outside itself.'));
             }
@@ -136,14 +138,15 @@ class DipIngest
             return;
         }
         $seven = str_starts_with($head, "7z\xBC\xAF\x27\x1C");
-        $list = new Process($seven ? ['7z', 'l', '-slt', $archive] : ['tar', '-tf', $archive]);
+        Archives::file($archive, $seven ? '7z' : 'tar');
+        $list = LimitedProcess::make($seven ? '7z' : 'tar', $seven ? ['7z', 'l', '-slt', $archive] : ['tar', '-tf', $archive]);
         $list->setTimeout(600)->run();
         $list->isSuccessful() || throw new RuntimeException(__('The package file cannot be opened.'));
         $names = $seven ? array_map(fn ($l) => substr($l, 7), preg_grep('/^Path = /', explode("\n", $list->getOutput())) ?: []) : explode("\n", trim($list->getOutput()));
         foreach ($names as $name) {
             ! preg_match('#(^|/)\.\.(/|$)|^/#', trim($name)) || throw new InvalidArgumentException(__('The package names a file outside itself.'));
         }
-        $process = new Process($seven ? ['7z', 'x', '-y', '-o'.$into, $archive] : ['tar', '-C', $into, '--no-same-owner', '-xf', $archive]);
+        $process = LimitedProcess::make($seven ? '7z' : 'tar', $seven ? ['7z', 'x', '-y', '-o'.$into, $archive] : ['tar', '-C', $into, '--no-same-owner', '-xf', $archive]);
         $process->setTimeout(3600)->run();
         $process->isSuccessful() || throw new RuntimeException(__('The package file cannot be opened.').' '.mb_substr($process->getErrorOutput(), 0, 500));
     }

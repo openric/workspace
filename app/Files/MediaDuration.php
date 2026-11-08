@@ -10,8 +10,8 @@
 
 namespace App\Files;
 
+use App\Support\LimitedProcess;
 use Symfony\Component\Process\ExecutableFinder;
-use Symfony\Component\Process\Process;
 
 class MediaDuration
 {
@@ -21,7 +21,7 @@ class MediaDuration
         if ((new ExecutableFinder)->find('ffprobe') === null || ! is_file($path)) {
             return null;
         }
-        $process = new Process(['ffprobe', '-v', 'error', '-show_entries', 'format=duration', '-of', 'default=noprint_wrappers=1:nokey=1', $path]);
+        $process = LimitedProcess::make('ffprobe', ['ffprobe', '-v', 'error', '-show_entries', 'format=duration', '-of', 'default=noprint_wrappers=1:nokey=1', $path]);
         $process->setTimeout(60);
         $process->run();
         $value = trim($process->getOutput());

@@ -21,10 +21,10 @@ use App\Models\MigrationPathway;
 use App\Models\MigrationPlan;
 use App\Models\NormalisationRule;
 use App\Models\User;
+use App\Support\LimitedProcess;
 use App\Support\Vocab;
 use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
-use Symfony\Component\Process\Process;
 use Throwable;
 
 class Conversions
@@ -148,7 +148,7 @@ class Conversions
             // A profile of its own each run: LibreOffice runs one at a time on a shared profile, and a second waits or fails.
             'libreoffice' => [['soffice', '--headless', '-env:UserInstallation=file://'.$work.'/profile', '--convert-to', $ext, '--outdir', $work.'/out', $input], 900],
         };
-        $process = new Process($command, $work);
+        $process = LimitedProcess::make($tool, $command, $work);
         $process->setTimeout($timeout)->run();
         if ($tool === 'libreoffice') {
             // LibreOffice names its output after the input.
@@ -156,7 +156,7 @@ class Conversions
             $made === [] || rename($made[0], $output);
         }
         if (! $process->isSuccessful() || ! is_file($output) || filesize($output) === 0) {
-            throw new \RuntimeException(trim(mb_substr($process->getErrorOutput() ?: $process->getOutput() ?: 'exit '.$process->getExitCode(), 0, 1000)) ?: __('the tool made nothing'));
+            throw new \RuntimeException(LimitedProcess::reason($process) ?? (trim(mb_substr($process->getErrorOutput() ?: $process->getOutput() ?: 'exit '.$process->getExitCode(), 0, 1000)) ?: __('the tool made nothing')));
         }
         $ceiling = (int) ($options['max_output_mb'] ?? 0);
         if ($ceiling > 0 && filesize($output) > $ceiling * 1024 * 1024) {
@@ -169,7 +169,7 @@ class Conversions
     private function version(string $tool): ?string
     {
         if (! array_key_exists($tool, $this->versions)) {
-            $process = new Process(match ($tool) {
+            $process = LimitedProcess::make($tool, match ($tool) {
                 'imagemagick' => ['convert', '-version'], 'ffmpeg' => ['ffmpeg', '-version'], 'ghostscript' => ['gs', '--version'], default => ['soffice', '--version'],
             });
             $process->setTimeout(60)->run();

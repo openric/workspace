@@ -20,6 +20,8 @@ class BuildOfflineCatalogue extends TrackedJob
     public function __construct(string $jobId, public string $catalogueId)
     {
         parent::__construct($jobId);
+        // A file job: the files worker runs it, without outside network where it is installed (R1 hardening).
+        $this->onQueue('files');
     }
 
     protected function run(BackgroundJob $job): array

@@ -6957,5 +6957,9 @@
     "An archive is for the institution's staff; it is never given a link.": "'n Argief is vir die instelling se personeel; dit kry nooit 'n skakel nie.",
     "The link no longer opens.": "Die skakel maak nie meer oop nie.",
     "A file could not be copied into the package.": "'n Lêer kon nie na die pakket gekopieer word nie.",
-    "Offline catalogue of this unit and everything inside it": "Aflyn-katalogus van hierdie eenheid en alles daarin"
+    "Offline catalogue of this unit and everything inside it": "Aflyn-katalogus van hierdie eenheid en alles daarin",
+    "it used more CPU time or memory than it is allowed": "dit het meer verwerkertyd of geheue gebruik as wat toegelaat word",
+    "it wrote a file larger than it is allowed": "dit het 'n lêer geskryf wat groter is as wat toegelaat word",
+    "The archive holds :count files; no more than :max are taken.": "Die argieflêer bevat :count lêers; nie meer as :max word aanvaar nie.",
+    "The archive unpacks to :size; no more than :max are taken.": "Die argieflêer pak uit tot :size; nie meer as :max word aanvaar nie."
 }

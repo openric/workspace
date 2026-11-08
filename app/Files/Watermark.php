@@ -34,9 +34,9 @@ namespace App\Files;
 use App\Models\Institution;
 use App\Models\RecordResource;
 use App\Models\RecordWatermark;
+use App\Support\LimitedProcess;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use Symfony\Component\Process\Process;
 
 class Watermark
 {
@@ -105,7 +105,7 @@ class Watermark
         if ($mark === null) {
             // The text, about a quarter of the image wide, white with a dark edge so it reads on light and dark alike.
             $temp = tempnam(sys_get_temp_dir(), 'wsw').'.png';
-            $text = new Process(['convert', '-background', 'none', '-fill', 'white', '-stroke', '#333333', '-strokewidth', '1',
+            $text = LimitedProcess::make('imagemagick', ['convert', '-background', 'none', '-fill', 'white', '-stroke', '#333333', '-strokewidth', '1',
                 '-font', 'DejaVu-Sans-Bold', '-size', max(80, intdiv($size[0], 4)).'x', 'label:'.$config['text'], $temp]);
             $text->setTimeout(60)->run();
             if (! $text->isSuccessful()) {
@@ -119,7 +119,7 @@ class Watermark
         try {
             $place = $config['gravity'] === 'Repeat' ? ['-tile'] : ['-gravity', $config['gravity']];
             // Written back in its own format: a copy's file has no extension to tell ImageMagick.
-            $process = new Process(['composite', '-dissolve', (string) $config['opacity'], ...$place, $mark, $imagePath, image_type_to_extension($size[2], false).':'.$imagePath]);
+            $process = LimitedProcess::make('imagemagick', ['composite', '-dissolve', (string) $config['opacity'], ...$place, $mark, $imagePath, image_type_to_extension($size[2], false).':'.$imagePath]);
             $process->setTimeout(120)->run();
             if (! $process->isSuccessful()) {
                 Log::warning('the watermark could not be applied', ['error' => mb_substr($process->getErrorOutput(), 0, 300)]);

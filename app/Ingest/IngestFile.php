@@ -14,6 +14,7 @@
 namespace App\Ingest;
 
 use App\Files\FileStore;
+use App\Support\Archives;
 use InvalidArgumentException;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use ZipArchive;
@@ -40,6 +41,7 @@ class IngestFile
         }
         $zip = new ZipArchive;
         $zip->open($path, ZipArchive::RDONLY) === true || throw new InvalidArgumentException(__('the file is not a ZIP the Workspace can open'));
+        Archives::zip($zip);
         $tables = [];
         for ($i = 0; $i < $zip->numFiles; $i++) {
             $entry = (string) $zip->getNameIndex($i);

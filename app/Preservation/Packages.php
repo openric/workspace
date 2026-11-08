@@ -30,13 +30,14 @@ use App\Models\PackageEvent;
 use App\Models\PackageFile;
 use App\Models\RecordResource;
 use App\Models\User;
+use App\Support\Archives;
+use App\Support\LimitedProcess;
 use App\Support\Vocab;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Number;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
 use RuntimeException;
-use Symfony\Component\Process\Process;
 use Throwable;
 use ZipArchive;
 
@@ -300,7 +301,7 @@ class Packages
 
             return;
         }
-        $process = new Process(['tar', '-C', $work, '-cf', $archive, $name]);
+        $process = LimitedProcess::make('tar', ['tar', '-C', $work, '-cf', $archive, $name]);
         $process->setTimeout(3600)->run();
         $process->isSuccessful() || throw new RuntimeException(__('The package file could not be written.').' '.$process->getErrorOutput());
     }
@@ -310,6 +311,7 @@ class Packages
         if ($format === 'zip') {
             $zip = new ZipArchive;
             $zip->open($archive) === true || throw new RuntimeException(__('The package file cannot be opened.'));
+            Archives::zip($zip);
             for ($i = 0; $i < $zip->numFiles; $i++) {
                 // No name may climb out of the folder it is unpacked into.
                 ! preg_match('#(^|/)\.\.(/|$)|^/#', (string) $zip->getNameIndex($i)) || throw new RuntimeException(__('The package names a file outside itself.'));
@@ -319,7 +321,8 @@ class Packages
 
             return;
         }
-        $process = new Process(['tar', '-C', $into, '--no-same-owner', '-xf', $archive]);
+        Archives::file($archive, 'tar');
+        $process = LimitedProcess::make('tar', ['tar', '-C', $into, '--no-same-owner', '-xf', $archive]);
         $process->setTimeout(3600)->run();
         $process->isSuccessful() || throw new RuntimeException(__('The package file cannot be opened.').' '.$process->getErrorOutput());
     }

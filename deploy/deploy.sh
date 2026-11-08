@@ -103,6 +103,8 @@ artisan workspace:audit:create-key --if-missing
 artisan optimize
 # An unsafe production configuration stops the release here, before the site comes back (roadmap phase 23).
 artisan workspace:preflight
+# A worker that outlives a release (the files worker, deploy/systemd) takes the new code once its job is done.
+artisan queue:restart
 artisan up
 trap - ERR
 

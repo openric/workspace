@@ -17,9 +17,9 @@ use App\Models\DigitalFile;
 use App\Models\ReplicationRun;
 use App\Models\ReplicationTarget;
 use App\Models\User;
+use App\Support\LimitedProcess;
 use App\Support\Vocab;
 use InvalidArgumentException;
-use Symfony\Component\Process\Process;
 use Throwable;
 
 class Replication
@@ -64,7 +64,7 @@ class Replication
         try {
             $this->store->ocfl()->initialize();
             $this->assertTargetFolder($target);
-            $process = new Process($this->rsync($target, $operation === 'verify'
+            $process = LimitedProcess::make('rsync', $this->rsync($target, $operation === 'verify'
                 ? ['--dry-run', '--checksum', '--delete', '--itemize-changes', '--stats']
                 : ['--delete', '--itemize-changes', '--stats']));
             $process->setTimeout(86400)->run();
@@ -104,7 +104,7 @@ class Replication
     /** The folder copied to is empty, does not exist yet, or holds an OCFL storage root; anything else is not overwritten. */
     private function assertTargetFolder(ReplicationTarget $target): void
     {
-        $process = new Process($this->rsync($target, ['--list-only', '--no-recursive', '--dirs'], true));
+        $process = LimitedProcess::make('rsync', $this->rsync($target, ['--list-only', '--no-recursive', '--dirs'], true));
         $process->setTimeout(120)->run();
         if (! $process->isSuccessful()) {
             // rsync says 23 when the folder is not there yet: it will be made.

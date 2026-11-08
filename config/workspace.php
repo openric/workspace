@@ -206,6 +206,32 @@ return [
     // Format identification against PRONOM (roadmap phase 15a): Siegfried's sf command; empty, files are left unidentified.
     'siegfried' => env('WORKSPACE_SIEGFRIED', 'sf'),
 
+    // Every outside program runs in a session of its own under these limits (App\Support\LimitedProcess; R1 hardening of
+    // 7 November 2026): its address space, CPU seconds and largest file. Measured on Ubuntu 24.04: Siegfried, ImageMagick,
+    // Ghostscript, FFmpeg and LibreOffice all convert ordinary files within 1 GiB; the budgets leave room for large ones.
+    'process_limits' => [
+        'enabled' => env('WORKSPACE_PROCESS_LIMITS', true),
+        'default' => ['memory_mb' => 2048, 'cpu_seconds' => 900, 'file_mb' => 8192],
+        'tools' => [
+            'libreoffice' => ['memory_mb' => 4096],
+            'ffmpeg' => ['memory_mb' => 4096, 'cpu_seconds' => 7200, 'file_mb' => 65536],
+            'tar' => ['memory_mb' => 512, 'cpu_seconds' => 7200, 'file_mb' => 65536],
+            '7z' => ['memory_mb' => 1024, 'cpu_seconds' => 7200, 'file_mb' => 65536],
+            'rsync' => ['memory_mb' => 1024, 'cpu_seconds' => 86400, 'file_mb' => 1048576],
+        ],
+    ],
+
+    // What an archive the Workspace unpacks may hold (an Archivematica DIP, a BagIt package, an import ZIP): its files
+    // together, uncompressed, and how many. A larger one is refused before anything is written.
+    'archive_limits' => [
+        'max_bytes' => (int) env('WORKSPACE_ARCHIVE_MAX_BYTES', 50 * 1024 ** 3),
+        'max_entries' => (int) env('WORKSPACE_ARCHIVE_MAX_ENTRIES', 200000),
+    ],
+
+    // Whether a separate worker, without network, runs the files queue (deploy/systemd/openric-workspace-files.service).
+    // Until it is installed the scheduler's worker runs the files queue too, as before.
+    'files_worker' => env('WORKSPACE_FILES_WORKER', false),
+
     // A copy of AtoM's uploads folder (the one holding r/), from which an import of
     // archival descriptions takes the file each digitalObjectURI names; empty, none is.
     'import_files' => env('WORKSPACE_IMPORT_FILES'),

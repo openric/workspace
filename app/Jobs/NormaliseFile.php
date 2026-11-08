@@ -18,7 +18,11 @@ class NormaliseFile implements ShouldQueue
 
     public $timeout = 7500;
 
-    public function __construct(public string $fileId, public ?string $userId = null) {}
+    public function __construct(public string $fileId, public ?string $userId = null)
+    {
+        // A file job: the files worker runs it, without outside network where it is installed (R1 hardening).
+        $this->onQueue('files');
+    }
 
     public function handle(Conversions $conversions): void
     {

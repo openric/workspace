@@ -222,6 +222,15 @@ Viewing copies, imports, format identification, normalisation, fixity schedules,
 
 Change the path in it if the code is not at `/usr/share/nginx/openric-workspace-live`. It runs as `www-data`. Admin, Operations shows the scheduler's heartbeat; it should be under a minute or two old.
 
+### The files worker, without outside network (recommended)
+
+File converters (LibreOffice, FFmpeg, ImageMagick, Ghostscript, ExifTool, Siegfried) read files people upload. Each already runs under CPU, memory and file-size limits, in a session of its own. On a host where AppArmor forbids unprivileged namespaces (Ubuntu 24.04 does), a single command cannot also be cut off from the network, so the jobs that run converters go to a queue of their own, `files`, which a systemd service runs with no address but the machine's own:
+
+    sudo cp deploy/systemd/openric-workspace-files.service /etc/systemd/system/
+    sudo systemctl daemon-reload && sudo systemctl enable --now openric-workspace-files
+
+Then set `WORKSPACE_FILES_WORKER=true` in `.env` and run `php artisan optimize`, so the scheduler's worker leaves the `files` queue to it. Until then the scheduler's worker runs both queues, with network. Change the paths in the unit if the code is not at `/usr/share/nginx/openric-workspace-live`, or if the object store (`WORKSPACE_OBJECT_STORE`) is outside `storage/`: add it to `ReadWritePaths`. A deploy restarts the worker.
+
 ## 9. ClamAV and Siegfried
 
     sudo systemctl enable --now clamav-daemon

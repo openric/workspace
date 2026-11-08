@@ -22,6 +22,7 @@ use App\Models\Concept;
 use App\Models\Import;
 use App\Models\IntakeFile;
 use App\Models\WatchFolder;
+use App\Support\Archives;
 use App\Support\Vocab;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
@@ -179,6 +180,7 @@ class WatchFolders
         try {
             $zip = new ZipArchive;
             $zip->open("$dir/$name", ZipArchive::RDONLY) === true || throw new InvalidArgumentException(__('the file is not a ZIP the Workspace can open'));
+            Archives::zip($zip);
             for ($i = 0; $i < $zip->numFiles; $i++) {
                 in_array('..', explode('/', (string) $zip->getNameIndex($i)), true) && throw new InvalidArgumentException(__('the ZIP names a file outside itself'));
             }

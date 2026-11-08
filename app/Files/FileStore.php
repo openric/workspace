@@ -17,6 +17,7 @@
 namespace App\Files;
 
 use App\Files\Ocfl\StorageRoot;
+use App\Support\LimitedProcess;
 use finfo;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -100,7 +101,7 @@ class FileStore
             if ($mime === 'application/pdf') {
                 // The first page, as an image; ImageMagick's own PDF reading is often switched off by its policy.
                 $page = tempnam(sys_get_temp_dir(), 'wsp');
-                $process = new Process(['pdftoppm', '-png', '-r', '110', '-f', '1', '-l', '1', '-singlefile', $masterPath, $page]);
+                $process = LimitedProcess::make('pdftoppm', ['pdftoppm', '-png', '-r', '110', '-f', '1', '-l', '1', '-singlefile', $masterPath, $page]);
                 $process->setTimeout(60)->run();
                 if (! $process->isSuccessful()) {
                     return [];
@@ -112,7 +113,7 @@ class FileStore
                 // ImageMagick runs in its own process, held to a memory and time limit, so a file that makes it
                 // crash or run away (a damaged TIFF can) costs only the copies, never the request or import.
                 $temp = tempnam(sys_get_temp_dir(), 'wsc');
-                $process = new Process(['convert', '-limit', 'memory', '512MiB', '-limit', 'map', '1GiB', '-limit', 'time', '120',
+                $process = LimitedProcess::make('imagemagick', ['convert', '-limit', 'memory', '512MiB', '-limit', 'map', '1GiB', '-limit', 'time', '120',
                     $source.'[0]', '-auto-orient', '-background', 'white', '-flatten', '-thumbnail', "{$side}x{$side}>", '-strip', '-quality', '85', 'jpeg:'.$temp]);
                 $process->setTimeout(150)->run();
                 if (! $process->isSuccessful() || filesize($temp) === 0) {
@@ -162,7 +163,7 @@ class FileStore
         $copies = [];
         foreach ($make as $use => [$type, $arguments]) {
             $temp = tempnam(sys_get_temp_dir(), 'wsm');
-            $process = new Process(['ffmpeg', '-y', '-v', 'error', '-i', $masterPath, ...$arguments, $temp]);
+            $process = LimitedProcess::make('ffmpeg', ['ffmpeg', '-y', '-v', 'error', '-i', $masterPath, ...$arguments, $temp]);
             $process->setTimeout(3600)->run();
             if (! $process->isSuccessful() || filesize($temp) === 0) {
                 @unlink($temp);
@@ -277,7 +278,7 @@ class FileStore
         if ($scanner === '') {
             return null;
         }
-        $process = new Process([$scanner, '--no-summary', '--fdpass', $path]);
+        $process = LimitedProcess::make('clamav', [$scanner, '--no-summary', '--fdpass', $path]);
         $process->setTimeout(120)->run();
         if ($process->getExitCode() === 1) {
             throw new InvalidArgumentException('the virus scanner found '.trim(preg_replace(['/^.*?: /', '/\s+FOUND$/'], '', trim($process->getOutput()))).', so the file was not kept');
