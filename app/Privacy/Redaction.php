@@ -42,6 +42,20 @@ class Redaction
         return $this->fields[$unit->id] ??= RecordRedaction::where('record_resource_id', $unit->id)->with('type', 'pattern')->get()->keyBy('field');
     }
 
+    /**
+     * Load the redactions of many records in one query, for a list that shows them all.
+     *
+     * @param  iterable<RecordResource>  $units
+     */
+    public function prime(iterable $units): void
+    {
+        $ids = collect($units)->pluck('id')->reject(fn ($id) => isset($this->fields[$id]))->values();
+        $found = $ids->isEmpty() ? collect() : RecordRedaction::whereIn('record_resource_id', $ids)->with('type', 'pattern')->get()->groupBy('record_resource_id');
+        foreach ($ids as $id) {
+            $this->fields[$id] = ($found[$id] ?? collect())->keyBy('field');
+        }
+    }
+
     public function seesUnredacted(?User $user, RecordResource $unit): bool
     {
         return $user !== null && $user->institution_id === $unit->institution_id

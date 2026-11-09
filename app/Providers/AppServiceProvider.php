@@ -17,6 +17,8 @@ use App\Models\DescriptionValue;
 use App\Models\DigitalFile;
 use App\Models\Identifier;
 use App\Models\Name;
+use App\Models\Permission;
+use App\Rights\Embargoes;
 use App\Models\RecordRedaction;
 use App\Models\Relation;
 use App\Models\RicDate;
@@ -51,6 +53,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->scoped(AccessControl::class);
         // And its cache of which fields of a record are redacted (phase 18b).
         $this->app->scoped(Redaction::class);
+        // And its embargoes preloaded for a list (the capacity test, R1).
+        $this->app->scoped(Embargoes::class);
         // The interface in the institution's own wording, over the JSON translations (phase 17c).
         $this->app->extend('translation.loader', fn ($loader) => new OverlayLoader($loader));
     }
@@ -69,6 +73,9 @@ class AppServiceProvider extends ServiceProvider
             $kind::saved(fn ($model) => SearchIndex::mark($model->getTable(), (string) $model->getKey()));
         }
         // A field redacted, or no longer, changes what the public entry may hold (phase 18b).
+        // A permission granted, denied or removed is seen by the next check in the same request.
+        Permission::saved(fn () => app(AccessControl::class)->forgetPermissions());
+        Permission::deleted(fn () => app(AccessControl::class)->forgetPermissions());
         RecordRedaction::saved(fn ($model) => SearchIndex::mark('record_resources', (string) $model->record_resource_id));
         RecordRedaction::deleted(fn ($model) => SearchIndex::mark('record_resources', (string) $model->record_resource_id));
         $this->app->terminating(fn () => app(SearchIndex::class)->flush());

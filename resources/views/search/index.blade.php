@@ -4,15 +4,16 @@
 @section('content')
     @php($lang = \App\Support\Vocab::languages())
     @php($kinds = ['records' => 'Archival descriptions', 'agents' => 'Authority records', 'activities' => 'Activities', 'places' => 'Places', 'repositories' => 'Repositories'])
-    @php($link = fn (array $change) => route('search', array_filter([...['q' => $query, 'kind' => $kind] + $filters, ...$change], fn ($v) => $v !== null && $v !== '')))
+    @php($link = fn (array $change) => route('search', array_filter([...['q' => $query, 'kind' => $kind, 'match' => request()->query('match') === 'pattern' ? 'pattern' : null] + $filters, ...$change], fn ($v) => $v !== null && $v !== '')))
     <h1>{{ __('Search') }}</h1>
     <form method="get" action="{{ route('search') }}" role="search" style="display: flex; gap: .5rem; flex-wrap: wrap; max-width: 40rem">
         <label for="search-q" style="position: absolute; left: -999px">{{ __('Search') }}</label>
         <input id="search-q" name="q" value="{{ $query }}" style="flex: 1 1 16rem" autofocus>
         @include('search._mode', ['institutionId' => auth()->user()->institution_id])
+        @include('search._pattern')
         <button type="submit" style="margin: 0">{{ __('Search') }}</button>
     </form>
-    <p class="meta">{{ $drafts ? __('Drafts are included.') : __('Published values only.') }} {{ __('Use quotes for a phrase, such as "town council"; a minus sign leaves a word out, such as council -minutes; OR finds either word.') }}</p>
+    <p class="meta">{{ $drafts ? __('Drafts are included.') : __('Published values only.') }} {{ __('Use quotes for a phrase, such as "town council"; a minus sign leaves a word out, such as council -minutes; OR finds either word.') }} {{ __('As a regular expression, ^Minutes of finds entries whose title begins so, and 19[0-4][0-9] any year from 1900 to 1949.') }}</p>
     @if($query !== '')
         <p role="status">{{ $search['total'] === 0 ? __('No results found.') : __(':count found.', ['count' => $search['total']]) }}</p>
         @include('search._expanded')
@@ -39,7 +40,7 @@
                 @endif
                 <h2>{{ __('Dates') }}</h2>
                 <form method="get" action="{{ route('search') }}" class="facet-years">
-                    @foreach(array_filter(['q' => $query, 'kind' => $kind, 'level' => $filters['level'], 'repository' => $filters['repository']]) as $name => $value)<input type="hidden" name="{{ $name }}" value="{{ $value }}">@endforeach
+                    @foreach(array_filter(['q' => $query, 'kind' => $kind, 'match' => request()->query('match') === 'pattern' ? 'pattern' : null, 'level' => $filters['level'], 'repository' => $filters['repository']]) as $name => $value)<input type="hidden" name="{{ $name }}" value="{{ $value }}">@endforeach
                     <label for="from">{{ __('From year') }}</label><input id="from" name="from" inputmode="numeric" size="5" value="{{ $filters['from'] }}">
                     <label for="to">{{ __('To year') }}</label><input id="to" name="to" inputmode="numeric" size="5" value="{{ $filters['to'] }}">
                     <button type="submit">{{ __('Apply') }}</button>

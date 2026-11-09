@@ -1,0 +1,88 @@
+#!/usr/bin/env python3
+# OpenRiC Workspace - fill a language's interface strings that no person has translated, by machine, through the AHG AI
+# gateway's chat model (the gateway's translate route offered only English and Afrikaans on 9 November 2026). The human
+# translations already in lang/<lang>.json (AtoM's, from PSIS) go with every batch as a glossary, so archival terms keep
+# their established form. Each answer is checked: placeholders and the plural bar kept, the text actually translated;
+# what fails twice stays English. Every machine string is listed in governance/translations/<lang>-machine.json, as
+# unreviewed. Saves after each batch, so a run that stops can be run again and carries on.
+#
+#   bin/lang-machine-fill fr "French (France)"
+#
+# Needs AI_GATEWAY_KEY in .env. Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+import json, os, re, sys, time, urllib.error, urllib.request
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+LANG, NAME = sys.argv[1], sys.argv[2]
+BATCH = 30
+env = open(os.path.join(ROOT, '.env')).read()
+KEY = re.search(r'^AI_GATEWAY_KEY=(.*)$', env, re.M).group(1).strip().strip('"')
+URL = ((re.search(r'^AI_GATEWAY_URL=(.*)$', env, re.M) or [None, 'https://ai.theahg.co.za/ai/v1'])[1]).strip().strip('"').rstrip('/') + '/ollama/api/chat'
+MODEL = os.environ.get('LANG_MODEL', 'qwen3:8b')
+DASH = re.compile('[\u2012\u2013\u2014\u2015]')
+PH = re.compile(r':[a-z_]+')
+
+path = os.path.join(ROOT, 'lang', LANG + '.json')
+track = os.path.join(ROOT, 'governance', 'translations', LANG + '-machine.json')
+os.makedirs(os.path.dirname(track), exist_ok=True)
+english = list(json.load(open(os.path.join(ROOT, 'lang', 'af.json'))).keys())
+have = json.load(open(path))
+machine = json.load(open(track)) if os.path.exists(track) else {}
+human = {k: v for k, v in have.items() if k not in machine}
+glossary = {k: v for k, v in human.items() if len(k.split()) <= 4 and not PH.search(k)}
+glossary = dict(sorted(glossary.items(), key=lambda kv: len(kv[0]))[:220])
+todo = [k for k in english if k not in have]
+print(f'{LANG}: {len(have)} translated, {len(todo)} to fill, glossary {len(glossary)}', flush=True)
+
+RULES = (f"You translate the interface of the OpenRiC Workspace, an archival records system (Records in Contexts), from English into {NAME}. "
+         "These are buttons, labels, headings, help sentences and messages on its screens: 'Map' means mapping a file's columns to fields, "
+         "'record' an archival record, 'description' an archival description, 'authority record' a description of a person, body or family. "
+         "Use the glossary's translations for its terms. Keep every placeholder such as :name, :count or :iri exactly. "
+         "A | separates singular and plural forms: translate both and keep the |. Keep acronyms (RiC, RiC-O, IRI, EAD, EAC-CPF, IIIF, DOI, OAI-PMH, CSV, PDF) unchanged. "
+         "Never use a long dash. Answer with JSON only: an object mapping each given number to its translation.\n\nGlossary:\n"
+         + json.dumps(glossary, ensure_ascii=False))
+
+
+def ask(items):
+    body = {'model': MODEL, 'stream': False, 'think': False, 'format': 'json', 'options': {'temperature': 0.1},
+            'messages': [{'role': 'system', 'content': RULES},
+                         {'role': 'user', 'content': json.dumps({str(i): s for i, s in enumerate(items)}, ensure_ascii=False)}]}
+    req = urllib.request.Request(URL, data=json.dumps(body).encode(), headers={'Authorization': 'Bearer ' + KEY, 'Content-Type': 'application/json', 'Accept': 'application/json'})
+    for attempt in range(3):
+        try:
+            answer = json.load(urllib.request.urlopen(req, timeout=600))['message']['content']
+            return json.loads(answer)
+        except (urllib.error.URLError, json.JSONDecodeError, KeyError, TimeoutError) as e:
+            print('   retry:', str(e)[:120], flush=True); time.sleep(10 * (attempt + 1))
+    return {}
+
+
+def good(src, tgt):
+    if not isinstance(tgt, str) or not tgt.strip():
+        return False
+    if sorted(PH.findall(src)) != sorted(PH.findall(tgt)) or src.count('|') != tgt.count('|'):
+        return False
+    # Untranslated: the same English back, unless it is a code, an acronym or a number.
+    return tgt.strip() != src.strip() or not re.search(r'[a-z]{3,}', src)
+
+
+def save():
+    ordered = {k: have[k] for k in english if k in have}
+    json.dump(ordered, open(path, 'w'), ensure_ascii=False, indent=4); open(path, 'a').write('\n')
+    json.dump(dict(sorted(machine.items())), open(track, 'w'), ensure_ascii=False, indent=1); open(track, 'a').write('\n')
+
+
+done = 0
+for start in range(0, len(todo), BATCH):
+    items = todo[start:start + BATCH]
+    answer = ask(items)
+    for i, src in enumerate(items):
+        tgt = answer.get(str(i))
+        if not good(src, tgt):
+            tgt = ask([src]).get('0')
+        if good(src, tgt):
+            have[src] = machine[src] = DASH.sub('-', tgt.strip())
+            done += 1
+    save()
+    print(f'  {min(start + BATCH, len(todo))} of {len(todo)}, {done} filled', flush=True)
+print(f'{LANG}: {done} filled by machine; {len(todo) - done} left in English', flush=True)

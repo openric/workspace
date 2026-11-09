@@ -32,6 +32,9 @@ use InvalidArgumentException;
 
 class Embargoes
 {
+    /** @var array<string, \Illuminate\Support\Collection<int, Embargo>> by record id, from prime(), each used once */
+    private array $primed = [];
+
     public const TYPES = Vocab::BASE.'embargo-type/';
 
     public const REASONS = Vocab::BASE.'embargo-reason/';
@@ -47,8 +50,29 @@ class Embargoes
     /** The embargo in force on a record today, the strictest when there are several. */
     public function inForce(RecordResource $unit): ?Embargo
     {
-        return Embargo::where('record_resource_id', $unit->id)->inForce()->with('type', 'exceptions.user', 'exceptions.role')->get()
-            ->sortBy(fn (Embargo $e) => count(self::ALLOWS[$e->type->notation] ?? []))->first();
+        // Preloaded answers are used once, so an embargo imposed or lifted later in the request is still seen.
+        if (array_key_exists($unit->id, $this->primed)) {
+            $embargoes = $this->primed[$unit->id];
+            unset($this->primed[$unit->id]);
+        } else {
+            $embargoes = Embargo::where('record_resource_id', $unit->id)->inForce()->with('type', 'exceptions.user', 'exceptions.role')->get();
+        }
+
+        return $embargoes->sortBy(fn (Embargo $e) => count(self::ALLOWS[$e->type->notation] ?? []))->first();
+    }
+
+    /**
+     * Look up the embargoes in force on many records in one query, for a list that is about to check them all.
+     *
+     * @param  iterable<RecordResource>  $units
+     */
+    public function prime(iterable $units): void
+    {
+        $ids = collect($units)->pluck('id')->values();
+        $found = $ids->isEmpty() ? collect() : Embargo::whereIn('record_resource_id', $ids)->inForce()->with('type', 'exceptions.user', 'exceptions.role')->get()->groupBy('record_resource_id');
+        foreach ($ids as $id) {
+            $this->primed[$id] = $found[$id] ?? collect();
+        }
     }
 
     /**

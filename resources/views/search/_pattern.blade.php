@@ -1,0 +1,2 @@
+{{-- OpenRiC Workspace - search by a regular expression instead of the words (roadmap phase 25a). Inside the search form. Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems. SPDX-License-Identifier: AGPL-3.0-or-later --}}
+<label class="search-pattern" style="margin: 0; font-weight: normal; white-space: nowrap"><input type="checkbox" name="match" value="pattern" @checked(request()->query('match') === 'pattern')> {{ __('As a regular expression') }}</label>

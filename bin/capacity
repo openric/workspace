@@ -1,0 +1,115 @@
+#!/bin/bash
+# OpenRiC Workspace - the capacity test (roadmap R1 hardening, after the external production-readiness assessment of
+# 7 November 2026). Runs this tree against a database of its own, openric_workspace_capacity, with its own signing key
+# and object store under storage/capacity, so no other Workspace is touched; the dataset is kept between runs.
+#
+#   bin/capacity setup             fetch k6 (pinned, checked against its SHA-256), migrate, install, make the key
+#   bin/capacity reset empty-it    empty the capacity database, its key and store, after a load that failed part way;
+#                                  a complete dataset is kept between runs and is never reset by anything else here
+#   bin/capacity seed PASSWORD     load the synthetic archive (php artisan workspace:capacity:seed)
+#   bin/capacity pages PASSWORD    the pages, with 1, 10 and 25 users at once (k6), against 32 PHP workers
+#   bin/capacity jobs PASSWORD     the heavy jobs, timed, with their peak memory
+#
+# Never while a deploy or the test suite runs: they share PostgreSQL's lock table (see INSTALL.md).
+# The database needs the vector extension, made once by PostgreSQL's superuser:
+#   sudo -u postgres psql -d openric_workspace_capacity -c 'CREATE EXTENSION IF NOT EXISTS vector'
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+K6_VERSION=v2.3.0
+K6_SHA256=39c3117b6af817592dcd0ce4242105c0a7af10948c2a425306f0be8f7a8a8ab1
+PORT=8188
+WORKERS=32
+DIR=storage/capacity
+RESULTS="$DIR/results/$(date +%Y-%m-%d)"
+
+# The capacity Workspace: its database, key and store, and nothing that reaches outside (no AI, mail, SPARQL or scanner).
+export DB_DATABASE=openric_workspace_capacity
+export WORKSPACE_AUDIT_SIGNING_KEY="$PWD/$DIR/keys/audit-signing.sk"
+export WORKSPACE_OBJECT_STORE="$PWD/$DIR/objects"
+export APP_URL="http://127.0.0.1:$PORT"
+export AI_GATEWAY_KEY='' WORKSPACE_SPARQL_URL='' WORKSPACE_VIRUS_SCANNER='' MAIL_MAILER=log QUEUE_CONNECTION=sync
+# As live's php-fpm (/etc/php/8.3/fpm): memory and opcache, so the numbers are those an institution would see. Its time
+# limit is for web requests only (SERVE below): console commands run without one, as live's do.
+PHP=(php -d memory_limit=4G -d opcache.enable_cli=1 -d opcache.memory_consumption=512 -d opcache.jit=off)
+SERVE=("${PHP[@]}" -d max_execution_time=300)
+mkdir -p "$DIR/keys" "$DIR/objects" "$DIR/bin" "$RESULTS"
+
+password() {
+  [ "${#1}" -ge 12 ] || { echo "Give the capacity accounts' password, at least 12 characters." >&2; exit 2; }
+}
+
+serve() {
+  # From public/, as artisan serve does: Laravel's router script finds index.php in the working directory.
+  (cd public && PHP_CLI_SERVER_WORKERS=$WORKERS exec "${SERVE[@]}" -S "127.0.0.1:$PORT" -t . ../vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php) \
+    > "$RESULTS/server.log" 2>&1 &
+  SERVER=$!
+  trap 'kill "$SERVER" 2>/dev/null || true' EXIT
+  for _ in $(seq 1 30); do curl -sf -o /dev/null "http://127.0.0.1:$PORT/up" && return; sleep 1; done
+  echo "The capacity Workspace did not start: see $RESULTS/server.log" >&2; exit 1
+}
+
+case "${1:-}" in
+  reset)
+    [ "${2:-}" = empty-it ] || { echo "This empties $DB_DATABASE: say bin/capacity reset empty-it." >&2; exit 2; }
+    [[ $DB_DATABASE == *_capacity ]] || { echo "Refused: $DB_DATABASE is not a capacity database." >&2; exit 1; }
+    # One table at a time: dropping them all at once outgrows the shared lock table PostgreSQL keeps for every database.
+    psql -d "$DB_DATABASE" -Atc "select tablename from pg_tables where schemaname = 'public'" | while read -r table; do
+      psql -d "$DB_DATABASE" -qc "drop table if exists public.\"$table\" cascade"
+    done
+    rm -rf "$DIR/keys" "$DIR/objects"
+    echo "Emptied $DB_DATABASE and its key and store. Next: bin/capacity setup."
+    ;;
+  setup)
+    if [ ! -x "$DIR/bin/k6" ]; then
+      tmp=$(mktemp -d)
+      gh release download "$K6_VERSION" -R grafana/k6 -p "k6-$K6_VERSION-linux-amd64.tar.gz" -D "$tmp"
+      echo "$K6_SHA256  $tmp/k6-$K6_VERSION-linux-amd64.tar.gz" | sha256sum -c -
+      tar -xzf "$tmp/k6-$K6_VERSION-linux-amd64.tar.gz" -C "$tmp"
+      mv "$tmp/k6-$K6_VERSION-linux-amd64/k6" "$DIR/bin/k6"
+      rm -rf "$tmp"
+    fi
+    "$DIR/bin/k6" version
+    "${PHP[@]}" artisan migrate --force
+    "${PHP[@]}" artisan workspace:install --institution="Capacity Test Archive (synthetic)" --base-iri=https://capacity.example.org \
+      --admin-name="Capacity administrator" --admin-email=admin@capacity.invalid --skip-openric-vocabularies --no-interaction
+    ;;
+  seed)
+    password "${2:-}"
+    /usr/bin/time -v "${PHP[@]}" artisan workspace:capacity:seed --password="$2" 2>&1 | tee "$RESULTS/seed.log"
+    ;;
+  pages)
+    password "${2:-}"
+    "${PHP[@]}" artisan workspace:capacity:probe targets --out="$RESULTS/targets.json"
+    serve
+    for vus in 1 10 25; do
+      echo "== $vus users"
+      "$DIR/bin/k6" run --quiet --local-ips=127.0.1.1-127.0.1.60 -e BASE="http://127.0.0.1:$PORT" -e TARGETS="$PWD/$RESULTS/targets.json" \
+        -e PASSWORD="$2" -e VUS="$vus" -e DURATION=3m --summary-export="$RESULTS/pages-$vus.json" tests/capacity/pages.js 2>&1 | tee "$RESULTS/pages-$vus.txt" || true
+    done
+    ;;
+  jobs)
+    password "${2:-}"
+    "${PHP[@]}" artisan workspace:capacity:probe targets --out="$RESULTS/targets.json"
+    wide=$(php -r 'echo json_decode(file_get_contents($argv[1]))->wide_fonds;' "$RESULTS/targets.json")
+    serve
+    # The widest fonds and all it reaches, as an archivist and as the public would ask for it.
+    jar=$(mktemp)
+    token=$(curl -s -c "$jar" "http://127.0.0.1:$PORT/sign-in" | grep -o 'name="_token" value="[^"]*"' | head -1 | sed 's/.*value="//; s/"$//')
+    curl -s -b "$jar" -c "$jar" -o /dev/null --data-urlencode "_token=$token" --data-urlencode "email=archivist@capacity.invalid" --data-urlencode "password=$2" "http://127.0.0.1:$PORT/sign-in"
+    for what in "EAD 2002|records/$wide/export/ead" "EAD3|records/$wide/export/ead3" "RiC-O Turtle|api/ric/v1/records/$wide/export?format=ttl" "RiC-O JSON-LD|api/ric/v1/records/$wide/export?format=jsonld"; do
+      label=${what%%|*}; path=${what#*|}
+      curl -s -b "$jar" -o /dev/null -m 600 -w "$label of the widest fonds: HTTP %{http_code}, %{time_total} s, %{size_download} bytes\n" "http://127.0.0.1:$PORT/$path" | tee -a "$RESULTS/jobs.txt"
+    done
+    rm -f "$jar"
+    for job in "workspace:capacity:probe import --rows=1000" "workspace:search:rebuild" "workspace:audit:verify" "workspace:ocfl:verify"; do
+      echo "== $job" | tee -a "$RESULTS/jobs.txt"
+      # shellcheck disable=SC2086
+      /usr/bin/time -f "%e s, peak %M KB" "${PHP[@]}" artisan $job 2>&1 | tail -4 | tee -a "$RESULTS/jobs.txt"
+    done
+    ;;
+  *)
+    sed -n '2,14p' "$0"; exit 2 ;;
+esac

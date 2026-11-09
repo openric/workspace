@@ -7194,5 +7194,11 @@
     "Delete a conversation so many days after its last message": "Vee 'n gesprek soveel dae ná sy laaste boodskap uit",
     "Instructions to the assistant (empty: the Workspace's own)": "Opdragte aan die assistent (leeg: die Workspace s'n)",
     "AI register": "KI-register",
-    ":n of :total:": ":n van :total:"
+    ":n of :total:": ":n van :total:",
+    "As a regular expression, ^Minutes of finds entries whose title begins so, and 19[0-4][0-9] any year from 1900 to 1949.": "As 'n gereelde uitdrukking vind ^Minutes of inskrywings waarvan die titel so begin, en 19[0-4][0-9] enige jaar van 1900 tot 1949.",
+    "As a regular expression": "As 'n gereelde uitdrukking",
+    "Nothing matched every word, so these are the closest matches by title. Check the spelling, or search for fewer words.": "Niks het by elke woord gepas nie, dus is dit die naaste ooreenkomste volgens titel. Kontroleer die spelling, of soek met minder woorde.",
+    "Searched with a regular expression, without regard to case.": "Gesoek met 'n gereelde uitdrukking, sonder om op hoof- of kleinletters te let.",
+    "That is not a regular expression the search can read: :reason": "Dit is nie 'n gereelde uitdrukking wat die soektog kan lees nie: :reason",
+    "The regular expression took too long and was stopped. Make it more specific, for example by anchoring it or naming more letters.": "Die gereelde uitdrukking het te lank geneem en is gestop. Maak dit meer spesifiek, byvoorbeeld deur dit te anker of meer letters te noem."
 }

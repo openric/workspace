@@ -1,0 +1,96 @@
+#!/usr/bin/env python3
+# OpenRiC Workspace - refresh the interface translations from the two sources a person translated: PSIS (AtoM's XLIFF,
+# apps/qubit/i18n and every plugin's i18n) first, then Heratio's lang/<lang>.json. A string either source translates
+# replaces the Workspace's own, a machine string (governance/translations/<lang>-machine.json) included, which then
+# leaves the machine list; what neither translates is kept. Afrikaans is not refreshed: Dr Johan Pieterse reviews it.
+# A translation that loses a :placeholder of the English is skipped, and long dashes become hyphens.
+#
+#   bin/lang-refresh            write lang/<lang>.json and print what changed
+#   bin/lang-refresh --check    write nothing; exit 1 when a language is behind its sources (release scripts)
+#
+# PSIS_ROOT and HERATIO_ROOT override /usr/share/nginx/archive and /usr/share/nginx/heratio.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+import glob, json, os, re, sys
+import xml.etree.ElementTree as ET
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+PSIS = os.environ.get('PSIS_ROOT', '/usr/share/nginx/archive')
+HERATIO = os.environ.get('HERATIO_ROOT', '/usr/share/nginx/heratio')
+CHECK = '--check' in sys.argv
+DASH = re.compile('[\u2012\u2013\u2014\u2015]')
+PH = re.compile(r':[a-z_]+')
+SKIP = {'af', 'languages'}
+# What an earlier, regular-expression scan of the XLIFF left behind: the markup of the next unit taken as a translation.
+MARKUP = re.compile(r'</?(source|target|note|trans-unit)\b|xml:space')
+
+
+def keeps_placeholders(src, tgt):
+    return all(p in tgt for p in PH.findall(src))
+
+
+def psis(lang):
+    """Every translated XLIFF unit of PSIS for the language, the core's before the plugins'."""
+    found = {}
+    files = sorted(glob.glob(f'{PSIS}/apps/qubit/i18n/{lang}/*.xml')) + sorted(glob.glob(f'{PSIS}/plugins/*/i18n/{lang}/*.xml')) \
+        + sorted(glob.glob(f'{PSIS}/atom-ahg-plugins/*/i18n/{lang}/*.xml'))
+    for path in files:
+        try:
+            tree = ET.parse(path)
+        except ET.ParseError as e:
+            print(f'  {path}: not read ({e})', file=sys.stderr)
+            continue
+        for unit in tree.iter():
+            if not unit.tag.endswith('trans-unit'):
+                continue
+            src = next((c for c in unit if c.tag.endswith('source')), None)
+            tgt = next((c for c in unit if c.tag.endswith('target')), None)
+            s = ''.join(src.itertext()) if src is not None else ''
+            t = ''.join(tgt.itertext()) if tgt is not None else ''
+            if s and t.strip():
+                found.setdefault(s, t)
+    return found
+
+
+def heratio(lang):
+    try:
+        return json.load(open(f'{HERATIO}/lang/{lang}.json', encoding='utf-8'))
+    except (FileNotFoundError, json.JSONDecodeError):
+        return {}
+
+
+english = list(json.load(open(f'{ROOT}/lang/af.json', encoding='utf-8')).keys())
+behind = []
+print('lang     before  after  psis  heratio  kept  machine')
+for path in sorted(glob.glob(f'{ROOT}/lang/*.json')):
+    lang = os.path.basename(path)[:-5]
+    if lang in SKIP:
+        continue
+    raw = open(path, encoding='utf-8').read()
+    old = json.loads(raw)
+    track_path = f'{ROOT}/governance/translations/{lang}-machine.json'
+    machine = json.load(open(track_path, encoding='utf-8')) if os.path.exists(track_path) else {}
+    p, h = psis(lang), heratio(lang)
+    new, count = {}, [0, 0, 0]
+    for k in english:
+        if k in p and keeps_placeholders(k, p[k]):
+            new[k] = DASH.sub('-', p[k]); count[0] += 1
+        elif isinstance(h.get(k), str) and h[k].strip() and h[k] != k and keeps_placeholders(k, h[k]):
+            new[k] = DASH.sub('-', h[k]); count[1] += 1
+        elif k in old and not MARKUP.search(old[k]):
+            new[k] = old[k]; count[2] += 1
+    # A machine string a person has since translated, or one no longer in the English, leaves the machine list.
+    still = {k: v for k, v in machine.items() if new.get(k) == v}
+    print(f'{lang:8} {len(old):6} {len(new):6} {count[0]:5} {count[1]:8} {count[2]:5} {len(still):8}')
+    if new != old or still != machine:
+        behind.append(lang)
+        if not CHECK:
+            indent = 4 if '\n    "' in raw else 1
+            open(path, 'w', encoding='utf-8').write(json.dumps(new, ensure_ascii=False, indent=indent) + '\n')
+            if machine:
+                open(track_path, 'w', encoding='utf-8').write(json.dumps(dict(sorted(still.items())), ensure_ascii=False, indent=1) + '\n')
+
+if CHECK:
+    print('behind their sources: ' + (', '.join(behind) if behind else 'none'))
+    sys.exit(1 if behind else 0)
+print('refreshed: ' + (', '.join(behind) if behind else 'none'))

@@ -10,7 +10,7 @@
             @if($institution->catalogue_show_counts)<p class="catalogue-counts">{{ __(':records archival descriptions, :agents people, families and organisations, :activities activities and :places places are published here, described in Records in Contexts.', $counts->all()) }}</p>@endif
             <form method="get" action="{{ route('discover.home') }}" role="search" class="catalogue-search">
                 <label for="q">{{ __('Search names, titles and reference codes') }}</label>
-                <div><input id="q" name="q" required>@include('search._mode', ['institutionId' => $institution->id, 'search' => null])<button type="submit">{{ __('Search') }}</button></div>
+                <div><input id="q" name="q" required>@include('search._mode', ['institutionId' => $institution->id, 'search' => null])@include('search._pattern')<button type="submit">{{ __('Search') }}</button></div>
             </form>
             <p><a href="{{ route('discover.ways-in') }}">{{ __('Ways into the collection') }}</a>@if(\App\Federation\TripleStore::configured()) · <a href="{{ route('discover.explore') }}">{{ __('Explore the graph') }}</a>@endif</p>
         </section>
@@ -35,7 +35,7 @@
         @endif
     @else
         @php($lang = \App\Support\Vocab::languages())
-        @php($link = fn (array $change) => route('discover.home', array_filter([...['q' => $query, 'kind' => $kind] + $search['filters'], ...$change], fn ($v) => $v !== null && $v !== '')))
+        @php($link = fn (array $change) => route('discover.home', array_filter([...['q' => $query, 'kind' => $kind, 'match' => request()->query('match') === 'pattern' ? 'pattern' : null] + $search['filters'], ...$change], fn ($v) => $v !== null && $v !== '')))
         <h1>{{ __('Search: :query', ['query' => $query]) }}</h1>
         <p role="status">{{ $search['total'] === 0 ? __('No results found.') : __(':count found.', ['count' => $search['total']]) }}</p>
         @if(\App\Support\Modules::on('federation') && \App\Models\FederationPeer::where(['institution_id' => $institution->id, 'is_active' => true, 'search_enabled' => true])->exists())
@@ -69,7 +69,7 @@
                 @endif
                 <h2>{{ __('Dates') }}</h2>
                 <form method="get" action="{{ route('discover.home') }}" class="facet-years">
-                    @foreach(array_filter(['q' => $query, 'kind' => $kind, 'level' => $search['filters']['level'], 'repository' => $search['filters']['repository']]) as $name => $value)<input type="hidden" name="{{ $name }}" value="{{ $value }}">@endforeach
+                    @foreach(array_filter(['q' => $query, 'kind' => $kind, 'match' => request()->query('match') === 'pattern' ? 'pattern' : null, 'level' => $search['filters']['level'], 'repository' => $search['filters']['repository']]) as $name => $value)<input type="hidden" name="{{ $name }}" value="{{ $value }}">@endforeach
                     <label for="from">{{ __('From year') }}</label><input id="from" name="from" inputmode="numeric" size="5" value="{{ $search['filters']['from'] }}">
                     <label for="to">{{ __('To year') }}</label><input id="to" name="to" inputmode="numeric" size="5" value="{{ $search['filters']['to'] }}">
                     <button type="submit">{{ __('Apply') }}</button>

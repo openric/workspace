@@ -24,6 +24,8 @@ use App\Models\Place;
 use App\Models\RecordResource;
 use App\Models\Repository;
 use App\Models\Rule;
+use App\Privacy\Redaction;
+use App\Rights\Embargoes;
 use App\Support\Vocab;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
@@ -70,6 +72,13 @@ class PublicCatalogue
                     ->where('value', 'ilike', $like)->select('subject_id'))
                 ->when(! $prefix, fn ($q) => $q->orWhereIn('id', DB::table('identifiers')->where('subject_table', $table)->where('value', 'ilike', $like)->select('subject_id')))))
             ->with([...self::WITH, ...$with])->get()
+            ->tap(function (Collection $found) use ($class) {
+                // Each entity's checks below would otherwise ask the database one record at a time.
+                if ($class === RecordResource::class) {
+                    app(Embargoes::class)->prime($found);
+                    app(Redaction::class)->prime($found);
+                }
+            })
             ->filter(fn ($entity) => $this->view->readable($entity))
             ->sortBy(fn ($entity) => mb_strtolower((string) $this->view->label($entity)))->values();
     }

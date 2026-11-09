@@ -64,9 +64,38 @@ class SearchTest extends TestCase
         app(SearchIndex::class)->flush();
     }
 
-    private function search(string $query, array $filters = [], bool $public = true): array
+    private function search(string $query, array $filters = [], bool $public = true, string $match = 'words'): array
     {
-        return app(SearchService::class)->search($this->institution, $query, $public, $filters);
+        return app(SearchService::class)->search($this->institution, $query, $public, $filters, 1, 20, ['match' => $match]);
+    }
+
+    public function test_a_search_that_finds_nothing_shows_the_closest_titles_said_to_be_close(): void
+    {
+        $found = $this->search('Minuets');
+        $this->assertTrue($found['close']);
+        $this->assertSame(['Minutes of the town council'], array_column($found['results'], 'title'));
+        $this->assertFalse($this->search('Minutes')['close'], 'an exact match is not a close one');
+        $this->assertSame(['total' => 0, 'close' => false], array_intersect_key($this->search('zzqxv'), ['total' => 1, 'close' => 1]));
+        // Still only what the public may read: the draft-only staff index is not asked.
+        $this->assertSame(0, $this->search('Strongrom')['total']);
+
+        $this->get(route('discover.home', ['q' => 'Minuets']))->assertOk()->assertSee('the closest matches by title')->assertSee('Minutes of the town council');
+        $this->assertSame(0, (int) DB::table('search_queries')->where('query', 'Minuets')->value('result_count'), 'counted as a search that found nothing');
+    }
+
+    public function test_a_regular_expression_searches_the_same_entries_and_a_bad_one_is_explained(): void
+    {
+        $this->assertSame(['Minutes of the town council'], array_column($this->search('^minutes of', match: 'pattern')['results'], 'title'), 'without regard to case');
+        $this->assertSame(['Photographs of the bridge'], array_column($this->search('19[0-4][0-9]', match: 'pattern')['results'], 'title'));
+        $this->assertStringContainsString('<mark>1902</mark>', (string) $this->search('19[0-4][0-9]', match: 'pattern')['results'][0]['snippet']);
+        $this->assertSame(0, $this->search('court.ouse', match: 'pattern')['total'], 'a draft value is not public');
+        $this->assertSame(1, $this->search('court.ouse', public: false, match: 'pattern')['total']);
+
+        $bad = $this->search('(unclosed', match: 'pattern');
+        $this->assertSame(0, $bad['total']);
+        $this->assertStringContainsString('not a regular expression', (string) $bad['error']);
+        $this->assertSame(1, $this->search('committees')['total'], 'the connection is still usable after a refused pattern');
+        $this->get(route('discover.home', ['q' => '(unclosed', 'match' => 'pattern']))->assertOk()->assertSee('not a regular expression');
     }
 
     public function test_the_public_finds_only_what_is_published(): void

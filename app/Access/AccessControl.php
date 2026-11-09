@@ -37,6 +37,7 @@ use App\Models\Role;
 use App\Models\User;
 use App\Support\Vocab;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 final class AccessControl
@@ -46,6 +47,9 @@ final class AccessControl
 
     /** @var array<string, ?string> IRI => concept id */
     private array $concepts = [];
+
+    /** @var array<string, Collection<int, object>> the permission rows for one account, kind and action, for this request */
+    private array $cells = [];
 
     /**
      * May this account (null: the public) take this action on this kind of record,
@@ -72,7 +76,8 @@ final class AccessControl
         }
         $roleIds = $this->roleIds($account, $institutionId);
 
-        $cells = DB::table('permissions')
+        // Asked once per request: a public list checks every record against the same rows (the capacity test, R1).
+        $cells = $this->cells[($account?->id ?? 'public')."|$institutionId|$kindId|$actionId|".implode(',', $roleIds)] ??= DB::table('permissions')
             ->where('institution_id', $institutionId)->where('kind_id', $kindId)->where('action_id', $actionId)
             ->where(fn ($q) => $q->whereIn('role_id', $roleIds)->when($account, fn ($q) => $q->orWhere('user_id', $account->id)))
             ->get(['user_id', 'role_id', 'repository_id', 'subject_id', 'is_grant']);
@@ -81,8 +86,9 @@ final class AccessControl
         }
 
         // From the most specific scope to the least: the record and the units above it,
-        // then its repository, then everything.
-        foreach ($this->scopes($subject) as [$field, $value]) {
+        // then its repository, then everything. The units above it are looked up only when
+        // some row is held on a single record, since otherwise none of them can match.
+        foreach ($this->scopes($subject, $cells->contains(fn ($c) => $c->subject_id !== null)) as [$field, $value]) {
             $here = $cells->filter(fn ($c) => match ($field) {
                 'subject_id' => $c->subject_id === $value,
                 'repository_id' => $c->subject_id === null && $c->repository_id === $value,
@@ -169,10 +175,17 @@ final class AccessControl
     {
         $this->roles = [];
         $this->concepts = [];
+        $this->cells = [];
+    }
+
+    /** Forget the permission rows asked this request, after a permission was granted, denied or removed. */
+    public function forgetPermissions(): void
+    {
+        $this->cells = [];
     }
 
     /** @return list<array{0: string, 1: ?string}> */
-    private function scopes(?Model $subject): array
+    private function scopes(?Model $subject, bool $records = true): array
     {
         // An instantiation is read and changed as its unit of description is.
         if ($subject instanceof Instantiation) {
@@ -180,7 +193,7 @@ final class AccessControl
         }
         $scopes = [];
         if ($subject instanceof RecordResource) {
-            for ($unit = $subject; $unit !== null; $unit = $unit->parent) {
+            for ($unit = $records ? $subject : null; $unit !== null; $unit = $unit->parent) {
                 $scopes[] = ['subject_id', $unit->id];
             }
             $scopes[] = ['repository_id', $subject->repository_id];

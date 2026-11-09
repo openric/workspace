@@ -28,6 +28,16 @@ Every published name of an entity finds it, not only its authorised form: a pers
 
 After a search, the facets narrow by kind, level of description, repository and years. A range of years finds units whose dates overlap it, so `1900` to `1910` finds a series of 1895 to 1905.
 
+## Regular expressions
+
+Tick **As a regular expression** beside the search box to search with a pattern instead of words. The pattern is matched against the names, identifiers and text of each entry, without regard to case, in PostgreSQL's regular-expression syntax:
+
+- `^Minutes of` finds entries whose title begins with those words.
+- `19[0-4][0-9]` finds any year from 1900 to 1949 written in the text.
+- `water.{0,20}supply` finds *water* followed within twenty characters by *supply*.
+
+A pattern searches only what a word search would: the public catalogue sees only what is published. A pattern that takes longer than five seconds is stopped; anchor it with `^`, or name more letters, to make it quicker. A pattern the search cannot read is explained instead of searched.
+
 ## Browsing instead of searching
 
 Searching suits a question you can put in words. To see what a collection holds, start from its top: the public catalogue's home lists every top-level collection and every repository, each opening onto what is inside it, and every entity's page links to the entities related to it. The [graph explorer](/help/article/graph-explorer-user-guide) answers questions about relations, such as every record created by members of a given family.
@@ -36,5 +46,5 @@ Searching suits a question you can put in words. To see what a collection holds,
 
 - Try fewer words, or a word less specific.
 - Try another form of a name, or the place under its older name.
-- Check the spelling; search does not correct it.
+- Check the spelling. When no entry holds every word, search shows instead the entries whose title holds a word closest to what you typed, such as *Minutes* for *Minuets*, and says that these are close matches. A search with a phrase in quotes or a word left out is taken as meant, and shows no close matches.
 - In the public catalogue, the record may simply not be published yet.

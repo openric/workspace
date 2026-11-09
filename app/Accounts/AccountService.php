@@ -10,6 +10,7 @@
 
 namespace App\Accounts;
 
+use App\Access\AccessControl;
 use App\Access\RoleService;
 use App\Audit\AuditLog;
 use App\Description\Bcp47;
@@ -186,6 +187,7 @@ class AccountService
                 $this->keepAnAdministrator($account);
                 DB::table('role_members')->where('user_id', $account->id)->delete();
                 DB::table('permissions')->where('user_id', $account->id)->delete();
+                app(AccessControl::class)->forgetPermissions();
                 DB::table('account_translation_languages')->where('user_id', $account->id)->delete();
                 DB::table('contact_points')->where(['subject_table' => 'users', 'subject_id' => $account->id])->delete();
                 DB::table('password_reset_tokens')->where('email', $account->email)->delete();

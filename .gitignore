@@ -30,3 +30,6 @@ Thumbs.db
 /storage/framework/testing/
 /test-results/
 /playwright-report/
+
+# The capacity test (bin/capacity): its key, store, k6 and results stay on the host.
+/storage/capacity/
