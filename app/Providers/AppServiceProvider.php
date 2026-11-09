@@ -25,6 +25,7 @@ use App\Preservation\PreservationEvents;
 use App\Privacy\Redaction;
 use App\Research\Shop;
 use App\Search\SearchIndex;
+use App\Support\Modules;
 use App\Support\Vocab;
 use App\Translation\OverlayLoader;
 use App\Versions\Versions;
@@ -34,6 +35,7 @@ use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Mail\Events\MessageSending;
 use Illuminate\Mail\Events\MessageSent;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
@@ -55,6 +57,8 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        // @module('name') ... @endmodule: shown only where the installation offers that experimental module (MODULES.md).
+        Blade::if('module', fn (string $module) => Modules::on($module));
         // The search index follows what entities say (ADR 0009): a change to a name, a value, an identifier or a date,
         // or to the entity itself, marks it; marked entities are indexed again once, when the request or command ends.
         foreach ([DescriptionValue::class, Name::class, Identifier::class, RicDate::class, CustomFieldValue::class] as $part) {

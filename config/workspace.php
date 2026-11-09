@@ -247,6 +247,8 @@ return [
     // Operations (roadmap phase 12a): the accounts, by email, that see the installation as a whole on the operations page
     // (the queue, failed jobs, disks), comma-separated; empty, whoever manages the only institution does. The bearer
     // token a monitor sends to read /metrics (empty, /metrics is not served), and the addresses it may come from.
+    // The experimental modules this installation offers, comma-separated, or "all" (MODULES.md): none unless named.
+    'modules' => env('WORKSPACE_MODULES', ''),
     'operators' => env('WORKSPACE_OPERATORS', ''),
     'metrics_token' => env('WORKSPACE_METRICS_TOKEN', ''),
     'metrics_ips' => env('WORKSPACE_METRICS_IPS', ''),

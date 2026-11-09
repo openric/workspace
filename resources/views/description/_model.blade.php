@@ -15,7 +15,7 @@
         'Delete this saved view?' => __('Delete this saved view?'), 'Name this view' => __('Name this view'), 'Link copied' => __('Link copied'),
         'Link to this view' => __('Link to this view'), 'Copy this link' => __('Copy this link')];
 @endphp
-<div class="model3d" @if($instantiation) data-model="{{ $instantiation->id }}" data-bookmarks="{{ route('models.bookmarks', $instantiation) }}" @endif data-text="{{ json_encode($texts) }}">
+<div class="model3d" @if($instantiation && \App\Support\Modules::on('3d')) data-model="{{ $instantiation->id }}" data-bookmarks="{{ route('models.bookmarks', $instantiation) }}" @endif data-text="{{ json_encode($texts) }}">
     <model-viewer id="{{ $viewerId }}" src="{{ $src }}" alt="{{ $alt }}" camera-controls touch-action="pan-y" loading="lazy"
         @if($settings['auto_rotate']) auto-rotate rotation-per-second="{{ (int) $settings['rotation_speed'] }}deg" @endif
         camera-orbit="{{ $settings['camera_orbit'] }}" @if($settings['min_camera_orbit']) min-camera-orbit="{{ $settings['min_camera_orbit'] }}" @endif
@@ -80,7 +80,7 @@
             </div>
         </details>
         @if($turntable)<p><a href="{{ route($fileRoute ?? 'files.show', $turntable) }}">{{ __('Turntable video') }}</a></p>@endif
-        @if($mayEdit)<p><a href="{{ route('models.edit', $instantiation) }}">{{ __('How the model is shown, and its hotspots') }}</a></p>@endif
+        @if($mayEdit && \App\Support\Modules::on('3d'))<p><a href="{{ route('models.edit', $instantiation) }}">{{ __('How the model is shown, and its hotspots') }}</a></p>@endif
     @endif
 </div>
 @once

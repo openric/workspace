@@ -30,15 +30,15 @@ Rules that depend on a value, such as "only a published record may appear in dis
 
 ## 3. Entities
 
-The kinds follow RiC-CM 1.0 and are serialised with RiC-O 1.1 classes only; anything RiC-O lacks uses a term from the published OpenRiC extension ontology (`https://openric.org/ns/ext/v1`, 1.4.0).
+The kinds follow RiC-CM 1.0.1 (30 September 2026; what changed from 1.0 is in `governance/RIC-CM-1.0.1-ASSESSMENT.md`) and are serialised with RiC-O 1.1 classes only; anything RiC-O lacks uses a term from the published OpenRiC extension ontology (`https://openric.org/ns/ext/v1`, 1.4.0). RiC-CM 1.0.1 and RiC-O 1.1 are normative for the Workspace's own model. ISAD(G), ISAAR(CPF), ISDIAH, ISDF, EAD and EAC-CPF are not: they inform the import and export adapters and the compatibility views that present a RiC description in their terms (roadmap phase 24), and nothing in the model is shaped by them.
 
 | Entity | RiC-O class on export | Notes |
 |---|---|---|
 | Institution | `rico:CorporateBody` | The tenant. Every other row belongs to exactly one. |
-| Repository | `rico:CorporateBody` holding records | ISDIAH; contact details with `openricx:ContactPoint`. |
+| Repository | `rico:CorporateBody` holding records | Contact details with `openricx:ContactPoint`. The ISDIAH screen and export are compatibility views over it. |
 | Record set, record, record part | `rico:RecordSet`, `rico:Record`, `rico:RecordPart` | Level is a concept. The hierarchy is a navigational view over part-of relations, not the whole model (hard constraint). |
 | Instantiation | `rico:Instantiation` | A carrier of a record; files attach here. An individual physical medium is an `openricx:Carrier`. |
-| Agent | `rico:Person`, `rico:CorporateBody`, `rico:Family` | ISAAR(CPF). An occupation held over time is an `openricx:Occupation`. |
+| Agent | `rico:Person`, `rico:CorporateBody`, `rico:Family` | An occupation held over time is an `openricx:Occupation`. The ISAAR(CPF) screen and EAC-CPF are compatibility views over it. |
 | Activity | `rico:Activity` with `rico:hasActivityType` | Production and accumulation are activity-type concepts, not classes (RiC-O 1.1 has no such classes). |
 | Place | `rico:Place` | |
 | Rule | `rico:Rule` with `rico:hasOrHadRuleType` | Access restrictions and security classification, with `rico:beginningDate` and `rico:endDate`. |

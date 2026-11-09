@@ -18,5 +18,5 @@
         @if($loop->first)<p>{{ __('Or') }}</p>@endif
         <p><a class="button" href="{{ route('sso.start', $provider) }}">{{ __('Sign in with :provider', ['provider' => $provider->label]) }}</a></p>
     @endforeach
-    @if(\App\Support\HostInstitution::for(request())?->registration_open)<p>{{ __('No account yet?') }} <a href="{{ route('register') }}">{{ __('Ask for one') }}</a>.</p>@endif
+    @if(\App\Support\HostInstitution::for(request())?->registration_open && \App\Support\Modules::on('research'))<p>{{ __('No account yet?') }} <a href="{{ route('register') }}">{{ __('Ask for one') }}</a>.</p>@endif
 @endsection

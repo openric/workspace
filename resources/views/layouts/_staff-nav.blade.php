@@ -8,7 +8,7 @@
         // group => [route name => [label, shown, the routes it is current for, "!" before one it is not]]; a group with nothing shown is left out.
         // As AtoM: what is described, then the working tools (its Manage), import and export (its Import), reports (Heratio's), then administration (its Admin);
         // the account's own pages (profile, jobs, access requests) are under its name in the header.
-        $nav = array_filter(array_map(fn ($items) => array_filter($items, fn ($item) => $item[1]), [
+        $nav = array_filter(array_map(fn ($items) => array_filter($items, fn ($item, $route) => $item[1] && \App\Support\Modules::routeOn($route), ARRAY_FILTER_USE_BOTH), [
             'Describe' => [
                 'records.index' => [__('Archival descriptions'), $user->mayAnywhere('read', 'description'), 'records.*|!records.export-all'],
                 'agents.index' => [__('Authority records'), $user->mayAnywhere('read', 'authority'), 'agents.*|!agents.duplicates'],

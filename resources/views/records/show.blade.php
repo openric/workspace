@@ -41,7 +41,7 @@
     @if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif
     <p>{{ $record->level->label(\App\Support\Vocab::languages()) }} @include('description._ric', ['term' => \App\Relations\EntityKinds::ricClass($record)])@if($record->referenceCode()), {{ $record->referenceCode() }}@endif{{ __('. Held by') }} <a href="{{ route('repositories.show', $record->repository) }}">{{ $record->repository->described('authorised-name', ['en']) }}</a>.<br>
        <strong>{{ __('Persistent IRI') }}:</strong> <code>{{ $record->iri }}</code></p>
-    <p><a href="{{ route('records.tree', $record) }}">{{ __('Hierarchy') }}</a> · <a href="{{ route('records.inventory', $record) }}">{{ __('Inventory') }}</a> · <a href="{{ route('records.finding-aid', $record) }}">{{ __('Finding aid') }}</a> · <a href="{{ route('records.print', $record) }}">{{ __('Print view') }}</a> · <a href="{{ route('records.export', $record) }}">{{ __('Export') }}</a>@if(auth()->user()->hasPermission(\App\Support\Vocab::permission('manage-institution'))) · <a href="{{ route('packages.index', $record) }}">{{ __('Information packages') }}</a>@endif @if(auth()->user()->may('update', 'description', $record)) · <a href="{{ route('research.rights-policies', $record) }}">{{ __('Rights policies for researchers') }}</a>@endif
+    <p><a href="{{ route('records.tree', $record) }}">{{ __('Hierarchy') }}</a> · <a href="{{ route('records.inventory', $record) }}">{{ __('Inventory') }}</a> · <a href="{{ route('records.finding-aid', $record) }}">{{ __('Finding aid') }}</a> · <a href="{{ route('records.print', $record) }}">{{ __('Print view') }}</a> · <a href="{{ route('records.export', $record) }}">{{ __('Export') }}</a>@if(auth()->user()->hasPermission(\App\Support\Vocab::permission('manage-institution'))) · <a href="{{ route('packages.index', $record) }}">{{ __('Information packages') }}</a>@endif @if(auth()->user()->may('update', 'description', $record))@module('research') · <a href="{{ route('research.rights-policies', $record) }}">{{ __('Rights policies for researchers') }}</a>@endmodule @endif
        @unless($canUpdate) · <a href="{{ route('access-requests.new', ['record' => $record->id, 'scope' => in_array($record->level->notation, \App\AccessRequests\AccessRequestService::COLLECTION_LEVELS, true) ? 'collection' : 'item']) }}">{{ __('Ask for access') }}</a>@endunless
        @if($canUpdate) · <a href="{{ route('history', ['records', $record->id]) }}">{{ __('History') }}</a>
            · <form method="post" action="{{ route('records.calculate-dates', $record) }}" style="display: inline">@csrf<button type="submit" style="margin-top: 0; padding: .1rem .5rem">{{ __('Calculate dates from the units inside') }}</button></form>@endif</p>
@@ -88,10 +88,10 @@
     @include('records._embargoes', ['record' => $record, 'canUpdate' => $canUpdate])
     @if(auth()->user()->hasPermission(\App\Support\Vocab::permission('manage-privacy')))@include('records._privacy', ['record' => $record])@endif
     @if(app(\App\Research\ShareLinks::class)->mayIssue(auth()->user(), $record))@include('records._share-links', ['record' => $record])@endif
-    @if($canUpdate)@include('records._at-risk', ['record' => $record])@endif
-    @if(auth()->user()->may('publish', 'description', $record))@include('records._scholarship', ['record' => $record])@endif
-    @if(auth()->user()->hasPermission(\App\Support\Vocab::permission('manage-repatriation')))@include('records._repatriation', ['record' => $record])@endif
-    @include('records._doi', ['record' => $record])
+    @module('heritage')@if($canUpdate)@include('records._at-risk', ['record' => $record])@endif @endmodule
+    @module('scholarship')@if(auth()->user()->may('publish', 'description', $record))@include('records._scholarship', ['record' => $record])@endif @endmodule
+    @module('repatriation')@if(auth()->user()->hasPermission(\App\Support\Vocab::permission('manage-repatriation')))@include('records._repatriation', ['record' => $record])@endif @endmodule
+    @module('dois')@include('records._doi', ['record' => $record])@endmodule
     @include('search._related', ['unit' => $record, 'public' => false, 'route' => 'records.show'])
     @if(auth()->user()->may('delete', 'description', $record))@include('records._retention', ['record' => $record]) @include('records._records-management', ['record' => $record]) @include('records._classification', ['record' => $record])@endif
     @include('description._community-labels', ['subject' => $record, 'kind' => 'records', 'canUpdate' => $canUpdate])

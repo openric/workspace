@@ -5,7 +5,7 @@
     @php($lang = \App\Support\Vocab::languages())
     @php($when = fn ($d) => $d?->timezone(config('workspace.timezone'))->format('Y-m-d H:i'))
     <h1>{{ __('Information packages') }}</h1>
-    <p><a href="{{ route('records.show', $record) }}">{{ \App\Relations\EntityKinds::label($record) }}</a> · <a href="{{ route('archivematica.index') }}">{{ __('Archivematica') }}</a></p>
+    <p><a href="{{ route('records.show', $record) }}">{{ \App\Relations\EntityKinds::label($record) }}</a>@module('archivematica') · <a href="{{ route('archivematica.index') }}">{{ __('Archivematica') }}</a>@endmodule</p>
     @if(session('status'))<p role="status">{{ session('status') }}</p>@endif
     @if($errors->any())<p class="error" role="alert">{{ $errors->first() }}</p>@endif
     <p>{{ __('An OAIS information package is the unit and its files put together as a BagIt bag, each file with its checksum: a SIP holds the masters as they came in, an AIP the masters and preservation masters with the unit\'s METS, PREMIS and RiC-O, and a DIP the copies a reader may use. A SIP is carried on into an AIP, and an AIP into a DIP. Each package is kept in an OCFL object of its own.') }}</p>

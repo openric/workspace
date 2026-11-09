@@ -6,7 +6,7 @@ This is the routine for taking the live instance at https://workspace.openric.or
 
 1. Read the release's entry in `ROADMAP.md` and its ADR. Look for anything an operator must do by hand: a new `.env` setting, a package to install, a cron line, a one-off artisan command. Releases that need one say so in their commit message.
 2. Open Admin, Operations, and check that nothing needs attention. A failing scheduler, a full disk or open fixity failures should be dealt with first, so that they are not confused with what the update changes.
-3. Check that CI passed on the release commit and on its tag. `deploy.sh` refuses a tag whose commit did not pass, so this only saves a wasted attempt.
+3. Check that all four CI jobs passed on the release commit and that the tag's own job passed. `deploy.sh` refuses otherwise, and refuses a tag not signed by a key in `deploy/allowed_signers`, so this only saves a wasted attempt. Afterwards the release's evidence is in `storage/app/releases/vX.Y.Z.md`.
 
 ## During
 

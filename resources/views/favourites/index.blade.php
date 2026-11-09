@@ -38,17 +38,17 @@
             <select name="folder_id" aria-label="{{ __('Folder') }}" form="bulk"><option value="">{{ __('Unfiled') }}</option>@foreach($folders as $f)<option value="{{ $f->id }}">{{ $f->name }}</option>@endforeach</select>
             <button type="submit" form="bulk">{{ __('Apply') }}</button></p>
         @php($bibliographies = \App\Models\Bibliography::where('user_id', auth()->id())->orderBy('name')->get())
-        @if($bibliographies->isNotEmpty())
+        @if($bibliographies->isNotEmpty() && \App\Support\Modules::on('research'))
             <p><label for="to-bib">{{ __('Add the records chosen to the bibliography') }}</label> <select id="to-bib" name="bibliography_id" form="bulk">@foreach($bibliographies as $b)<option value="{{ $b->id }}">{{ $b->name }}</option>@endforeach</select>
                 <button type="submit" form="bulk" formaction="{{ route('research.bibliographies.from-favourites') }}">{{ __('Add') }}</button></p>
         @endif
         @php($collections = \App\Models\ResearchCollection::where('user_id', auth()->id())->orderBy('name')->get())
-        @if($collections->isNotEmpty())
+        @if($collections->isNotEmpty() && \App\Support\Modules::on('research'))
             <p><label for="to-coll">{{ __('Add what is chosen to the collection') }}</label> <select id="to-coll" name="collection_id" form="bulk">@foreach($collections as $c)<option value="{{ $c->id }}">{{ $c->name }}</option>@endforeach</select>
                 <button type="submit" form="bulk" formaction="{{ route('research.collections.from-favourites') }}">{{ __('Add') }}</button></p>
         @endif
         @php($projects = app(\App\Research\Projects::class)->contributing(auth()->user()))
-        @if($projects->isNotEmpty())
+        @if($projects->isNotEmpty() && \App\Support\Modules::on('research'))
             <p><label for="to-proj">{{ __('Add the records chosen to the project') }}</label> <select id="to-proj" name="project_id" form="bulk">@foreach($projects as $p)<option value="{{ $p->id }}">{{ $p->title }}</option>@endforeach</select>
                 <button type="submit" form="bulk" formaction="{{ route('research.projects.from-favourites') }}">{{ __('Add') }}</button></p>
         @endif

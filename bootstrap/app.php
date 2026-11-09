@@ -3,6 +3,7 @@
 use App\Api\Problem;
 use App\Http\Middleware\EnsureAccountActive;
 use App\Http\Middleware\RequireAccess;
+use App\Http\Middleware\RequireModule;
 use App\Http\Middleware\SetLocale;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -24,6 +25,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias(['active' => EnsureAccountActive::class, 'access' => RequireAccess::class]);
         // The interface's language for every web page (WS-005); the API answers in data, not prose.
         $middleware->appendToGroup('web', SetLocale::class);
+        // An experimental module the installation does not offer answers 404 (MODULES.md, roadmap R1 hardening).
+        $middleware->appendToGroup('web', RequireModule::class);
+        $middleware->appendToGroup('api', RequireModule::class);
         // PayFast's notification comes from PayFast, with no CSRF token; the shop verifies it (roadmap phase 19a). A SWORD
         // deposit comes from Archivematica, signed in with an API key on each request (phase 15d).
         // A SPARQL query is posted from anywhere, as the protocol allows; it reads only published data (phase 16e).

@@ -6,6 +6,7 @@ Where each Heratio package stands in the OpenRiC Workspace. The end product has 
 - **Partial**: some of it exists; the phase completes it.
 - **Planned**: nothing yet; the phase brings it.
 - **Not carried**: decided against, for the reason given.
+- **Parked**: out of scope for now, kept for possible future implementation (the GLAM domains of phase 21, parked by Dr Johan Pieterse on 9 November 2026).
 
 Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 
@@ -22,23 +23,23 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-annotations` | 1286 | V0.1 candidate | Planned | 14 | `ahgAnnotationsPlugin` | As IIIF annotations |
 | `ahg-api` | 30902 | V0.1 candidate | Covered | 22c | `ahgAPIPlugin`, `arRestApiPlugin` | Read API, keys, proposals, files (ADR 0007); webhooks, OpenAPI, sitemaps, Atom feed and METS from v0.0.108 (ADR 0020); API writes stay proposals |
 | `ahg-api-plugin` | 179 | V0.1 candidate | Covered |  | none | The proposals contract the MCP uses (v0.0.47) |
-| `ahg-archaeology` | 4291 | out: GLAM sector | Planned | 21 | `ahgArchaeologyPlugin` |  |
+| `ahg-archaeology` | 4291 | out: GLAM sector | Parked | 21 | `ahgArchaeologyPlugin` |  |
 | `ahg-archivematica` | 4049 | later: V1.0+ | Done | 15d | `arStorageServicePlugin` | Against Archivematica's API from v0.0.117: transfers followed to their AIP, DIPs fetched from the Storage Service and taken in, its METS parser copied; settings by operators (ADR 0022) |
 | `ahg-articles` | 2447 | later: V1.0+ | Done | 20a | none | Articles with their files, sections, related articles, comments and moderation, and reads, from v0.0.123 (ADR 0024) |
-| `ahg-artwork-request` | 1844 | out: GLAM sector | Planned | 21 | none |  |
+| `ahg-artwork-request` | 1844 | out: GLAM sector | Parked | 21 | none |  |
 | `ahg-audit-trail` | 4072 | V0.1 candidate | Covered |  | `ahgAuditTrailPlugin` | Tamper-evident audit log (ADR 0004) |
 | `ahg-authority-resolution` | 12466 | V0.1 candidate | Done | 17b2 | `ahgAuthorityResolutionPlugin` | All of it, on RiC: mentions from every proposed agent and place with their context, candidates ranked by name and nine kinds of evidence, decisions kept as seen, the park queue with its nightly scan, NER feedback, outside authorities (VIAF, Wikidata, GeoNames; TGN, GND, ISNI and SAGNC listed as Heratio's stubs) filling new records with each field's source, and assignment, from v0.0.129 (ADR 0025) |
 | `ahg-backup` | 5683 | later: V1.0+ | Partial | 3 (last) | `ahgBackupPlugin` | Database backup before each deploy; deferred to the end |
-| `ahg-biblio-bf` | 3060 | out: GLAM sector | Planned | 21 | none |  |
-| `ahg-biblio-frbr` | 2006 | out: GLAM sector | Planned | 21 | none |  |
+| `ahg-biblio-bf` | 3060 | out: GLAM sector | Parked | 21 | none |  |
+| `ahg-biblio-frbr` | 2006 | out: GLAM sector | Parked | 21 | none |  |
 | `ahg-c2pa` | 17272 | V0.1 candidate | Planned | 17 (last) | `ahgC2paPlugin` | Moved to phase 17 with the AI services its manifests describe, on Dr Johan Pieterse's choice 1B of 3 November 2026 (ADR 0020) |
 | `ahg-cart` | 2166 | later: V1.0+ | Covered | 19a | `ahgCartPlugin` | The cart, the shop with PayFast, orders and paid downloads; with the shop closed, requests to publish (ADR 0017). Not Stripe, which Heratio never charges with |
 | `ahg-cdpa` | 2774 | later: jurisdiction | Covered | 18e | `ahgCDPAPlugin` | The Cyber and Data Protection Act as a jurisdiction of the privacy registers, with data controller licences and the Data Protection Officer's certificate and form DP2, from v0.0.101 (ADR 0016); a pack switched on in the settings |
-| `ahg-condition` | 1690 | later: V1.0+ | Planned | 21 | `ahgConditionPlugin` |  |
+| `ahg-condition` | 1690 | later: V1.0+ | Parked | 21 | `ahgConditionPlugin` |  |
 | `ahg-core` | 60173 | V0.1 candidate | Covered |  | `ahgAccessibilityPlugin`, `ahgCorePlugin` | Framework, not a function: the Workspace has its own (Laravel, PostgreSQL); its alternative text for images, with the worklist, is the instantiation's alternative-text element (v0.0.64) |
 | `ahg-custom-fields` | 1338 | later: V1.0+ | Covered | 22b | `ahgCustomFieldsPlugin` | The institution's own fields on five kinds of entity, from v0.0.107 (ADR 0020) |
 | `ahg-dacs-manage` | 1084 | V0.1 candidate | Covered |  | `ahgDacsManagePlugin`, `arDacsPlugin` | DACS display standard, from v0.0.76 |
-| `ahg-dam` | 4736 | out: GLAM sector | Planned | 21 | `ahgDAMPlugin` |  |
+| `ahg-dam` | 4736 | out: GLAM sector | Parked | 21 | `ahgDAMPlugin` |  |
 | `ahg-data-migration` | 5270 | later: V1.0+ | Partial | 4 | `ahgDataMigrationPlugin` | AtoM CSV and EAD import with dry runs and reports |
 | `ahg-dc-manage` | 639 | V0.1 candidate | Covered |  | `ahgDcManagePlugin`, `sfDcPlugin` | Dublin Core export, and the Dublin Core display standard from v0.0.76 |
 | `ahg-dedupe` | 3144 | later: V1.0+ | Covered | 22b | `ahgDedupePlugin` | Rules, scan, review and merge of duplicate descriptions, from v0.0.107 (ADR 0020); authority records and places already had their own duplicates and merge |
@@ -48,7 +49,7 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-doi-manage` | 4884 | later: V1.0+ | Done | 20c | `ahgDoiPlugin` | DOIs for units of description at DataCite: minting, drafts, updates, verification, hiding, the queue, minting on publish, batches, funding, usage events and the report, from v0.0.125 (ADR 0024) |
 | `ahg-donor-manage` | 3241 | later: V1.0+ | Partial | 9 | `ahgDonorAgreementPlugin`, `ahgDonorManagePlugin` | Donors as authority records with contact points, and the donor list, from v0.0.77 (9a); donor agreements with their rights, restrictions, reminders and documents from v0.0.78 (9b) |
 | `ahg-dropdown-manage` | 1744 | V0.1 candidate | Done | 20d | none | Every list is a bundled SKOS vocabulary; an institution words, orders and defaults any of them for itself, and adds and hides terms in the open ones, from v0.0.126 (ADR 0024). Before 20d this row said the lists were editable, which they were not |
-| `ahg-exhibition` | 26806 | out: GLAM sector | Planned | 21 | `ahgExhibitionPlugin` |  |
+| `ahg-exhibition` | 26806 | out: GLAM sector | Parked | 21 | `ahgExhibitionPlugin` |  |
 | `ahg-export` | 1256 | V0.1 candidate | Covered |  | `ahgExportPlugin` | EAD, Dublin Core, MODS, CSV and RiC-O export |
 | `ahg-extended-rights` | 7869 | V0.1 candidate | Partial | 13 | `ahgExtendedRightsPlugin` | Rights statements, licences, grants, batch rights and the rights report (v0.0.57 to v0.0.59); embargoes of records and their files, with exceptions, notices and the list from v0.0.89 (13a, ADR 0015); retention and disposal in 13b |
 | `ahg-favorites` | 2634 | later: V1.0+ | Covered | 19a | `ahgFavoritesPlugin` | Favourites of any entity, folders shared by a link, nine export formats, import by IRI (ADR 0017); sending to collections (with notes), projects (as their records) and bibliographies |
@@ -58,26 +59,26 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-ftp-upload` | 2301 | later: V1.0+ | Covered | 22a | `ahgFtpPlugin` | An FTP or SFTP account kept to a watched folder, from v0.0.106 (ADR 0020): files go to the Workspace's own store, not to an FTP server for later fetching |
 | `ahg-function-manage` | 2606 | V0.1 candidate | Covered |  | `ahgFunctionManagePlugin` | Activities with ISDF elements |
 | `ahg-functions-docs` | 716 | later: V1.0+ | Done | 20d | `ahgFunctionsDocsPlugin` | The code reference, read from the code: PHP classes and methods, Blade templates, routes, console commands and bundled vocabularies, from v0.0.126 (ADR 0024) |
-| `ahg-gallery` | 7210 | out: GLAM sector | Planned | 21 | `ahgGalleryPlugin` |  |
+| `ahg-gallery` | 7210 | out: GLAM sector | Parked | 21 | `ahgGalleryPlugin` |  |
 | `ahg-gis` | 280 | V0.1 candidate | Covered | 22c | `ahgGISPlugin` | Places have coordinates and containment; places within a box or radius as GeoJSON from v0.0.108 (ADR 0020) |
 | `ahg-graphql` | 764 | later: V1.0+ | Covered | 22c | `ahgGraphQLPlugin` | Read-only GraphQL over what the public may read, from v0.0.108 (ADR 0020) |
-| `ahg-harris-matrix` | 1343 | out: GLAM sector | Planned | 21 | none |  |
+| `ahg-harris-matrix` | 1343 | out: GLAM sector | Parked | 21 | none |  |
 | `ahg-help` | 5771 | later: V1.0+ | Done | 20b | `ahgHelpPlugin` | The Help Center: guides from Markdown with search, categories, sections, links, help in context, the system map and breakdown, from v0.0.124; 73 guides now, each phase adding its own (ADR 0024) |
-| `ahg-heritage-manage` | 12679 | V0.1 candidate | Planned | 21 | `ahgHeritagePlugin`, `ahgHeritageAccountingPlugin` | Heritage asset register and heritage accounting, with the museum domain |
+| `ahg-heritage-manage` | 12679 | V0.1 candidate | Parked | 21 | `ahgHeritagePlugin`, `ahgHeritageAccountingPlugin` | Heritage asset register and heritage accounting (GRAP 103 / IPSAS 45), with the museum domain; parked on 9 November 2026. Its public heritage portal is covered by the Workspace's own: the public catalogue and its ways in (v0.0.131), Sparnatural (v0.0.122), the landing page builder (phase 20), reviewed community contributions (v0.0.135), access requests and embargoes; not its leaderboard, trending or custodian batch pages. Unpark with `ahg-ipsas` if an institution must report heritage assets under GRAP 103 |
 | `ahg-icip` | 6793 | later: jurisdiction | Partial | 18 | `ahgICIPPlugin` | Traditional Knowledge and Biocultural labels (v0.0.59); the rest of ICIP in phase 18 |
 | `ahg-iiif-collection` | 8745 | out: GLAM sector | Partial | 14 | `ahgIiifPlugin` | Presentation 3 manifests (PSIS's manifest, Heratio's audio and video canvases), fonds collections, curated collections, Change Discovery, Content State, the Mirador viewer and the IIIF-ready gate from v0.0.87 (14a, ADR 0014); Content Search 2.0, Auth Flow 2.0, saved viewer layouts and validation from v0.0.88 (14b); clearance levels on the probe from v0.0.101 (18c); sound and video lengths read by ffprobe and their viewing copies (Heratio's MediaDerivativeService) from v0.0.102; NER annotations in phase 17, 3D reports in phase 21 |
-| `ahg-image-ar` | 896 | out: GLAM sector | Planned | 21 | `ahgImageArPlugin` |  |
+| `ahg-image-ar` | 896 | out: GLAM sector | Parked | 21 | `ahgImageArPlugin` |  |
 | `ahg-inference-receipts` | 1569 | out: AI (V2+) | Done | 17a | none | Its signing code is copied for the audit chain; every call a model answers is a receipt in a chained, signed, append-only log, from v0.0.127 (ADR 0025) |
 | `ahg-information-object-manage` | 47506 | V0.1 candidate | Covered | 9 | `ahgInformationObjectManagePlugin`, `ahgProvenancePlugin` | Records and record sets: ISAD(G), hierarchy, levels, instantiations, publication; provenance and custody history from v0.0.81 (9e) |
 | `ahg-ingest` | 5338 | later: V1.0+ | Covered | 22a | `ahgIngestPlugin` | The import with PSIS's ingest steps: spreadsheets, column mapping with kept mappings, ZIPs with their files, classification, undo, a BagIt bag, grid entry, from v0.0.106 (ADR 0020); OCR and AI processing in phase 17 |
 | `ahg-integrity` | 3078 | later: V1.0+ | Covered | 12a | `ahgIntegrityPlugin` | Fixity schedules, runs, the ledger and failures from v0.0.110 (ADR 0021); retention, holds and disposition are phase 13b's |
-| `ahg-ipsas` | 2129 | later: jurisdiction | Planned | 21 | `ahgIPSASPlugin` | With heritage accounting |
+| `ahg-ipsas` | 2129 | later: jurisdiction | Parked | 21 | `ahgIPSASPlugin` | With heritage accounting |
 | `ahg-jobs` | 950 | later: V1.0+ | Covered | 5 | none | Background jobs and their screen (v0.0.63) |
 | `ahg-jobs-manage` | 691 | later: V1.0+ | Covered | 12a | `ahgJobsManagePlugin` | The jobs page since phase 5; failed queue jobs on the operations page from v0.0.110 (ADR 0021) |
 | `ahg-label` | 1383 | later: V1.0+ | Covered | 22a | `ahgLabelPlugin` | Templates and sheets for records and containers, Code 128 and QR drawn by the Workspace, from v0.0.106 (ADR 0020) |
 | `ahg-landing-page` | 3557 | later: V1.0+ | Done | 20a | `ahgLandingPagePlugin` | Landing pages of 20 kinds of block from what the public may read, the default one the catalogue's home, and users' dashboards, from v0.0.123 (ADR 0024) |
-| `ahg-library` | 45610 | out: GLAM sector | Planned | 21 | `ahgLibraryPlugin` |  |
-| `ahg-loan` | 3798 | out: GLAM sector | Planned | 21 | `ahgLoanPlugin` |  |
+| `ahg-library` | 45610 | out: GLAM sector | Parked | 21 | `ahgLibraryPlugin` |  |
+| `ahg-loan` | 3798 | out: GLAM sector | Parked | 21 | `ahgLoanPlugin` |  |
 | `ahg-marketing` | 726 | later: V1.0+ | Not carried | 20a | none | AHG's own sales pages for Heratio (a comparison with AtoM and a migration lead form into AHG's Workbench); an institution has no use for them (ADR 0024) |
 | `ahg-marketplace` | 19926 | out: GLAM sector | Not carried | 22 | `ahgMarketplacePlugin` | Selling items is not an archive's work; archives only to V1.0 (choice 1B, ADR 0020) |
 | `ahg-media-processing` | 2733 | V0.1 candidate | Partial | 5 | none | Reference copies and thumbnails in a job, made again on request, the institution's watermark on reference copies (v0.0.64); a watermark per object and by security classification in phase 18, audio and video previews and transcription later |
@@ -87,10 +88,10 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-metadata-extraction` | 2770 | V0.1 candidate | Partial | 5 | `ahgMetadataExtractionPlugin` | Embedded metadata read with exiftool and kept on the master; creator, date, title, description and copyright proposed for review (v0.0.64); keywords wait for a subject proposal kind |
 | `ahg-mods-manage` | 956 | out: GLAM sector | Covered |  | `ahgModsManagePlugin`, `sfModsPlugin` | MODS export, and the MODS display standard from v0.0.76 |
 | `ahg-multi-tenant` | 2626 | later: V1.0+ | Covered |  | `ahgMultiTenantPlugin` | An institution per host, isolated by design; compare with PSIS ahgMultiTenantPlugin, which has more screens |
-| `ahg-museum` | 7661 | out: GLAM sector | Planned | 21 | `ahgMuseumPlugin` |  |
+| `ahg-museum` | 7661 | out: GLAM sector | Parked | 21 | `ahgMuseumPlugin` |  |
 | `ahg-narssa` | 581 | later: jurisdiction | Covered | 18d | `ahgNARSSAPlugin` | Transfers packaged as EAD3, master files, a manifest and METS, from records or approved transfer disposals, from v0.0.101 (ADR 0016); with PSIS's SAHRA export permits; a pack switched on in the settings |
 | `ahg-naz` | 3600 | later: jurisdiction | Covered | 18e | `ahgNAZPlugin` | Closure periods and protected records kept as embargoes, research permits, records schedules and transfers, from v0.0.101 (ADR 0016); a pack switched on in the settings |
-| `ahg-nmmz` | 2666 | later: jurisdiction | Planned | 21 | `ahgNMMZPlugin` | Moved to phase 21 with the heritage objects it registers, by Dr Johan Pieterse on 2 November 2026 |
+| `ahg-nmmz` | 2666 | later: jurisdiction | Parked | 21 | `ahgNMMZPlugin` | Moved to phase 21 with the heritage objects it registers, by Dr Johan Pieterse on 2 November 2026 |
 | `ahg-oai` | 1847 | V0.1 candidate | Covered |  | `arOaiPlugin` | OAI-PMH, Export-Only profile |
 | `ahg-observability` | 1903 | later: V1.0+ | Covered | 12a | `ahgObservabilityPlugin` | Health figures as a page and Prometheus text from v0.0.110 (ADR 0021); no tracing or latency histograms |
 | `ahg-ocfl` | 3106 | later: V1.0+ | Done | 15b | `ahgOcflPlugin` | OCFL 1.1 as the one object store from v0.0.115, laid out by extension 0004, each version the whole object, objects purged at destruction (ADR 0022); the mirror to a second root is replication, in 15c |
@@ -119,7 +120,7 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-settings` | 16789 | V0.1 candidate | Covered |  | `ahgSettingsPlugin` | Institution settings, written fresh |
 | `ahg-share-link` | 2659 | later: V1.0+ | Covered | 19a | `ahgTimeLimitedShareLinkPlugin` | Share links that never open more than their issuer may read, with their log and prune (ADR 0017); clearance with 18c |
 | `ahg-sharepoint` | 6045 | later: V1.0+ | Planned | 22, pilot | `ahgSharePointPlugin` | When a pilot with a Microsoft tenant needs it (choice 2B, ADR 0020) |
-| `ahg-spectrum` | 12393 | out: GLAM sector | Planned | 21 | `ahgSpectrumPlugin` |  |
+| `ahg-spectrum` | 12393 | out: GLAM sector | Parked | 21 | `ahgSpectrumPlugin` |  |
 | `ahg-static-page` | 695 | later: V1.0+ | Done | 20a | `ahgStaticPagePlugin` | Static pages in each language, about, privacy and terms at their own addresses, from v0.0.123 (ADR 0024) |
 | `ahg-statistics` | 1906 | later: V1.0+ | Done | 8 | `ahgStatisticsPlugin` | Views and downloads of the public catalogue by day, item and repository, web crawlers apart, CSV; no address, user agent or place is kept, so there is no count by country |
 | `ahg-storage-manage` | 7645 | V0.1 candidate | Covered |  | `ahgStorageManagePlugin` | Containers and storage places, with movements |
@@ -130,7 +131,7 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-vendor` | 6980 | later: V1.0+ | Covered | 22d | `ahgVendorPlugin` | Vendors on authority records, services, transactions with records, condition, history and documents, from v0.0.109 (ADR 0020); contracts not carried |
 | `ahg-version-control` | 3142 | later: V1.0+ | Covered | 22b | `ahgVersionControlPlugin` | Versions of descriptions and authority records, compared and restored, from v0.0.107 (ADR 0020) |
 | `ahg-workflow` | 7830 | later: V1.0+ | Covered | 10 | `ahgWorkflowPlugin` | Workflows, steps, tasks, pool, assignment, decisions, team work, history and bulk operations from v0.0.82 (10a); queues, service levels, overdue notices, publish gates, readiness and the diagram from v0.0.84 (10b); Spectrum procedures in phase 21 |
-| `ahg-z3950` | 5243 | out: GLAM sector | Planned | 21 | none |  |
+| `ahg-z3950` | 5243 | out: GLAM sector | Parked | 21 | none |  |
 
 : Heratio packages and their Workspace status
 

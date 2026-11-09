@@ -1,0 +1,4 @@
+# The keys that sign OpenRiC Workspace release tags (ssh-keygen ALLOWED SIGNERS format). deploy/deploy.sh verifies a tag
+# against the copy of this file in the release already live, so a new release cannot vouch for its own signature.
+# Replacing or adding a key: commit it here and release; it takes effect from the release after.
+pieterse.johan3@gmail.com namespaces="git" ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIluF9OUHuaRUyp6qkOj+325/r4Ru4eVgLRcbhn44Rm5

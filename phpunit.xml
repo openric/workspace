@@ -29,6 +29,7 @@
         <env name="QUEUE_CONNECTION" value="sync"/>
         <!-- No test reaches the AI gateway: a key in .env (the dev tree has one) is blanked; AI tests set a fake key and fake each call. -->
         <env name="AI_GATEWAY_KEY" value="" force="true"/>
+        <env name="WORKSPACE_MODULES" value="all" force="true"/>
         <env name="WORKSPACE_VIRUS_SCANNER" value=""/>
         <env name="SESSION_DRIVER" value="array"/>
         <env name="PULSE_ENABLED" value="false"/>

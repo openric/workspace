@@ -19,5 +19,5 @@
     @endif
     @if($facets->every(fn ($i) => $i->isEmpty()) && ! $timeline['centuries'])<p>{{ __('Nothing is published yet.') }}</p>@endif
     {{-- Phase 17d4: the languages of the collection and the research leads its curators published. --}}
-    <section><h2>{{ __('More ways in') }}</h2><p><a href="{{ route('discover.languages') }}">{{ __('Languages of the collection') }}</a> · <a href="{{ route('discover.research-leads') }}">{{ __('Research leads') }}</a></p></section>
+    @module('scholarship')<section><h2>{{ __('More ways in') }}</h2><p><a href="{{ route('discover.languages') }}">{{ __('Languages of the collection') }}</a> · <a href="{{ route('discover.research-leads') }}">{{ __('Research leads') }}</a></p></section>@endmodule
 @endsection

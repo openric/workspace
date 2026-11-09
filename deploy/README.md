@@ -4,11 +4,11 @@ To install the Workspace on a new server, follow `INSTALL.md` first. The live in
 
 ## Release and deploy
 
-1. Merge to `main`, and wait for CI ("Tests on PostgreSQL 16") to pass on that commit.
-2. Tag it, signed: `git tag -s vX.Y.Z -m "what changed" && git push origin vX.Y.Z`.
+1. Merge to `main`, and wait for every CI job to pass on that commit: the tests, accessibility, and dependencies, secrets and SBOM.
+2. Tag it, signed with a key listed in `deploy/allowed_signers`: `git tag -s vX.Y.Z -m "what changed" && git push origin vX.Y.Z`, and wait for the tag's own job ("The tag is signed and its commit passed on main").
 3. Deploy: `cd /usr/share/nginx/openric-workspace-live && sudo deploy/deploy.sh vX.Y.Z`. As root, the script runs git, composer and `pg_dump` as the owner of the live directory and artisan as `www-data`, so nothing it writes belongs to root.
 
-`deploy.sh` refuses a tag whose commit did not pass CI. It backs up the database with `pg_dump` to `storage/app/backups/` (the last ten are kept), puts the site in maintenance mode, checks out the tag, installs dependencies without development packages, runs the migrations, caches configuration, routes and views, and brings the site back. It then checks that `/sign-in` and `/vocab/permission/` answer 200.
+`deploy.sh` refuses a tag that is not annotated, is not the same tag object on GitHub, is not signed by a key in `deploy/allowed_signers` (the copy in the release already live, so a new release cannot vouch for itself) and verified by GitHub, or whose commit lacks a passing run of any of the four CI jobs, or has a later failure. It writes what it checked, with a link to each job's run, the backup, the preflight and the audit chain's verification, to `storage/app/releases/vX.Y.Z.md`, the release's evidence. It backs up the database with `pg_dump` to `storage/app/backups/` (the last ten are kept), puts the site in maintenance mode, checks out the tag, installs dependencies without development packages, runs the migrations, caches configuration, routes and views, and brings the site back. It then checks that `/sign-in` and `/vocab/permission/` answer 200.
 
 ## Releasing without a password prompt
 

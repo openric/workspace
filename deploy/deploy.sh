@@ -11,7 +11,10 @@
 # narrow sudoers rule can allow exactly that without a password (deploy/README.md).
 #
 # The live instance runs only tagged releases, never a working copy. A tag is
-# deployed only when CI passed on its commit. The database is backed up before
+# deployed only when it is signed by a key in deploy/allowed_signers (the copy in the
+# release already live) and verified by GitHub, is the same tag object here and there,
+# and every CI job passed on its exact commit with none failing after. What was checked
+# is kept as the release's evidence in storage/app/releases/{tag}.md. The database is backed up before
 # migrations run. If a step fails, the site is left in maintenance mode and the
 # rollback command is printed.
 #
@@ -25,7 +28,8 @@ TAG=${1:-}
 LIVE=${WORKSPACE_LIVE:-/usr/share/nginx/openric-workspace-live}
 URL=${WORKSPACE_URL:-https://workspace.openric.org}
 REPO=${WORKSPACE_REPO:-openric/workspace}
-CI_CHECK="Tests on PostgreSQL 16"
+# Every job of .github/workflows/ci.yml: a release passes only when each passed on its commit.
+REQUIRED_CHECKS=("Tests on PostgreSQL 16" "Accessibility (WCAG 2.2 AA)" "Dependencies, secrets and SBOM" "The tag is signed and its commit passed on main")
 KEEP_BACKUPS=10
 
 fail() { echo "deploy: $*" >&2; exit 1; }
@@ -56,17 +60,44 @@ if [[ ${WORKSPACE_DEPLOY_STAGE:-} != 2 ]]; then
   PREVIOUS=$(owner git describe --tags --exact-match HEAD 2>/dev/null || owner git rev-parse --short HEAD)
   echo "commit ${SHA:0:12}; live now runs $PREVIOUS"
 
-  echo "== 2. CI on that commit"
+  EVIDENCE_DIR="$LIVE/storage/app/releases"
+  owner mkdir -p "$EVIDENCE_DIR"
+  EVIDENCE="$EVIDENCE_DIR/$TAG.md"
+  evidence() { printf '%s\n' "$@" | owner tee -a "$EVIDENCE" > /dev/null; }
+  owner rm -f "$EVIDENCE"
+  evidence "# Release evidence: $TAG" "" "- Deployed to: $URL" "- Commit: $SHA" "- Previously live: $PREVIOUS" "- Started: $(date -u +%Y-%m-%dT%H:%M:%SZ)" ""
+
+  echo "== 2. Signature, identity and CI of that tag"
   # The public GitHub API, so no token is needed: gh keeps its token in the desktop
-  # keyring, which a root session switching user cannot reach. A release tag's own CI
-  # run skips the tests (its commit passed them on main), so the commit passes when a
-  # run of them succeeded and none failed, whatever the latest run says.
-  CI=$(curl -fsS --max-time 30 "https://api.github.com/repos/$REPO/commits/$SHA/check-runs" \
-    | jq -r --arg name "$CI_CHECK" '[.check_runs[] | select(.name == $name) | .conclusion] as $c
-        | if ($c | index("success")) and (($c | index("failure")) | not) then "success" else ($c | first // "none") end') \
-    || fail "could not read CI status from GitHub"
-  [[ $CI == success ]] || fail "CI \"$CI_CHECK\" on ${SHA:0:12} is $CI, not success"
-  echo "passed"
+  # keyring, which a root session switching user cannot reach.
+  api() { curl -fsS --max-time 30 "https://api.github.com/repos/$REPO/$1" || fail "could not read $1 from GitHub"; }
+  TAG_OBJECT=$(owner git rev-parse "refs/tags/$TAG")
+  [[ $(owner git cat-file -t "$TAG_OBJECT") == tag ]] || fail "$TAG is not an annotated tag"
+  [[ $(api "git/ref/tags/$TAG" | jq -r .object.sha) == "$TAG_OBJECT" ]] || fail "$TAG here is not the tag GitHub holds"
+  GITHUB_TAG=$(api "git/tags/$TAG_OBJECT")
+  [[ $(jq -r .verification.verified <<< "$GITHUB_TAG") == true ]] || fail "GitHub does not verify the signature of $TAG"
+  [[ $(jq -r .object.sha <<< "$GITHUB_TAG") == "$SHA" ]] || fail "$TAG names another commit on GitHub"
+  # The signers of the release already live, never the new release's own list.
+  if [[ -f "$LIVE/deploy/allowed_signers" ]]; then
+    owner git -c gpg.ssh.allowedSignersFile="$LIVE/deploy/allowed_signers" verify-tag "$TAG" 2>&1 | tail -1 \
+      || fail "the signature of $TAG is not from a key in deploy/allowed_signers"
+    SIGNED="verified here against deploy/allowed_signers of $PREVIOUS, and by GitHub"
+  else
+    SIGNED="verified by GitHub only: $PREVIOUS has no deploy/allowed_signers yet"
+  fi
+  echo "signed: $SIGNED"
+  evidence "## Tag" "" "- Tag object: $TAG_OBJECT, the same on GitHub" "- Signature: $SIGNED" "" "## CI on $SHA" ""
+  # Each job's latest run that was not skipped must have succeeded: a release tag's own run skips the
+  # tests (its commit passed them on main), and a failure after a success is not hidden by it.
+  RUNS=$(api "commits/$SHA/check-runs?per_page=100")
+  for check in "${REQUIRED_CHECKS[@]}"; do
+    LAST=$(jq -r --arg name "$check" '[.check_runs[] | select(.name == $name and .conclusion != "skipped")]
+      | sort_by(.completed_at // "9999") | last // {} | "\(.conclusion // (if .status then "still running" else "none" end))\t\(.html_url // "")"' <<< "$RUNS")
+    [[ ${LAST%%$'\t'*} == success ]] || fail "CI \"$check\" on ${SHA:0:12} is ${LAST%%$'\t'*}, not success"
+    echo "$check: success"
+    evidence "- $check: success, ${LAST#*$'\t'}"
+  done
+  evidence ""
 
   echo "== 3. Database backup"
   BACKUPS="$LIVE/storage/app/backups"
@@ -80,6 +111,7 @@ if [[ ${WORKSPACE_DEPLOY_STAGE:-} != 2 ]]; then
   owner chmod 640 "$DUMP"
   ls -1t "$BACKUPS"/before-*.dump | tail -n +$((KEEP_BACKUPS + 1)) | xargs -r rm --
   echo "$DUMP"
+  evidence "## Deploy" "" "- Database backed up before migrating: $(basename "$DUMP")"
 
   trap on_error ERR
   echo "== 4. Maintenance mode and code"
@@ -87,11 +119,12 @@ if [[ ${WORKSPACE_DEPLOY_STAGE:-} != 2 ]]; then
   if [[ -d vendor ]]; then artisan down --retry=30; fi
   owner git -c advice.detachedHead=false checkout --quiet --detach "$TAG"
   trap - ERR
-  export WORKSPACE_DEPLOY_STAGE=2 PREVIOUS DUMP
+  export WORKSPACE_DEPLOY_STAGE=2 PREVIOUS DUMP EVIDENCE
   exec "$LIVE/deploy/deploy.sh" "$TAG"
 fi
 
 # Stage 2: from the release being deployed.
+evidence() { if [[ -n ${EVIDENCE:-} ]]; then printf '%s\n' "$@" | owner tee -a "$EVIDENCE" > /dev/null; fi; }
 trap on_error ERR
 echo "== 5. Dependencies, migrations, signing key, caches"
 owner composer install --no-dev --optimize-autoloader --no-interaction --no-progress --quiet
@@ -103,6 +136,7 @@ artisan workspace:audit:create-key --if-missing
 artisan optimize
 # An unsafe production configuration stops the release here, before the site comes back (roadmap phase 23).
 artisan workspace:preflight
+evidence "- Migrations, vocabularies, caches and the preflight check passed"
 # A worker that outlives a release (the files worker, deploy/systemd) takes the new code once its job is done.
 artisan queue:restart
 artisan up
@@ -120,5 +154,8 @@ for path in /.env /composer.json /composer.lock /storage/logs/laravel.log /vendo
   [[ $code == 403 || $code == 404 ]] || fail "$path answered $code after deploying $TAG; it must not be served"
 done
 echo "private files refused"
-artisan workspace:audit:verify
-echo "Deployed $TAG (was $PREVIOUS)."
+evidence "- /sign-in and /vocab/permission/ answer 200; private files are refused"
+AUDIT=$(artisan workspace:audit:verify)
+echo "$AUDIT"
+evidence "- $AUDIT" "- Finished: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+echo "Deployed $TAG (was $PREVIOUS). Evidence: ${EVIDENCE:-none}"

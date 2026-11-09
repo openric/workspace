@@ -22,13 +22,16 @@
     .carousel-pause { margin: 0 0 0 .5rem; padding: .25rem .6rem; font-size: .8rem; display: inline-flex; align-items: center; gap: .3rem; background: var(--bg); color: var(--muted-2); border: 1px solid var(--line); box-shadow: none; }
     @media (max-width: 1199px) { .carousel-arrow { display: none; } }
     @media (max-width: 40rem) { .collection-card { width: 78vw; } .collection-card img { height: 180px; } }
+    /* The slide's place, read but not shown: its name then comes from what it shows, as WCAG 2.5.3 asks (axe 4.14 label-content-name-mismatch). */
+    .collection-card-position { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
     @media (prefers-reduced-motion: reduce) { .collections-track { scroll-behavior: auto; } .collection-card { transition: none; } }
 </style>
 <section class="collections-carousel" aria-roledescription="carousel" aria-label="Collections" data-autorotate="5000">
     <button type="button" class="carousel-arrow left" aria-label="Previous collections" data-scroll="-1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
     <div class="collections-track" id="collections-track" tabindex="-1">
         @foreach($featured as $i => ['unit' => $unit, 'file' => $file, 'count' => $count, 'summary' => $summary])
-            <a href="{{ route('discover.record', $unit->id) }}" class="collection-card" aria-roledescription="slide" aria-label="{{ $i + 1 }} of {{ $featured->count() }}: {{ $view->label($unit) }}">
+            <a href="{{ route('discover.record', $unit->id) }}" class="collection-card" aria-roledescription="slide">
+                <span class="collection-card-position">{{ __(':n of :total:', ['n' => $i + 1, 'total' => $featured->count()]) }}</span>
                 <img src="{{ route('discover.file', $file) }}" alt="" loading="{{ $i < 3 ? 'eager' : 'lazy' }}" width="{{ $file->width }}" height="{{ $file->height }}">
                 <div class="collection-card-body">
                     <h3 class="collection-card-title">{{ $view->label($unit) }}</h3>

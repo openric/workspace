@@ -4,11 +4,11 @@
 @section('head')<link rel="stylesheet" href="/vendor/ahg-theme-b5/js/vendor/mirador/mirador.min.css">@endsection
 @section('content')
     <p><a href="{{ route('discover.record', $unit->id) }}">{{ __('Back to :name', ['name' => $view->label($unit)]) }}</a> · <a href="{{ $manifest }}">{{ __('IIIF manifest') }}</a>
-        @if($signedIn) · <a href="{{ route('iiif-workspaces.index') }}">{{ __('My viewer layouts') }}</a>@if($default) · <a href="{{ route('iiif-workspaces.open', $default) }}">{{ __('Open my default layout') }}</a>@endif @endif</p>
+        @if($signedIn && \App\Support\Modules::on('iiif-extras')) · <a href="{{ route('iiif-workspaces.index') }}">{{ __('My viewer layouts') }}</a>@if($default) · <a href="{{ route('iiif-workspaces.open', $default) }}">{{ __('Open my default layout') }}</a>@endif @endif</p>
     <h1>{{ $view->label($unit) }}</h1>
     @if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif
     <div id="mirador" style="position: relative; height: 75vh; min-height: 420px" aria-label="{{ __('Mirador viewer') }}"></div>
-    @if($signedIn)
+    @if($signedIn && \App\Support\Modules::on('iiif-extras'))
         <form method="post" action="{{ route('iiif-workspaces.store') }}" id="save-layout" style="margin-top: .5rem">@csrf
             <input type="hidden" name="windows" id="layout-windows">
             <label for="layout-name">{{ __('Save these windows as') }}</label> <input id="layout-name" name="name" required maxlength="255" size="30">

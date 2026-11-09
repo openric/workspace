@@ -38,11 +38,11 @@
         @php($link = fn (array $change) => route('discover.home', array_filter([...['q' => $query, 'kind' => $kind] + $search['filters'], ...$change], fn ($v) => $v !== null && $v !== '')))
         <h1>{{ __('Search: :query', ['query' => $query]) }}</h1>
         <p role="status">{{ $search['total'] === 0 ? __('No results found.') : __(':count found.', ['count' => $search['total']]) }}</p>
-        @if(\App\Models\FederationPeer::where(['institution_id' => $institution->id, 'is_active' => true, 'search_enabled' => true])->exists())
+        @if(\App\Support\Modules::on('federation') && \App\Models\FederationPeer::where(['institution_id' => $institution->id, 'is_active' => true, 'search_enabled' => true])->exists())
             {{-- The catalogues it federates with (phase 16a). --}}
             <p><a href="{{ route('discover.federated', ['q' => $query]) }}">{{ __('Search other catalogues for this') }}</a></p>
         @endif
-        @if(\Illuminate\Support\Facades\DB::table('federation_members')->where(['institution_id' => $institution->id, 'is_enabled' => true, 'is_self' => false])->exists())
+        @if(\App\Support\Modules::on('federation') && \Illuminate\Support\Facades\DB::table('federation_members')->where(['institution_id' => $institution->id, 'is_enabled' => true, 'is_self' => false])->exists())
             {{-- Its union catalogue (phase 16b). --}}
             <p><a href="{{ route('discover.union', ['q' => $query]) }}">{{ __('Search the union catalogue for this') }}</a></p>
         @endif

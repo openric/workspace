@@ -4,7 +4,7 @@
 @section('content')
     <h1>{{ __('Users') }}</h1>
     @php($waiting = \App\Models\RegistrationRequest::where('institution_id', auth()->user()->institution_id)->whereNull('approved_at')->whereNull('rejected_at')->count())
-    <p><a href="{{ route('registrations.index') }}">{{ __('Requests for an account') }}</a>@if($waiting) ({{ __(':count waiting', ['count' => $waiting]) }})@endif</p>
+    @module('research')<p><a href="{{ route('registrations.index') }}">{{ __('Requests for an account') }}</a>@if($waiting) ({{ __(':count waiting', ['count' => $waiting]) }})@endif</p>@endmodule
     <p><a href="{{ route('accounts.create') }}">{{ __('New user') }}</a></p>
     <table>
         <thead><tr><th scope="col">{{ __('Name') }}</th><th scope="col">{{ __('Email') }}</th><th scope="col">{{ __('Roles') }}</th><th scope="col">{{ __('State') }}</th></tr></thead>

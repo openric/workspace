@@ -7193,5 +7193,6 @@
     "Offer it in the public catalogue": "Bied dit in die openbare katalogus aan",
     "Delete a conversation so many days after its last message": "Vee 'n gesprek soveel dae ná sy laaste boodskap uit",
     "Instructions to the assistant (empty: the Workspace's own)": "Opdragte aan die assistent (leeg: die Workspace s'n)",
-    "AI register": "KI-register"
+    "AI register": "KI-register",
+    ":n of :total:": ":n van :total:"
 }

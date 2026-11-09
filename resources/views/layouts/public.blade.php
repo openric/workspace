@@ -43,7 +43,7 @@
         <button type="submit" style="margin: 0">{{ __('Search') }}</button>
         {{-- The catalogue's assistant, where the institution offers it (phase 17f). --}}
         @if($institution && app(\App\Ai\Gateway::class)->available($institution->id) && app(\App\Ai\Gateway::class)->settings($institution->id)->chatbot_public)<a href="{{ route('discover.ask') }}" style="white-space: nowrap">{{ __('Ask the catalogue') }}</a>@endif
-        @guest<a href="{{ route('clipboard.index') }}" style="white-space: nowrap">{{ __('Clipboard') }} ({{ app(\App\Clipboard\ClipboardService::class)->count() }})</a><a href="{{ route('shop.cart') }}" style="white-space: nowrap">{{ __('Cart') }} ({{ app(\App\Research\Shop::class)->count(null) }})</a><a href="{{ route('sign-in') }}" style="white-space: nowrap">{{ __('Log in') }}</a>@endguest
+        @guest<a href="{{ route('clipboard.index') }}" style="white-space: nowrap">{{ __('Clipboard') }} ({{ app(\App\Clipboard\ClipboardService::class)->count() }})</a>@module('shop')<a href="{{ route('shop.cart') }}" style="white-space: nowrap">{{ __('Cart') }} ({{ app(\App\Research\Shop::class)->count(null) }})</a>@endmodule<a href="{{ route('sign-in') }}" style="white-space: nowrap">{{ __('Log in') }}</a>@endguest
     </form>
     @include('layouts._account')
     @include('layouts._language')
@@ -58,7 +58,7 @@
     @php($hasArticles = app(\App\Site\Articles::class)->published($institution)->exists())
         <nav aria-label="{{ __('About the institution') }}" style="margin-bottom: .6rem; display: flex; gap: 1rem; flex-wrap: wrap">
             @foreach($sitePages as $sitePage)<a href="{{ route('site.'.$sitePage->slug) }}">{{ $sitePage->translation(\App\Support\Vocab::languages())?->title }}</a>@endforeach
-            @if($hasArticles)<a href="{{ route('site.articles-public') }}">{{ __('Articles') }}</a>@endif
+            @if($hasArticles && \App\Support\Modules::on('articles'))<a href="{{ route('site.articles-public') }}">{{ __('Articles') }}</a>@endif
             <a href="{{ route('help.index') }}">{{ __('Help') }}</a>
             <a href="{{ route('accessibility.statement') }}">{{ __('Accessibility') }}</a>
         </nav>

@@ -46,7 +46,7 @@
     <h1 lang="{{ $titleLanguage }}">{{ $title }}</h1>
     @if($display->allows($profile, 'clipboard'))@include('clipboard._button', ['type' => 'records', 'id' => $unit->id])@endif
     @if($display->allows($profile, 'favourites'))@include('favourites._button', ['entity' => $unit])@endif
-    @if($display->allows($profile, 'order'))@include('shop._add', ['unit' => $unit])@endif
+    @if($display->allows($profile, 'order') && \App\Support\Modules::on('shop'))@include('shop._add', ['unit' => $unit])@endif
     @if($display->allows($profile, 'cite'))<a href="{{ route('cite', $unit->id) }}" class="no-print" style="font-size: .85rem">{{ __('Cite') }}</a>@endif
     {{-- Its DOI, once findable (phase 20c). --}}
     @php($unitDoi = \App\Models\RecordDoi::where('record_resource_id', $unit->id)->whereHas('state', fn ($q) => $q->where('notation', 'findable'))->first())
@@ -54,12 +54,12 @@
     @if($display->allows($profile, 'feedback'))<a href="{{ route('feedback.create', ['record' => $unit->id]) }}" class="no-print" style="font-size: .85rem">{{ __('Feedback on this record') }}</a>@endif
     {{-- Repatriation (phase 17d2): the claims about it, where the register is shown, and lodging one, where the institution allows it. --}}
     @php($repatriation = \App\Models\RepatriationSetting::for($institution->id))
-    @if($repatriation->public_register)@foreach(\App\Models\RepatriationClaim::where('record_resource_id', $unit->id)->get() as $rc)<a href="{{ route('discover.repatriation.show', $rc->id) }}" class="no-print" style="font-size: .85rem">{{ __('Virtual return') }}</a> @endforeach @endif
+    @if($repatriation->public_register && \App\Support\Modules::on('repatriation'))@foreach(\App\Models\RepatriationClaim::where('record_resource_id', $unit->id)->get() as $rc)<a href="{{ route('discover.repatriation.show', $rc->id) }}" class="no-print" style="font-size: .85rem">{{ __('Virtual return') }}</a> @endforeach @endif
     {{-- Languages and research leads (phase 17d4). --}}
-    <a href="{{ route('discover.transcribe', $unit->id) }}" class="no-print" style="font-size: .85rem">{{ __('Transcribe or translate') }}</a>
+    @module('scholarship')<a href="{{ route('discover.transcribe', $unit->id) }}" class="no-print" style="font-size: .85rem">{{ __('Transcribe or translate') }}</a>@endmodule
     @php($publishedLead = \App\Models\ResearchLead::where(['record_resource_id' => $unit->id, 'status_id' => \App\Scholarship\ResearchLeads::status('published')])->first())
-    @if($publishedLead)<a href="{{ route('discover.research-leads.show', $publishedLead->id) }}" class="no-print" style="font-size: .85rem">{{ __('Research lead') }}</a>@endif
-    @if($repatriation->public_lodging)<a href="{{ route('discover.repatriation.lodge', $unit->id) }}" class="no-print" style="font-size: .85rem">{{ __('Lodge a repatriation claim') }}</a>@endif
+    @if($publishedLead && \App\Support\Modules::on('scholarship'))<a href="{{ route('discover.research-leads.show', $publishedLead->id) }}" class="no-print" style="font-size: .85rem">{{ __('Research lead') }}</a>@endif
+    @if($repatriation->public_lodging && \App\Support\Modules::on('repatriation'))<a href="{{ route('discover.repatriation.lodge', $unit->id) }}" class="no-print" style="font-size: .85rem">{{ __('Lodge a repatriation claim') }}</a>@endif
     <p class="meta">{{ $unit->level->label(\App\Support\Vocab::languages()) }} @include('description._ric', ['term' => \App\Relations\EntityKinds::ricClass($unit)])
         @if($unit->referenceCode()) · {{ $unit->referenceCode() }}@endif
         @if($unit->repository && $view->readable($unit->repository)) · {{ __('Held by') }} <a href="{{ route('discover.repository', $unit->repository->id) }}">{{ $view->label($unit->repository) }}</a>@endif</p>

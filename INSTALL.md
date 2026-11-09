@@ -101,6 +101,7 @@ And, as they apply:
 | `WORKSPACE_OBJECT_STORE` | The folder of the OCFL storage root that holds every file; outside `public/` | `storage/app/objects` |
 | `WORKSPACE_MAX_UPLOAD_MB` | The largest file an upload may be | 60 |
 | `WORKSPACE_VIRUS_SCANNER` | The ClamAV client, or empty for none | `clamdscan` |
+| `WORKSPACE_MODULES` | The experimental modules this installation offers, comma-separated, or `all`; `MODULES.md` lists them and why each is experimental | empty: the supported modules only |
 | `WORKSPACE_SIEGFRIED` | Siegfried's command, or empty for none | `sf` |
 | `WORKSPACE_OPERATORS` | Comma-separated e-mail addresses of the installation's operators, who see its health and set file formats, normalisation rules, replication and Archivematica | With one institution, its administrators |
 | `WORKSPACE_METRICS_TOKEN`, `WORKSPACE_METRICS_IPS` | The bearer token and addresses for `/metrics` (Prometheus) | Not served |
@@ -261,6 +262,7 @@ A restore is complete only when `workspace:fixity` reports no failure and `works
 
 ## Optional parts
 
+- Experimental modules (research services, repatriation, the shop, federation, DOIs and the others in `MODULES.md`) are off until named in `WORKSPACE_MODULES`. Name only what the institution has decided to take on.
 - Single sign-on and two-factor sign-in: Admin, Sign-in settings (`deploy/README.md`, "Single sign-on and two-factor sign-in").
 - Archivematica: Admin, Archivematica, set by an operator. Its transfer source must be a folder both Archivematica and this server can reach. Its DIP upload to the Workspace uses SWORD at `https://archives.example.org/sword/servicedocument`, signed in with an account's e-mail address and an API key with the write scope.
 - Replication: Admin, Preservation, Replication. A target on another server needs an SSH key `www-data` can read, and the server's host key accepted once.
