@@ -22,7 +22,7 @@ jobs:
   test:
     name: Tests on PostgreSQL 16
     if: github.ref_type != 'tag'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     services:
       postgres:
         # PostgreSQL 16 with pgvector, for search by meaning (phase 17d1); the version this host runs.
@@ -80,7 +80,7 @@ jobs:
   accessibility:
     name: Accessibility (WCAG 2.2 AA)
     if: github.ref_type != 'tag'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     services:
       postgres:
         image: pgvector/pgvector:0.6.0-pg16
@@ -138,7 +138,7 @@ jobs:
   release-tag:
     name: The tag is signed and its commit passed on main
     if: github.ref_type == 'tag'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       actions: read
@@ -162,7 +162,7 @@ jobs:
   # (8 November 2026, when this job failed for hours on v0.0.141), and each file is checked against its published SHA-256.
   security:
     name: Dependencies, secrets and SBOM
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
     env:
