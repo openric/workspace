@@ -39,6 +39,15 @@
             <p><label for="ai-annif-limit">{{ __('At most so many subjects a record') }}</label> <input id="ai-annif-limit" name="annif_limit" type="number" min="1" max="20" value="{{ $settings->annif_limit ?? 5 }}" style="width: 5rem">
                 <label for="ai-annif-threshold">{{ __('How sure it must be (0 to 0.99)') }}</label> <input id="ai-annif-threshold" name="annif_threshold" type="number" step="0.01" min="0" max="0.99" value="{{ $settings->annif_threshold ?? 0.2 }}" style="width: 5rem"></p>
         </fieldset>
+        {{-- The catalogue's assistant (phase 17f): staff may ask it while AI is on; the public only when chosen here. --}}
+        <fieldset id="assistant"><legend>{{ __('The catalogue\'s assistant') }}</legend>
+            <p class="meta">{{ __('Answers questions from the records the reader may read, citing them; its answers are marked as written by AI, and readers may flag one as wrong for review.') }}</p>
+            <p><label><input type="checkbox" name="chatbot_public" value="1" @checked($settings->chatbot_public)> {{ __('Offer it in the public catalogue') }}</label></p>
+            <label for="ai-chat-days">{{ __('Delete a conversation so many days after its last message') }}</label><input id="ai-chat-days" name="chatbot_retention_days" type="number" min="1" max="3650" value="{{ $settings->chatbot_retention_days ?? 90 }}">
+            <label for="ai-chat-rules">{{ __('Instructions to the assistant (empty: the Workspace\'s own)') }}</label>
+            <textarea id="ai-chat-rules" name="chatbot_instructions" rows="6" maxlength="5000" placeholder="{{ \Illuminate\Support\Str::limit(\App\Ai\Chatbot::RULES, 300) }}">{{ $settings->chatbot_instructions }}</textarea>
+            <p><a href="{{ route('ai.compliance') }}">{{ __('AI register and compliance') }}</a> · <a href="{{ route('ai.answers') }}">{{ __('Flagged answers') }}</a></p>
+        </fieldset>
         <button type="submit">{{ __('Save') }}</button></form>
 
     <h2>{{ __('This month') }}</h2>

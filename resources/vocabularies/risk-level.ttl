@@ -1,0 +1,44 @@
+# OpenRiC Workspace - OpenRiC Workspace Risk Levels.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# How severe, how likely or how great what remains of a risk is (Heratio's ai_risk_register severity, likelihood and residual risk, roadmap phase 17f).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/risk-level/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Risk Levels"@en ;
+    dcterms:description "How severe, how likely or how great what remains of a risk is (Heratio's ai_risk_register severity, likelihood and residual risk, roadmap phase 17f)."@en ;
+    dcterms:issued "2026-11-08"^^xsd:date ;
+    skos:hasTopConcept v:low, v:medium, v:high, v:critical .
+
+v:low a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Low"@en, "Laag"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's register of its AI systems, as Heratio's ahg-ai-compliance keeps it (EU AI Act; POPIA's accountability principle in South Africa)."@en ;
+    skos:definition "Unlikely, or of little harm."@en .
+
+v:medium a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Medium"@en, "Middelmatig"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's register of its AI systems, as Heratio's ahg-ai-compliance keeps it (EU AI Act; POPIA's accountability principle in South Africa)."@en ;
+    skos:definition "Possible, or of some harm."@en .
+
+v:high a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "High"@en, "Hoog"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's register of its AI systems, as Heratio's ahg-ai-compliance keeps it (EU AI Act; POPIA's accountability principle in South Africa)."@en ;
+    skos:definition "Likely, or of serious harm."@en .
+
+v:critical a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Critical"@en, "Kritiek"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's register of its AI systems, as Heratio's ahg-ai-compliance keeps it (EU AI Act; POPIA's accountability principle in South Africa)."@en ;
+    skos:definition "Almost certain, or of grave harm."@en .

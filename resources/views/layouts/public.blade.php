@@ -41,6 +41,8 @@
         <label for="site-q" style="margin: 0; position: absolute; left: -999px">{{ __('Search the catalogue') }}</label>
         <input id="site-q" name="q" value="{{ request('q') }}" placeholder="{{ __('Search the catalogue') }}" style="max-width: 16rem">
         <button type="submit" style="margin: 0">{{ __('Search') }}</button>
+        {{-- The catalogue's assistant, where the institution offers it (phase 17f). --}}
+        @if($institution && app(\App\Ai\Gateway::class)->available($institution->id) && app(\App\Ai\Gateway::class)->settings($institution->id)->chatbot_public)<a href="{{ route('discover.ask') }}" style="white-space: nowrap">{{ __('Ask the catalogue') }}</a>@endif
         @guest<a href="{{ route('clipboard.index') }}" style="white-space: nowrap">{{ __('Clipboard') }} ({{ app(\App\Clipboard\ClipboardService::class)->count() }})</a><a href="{{ route('shop.cart') }}" style="white-space: nowrap">{{ __('Cart') }} ({{ app(\App\Research\Shop::class)->count(null) }})</a><a href="{{ route('sign-in') }}" style="white-space: nowrap">{{ __('Log in') }}</a>@endguest
     </form>
     @include('layouts._account')

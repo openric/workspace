@@ -35,14 +35,16 @@ class Gateway
         return AiSetting::firstOrNew(['institution_id' => $institutionId]);
     }
 
-    /** Why the institution may not ask a model now, or null when it may. */
-    public function refusal(string $institutionId): ?string
+    /** Why the institution may not ask a model now (for this service, when one is named), or null when it may. */
+    public function refusal(string $institutionId, ?string $service = null): ?string
     {
         $settings = $this->settings($institutionId);
 
         return match (true) {
             ! $this->configured() => __('AI is not set up: the installation has no AI gateway key.'),
             ! $settings->enabled => __('AI is switched off for this institution.'),
+            // A system the institution halted in its AI register (phase 17f, EU AI Act article 14) is never called.
+            $service !== null && app(Compliance::class)->halted($institutionId, $service) => __('This AI system is halted in the institution\'s AI register.'),
             $settings->monthly_limit !== null && $this->inferences->thisMonth($institutionId) >= $settings->monthly_limit => __('This month\'s limit of :n AI calls is reached.', ['n' => $settings->monthly_limit]),
             default => null,
         };
@@ -66,7 +68,7 @@ class Gateway
      */
     public function call(Institution $institution, string $service, string $path, array $body, array $trace, callable $read, ?string $file = null): array
     {
-        if ($reason = $this->refusal($institution->id)) {
+        if ($reason = $this->refusal($institution->id, $service)) {
             throw new AiUnavailable($reason);
         }
         $endpoint = (string) config('workspace.ai.gateway_url').'/'.ltrim($path, '/');

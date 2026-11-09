@@ -16,8 +16,8 @@ Scope and size are from the G1 audit (`g1-heratio-packages-74239a1.csv`).
 | `ahg-accession-manage` | 6795 | later: V1.0+ | Partial | 9 | `ahgAccessionManagePlugin`, `qtAccessionPlugin` | Accessions, CAAIS, deaccessions, CSV and CAAIS export from v0.0.77 (9a); intake from v0.0.79 (9c); appraisal, valuation, containers, rights and the whole add form from v0.0.80 (9d) |
 | `ahg-acl` | 9750 | V0.1 candidate | Covered |  | `qbAclPlugin` | Roles and permissions with default deny (ADR 0005), written fresh |
 | `ahg-actor-manage` | 13061 | V0.1 candidate | Covered |  | `ahgActorManagePlugin`, `ahgAuthorityPlugin`, `ahgContactPlugin` | Authority records: ISAAR(CPF), merge, split, duplicates, completeness |
-| `ahg-ai-chatbot` | 4924 | out: AI (V2+) | Planned | 17 (last) | `ahgChatbotPlugin` |  |
-| `ahg-ai-compliance` | 4043 | out: AI (V2+) | Planned | 17 (last) | `ahgAiCompliancePlugin` |  |
+| `ahg-ai-chatbot` | 4924 | out: AI (V2+) | Done | 17f | `ahgChatbotPlugin` | The catalogue's assistant from v0.0.143: staff over what they may read and the help guides, the public over published records only where the institution offers it; personal information masked, answers cited and linked, checked against their sources, kept in the log of inferences; flagged answers reviewed; conversations deleted after their retention. WhatsApp and the preservation-knowledge corpus not carried (see below) |
+| `ahg-ai-compliance` | 4043 | out: AI (V2+) | Done | 17f | `ahgAiCompliancePlugin` | The AI register from v0.0.143: a system per AI service with its risk class and oversight, halting and resuming, risks (article 9), incidents with a nightly monitor, models seen, Annex IV as a page and Markdown, reviewers' attestations (article 14); the log of inferences, its key and verification were already there from v0.0.127 |
 | `ahg-ai-services` | 30242 | out: AI (V2+) | Partial | 17a to 17b | `ahgAIPlugin`, `ahgAiConditionPlugin` | Proposals and their review queue (v0.0.47, v0.0.48); the gateway client and OCR of printed pages by a vision model checked against Tesseract (heratio#1522), from v0.0.127; names found by spaCy, summaries and a vision model's condition assessment, each proposed for review, from v0.0.128 (ADR 0025); handwriting once a gateway key lets its answer be checked |
 | `ahg-annotations` | 1286 | V0.1 candidate | Planned | 14 | `ahgAnnotationsPlugin` | As IIIF annotations |
 | `ahg-api` | 30902 | V0.1 candidate | Covered | 22c | `ahgAPIPlugin`, `arRestApiPlugin` | Read API, keys, proposals, files (ADR 0007); webhooks, OpenAPI, sitemaps, Atom feed and METS from v0.0.108 (ADR 0020); API writes stay proposals |
@@ -1705,3 +1705,42 @@ Added on 8 November 2026 with the R1 accessibility check, after the external pro
 
 : Accessibility, field by field
 
+### The catalogue's assistant (`ahg-ai-chatbot`)
+
+Added on 8 November 2026 with phase 17f.
+
+| Heratio | Workspace | Status |
+|---|---|---|
+| `/chatbot` (session, message, reset) | `/ask` for staff, `/discover/ask` for the public catalogue; ask, start a new conversation | Same; the public one only where offered |
+| RAG over the catalogue through Qdrant | The Workspace search (words and meaning, pgvector) and the Graph-Grounding packs of what it finds; for staff, the help guides too | Same idea, on the Workspace's own search |
+| PII redaction before the model | Email addresses and runs of nine or more digits masked, the question kept masked | Same |
+| Grounding check of the answer | The share of an answer's significant words found in its sources, under 0.45 shown as "Check this answer" | Same |
+| Audit receipt in `ahg-ai-compliance` | A receipt in the log of inferences, the answer naming it | Same |
+| `/review` (flagged answers) and `/escalate` | Report this answer as wrong, with a note; Flagged answers, found right or wrong | Same; escalation is the flag |
+| `/history` | The conversation in hand | Narrower: no list of past conversations |
+| `chatbot/policy` | The help guide and the AI register's description of the assistant | Same in substance |
+| Retention and prune | `chatbot_retention_days` (90), `workspace:chat:prune` nightly | Same |
+| `/webhooks/whatsapp` (asking over WhatsApp) | none | Not carried: WhatsApp is for staff notices only (v0.0.134) |
+| `/preservation-knowledge` corpus, `chatbot:test-multilang` | none | Not carried: the assistant answers from the institution's catalogue, not a general corpus; the languages are those of the gateway's chat model |
+
+: The catalogue's assistant, field by field
+
+### AI compliance (`ahg-ai-compliance`)
+
+Added on 8 November 2026 with phase 17f.
+
+| Heratio | Workspace | Status |
+|---|---|---|
+| `/systems` (register: name, purpose, provider, role, risk class, lifecycle, deployment context, oversight, owner, review dates) | The AI register, a system for each AI service, filled in by the Workspace and changed on the system's page | Same; systems are the services, not created or deleted by hand |
+| `/oversight` (accept and reject rates, halt and resume a service, halt all) | Oversight over 30 days beside each system; Halt and Resume with a reason | Same; no halt-all, since AI is switched off as a whole in Admin > AI |
+| `/oversight/policy` (human review required, dual review) | A person reviews every output; two people review each output; the reminder shown to reviewers | Recorded; every output is already a proposal a person reviews |
+| `/oversight/attest`, countersign | Reviewing AI output, attested for a year | Same; no countersigning |
+| `/risk` (description, severity, likelihood, intended use or misuse, affected group, mitigation, residual, status), archive, sign-off | Risks on the system's page, each change with its reviewer | Same; a risk is closed by its status, not archived |
+| `/risk/{id}/incident` | Incidents on the system's page, optionally against a risk, resolved with how | Same |
+| `ahg:ai-risk-monitor` | `workspace:ai:monitor` nightly: rejection over half of at least 20, or three wrong answers, one open incident at a time | Same |
+| `/models` (model, version, training data, limits, purpose, retired) | Models, taken from the log of inferences, with what is known of them | Same; added when a model first answers, not by hand |
+| `/documentation`, `ahg:ai-annex-iv` | Annex IV on the system's page and as Markdown | Same |
+| `ahg:ai-halt` | Halt on the system's page | Same, from the screen only |
+| Inference log, `/.well-known/ai-inference-pubkey`, install key, verify, prune | The chained, signed log of inferences, its public key and `workspace:ai:verify`, from v0.0.127 | Same (17a) |
+
+: AI compliance, field by field

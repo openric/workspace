@@ -1,0 +1,30 @@
+# OpenRiC Workspace - OpenRiC Workspace Chat Roles.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Who wrote a message in a conversation with the catalogue's assistant (Heratio's ahg_ai_chatbot_message.role, roadmap phase 17f).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/chat-role/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Chat Roles"@en ;
+    dcterms:description "Who wrote a message in a conversation with the catalogue's assistant (Heratio's ahg_ai_chatbot_message.role, roadmap phase 17f)."@en ;
+    dcterms:issued "2026-11-08"^^xsd:date ;
+    skos:hasTopConcept v:user, v:assistant .
+
+v:user a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Reader"@en, "Leser"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with a conversation with the catalogue's assistant, as Heratio's ahg-ai-chatbot keeps it."@en ;
+    skos:definition "The person asking."@en .
+
+v:assistant a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Assistant"@en, "Assistent"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with a conversation with the catalogue's assistant, as Heratio's ahg-ai-chatbot keeps it."@en ;
+    skos:definition "The catalogue's assistant, answering through the AI gateway."@en .

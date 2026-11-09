@@ -14,6 +14,7 @@ use App\AccessRequests\AccessRequestService;
 use App\Accounts\AccountService;
 use App\Accounts\ApiKeyService;
 use App\Accounts\RegistrationService;
+use App\Ai\Compliance as AiCompliance;
 use App\Ai\Inferences;
 use App\Authority\Mentions;
 use App\CustomFields\CustomFields;
@@ -46,7 +47,11 @@ use App\Jurisdiction\NarssaTransfers;
 use App\Labels\Labels;
 use App\Language\Contributions;
 use App\Language\Corpus;
+use App\Models\AiIncident;
+use App\Models\AiModel;
+use App\Models\AiRisk;
 use App\Models\CaptionTrack;
+use App\Models\ChatConversation;
 use App\Models\Concept;
 use App\Models\Container;
 use App\Models\DuplicateDetection;
@@ -363,6 +368,18 @@ class AccessMatrixTest extends TestCase
         $make('research report', fn () => [$report = app(Reports::class)->create($admin, ['title' => 'Interim report', 'project_id' => $project()->id]),
             app(Reports::class)->saveSection($admin, $report, ['title' => 'Findings', 'content' => 'Twelve letters']), app(Reports::class)->requestReview($admin, $report, app(AccountService::class)->create($institution, 'Reviewer', 'reviewer@example.org', 'correct horse battery staple')->email)]);
         $make('annotation', fn () => app(Annotations::class)->save($admin, $letter, ['content' => 'The clerk signed it.']));
+        $make('AI compliance', function () use ($institution) {
+            $system = app(AiCompliance::class)->systems($institution)->first();
+            $level = fn (string $v, string $n) => Concept::where('iri', Vocab::BASE."$v/$n")->value('id');
+            $conversation = ChatConversation::create(['institution_id' => $institution->id, 'public' => true, 'token_hash' => hash('sha256', 'matrix'), 'last_message_at' => now()]);
+
+            return [$system, AiRisk::create(['institution_id' => $institution->id, 'system_id' => $system->id, 'description' => 'A summary invents a date',
+                'severity_id' => $level('risk-level', 'medium'), 'likelihood_id' => $level('risk-level', 'low'), 'use_id' => $level('ai-risk-use', 'intended'),
+                'residual_id' => $level('risk-level', 'low'), 'status_id' => $level('ai-risk-status', 'active')]),
+                AiIncident::create(['institution_id' => $institution->id, 'system_id' => $system->id, 'description' => 'A date was wrong', 'severity_id' => $level('risk-level', 'low')]),
+                AiModel::create(['institution_id' => $institution->id, 'service_id' => $system->service_id, 'model' => 'qwen3:8b', 'first_seen_at' => now(), 'last_seen_at' => now(), 'calls' => 1]),
+                $conversation->messages()->create(['role_id' => $level('chat-role', 'assistant'), 'content' => 'The council met monthly.', 'flagged_at' => now()])];
+        });
         $make('resolution', fn () => app(Sources::class)->propose($admin, $this->objects['Agent'], app(AgentService::class)->create($institution, 'person', 'Botha, A.', 'en')));
         $make('journal parts', fn () => [app(Journals::class)->saveIssue($admin, $this->objects['ResearchJournal'], ['volume' => '1', 'number' => '1']),
             app(Journals::class)->saveArticle($admin, $this->objects['ResearchJournal'], ['title' => 'On bridges'])]);

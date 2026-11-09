@@ -1,0 +1,30 @@
+# OpenRiC Workspace - OpenRiC Workspace AI Act Roles.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What the institution is for an AI system under the EU AI Act (Heratio's ai_system.role, roadmap phase 17f).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/ai-role/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace AI Act Roles"@en ;
+    dcterms:description "What the institution is for an AI system under the EU AI Act (Heratio's ai_system.role, roadmap phase 17f)."@en ;
+    dcterms:issued "2026-11-08"^^xsd:date ;
+    skos:hasTopConcept v:deployer, v:provider .
+
+v:deployer a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Deployer"@en, "Ontplooier"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's register of its AI systems, as Heratio's ahg-ai-compliance keeps it (EU AI Act; POPIA's accountability principle in South Africa)."@en ;
+    skos:definition "Uses an AI system under its own authority, as an archive using the Workspace's AI does."@en .
+
+v:provider a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Provider"@en, "Verskaffer"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's register of its AI systems, as Heratio's ahg-ai-compliance keeps it (EU AI Act; POPIA's accountability principle in South Africa)."@en ;
+    skos:definition "Develops an AI system and places it on the market or puts it into service."@en .

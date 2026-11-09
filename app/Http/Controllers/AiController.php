@@ -86,6 +86,11 @@ class AiController extends Controller
             'rerank_history' => $request->boolean('search.rerank_history'), 'expansion_limit' => $search['search']['expansion_limit'] ?? 5,
             'embedding_model' => $search['search']['embedding_model'] ?? null, 'min_similarity' => $search['search']['min_similarity'] ?? 0.40]);
 
+        // The catalogue's assistant (phase 17f): offered to the public only when chosen; its conversations kept so long.
+        $chat = $request->validate(['chatbot_retention_days' => ['nullable', 'integer', 'between:1,3650'], 'chatbot_instructions' => ['nullable', 'string', 'max:5000']]);
+        AuditLog::actingAs($request->user(), fn () => $settings->update(['chatbot_public' => $request->boolean('chatbot_public'),
+            'chatbot_retention_days' => $chat['chatbot_retention_days'] ?? 90, 'chatbot_instructions' => trim((string) ($chat['chatbot_instructions'] ?? '')) ?: null]));
+
         // Annif (phase 17e).
         $annif = $request->validate(['annif_project' => ['nullable', 'string', 'max:100', 'regex:/^[A-Za-z0-9._-]+$/'], 'annif_vocabulary_id' => ['nullable', 'uuid'],
             'annif_limit' => ['nullable', 'integer', 'between:1,20'], 'annif_threshold' => ['nullable', 'numeric', 'between:0,0.99']]);

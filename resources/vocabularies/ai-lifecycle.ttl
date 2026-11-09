@@ -1,0 +1,44 @@
+# OpenRiC Workspace - OpenRiC Workspace AI System Lifecycle.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Where an AI system is in its life (Heratio's ai_system.lifecycle_status, roadmap phase 17f).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/ai-lifecycle/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace AI System Lifecycle"@en ;
+    dcterms:description "Where an AI system is in its life (Heratio's ai_system.lifecycle_status, roadmap phase 17f)."@en ;
+    dcterms:issued "2026-11-08"^^xsd:date ;
+    skos:hasTopConcept v:development, v:deployed, v:suspended, v:retired .
+
+v:development a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "In development"@en, "In ontwikkeling"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's register of its AI systems, as Heratio's ahg-ai-compliance keeps it (EU AI Act; POPIA's accountability principle in South Africa)."@en ;
+    skos:definition "Being built or tried; not yet used on the institution's records."@en .
+
+v:deployed a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "In use"@en, "In gebruik"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's register of its AI systems, as Heratio's ahg-ai-compliance keeps it (EU AI Act; POPIA's accountability principle in South Africa)."@en ;
+    skos:definition "Used on the institution's records."@en .
+
+v:suspended a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Suspended"@en, "Opgeskort"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's register of its AI systems, as Heratio's ahg-ai-compliance keeps it (EU AI Act; POPIA's accountability principle in South Africa)."@en ;
+    skos:definition "Not used for now."@en .
+
+v:retired a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Retired"@en, "Afgetree"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's register of its AI systems, as Heratio's ahg-ai-compliance keeps it (EU AI Act; POPIA's accountability principle in South Africa)."@en ;
+    skos:definition "No longer used."@en .

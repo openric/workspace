@@ -1,0 +1,37 @@
+# OpenRiC Workspace - OpenRiC Workspace Chat Reviews.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# What a reviewer found of an answer a reader flagged (Heratio's chatbot review queue, roadmap phase 17f).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/chat-review/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace Chat Reviews"@en ;
+    dcterms:description "What a reviewer found of an answer a reader flagged (Heratio's chatbot review queue, roadmap phase 17f)."@en ;
+    dcterms:issued "2026-11-08"^^xsd:date ;
+    skos:hasTopConcept v:pending, v:right, v:wrong .
+
+v:pending a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Waiting for review"@en, "Wag vir hersiening"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with a conversation with the catalogue's assistant, as Heratio's ahg-ai-chatbot keeps it."@en ;
+    skos:definition "Flagged by a reader; not yet reviewed."@en .
+
+v:right a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "The answer was right"@en, "Die antwoord was reg"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with a conversation with the catalogue's assistant, as Heratio's ahg-ai-chatbot keeps it."@en ;
+    skos:definition "Reviewed: the answer stands."@en .
+
+v:wrong a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "The answer was wrong"@en, "Die antwoord was verkeerd"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with a conversation with the catalogue's assistant, as Heratio's ahg-ai-chatbot keeps it."@en ;
+    skos:definition "Reviewed: the answer was wrong; it may become an incident in the AI risk register."@en .

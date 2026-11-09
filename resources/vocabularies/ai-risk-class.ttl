@@ -1,0 +1,44 @@
+# OpenRiC Workspace - OpenRiC Workspace AI Risk Classes.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# How an AI system is classified for risk, after the EU AI Act's tiers (Heratio's ai_system.risk_classification, roadmap phase 17f).
+
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix v:       <https://workspace.openric.org/vocab/ai-risk-class/> .
+
+v: a skos:ConceptScheme ;
+    dcterms:title "OpenRiC Workspace AI Risk Classes"@en ;
+    dcterms:description "How an AI system is classified for risk, after the EU AI Act's tiers (Heratio's ai_system.risk_classification, roadmap phase 17f)."@en ;
+    dcterms:issued "2026-11-08"^^xsd:date ;
+    skos:hasTopConcept v:prohibited, v:high, v:limited, v:minimal .
+
+v:prohibited a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Prohibited"@en, "Verbode"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's register of its AI systems, as Heratio's ahg-ai-compliance keeps it (EU AI Act; POPIA's accountability principle in South Africa)."@en ;
+    skos:definition "A practice the EU AI Act forbids; such a system is never used."@en .
+
+v:high a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "High risk"@en, "Hoë risiko"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's register of its AI systems, as Heratio's ahg-ai-compliance keeps it (EU AI Act; POPIA's accountability principle in South Africa)."@en ;
+    skos:definition "A system the EU AI Act lists as high risk, with its full obligations."@en .
+
+v:limited a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Limited risk"@en, "Beperkte risiko"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's register of its AI systems, as Heratio's ahg-ai-compliance keeps it (EU AI Act; POPIA's accountability principle in South Africa)."@en ;
+    skos:definition "A system with transparency obligations: people are told they deal with AI, as a chatbot does."@en .
+
+v:minimal a skos:Concept ;
+    skos:inScheme v: ;
+    skos:topConceptOf v: ;
+    skos:prefLabel "Minimal risk"@en, "Minimale risiko"@af ;
+    skos:scopeNote "Not a RiC-O term: kept with the institution's register of its AI systems, as Heratio's ahg-ai-compliance keeps it (EU AI Act; POPIA's accountability principle in South Africa)."@en ;
+    skos:definition "A system with no specific obligations, such as one whose every output a person reviews."@en .

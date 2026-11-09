@@ -17,6 +17,7 @@ use App\Http\Controllers\AccountController;
 use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\AgentController;
 use App\Http\Controllers\AgreementController;
+use App\Http\Controllers\AiComplianceController;
 use App\Http\Controllers\AiController;
 use App\Http\Controllers\AltTextController;
 use App\Http\Controllers\AnalysisController;
@@ -24,6 +25,7 @@ use App\Http\Controllers\ApiKeyController;
 use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\AuthorityResolutionController;
 use App\Http\Controllers\CaptionController;
+use App\Http\Controllers\ChatController;
 use App\Http\Controllers\ClearanceController;
 use App\Http\Controllers\ClipboardController;
 use App\Http\Controllers\CommunityLabelController;
@@ -274,6 +276,11 @@ Route::middleware([ServeDiscovery::class, 'throttle:120,1'])->group(function () 
 Route::middleware(ServeDiscovery::class)->prefix('discover')->name('discover.')->group(function () {
     // A published 3D model alone, to embed in another page (roadmap phase 21).
     Route::get('/models/{instantiation}/embed', [Model3dController::class, 'embed'])->whereUuid('instantiation')->name('models.embed');
+    // The catalogue's assistant, where the institution offers it (roadmap phase 17f).
+    Route::get('/ask', [ChatController::class, 'show'])->name('ask');
+    Route::post('/ask', [ChatController::class, 'ask'])->middleware('throttle:10,1')->name('ask.store');
+    Route::post('/ask/restart', [ChatController::class, 'restart'])->name('ask.restart');
+    Route::post('/ask/{message}/flag', [ChatController::class, 'flag'])->whereUuid('message')->middleware('throttle:10,1')->name('ask.flag');
     Route::get('/', [DiscoverController::class, 'home'])->name('home');
     Route::get('/records/{id}', [DiscoverController::class, 'record'])->name('record');
     // Ways into the collection (roadmap phase 17d1).
@@ -503,6 +510,15 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::post('/instantiations/{instantiation}/read-text', [AiController::class, 'readText'])->name('instantiations.read-text');
     Route::post('/instantiations/{instantiation}/assess-condition', [AiController::class, 'condition'])->name('instantiations.assess-condition');
     Route::post('/records/{record}/ask/{task}', [AiController::class, 'ask'])->name('records.ask')->where('task', 'names|summary|subjects');
+    // The catalogue's assistant for staff, the answers readers flagged, and reviewers' attestation (roadmap phase 17f).
+    Route::get('/ask', [ChatController::class, 'show'])->name('ask');
+    Route::post('/ask', [ChatController::class, 'ask'])->middleware('throttle:20,1')->name('ask.store');
+    Route::post('/ask/restart', [ChatController::class, 'restart'])->name('ask.restart');
+    Route::post('/ask/{message}/flag', [ChatController::class, 'flag'])->whereUuid('message')->name('ask.flag');
+    Route::get('/admin/ai/answers', [ChatController::class, 'flagged'])->name('ai.answers');
+    Route::post('/admin/ai/answers/{message}', [ChatController::class, 'review'])->whereUuid('message')->name('ai.answers.review');
+    Route::get('/admin/ai/attestation', [AiComplianceController::class, 'attestation'])->name('ai.attestation');
+    Route::post('/admin/ai/attestation', [AiComplianceController::class, 'attest'])->name('ai.attest');
     Route::post('/instantiations/{instantiation}/own-copy', [InstantiationController::class, 'replaceCopy'])->name('instantiations.replace-copy');
     // A 3D model's page (roadmap phase 21): how it is shown, its hotspots, its turntable; and the institution's defaults.
     Route::prefix('instantiations/{instantiation}/model')->name('models.')->whereUuid(['instantiation', 'hotspot'])->group(function () {
@@ -806,6 +822,17 @@ Route::middleware(['auth', 'active'])->group(function () {
             Route::post('/verify', [AiController::class, 'verify'])->name('verify');
             Route::get('/inferences', [AiController::class, 'inferences'])->name('inferences');
             Route::get('/inferences/{inference}', [AiController::class, 'inference'])->name('inference');
+            // The AI register and compliance (roadmap phase 17f).
+            Route::get('/compliance', [AiComplianceController::class, 'index'])->name('compliance');
+            Route::get('/systems/{system}', [AiComplianceController::class, 'system'])->whereUuid('system')->name('systems.show');
+            Route::post('/systems/{system}', [AiComplianceController::class, 'update'])->whereUuid('system')->name('systems.update');
+            Route::post('/systems/{system}/halt', [AiComplianceController::class, 'halt'])->whereUuid('system')->name('systems.halt');
+            Route::get('/systems/{system}/annex-iv.md', [AiComplianceController::class, 'annex'])->whereUuid('system')->name('systems.annex');
+            Route::post('/systems/{system}/risks', [AiComplianceController::class, 'storeRisk'])->whereUuid('system')->name('risks.store');
+            Route::post('/risks/{risk}', [AiComplianceController::class, 'updateRisk'])->whereUuid('risk')->name('risks.update');
+            Route::post('/systems/{system}/incidents', [AiComplianceController::class, 'storeIncident'])->whereUuid('system')->name('incidents.store');
+            Route::post('/incidents/{incident}/resolve', [AiComplianceController::class, 'resolveIncident'])->whereUuid('incident')->name('incidents.resolve');
+            Route::post('/models/{model}', [AiComplianceController::class, 'updateModel'])->whereUuid('model')->name('models.update');
         });
         // The code reference, read from the code (roadmap phase 20d).
         Route::get('/admin/code-reference', [FunctionsDocsController::class, 'index'])->name('functions-docs.index');

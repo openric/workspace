@@ -3,6 +3,8 @@
 use App\AccessRequests\AccessRequestService;
 use App\Ai\AiUnavailable;
 use App\Ai\Annif;
+use App\Ai\Chatbot;
+use App\Ai\Compliance;
 use App\Authority\Candidates;
 use App\Authority\Mentions;
 use App\Authority\NerFeedback;
@@ -450,3 +452,20 @@ Artisan::command('workspace:annif:trial {--institution=}', function () {
         $this->info(sprintf('%s: %d records, precision %.2f, recall %.2f.', $institution->name, $r['records'], $r['precision'], $r['recall']));
     });
 })->purpose('Try each institution\'s Annif project on the subjects its published records already have, and keep the result');
+
+// The AI register's monitor (roadmap phase 17f, after Heratio's ahg:ai-risk-monitor): an incident for a system whose
+// proposals reviewers mostly reject, or whose answers readers find wrong, unless one the monitor raised is still open.
+Artisan::command('workspace:ai:monitor', function () {
+    foreach (Institution::all() as $institution) {
+        foreach (app(Compliance::class)->monitor($institution) as $incident) {
+            $this->line($institution->name.': '.$incident->description);
+        }
+    }
+})->purpose('Raise an incident in the AI register for each AI system reviewers mostly reject, or whose answers readers find wrong');
+Schedule::command('workspace:ai:monitor')->dailyAt('03:15')->withoutOverlapping(60)->when(fn () => DB::table('ai_settings')->where('enabled', true)->exists());
+
+// Conversations with the catalogue's assistant, deleted once past the institution's retention (phase 17f).
+Artisan::command('workspace:chat:prune', function () {
+    $this->info(app(Chatbot::class)->prune().' conversations deleted.');
+})->purpose('Delete conversations with the catalogue\'s assistant past the institution\'s retention');
+Schedule::command('workspace:chat:prune')->dailyAt('03:30')->withoutOverlapping(60);
