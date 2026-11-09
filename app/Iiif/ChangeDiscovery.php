@@ -69,7 +69,10 @@ class ChangeDiscovery
     private function activities(): array
     {
         $presentation = new Presentation($this->catalogue);
-        $units = $this->catalogue->visible('records')->filter(fn (RecordResource $unit) => $presentation->hasManifest($unit));
+        // Only the records with files can have a manifest, so only those are loaded (v0.0.146).
+        $units = $this->catalogue->visible('records', '', false, [], fn ($q) => $q->whereExists(fn ($x) => $x->from('instantiations as i')
+            ->join('digital_files as f', 'f.instantiation_id', '=', 'i.id')->whereColumn('i.record_resource_id', 'e.id')->whereNull('i.deleted_at')))
+            ->filter(fn (RecordResource $unit) => $presentation->hasManifest($unit));
         $activities = [];
         foreach ($this->catalogue->datestamps($units->pluck('id')->all()) as $id => $at) {
             $activities[] = ['Update', route('iiif.manifest', $id), $at];

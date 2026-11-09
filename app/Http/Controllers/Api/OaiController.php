@@ -94,8 +94,8 @@ class OaiController extends Controller
     private function identify(): Response
     {
         $institution = $this->catalogue->institution;
-        $records = $this->catalogue->visible('records');
-        $earliest = collect($this->catalogue->datestamps($records->pluck('id')->all()))->min() ?? CarbonImmutable::parse($institution->created_at)->utc();
+        $first = $this->catalogue->harvest()->reorder()->min('h.changed');
+        $earliest = $first !== null ? CarbonImmutable::parse($first)->utc() : CarbonImmutable::parse($institution->created_at)->utc();
         $this->open(true);
         $this->x->startElement('Identify');
         $this->x->writeElement('repositoryName', $institution->name);
@@ -144,7 +144,7 @@ class OaiController extends Controller
         if (isset($this->args['resumptionToken'])) {
             return $this->error('badResumptionToken', 'Sets come in one list, so there is no token to resume.');
         }
-        $tops = $this->catalogue->visible('records')->whereNull('parent_id');
+        $tops = $this->catalogue->visible('records', '', false, [], fn ($q) => $q->whereNull('e.parent_id'));
         $this->open(true);
         $this->x->startElement('ListSets');
         $this->set('records', 'Every published unit of description');
@@ -177,7 +177,7 @@ class OaiController extends Controller
         }
         $this->open(true);
         $this->x->startElement('GetRecord');
-        $this->record($unit, $this->catalogue->datestamps([$unit->id])[$unit->id], $this->tops([$unit])[$unit->id], $this->args['metadataPrefix'], true);
+        $this->record($unit, $this->catalogue->datestamps([$unit->id])[$unit->id], $this->catalogue->tops([$unit->id])[$unit->id], $this->args['metadataPrefix'], true);
         $this->x->endElement();
 
         return $this->close();
@@ -198,34 +198,35 @@ class OaiController extends Controller
         if ($problem !== null) {
             return $this->error('badArgument', $problem);
         }
-        $units = $this->catalogue->visible('records');
-        $stamps = $this->catalogue->datestamps($units->pluck('id')->all());
-        $tops = $this->tops($units->all());
         if ($state['s'] !== null && $state['s'] !== 'records' && ! str_starts_with($state['s'], 'records:')) {
             return $this->error('badArgument', 'The sets are records and records:{UUID}.');
         }
-        $selected = $units->filter(fn ($u) => ($from === null || $stamps[$u->id] >= $from) && ($until === null || $stamps[$u->id] <= $until)
-            && ($state['s'] === null || $state['s'] === 'records' || $state['s'] === 'records:'.$tops[$u->id]))
-            ->sortBy(fn ($u) => [$stamps[$u->id]->getTimestamp(), $u->id])->values();
-        if ($selected->isEmpty()) {
+        // Selected, counted and paged in the database (v0.0.146), so a harvest of 100,000 records loads a page at a time.
+        $selected = $this->catalogue->harvest($from, $until, $state['s'] !== null && str_starts_with($state['s'], 'records:') ? substr($state['s'], 8) : null);
+        // Counted once, on the first page, and carried in the token: the protocol lets the list's size be approximate.
+        $total = isset($state['n']) && is_int($state['n']) ? $state['n'] : (clone $selected)->reorder()->count();
+        if ($total === 0) {
             return $this->error('noRecordsMatch', 'No published record matches.');
         }
-        if ($state['o'] >= $selected->count()) {
+        if ($state['o'] >= $total) {
             return $this->error('badResumptionToken', 'The resumption token is past the end of the list.');
         }
-        $page = $selected->slice($state['o'], self::PAGE);
+        $page = (clone $selected)->offset($state['o'])->limit(self::PAGE)->get();
+        $units = RecordResource::whereIn('id', $page->pluck('id'))->with(PublicCatalogue::WITH)->get()->keyBy('id');
         $this->open(true);
         $this->x->startElement($withMetadata ? 'ListRecords' : 'ListIdentifiers');
-        foreach ($page as $unit) {
-            $this->record($unit, $stamps[$unit->id], $tops[$unit->id], $state['p'], $withMetadata);
+        foreach ($page as $row) {
+            if (($unit = $units[$row->id] ?? null) !== null && $this->catalogue->view->readable($unit)) {
+                $this->record($unit, CarbonImmutable::parse($row->changed)->utc(), $row->top, $state['p'], $withMetadata);
+            }
         }
         $next = $state['o'] + self::PAGE;
-        if ($next < $selected->count() || $state['o'] > 0) {
+        if ($next < $total || $state['o'] > 0) {
             $this->x->startElement('resumptionToken');
-            $this->x->writeAttribute('completeListSize', (string) $selected->count());
+            $this->x->writeAttribute('completeListSize', (string) $total);
             $this->x->writeAttribute('cursor', (string) $state['o']);
-            if ($next < $selected->count()) {
-                $this->x->text(rtrim(strtr(base64_encode(json_encode([...$state, 'o' => $next])), '+/', '-_'), '='));
+            if ($next < $total) {
+                $this->x->text(rtrim(strtr(base64_encode(json_encode([...$state, 'o' => $next, 'n' => $total])), '+/', '-_'), '='));
             }
             $this->x->endElement();
         }
@@ -280,27 +281,6 @@ class OaiController extends Controller
         $prefix = 'oai:'.$this->host().':';
 
         return str_starts_with($identifier, $prefix) ? $this->catalogue->find('records', substr($identifier, strlen($prefix))) : null;
-    }
-
-    /**
-     * The top unit of each unit's hierarchy, for its set.
-     *
-     * @param  list<RecordResource>  $units
-     * @return array<string, string>
-     */
-    private function tops(array $units): array
-    {
-        $parents = DB::table('record_resources')->where('institution_id', $this->catalogue->institution->id)->pluck('parent_id', 'id')->all();
-        $tops = [];
-        foreach ($units as $unit) {
-            $id = $unit->id;
-            while (($parents[$id] ?? null) !== null) {
-                $id = $parents[$id];
-            }
-            $tops[$unit->id] = $id;
-        }
-
-        return $tops;
     }
 
     /** @return array{0: ?CarbonImmutable, 1: ?CarbonImmutable, 2: ?string} from, until (inclusive) and what is wrong with them */

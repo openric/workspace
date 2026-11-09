@@ -25,7 +25,7 @@ Loading took 162 minutes on the development host (24 cores, 251 GB of memory, Po
 
 ## The public catalogue
 
-The first measurement was of the demonstration Workspace itself, at 980 records: its catalogue home made 10,702 queries and took 13 to 17 seconds, a fonds page 5.5 seconds. Each record's check of what the public may read asked the database again for the Public role's permissions (5,446 queries), walked up its parents one query at a time (3,118), and asked for its embargoes (990) and redactions (980). v0.0.145 asks for the permissions once per request, walks the parents only when some permission is held on a single record, and asks for the embargoes and redactions of a whole list in one query each. The home page now makes 106 queries and takes 0.3 seconds; a test keeps the number of queries the same for 25 records as for 5.
+The first measurement was of the demonstration Workspace itself, at 980 records: its catalogue home made 10,702 queries and took 13 to 17 seconds, a fonds page 5.5 seconds. Each record's check of what the public may read asked the database again for the Public role's permissions (5,446 queries), walked up its parents one query at a time (3,118), and asked for its embargoes (990) and redactions (980). v0.0.145 asks for the permissions once per request, walks the parents only when some permission is held on a single record, and asks for the embargoes and redactions of a whole list in one query each. The home page now makes about 190 queries, 0.65 seconds of them in the database, and takes about 5.5 seconds on the demonstration host at a load average near 40 (a fonds page 1.1 seconds, from 5.5); a test keeps the number of queries the same for 25 records as for 5. Most of what remains is the home page loading every public authority record (4,418, 3.0 seconds) and place (2,779, 2.1 seconds) only to count them, which v0.0.146 counts in SQL. (A figure of 0.3 seconds given with v0.0.145 was measured on the development database, which holds 39 records, and was wrong.)
 
 At 100,000 units that is not enough. Every public list loads all published records and decides each in PHP; above 65,535 records the eager loading of their names exceeds PostgreSQL's limit on a query's parameters, and the page fails after about two minutes. That is the catalogue home and every public record page, which loads the whole list for its strip of thumbnails, and with them the browse pages, OAI-PMH lists, IIIF change discovery, the site's blocks and DOI batches (18 places in all). Pages about one entity scale:
 
@@ -38,7 +38,51 @@ At 100,000 units that is not enough. Every public list loads all published recor
 
 : Single pages at 100,000 units, measured in the process before any load
 
-So the load test of pages (`bin/capacity pages`: k6 2.3.0, readers and archivists at 1, 10 and 25 at once) could not run, and waits for **v0.0.146**, which decides public visibility in SQL, with a test that SQL and the check in PHP agree on what the public may read, and lists that count and page in the database. The test is then run again and this report extended.
+So the load test of pages could not run until **v0.0.146**, which decides what the public may read in SQL (`PublicCatalogue::ids()`), held by a test to the same answer as the check in PHP for every rule, and has every public list count, order and page in the database. On the development host, at 100,000 units, measured in the process:
+
+| Page | Before v0.0.146 | v0.0.146 |
+| --- | --- | --- |
+| The catalogue home | fails after 105 s | 2.0 s |
+| A record's public page | fails after 120 s | 1.6 to 1.8 s |
+| The fonds of 10,000 items, its page | fails (157 s in one run) | 1.8 s |
+| The API's list of records, page 200 of 50 | 8.6 s | 2.0 s |
+| OAI-PMH Identify | 3.0 s | 1.4 s |
+| OAI-PMH, a page of 100 identifiers | | 1.3 to 2.7 s |
+
+: Public pages at 100,000 units, in the process
+
+The largest single gain came from comparing names by their state's and type's ids rather than joining on the terms' IRIs: PostgreSQL then estimates from the column's statistics that 94,000 names are published, where it had guessed a few dozen and chosen plans that ran for seconds.
+
+### Under load
+
+`bin/capacity pages` (k6 2.3.0, pinned by checksum) ran readers and archivists, six to four, at 1, 10 and 25 at once for three minutes each, every one from an address of its own and reading for one to three seconds between pages, against 32 PHP workers, on a host shared with other work at a load average of 20 to 40. The time of each page, in milliseconds, half of them faster than the first figure and 95 in 100 faster than the second:
+
+| Page | 1 user | 10 users | 25 users |
+| --- | --- | --- | --- |
+| Public authority record | 155 / 183 | 203 / 352 | 262 / 451 |
+| Public tree of the widest fonds | 304 / 327 | 347 / 741 | 550 / 1,023 |
+| Public search | 548 / 734 | 658 / 1,379 | 955 / 1,796 |
+| Public record | 1,674 / 1,858 | 2,130 / 3,259 | 3,986 / 6,705 |
+| Deepest public record | 2,096 / 2,168 | 2,579 / 5,469 | 4,587 / 7,325 |
+| Catalogue home | 2,144 / 2,306 | 3,121 / 4,057 | 5,321 / 8,828 |
+| OAI-PMH list | 2,920 / 2,982 | 4,339 / 7,718 | 7,709 / 11,319 |
+| Dashboard | 137 / 161 | 152 / 268 | 198 / 308 |
+| Record form | 226 / 241 | 250 / 379 | 351 / 543 |
+| Saving a record | 216 / 241 | 218 / 343 | 267 / 496 |
+| Staff search | 603 / 694 | 658 / 1,368 | 1,074 / 1,888 |
+| Staff authority record | 290 / 327 | 300 / 423 | 433 / 755 |
+| Staff tree of the widest fonds | 8,050 / 8,525 | 8,694 / 9,708 | 9,001 / 11,454 |
+| Staff record | 18,001 / 18,232 | 20,602 / 31,536 | 24,262 / 29,023 |
+
+: Pages under load at 100,000 units (median / 95th percentile, ms)
+
+No request failed but three of 77 public record pages at 25 users, which answered 404 rightly: the probe had picked them for having a published name, though they were under embargo or closed; it now takes its records from the public catalogue's own query. The test's own thresholds (95 in 100 under one second up to ten users, under 2.5 seconds at 25) are not met:
+
+- **The staff side** decides what an account may read one entity at a time, as the public side did before v0.0.146: a staff record's page takes 18 seconds, the staff tree of the widest fonds 8. Moving it into SQL as v0.0.146 did for the public is [openric/workspace#8](https://github.com/openric/workspace/issues/8).
+- **The public pages that work out the visible set** (the home, a record's page, the OAI-PMH list) take two to three seconds alone and slow under load as they share the database. Each still asks for the set more than once a page; computing it once a request is the next step for them.
+- Pages that read one entity, search, the tree, the forms and saving stay under two seconds throughout.
+
+The first run of this test also found a fault in the test itself: k6 empties each user's cookies every iteration unless told not to, so the archivists, signed in once, were sent to the sign-in page from their second round on. `noCookiesReset` is now set.
 
 ## Search (phase 25a)
 
@@ -69,12 +113,11 @@ Every regular expression stayed well inside its five-second limit.
 
 : Background work at 100,000 units
 
-Every one finished and none ran short of memory. Two stand out: the Turtle export takes four times as long as the same graph as JSON-LD, which points at its serialiser rather than at the data, and is looked at with v0.0.146; and an import commits about 21 rows a second, so an institution's first migration of 100,000 rows is an overnight job, run as one. The import's one issue was its standing note that imported values are drafts until someone publishes them.
+Every one finished and none ran short of memory. Two stand out. The Turtle export takes four times as long as the same graph as JSON-LD; measured stage by stage, the Turtle writer takes 0.7 seconds, while turning the JSON-LD into RDF (`ml/json-ld`, through EasyRdf) takes 123 seconds for its 37,628 triples, which Turtle and RDF/XML pay and JSON-LD does not, and gathering the record and its 10,000 parts takes 43 seconds and 57,817 queries, which every format pays; a fonds somewhat larger would pass PHP's 300-second limit for a request ([openric/workspace#7](https://github.com/openric/workspace/issues/7)). And an import commits about 21 rows a second, so an institution's first migration of 100,000 rows is an overnight job, run as one. The import's one issue was its standing note that imported values are drafts until someone publishes them.
 
 ## Not measured
 
 - The Fuseki rebuild for SPARQL, which is off in the capacity Workspace.
-- Pages under load, until v0.0.146.
 - Afrikaans, French and other interface languages, which do not change the work a page does.
 
 ## How to run it again

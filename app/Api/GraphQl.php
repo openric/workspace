@@ -90,8 +90,9 @@ class GraphQl
         $offset = (int) ($args['offset'] ?? 0);
         ($limit >= 1 && $limit <= self::MAX_LIMIT && $offset >= 0) || throw new InvalidArgumentException('limit is from 1 to '.self::MAX_LIMIT.', and offset 0 or more.');
 
-        return $this->catalogue->visible($kind, trim((string) ($args['q'] ?? '')))->slice($offset, $limit)
-            ->map(fn ($e) => $this->shape($kind, $e, $selection))->values()->all();
+        // Paged in the database, in name order as before (v0.0.146).
+        return $this->catalogue->byName($this->catalogue->query($kind, trim((string) ($args['q'] ?? ''))), $kind)->with(PublicCatalogue::WITH)->offset($offset)->limit($limit)->get()
+            ->filter(fn ($e) => $this->catalogue->view->readable($e))->map(fn ($e) => $this->shape($kind, $e, $selection))->values()->all();
     }
 
     private function shape(string $kind, Model $entity, array $selection): array

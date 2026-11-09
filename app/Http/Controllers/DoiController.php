@@ -135,9 +135,12 @@ class DoiController extends Controller
         if ($request->isMethod('post')) {
             $data = $request->validate(['repository_id' => ['nullable', 'uuid'], 'level_id' => ['nullable', 'uuid'], 'limit' => ['required', 'integer', 'between:1,5000']]);
             $catalogue = new PublicCatalogue($institution);
-            $units = $catalogue->visible('records')->whereNotIn('id', RecordDoi::where('institution_id', $institution->id)->pluck('record_resource_id')->all())
-                ->when($data['repository_id'] ?? null, fn ($c, $id) => $c->filter(fn ($u) => $u->repository_id === $id || collect($u->ancestors())->contains('repository_id', $id)))
-                ->when($data['level_id'] ?? null, fn ($c, $id) => $c->where('level_id', $id))->take((int) $data['limit']);
+            // Chosen and paged in the database, oldest first (v0.0.146): a repository's are its units and every unit inside them.
+            $units = $catalogue->query('records')->whereNotIn('e.id', RecordDoi::where('institution_id', $institution->id)->select('record_resource_id'))
+                ->when($data['repository_id'] ?? null, fn ($q, $id) => $q->whereRaw('e.id IN (WITH RECURSIVE d(id) AS (SELECT id FROM record_resources WHERE repository_id = ?
+                    UNION ALL SELECT c.id FROM record_resources c JOIN d ON c.parent_id = d.id) SELECT id FROM d)', [$id]))
+                ->when($data['level_id'] ?? null, fn ($q, $id) => $q->where('e.level_id', $id))
+                ->with(PublicCatalogue::WITH)->orderBy('e.created_at')->orderBy('e.id')->limit((int) $data['limit'])->get()->filter(fn ($u) => $catalogue->view->readable($u));
             $queued = $units->filter(fn ($u) => $this->dois->enqueue($u, 'mint', $request->user()))->count();
 
             return redirect()->route('dois.queue')->with('status', trans_choice(':count unit queued to be minted.|:count units queued to be minted.', $queued, ['count' => $queued]));

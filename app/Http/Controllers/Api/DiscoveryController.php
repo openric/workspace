@@ -272,7 +272,7 @@ class DiscoveryController extends Controller
     /** Activities that are events; one described as an ISDF function is served at /functions instead (roadmap phase 24). */
     public function activities(Request $request): JsonResponse
     {
-        return $this->list($request, 'activities', fn ($a) => $this->contextStub($request, $a, $a->activityType?->notation), fn ($a) => ! $a->is_function);
+        return $this->list($request, 'activities', fn ($a) => $this->contextStub($request, $a, $a->activityType?->notation), fn ($q) => $q->where('e.is_function', false));
     }
 
     public function activity(Request $request, string $key): JsonResponse|Response
@@ -300,7 +300,7 @@ class DiscoveryController extends Controller
     public function functions(Request $request): JsonResponse
     {
         return $this->list($request, 'activities', fn ($a) => array_filter(['@id' => $a->iri, '@type' => 'openricx:Function', 'rico:name' => $this->view($request)->label($a),
-            'openric:localType' => $a->activityType?->notation]), fn ($a) => $a->is_function, 'functions');
+            'openric:localType' => $a->activityType?->notation]), fn ($q) => $q->where('e.is_function', true), 'functions');
     }
 
     public function function(Request $request, string $key): JsonResponse|Response
@@ -338,7 +338,8 @@ class DiscoveryController extends Controller
             if (! in_array($type, $types, true)) {
                 continue;
             }
-            foreach ($this->catalogue($request)->visible($kind, $query, true)->take($limit) as $entity) {
+            $catalogue = $this->catalogue($request);
+            foreach ($catalogue->byName($catalogue->query($kind, $query, true), $kind)->with(PublicCatalogue::WITH)->limit($limit)->get()->filter(fn ($e) => $catalogue->view->readable($e)) as $entity) {
                 $label = (string) $this->view($request)->label($entity);
                 $items[] = ['id' => $entity->iri, '@id' => $entity->iri, 'label' => $label, 'type' => ucfirst($type), '@type' => $this->jsonLd($request)->type($entity),
                     'score' => round(mb_strlen($query) / max(mb_strlen($label), 1), 2)];
@@ -350,22 +351,23 @@ class DiscoveryController extends Controller
     }
 
     /** A list envelope (Core Discovery 3.3): page and limit, the total of what the public may read, links to the pages either side. */
-    protected function list(Request $request, string $kind, callable $item, ?callable $only = null, ?string $type = null): JsonResponse
+    protected function list(Request $request, string $kind, callable $item, ?callable $narrow = null, ?string $type = null): JsonResponse
     {
         $page = $this->bounded($request, 'page', 1, PHP_INT_MAX);
         $limit = $this->bounded($request, 'limit', 50, 200);
         if ($page === null || $limit === null) {
             return Problem::response($request, 400, 'page is a whole number from 1, and limit one from 1 to 200.');
         }
-        $all = $this->catalogue($request)->visible($kind, trim((string) $request->query('q', '')));
-        if ($only) {
-            $all = $all->filter($only)->values();
-        }
+        // Counted and paged in the database (v0.0.146), in name order as before.
+        $catalogue = $this->catalogue($request);
+        $all = $catalogue->query($kind, trim((string) $request->query('q', '')))->when($narrow, $narrow);
+        $total = (clone $all)->count();
+        $items = $catalogue->byName($all, $kind)->with(PublicCatalogue::WITH)->offset(($page - 1) * $limit)->limit($limit)->get()->filter(fn ($e) => $catalogue->view->readable($e));
         $link = fn (int $to) => $request->url().'?'.http_build_query([...$request->query(), 'page' => $to, 'limit' => $limit]);
 
-        return $this->json(['@context' => JsonLd::CONTEXT, '@type' => self::LISTS[$type ?? $kind], 'openric:total' => $all->count(), 'openric:page' => $page,
-            'openric:limit' => $limit, 'openric:next' => $page * $limit < $all->count() ? $link($page + 1) : null, 'openric:prev' => $page > 1 ? $link($page - 1) : null,
-            'openric:items' => $all->slice(($page - 1) * $limit, $limit)->map($item)->values()->all()]);
+        return $this->json(['@context' => JsonLd::CONTEXT, '@type' => self::LISTS[$type ?? $kind], 'openric:total' => $total, 'openric:page' => $page,
+            'openric:limit' => $limit, 'openric:next' => $page * $limit < $total ? $link($page + 1) : null, 'openric:prev' => $page > 1 ? $link($page - 1) : null,
+            'openric:items' => $items->map($item)->values()->all()]);
     }
 
     /**
@@ -461,8 +463,8 @@ class DiscoveryController extends Controller
             $inside = fn ($la, $lo) => 2 * 6371.0088 * asin(min(1, sqrt(sin(deg2rad($la - $lat) / 2) ** 2 + cos(deg2rad($lat)) * cos(deg2rad($la)) * sin(deg2rad($lo - $lon) / 2) ** 2))) <= $radius;
         }
         $limit = $this->bounded($request, 'limit', 500, 5000) ?? 500;
-        $features = $this->catalogue($request)->visible('places')
-            ->filter(fn ($p) => $p->latitude !== null && $inside((float) $p->latitude, (float) $p->longitude))->take($limit)
+        $features = $this->catalogue($request)->visible('places', '', false, [], fn ($q) => $q->whereNotNull('e.latitude')->whereNotNull('e.longitude'))
+            ->filter(fn ($p) => $inside((float) $p->latitude, (float) $p->longitude))->take($limit)
             ->map(fn ($p) => ['type' => 'Feature', 'id' => $p->id,
                 'geometry' => ['type' => 'Point', 'coordinates' => array_values(array_filter([(float) $p->longitude, (float) $p->latitude, $p->altitude !== null ? (float) $p->altitude : null], fn ($v) => $v !== null))],
                 'properties' => ['iri' => $p->iri, 'name' => (string) $this->view($request)->label($p), 'url' => route('discover.place', $p->id), 'api' => route('api.place', $p->id)]])

@@ -9,13 +9,13 @@
 
 namespace App\Console\Commands;
 
+use App\Api\PublicCatalogue;
 use App\Exchange\Import\ImportService;
 use App\Models\Agent;
 use App\Models\Import;
 use App\Models\Institution;
 use App\Models\RecordResource;
 use App\Models\User;
-use App\Support\Vocab;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
@@ -46,17 +46,16 @@ class CapacityProbe extends Command
 
     private function targets(): int
     {
-        $published = fn (string $table) => DB::table('names')->where('subject_table', $table)
-            ->whereIn('state_id', DB::table('concepts')->where('iri', Vocab::valueState('published'))->select('id'))->select('subject_id');
         // The seed gives each unit a local identifier: CAP-W for the widest fonds, CAP-D/1/... for the deepest branch.
         $identified = fn (string $op, string $value) => DB::table('identifiers')->where('subject_table', 'record_resources')->where('value', $op, $value)->select('subject_id');
         $wide = DB::table('identifiers')->where(['subject_table' => 'record_resources', 'value' => 'CAP-W'])->value('subject_id');
         $deep = DB::table('identifiers')->where(['subject_table' => 'record_resources', 'value' => 'CAP-D/1/1/1/1/1/1/1'])->value('subject_id');
-        $items = RecordResource::whereIn('id', $published('record_resources'))->whereIn('id', $identified('like', 'CAP-%/%/%/%'))
-            ->inRandomOrder()->limit(200)->pluck('id');
+        // What the public may read, as the catalogue decides it (embargoed and closed units are published too, and answer 404).
+        $catalogue = new PublicCatalogue(Institution::query()->firstOrFail());
+        $items = $catalogue->query('records')->whereIn('e.id', $identified('like', 'CAP-%/%/%/%'))->inRandomOrder()->limit(200)->pluck('e.id');
         $targets = [
             'wide_fonds' => $wide, 'deep_unit' => $deep, 'records' => $items,
-            'agents' => Agent::whereIn('id', $published('agents'))->inRandomOrder()->limit(50)->pluck('id'),
+            'agents' => $catalogue->query('agents')->inRandomOrder()->limit(50)->pluck('e.id'),
             'editable' => RecordResource::whereIn('id', $identified('like', 'CAP-%/%/%/%'))->inRandomOrder()->limit(100)->pluck('id'),
             'words' => ['minutes', 'water supply', 'register entry', 'petitions', 'roads and bridges', 'Botha', 'Riverside council', 'drought relief 1933', 'schools', 'Kloofdal'],
             'counts' => ['units' => RecordResource::count(), 'agents' => Agent::count(), 'places' => DB::table('places')->count(), 'activities' => DB::table('activities')->count(),

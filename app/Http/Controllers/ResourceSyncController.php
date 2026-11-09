@@ -37,7 +37,8 @@ class ResourceSyncController extends Controller
     {
         $urls = [];
         foreach (self::KINDS as $kind) {
-            foreach ($this->catalogue($request)->visible($kind) as $entity) {
+            // Streamed from the database, only the address and the date (v0.0.146).
+            foreach ($this->catalogue($request)->query($kind)->select('e.iri', 'e.updated_at')->orderBy('e.id')->cursor() as $entity) {
                 $urls[] = ['loc' => $entity->iri, 'lastmod' => $entity->updated_at?->toAtomString()];
             }
         }
@@ -55,7 +56,7 @@ class ResourceSyncController extends Controller
         }
         $urls = [];
         foreach (self::KINDS as $kind) {
-            foreach ($this->catalogue($request)->visible($kind)->filter(fn ($e) => $e->updated_at && $e->updated_at->gte($from)) as $entity) {
+            foreach ($this->catalogue($request)->query($kind)->where('e.updated_at', '>=', $from)->select('e.iri', 'e.updated_at', 'e.created_at')->orderBy('e.id')->cursor() as $entity) {
                 $urls[] = ['loc' => $entity->iri, 'lastmod' => $entity->updated_at->toAtomString(), 'change' => $entity->created_at?->gte($from) ? 'created' : 'updated'];
             }
         }

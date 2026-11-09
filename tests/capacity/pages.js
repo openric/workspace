@@ -16,15 +16,23 @@ const PASSWORD = __ENV.PASSWORD;
 const VUS = Number(__ENV.VUS || 1);
 const errors = new Counter('page_errors');
 
+const PAGES = ['catalogue', 'public search', 'public record', 'public tree of the widest fonds', 'public authority record', 'deepest public record', 'OAI-PMH list',
+  'sign-in', 'dashboard', 'staff search', 'staff record', 'staff tree of the widest fonds', 'record form', 'save record', 'staff authority record'];
+
+
 export const options = {
   scenarios: {
     readers: { executor: 'constant-vus', exec: 'reader', vus: Math.max(1, Math.ceil(VUS * 0.6)), duration: __ENV.DURATION || '3m' },
     staff: { executor: 'constant-vus', exec: 'archivist', vus: Math.max(1, Math.floor(VUS * 0.4)), duration: __ENV.DURATION || '3m' },
   },
   // The pass targets of the capacity test: p95 under 1 s at 10 users and 2.5 s at 25; no errors.
-  thresholds: { http_req_failed: ['rate<0.001'], http_req_duration: [`p(95)<${VUS <= 10 ? 1000 : 2500}`] },
+  thresholds: Object.assign({ http_req_failed: ['rate<0.001'], http_req_duration: [`p(95)<${VUS <= 10 ? 1000 : 2500}`] },
+    // One per page, never failing, so the summary reports each page's times on its own.
+    Object.fromEntries(PAGES.map((name) => [`http_req_duration{page:${name}}`, ['max>=0']]))),
   summaryTrendStats: ['p(50)', 'p(95)', 'p(99)', 'max', 'count'],
   discardResponseBodies: false,
+  // Each archivist signs in once and stays signed in, as a person does; k6 otherwise clears every user's cookies each iteration.
+  noCookiesReset: true,
 };
 
 const pick = (list) => list[Math.floor(Math.random() * list.length)];
@@ -45,9 +53,9 @@ export function reader() {
     page('catalogue', '/discover');
     page('public search', '/discover?q=' + encodeURIComponent(pick(T.words)));
     page('public record', '/discover/records/' + pick(T.records));
-    page('public tree, widest fonds', '/discover/records/' + T.wide_fonds + '/tree');
+    page('public tree of the widest fonds', '/discover/records/' + T.wide_fonds + '/tree');
     page('public authority record', '/discover/agents/' + pick(T.agents));
-    page('public record, deepest', '/discover/records/' + T.deep_unit);
+    page('deepest public record', '/discover/records/' + T.deep_unit);
     page('OAI-PMH list', '/api/ric/v1/oai?verb=ListIdentifiers&metadataPrefix=oai_dc');
   });
 }
@@ -72,7 +80,7 @@ export function archivist() {
     page('staff search', '/search?q=' + encodeURIComponent(pick(T.words)));
     const id = pick(T.editable);
     page('staff record', '/records/' + id);
-    page('staff tree, widest fonds', '/records/' + T.wide_fonds + '/tree');
+    page('staff tree of the widest fonds', '/records/' + T.wide_fonds + '/tree');
     const form = page('record form', '/records/' + id + '/edit');
     if (form.status === 200) {
       const saved = form.submitForm({ formSelector: 'form[method="post"][action$="/records/' + id + '"]', params: { tags: { page: 'save record' }, redirects: 1 } });

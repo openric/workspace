@@ -29,6 +29,7 @@ use App\Models\DigitalFile;
 use App\Models\RecordResource;
 use App\Models\Relation;
 use App\Models\Repository;
+use App\Privacy\Redaction;
 use App\Relations\EntityKinds;
 use App\Relations\RelationService;
 use App\Reports\UsageService;
@@ -42,6 +43,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -52,6 +54,9 @@ class DiscoverController extends Controller
     private const STANDARDS = ['agent' => Elements::ISAAR_CPF, 'repository' => Elements::ISDIAH, 'place' => Elements::PLACE, 'activity' => Elements::ACTIVITY, 'rule' => Elements::RULE];
 
     /** What a search finds, by catalogue key, and what the results call it. */
+    /** How many of the units directly inside a record its page lists at a time. */
+    private const INSIDE = 100;
+
     private const FOUND = ['records' => 'Archival descriptions', 'agents' => 'People, families and organisations', 'activities' => 'Activities', 'places' => 'Places', 'repositories' => 'Repositories'];
 
     public function home(Request $request): View
@@ -77,12 +82,14 @@ class DiscoverController extends Controller
             $search['levels'] = Concept::whereIn('id', array_keys($search['facets']['level']))->with('labels')->get()->keyBy('id');
             $search['repositories'] = Repository::whereIn('id', array_keys($search['facets']['repository']))->with(['names.nameType', 'names.state'])->get()->keyBy('id');
         }
-        $records = $query === '' ? $catalogue->visible('records', '', false, ['level.labels']) : collect();
+        // The units at the top and the counts, decided in SQL: the home page never loads every published record (v0.0.146).
+        $browse = $query === '';
 
         return view('discover.home', ['institution' => $catalogue->institution, 'query' => $query, 'kind' => $kind, 'search' => $search, 'kinds' => self::FOUND,
-            'featured' => $query === '' ? $catalogue->featured($records) : collect(),
-            'view' => $catalogue->view, 'tops' => $records->whereNull('parent_id')->values(), 'counts' => $query === '' ? collect(array_keys(self::FOUND))->mapWithKeys(fn ($k) => [$k => $k === 'records' ? $records->count() : $catalogue->visible($k)->count()]) : collect(),
-            'repositories' => $query === '' ? $catalogue->visible('repositories') : collect()]);
+            'featured' => $browse ? $catalogue->featured() : collect(),
+            'view' => $catalogue->view, 'tops' => $browse ? $catalogue->visible('records', '', false, ['level.labels'], fn ($q) => $q->whereNull('e.parent_id')) : collect(),
+            'counts' => $browse && $catalogue->institution->catalogue_show_counts ? collect(array_keys(self::FOUND))->mapWithKeys(fn ($k) => [$k => $catalogue->query($k)->count()]) : collect(),
+            'repositories' => $browse ? $catalogue->visible('repositories') : collect()]);
     }
 
     public function record(Request $request, string $id): View
@@ -95,7 +102,15 @@ class DiscoverController extends Controller
         rescue(fn () => app(DataciteEvents::class)->used($unit, 'unique-dataset-investigations-regular'), report: false);
         $view = $catalogue->view;
         $ancestors = array_values(array_filter($unit->ancestors(), fn ($a) => $view->readable($a)));
-        $children = $unit->children()->with('names.nameType', 'names.state', 'level.labels', 'identifiers.identifierType', 'dates.property')->get()->filter(fn ($c) => $view->readable($c))->values();
+        // The units directly inside it, a hundred to a page, counted and paged in the database (v0.0.146): a fonds of
+        // 10,000 items had loaded and checked every one of them for each view.
+        $inside = $catalogue->query('records')->where('e.parent_id', $unit->id);
+        $childTotal = (clone $inside)->count();
+        $childPage = max(1, min((int) $request->query('inside', 1), (int) max(1, ceil($childTotal / self::INSIDE))));
+        $children = $inside->with('names.nameType', 'names.state', 'level.labels', 'identifiers.identifierType', 'dates.property')
+            ->orderBy('e.position')->orderBy('e.id')->offset(($childPage - 1) * self::INSIDE)->limit(self::INSIDE)->get()
+            ->tap(fn ($found) => [app(Embargoes::class)->prime($found), app(Redaction::class)->prime($found)])
+            ->filter(fn ($c) => $view->readable($c))->values();
         $service = app(InstantiationService::class);
         $instantiations = $unit->instantiations->filter(fn ($i) => $view->label($i) !== null)->map(fn ($i) => [
             'instantiation' => $i, 'files' => $i->files->filter(fn (DigitalFile $f) => $service->deliverable(null, $f->setRelation('instantiation', $i)))->keyBy(fn ($f) => $f->use->notation),
@@ -104,6 +119,7 @@ class DiscoverController extends Controller
         [$childThumbnails, $childThumbnailTotal] = $this->childThumbnails($catalogue, $unit);
 
         return view('discover.record', ['unit' => $unit, 'view' => $view, 'ancestors' => $ancestors, 'children' => $children, 'instantiations' => $instantiations,
+            'childTotal' => $childTotal, 'childPage' => $childPage, 'childPages' => (int) ceil($childTotal / self::INSIDE),
             'relations' => $this->relations($unit, $catalogue), 'institution' => $catalogue->institution,
             'childThumbnails' => $childThumbnails, 'childThumbnailTotal' => $childThumbnailTotal,
             'tree' => (new TreeService(null, $catalogue))->window($unit), 'iiif' => (new Presentation($catalogue))->hasManifest($unit),
@@ -122,34 +138,38 @@ class DiscoverController extends Controller
         if (! $unit->display_as_compound) {
             return [collect(), 0];
         }
-        $records = $catalogue->visible('records');
-        $parents = $records->pluck('parent_id', 'id');
-        $inside = $records->filter(function ($r) use ($parents, $unit) {
-            for ($id = $parents[$r->id] ?? null, $seen = 0; $id !== null && $seen < 100; $id = $parents[$id] ?? null, $seen++) {
-                if ($id === $unit->id) {
-                    return true;
-                }
-            }
-
-            return false;
-        })->keyBy('id');
-        if ($inside->isEmpty()) {
+        // The units inside it, at any depth, through units the public may read, that have a thumbnail (v0.0.146: in SQL).
+        $visible = $catalogue->ids('records');
+        $pictured = collect(DB::select('WITH RECURSIVE v AS MATERIALIZED ('.$visible->toSql().'),
+            down(id) AS (
+                SELECT c.id FROM record_resources c JOIN v ON v.id = c.id WHERE c.parent_id = ?
+                UNION ALL
+                SELECT c.id FROM record_resources c JOIN down ON c.parent_id = down.id JOIN v ON v.id = c.id
+            ) SELECT d.id FROM down d WHERE d.id IN (SELECT i.record_resource_id FROM instantiations i JOIN digital_files f ON f.instantiation_id = i.id
+                JOIN concepts u ON u.id = f.use_id WHERE u.notation = \'thumbnail\' AND i.deleted_at IS NULL)', [...$visible->getBindings(), $unit->id]))->pluck('id');
+        if ($pictured->isEmpty()) {
             return [collect(), 0];
         }
+        // ponytail: each file's own rules are checked in PHP for the first 500 pictured units; past that the total is the
+        // number of pictured units, which may count a few whose files are withheld.
+        $candidates = $pictured->take(500);
         $service = app(InstantiationService::class);
         $found = [];
         DigitalFile::query()->whereHas('use', fn ($q) => $q->where('notation', 'thumbnail'))
-            ->whereHas('instantiation', fn ($q) => $q->whereIn('record_resource_id', $inside->keys())->whereNull('deleted_at'))
+            ->whereHas('instantiation', fn ($q) => $q->whereIn('record_resource_id', $candidates)->whereNull('deleted_at'))
             ->with('use', 'instantiation.record', 'instantiation.availability')->orderBy('created_at')->get()
+            ->tap(fn ($files) => app(Embargoes::class)->prime($files->pluck('instantiation.record')->unique('id')))
             ->each(function (DigitalFile $file) use (&$found, $service) {
                 $owner = $file->instantiation->record_resource_id;
                 if (! isset($found[$owner]) && $service->deliverable(null, $file)) {
                     $found[$owner] = $file;
                 }
             });
-        $tiles = collect($found)->map(fn ($file, $id) => ['unit' => $inside[$id], 'file' => $file])->values();
+        $shown = array_slice($found, 0, 24, true);
+        $units = $catalogue->query('records')->whereIn('e.id', array_keys($shown))->with(PublicCatalogue::WITH)->get()->keyBy('id');
+        $tiles = collect($shown)->filter(fn ($file, $id) => isset($units[$id]))->map(fn ($file, $id) => ['unit' => $units[$id], 'file' => $file])->values();
 
-        return [$tiles->take(24), $tiles->count()];
+        return [$tiles, $pictured->count() > 500 ? $pictured->count() : count($found)];
     }
 
     /** A branch of the hierarchy tree in the public catalogue: published units only. */
@@ -169,8 +189,7 @@ class DiscoverController extends Controller
     public function repository(Request $request, string $id): View
     {
         // Its holdings, as AtoM lists them: the published units at the top that it holds, with what each holds inside.
-        $holdings = $this->catalogue($request)->visible('records', '', false, ['level.labels'])
-            ->where('repository_id', $id)->whereNull('parent_id')->sortBy(fn ($unit) => mb_strtolower((string) $this->catalogue($request)->view->label($unit)))->values();
+        $holdings = $this->catalogue($request)->visible('records', '', false, ['level.labels'], fn ($q) => $q->where('e.repository_id', $id)->whereNull('e.parent_id'));
 
         return $this->entity($request, 'repository', $id, ['contactPoints'], ['holdings' => $holdings]);
     }

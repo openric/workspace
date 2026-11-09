@@ -9,7 +9,6 @@
 namespace App\Http\Controllers;
 
 use App\Api\PublicCatalogue;
-use App\Models\RecordResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -44,7 +43,8 @@ class PublishingController extends Controller
     {
         $catalogue = $this->catalogue($request);
         $xml = '<?xml version="1.0" encoding="UTF-8"?>'."\n".'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
-        foreach ($catalogue->visible($kind)->take(50000) as $entity) {
+        // Streamed from the database, only what the page needs (v0.0.146).
+        foreach ($catalogue->query($kind)->select('e.id', 'e.updated_at')->orderBy('e.id')->limit(50000)->cursor() as $entity) {
             $xml .= '<url><loc>'.e(route(self::PAGES[$kind], $entity->getKey())).'</loc><lastmod>'.$entity->updated_at?->toAtomString().'</lastmod></url>';
         }
 
@@ -56,7 +56,7 @@ class PublishingController extends Controller
     {
         $catalogue = $this->catalogue($request);
         $view = $catalogue->view;
-        $records = $catalogue->visible('records')->sortByDesc(fn (RecordResource $r) => $r->updated_at)->take(50)->values();
+        $records = $catalogue->query('records')->with(PublicCatalogue::WITH)->orderByDesc('e.updated_at')->limit(50)->get()->filter(fn ($r) => $view->readable($r))->values();
         $updated = $records->first()?->updated_at ?? now();
         $institution = $request->attributes->get('institution');
         $xml = '<?xml version="1.0" encoding="UTF-8"?>'."\n".'<feed xmlns="http://www.w3.org/2005/Atom">'

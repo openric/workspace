@@ -74,13 +74,7 @@ final class AccessControl
         if ($institutionId === null || $actionId === null || $kindId === null) {
             return false;
         }
-        $roleIds = $this->roleIds($account, $institutionId);
-
-        // Asked once per request: a public list checks every record against the same rows (the capacity test, R1).
-        $cells = $this->cells[($account?->id ?? 'public')."|$institutionId|$kindId|$actionId|".implode(',', $roleIds)] ??= DB::table('permissions')
-            ->where('institution_id', $institutionId)->where('kind_id', $kindId)->where('action_id', $actionId)
-            ->where(fn ($q) => $q->whereIn('role_id', $roleIds)->when($account, fn ($q) => $q->orWhere('user_id', $account->id)))
-            ->get(['user_id', 'role_id', 'repository_id', 'subject_id', 'is_grant']);
+        $cells = $this->rows($account, $action, $kind, $institutionId);
         if ($cells->isEmpty()) {
             return false;
         }
@@ -105,6 +99,28 @@ final class AccessControl
         }
 
         return false;
+    }
+
+    /**
+     * The permission rows that decide this action on this kind for the account (null: the public) in the institution:
+     * its own and its roles'. Asked once per request, since a list checks every entry against the same rows (the
+     * capacity test, R1); PublicCatalogue builds its SQL from them, so both decide from the same rows (v0.0.146).
+     *
+     * @return Collection<int, object{user_id: ?string, role_id: ?string, repository_id: ?string, subject_id: ?string, is_grant: bool}>
+     */
+    public function rows(?User $account, string $action, string $kind, string $institutionId): Collection
+    {
+        $actionId = $this->conceptId(Vocab::permission($action));
+        $kindId = $this->conceptId(Vocab::kind($kind));
+        if ($actionId === null || $kindId === null) {
+            return collect();
+        }
+        $roleIds = $this->roleIds($account, $institutionId);
+
+        return $this->cells[($account?->id ?? 'public')."|$institutionId|$kindId|$actionId|".implode(',', $roleIds)] ??= DB::table('permissions')
+            ->where('institution_id', $institutionId)->where('kind_id', $kindId)->where('action_id', $actionId)
+            ->where(fn ($q) => $q->whereIn('role_id', $roleIds)->when($account, fn ($q) => $q->orWhere('user_id', $account->id)))
+            ->get(['user_id', 'role_id', 'repository_id', 'subject_id', 'is_grant']);
     }
 
     /**

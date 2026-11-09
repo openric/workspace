@@ -48,7 +48,7 @@ class BlockData
     public function count(string $kind, PublicCatalogue $catalogue): int
     {
         return in_array($kind, self::KINDS, true)
-            ? (int) Cache::remember('landing:count:'.$catalogue->institution->id.':'.$kind, self::CACHE_SECONDS, fn () => $catalogue->visible($kind)->count()) : 0;
+            ? (int) Cache::remember('landing:count:'.$catalogue->institution->id.':'.$kind, self::CACHE_SECONDS, fn () => $catalogue->query($kind)->count()) : 0;
     }
 
     private function statistics(array $config, PublicCatalogue $catalogue): array
@@ -66,7 +66,8 @@ class BlockData
     private function recent(array $config, PublicCatalogue $catalogue): array
     {
         $limit = max(1, min((int) ($config['limit'] ?? 6), 50));
-        $units = $catalogue->visible('records', '', false, ['level.labels'])->sortByDesc('created_at')->take($limit)->values();
+        $units = $catalogue->query('records')->with([...PublicCatalogue::WITH, 'level.labels'])->orderByDesc('e.created_at')->limit($limit)->get()
+            ->filter(fn ($u) => $catalogue->view->readable($u))->values();
 
         return $this->cards($units, $catalogue);
     }
@@ -83,8 +84,8 @@ class BlockData
     private function holdings(array $config, PublicCatalogue $catalogue): array
     {
         $limit = max(1, min((int) ($config['limit'] ?? 10), 50));
-        $units = $catalogue->visible('records', '', false, ['level.labels'])->whereNull('parent_id')
-            ->when(! empty($config['repository_id']), fn ($c) => $c->where('repository_id', $config['repository_id']));
+        $units = $catalogue->visible('records', '', false, ['level.labels'], fn ($q) => $q->whereNull('e.parent_id')
+            ->when(! empty($config['repository_id']), fn ($q) => $q->where('e.repository_id', $config['repository_id'])));
         $units = ($config['sort'] ?? 'title') === 'title' ? $units : $units->sortByDesc('created_at');
 
         return $units->take($limit)->values()->map(fn (RecordResource $u) => ['unit' => $u, 'title' => $catalogue->view->label($u), 'level' => $u->level?->label([app()->getLocale(), 'en']),
@@ -110,7 +111,7 @@ class BlockData
         if (! $repository) {
             return null;
         }
-        $holdings = $catalogue->visible('records')->whereNull('parent_id')->where('repository_id', $repository->id)->take(max(1, min((int) ($config['max_holdings'] ?? 5), 50)));
+        $holdings = $catalogue->visible('records', '', false, [], fn ($q) => $q->whereNull('e.parent_id')->where('e.repository_id', $repository->id))->take(max(1, min((int) ($config['max_holdings'] ?? 5), 50)));
 
         return ['repository' => $repository, 'name' => $catalogue->view->label($repository), 'href' => route('discover.repository', $repository->id),
             'description' => ($text = $catalogue->view->value($repository, 'history') ?? $catalogue->view->value($repository, 'holdings')) ? Str::limit($text, 400) : null,
@@ -121,7 +122,7 @@ class BlockData
     /** The published places that have coordinates. */
     private function places(PublicCatalogue $catalogue): array
     {
-        return $catalogue->visible('places')->filter(fn ($p) => $p->latitude !== null && $p->longitude !== null)->take(500)
+        return $catalogue->visible('places', '', false, [], fn ($q) => $q->whereNotNull('e.latitude')->whereNotNull('e.longitude'))->take(500)
             ->map(fn ($p) => ['name' => (string) $catalogue->view->label($p), 'latitude' => (float) $p->latitude, 'longitude' => (float) $p->longitude, 'href' => route('discover.place', $p->id)])->values()->all();
     }
 

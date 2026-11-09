@@ -78,8 +78,11 @@
     @include('discover._relations', ['relations' => $relations, 'view' => $view, 'heading' => __('Related'), 'except' => ['subject', 'place', 'documentary-form', 'creation', 'accumulation']])
 
     @if($children->isNotEmpty())
-        <h2>{{ __('Inside it (:count)', ['count' => $children->count()]) }}</h2>
+        <h2>{{ __('Inside it (:count)', ['count' => $childTotal]) }}</h2>
         <ul>@foreach($children as $child)<li><a href="{{ route('discover.record', $child->id) }}">{{ $view->label($child) }}</a> <span class="meta">{{ collect([$child->level->label(\App\Support\Vocab::languages()), $child->referenceCode(), $child->dates->first()?->display()])->filter()->join(', ') }}</span></li>@endforeach</ul>
+        @if($childPages > 1)
+            <p class="meta">{{ __('Page :page of :pages', ['page' => $childPage, 'pages' => $childPages]) }}@if($childPage > 1) · <a href="{{ request()->fullUrlWithQuery(['inside' => $childPage - 1]) }}">{{ __('Previous page') }}</a>@endif @if($childPage < $childPages) · <a href="{{ request()->fullUrlWithQuery(['inside' => $childPage + 1]) }}">{{ __('Next page') }}</a>@endif</p>
+        @endif
     @endif
     @include('discover._rights', ['subject' => $unit, 'view' => $view])
     {{-- Its provenance, unless its overview keeps it from the public (roadmap phase 9e). --}}
