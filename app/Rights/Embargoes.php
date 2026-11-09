@@ -32,7 +32,7 @@ use InvalidArgumentException;
 
 class Embargoes
 {
-    /** @var array<string, \Illuminate\Support\Collection<int, Embargo>> by record id, from prime(), each used once */
+    /** @var array<string, Collection<int, Embargo>> by record id, from prime(), each used once */
     private array $primed = [];
 
     public const TYPES = Vocab::BASE.'embargo-type/';

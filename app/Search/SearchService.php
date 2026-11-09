@@ -13,8 +13,8 @@ namespace App\Search;
 
 use App\Models\Institution;
 use App\Models\User;
-use Illuminate\Database\QueryException;
 use Illuminate\Database\Query\Builder;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
@@ -41,11 +41,10 @@ final class SearchService
      * Search the index. Mode (phase 17d1): words (the full-text search, widened by the synonyms the institution's
      * vocabularies hold, or a model suggests, where it allows), meaning (the entries nearest the query in meaning), or
      * both, fused by reciprocal rank. The same filters and facets either way; a page reranked by the account's recent
-     * searches where the institution allows it.
+     * searches where the institution allows it. With match 'pattern' (by the words only) the query is a regular
+     * expression, matched without regard to case (phase 25a).
      *
      * @param  array{kind?: ?string, level?: ?string, repository?: ?string, from?: ?int, to?: ?int}  $filters
-     * With match 'pattern' (by the words only) the query is a regular expression, matched without regard to case.
-     *
      * @param  array{mode?: string, user?: ?User, match?: string}  $options
      * @return array{total: int, results: list<array{table: string, id: string, title: string, snippet: HtmlString}>, facets: array{kind: array<string, int>, level: array<string, int>, repository: array<string, int>}, mode: string, expanded: list<string>, match: string, close: bool, error: ?string}
      */
