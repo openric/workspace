@@ -104,6 +104,8 @@ jobs:
       DB_PASSWORD: workspace
       DEMO_PASSWORD: demonstration-password
       WORKSPACE_URL: http://127.0.0.1:8000
+      # No virus scanner on the runner, as in the test suite: the demonstration's files are made by workspace:demo itself.
+      WORKSPACE_VIRUS_SCANNER: ''
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # v2
