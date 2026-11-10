@@ -29,7 +29,7 @@ LIVE=${WORKSPACE_LIVE:-/usr/share/nginx/openric-workspace-live}
 URL=${WORKSPACE_URL:-https://workspace.openric.org}
 REPO=${WORKSPACE_REPO:-openric/workspace}
 # Every job of .github/workflows/ci.yml: a release passes only when each passed on its commit.
-REQUIRED_CHECKS=("Tests on PostgreSQL 16" "Accessibility (WCAG 2.2 AA)" "Dependencies, secrets and SBOM" "The tag is signed and its commit passed on main")
+REQUIRED_CHECKS=("Tests on PostgreSQL 16" "Accessibility (WCAG 2.2 AA)" "Docker install builds, starts and backs up" "Dependencies, secrets and SBOM" "The tag is signed and its commit passed on main")
 KEEP_BACKUPS=10
 
 fail() { echo "deploy: $*" >&2; exit 1; }

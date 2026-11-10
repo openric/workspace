@@ -1,0 +1,166 @@
+#!/usr/bin/env bash
+# =============================================================================
+# bin/restore - restore a backup bin/backup made, onto an installed Workspace, and prove it (roadmap phase 3)
+# =============================================================================
+# Onto a Workspace installed by bin/install or Docker, of the backup's release or newer:
+#   1. checks every file of the backup against its SHA256SUMS, before touching anything;
+#   2. refuses a Workspace that already holds records, unless --replace says to put them aside;
+#   3. takes the site down, makes the database afresh as PostgreSQL's superuser with its extensions, and restores the
+#      dump into it owned by the Workspace's own role;
+#   4. puts the object store, the audit signing key and the branding back, keeping what was there beside them as
+#      *.before-restore-<time>; takes the backup's application key into .env (the stored secrets are encrypted with
+#      it) and keeps the backup's whole .env beside it as .env.from-backup;
+#   5. migrates (a backup of an older release is brought up to this one), caches, and brings the site back;
+#   6. verifies, and fails unless all three pass: the audit chain (workspace:audit:verify), the object store
+#      (workspace:ocfl:verify) and every kept file's digest (workspace:fixity); and the counts match the manifest.
+#
+#   sudo bin/restore --from=/mnt/backups/openric-workspace-20261109T180000Z
+#   sudo bin/restore --from=... --replace       onto a Workspace that holds records, which are put aside
+#   sudo bin/restore --from=... --discard       onto one whose records are thrown away (the demonstration's nightly
+#                                                reset, bin/demo-reset; refused unless it is a demonstration)
+#
+# The superuser: by default `sudo -u postgres` on this machine; in Docker, or with PostgreSQL elsewhere, set
+# PG_SUPERUSER and PG_SUPERPASSWORD in the environment (never on the command line).
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# =============================================================================
+set -euo pipefail
+umask 077
+
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+FROM="" REPLACE=0 DISCARD=0
+for arg in "$@"; do
+    case "$arg" in
+        --from=*) FROM="${arg#*=}" ;;
+        --replace) REPLACE=1 ;;
+        --discard) DISCARD=1 ;;
+        -h|--help) sed -n '2,24p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+        *) echo "Unknown option: $arg (see --help)" >&2; exit 2 ;;
+    esac
+done
+[ -n "$FROM" ] || { echo "Give --from=<a folder bin/backup made>" >&2; exit 2; }
+FROM="$(cd "$FROM" && pwd)"
+
+say()  { printf '\n\033[1;36m==> %s\033[0m\n' "$*"; }
+ok()   { printf '    \033[1;32mok\033[0m %s\n' "$*"; }
+die()  { printf '    \033[1;31mfailed\033[0m %s\n' "$*" >&2; exit 1; }
+# A setting as Laravel reads it: for this Workspace's .env the process's environment first (Docker's), then the file.
+env_get() { if [ "$2" = "$DIR/.env" ] && [ -n "${!1:-}" ]; then printf '%s\n' "${!1}"; else grep -E "^$1=" "$2" | tail -1 | cut -d= -f2- | sed 's/^"//; s/"$//'; fi; }
+PHP="$(command -v php8.3 || command -v php)"
+WEB="${WORKSPACE_WEB_USER:-www-data}"
+as_web() { if [ "$(id -un)" = "$WEB" ]; then "$@"; elif command -v gosu >/dev/null; then gosu "$WEB" "$@"; else sudo -u "$WEB" "$@"; fi; }
+artisan() { as_web "$PHP" "$DIR/artisan" "$@"; }
+# A configuration value, read by booting the application (tinker would print warnings into it).
+config() { as_web "$PHP" -r 'require $argv[1]."/vendor/autoload.php"; $a = require $argv[1]."/bootstrap/app.php"; $a->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap(); echo config($argv[2]);' "$DIR" "$1"; }
+manifest() { "$PHP" -r 'echo json_decode(file_get_contents($argv[1]), true)[$argv[2]] ?? "";' "$FROM/manifest.json" "$1"; }
+
+DB="$(env_get DB_DATABASE "$DIR/.env")"
+OWNER_ROLE="$(env_get DB_USERNAME "$DIR/.env")"
+HOST="$(env_get DB_HOST "$DIR/.env")" PORT="$(env_get DB_PORT "$DIR/.env")"
+if [ -n "${PG_SUPERUSER:-}" ]; then
+    super() { PGPASSWORD="$PG_SUPERPASSWORD" "$@" -h "$HOST" -p "$PORT" -U "$PG_SUPERUSER"; }
+else
+    super() { sudo -u postgres "$@"; }
+fi
+STAMP="$(date -u +%Y%m%dT%H%M%SZ)"
+
+# =============================================================================
+say "1/6 The backup"
+[ -f "$FROM/SHA256SUMS" ] && [ -f "$FROM/manifest.json" ] || die "$FROM is not a backup bin/backup made"
+(cd "$FROM" && sha256sum --quiet -c SHA256SUMS) || die "a file of the backup does not match its digest: it is damaged, and nothing was changed"
+ok "every file matches its digest"
+ok "v$(manifest release) from $(manifest host), made $(manifest made): $(manifest records) records, $(manifest files) files, $(manifest audit_rows) audit rows"
+[ "$(cat "$DIR/VERSION")" = "$(manifest release)" ] || ok "this Workspace is v$(cat "$DIR/VERSION"): the backup is migrated to it after the restore"
+
+# =============================================================================
+say "2/6 This Workspace"
+HELD="$(super psql -tA -d "$DB" -c "SELECT CASE WHEN to_regclass('public.record_resources') IS NULL THEN 0 ELSE (SELECT count(*) FROM record_resources) END")"
+if [ "$DISCARD" -eq 1 ] && [ -z "$(env_get WORKSPACE_DEMO_EMAIL "$DIR/.env")" ]; then
+    die "--discard throws records away, so it is for a demonstration only (WORKSPACE_DEMO_EMAIL set); use --replace"
+fi
+if [ "$HELD" -gt 0 ] && [ "$REPLACE" -ne 1 ] && [ "$DISCARD" -ne 1 ]; then
+    die "$DB holds $HELD records. Restore onto a fresh install, or give --replace to put this database aside as ${DB}_before_restore_${STAMP,,} and replace it"
+fi
+ok "$DB, $HELD records"
+
+# =============================================================================
+say "3/6 The database"
+artisan down --retry=60 >/dev/null 2>&1 || true
+super psql -q -d postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = '$DB' AND pid <> pg_backend_pid()" >/dev/null
+if [ "$HELD" -gt 0 ] && [ "$DISCARD" -ne 1 ]; then
+    ASIDE="${DB}_before_restore_${STAMP,,}"
+    super psql -q -d postgres -c "ALTER DATABASE \"$DB\" RENAME TO \"$ASIDE\""
+    ok "the database that was here is kept as $ASIDE"
+else
+    super psql -q -d postgres -c "DROP DATABASE IF EXISTS \"$DB\" WITH (FORCE)"
+fi
+super psql -q -d postgres -c "CREATE DATABASE \"$DB\" OWNER \"$OWNER_ROLE\" ENCODING 'UTF8' TEMPLATE template0"
+super psql -q -d "$DB" -c 'CREATE EXTENSION IF NOT EXISTS vector; CREATE EXTENSION IF NOT EXISTS pg_trgm; CREATE EXTENSION IF NOT EXISTS unaccent'
+# Everything but the extensions (made above, as only the superuser may), owned by the Workspace's role. pg_restore
+# reads the dump from a file it can seek in, in a folder the superuser can read.
+WORK="$(mktemp -d)"
+cp "$FROM/database.dump" "$WORK/database.dump"
+pg_restore -l "$WORK/database.dump" | grep -v ' EXTENSION ' > "$WORK/list"
+[ -n "${PG_SUPERUSER:-}" ] || { chmod 755 "$WORK"; chmod 644 "$WORK/database.dump" "$WORK/list"; }
+super pg_restore --no-owner --role="$OWNER_ROLE" --exit-on-error -L "$WORK/list" -d "$DB" "$WORK/database.dump" \
+    || { rm -rf "$WORK"; die "pg_restore stopped (above); the site is left down"; }
+rm -rf "$WORK"
+ok "restored into $DB"
+
+# =============================================================================
+say "4/6 Files, keys and settings"
+put_back() {
+    local tar="$1" target="$2" what="$3"
+    mkdir -p "$target"
+    if [ -n "$(ls -A "$target" 2>/dev/null)" ] && [ "$DISCARD" -eq 1 ]; then
+        find "$target" -mindepth 1 -delete
+    elif [ -n "$(ls -A "$target" 2>/dev/null)" ]; then
+        mv "$target" "$target.before-restore-$STAMP" && mkdir -p "$target"
+        ok "what was in $target ($what) is kept as $target.before-restore-$STAMP"
+    fi
+    tar -C "$target" -xf "$tar"
+    chown -R "$WEB":"$WEB" "$target" 2>/dev/null || true
+}
+STORE="$(config workspace.object_store)"
+# Unset, it is storage/app/objects, as FileStore has it.
+STORE="${STORE:-$DIR/storage/app/objects}"
+KEYS="$(dirname "$(config workspace.audit_signing_key)")"
+put_back "$FROM/objects.tar" "$STORE" "object store"; ok "object store, in $STORE"
+put_back "$FROM/keys.tar" "$KEYS" "keys"; chmod 700 "$KEYS"; find "$KEYS" -type f -exec chmod 600 {} +; ok "audit signing key, in $KEYS"
+if [ -f "$FROM/branding.tar" ]; then put_back "$FROM/branding.tar" "$DIR/storage/app/private/branding" "branding"; ok "branding"; fi
+# The application key encrypts the secrets stored in the database: the backup's, or none of them can be read.
+cp "$FROM/env" "$DIR/.env.from-backup"
+for key in APP_KEY APP_PREVIOUS_KEYS; do
+    value="$(env_get "$key" "$FROM/env" || true)"
+    [ -n "$value" ] || continue
+    if grep -qE "^$key=" "$DIR/.env"; then sed -i -E "s|^$key=.*|$key=$value|" "$DIR/.env"; else printf '%s=%s\n' "$key" "$value" >> "$DIR/.env"; fi
+done
+ok "the backup's application key is in .env; its whole .env is beside it as .env.from-backup"
+
+# =============================================================================
+say "5/6 Migrate and come back"
+artisan config:clear >/dev/null
+artisan migrate --force --no-interaction
+artisan config:cache >/dev/null && artisan route:cache >/dev/null && artisan view:cache >/dev/null
+artisan queue:restart >/dev/null 2>&1 || true
+artisan up >/dev/null
+ok "up, at v$(cat "$DIR/VERSION")"
+
+# =============================================================================
+say "6/6 Verify"
+FAILED=0
+artisan workspace:audit:verify && ok "audit chain" || { FAILED=1; echo "    the audit chain does not verify"; }
+artisan workspace:ocfl:verify && ok "object store" || { FAILED=1; echo "    the object store does not verify"; }
+artisan workspace:fixity && ok "every file's digest" || { FAILED=1; echo "    fixity failed for a file"; }
+export PGPASSWORD="$(env_get DB_PASSWORD "$DIR/.env")"
+count() { psql -tA -h "$HOST" -p "$PORT" -U "$OWNER_ROLE" -d "$DB" -c "$1"; }
+for check in "records:SELECT count(*) FROM record_resources" "files:SELECT count(*) FROM digital_files" "audit_rows:SELECT count(*) FROM audit_log"; do
+    name="${check%%:*}"; have="$(count "${check#*:}")"; want="$(manifest "$name")"
+    # A migration may itself add audit rows, so the restored chain may be longer, never shorter.
+    if [ "$name" = audit_rows ] && [ "$have" -ge "$want" ]; then ok "$name: $have (the backup had $want)"
+    elif [ "$have" = "$want" ]; then ok "$name: $have, as in the backup"
+    else FAILED=1; echo "    $name: $have here, $want in the backup"; fi
+done
+unset PGPASSWORD
+[ "$FAILED" -eq 0 ] || die "the restore does not verify: see above. The backup is unchanged."
+printf '\n    Restored and verified: %s\n' "$FROM"

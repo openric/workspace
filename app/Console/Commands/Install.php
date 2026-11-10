@@ -77,7 +77,10 @@ class Install extends Command
             $this->call('workspace:vocabulary:import', ['--configured' => true]);
         }
 
-        $password = $this->input->isInteractive() ? $this->secret('Administrator password (at least 12 characters; empty to generate one)') : null;
+        // Asked for when interactive; otherwise taken from WORKSPACE_INSTALL_PASSWORD (the Docker install's), never from the
+        // command line, where every process may read it; else generated.
+        $password = $this->input->isInteractive() ? $this->secret('Administrator password (at least 12 characters; empty to generate one)')
+            : ((string) getenv('WORKSPACE_INSTALL_PASSWORD') ?: null);
         $generated = $password === null || $password === '';
         if ($generated) {
             $password = Str::password(24);

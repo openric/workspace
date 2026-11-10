@@ -1,5 +1,6 @@
 <?php
 
+use App\Accounts\AccountException;
 use App\Api\Problem;
 use App\Http\Middleware\EnsureAccountActive;
 use App\Http\Middleware\RequireAccess;
@@ -34,6 +35,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(except: ['shop/payfast/notify', 'sword/*', 'sparql']);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        // A refusal of the account rules (the demonstration account among them) goes back to the form with its reason.
+        $exceptions->render(fn (AccountException $e, Request $request) => $request->is('api/*') || $request->expectsJson()
+            ? null : back()->withInput($request->except('password', 'password_confirmation', 'current_password'))->withErrors(['account' => $e->getMessage()]));
         // The OpenRiC API answers every error as RFC 7807 problem details (Core Discovery 0.6.0, section 4).
         $exceptions->render(function (Throwable $e, Request $request) {
             if (! $request->is('api/ric/*') && ! $request->is('api/ric')) {

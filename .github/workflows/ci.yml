@@ -162,6 +162,36 @@ jobs:
   # and a software bill of materials kept with every run, so each release tag has its own.
   # Release downloads come with the job's own token and are retried: GitHub throttles anonymous downloads in an incident
   # (8 November 2026, when this job failed for hours on v0.0.141), and each file is checked against its published SHA-256.
+  docker:
+    name: Docker install builds, starts and backs up
+    if: github.ref_type != 'tag'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Settings, with passwords made for this run
+        run: |
+          cp docker/.env.docker.example docker/.env.docker
+          for name in WORKSPACE_ADMIN_PASSWORD DB_PASSWORD DB_ROOT_PASSWORD; do
+            sed -i "s|^$name=.*|$name=$(openssl rand -hex 16)|" docker/.env.docker
+          done
+      - name: Build and start
+        run: docker compose -f docker/docker-compose.yml --env-file docker/.env.docker up -d --build
+      - name: The first start installs, and the Workspace answers
+        run: |
+          for i in $(seq 1 90); do docker compose -f docker/docker-compose.yml --env-file docker/.env.docker logs workspace | grep -qE '\[init\] (ready|FATAL)' && break; sleep 5; done
+          docker compose -f docker/docker-compose.yml --env-file docker/.env.docker logs workspace | grep -E '^\[init\]|FAIL'
+          docker compose -f docker/docker-compose.yml --env-file docker/.env.docker logs workspace | grep -q '\[init\] ready'
+          curl -fsS -o /dev/null http://localhost:8090/sign-in
+          curl -fsS -o /dev/null http://localhost:8090/discover
+      - name: A backup is made and its digests check
+        run: |
+          docker compose -f docker/docker-compose.yml --env-file docker/.env.docker exec -T workspace bin/backup --to=/backups
+          docker compose -f docker/docker-compose.yml --env-file docker/.env.docker exec -T workspace sh -c 'cd /backups/openric-workspace-* && sha256sum -c SHA256SUMS'
+      - name: Logs, when it failed
+        if: failure()
+        run: docker compose -f docker/docker-compose.yml --env-file docker/.env.docker logs --tail=200
   security:
     name: Dependencies, secrets and SBOM
     runs-on: ubuntu-24.04

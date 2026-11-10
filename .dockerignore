@@ -1,0 +1,22 @@
+# What the Docker build leaves out: history, what the image installs itself, local data and secrets.
+.git
+.github
+vendor
+node_modules
+.env
+.env.*
+!.env.example
+storage/app/*
+storage/logs/*
+storage/framework/cache/data/*
+storage/framework/sessions/*
+storage/framework/views/*
+storage/keys/*
+storage/capacity
+bootstrap/cache/*.php
+docker/.env.docker
+docker/backups
+tests
+test-results
+playwright-report
+graphify-out

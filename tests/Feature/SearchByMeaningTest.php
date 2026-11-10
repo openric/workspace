@@ -180,6 +180,11 @@ class SearchByMeaningTest extends TestCase
         $this->get(route('discover.ways-in.units', ['themes', $bridges]))->assertOk()->assertSee('Plans for the new bridge')->assertDontSee('Unpublished letter')->assertSee('1 description');
         $this->get(route('discover.ways-in.facet', 'people'))->assertOk()->assertSee('Botha, Maria');
         $this->get(route('discover.ways-in.timeline'))->assertOk()->assertSee('1900 to 1909')->assertSee('1950 to 1959');
+
+        // A theme labelled only in another language (an archive's own French vocabulary) is named, not left blank.
+        DB::table('concept_labels')->where('concept_id', $bridges)->update(['language' => 'fr']);
+        $this->get(route('discover.ways-in'))->assertOk()->assertSee('>Bridges</a>', false);
+        $this->get(route('discover.ways-in.facet', 'themes'))->assertOk()->assertSee('>Bridges</a>', false);
         $this->get(route('discover.ways-in.decade', 1950))->assertOk()->assertSee('School register')->assertDontSee('Plans for the new bridge');
     }
 

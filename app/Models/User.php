@@ -102,4 +102,12 @@ class User extends Authenticatable implements HasLocalePreference
     {
         app(AccessControl::class)->forget($this);
     }
+
+    /** Is this the demonstration installation's public account (config workspace.demo_account)? */
+    public function isDemo(): bool
+    {
+        $demo = (string) config('workspace.demo_account.email');
+
+        return $demo !== '' && mb_strtolower((string) $this->email) === mb_strtolower($demo);
+    }
 }

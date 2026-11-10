@@ -50,6 +50,9 @@ class TwoFactor
     /** Begin: a new secret, not in force until a code from it is confirmed. @return array{secret: string, uri: string, qr: string} */
     public function begin(User $user): array
     {
+        if ($user->isDemo()) {
+            throw new AccountException(__('The demonstration account cannot be changed: it is the same for every visitor, and the demonstration is reset each night.'));
+        }
         $secret = Base32::encodeUpperUnpadded(random_bytes(20));
         $user->forceFill(['two_factor_secret' => $secret, 'two_factor_confirmed_at' => null, 'two_factor_recovery_codes' => null, 'two_factor_last_step' => null])->save();
         $issuer = $user->institution->name.' (OpenRiC Workspace)';
@@ -113,6 +116,11 @@ class TwoFactor
     /** Must this account have two-factor sign-in, under its institution's policy? */
     public function required(User $user): bool
     {
+        // Never for the demonstration's public account, which every visitor shares.
+        if ($user->isDemo()) {
+            return false;
+        }
+
         return match ($this->policy($user->institution)) {
             'required' => true,
             'required-for-administrators' => collect(self::ADMINISTRATION)->contains(fn ($action) => $user->may($action, 'institution')),

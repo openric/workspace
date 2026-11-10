@@ -14,6 +14,10 @@
         <input id="password" name="password" type="password" autocomplete="current-password" required>
         <button type="submit">{{ __('Log in') }}</button>
     </form>
+    @if(config('workspace.demo_account.email') && config('workspace.demo_account.password'))
+        {{-- The demonstration's public account, as Heratio's demo shows its own; it is reset each night. --}}
+        <p class="callout demo-sign-in"><strong>{{ __('Demonstration') }}:</strong> <code>{{ config('workspace.demo_account.email') }}</code> / <code>{{ config('workspace.demo_account.password') }}</code>. {{ __('An administrator of the demonstration, whose changes are undone each night.') }}</p>
+    @endif
     @foreach($providers as $provider)
         @if($loop->first)<p>{{ __('Or') }}</p>@endif
         <p><a class="button" href="{{ route('sso.start', $provider) }}">{{ __('Sign in with :provider', ['provider' => $provider->label]) }}</a></p>

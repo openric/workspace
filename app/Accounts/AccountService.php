@@ -40,6 +40,7 @@ class AccountService
     /** Change the account's name and sign-in email (Heratio's user update, without its username and typed passwords). */
     public function update(User $account, string $name, string $email, ?User $actor = null): void
     {
+        $this->keepDemo($account);
         $email = mb_strtolower(trim($email));
         if (User::where('email', $email)->whereKeyNot($account->id)->exists()) {
             throw new InvalidArgumentException(__('another account signs in with that email'));
@@ -79,6 +80,7 @@ class AccountService
     /** Make the account a member of exactly these roles of its institution. */
     public function setRoles(User $account, array $roleIds, ?User $actor = null): void
     {
+        $this->keepDemo($account);
         $wanted = Role::where('institution_id', $account->institution_id)->where('is_system', false)->whereIn('id', $roleIds)->get();
         if ($wanted->count() !== count(array_unique($roleIds))) {
             throw new InvalidArgumentException(__('every role must be one of the institution\'s own roles'));
@@ -104,6 +106,7 @@ class AccountService
 
     public function revokeTemplateRole(User $account, string $template, ?User $actor = null): void
     {
+        $this->keepDemo($account);
         $role = $this->roles->byTemplate($account->institution, $template)
             ?? throw new InvalidArgumentException("the institution has no $template role");
         $this->roles->removeMember($role, $account, $actor);
@@ -111,6 +114,7 @@ class AccountService
 
     public function disable(User $account, ?User $actor = null): void
     {
+        $this->keepDemo($account);
         DB::transaction(function () use ($account, $actor) {
             $this->keepAnAdministrator($account);
             AuditLog::actingAs($actor, fn () => $account->update(['disabled_at' => now()]));
@@ -131,6 +135,7 @@ class AccountService
      */
     public function issuePasswordLink(User $account, ?User $actor = null): string
     {
+        $this->keepDemo($account);
         $token = DB::transaction(function () use ($account, $actor) {
             $token = Password::broker()->createToken($account);
             AuditLog::record(Vocab::action('issue-password-link'), $account, null, null, $actor);
@@ -144,6 +149,9 @@ class AccountService
     /** Set the password from a one-time link. Returns false if the link is not valid. */
     public function setPasswordWithToken(string $email, string $token, string $password): bool
     {
+        if (($found = User::where('email', mb_strtolower(trim($email)))->first()) !== null) {
+            $this->keepDemo($found);
+        }
         $status = Password::broker()->reset(
             ['email' => mb_strtolower(trim($email)), 'token' => $token, 'password' => $password],
             function (User $account, string $password) {
@@ -159,6 +167,7 @@ class AccountService
 
     public function changePassword(User $account, string $password): void
     {
+        $this->keepDemo($account);
         DB::transaction(function () use ($account, $password) {
             AuditLog::actingAs($account, fn () => $account->update(['password' => $password]));
             AuditLog::record(Vocab::action('set-password'), $account, null, null, $account);
@@ -179,6 +188,7 @@ class AccountService
      */
     public function delete(User $account, ?User $actor = null): void
     {
+        $this->keepDemo($account);
         if ($actor !== null && $actor->id === $account->id) {
             throw new AccountException(__('You cannot delete your own account.'));
         }
@@ -213,6 +223,14 @@ class AccountService
             ->where('m.role_id', $admin->id)->whereNull('u.disabled_at')->where('u.id', '<>', $account->id)->exists();
         if (! $others) {
             throw new AccountException(__('This is the last active administrator of the institution; give another account the Administrator role first.'));
+        }
+    }
+
+    /** The demonstration's public account stays as it is all day, so no visitor can take it from the next one. */
+    private function keepDemo(User $account): void
+    {
+        if ($account->isDemo()) {
+            throw new AccountException(__('The demonstration account cannot be changed: it is the same for every visitor, and the demonstration is reset each night.'));
         }
     }
 }

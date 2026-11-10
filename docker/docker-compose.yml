@@ -1,0 +1,89 @@
+# =============================================================================
+# OpenRiC Workspace - Docker install: the Workspace and PostgreSQL 16 with pgvector
+#
+# After Heratio's docker/docker-compose.yml.
+#
+#   cp docker/.env.docker.example docker/.env.docker      then set the three CHANGEME_ values and the names
+#   docker compose -f docker/docker-compose.yml --env-file docker/.env.docker up -d --build
+#   docker compose -f docker/docker-compose.yml --env-file docker/.env.docker logs -f workspace
+#
+# What lasts, in volumes, across rebuilds: the database; storage/ (the object store, the audit signing key, logs);
+# and the state (.env with its application key, and the marker that the Workspace is installed), so a rebuilt
+# container never installs over what is there. `down -v` removes them, and with them every record.
+#
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# =============================================================================
+name: openric-workspace
+
+services:
+  workspace:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      args:
+        WITH_OFFICE: ${WITH_OFFICE:-false}
+    image: openric-workspace:local
+    depends_on:
+      db: { condition: service_healthy }
+    environment:
+      APP_URL: ${APP_URL:-http://localhost:8090}
+      APP_ENV: ${APP_ENV:-production}
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_DATABASE: ${DB_DATABASE:-openric_workspace}
+      DB_USERNAME: ${DB_USERNAME:-openric_workspace}
+      DB_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD in docker/.env.docker}
+      WORKSPACE_INSTITUTION: ${WORKSPACE_INSTITUTION:?set WORKSPACE_INSTITUTION in docker/.env.docker}
+      WORKSPACE_BASE_IRI: ${WORKSPACE_BASE_IRI:?set WORKSPACE_BASE_IRI in docker/.env.docker}
+      WORKSPACE_ADMIN_NAME: ${WORKSPACE_ADMIN_NAME:?set WORKSPACE_ADMIN_NAME in docker/.env.docker}
+      WORKSPACE_ADMIN_EMAIL: ${WORKSPACE_ADMIN_EMAIL:?set WORKSPACE_ADMIN_EMAIL in docker/.env.docker}
+      WORKSPACE_INSTALL_PASSWORD: ${WORKSPACE_ADMIN_PASSWORD:?set WORKSPACE_ADMIN_PASSWORD in docker/.env.docker}
+      WORKSPACE_LANGUAGE: ${WORKSPACE_LANGUAGE:-en}
+      WORKSPACE_MODULES: ${WORKSPACE_MODULES:-}
+      WORKSPACE_DEMO: ${WORKSPACE_DEMO:-false}
+      # A public demonstration only: its account shown on the sign-in page, and bin/demo-reset allowed (docker/README.md).
+      WORKSPACE_DEMO_EMAIL: ${WORKSPACE_DEMO_EMAIL:-}
+      WORKSPACE_DEMO_PASSWORD: ${WORKSPACE_DEMO_PASSWORD:-}
+      WORKSPACE_TIMEZONE: ${WORKSPACE_TIMEZONE:-UTC}
+      # No ClamAV in the container: uploads are kept as not scanned unless a scanner that reaches one is named.
+      WORKSPACE_VIRUS_SCANNER: ${WORKSPACE_VIRUS_SCANNER:-}
+      MAIL_MAILER: ${MAIL_MAILER:-log}
+      MAIL_HOST: ${MAIL_HOST:-}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_USERNAME: ${MAIL_USERNAME:-}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+      MAIL_FROM_ADDRESS: ${MAIL_FROM_ADDRESS:-workspace@example.org}
+      # For bin/restore inside the container: PostgreSQL's superuser, which alone may make the vector extension.
+      PG_SUPERUSER: postgres
+      PG_SUPERPASSWORD: ${DB_ROOT_PASSWORD:?set DB_ROOT_PASSWORD in docker/.env.docker}
+    ports:
+      - "${WORKSPACE_PORT:-8090}:80"
+    volumes:
+      - workspace-storage:/var/www/openric-workspace/storage
+      - workspace-state:/var/lib/openric-workspace
+      # Backups made and restored inside the container: a folder of the host's, so they outlive it.
+      - ${WORKSPACE_BACKUPS:-./backups}:/backups
+    restart: unless-stopped
+
+  db:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_PASSWORD: ${DB_ROOT_PASSWORD:?set DB_ROOT_PASSWORD in docker/.env.docker}
+      WORKSPACE_DB: ${DB_DATABASE:-openric_workspace}
+      WORKSPACE_DB_USER: ${DB_USERNAME:-openric_workspace}
+      WORKSPACE_DB_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD in docker/.env.docker}
+    volumes:
+      - workspace-db:/var/lib/postgresql/data
+      - ./postgres-init.sh:/docker-entrypoint-initdb.d/10-openric-workspace.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ${DB_DATABASE:-openric_workspace}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+volumes:
+  workspace-storage:
+  workspace-state:
+  workspace-db:

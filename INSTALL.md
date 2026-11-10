@@ -6,6 +6,19 @@ The examples use `archives.example.org` for the host, `/usr/share/nginx/openric-
 
 The Workspace is in development and not yet released for use. Install it to try it, not yet to hold an archive's only copy of anything.
 
+## Three ways in
+
+- **One command on a server**, after Heratio's installer: clone, then `bin/install`, which does every step below in order, each skipped when already done, so a stopped run is simply run again:
+
+        git clone https://github.com/openric/workspace.git /usr/share/nginx/openric-workspace-live
+        cd /usr/share/nginx/openric-workspace-live
+        sudo bin/install --domain=archives.example.org --institution="Riverside Archives" \
+            --admin-name="Your Name" --admin-email=you@example.org --https
+
+  `bin/install --help` lists the rest (`--demo`, `--modules=`, `--ref=`, `--skip-packages`). It installs the newest release tag, makes the database role with a generated password, and shows the administrator's generated password once.
+- **Docker**, the Workspace and PostgreSQL in two containers: `docker/README.md`.
+- **By hand**, step by step: the rest of this guide, which is what `bin/install` does.
+
 ## What it needs
 
 - Ubuntu 24.04 (or another Linux with the same packages), with a user that owns the code and `sudo`.
@@ -250,15 +263,13 @@ The ClamAV daemon takes a few minutes to load its signatures on first start. `ww
 
 ## Backups
 
-Back up, together, and test a restore:
+`bin/backup` takes, together, what a restore needs: the database (`pg_dump`), the OCFL object store, the audit signing key, `.env` (with the application key that encrypts the stored secrets) and the institution's branding, with a manifest of the release and the counts, and a digest of each file:
 
-- the database (`pg_dump -Fc`; `deploy/deploy.sh` keeps the last ten under `storage/app/backups/` at each release);
-- the object store, which holds every file in OCFL objects any OCFL tool can read;
-- the audit signing key (`storage/keys/`);
-- the institution's logo (`storage/app/private/branding/`);
-- `.env`.
+    bin/backup --to=/mnt/backups --keep=14
 
-A restore is complete only when `workspace:fixity` reports no failure and `workspace:audit:verify` the chain intact. Admin, Preservation can also keep a copy of the object store on another disk or server by rsync, on a schedule.
+Schedule it (cron, as the clone's owner), and copy each backup off the server: the folder holds the signing key and `.env`, and is readable by its owner only. `deploy/deploy.sh` also dumps the database before each release (the last ten, in `storage/app/backups/`), which is no substitute: it holds neither the files nor the key.
+
+`bin/restore --from=<backup>` puts one back onto a Workspace installed by `bin/install` or Docker, of the same release or newer, and fails unless the audit chain (`workspace:audit:verify`), the object store (`workspace:ocfl:verify`) and every file's digest (`workspace:fixity`) verify and the counts match the backup's. A backup is tested only when it has been restored: `deploy/runbooks/restoring.md` is the routine and the drill, done at least every quarter. Admin, Preservation can also keep a copy of the object store on another disk or server by rsync, on a schedule.
 
 ## Optional parts
 
@@ -278,6 +289,7 @@ A restore is complete only when `workspace:fixity` reports no failure and `works
 - Search by meaning (phase 17d1) needs pgvector (0.6 or later) in the database: as a PostgreSQL superuser, run `CREATE EXTENSION IF NOT EXISTS vector;` in the Workspace's database before migrating (`sudo -u postgres psql -d <database> -c 'CREATE EXTENSION IF NOT EXISTS vector;'`; on Debian and Ubuntu the package is `postgresql-16-pgvector`). Switch it on under Admin, AI, Search; the scheduler embeds the index every ten minutes.
 - Close matches in search (phase 25a) need pg_trgm, which ships with PostgreSQL (`postgresql-contrib`) and is a trusted extension: the migration creates it as the database's owner, the role the Workspace connects as, so no superuser is needed. Where the Workspace connects as a role that does not own its database, a superuser runs `CREATE EXTENSION IF NOT EXISTS pg_trgm;` there first.
 - WhatsApp notices to staff: the Workspace writes each one into the estate's spool (`/var/spool/ahg-whatsapp`) as the Meta-approved template `ahg_system_notice`, and `ahg-whatsapp-watcher` sends it, so the Workspace holds no WhatsApp credential. Put the web server's user in the spool's group (`usermod -aG ahg-whatsapp www-data`, then restart PHP-FPM), and set `WHATSAPP_ENABLED=true` once the template is approved. Each staff member then gives their number on their profile.
+- A public demonstration, as workspace.openric.org is: set `WORKSPACE_DEMO_EMAIL` and `WORKSPACE_DEMO_PASSWORD` in `.env` and run `sudo -u www-data php artisan workspace:demo:account`. The sign-in page then shows the account, an administrator that nobody can change, disable or delete. Take a baseline with `sudo -u www-data bin/demo-snapshot` and install `deploy/cron/openric-workspace-demo-reset`, which puts the demonstration back to it each night at 02:00 (`deploy/runbooks/restoring.md`). Never on an installation that holds real records.
 - ResourceSync is always on, at `/.well-known/resourcesync`. `RESOURCESYNC_CHANGELIST_DAYS` (30) and `RESOURCESYNC_PAGE_SIZE` (1000) change its horizon and page size.
 
 ## Updating

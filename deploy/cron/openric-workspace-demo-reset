@@ -1,0 +1,13 @@
+# OpenRiC Workspace - the demonstration's nightly reset (after Heratio's heratio-demo-reset), at 02:00 when few visit.
+# Only for a demonstration: bin/demo-reset refuses unless WORKSPACE_DEMO_EMAIL is set. Install as root:
+#   cp deploy/cron/openric-workspace-demo-reset /etc/cron.d/ && chmod 0644 /etc/cron.d/openric-workspace-demo-reset
+# and take the first baseline: sudo -u www-data bin/demo-snapshot. Take a new one after every recording session or
+# change the demonstration should keep, or that night's reset undoes it.
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+MAILTO=""
+
+0 2 * * * root /usr/share/nginx/openric-workspace-live/bin/demo-reset >> /usr/share/nginx/openric-workspace-live/storage/logs/demo-reset.log 2>&1

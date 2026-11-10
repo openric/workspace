@@ -1,0 +1,108 @@
+#!/usr/bin/env bash
+# =============================================================================
+# bin/backup - back up a Workspace whole: what a restore needs, together (roadmap phase 3)
+# =============================================================================
+# One folder holds:
+#   database.dump    pg_dump --format=custom of the database
+#   objects.tar      the OCFL object store (every kept file, in objects any OCFL tool reads)
+#   keys.tar         storage/keys: the audit signing key, without which nothing can be changed
+#   branding.tar     the institution's logo and banner (storage/app/private/branding), when there is one
+#   env              .env, with the application key that encrypts the stored passwords and secrets
+#   manifest.json    the release, the database's migrations, the audit chain's last row, the counts
+#   SHA256SUMS       a digest of each, which bin/restore checks before it touches anything
+#
+# The database is dumped first and the object store archived after it: OCFL only ever adds, so every file the dump
+# refers to is in the archive; a file that came in between is merely extra. The folder holds secrets (the key, .env):
+# it is made readable by its owner only. Keep backups apart from the server, and test one: bin/restore on another.
+#
+#   bin/backup                        into storage/app/backups/full/
+#   bin/backup --to=/mnt/backups      into a folder of your own
+#   bin/backup --keep=7               and keep only the newest seven there
+#   bin/backup --dir=/srv/workspace   a Workspace other than the one this script is in
+#
+# Run it as a user who can read the code's folder, storage/ and .env (the clone's owner, or root).
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# =============================================================================
+set -euo pipefail
+umask 077
+
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+TO="" KEEP=0
+for arg in "$@"; do
+    case "$arg" in
+        --to=*) TO="${arg#*=}" ;;
+        --keep=*) KEEP="${arg#*=}" ;;
+        --dir=*) DIR="$(cd "${arg#*=}" && pwd)" ;;
+        -h|--help) sed -n '2,24p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+        *) echo "Unknown option: $arg (see --help)" >&2; exit 2 ;;
+    esac
+done
+[[ "$KEEP" =~ ^[0-9]+$ ]] || { echo "--keep takes a number" >&2; exit 2; }
+TO="${TO:-$DIR/storage/app/backups/full}"
+
+# A setting as Laravel reads it: the process's environment first (Docker's), then .env.
+env_get() { if [ -n "${!1:-}" ]; then printf '%s\n' "${!1}"; else grep -E "^$1=" "$DIR/.env" | tail -1 | cut -d= -f2- | sed 's/^"//; s/"$//'; fi; }
+[ -r "$DIR/.env" ] || { echo "Cannot read $DIR/.env: run as the clone's owner or root" >&2; exit 1; }
+PHP="$(command -v php8.3 || command -v php)"
+# Read through the application, as the web server's user when this is root, so nothing under storage/ becomes root's.
+WEB="${WORKSPACE_WEB_USER:-www-data}"
+as_web() { if [ "$(id -u)" -ne 0 ]; then "$@"; elif command -v gosu >/dev/null; then gosu "$WEB" "$@"; else sudo -u "$WEB" "$@"; fi; }
+# A configuration value, read by booting the application (tinker would print warnings into it).
+config() { as_web "$PHP" -r 'require $argv[1]."/vendor/autoload.php"; $a = require $argv[1]."/bootstrap/app.php"; $a->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap(); echo config($argv[2]);' "$DIR" "$1"; }
+
+STAMP="$(date -u +%Y%m%dT%H%M%SZ)"
+OUT="$TO/openric-workspace-$STAMP"
+mkdir -p "$OUT"
+echo "Backing up to $OUT"
+
+# The database first. The password goes in the environment, never on the command line.
+export PGPASSWORD="$(env_get DB_PASSWORD)"
+DB_ARGS=(-h "$(env_get DB_HOST)" -p "$(env_get DB_PORT)" -U "$(env_get DB_USERNAME)" -d "$(env_get DB_DATABASE)")
+pg_dump --format=custom --no-owner "${DB_ARGS[@]}" -f "$OUT/database.dump"
+echo "  database   $(du -h "$OUT/database.dump" | cut -f1)"
+MIGRATIONS="$(psql -tA "${DB_ARGS[@]}" -c 'SELECT count(*) FROM migrations')"
+AUDIT_ROWS="$(psql -tA "${DB_ARGS[@]}" -c 'SELECT count(*) FROM audit_log')"
+AUDIT_LAST="$(psql -tA "${DB_ARGS[@]}" -c 'SELECT entry_hash FROM audit_log WHERE seq IS NOT NULL ORDER BY seq DESC LIMIT 1')"
+RECORDS="$(psql -tA "${DB_ARGS[@]}" -c 'SELECT count(*) FROM record_resources')"
+FILES="$(psql -tA "${DB_ARGS[@]}" -c 'SELECT count(*) FROM digital_files')"
+unset PGPASSWORD
+
+# Then the object store, the keys and the branding, each as the folder it is.
+STORE="$(config workspace.object_store)"
+# Unset, it is storage/app/objects, as FileStore has it.
+STORE="${STORE:-$DIR/storage/app/objects}"
+[ -d "$STORE" ] || { echo "The object store $STORE is not there" >&2; exit 1; }
+tar -C "$STORE" -cf "$OUT/objects.tar" .
+echo "  objects    $(du -h "$OUT/objects.tar" | cut -f1) from $STORE"
+KEYS="$(dirname "$(config workspace.audit_signing_key)")"
+tar -C "$KEYS" -cf "$OUT/keys.tar" .
+echo "  keys       from $KEYS"
+if [ -d "$DIR/storage/app/private/branding" ]; then
+    tar -C "$DIR/storage/app/private/branding" -cf "$OUT/branding.tar" .
+    echo "  branding"
+fi
+cp "$DIR/.env" "$OUT/env"
+
+cat > "$OUT/manifest.json" <<JSON
+{
+  "made": "$STAMP",
+  "host": "$(hostname -f 2>/dev/null || hostname)",
+  "release": "$(cat "$DIR/VERSION" 2>/dev/null)",
+  "commit": "$(git -C "$DIR" describe --tags --always 2>/dev/null || echo unknown)",
+  "database": "$(env_get DB_DATABASE)",
+  "migrations": $MIGRATIONS,
+  "audit_rows": $AUDIT_ROWS,
+  "audit_last_hash": "$AUDIT_LAST",
+  "records": $RECORDS,
+  "files": $FILES
+}
+JSON
+(cd "$OUT" && sha256sum -- * > SHA256SUMS)
+echo "  manifest   v$(cat "$DIR/VERSION" 2>/dev/null), $RECORDS records, $FILES files, $AUDIT_ROWS audit rows"
+
+if [ "$KEEP" -gt 0 ]; then
+    # shellcheck disable=SC2012
+    ls -1d "$TO"/openric-workspace-* | sort | head -n -"$KEEP" | while read -r old; do rm -rf -- "$old"; echo "  removed    $(basename "$old")"; done
+fi
+echo "Done: $OUT"

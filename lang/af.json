@@ -7200,5 +7200,8 @@
     "Nothing matched every word, so these are the closest matches by title. Check the spelling, or search for fewer words.": "Niks het by elke woord gepas nie, dus is dit die naaste ooreenkomste volgens titel. Kontroleer die spelling, of soek met minder woorde.",
     "Searched with a regular expression, without regard to case.": "Gesoek met 'n gereelde uitdrukking, sonder om op hoof- of kleinletters te let.",
     "That is not a regular expression the search can read: :reason": "Dit is nie 'n gereelde uitdrukking wat die soektog kan lees nie: :reason",
-    "The regular expression took too long and was stopped. Make it more specific, for example by anchoring it or naming more letters.": "Die gereelde uitdrukking het te lank geneem en is gestop. Maak dit meer spesifiek, byvoorbeeld deur dit te anker of meer letters te noem."
+    "The regular expression took too long and was stopped. Make it more specific, for example by anchoring it or naming more letters.": "Die gereelde uitdrukking het te lank geneem en is gestop. Maak dit meer spesifiek, byvoorbeeld deur dit te anker of meer letters te noem.",
+    "The demonstration account cannot be changed: it is the same for every visitor, and the demonstration is reset each night.": "Die demonstrasierekening kan nie verander word nie: dit is dieselfde vir elke besoeker, en die demonstrasie word elke nag teruggestel.",
+    "Demonstration": "Demonstrasie",
+    "An administrator of the demonstration, whose changes are undone each night.": "'n Administrateur van die demonstrasie, wie se veranderinge elke nag ongedaan gemaak word."
 }

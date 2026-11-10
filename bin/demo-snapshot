@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# =============================================================================
+# bin/demo-snapshot - take the demonstration's baseline: the state bin/demo-reset puts back each night
+# =============================================================================
+# After Heratio's heratio-demo-snapshot.sh. Run it after any change the demonstration should keep: a recording session
+# (whatever it made is otherwise undone that night), new showcase content, or a release. A whole backup (bin/backup),
+# so the reset puts back the files and the audit chain with the database.
+#
+#   sudo -u www-data bin/demo-snapshot                 into storage/app/demo-baseline/
+#   sudo -u www-data bin/demo-snapshot --keep=5         keeping the newest five
+#
+# Only on a demonstration (WORKSPACE_DEMO_EMAIL set in .env).
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# =============================================================================
+set -euo pipefail
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+KEEP=5
+for arg in "$@"; do
+    case "$arg" in
+        --keep=*) KEEP="${arg#*=}" ;;
+        -h|--help) sed -n '2,13p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+        *) echo "Unknown option: $arg (see --help)" >&2; exit 2 ;;
+    esac
+done
+demo="${WORKSPACE_DEMO_EMAIL:-$(grep -E '^WORKSPACE_DEMO_EMAIL=' "$DIR/.env" | tail -1 | cut -d= -f2- | sed 's/^"//; s/"$//')}"
+[ -n "$demo" ] || { echo "Not a demonstration (WORKSPACE_DEMO_EMAIL is not set): refusing." >&2; exit 1; }
+BASE="$DIR/storage/app/demo-baseline"
+"$DIR/bin/backup" --to="$BASE" --keep="$KEEP"
+latest="$(ls -1d "$BASE"/openric-workspace-* | sort | tail -1)"
+ln -sfn "$latest" "$BASE/current"
+echo "The demonstration's baseline is now $(basename "$latest"); bin/demo-reset puts it back each night."

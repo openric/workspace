@@ -16,7 +16,7 @@ class ReleaseControlTest extends TestCase
     public function test_the_deploy_requires_every_job_of_the_workflow(): void
     {
         preg_match_all('/^  [a-z-]+:\n    name: (.+)$/m', file_get_contents(base_path('.github/workflows/ci.yml')), $jobs);
-        $this->assertCount(4, $jobs[1], 'the workflow\'s jobs');
+        $this->assertCount(5, $jobs[1], 'the workflow\'s jobs');
         preg_match('/^REQUIRED_CHECKS=\((.+)\)$/m', file_get_contents(base_path('deploy/deploy.sh')), $line);
         preg_match_all('/"([^"]+)"/', $line[1] ?? '', $required);
         $this->assertEqualsCanonicalizing($jobs[1], $required[1], 'deploy.sh requires exactly the workflow\'s jobs');

@@ -202,6 +202,14 @@ return [
     // Checks of workspace:preflight an installation waives, comma-separated (roadmap phase 23): a demonstration
     // instance that sends no mail waives "mail". A waived check is still shown when deploying.
     'preflight_waive' => env('WORKSPACE_PREFLIGHT_WAIVE', ''),
+
+    // A demonstration installation's public account (after Heratio's demo): shown on the sign-in page, an administrator,
+    // kept from being changed, disabled or deleted, and its installation reset each night (bin/demo-reset). Unset on any
+    // real installation: then nothing of it exists.
+    'demo_account' => [
+        'email' => env('WORKSPACE_DEMO_EMAIL'),
+        'password' => env('WORKSPACE_DEMO_PASSWORD'),
+    ],
     'virus_scanner' => env('WORKSPACE_VIRUS_SCANNER', 'clamdscan'),
     // Format identification against PRONOM (roadmap phase 15a): Siegfried's sf command; empty, files are left unidentified.
     'siegfried' => env('WORKSPACE_SIEGFRIED', 'sf'),

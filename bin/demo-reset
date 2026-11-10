@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+# =============================================================================
+# bin/demo-reset - put the demonstration back to its baseline, undoing the day's visitors (nightly, from cron)
+# =============================================================================
+# After Heratio's heratio-demo-reset.sh, on bin/restore: the database, the files and the audit chain go back to the
+# baseline bin/demo-snapshot took, and the result is verified as every restore is (the audit chain, the object store,
+# every file's digest); then the public account is put back (workspace:demo:account).
+#
+# It refuses, and the demonstration keeps the day's changes, which is cosmetic, when:
+#   - this is not a demonstration (WORKSPACE_DEMO_EMAIL unset): it would throw away real records;
+#   - there is no baseline yet (run bin/demo-snapshot);
+#   - the baseline was taken by a newer release than the code (a baseline from an older release is migrated forward).
+#
+#   bin/demo-reset            as root, from deploy/cron/openric-workspace-demo-reset at 02:00
+#
+# Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# =============================================================================
+set -euo pipefail
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+PHP="$(command -v php8.3 || command -v php)"
+echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] demonstration reset"
+demo="${WORKSPACE_DEMO_EMAIL:-$(grep -E '^WORKSPACE_DEMO_EMAIL=' "$DIR/.env" | tail -1 | cut -d= -f2- | sed 's/^"//; s/"$//')}"
+[ -n "$demo" ] || { echo "Not a demonstration (WORKSPACE_DEMO_EMAIL is not set): refusing to throw records away." >&2; exit 1; }
+BASE="$DIR/storage/app/demo-baseline/current"
+[ -f "$BASE/manifest.json" ] || { echo "No baseline at $BASE: run bin/demo-snapshot first." >&2; exit 1; }
+
+# Never a baseline from a newer release: the schema would be newer than the code that reads it.
+have="$(cat "$DIR/VERSION")"
+want="$("$PHP" -r 'echo json_decode(file_get_contents($argv[1]), true)["release"] ?? "";' "$BASE/manifest.json")"
+newest="$(printf '%s\n%s\n' "$have" "$want" | sort -V | tail -1)"
+if [ "$want" != "$have" ] && [ "$newest" = "$want" ]; then
+    echo "The baseline is from v$want, newer than this code (v$have): not restoring it. Take a new one with bin/demo-snapshot." >&2
+    exit 1
+fi
+
+"$DIR/bin/restore" --from="$(readlink -f "$BASE")" --discard
+if [ "$(id -u)" -eq 0 ]; then
+    if command -v gosu >/dev/null; then gosu www-data "$PHP" "$DIR/artisan" workspace:demo:account; else sudo -u www-data "$PHP" "$DIR/artisan" workspace:demo:account; fi
+else
+    "$PHP" "$DIR/artisan" workspace:demo:account
+fi
+echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] done: back to the baseline of v$want"

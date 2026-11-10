@@ -71,7 +71,7 @@ class ExploreController extends Controller
         })->keyBy('id');
 
         return $rows->filter(fn ($r) => $entities->has($r->id))->map(fn ($r) => ['id' => $r->id, 'n' => (int) $r->n, 'name' => $table === 'concepts'
-            ? (string) $entities[$r->id]->label(Vocab::languages()) : (string) $catalogue->view->label($entities[$r->id]),
+            ? $entities[$r->id]->anyLabel(Vocab::languages()) : (string) $catalogue->view->label($entities[$r->id]),
             'url' => match ($table) {
                 'agents' => route('discover.agent', $r->id), 'places' => route('discover.place', $r->id), default => null
             }])->values();
