@@ -14,10 +14,10 @@
 <label for="{{ $prefix }}-licence">{{ __('Licence') }} (Creative Commons)</label>{{ $select('licence', \App\Rights\RightsService::LICENCES, $right?->licence, true) }}
 <label for="{{ $prefix }}-copyright_status">{{ __('Copyright status') }}</label>{{ $select('copyright_status', \App\Rights\RightsService::COPYRIGHT_STATUSES, $right?->copyrightStatus, true) }}
 <label for="{{ $prefix }}-holder">{{ __('Rights holder') }} @include('description._ric', ['term' => 'rico:hasOrHadIntellectualPropertyRightsHolder'])</label>
-{{-- ponytail: every authority record in one list; a search field when institutions hold more than a few thousand. --}}
+{{-- ponytail: every authority record in one list, from one query (Agent::choices); a search field when institutions hold tens of thousands. --}}
 <select id="{{ $prefix }}-holder" name="holder"><option value="">{{ __('Not given') }}</option>
-    @foreach(\App\Models\Agent::where('institution_id', auth()->user()->institution_id)->whereNull('deleted_at')->with('names')->get()->sortBy(fn ($a) => mb_strtolower((string) $a->described('agent-authorised-name', ['en']))) as $agent)
-        <option value="{{ $agent->id }}" @selected(old('holder', $right?->holder_id) === $agent->id)>{{ $agent->described('agent-authorised-name', $lang) }}</option>
+    @foreach(\App\Models\Agent::choices(auth()->user()->institution_id, $lang) as $agentId => $agentName)
+        <option value="{{ $agentId }}" @selected(old('holder', $right?->holder_id) === $agentId)>{{ $agentName }}</option>
     @endforeach
 </select>
 <label for="{{ $prefix }}-jurisdiction">{{ __('Jurisdiction (two-letter country code, such as ZA)') }}</label><input id="{{ $prefix }}-jurisdiction" name="jurisdiction" maxlength="2" size="3" value="{{ old('jurisdiction', $right?->jurisdiction) }}">

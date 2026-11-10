@@ -38,8 +38,8 @@
             </select>
             <label for="community-{{ $subject->getKey() }}">{{ __('Community') }}</label> @include('description._ric', ['term' => null])
             <select id="community-{{ $subject->getKey() }}" name="community"><option value="">{{ __('Not given') }}</option>
-                @foreach(\App\Models\Agent::where('institution_id', auth()->user()->institution_id)->whereNull('deleted_at')->with('names')->get()->sortBy(fn ($a) => mb_strtolower((string) $a->described('agent-authorised-name', ['en']))) as $agent)
-                    <option value="{{ $agent->id }}">{{ $agent->described('agent-authorised-name', $lang) }}</option>
+                @foreach(\App\Models\Agent::choices(auth()->user()->institution_id, $lang) as $agentId => $agentName)
+                    <option value="{{ $agentId }}">{{ $agentName }}</option>
                 @endforeach
             </select>
             <label for="condition-{{ $subject->getKey() }}">{{ __('Access condition') }}</label> @include('description._ric', ['term' => null])

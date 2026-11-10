@@ -28,6 +28,7 @@ use App\Relations\RelationService;
 use App\Support\Vocab;
 use App\Vocabulary\ConceptService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Once;
 use InvalidArgumentException;
 use Tests\TestCase;
 
@@ -286,5 +287,26 @@ class AgentTest extends TestCase
         } catch (InvalidArgumentException) {
             $this->addToAssertionCount(1);
         }
+    }
+
+    public function test_a_choice_of_authority_records_names_each_as_its_page_does_in_one_query(): void
+    {
+        $zulu = $this->agents->create($this->institution, 'person', 'Zulu, Thandi', 'en');
+        $french = $this->agents->create($this->institution, 'corporate-body', 'Archives de la ville', 'fr');
+        $this->agents->describe($french, ['agent-authorised-name' => 'City archives'], 'en');
+        $gone = $this->agents->create($this->institution, 'person', 'Botha, Gone', 'en');
+        $gone->forceFill(['deleted_at' => now()])->save();
+        $elsewhere = Institution::create(['name' => 'Elsewhere', 'base_iri' => 'https://elsewhere.example.org']);
+        $this->agents->create($elsewhere, 'person', 'Abrahams, Other', 'en');
+
+        foreach ([['en'], ['fr', 'en'], ['de']] as $languages) {
+            $choices = Agent::choices($this->institution->id, $languages);
+            $expected = Agent::where('institution_id', $this->institution->id)->whereNull('deleted_at')->get()
+                ->mapWithKeys(fn ($a) => [$a->id => (string) $a->described('agent-authorised-name', $languages)])
+                ->sortBy(fn ($name) => mb_strtolower($name))->all();
+            $this->assertSame($expected, $choices, implode(',', $languages));
+            Once::flush();
+        }
+        $this->assertSame([$french->id, $zulu->id], array_keys(Agent::choices($this->institution->id, ['en'])));
     }
 }

@@ -44,7 +44,7 @@ class ProvenanceController extends Controller
             'choices' => [...collect(ProvenanceOverview::TERMS)->map($choices)->all(), ...collect(ProvenanceService::ENTRY_TERMS)->map($choices)->all(),
                 'document_type' => $choices('provenance-document-type')],
             // ponytail: every authority record in one list, as the rights holder; a search field when institutions hold more than a few thousand.
-            'agents' => Agent::where('institution_id', $record->institution_id)->whereNull('deleted_at')->with('names')->get()
+            'agents' => Agent::where('institution_id', $record->institution_id)->whereNull('deleted_at')->with('names.nameType')->get()
                 ->sortBy(fn (Agent $a) => mb_strtolower((string) $a->described('agent-authorised-name', ['en'])))->values()]);
     }
 

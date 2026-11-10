@@ -173,8 +173,8 @@ class RepatriationController extends Controller
         $languages = Vocab::languages();
 
         return ['statuses' => Concept::choices(Claims::STATUSES)->get(),
-            'agents' => Agent::where('institution_id', $institution)->whereNull('deleted_at')->get()->map(fn ($a) => ['id' => $a->id, 'name' => EntityKinds::label($a, $languages)])->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)->values(),
-            'places' => Place::where('institution_id', $institution)->whereNull('deleted_at')->get()->map(fn ($p) => ['id' => $p->id, 'name' => EntityKinds::label($p, $languages)])->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)->values()];
+            'agents' => Agent::where('institution_id', $institution)->whereNull('deleted_at')->with('names.nameType')->get()->map(fn ($a) => ['id' => $a->id, 'name' => EntityKinds::label($a, $languages)])->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)->values(),
+            'places' => Place::where('institution_id', $institution)->whereNull('deleted_at')->with('names.nameType')->get()->map(fn ($p) => ['id' => $p->id, 'name' => EntityKinds::label($p, $languages)])->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)->values()];
     }
 
     private function validated(Request $request): array

@@ -64,7 +64,7 @@ class AccessionController extends Controller
         $choices = fn (string $vocabulary) => Concept::choices(Vocab::BASE.$vocabulary.'/')->with('labels')->get();
 
         return view('accessions.create', ['terms' => collect(AccessionService::TERMS)->map($choices), 'repositories' => $this->repositories($institutionId),
-            'agents' => Agent::where('institution_id', $institutionId)->whereNull('deleted_at')->with('names')->get()
+            'agents' => Agent::where('institution_id', $institutionId)->whereNull('deleted_at')->with('names.nameType')->get()
                 ->sortBy(fn (Agent $a) => mb_strtolower((string) $a->described('agent-authorised-name', ['en'])))->values(),
             // ponytail: every description in one list, as the rights holder's authority records; a search field when an institution holds thousands.
             'records' => RecordResource::where('institution_id', $institutionId)->whereNull('deleted_at')->with('names')->limit(2000)->get()
@@ -128,7 +128,7 @@ class AccessionController extends Controller
                 'templates' => $intake->templates($request->user()->institution), 'priorities' => $choices('intake-priority'), 'categories' => $choices('attachment-category')],
             'care' => ['types' => $choices('appraisal-type'), 'significance' => $choices('appraisal-significance'), 'recommendations' => $choices('appraisal-recommendation'),
                 'valuationTypes' => $choices('valuation-type'), 'methods' => $choices('valuation-method'), 'templates' => app(AccessionAppraisalService::class)->templates($request->user()->institution),
-                'agents' => Agent::where('institution_id', $accession->institution_id)->whereNull('deleted_at')->with('names')->get()
+                'agents' => Agent::where('institution_id', $accession->institution_id)->whereNull('deleted_at')->with('names.nameType')->get()
                     ->sortBy(fn (Agent $a) => mb_strtolower((string) $a->described('agent-authorised-name', ['en'])))->values(),
                 'containerTypes' => app(StorageService::class)->types($accession->institution_id), 'conditions' => $choices('container-condition'),
                 'places' => app(StorageService::class)->storagePlaces($accession->institution_id), 'barcodes' => (bool) $request->user()->institution->fresh()->accession_container_barcodes,

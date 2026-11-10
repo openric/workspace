@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\DB;
 
 #[Fillable(['institution_id', 'iri', 'agent_type_id', 'description_identifier', 'maintainer_id', 'description_status_id', 'description_detail_id', 'embargo_until', 'icip_sensitivity_id', 'source_standard'])]
 class Agent extends Model
@@ -30,6 +31,24 @@ class Agent extends Model
     protected function casts(): array
     {
         return ['embargo_until' => 'immutable_date', 'deleted_at' => 'immutable_datetime'];
+    }
+
+    /**
+     * Every authority record of an institution as id => authorised name, in name order, for a choice list: the name in the
+     * first of the languages that has one, else the first written, as described() picks it. One query, once a request, so
+     * a form listing every agent never loads them as models (a record's page held two such lists: 13 s on live at 4,000).
+     *
+     * @param  list<string>  $languages
+     * @return array<string, string>
+     */
+    public static function choices(string $institutionId, array $languages): array
+    {
+        return once(fn () => collect(DB::select('SELECT e.id, n.value FROM agents e
+            LEFT JOIN LATERAL (SELECT value FROM names WHERE subject_table = ? AND subject_id = e.id AND name_type_id = (SELECT id FROM concepts WHERE iri = ?)
+                ORDER BY array_position(?::text[], language::text) NULLS LAST, created_at LIMIT 1) n ON true
+            WHERE e.institution_id = ? AND e.deleted_at IS NULL ORDER BY lower(n.value) NULLS LAST, e.id',
+            ['agents', Vocab::NAME_TYPES.'authorised', '{'.implode(',', array_map(fn ($l) => '"'.$l.'"', $languages)).'}', $institutionId]))
+            ->mapWithKeys(fn ($row) => [$row->id => (string) $row->value])->all());
     }
 
     public function agentType(): BelongsTo
