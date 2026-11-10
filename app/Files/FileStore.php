@@ -324,6 +324,13 @@ class FileStore
         }
         $process = LimitedProcess::make('clamav', [$scanner, '--no-summary', '--fdpass', $path]);
         $process->setTimeout(120)->run();
+        if ($process->getExitCode() === 2) {
+            // Under php-fpm on the demonstration host the daemon is handed something that is "not a regular file" for
+            // every --fdpass (10 November 2026), so the file's bytes are streamed to it instead.
+            // ponytail: clamd streams at most its StreamMaxLength (25 MB on Ubuntu), so a larger file is refused there.
+            $process = LimitedProcess::make('clamav', [$scanner, '--no-summary', '--stream', $path]);
+            $process->setTimeout(120)->run();
+        }
         if ($process->getExitCode() === 1) {
             throw new InvalidArgumentException('the virus scanner found '.trim(preg_replace(['/^.*?: /', '/\s+FOUND$/'], '', trim($process->getOutput()))).', so the file was not kept');
         }

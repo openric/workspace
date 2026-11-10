@@ -303,4 +303,17 @@ class InstantiationTest extends TestCase
         $this->upload($this->scan(30, 30))->assertRedirect();
         $this->assertSame('clamdscan', DigitalFile::whereHas('use', fn ($q) => $q->where('notation', 'master'))->sole()->scanned_with);
     }
+
+    public function test_a_scanner_that_cannot_take_a_passed_file_is_asked_again_with_the_file_streamed(): void
+    {
+        // As clamdscan under php-fpm on the demonstration host: --fdpass answers 2 (an error), --stream scans.
+        $scanner = storage_path('framework/testing/fdpass-fails.sh');
+        @mkdir(dirname($scanner), 0775, true);
+        file_put_contents($scanner, "#!/bin/sh\ncase \" \$* \" in *' --fdpass '*) exit 2;; esac\nexit 0\n");
+        chmod($scanner, 0755);
+        config(['workspace.virus_scanner' => $scanner]);
+        $this->upload($this->scan(30, 30))->assertRedirect()->assertSessionHasNoErrors();
+        $this->assertSame($scanner, DigitalFile::whereHas('use', fn ($q) => $q->where('notation', 'master'))->sole()->scanned_with);
+        unlink($scanner);
+    }
 }
