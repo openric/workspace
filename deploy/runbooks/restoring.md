@@ -67,6 +67,6 @@ At least each quarter, and after any change to these scripts: restore the newest
 
 A public demonstration (`WORKSPACE_DEMO_EMAIL` and `WORKSPACE_DEMO_PASSWORD` set, shown on the sign-in page with full administrator rights) is put back each night to a baseline, after Heratio's demo:
 
-- `sudo -u www-data bin/demo-snapshot` takes the baseline (a `bin/backup` into `storage/app/demo-baseline/`). Take a new one after every recording session or change the demonstration should keep: the night undoes anything since.
+- `bin/demo-snapshot` takes the baseline (a `bin/backup` into `storage/app/demo-baseline/`), from cron every afternoon at 16:00, so what is made during the day is kept; run it by hand for a clean baseline at any other time.
 - `bin/demo-reset`, from `deploy/cron/openric-workspace-demo-reset` at 02:00, restores it with `bin/restore --discard` and puts the public account back (`workspace:demo:account`). It refuses on an installation that is not a demonstration, without a baseline, or with a baseline from a newer release than the code.
 - The public account cannot be changed, disabled or deleted, nor set up for two-factor sign-in, by anyone, so no visitor can take it from the next.

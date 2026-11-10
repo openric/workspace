@@ -1,8 +1,11 @@
-# OpenRiC Workspace - the demonstration's nightly reset (after Heratio's heratio-demo-reset), at 02:00 when few visit.
+# OpenRiC Workspace - the demonstration's afternoon snapshot and nightly reset (after Heratio's heratio-demo-reset).
+# At 16:00 the day's state becomes the baseline (Dr Johan Pieterse, 10 November 2026: what is made during the working
+# day, video recordings among it, is kept); at 02:00, when few visit, the baseline is put back, undoing whatever
+# visitors changed since. A change a visitor makes before 16:00 is kept too: take a clean snapshot by hand if one should
+# not be. Times are the server's (Africa/Johannesburg).
 # Only for a demonstration: bin/demo-reset refuses unless WORKSPACE_DEMO_EMAIL is set. Install as root:
 #   cp deploy/cron/openric-workspace-demo-reset /etc/cron.d/ && chmod 0644 /etc/cron.d/openric-workspace-demo-reset
-# and take the first baseline: sudo -u www-data bin/demo-snapshot. Take a new one after every recording session or
-# change the demonstration should keep, or that night's reset undoes it.
+# and take the first baseline: sudo -u www-data bin/demo-snapshot.
 # Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
@@ -10,4 +13,5 @@ SHELL=/bin/bash
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 MAILTO=""
 
+0 16 * * * www-data /usr/share/nginx/openric-workspace-live/bin/demo-snapshot >> /usr/share/nginx/openric-workspace-live/storage/logs/demo-reset.log 2>&1
 0 2 * * * root /usr/share/nginx/openric-workspace-live/bin/demo-reset >> /usr/share/nginx/openric-workspace-live/storage/logs/demo-reset.log 2>&1
