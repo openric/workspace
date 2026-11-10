@@ -12,11 +12,13 @@ use App\Accounts\AccountService;
 use App\Audit\AuditLog;
 use App\Description\Bcp47;
 use App\Description\RepositoryService;
+use App\Files\FileStore;
 use App\Models\Institution;
 use App\Support\Vocab;
 use App\Vocabulary\SkosImporter;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
@@ -92,6 +94,8 @@ class Install extends Command
 
         // Every audit row is signed (ADR 0004), so the key comes before the first one.
         $this->call('workspace:audit:create-key', ['--if-missing' => true]);
+        // The object store now, not with the first file: until it exists Operations reports it cannot be written to.
+        File::ensureDirectoryExists(app(FileStore::class)->root());
 
         $admin = DB::transaction(function () use ($input, $password, $accounts, $repositories, $language, $roles) {
             $institution = Institution::create(['name' => $input['institution'], 'base_iri' => $input['base_iri']]);

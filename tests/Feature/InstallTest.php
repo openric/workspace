@@ -20,6 +20,8 @@ class InstallTest extends TestCase
 
     public function test_install_creates_the_institution_grants_and_administrator(): void
     {
+        $store = sys_get_temp_dir().'/workspace-objects-'.bin2hex(random_bytes(6));
+        config(['workspace.object_store' => $store]);
         $this->artisan('workspace:install', [
             '--institution' => 'Riverside Parish Council Archives',
             '--base-iri' => 'https://archives.example.org/',
@@ -37,6 +39,8 @@ class InstallTest extends TestCase
         $this->assertTrue($admin->hasPermission(Vocab::permission('manage-accounts')));
         $this->assertFalse($admin->hasPermission(Vocab::permission('publish')));
         $this->assertTrue(DB::table('audit_log as a')->join('concepts as c', 'c.id', '=', 'a.action_id')->where('c.notation', 'install')->exists());
+        $this->assertDirectoryExists($store, 'the object store is made at install, so Operations finds it writable before the first file');
+        rmdir($store);
 
         $this->artisan('workspace:install', ['--no-interaction' => true])->assertFailed();
     }
