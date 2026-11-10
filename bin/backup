@@ -72,9 +72,14 @@ unset PGPASSWORD
 STORE="$(config workspace.object_store)"
 # Unset, it is storage/app/objects, as FileStore has it.
 STORE="${STORE:-$DIR/storage/app/objects}"
-[ -d "$STORE" ] || { echo "The object store $STORE is not there" >&2; exit 1; }
-tar -C "$STORE" -cf "$OUT/objects.tar" .
-echo "  objects    $(du -h "$OUT/objects.tar" | cut -f1) from $STORE"
+if [ -d "$STORE" ]; then
+    tar -C "$STORE" -cf "$OUT/objects.tar" .
+    echo "  objects    $(du -h "$OUT/objects.tar" | cut -f1) from $STORE"
+else
+    # A Workspace that has kept no file yet has no store: its archive is empty.
+    tar -cf "$OUT/objects.tar" -T /dev/null
+    echo "  objects    none kept yet ($STORE is not made until the first file)"
+fi
 KEYS="$(dirname "$(config workspace.audit_signing_key)")"
 tar -C "$KEYS" -cf "$OUT/keys.tar" .
 echo "  keys       from $KEYS"

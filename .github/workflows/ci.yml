@@ -182,15 +182,17 @@ jobs:
         run: docker compose -f docker/docker-compose.yml --env-file docker/.env.docker up -d --build
       - name: The first start installs, and the Workspace answers
         run: |
-          for i in $(seq 1 90); do docker compose -f docker/docker-compose.yml --env-file docker/.env.docker logs workspace | grep -qE '\[init\] (ready|FATAL)' && break; sleep 5; done
-          docker compose -f docker/docker-compose.yml --env-file docker/.env.docker logs workspace | grep -E '^\[init\]|FAIL'
-          docker compose -f docker/docker-compose.yml --env-file docker/.env.docker logs workspace | grep -q '\[init\] ready'
+          for i in $(seq 1 90); do docker compose -f docker/docker-compose.yml --env-file docker/.env.docker logs --no-log-prefix workspace | grep -qE '\[init\] (ready|FATAL)' && break; sleep 5; done
+          docker compose -f docker/docker-compose.yml --env-file docker/.env.docker logs --no-log-prefix workspace | grep -E '^\[init\]|FAIL' || true
+          docker compose -f docker/docker-compose.yml --env-file docker/.env.docker logs --no-log-prefix workspace | grep -q '\[init\] ready'
+          # [init] ready comes just before supervisord starts nginx: wait for it to answer.
+          for i in $(seq 1 30); do curl -fsS -o /dev/null http://localhost:8090/up && break; sleep 2; done
           curl -fsS -o /dev/null http://localhost:8090/sign-in
           curl -fsS -o /dev/null http://localhost:8090/discover
       - name: A backup is made and its digests check
         run: |
           docker compose -f docker/docker-compose.yml --env-file docker/.env.docker exec -T workspace bin/backup --to=/backups
-          docker compose -f docker/docker-compose.yml --env-file docker/.env.docker exec -T workspace sh -c 'cd /backups/openric-workspace-* && sha256sum -c SHA256SUMS'
+          docker compose -f docker/docker-compose.yml --env-file docker/.env.docker exec -T workspace sh -c 'cd "$(ls -1d /backups/openric-workspace-* | tail -1)" && sha256sum -c SHA256SUMS'
       - name: Logs, when it failed
         if: failure()
         run: docker compose -f docker/docker-compose.yml --env-file docker/.env.docker logs --tail=200
