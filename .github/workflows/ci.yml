@@ -176,6 +176,8 @@ jobs:
           for name in WORKSPACE_ADMIN_PASSWORD DB_PASSWORD DB_ROOT_PASSWORD; do
             sed -i "s|^$name=.*|$name=$(openssl rand -hex 16)|" docker/.env.docker
           done
+          # The runner's own mirror, next to it, rather than archive.ubuntu.com.
+          echo 'UBUNTU_MIRROR=http://azure.archive.ubuntu.com/ubuntu' >> docker/.env.docker
       - name: Build and start
         run: docker compose -f docker/docker-compose.yml --env-file docker/.env.docker up -d --build
       - name: The first start installs, and the Workspace answers

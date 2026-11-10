@@ -10,6 +10,7 @@
 #
 # Build arguments:
 #   WITH_OFFICE=true   LibreOffice, for PDF copies of office documents (about 600 MB more); default false
+#   UBUNTU_MIRROR=URL  an Ubuntu mirror to use instead of archive.ubuntu.com
 #
 # Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
 # SPDX-License-Identifier: AGPL-3.0-or-later
@@ -17,10 +18,15 @@
 FROM ubuntu:24.04
 
 ARG WITH_OFFICE=false
+# Another Ubuntu mirror than archive.ubuntu.com, e.g. http://azure.archive.ubuntu.com/ubuntu (CI) or the country's.
+ARG UBUNTU_MIRROR=
 ARG SIEGFRIED_VERSION=1.11.9
 ARG SIEGFRIED_SHA256=db22156c4767ee2db3c410b86488966c18e66c39b3bd90aa7a9dab7d769e3005
 ENV DEBIAN_FRONTEND=noninteractive TZ=UTC
 
+# Each download tried five times, from the mirror given: one unreachable archive server (10 November 2026) stopped a build.
+RUN echo 'Acquire::Retries "5";' > /etc/apt/apt.conf.d/80-retries \
+    && if [ -n "$UBUNTU_MIRROR" ]; then sed -i "s|http://archive.ubuntu.com/ubuntu|$UBUNTU_MIRROR|g; s|http://security.ubuntu.com/ubuntu|$UBUNTU_MIRROR|g" /etc/apt/sources.list.d/ubuntu.sources; fi
 RUN apt-get update && apt-get install -y --no-install-recommends \
         ca-certificates curl git unzip acl gosu supervisor nginx postgresql-client-16 \
         php8.3-fpm php8.3-cli php8.3-pgsql php8.3-mbstring php8.3-xml php8.3-intl php8.3-curl php8.3-zip php8.3-gd php8.3-imagick \

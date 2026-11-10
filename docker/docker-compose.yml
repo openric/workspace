@@ -23,6 +23,7 @@ services:
       dockerfile: docker/Dockerfile
       args:
         WITH_OFFICE: ${WITH_OFFICE:-false}
+        UBUNTU_MIRROR: ${UBUNTU_MIRROR:-}
     image: openric-workspace:local
     depends_on:
       db: { condition: service_healthy }
