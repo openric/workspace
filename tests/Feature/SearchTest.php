@@ -142,6 +142,17 @@ class SearchTest extends TestCase
         $this->assertSame(0, $this->search('etude')['total']);
     }
 
+    public function test_a_repository_whose_name_is_not_published_is_no_public_facet_though_its_records_are_found(): void
+    {
+        $family = app(RepositoryService::class)->create($this->institution, 'Engelbrecht Family Repository', 'en', 'EFR');
+        $programmes = app(RecordService::class)->create($this->institution, self::LEVEL.'series', 'Programmes of the bridge choir', 'en', null, $family, 'CHO');
+        app(PublicationService::class)->apply($programmes, 'publish', null, false, $this->editor);
+        app(SearchIndex::class)->flush();
+        $page = $this->get(self::SITE.'/discover?q=bridge')->assertOk()->assertSee('Programmes of the bridge choir');
+        $page->assertSee('repository='.$this->minutes->repository_id, false)->assertDontSee('repository='.$family->id, false);
+        $page->assertDontSee('Engelbrecht Family Repository');
+    }
+
     public function test_staff_search_shows_drafts_only_to_those_who_may_see_them(): void
     {
         $this->actingAs($this->editor)->get(self::SITE.'/search?q=courthouse')->assertOk()

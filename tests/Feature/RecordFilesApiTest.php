@@ -13,9 +13,11 @@ use App\Description\InstantiationService;
 use App\Description\PublicationService;
 use App\Description\RecordService;
 use App\Description\RepositoryService;
+use App\Language\Corpus;
 use App\Models\Institution;
 use App\Models\RecordResource;
 use App\Models\User;
+use App\Rights\Embargoes;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Imagick;
 use ImagickPixel;
@@ -98,5 +100,31 @@ class RecordFilesApiTest extends TestCase
         $this->assertSame([], $this->getJson(self::API."/records/{$this->record->id}/files")->json('instantiations.0.text'));
         app(PublicationService::class)->apply($this->record, 'publish', null, false, $this->editor);
         $this->assertSame('Minutes of the meeting of 3 May 1902, corrected.', $this->getJson(self::API."/records/{$this->record->id}/files")->json('instantiations.0.text.0.value'));
+    }
+
+    public function test_the_text_of_a_page_goes_where_its_reference_copy_goes_so_an_embargo_on_the_files_withholds_it(): void
+    {
+        $service = app(InstantiationService::class);
+        $scan = $service->upload($this->record, $this->scan(), 'page-1.png', 'en', 'Scan of page 1', null, 'online', $this->editor);
+        $service->describe($scan, ['instantiation-transcript' => 'Conductor: Mr E. Fortuin.'], 'en', $this->editor);
+        app(PublicationService::class)->apply($this->record, 'publish', null, false, $this->editor);
+        app(PublicationService::class)->apply($scan, 'publish', null, false, $this->editor);
+        $files = fn () => $this->getJson(self::API."/records/{$this->record->id}/files")->assertOk()->json('instantiations.0');
+        $corpus = fn () => app(Corpus::class)->transcriptions(Institution::find($this->record->institution_id), 'en')->pluck('text')->all();
+        $this->assertSame('Conductor: Mr E. Fortuin.', $files()['text'][0]['value']);
+        $this->assertSame(['Conductor: Mr E. Fortuin.'], $corpus());
+
+        // Files withheld: the thumbnail still, and neither the reference copy nor the text of the page (#12).
+        $embargo = app(Embargoes::class)->impose($this->record, ['type' => 'digital-only', 'starts_on' => now()->toDateString()], false, $this->editor)[0];
+        $page = $files();
+        $this->assertSame(['thumbnail'], array_column($page['files'], 'use'));
+        $this->assertSame([], $page['text']);
+        $this->assertSame([], $corpus(), 'nor in the language pages');
+        $this->assertTrue($service->textDeliverable($this->editor, $scan), 'who may change the record still may');
+
+        // A partial embargo leaves the reference copy, and the text with it.
+        app(Embargoes::class)->lift($embargo, 'Cleared by the donor.', $this->editor);
+        app(Embargoes::class)->impose($this->record, ['type' => 'partial', 'starts_on' => now()->toDateString()], false, $this->editor);
+        $this->assertSame('Conductor: Mr E. Fortuin.', $files()['text'][0]['value']);
     }
 }

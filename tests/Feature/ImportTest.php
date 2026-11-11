@@ -25,6 +25,7 @@ use App\Relations\RelationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Queue;
 use Tests\TestCase;
 
 class ImportTest extends TestCase
@@ -111,6 +112,14 @@ class ImportTest extends TestCase
         $this->assertSame('created', $units->firstWhere('key', '4')['action']);
         $this->actingAs($this->editor)->get("/imports/{$import->id}")->assertOk()->assertSee('Dry run: nothing has been written.')
             ->assertSee('would be created')->assertSee('Import now')->assertSee('not a column of AtoM');
+    }
+
+    public function test_before_its_file_is_read_an_import_says_it_waits_and_shows_no_placeholder(): void
+    {
+        Queue::fake();
+        $import = $this->upload($this->atomFile(), 'csv');
+        $this->actingAs($this->editor)->get("/imports/{$import->id}")->assertOk()->assertSee('Waiting for a worker.')
+            ->assertDontSee(':created')->assertDontSee(':rejected')->assertDontSee('Dry run: nothing has been written.');
     }
 
     public function test_a_csv_is_imported_with_translations_events_creators_and_access_points_and_imports_again_without_duplicates(): void

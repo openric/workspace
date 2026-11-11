@@ -255,10 +255,24 @@ class InstantiationService
      */
     public function deliverable(?User $user, DigitalFile $file): bool
     {
-        $instantiation = $file->instantiation;
-        $unit = $instantiation->record;
         // A preservation master is the master's, an access copy the reference copy's, to every rule below (phase 15c).
-        $use = ['preservation' => 'master', 'access' => 'reference'][$file->use->notation] ?? $file->use->notation;
+        return $this->mayHave($user, $file->instantiation, ['preservation' => 'master', 'access' => 'reference'][$file->use->notation] ?? $file->use->notation);
+    }
+
+    /**
+     * May the account, or with none the public, have the text of an instantiation's pages (its transcript)? The text is the
+     * page's content, so it goes where the reference copy would: never under an embargo that withholds the files, a
+     * protocol, a clearance or screening that withholds them, nor of an instantiation kept on request.
+     */
+    public function textDeliverable(?User $user, Instantiation $instantiation): bool
+    {
+        return $this->mayHave($user, $instantiation, 'reference');
+    }
+
+    /** The one rule for delivery (WS-007), for a file of the use given (master, reference or thumbnail) of the instantiation. */
+    private function mayHave(?User $user, Instantiation $instantiation, string $use): bool
+    {
+        $unit = $instantiation->record;
         if ($instantiation->deleted_at !== null || $unit->deleted_at !== null || ($user !== null && $unit->institution_id !== $user->institution_id)) {
             return false;
         }

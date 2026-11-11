@@ -20,7 +20,9 @@ namespace App\Language;
 
 use App\Ai\Gateway;
 use App\Audit\AuditLog;
+use App\Description\InstantiationService;
 use App\Models\Concept;
+use App\Models\Instantiation;
 use App\Models\Institution;
 use App\Models\LanguageGlossaryEntry;
 use App\Models\User;
@@ -111,7 +113,10 @@ class Corpus
             ->where('v.element_id', Concept::where('iri', Vocab::element('instantiation-transcript'))->value('id'))
             ->where('v.state_id', Concept::where('iri', Vocab::valueState('published'))->value('id'))
             ->whereRaw("lower(split_part(v.language, '-', 1)) = ?", [$code])->whereNull('i.deleted_at')->whereIn('i.record_resource_id', $public)
-            ->select('i.record_resource_id as id', 'v.value')->orderByRaw('length(v.value) DESC')->limit(self::MAX_TRANSCRIPTIONS)->get()
+            // ponytail: the delivery rule is decided in PHP, so three times as many are read to keep MAX_TRANSCRIPTIONS after
+            // those withheld (an embargo on the files, a protocol, a clearance); fewer show when most of a language is withheld.
+            ->select('i.record_resource_id as id', 'i.id as instantiation_id', 'v.value')->orderByRaw('length(v.value) DESC')->limit(self::MAX_TRANSCRIPTIONS * 3)->get()
+            ->filter(fn ($r) => app(InstantiationService::class)->textDeliverable(null, Instantiation::find($r->instantiation_id)))->take(self::MAX_TRANSCRIPTIONS)->values()
             ->map(fn ($r) => ['id' => $r->id, 'text' => Str::limit(trim((string) $r->value), 1500)]);
     }
 

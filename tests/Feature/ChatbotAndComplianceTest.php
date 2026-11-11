@@ -17,6 +17,7 @@ use App\Ai\AiUnavailable;
 use App\Ai\Chatbot;
 use App\Ai\Compliance;
 use App\Ai\Gateway;
+use App\Description\InstantiationService;
 use App\Description\PublicationService;
 use App\Description\RecordService;
 use App\Description\RepositoryService;
@@ -30,6 +31,7 @@ use App\Models\ChatMessage;
 use App\Models\Institution;
 use App\Models\RecordResource;
 use App\Models\User;
+use App\Rights\Embargoes;
 use App\Search\SearchIndex;
 use App\Vocabulary\SkosImporter;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -122,6 +124,47 @@ class ChatbotAndComplianceTest extends TestCase
         $this->post(route('discover.ask.store'), ['question' => 'Tell me about the council minutes'])->assertRedirect();
         $this->assertFalse(ChatMessage::whereNotNull('inference_id')->sole()->guardrail['grounded']);
         $this->get(route('discover.ask'))->assertSee('Check this answer:');
+    }
+
+    public function test_the_assistant_reads_the_text_of_a_records_pages_the_public_may_have_and_no_other(): void
+    {
+        $this->offer();
+        $programme = app(RecordService::class)->create($this->institution, self::LEVEL.'item', 'Programme for the spring concert, 1958', 'en', $this->minutes, null, 'RPC/2');
+        $page = app(InstantiationService::class)->create($programme, 'Programme, front', 'en', null, 'online', $this->admin);
+        app(InstantiationService::class)->describe($page, ['instantiation-transcript' => 'Conductor: Mr E. Fortuin. Accompanist: Mrs J. Botha.'], 'en', $this->admin);
+        foreach ([$programme, $page] as $entity) {
+            app(PublicationService::class)->apply($entity, 'publish', null, false, $this->admin);
+        }
+        app(SearchIndex::class)->flush();
+        $this->post(route('discover.ask.store'), ['question' => 'Who conducted the spring concert of 1958?'])->assertRedirect();
+        $this->assertStringContainsString('Conductor: Mr E. Fortuin', json_encode($this->sent[0]), 'a published page the public may read is a source (#12)');
+
+        // With its files withheld, its text is withheld from the assistant as from everyone else.
+        app(Embargoes::class)->impose($programme, ['type' => 'digital-only', 'starts_on' => now()->toDateString()], false, $this->admin);
+        $this->post(route('discover.ask.restart'));
+        $this->post(route('discover.ask.store'), ['question' => 'Who conducted the spring concert of 1958?'])->assertRedirect();
+        $this->assertStringNotContainsString('Fortuin', json_encode(end($this->sent)));
+    }
+
+    public function test_the_assistant_searches_with_every_word_of_a_question_before_any_of_them(): void
+    {
+        $this->offer();
+        $records = app(RecordService::class);
+        $choir = $records->create($this->institution, self::LEVEL.'item', 'Riverside Choral Society records', 'en', $this->minutes, null, 'RPC/3');
+        $helmet = $records->create($this->institution, self::LEVEL.'item', 'Records of a society of antiquaries: a great helm', 'en', $this->minutes, null, 'RPC/4');
+        foreach ([$choir, $helmet] as $entity) {
+            app(PublicationService::class)->apply($entity, 'publish', null, false, $this->admin);
+        }
+        app(SearchIndex::class)->flush();
+        $this->post(route('discover.ask.store'), ['question' => 'What records of the Riverside Choral Society do you hold?'])->assertRedirect();
+        $sent = json_encode($this->sent[0]);
+        $this->assertStringContainsString('[1] Riverside Choral Society records', $sent);
+        $this->assertStringNotContainsString('] Records of a society of antiquaries', $sent, 'a record with only some of the words is no source when one has all (#13)');
+
+        // A question no record holds every word of still finds what holds any of them.
+        $this->post(route('discover.ask.restart'));
+        $this->post(route('discover.ask.store'), ['question' => 'What minutes did the council keep?'])->assertRedirect();
+        $this->assertStringContainsString('Minutes of the Riverside council', json_encode(end($this->sent)));
     }
 
     public function test_staff_ask_over_drafts_they_may_see(): void

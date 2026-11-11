@@ -60,11 +60,13 @@
                         @foreach($search['facets']['level'] as $id => $n)@if($concept = $search['levels']->get($id))<li>@if($search['filters']['level'] === $id)<strong>{{ $concept->label($lang) }}</strong>@else<a href="{{ $link(['level' => $id, 'page' => null]) }}">{{ $concept->label($lang) }}</a>@endif <span class="meta">{{ $n }}</span></li>@endif @endforeach
                     </ul>
                 @endif
-                @if($search['facets']['repository'] !== [])
+                {{-- Only a repository whose name is published: one with none is no facet a visitor could read (its records stay findable). --}}
+                @php($repositoryFacet = collect($search['facets']['repository'])->filter(fn ($n, $id) => ($r = $search['repositories']->get($id)) && $view->label($r) !== null))
+                @if($repositoryFacet->isNotEmpty())
                     <h2>{{ __('Repository') }}</h2>
                     <ul class="facets">
                         @if($search['filters']['repository'])<li><a href="{{ $link(['repository' => null, 'page' => null]) }}">{{ __('Any') }}</a></li>@endif
-                        @foreach($search['facets']['repository'] as $id => $n)@if($repository = $search['repositories']->get($id))<li>@if($search['filters']['repository'] === $id)<strong>{{ $view->label($repository) }}</strong>@else<a href="{{ $link(['repository' => $id, 'page' => null]) }}">{{ $view->label($repository) }}</a>@endif <span class="meta">{{ $n }}</span></li>@endif @endforeach
+                        @foreach($repositoryFacet as $id => $n)@if($repository = $search['repositories']->get($id))<li>@if($search['filters']['repository'] === $id)<strong>{{ $view->label($repository) }}</strong>@else<a href="{{ $link(['repository' => $id, 'page' => null]) }}">{{ $view->label($repository) }}</a>@endif <span class="meta">{{ $n }}</span></li>@endif @endforeach
                     </ul>
                 @endif
                 <h2>{{ __('Dates') }}</h2>

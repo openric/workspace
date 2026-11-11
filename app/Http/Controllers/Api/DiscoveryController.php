@@ -145,13 +145,13 @@ class DiscoveryController extends Controller
         $public = new PublicRights($view);
         $items = [];
         foreach ($instantiations as $instantiation) {
-            // Shown as the public catalogue shows it: with a published title. Its text is the file's content, so only of a file a visitor may open.
+            // Shown as the public catalogue shows it: with a published title. Its text is the pages' content, so only where the reference copy may go.
             $title = $view->label($instantiation);
             if ($title === null) {
                 continue;
             }
             $files = $instantiation->files->filter(fn (DigitalFile $file) => $service->deliverable(null, $file))->sortBy(fn ($file) => $file->use->notation);
-            $text = $instantiation->availability->notation !== 'online' ? [] : $view->values($instantiation, 'instantiation-transcript')->map(fn ($v) => ['language' => $v->language, 'value' => $v->value])->values()->all();
+            $text = ! $service->textDeliverable(null, $instantiation) ? [] : $view->values($instantiation, 'instantiation-transcript')->map(fn ($v) => ['language' => $v->language, 'value' => $v->value])->values()->all();
             if ($files->isEmpty() && $text === []) {
                 continue; // nothing a visitor may have of it
             }
