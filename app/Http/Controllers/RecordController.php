@@ -169,9 +169,9 @@ class RecordController extends Controller
         $this->own($request, $record);
         $top = $record->ancestors()[0] ?? $record;
 
-        [$byParent, $titles, $codes] = $this->records->outline($top, $request->user(), [app()->getLocale(), 'en']);
+        $page = max(1, (int) $request->query('page', 1));
 
-        return view('records.tree', ['record' => $record, 'top' => $top, 'byParent' => $byParent, 'titles' => $titles, 'codes' => $codes]);
+        return view('records.tree', ['record' => $record, 'top' => $top, 'page' => $page, ...$this->records->outline($top, $request->user(), [app()->getLocale(), 'en'], $page)]);
     }
 
     /** Every unit inside this one, in order, with its reference code, level, dates and extent. */

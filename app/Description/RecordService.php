@@ -266,28 +266,65 @@ class RecordService
         return [$found, false];
     }
 
+    /** Lines of the hierarchy page at once (#8): a fonds of 10,000 took four seconds on one page. */
+    public const OUTLINE_PAGE = 500;
+
     /**
-     * The hierarchy as its outline needs it, for a fonds of thousands (#8): the units the account may read, as hierarchy()
-     * decides them but without loading their descriptions, grouped by parent, each with its title in the first of the
-     * languages that has one (as described() picks it) and its local reference code, both read in one query.
+     * A page of the hierarchy below $top, depth first in the arrangement's order, for its outline: the units the account
+     * may read, a unit it may not read hiding everything inside it as the tree does, each with its depth, its title in the
+     * first of the languages that has one (as described() picks it) and its local reference code. The order comes from one
+     * query; the rights are read only until the page is full (#8).
      *
      * @param  list<string>  $languages
-     * @return array{0: Collection<string, Collection<int, RecordResource>>, 1: array<string, string>, 2: array<string, string>}
+     * @return array{units: list<array{unit: RecordResource, depth: int}>, titles: array<string, string>, codes: array<string, string>, more: bool}
      */
-    public function outline(RecordResource $top, User $user, array $languages): array
+    public function outline(RecordResource $top, User $user, array $languages, int $page = 1): array
     {
-        $units = RecordResource::whereKey($ids = $top->descendantIds())->whereNull('deleted_at')->with('level.labels')->orderBy('position')->orderBy('id')->get()
-            ->filter(fn (RecordResource $r) => $user->may('read', 'description', $r));
-        $list = '{'.implode(',', array_map(fn ($l) => '"'.$l.'"', $languages)).'}';
-        $titles = collect(DB::select('SELECT e.id, n.value FROM unnest(?::uuid[]) e(id)
+        $rows = DB::select('WITH RECURSIVE t(id, parent_id, depth, path) AS (
+                SELECT id, parent_id, 1, ARRAY[lpad(position::text, 10, \'0\') || id::text] FROM record_resources WHERE parent_id = ? AND deleted_at IS NULL
+                UNION ALL SELECT r.id, r.parent_id, t.depth + 1, t.path || (lpad(r.position::text, 10, \'0\') || r.id::text)
+                FROM record_resources r JOIN t ON r.parent_id = t.id WHERE r.deleted_at IS NULL)
+            SELECT id, parent_id, depth FROM t ORDER BY path', [$top->id]);
+        $skip = ($page - 1) * self::OUTLINE_PAGE;
+        [$found, $hidden, $more, $models] = [[], [], false, collect()];
+        foreach ($rows as $at => $row) {
+            if (isset($hidden[$row->parent_id])) {
+                $hidden[$row->id] = true; // inside a unit the account may not read
+
+                continue;
+            }
+            if (! $models->has($row->id)) {
+                // The next rows' units, loaded a page's worth at a time, for the rights to be read on them.
+                $models = RecordResource::whereKey(array_column(array_slice($rows, $at, self::OUTLINE_PAGE), 'id'))->with('level.labels')->get()->keyBy('id');
+            }
+            $unit = $models->get($row->id);
+            if (! $user->may('read', 'description', $unit)) {
+                $hidden[$row->id] = true;
+
+                continue;
+            }
+            if ($skip > 0) {
+                $skip--;
+
+                continue;
+            }
+            if (count($found) === self::OUTLINE_PAGE) {
+                $more = true;
+                break;
+            }
+            $found[] = ['unit' => $unit, 'depth' => (int) $row->depth];
+        }
+        $ids = array_map(fn ($f) => $f['unit']->id, $found);
+        $titles = $ids === [] ? [] : collect(DB::select('SELECT e.id, n.value FROM unnest(?::uuid[]) e(id)
             JOIN LATERAL (SELECT value FROM names WHERE subject_table = ? AND subject_id = e.id AND name_type_id = (SELECT id FROM concepts WHERE iri = ?)
                 ORDER BY array_position(?::text[], language::text) NULLS LAST, created_at LIMIT 1) n ON true',
-            ['{'.implode(',', $ids).'}', 'record_resources', Vocab::NAME_TYPES.config('workspace.name_elements.title'), $list]))->pluck('value', 'id')->all();
+            ['{'.implode(',', $ids).'}', 'record_resources', Vocab::NAME_TYPES.config('workspace.name_elements.title'), '{'.implode(',', array_map(fn ($l) => '"'.$l.'"', $languages)).'}']))
+            ->pluck('value', 'id')->all();
         $codes = DB::table('identifiers')->where('subject_table', 'record_resources')->whereIn('subject_id', $ids)
             ->where('identifier_type_id', Concept::where('iri', Vocab::IDENTIFIER_TYPES.'local')->value('id'))->orderBy('created_at')->get(['subject_id', 'value'])
             ->unique('subject_id')->pluck('value', 'subject_id')->all();
 
-        return [$units->groupBy('parent_id'), $titles, $codes];
+        return ['units' => $found, 'titles' => $titles, 'codes' => $codes, 'more' => $more];
     }
 
     /** What reading a unit's description needs loaded. */

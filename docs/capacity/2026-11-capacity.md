@@ -100,6 +100,12 @@ The run of 9 November found the staff record page at 18 seconds and the staff tr
 
 No request failed at any load. The staff record now meets the target at 25 users and is 0.4 seconds over it at 10. The hierarchy page is the one still over: it lists all 10,000 units of the widest fonds on one page by design, and would need paging too to come under a second. Staff search can still show a short page where results the account may not read are dropped after paging, as its code notes.
 
+### Later on 11 November (v0.0.154)
+
+The hierarchy page now shows its fonds depth first, five hundred lines to a page: the order from one recursive query, the rights read only until the page is full, a unit the account may not read hiding what is inside it. Its 95th percentile at 100,000 units: 980 ms with one user, 905 with 10 and 803 with 25 (from 8,525, 9,708 and 11,454 on 9 November). No request failed.
+
+The RiC-O exports of the fonds of 10,000 items (openric/workspace#7): its document loads the units inside it and beside it in batches, with their embargoes and redactions read together, where it read each at a time (137 queries where it made 77,824), and the Workspace's own JSON-LD is read into the RDF graph directly rather than by the general JSON-LD processor, held to the same triples by RdfTest. Turtle took 28 s (from 167) and JSON-LD 12 s (from 44). Of the 28 s, 16 are EasyRdf building and writing the graph. In the same run, EAD, the import and the search rebuild, whose code did not change, took 40 to 70 per cent longer than on 9 November, so the host was busier; they are not compared here.
+
 ## Search (phase 25a)
 
 | Search | Found | Time |

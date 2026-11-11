@@ -112,4 +112,19 @@ class StaffTreeTest extends TestCase
         $this->actingAs($this->archivist)->get(route('records.tree', $this->fonds))->assertOk()
             ->assertSee('Minute book 12</a> <small>Item, 12</small>', false)->assertDontSee('Minute book 3</a>', false);
     }
+
+    public function test_the_hierarchy_is_depth_first_and_a_refused_unit_hides_what_is_inside_it(): void
+    {
+        $records = app(RecordService::class);
+        $series = $records->create($this->institution, self::LEVEL.'series', 'Correspondence', 'en', $this->fonds, null, 'C');
+        $letter = $records->create($this->institution, self::LEVEL.'item', 'Letter to the mayor', 'en', $series, null, 'C/1');
+        $outline = $records->outline($this->fonds, $this->archivist, ['en']);
+        $titles = array_map(fn ($row) => $outline['titles'][$row['unit']->id].'@'.$row['depth'], $outline['units']);
+        $this->assertSame(['Correspondence@1', 'Letter to the mayor@2'], array_slice($titles, -2), 'the series, then what is inside it, one deeper');
+        $this->assertFalse($outline['more']);
+
+        $this->hide($series);
+        $this->actingAs($this->archivist)->get(route('records.tree', $this->fonds))->assertOk()
+            ->assertDontSee('Correspondence')->assertDontSee('Letter to the mayor')->assertSee('Minute book 12');
+    }
 }

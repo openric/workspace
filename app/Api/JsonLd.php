@@ -32,9 +32,11 @@ use App\Models\Relation;
 use App\Models\Repository;
 use App\Models\RicDate;
 use App\Models\Rule;
+use App\Privacy\Redaction;
 use App\Relations\EntityKinds;
 use App\Relations\RelationService;
 use App\Relations\RelationTypes;
+use App\Rights\Embargoes;
 use App\Rights\PublicRights;
 use App\Support\Vocab;
 use Illuminate\Database\Eloquent\Model;
@@ -174,14 +176,15 @@ class JsonLd
         if ($unit->parent && $this->view->readable($unit->parent) && $this->isRecordSet($unit->parent)) {
             $out['rico:isDirectlyIncludedIn'] = $this->stub($unit->parent);
         }
-        $direct = $unit->children->filter(fn ($c) => $this->view->readable($c))->values();
+        // The units inside it, loaded once with what reading and naming each needs, and their embargoes and redactions read
+        // together: one at a time, a fonds of 10,000 items took 77,824 queries (#7).
+        $direct = $this->readableUnits($unit->children()->with(self::UNIT_WITH)->orderBy('id')->get());
         if ($direct->isNotEmpty() && str_ends_with((string) $out['@type'], 'RecordSet')) {
             $out['rico:directlyIncludes'] = $direct->map(fn ($c) => $this->stub($c))->all();
         }
         // Its place among the units arranged beside it, in their order (rico:directlyPrecedesInSequence; step 12c).
         if ($unit->parent_id) {
-            $siblings = RecordResource::where('parent_id', $unit->parent_id)->whereNull('deleted_at')->orderBy('position')->orderBy('id')->with(PublicCatalogue::WITH)->get()
-                ->filter(fn ($r) => $this->view->readable($r))->values();
+            $siblings = $this->readableUnits(RecordResource::where('parent_id', $unit->parent_id)->whereNull('deleted_at')->orderBy('position')->orderBy('id')->with(self::UNIT_WITH)->get());
             $at = $siblings->search(fn ($r) => $r->id === $unit->id);
             if ($at !== false && $at > 0) {
                 $out['rico:directlyFollowsInSequence'] = $this->stub($siblings[$at - 1]);
@@ -190,7 +193,7 @@ class JsonLd
                 $out['rico:directlyPrecedesInSequence'] = $this->stub($siblings[$at + 1]);
             }
         }
-        $children = $unit->children->filter(fn ($c) => $this->view->readable($c))->map(fn ($c) => $this->stub($c))->values()->all();
+        $children = $direct->map(fn ($c) => $this->stub($c))->all();
         $proxies = $unit->memberProxies->filter(fn ($m) => $this->view->readable($m->record))->values();
         $children = [...$children, ...$proxies->map(fn ($m) => $this->stub($m->record))->all()];
         if ($children !== []) {
@@ -617,6 +620,23 @@ class JsonLd
         }
 
         return ['@context' => self::CONTEXT, '@graph' => collect($graph)->unique('@id')->values()->all()];
+    }
+
+    /** What a unit listed in another's document needs loaded: to be read (PublicCatalogue::WITH) and named with its class. */
+    private const UNIT_WITH = [...PublicCatalogue::WITH, 'level'];
+
+    /**
+     * The units the reader may read, of a list loaded with UNIT_WITH, their embargoes and redactions read for all at once.
+     *
+     * @param  Collection<int, RecordResource>  $units
+     * @return Collection<int, RecordResource>
+     */
+    private function readableUnits(Collection $units): Collection
+    {
+        app(Embargoes::class)->prime($units);
+        app(Redaction::class)->prime($units);
+
+        return $units->filter(fn (RecordResource $r) => $this->view->readable($r))->values();
     }
 
     /** A reference to an entity described elsewhere: its IRI, class and published name. */
