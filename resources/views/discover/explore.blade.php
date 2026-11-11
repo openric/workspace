@@ -16,7 +16,9 @@
             (function () {
                 const element = document.getElementById('sparnatural');
                 const results = document.getElementById('explore-results');
-                element.addEventListener('queryUpdated', function (event) { element.dataset.query = event.detail.queryString; });
+                // Sparnatural writes its query in the configuration's own names (a shape, a property shape); expandSparql gives
+                // the RiC-O classes and properties the graph is in (sh:targetClass, sh:path), else nothing would ever match.
+                element.addEventListener('queryUpdated', function (event) { element.dataset.query = element.expandSparql(event.detail.queryString); });
                 element.addEventListener('submit', function () {
                     const query = element.dataset.query;
                     if (!query) { return; }

@@ -30,13 +30,18 @@ class SparnaturalConfig
 
     /** The RiC-O classes of each kind of entity a relation type joins. */
     private const KIND_CLASSES = ['record' => ['Record', 'RecordSet', 'RecordPart'], 'agent' => ['Person', 'Family', 'CorporateBody'], 'repository' => ['CorporateBody'],
-        'place' => ['Place'], 'activity' => ['Activity'], 'rule' => ['Rule'], 'instantiation' => ['Instantiation']];
+        'place' => ['Place'], 'activity' => ['Activity'], 'rule' => ['Rule'], 'instantiation' => ['Instantiation'],
+        // The kinds of the relations between people and groups (membership, family, leadership, positions): without them a
+        // reader could not ask who was a member of a society. Accessions, agreements and containers are not in the store.
+        'person' => ['Person'], 'group' => ['CorporateBody', 'Family'], 'position' => ['Position']];
 
     private const DATES = ['http://www.w3.org/2001/XMLSchema#date', 'http://www.w3.org/2001/XMLSchema#dateTime', 'http://www.w3.org/2001/XMLSchema#gYear'];
 
     public function turtle(): string
     {
-        return Cache::remember('sparnatural:config:'.md5((string) filemtime(resource_path(self::SHAPES))), 86400, fn () => $this->build()->serialise('turtle'));
+        // Made again when the shapes change or a release does, since a release can change how it is made.
+        return Cache::remember('sparnatural:config:'.md5(filemtime(resource_path(self::SHAPES)).'|'.trim((string) @file_get_contents(base_path('VERSION')))), 86400,
+            fn () => $this->build()->serialise('turtle'));
     }
 
     public function build(): Graph

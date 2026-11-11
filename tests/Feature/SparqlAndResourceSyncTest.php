@@ -118,6 +118,7 @@ class SparqlAndResourceSyncTest extends TestCase
         $this->assertSame('urn:x-arq:UnionGraph', $ask[2], 'no graph named: all of them');
 
         $this->get('/discover/explore')->assertOk()->assertSee('<spar-natural', false)->assertSee(route('sparnatural.config'), false);
+        $this->get('/discover/explore')->assertSee('element.expandSparql(event.detail.queryString)', false);
         $this->get(route('discover.home'))->assertSee(route('discover.explore'), false);
         config(['workspace.sparql.url' => '']);
         $this->post('/sparql', ['query' => 'ASK { ?s ?p ?o }'])->assertStatus(503);
@@ -138,6 +139,10 @@ class SparqlAndResourceSyncTest extends TestCase
         $properties = collect($record->allResources('sh:property'));
         $this->assertTrue($properties->contains(fn ($p) => $p->getResource('dash:propertyRole')?->getUri() === 'http://datashapes.org/dash#LabelRole'), 'a record is named by its title');
         $this->assertTrue($properties->contains(fn ($p) => str_ends_with((string) $p->getResource('sh:node')?->getUri(), '#Person')), 'a record links to a person');
+        // A society to its members: the relation types between people and groups are links too.
+        $body = collect($entities['https://www.ica.org/standards/RiC/ontology#CorporateBody']->allResources('sh:property'));
+        $this->assertTrue($body->contains(fn ($p) => $p->getResource('sh:path')?->getUri() === 'https://www.ica.org/standards/RiC/ontology#hasOrHadMember'
+            && str_ends_with((string) $p->getResource('sh:node')?->getUri(), '#Person')), 'a corporate body has or had members');
         $this->assertSame($turtle, app(SparnaturalConfig::class)->turtle(), 'cached');
     }
 
