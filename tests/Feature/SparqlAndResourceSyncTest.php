@@ -57,7 +57,7 @@ class SparqlAndResourceSyncTest extends TestCase
         Http::fake(function (ClientRequest $request) {
             parse_str((string) parse_url($request->url(), PHP_URL_QUERY), $query);
             if (str_ends_with((string) parse_url($request->url(), PHP_URL_PATH), '/query')) {
-                $this->sent[] = ['QUERY', (string) ($request->data()['query'] ?? '')];
+                $this->sent[] = ['QUERY', (string) ($request->data()['query'] ?? ''), $request->data()['default-graph-uri'] ?? null];
 
                 return Http::response(['head' => ['vars' => ['g']], 'results' => ['bindings' => array_map(fn ($g) => ['g' => ['type' => 'uri', 'value' => $g]], $this->held)]], 200,
                     ['Content-Type' => 'application/sparql-results+json']);
@@ -112,6 +112,10 @@ class SparqlAndResourceSyncTest extends TestCase
         $this->post('/sparql', ['query' => 'DELETE WHERE { ?s ?p ?o }'])->assertStatus(400);
         $this->get('/sparql')->assertStatus(400);
         $this->assertCount(2, collect($this->sent)->where(0, 'QUERY'), 'an update never reaches the store');
+        // Each entity is a named graph: a query that names none is asked of their union, one that names its graphs keeps them.
+        [$graphs, $ask] = collect($this->sent)->where(0, 'QUERY')->values()->all();
+        $this->assertNull($graphs[2], 'GRAPH ?g: the named graphs as they are');
+        $this->assertSame('urn:x-arq:UnionGraph', $ask[2], 'no graph named: all of them');
 
         $this->get('/discover/explore')->assertOk()->assertSee('<spar-natural', false)->assertSee(route('sparnatural.config'), false);
         $this->get(route('discover.home'))->assertSee(route('discover.explore'), false);

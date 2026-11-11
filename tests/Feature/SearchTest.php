@@ -8,17 +8,21 @@
 
 namespace Tests\Feature;
 
+use App\Access\AccessControl;
 use App\Access\RoleService;
 use App\Accounts\AccountService;
 use App\Description\DateService;
 use App\Description\PublicationService;
 use App\Description\RecordService;
 use App\Description\RepositoryService;
+use App\Models\Concept;
 use App\Models\Institution;
+use App\Models\Permission;
 use App\Models\RecordResource;
 use App\Models\User;
 use App\Search\SearchIndex;
 use App\Search\SearchService;
+use App\Support\Vocab;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -161,6 +165,25 @@ class SearchTest extends TestCase
         $this->actingAs($reader)->get(self::SITE.'/search?q=courthouse')->assertOk()
             ->assertSee('Published values only.')->assertSee('No results found.')->assertDontSee('Minutes of the town council');
         $this->actingAs($reader)->get(self::SITE.'/search?q=committees')->assertOk()->assertSee('Minutes of the town council');
+    }
+
+    public function test_a_staff_search_page_is_full_though_the_account_may_not_read_a_result(): void
+    {
+        $records = app(RecordService::class);
+        $ledgers = collect(range(1, 22))->map(fn ($n) => $records->create($this->institution, self::LEVEL.'item', sprintf('Rates ledger %02d', $n), 'en', $this->minutes, null, "L$n"));
+        app(SearchIndex::class)->flush();
+        // The editor's role refused reading one of them.
+        Permission::create(['institution_id' => $this->institution->id, 'role_id' => app(RoleService::class)->byTemplate($this->institution, 'editor')->id,
+            'kind_id' => Concept::where('iri', Vocab::kind('description'))->value('id'), 'action_id' => Concept::where('iri', Vocab::permission('read'))->value('id'),
+            'subject_table' => 'record_resources', 'subject_id' => $ledgers[2]->id, 'is_grant' => false]);
+        app(AccessControl::class)->flush();
+        $before = DB::table('search_queries')->count();
+        $first = (string) $this->actingAs($this->editor)->get(self::SITE.'/search?q=ledger')->assertOk()->getContent();
+        $this->assertSame(20, substr_count($first, '>Rates ledger '), 'a full page of what the editor may read (#8)');
+        $this->assertStringNotContainsString('Rates ledger 03', $first);
+        $second = (string) $this->actingAs($this->editor)->get(self::SITE.'/search?q=ledger&page=2')->assertOk()->getContent();
+        $this->assertSame(1, substr_count($second, '>Rates ledger '), 'and the one left on the next');
+        $this->assertSame($before + 2, DB::table('search_queries')->count(), 'each page one search in the statistics');
     }
 
     public function test_search_statistics_count_queries_without_keeping_who_searched(): void

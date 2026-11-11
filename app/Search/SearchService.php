@@ -125,7 +125,9 @@ final class SearchService
                     default => throw $e,
                 });
             }
-            app(SearchAnalyticsService::class)->recordQuery($institution->id, $public, $query, $filters, $total, (microtime(true) - $started) * 1000);
+            if ($options['record'] ?? true) {
+                app(SearchAnalyticsService::class)->recordQuery($institution->id, $public, $query, $filters, $total, (microtime(true) - $started) * 1000);
+            }
 
             return ['total' => $total, 'results' => array_values($rows), 'facets' => $found, 'mode' => $mode, 'expanded' => [], 'match' => $match, 'close' => false, 'error' => null];
         }
@@ -187,8 +189,11 @@ final class SearchService
         }
 
         // A search answered only by close matches still counts as finding nothing, for the statistics of searches that fail.
-        app(SearchAnalyticsService::class)->recordQuery($institution->id, $public, $query, $filters, $close ? 0 : $total, (microtime(true) - $started) * 1000);
-        if ($user !== null && $settings->rerank_history) {
+        // A page read again only to fill a page with what the account may read (#8) is not another search: 'record' => false.
+        if ($options['record'] ?? true) {
+            app(SearchAnalyticsService::class)->recordQuery($institution->id, $public, $query, $filters, $close ? 0 : $total, (microtime(true) - $started) * 1000);
+        }
+        if (($options['record'] ?? true) && $user !== null && $settings->rerank_history) {
             app(HistoryRerank::class)->remember($user->id, $query);
         }
 

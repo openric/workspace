@@ -26,6 +26,12 @@ class SparqlController extends Controller
 
     private const UPDATE = '/\b(INSERT|DELETE|LOAD|CLEAR|CREATE|DROP|COPY|MOVE|ADD)\s+(DATA|WHERE|GRAPH|SILENT|DEFAULT|NAMED|ALL|\{|<)/i';
 
+    /** A query that chooses its graphs itself: FROM, FROM NAMED or GRAPH. */
+    private const NAMES_GRAPHS = '/\b(FROM|GRAPH)\b/i';
+
+    /** Apache Jena's name for the union of a dataset's named graphs. */
+    private const UNION_GRAPH = 'urn:x-arq:UnionGraph';
+
     public function query(Request $request): Response
     {
         if (! TripleStore::configured()) {
@@ -39,7 +45,11 @@ class SparqlController extends Controller
         $timeout = (int) config('workspace.sparql.timeout_seconds');
         try {
             $answer = Http::timeout($timeout + 5)->withHeaders(['Accept' => $accept])->asForm()
-                ->post(TripleStore::dataset().'/query', ['query' => $query, 'timeout' => $timeout * 1000]);
+                ->post(TripleStore::dataset().'/query', ['query' => $query, 'timeout' => $timeout * 1000,
+                    // Each entity is a named graph of its own (TripleStore), so a query that names no graph is asked of all of
+                    // them together, Jena's union graph; the dataset's own default graph is empty. A query with FROM or GRAPH
+                    // keeps the graphs it names.
+                    ...(preg_match(self::NAMES_GRAPHS, $query) ? [] : ['default-graph-uri' => self::UNION_GRAPH])]);
         } catch (Throwable) {
             return response(__('The SPARQL endpoint did not answer in time.'), 504, ['Content-Type' => 'text/plain; charset=utf-8']);
         }
