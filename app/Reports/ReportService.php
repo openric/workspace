@@ -164,7 +164,7 @@ final class ReportService
     public function row(string $list, object $row): array
     {
         $lang = Vocab::languages();
-        $when = fn ($time) => $time ? Carbon::parse($time)->format('Y-m-d H:i') : '';
+        $when = fn ($time) => $time ? Carbon::parse($time)->timezone(config('workspace.timezone'))->format('Y-m-d H:i') : '';
         $yes = fn (Model $m) => $this->isPublished($m) ? __('Yes') : __('No');
 
         return match ($list) {

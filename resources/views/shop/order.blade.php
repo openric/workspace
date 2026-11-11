@@ -7,7 +7,7 @@
     <h1>{{ __('Order :reference', ['reference' => $order->reference]) }}</h1>
     @if(session('status'))<p role="status">{{ session('status') }}</p>@endif
     @error('cart')<p class="error" role="alert">{{ $message }}</p>@enderror
-    <p><strong>{{ $order->status->label($lang) }}</strong> · {{ __('placed on :date', ['date' => $order->created_at->format('Y-m-d H:i')]) }}@if($order->paid_at) · {{ __('paid on :date', ['date' => $order->paid_at->format('Y-m-d')]) }}@endif</p>
+    <p><strong>{{ $order->status->label($lang) }}</strong> · {{ __('placed on :date', ['date' => $order->created_at->timezone(config('workspace.timezone'))->format('Y-m-d H:i')]) }}@if($order->paid_at) · {{ __('paid on :date', ['date' => $order->paid_at->format('Y-m-d')]) }}@endif</p>
     <table><thead><tr><th scope="col">{{ __('Record') }}</th><th scope="col">{{ __('Product') }}</th><th scope="col">{{ __('Quantity') }}</th><th scope="col">{{ __('Price') }}</th><th scope="col">{{ __('Downloads') }}</th></tr></thead>
         <tbody>@foreach($order->items as $item)<tr><td>{{ $item->record_title }}</td><td>{{ $item->product_name }}</td><td>{{ $item->quantity }}</td><td>{{ $order->currency }} {{ number_format((float) $item->line_total, 2) }}</td>
             <td>@if($order->user_id === auth()->id() && ($d = $item->downloads->first()))
@@ -27,7 +27,7 @@
         @if($order->notes)<dt>{{ __('Notes') }}</dt><dd>{{ $order->notes }}</dd>@endif</dl>
     @if($manages)
         <h2>{{ __('Payments') }}</h2>
-        @forelse($order->payments as $p)<p>{{ $p->gateway }} · {{ $p->status->label($lang) }}@if($p->amount !== null) · {{ $p->currency }} {{ number_format((float) $p->amount, 2) }}@endif @if($p->transaction_id) · {{ $p->transaction_id }}@endif @if($p->refused_because) · <strong>{{ __('refused: :why', ['why' => $p->refused_because]) }}</strong>@endif · {{ $p->created_at->format('Y-m-d H:i') }}</p>
+        @forelse($order->payments as $p)<p>{{ $p->gateway }} · {{ $p->status->label($lang) }}@if($p->amount !== null) · {{ $p->currency }} {{ number_format((float) $p->amount, 2) }}@endif @if($p->transaction_id) · {{ $p->transaction_id }}@endif @if($p->refused_because) · <strong>{{ __('refused: :why', ['why' => $p->refused_because]) }}</strong>@endif · {{ $p->created_at->timezone(config('workspace.timezone'))->format('Y-m-d H:i') }}</p>
         @empty<p>{{ __('None.') }}</p>@endforelse
         <form method="post" action="{{ route('shop.orders.status', $order) }}">@csrf
             <label for="o-status">{{ __('Change the status to') }}</label> <select id="o-status" name="status">@foreach($statuses as $s)<option value="{{ $s->notation }}">{{ $s->label($lang) }}</option>@endforeach</select>

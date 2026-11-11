@@ -21,7 +21,7 @@
 
     <h2>{{ __('Taken in') }}</h2>
     <table><thead><tr><th scope="col">{{ __('When') }}</th><th scope="col">{{ __('File') }}</th><th scope="col">{{ __('From') }}</th><th scope="col">{{ __('What became of it') }}</th></tr></thead>
-        <tbody>@forelse($log as $e)<tr><td>{{ $e->created_at->timezone($tz)->format('Y-m-d H:i') }}</td><td>{{ $e->file_name }}@if($e->size_bytes) <span class="meta">{{ \Illuminate\Support\Number::fileSize($e->size_bytes) }}</span>@endif</td>
+        <tbody>@forelse($log as $e)<tr><td>{{ $e->created_at->timezone($tz)->timezone(config('workspace.timezone'))->format('Y-m-d H:i') }}</td><td>{{ $e->file_name }}@if($e->size_bytes) <span class="meta">{{ \Illuminate\Support\Number::fileSize($e->size_bytes) }}</span>@endif</td>
             <td>{{ $e->folder?->label ?? __('scan API') }}</td>
             <td>{{ $e->outcome->label($lang) }}@if($e->record) · <a href="{{ route('records.show', $e->record) }}">{{ \App\Relations\EntityKinds::label($e->record) }}</a>@endif
                 @if($e->import) · <a href="{{ route('imports.show', $e->import) }}">{{ __('its report') }}</a>@endif @if($e->message) · {{ $e->message }}@endif</td></tr>

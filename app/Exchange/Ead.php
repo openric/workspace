@@ -202,7 +202,7 @@ class Ead
         $x->endElement();
         $x->startElement('eventdatetime');
         $x->writeAttribute('standarddatetime', now()->toAtomString());
-        $x->text(now()->format('Y-m-d H:i'));
+        $x->text(now()->timezone(config('workspace.timezone'))->format('Y-m-d H:i'));
         $x->endElement();
         $x->startElement('agenttype');
         $x->writeAttribute('value', 'machine');

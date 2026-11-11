@@ -13,7 +13,7 @@
         <section style="border-top: 1px solid var(--line); padding: .5rem 0">
             <h2 style="font-size: 1rem; margin: .2rem 0">@if($f->file)<a href="{{ route('instantiations.show', $f->file->instantiation_id) }}">{{ $f->file->original_name }}</a> ({{ $f->file->use->label($lang) }}) · {{ \App\Relations\EntityKinds::label($f->file->instantiation->record) }}@else<code>{{ $f->digital_file_id }}</code>@endif</h2>
             <p><strong>{{ $f->outcome->label($lang) }}</strong> · {{ $f->status->label($lang) }} · {{ trans_choice(':count failed check|:count failed checks in a row', $f->consecutive_failures, ['count' => $f->consecutive_failures]) }}
-                · {{ __('first :first, last :last', ['first' => $f->first_failed_at->timezone($tz)->format('Y-m-d H:i'), 'last' => $f->last_failed_at->timezone($tz)->format('Y-m-d H:i')]) }}
+                · {{ __('first :first, last :last', ['first' => $f->first_failed_at->timezone($tz)->timezone(config('workspace.timezone'))->format('Y-m-d H:i'), 'last' => $f->last_failed_at->timezone($tz)->timezone(config('workspace.timezone'))->format('Y-m-d H:i')]) }}
                 @if($f->acknowledgedBy) · {{ __('acknowledged by :name', ['name' => $f->acknowledgedBy->name]) }}@endif</p>
             @if($f->resolution_notes)<p>{{ $f->resolution_notes }}</p>@endif
             @if(in_array($f->status->notation, \App\Models\FixityFailure::OPEN, true))

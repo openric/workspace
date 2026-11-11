@@ -23,5 +23,5 @@
         <dt>{{ __('Rights in force') }}</dt><dd>{{ implode('; ', $simulation['rights']) ?: __('none') }}</dd>
     </dl>
     <h2>{{ __('Earlier checks') }}</h2>
-    @foreach($history as $h)<p style="margin: .1rem 0">{{ $h->evaluated_at->setTimezone(config('workspace.timezone'))->format('Y-m-d H:i') }} {{ $h->rule?->name }}: {{ $h->outcome?->label(\App\Support\Vocab::languages()) }}</p>@endforeach
+    @foreach($history as $h)<p style="margin: .1rem 0">{{ $h->evaluated_at->setTimezone(config('workspace.timezone'))->timezone(config('workspace.timezone'))->format('Y-m-d H:i') }} {{ $h->rule?->name }}: {{ $h->outcome?->label(\App\Support\Vocab::languages()) }}</p>@endforeach
 @endsection

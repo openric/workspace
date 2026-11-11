@@ -87,7 +87,7 @@ class EacCpf
             $x->writeElement('eventType', $type);
             $x->startElement('eventDateTime');
             $x->writeAttribute('standardDateTime', $at->toAtomString());
-            $x->text($at->format('Y-m-d H:i'));
+            $x->text($at->timezone(config('workspace.timezone'))->format('Y-m-d H:i'));
             $x->endElement();
             $x->writeElement('agentType', $who ? 'human' : 'machine');
             $x->writeElement('agent', $who ?? 'OpenRiC Workspace');

@@ -5,7 +5,7 @@
 <strong>{{ __('Subject') }}:</strong> {{ $request->subject }}@endif<br>
 <strong>{{ __('Requester') }}:</strong> {{ $request->user->name }}<br>
 <strong>{{ __('Urgency') }}:</strong> {{ $request->urgency->label([app()->getLocale(), 'en']) }}<br>
-<strong>{{ __('Received') }}:</strong> {{ $request->created_at->format('Y-m-d H:i') }}</p>
+<strong>{{ __('Received') }}:</strong> {{ $request->created_at->timezone(config('workspace.timezone'))->format('Y-m-d H:i') }}</p>
 <p><strong>{{ __('Reason') }}:</strong></p>
 <blockquote>{!! nl2br(e($request->reason)) !!}</blockquote>
 @if($request->justification)<p><strong>{{ __('Justification') }}:</strong></p>

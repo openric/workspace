@@ -20,7 +20,7 @@
             @foreach($filed as $report)
                 <tr><td><a href="{{ route('reports.builder.show', $report) }}">{{ $report->name }}</a>@if($report->shared) <span class="meta">{{ __('shared') }}</span>@endif</td>
                     <td>{{ __(\App\Reports\ReportBuilder::SOURCE_TITLES[$report->source] ?? $report->source) }}</td><td>{{ $report->status->label($lang) }}</td>
-                    <td>{{ $report->owner->name }}</td><td>{{ $report->updated_at->format('Y-m-d H:i') }}</td></tr>
+                    <td>{{ $report->owner->name }}</td><td>{{ $report->updated_at->timezone(config('workspace.timezone'))->format('Y-m-d H:i') }}</td></tr>
             @endforeach
         </tbody></table>
     @endforeach

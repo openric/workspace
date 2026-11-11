@@ -12,7 +12,7 @@
     @forelse($pending as $registration)
         <section style="border: 1px solid var(--line); border-radius: var(--radius); padding: .5rem 1rem; margin: .75rem 0">
             <h3 style="margin: .3rem 0">{{ $registration->name }}</h3>
-            <p style="margin: .2rem 0">{{ $registration->email }} · {{ __('asked :when', ['when' => $registration->created_at->format('Y-m-d H:i')]) }}</p>
+            <p style="margin: .2rem 0">{{ $registration->email }} · {{ __('asked :when', ['when' => $registration->created_at->timezone(config('workspace.timezone'))->format('Y-m-d H:i')]) }}</p>
             @if($registration->reason)<p style="margin: .4rem 0">{{ $registration->reason }}</p>@endif
             <form method="post" action="{{ route('registrations.approve', $registration) }}">
                 @csrf

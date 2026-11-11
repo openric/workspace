@@ -61,7 +61,7 @@
 
     @if($mention->decisions->isNotEmpty())
         <h2>{{ __('Decisions') }}</h2>
-        <ul>@foreach($mention->decisions as $d)<li>{{ $d->decision->label(\App\Support\Vocab::languages()) }}, {{ __('by :name on :date', ['name' => $d->user->name, 'date' => $d->decided_at->format('Y-m-d H:i')]) }}@if($d->reason): {{ $d->reason }}@endif
+        <ul>@foreach($mention->decisions as $d)<li>{{ $d->decision->label(\App\Support\Vocab::languages()) }}, {{ __('by :name on :date', ['name' => $d->user->name, 'date' => $d->decided_at->timezone(config('workspace.timezone'))->format('Y-m-d H:i')]) }}@if($d->reason): {{ $d->reason }}@endif
             <span class="meta">{{ trans_choice('(:count candidate seen)|(:count candidates seen)', count($d->candidates_snapshot), ['count' => count($d->candidates_snapshot)]) }}</span></li>@endforeach</ul>
     @endif
 @endsection

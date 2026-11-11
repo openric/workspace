@@ -18,10 +18,10 @@
     @php($verb = $import->committed_at ? '' : 'would be ')
     <p>{{ \App\Exchange\Import\ImportService::FORMATS[$import->format] ?? $import->format }}, {{ __('source ":source", language :language', ['source' => $import->source, 'language' => $import->language]) }},
         @if($import->repository){{ __('into :repository', ['repository' => $import->repository->described('authorised-name', ['en'])]) }}@endif @if($import->parent), {{ __('inside') }} <a href="{{ route('records.show', $import->parent) }}">{{ $import->parent->described('title', ['en']) }}</a>@endif.
-        {{ __('Uploaded by :name on :date.', ['name' => $import->user->name, 'date' => $import->created_at->format('Y-m-d H:i')]) }} SHA-256 <code>{{ $import->file_sha256 }}</code>.</p>
+        {{ __('Uploaded by :name on :date.', ['name' => $import->user->name, 'date' => $import->created_at->timezone(config('workspace.timezone'))->format('Y-m-d H:i')]) }} SHA-256 <code>{{ $import->file_sha256 }}</code>.</p>
     @php($done = (bool) $import->committed_at)
     @unless($job?->active())
-    <p><strong>{{ $done ? __('Imported on :date.', ['date' => $import->committed_at->format('Y-m-d H:i')]) : __('Dry run: nothing has been written.') }}</strong>
+    <p><strong>{{ $done ? __('Imported on :date.', ['date' => $import->committed_at->timezone(config('workspace.timezone'))->format('Y-m-d H:i')]) : __('Dry run: nothing has been written.') }}</strong>
         {{ __($done ? ':entries entries in the file: :created created, :updated updated, :unchanged unchanged, :rejected not imported.' : ':entries entries in the file: :created would be created, :updated would be updated, :unchanged unchanged, :rejected not imported.', ['entries' => count($report['units'] ?? [])] + $actions) }}
         @if($report['counts'] ?? null){{ __($done ? ':values values; :relations relations proposed for review; :agents authority records, :places places and :concepts concepts created, linked from the entries; :containers containers made; :files files kept.' : ':values values; :relations relations would be proposed for review; :agents authority records, :places places and :concepts concepts would be created, linked from the entries; :containers containers would be made; :files files kept.', ['containers' => 0, 'files' => 0] + $report['counts']) }}@endif</p>
     @endunless
@@ -35,7 +35,7 @@
     @if($done)
         <p><a href="{{ route('imports.bag', $import) }}">{{ __('Download as a BagIt bag') }}</a> <span class="meta">{{ __('The file as uploaded, the files it kept and what became of each entry, with their SHA-256.') }}</span></p>
         @if($undo = $import->options['undo'] ?? null)
-            <p><strong>{{ __('Undone on :date: :count deleted.', ['date' => \Illuminate\Support\Carbon::parse($import->options['undone_at'])->format('Y-m-d H:i'), 'count' => $undo['deleted']]) }}</strong></p>
+            <p><strong>{{ __('Undone on :date: :count deleted.', ['date' => \Illuminate\Support\Carbon::parse($import->options['undone_at'])->timezone(config('workspace.timezone'))->format('Y-m-d H:i'), 'count' => $undo['deleted']]) }}</strong></p>
             @if($undo['kept'])<p>{{ __('Kept') }}:</p><ul>@foreach($undo['kept'] as $k)<li>{{ $k['title'] ?? $k['id'] }}: {{ $k['why'] }}</li>@endforeach</ul>@endif
         @else
             <form method="post" action="{{ route('imports.undo', $import) }}" onsubmit="return confirm('{{ __('Delete what this import created? What anyone changed since is kept.') }}')">@csrf

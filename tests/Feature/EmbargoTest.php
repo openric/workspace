@@ -107,10 +107,13 @@ class EmbargoTest extends TestCase
         $this->assertSame([200, 200, 200, 200, 404], $this->visitor(), 'before: the public has the reference copy and thumbnail, not the master');
         $this->impose(['type' => 'partial', 'reason' => 'copyright', 'public_message' => 'In copyright until 2031.']);
         $this->assertSame([200, 200, 200, 200, 404], $this->visitor());
-        $this->get(route('discover.record', $this->letter->id))->assertSee('Under embargo')->assertSee('In copyright until 2031.');
+        $this->get(route('discover.record', $this->letter->id))->assertSee('Under embargo')->assertSee('In copyright until 2031.')->assertSee('Deep zoom', false);
 
         Embargo::sole()->update(['type_id' => Concept::where('iri', Embargoes::TYPES.'digital-only')->value('id')]);
         $this->assertSame([200, 200, 200, 404, 404], $this->visitor(), 'files withheld: the thumbnail still shows');
+        // The thumbnail at its own size, under the embargo's message: no viewer to enlarge it in (#10).
+        $this->get(route('discover.record', $this->letter->id))->assertSee('Under embargo')->assertSee('viewer-thumbnail-only')
+            ->assertSee(route('discover.file', $this->scan->file('thumbnail')), false)->assertDontSee('Deep zoom')->assertDontSee('Open the image');
         Embargo::sole()->update(['type_id' => Concept::where('iri', Embargoes::TYPES.'metadata-only')->value('id')]);
         $this->assertSame([200, 200, 404, 404, 404], $this->visitor(), 'description only');
         Embargo::sole()->update(['type_id' => Concept::where('iri', Embargoes::TYPES.'full')->value('id')]);

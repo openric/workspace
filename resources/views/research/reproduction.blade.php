@@ -68,5 +68,5 @@
                 <button type="submit">{{ __('Save') }}</button></form>
         </details>
     @endif
-    <details><summary>{{ __('History') }}</summary>@foreach($reproduction->statusChanges as $c)<p><small>{{ $c->created_at->format('Y-m-d H:i') }} · {{ $c->old_status ? __(':from to :to', ['from' => $c->old_status, 'to' => $c->new_status]) : $c->new_status }}@if($c->changedBy) · {{ $c->changedBy->name }}@endif @if($c->notes) · {{ $c->notes }}@endif</small></p>@endforeach</details>
+    <details><summary>{{ __('History') }}</summary>@foreach($reproduction->statusChanges as $c)<p><small>{{ $c->created_at->timezone(config('workspace.timezone'))->format('Y-m-d H:i') }} · {{ $c->old_status ? __(':from to :to', ['from' => $c->old_status, 'to' => $c->new_status]) : $c->new_status }}@if($c->changedBy) · {{ $c->changedBy->name }}@endif @if($c->notes) · {{ $c->notes }}@endif</small></p>@endforeach</details>
 @endsection

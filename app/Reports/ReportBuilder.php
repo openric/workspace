@@ -241,8 +241,8 @@ final class ReportBuilder
             'repository' => $entity instanceof RecordResource ? (string) EntityKinds::label($entity->repository) : '',
             'type' => $type ? (string) $entity->{$type}?->label($lang) : '',
             'published' => $this->reports->isPublished($entity) ? __('Yes') : __('No'),
-            'created' => $entity->created_at?->format('Y-m-d H:i') ?? '',
-            'updated' => $entity->updated_at?->format('Y-m-d H:i') ?? '',
+            'created' => $entity->created_at?->timezone(config('workspace.timezone'))->format('Y-m-d H:i') ?? '',
+            'updated' => $entity->updated_at?->timezone(config('workspace.timezone'))->format('Y-m-d H:i') ?? '',
             'iri' => (string) $entity->iri,
             default => '',
         };
@@ -280,7 +280,7 @@ final class ReportBuilder
         })->all();
 
         return ['title' => $report->name, 'description' => (string) $report->description, 'source' => __(self::SOURCE_TITLES[$report->source]),
-            'generated' => now()->format('Y-m-d H:i'), 'status' => $report->status->label(Vocab::languages()), 'cut' => $cut, 'entities' => $entities->count(), 'sections' => $sections];
+            'generated' => now()->timezone(config('workspace.timezone'))->format('Y-m-d H:i'), 'status' => $report->status->label(Vocab::languages()), 'cut' => $cut, 'entities' => $entities->count(), 'sections' => $sections];
     }
 
     /** @return list<array{0: string, 1: string}> how many entities have each value of what is counted, most first */

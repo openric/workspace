@@ -69,7 +69,7 @@ class EacF
             $x->endElement();
             $x->startElement('eventDateTime');
             $x->writeAttribute('standardDateTime', $at->toAtomString());
-            $x->text($at->format('Y-m-d H:i'));
+            $x->text($at->timezone(config('workspace.timezone'))->format('Y-m-d H:i'));
             $x->endElement();
             $x->endElement();
         }

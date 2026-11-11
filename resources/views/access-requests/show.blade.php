@@ -16,10 +16,10 @@
         @if($r->requestType)<br><strong>{{ __('Request type') }}:</strong> {{ $r->requestType->label($lang) }}@endif
         @if($r->accessType)<br><strong>{{ __('Access type') }}:</strong> {{ $r->accessType->label($lang) }}@endif
         <br><strong>{{ __('Requester') }}:</strong> {{ $r->user->name }} &lt;{{ $r->user->email }}&gt;
-        <br><strong>{{ __('Status') }}:</strong> {{ $r->status->label($lang) }}@if($r->grantsAccess()), {{ __('access until :date', ['date' => $r->expires_at->format('Y-m-d H:i')]) }}@endif
+        <br><strong>{{ __('Status') }}:</strong> {{ $r->status->label($lang) }}@if($r->grantsAccess()), {{ __('access until :date', ['date' => $r->expires_at->timezone(config('workspace.timezone'))->format('Y-m-d H:i')]) }}@endif
         <br><strong>{{ __('Urgency') }}:</strong> {{ $r->urgency->label($lang) }}
-        <br><strong>{{ __('Received') }}:</strong> {{ $r->created_at->format('Y-m-d H:i') }}
-        @if($r->reviewer)<br><strong>{{ __('Reviewed by') }}:</strong> {{ $r->reviewer->name }}, {{ $r->reviewed_at->format('Y-m-d H:i') }}@endif</p>
+        <br><strong>{{ __('Received') }}:</strong> {{ $r->created_at->timezone(config('workspace.timezone'))->format('Y-m-d H:i') }}
+        @if($r->reviewer)<br><strong>{{ __('Reviewed by') }}:</strong> {{ $r->reviewer->name }}, {{ $r->reviewed_at->timezone(config('workspace.timezone'))->format('Y-m-d H:i') }}@endif</p>
     <h2>{{ $r->subject ? __('Description') : __('Reason') }}</h2>
     <p style="white-space: pre-line">{{ $r->reason }}</p>
     @if($r->justification)<h2>{{ __('Justification') }}</h2><p style="white-space: pre-line">{{ $r->justification }}</p>@endif

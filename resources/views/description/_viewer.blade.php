@@ -25,7 +25,9 @@
         $master && $master->mime_type === 'application/pdf' => 'pdf',
         $timed && str_starts_with($timed->mime_type, 'video/') => 'video',
         $timed && str_starts_with($timed->mime_type, 'audio/') => 'audio',
-        $browserImage($reference) || $browserImage($master) || $browserImage($thumbnail) => 'image',
+        $browserImage($reference) || $browserImage($master) => 'image',
+        // Only the thumbnail, as under an embargo that withholds the files: shown at its own size, never enlarged in a viewer (#10).
+        $browserImage($thumbnail) => 'thumbnail',
         default => null,
     };
     $viewerId = 'v-'.$instantiation->id;
@@ -38,6 +40,8 @@
     @include('description._model', ['src' => $url($reference ?? $master), 'alt' => $alt, 'instantiation' => $instantiation, 'fileRoute' => $fileRoute, 'public' => $fileRoute === 'discover.file'])
 @elseif($kind === 'splat')
     @include('description._splat', ['src' => $url($master), 'alt' => $alt, 'extension' => $extension($master)])
+@elseif($kind === 'thumbnail')
+    <img src="{{ $url($thumbnail) }}" alt="{{ $alt }}" @if($thumbnail->width) width="{{ $thumbnail->width }}" height="{{ $thumbnail->height }}" @endif loading="lazy" class="viewer-thumbnail-only">
 @elseif($kind === 'image')
     @php
         $image = $browserImage($reference) ? $reference : ($browserImage($master) ? $master : $thumbnail);

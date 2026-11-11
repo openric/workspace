@@ -14,7 +14,7 @@
             @foreach($held as $account)
                 @php($report = $reports[strtolower($account->email)][0] ?? null)
                 <li><strong>{{ $account->name }}</strong> &lt;{{ $account->email }}&gt;
-                    <span class="meta">{{ __('Held since :date', ['date' => $account->email_bounced_at->format('Y-m-d H:i')]) }}@if($report) · {{ $report->type->label($lang) }}@if($report->provider) ({{ $report->provider }})@endif @endif</span>
+                    <span class="meta">{{ __('Held since :date', ['date' => $account->email_bounced_at->timezone(config('workspace.timezone'))->format('Y-m-d H:i')]) }}@if($report) · {{ $report->type->label($lang) }}@if($report->provider) ({{ $report->provider }})@endif @endif</span>
                     @if($report?->reason)<span class="summary">{{ \Illuminate\Support\Str::limit($report->reason, 300) }}</span>@endif
                     <form method="post" action="{{ route('email.clear', $account) }}">@csrf<button type="submit" style="margin-top: 0">{{ __('Send to it again') }}</button></form></li>
             @endforeach
@@ -34,7 +34,7 @@
         <ul>
             @foreach($sent as $mail)
                 <li><strong>{{ $mail->subject ?: class_basename($mail->mailable) }}</strong>
-                    <span class="meta">{{ collect([$mail->recipient_email, $mail->status->label($lang), ($mail->sent_at ?? $mail->queued_at ?? $mail->created_at)?->format('Y-m-d H:i')])->filter()->join(' · ') }}</span>
+                    <span class="meta">{{ collect([$mail->recipient_email, $mail->status->label($lang), ($mail->sent_at ?? $mail->queued_at ?? $mail->created_at)?->timezone(config('workspace.timezone'))->format('Y-m-d H:i')])->filter()->join(' · ') }}</span>
                     @if($mail->error)<span class="summary">{{ \Illuminate\Support\Str::limit($mail->error, 300) }}</span>@endif</li>
             @endforeach
         </ul>

@@ -33,7 +33,7 @@
         <ul>
             @foreach($jobs as $job)
                 <li><a href="{{ route('jobs.show', $job) }}"><strong>{{ $job->name }}</strong></a>
-                    <span class="meta">{{ collect([$job->type->label($lang), $job->status->label($lang), $all ? $job->user?->name : null, $job->created_at->format('Y-m-d H:i'),
+                    <span class="meta">{{ collect([$job->type->label($lang), $job->status->label($lang), $all ? $job->user?->name : null, $job->created_at->timezone(config('workspace.timezone'))->format('Y-m-d H:i'),
                         $job->duration !== null ? trans_choice(':count second|:count seconds', $job->duration) : null])->filter(fn ($v) => $v !== null && $v !== '')->join(' · ') }}</span>
                     @if($job->error_message)<span class="summary">{{ \Illuminate\Support\Str::limit($job->error_message, 200) }}</span>@endif</li>
             @endforeach

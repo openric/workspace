@@ -12,9 +12,9 @@
             <tr><th scope="row">{{ __('Type') }}</th><td>{{ $job->type->label($lang) }}</td></tr>
             <tr><th scope="row">{{ __('Status') }}</th><td>{{ $job->status->label($lang) }}@if($job->active()) <small>{{ __('This page refreshes itself until it is done.') }}</small>@endif</td></tr>
             <tr><th scope="row">{{ __('Asked for by') }}</th><td>{{ $job->user?->name ?? __('The Workspace') }}</td></tr>
-            <tr><th scope="row">{{ __('Created') }}</th><td>{{ $job->created_at->format('Y-m-d H:i:s') }}</td></tr>
-            <tr><th scope="row">{{ __('Started') }}</th><td>{{ $job->started_at?->format('Y-m-d H:i:s') ?? '-' }}</td></tr>
-            <tr><th scope="row">{{ __('Completed') }}</th><td>{{ $job->completed_at?->format('Y-m-d H:i:s') ?? '-' }}</td></tr>
+            <tr><th scope="row">{{ __('Created') }}</th><td>{{ $job->created_at->timezone(config('workspace.timezone'))->format('Y-m-d H:i:s') }}</td></tr>
+            <tr><th scope="row">{{ __('Started') }}</th><td>{{ $job->started_at?->timezone(config('workspace.timezone'))->format('Y-m-d H:i:s') ?? '-' }}</td></tr>
+            <tr><th scope="row">{{ __('Completed') }}</th><td>{{ $job->completed_at?->timezone(config('workspace.timezone'))->format('Y-m-d H:i:s') ?? '-' }}</td></tr>
             <tr><th scope="row">{{ __('Duration') }}</th><td>{{ $job->duration !== null ? trans_choice(':count second|:count seconds', $job->duration) : '-' }}</td></tr>
             @if($job->subject_table === 'imports')<tr><th scope="row">{{ __('Import') }}</th><td><a href="{{ route('imports.show', $job->subject_id) }}">{{ __('The import and its report') }}</a></td></tr>@endif
             @if($job->subject_table === 'instantiations' && ($instantiation = \App\Models\Instantiation::find($job->subject_id)))<tr><th scope="row">{{ __('Instantiation') }}</th><td><a href="{{ \App\Relations\EntityKinds::route($instantiation) }}">{{ \App\Relations\EntityKinds::label($instantiation) }}</a></td></tr>@endif

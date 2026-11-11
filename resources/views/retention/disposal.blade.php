@@ -11,16 +11,16 @@
     <p><strong>{{ $disposal->action->label($lang) }}</strong> · {{ $disposal->status->label($lang) }}@if($disposal->disposalClass) · {{ $disposal->disposalClass->schedule->reference }}: {{ $disposal->disposalClass->reference }} {{ $disposal->disposalClass->title }}@endif</p>
     @if($disposal->reason)<p>{{ $disposal->reason }}</p>@endif
     <ol>
-        <li>{{ __('Initiated by :name on :date', ['name' => $disposal->initiatedBy?->name, 'date' => $disposal->initiated_at->format('Y-m-d H:i')]) }}</li>
-        @if($disposal->recommended_at)<li>{{ __('Recommended by :name on :date', ['name' => $disposal->recommendedBy?->name, 'date' => $disposal->recommended_at->format('Y-m-d H:i')]) }}</li>@endif
-        @if($disposal->approved_at)<li>{{ __('Approved by :name on :date', ['name' => $disposal->approvedBy?->name, 'date' => $disposal->approved_at->format('Y-m-d H:i')]) }}</li>@endif
-        @if($disposal->cleared_at)<li>{{ __('Legally cleared by :name on :date', ['name' => $disposal->clearedBy?->name, 'date' => $disposal->cleared_at->format('Y-m-d H:i')]) }}</li>@endif
-        @if($disposal->executed_at)<li>{{ __('Carried out by :name on :date', ['name' => $disposal->executedBy?->name, 'date' => $disposal->executed_at->format('Y-m-d H:i')]) }}@if($disposal->transfer_destination): {{ $disposal->transfer_destination }}@endif</li>@endif
+        <li>{{ __('Initiated by :name on :date', ['name' => $disposal->initiatedBy?->name, 'date' => $disposal->initiated_at->timezone(config('workspace.timezone'))->format('Y-m-d H:i')]) }}</li>
+        @if($disposal->recommended_at)<li>{{ __('Recommended by :name on :date', ['name' => $disposal->recommendedBy?->name, 'date' => $disposal->recommended_at->timezone(config('workspace.timezone'))->format('Y-m-d H:i')]) }}</li>@endif
+        @if($disposal->approved_at)<li>{{ __('Approved by :name on :date', ['name' => $disposal->approvedBy?->name, 'date' => $disposal->approved_at->timezone(config('workspace.timezone'))->format('Y-m-d H:i')]) }}</li>@endif
+        @if($disposal->cleared_at)<li>{{ __('Legally cleared by :name on :date', ['name' => $disposal->clearedBy?->name, 'date' => $disposal->cleared_at->timezone(config('workspace.timezone'))->format('Y-m-d H:i')]) }}</li>@endif
+        @if($disposal->executed_at)<li>{{ __('Carried out by :name on :date', ['name' => $disposal->executedBy?->name, 'date' => $disposal->executed_at->timezone(config('workspace.timezone'))->format('Y-m-d H:i')]) }}@if($disposal->transfer_destination): {{ $disposal->transfer_destination }}@endif</li>@endif
     </ol>
     @if($disposal->notes)<p style="white-space: pre-line" class="meta">{{ $disposal->notes }}</p>@endif
     @if($disposal->certificate)<p>{{ __('Certificate of destruction') }}: <a href="{{ route('retention.certificate', $disposal->certificate) }}">{{ $disposal->certificate->number }}</a></p>@endif
     @if($disposal->verification)
-        <h2>{{ __('Verification') }} ({{ $disposal->verified_at->format('Y-m-d H:i') }})</h2>
+        <h2>{{ __('Verification') }} ({{ $disposal->verified_at->timezone(config('workspace.timezone'))->format('Y-m-d H:i') }})</h2>
         <ul>@foreach($disposal->verification as $c)<li>{{ $c['passed'] ? __('Yes') : __('No') }}: {{ __($c['check']) }}@if($c['detail']) ({{ $c['detail'] }})@endif</li>@endforeach</ul>
     @endif
     @foreach(array_filter([

@@ -91,5 +91,5 @@
 
     <h2>{{ __('History') }}</h2>
     <table><thead><tr><th scope="col">{{ __('When') }}</th><th scope="col">{{ __('From') }}</th><th scope="col">{{ __('To') }}</th><th scope="col">{{ __('By') }}</th><th scope="col">{{ __('Notes') }}</th></tr></thead>
-        <tbody>@foreach($transaction->history as $h)<tr><td>{{ $h->created_at->timezone($tz)->format('Y-m-d H:i') }}</td><td>{{ $h->from?->label($lang) }}</td><td>{{ $h->to->label($lang) }}</td><td>{{ $h->changedBy?->name }}</td><td>{{ $h->notes }}</td></tr>@endforeach</tbody></table>
+        <tbody>@foreach($transaction->history as $h)<tr><td>{{ $h->created_at->timezone($tz)->timezone(config('workspace.timezone'))->format('Y-m-d H:i') }}</td><td>{{ $h->from?->label($lang) }}</td><td>{{ $h->to->label($lang) }}</td><td>{{ $h->changedBy?->name }}</td><td>{{ $h->notes }}</td></tr>@endforeach</tbody></table>
 @endsection

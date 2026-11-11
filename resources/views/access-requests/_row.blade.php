@@ -2,6 +2,6 @@
 @php($lang = \App\Support\Vocab::languages())
 <li><a href="{{ route('access-requests.show', $r) }}"><strong>{{ $r->subject ?? \Illuminate\Support\Str::ucfirst($r->target()) }}</strong></a>
     <span class="meta">{{ collect([$r->instantiation ? __('of :record', ['record' => $r->record->described('title', [app()->getLocale(), 'en'])]) : ($r->subject ? \Illuminate\Support\Str::ucfirst($r->target()) : null), $withRequester ? $r->user->name : null,
-        $r->status->label($lang), $r->urgency->notation !== 'normal' ? $r->urgency->label($lang) : null, $r->created_at->format('Y-m-d H:i'),
+        $r->status->label($lang), $r->urgency->notation !== 'normal' ? $r->urgency->label($lang) : null, $r->created_at->timezone(config('workspace.timezone'))->format('Y-m-d H:i'),
         $r->grantsAccess() ? __('access until :date', ['date' => $r->expires_at->format('Y-m-d')]) : null])->filter()->join(' · ') }}</span>
     <span class="summary">{{ \Illuminate\Support\Str::limit($r->reason, 200) }}</span></li>

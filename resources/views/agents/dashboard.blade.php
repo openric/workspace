@@ -19,7 +19,7 @@
     @endforelse
     <h2>{{ __('Recently changed') }}</h2>
     @forelse($recent as $agent)
-        <p><a href="{{ route('agents.show', $agent) }}">{{ $agent->described('agent-authorised-name', ['en']) }}</a>, {{ $agent->updated_at->format('Y-m-d H:i') }}</p>
+        <p><a href="{{ route('agents.show', $agent) }}">{{ $agent->described('agent-authorised-name', ['en']) }}</a>, {{ $agent->updated_at->timezone(config('workspace.timezone'))->format('Y-m-d H:i') }}</p>
     @empty
         <p>{{ __('None.') }}</p>
     @endforelse

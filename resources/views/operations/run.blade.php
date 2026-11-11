@@ -4,11 +4,11 @@
 @section('content')
     @php($lang = \App\Support\Vocab::languages())
     @php($tz = config('workspace.timezone'))
-    <h1>{{ __('Fixity run of :date', ['date' => $run->started_at->timezone($tz)->format('Y-m-d H:i')]) }}</h1>
+    <h1>{{ __('Fixity run of :date', ['date' => $run->started_at->timezone($tz)->timezone(config('workspace.timezone'))->format('Y-m-d H:i')]) }}</h1>
     <p><a href="{{ route('fixity.schedules') }}">{{ __('Fixity') }}</a></p>
     <p>{{ $run->schedule?->name ?? __('Every file') }} · {{ $run->trigger->label($lang) }}@if($run->user) ({{ $run->user->name }})@endif · {{ $run->status->label($lang) }}
         · {{ __(':checked files, :bytes, :changed changed, :missing missing', ['checked' => number_format($run->files_checked), 'bytes' => \Illuminate\Support\Number::fileSize($run->bytes_checked, 1), 'changed' => $run->files_changed, 'missing' => $run->files_missing]) }}
-        @if($run->completed_at) · {{ __('ended :date', ['date' => $run->completed_at->timezone($tz)->format('Y-m-d H:i')]) }}@endif</p>
+        @if($run->completed_at) · {{ __('ended :date', ['date' => $run->completed_at->timezone($tz)->timezone(config('workspace.timezone'))->format('Y-m-d H:i')]) }}@endif</p>
     @if($run->error_message)<p class="error" role="alert">{{ $run->error_message }}</p>@endif
     <table><thead><tr><th scope="col">{{ __('File') }}</th><th scope="col">{{ __('Outcome') }}</th><th scope="col">SHA-256</th><th scope="col">{{ __('Size') }}</th></tr></thead>
         <tbody>@foreach($checks as $c)<tr><td>@if($c->file)<a href="{{ route('instantiations.show', $c->file->instantiation_id) }}">{{ $c->file->original_name }}</a> ({{ $c->file->use->label($lang) }})@else<code>{{ $c->digital_file_id }}</code>@endif</td>

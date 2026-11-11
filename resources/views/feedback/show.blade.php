@@ -12,7 +12,7 @@
         <dt>{{ __('Remarks') }}</dt><dd style="white-space: pre-line">{{ $entry->remarks }}</dd>
         <dt>{{ __('From') }}</dt><dd>{{ $entry->name }} {{ $entry->surname }} · <a href="mailto:{{ $entry->email }}">{{ $entry->email }}</a>@if($entry->phone) · {{ $entry->phone }}@endif</dd>
         @if($entry->relationship)<dt>{{ __('Relationship to the record') }}</dt><dd>{{ $entry->relationship }}</dd>@endif
-        <dt>{{ __('Received') }}</dt><dd>{{ $entry->created_at->format('Y-m-d H:i') }}</dd>
+        <dt>{{ __('Received') }}</dt><dd>{{ $entry->created_at->timezone(config('workspace.timezone'))->format('Y-m-d H:i') }}</dd>
         @if($entry->completed_at)<dt>{{ __('Completed') }}</dt><dd>{{ $entry->completed_at->format('Y-m-d') }}@if($entry->completedBy) {{ __('by :who', ['who' => $entry->completedBy->name]) }}@endif</dd>@endif
     </dl>
     <form method="post" action="{{ route('feedback.update', $entry) }}">@csrf

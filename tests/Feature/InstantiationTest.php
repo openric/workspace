@@ -110,6 +110,17 @@ class InstantiationTest extends TestCase
         $this->actingAs($this->editor)->get($instantiation->iri)->assertRedirect(route('instantiations.show', $instantiation));
     }
 
+    public function test_a_time_is_shown_in_the_institutions_timezone_not_in_utc(): void
+    {
+        config(['workspace.timezone' => 'Africa/Johannesburg']);
+        $this->upload($this->scan())->assertRedirect();
+        $instantiation = Instantiation::sole();
+        $instantiation->file('master')->update(['fixity_checked_at' => '2026-11-10 12:46:00+00']);
+        // Stored at 12:46 UTC, shown at 14:46 in Johannesburg (#9), as the PREMIS events on the same page are.
+        $this->actingAs($this->editor)->get("/instantiations/{$instantiation->id}")->assertOk()
+            ->assertSee('Fixity last checked 2026-11-10 14:46')->assertDontSee('2026-11-10 12:46');
+    }
+
     public function test_a_file_whose_checksum_does_not_match_is_refused_and_nothing_is_kept(): void
     {
         $this->upload($this->scan(), ['sha256' => str_repeat('a', 64)])->assertSessionHasErrors('file');

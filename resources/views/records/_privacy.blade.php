@@ -20,7 +20,7 @@
     @if($latest === null)
         <p>{{ __('Not scanned yet.') }}</p>
     @else
-        <p>{{ __('Scanned on :date under :law by :who', ['date' => $latest->started_at->format('Y-m-d H:i'), 'law' => $latest->jurisdiction->name, 'who' => $latest->scannedBy?->name ?? '-']) }}
+        <p>{{ __('Scanned on :date under :law by :who', ['date' => $latest->started_at->timezone(config('workspace.timezone'))->format('Y-m-d H:i'), 'law' => $latest->jurisdiction->name, 'who' => $latest->scannedBy?->name ?? '-']) }}
             · {{ $latest->coverage->label($lang) }} · <strong>{{ $latest->status->label($lang) }}</strong>
             @if($latest->decidedBy) ({{ __('by :who on :date', ['who' => $latest->decidedBy->name, 'date' => $latest->decided_at->format('Y-m-d')]) }})@endif
             @if($latest->finished_at === null)<br><span class="error">{{ __('A pattern could not be evaluated; the scan is not complete.') }}</span>@endif

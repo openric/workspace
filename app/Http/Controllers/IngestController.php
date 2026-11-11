@@ -116,7 +116,7 @@ class IngestController extends Controller
         fclose($out);
         $user = $request->user();
         $name = __('Grid entry under :title', ['title' => mb_substr((string) EntityKinds::label($parent), 0, 120)]).'.csv';
-        $import = Import::create(['institution_id' => $user->institution_id, 'user_id' => $user->id, 'format' => 'csv', 'source' => 'grid '.now()->format('Y-m-d H:i:s'),
+        $import = Import::create(['institution_id' => $user->institution_id, 'user_id' => $user->id, 'format' => 'csv', 'source' => 'grid '.now()->timezone(config('workspace.timezone'))->format('Y-m-d H:i:s'),
             'file_name' => $name, 'file_sha256' => hash('sha256', $content), 'content' => $content, 'language' => $data['language'], 'repository_id' => $parent->repository_id
                 ?? collect($parent->ancestors())->first()?->repository_id, 'parent_id' => $parent->id,
             'options' => ['agent_type' => null, 'create_terms' => true, 'match_identifier' => false, 'default_level' => 'item']]);

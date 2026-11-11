@@ -13,7 +13,7 @@
     <table>
         <thead><tr><th scope="col">{{ __('Record') }}</th><th scope="col">{{ __('Check') }}</th><th scope="col">{{ __('Details') }}</th><th scope="col">{{ __('When') }}</th></tr></thead>
         <tbody>@foreach($dashboard['failures'] as $r)
-            <tr><td><a href="{{ route('iiif-validation.record', $r->record) }}">{{ \App\Relations\EntityKinds::label($r->record) }}</a></td><td>{{ $r->check->label($lang) }}</td><td>{{ $r->details }}</td><td>{{ $r->validated_at->format('Y-m-d H:i') }}</td></tr>
+            <tr><td><a href="{{ route('iiif-validation.record', $r->record) }}">{{ \App\Relations\EntityKinds::label($r->record) }}</a></td><td>{{ $r->check->label($lang) }}</td><td>{{ $r->details }}</td><td>{{ $r->validated_at->timezone(config('workspace.timezone'))->format('Y-m-d H:i') }}</td></tr>
         @endforeach</tbody>
     </table>@endif
 @endsection

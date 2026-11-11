@@ -30,7 +30,7 @@
                     {{ __('for') }} <a href="{{ route('records.show', $p->record) }}">{{ \App\Relations\EntityKinds::label($p->record) }}</a>
                     <small>(<a href="{{ route('proposals.index', ['record' => $p->record_resource_id, 'status' => $status]) }}">{{ __('all for this record') }}</a>)</small>
                 </h3>
-                @php($facts = array_filter(['Proposed by '.$p->proposedBy->name.', through '.$p->origin_label.', '.$p->created_at->format('Y-m-d H:i'),
+                @php($facts = array_filter(['Proposed by '.$p->proposedBy->name.', through '.$p->origin_label.', '.$p->created_at->timezone(config('workspace.timezone'))->format('Y-m-d H:i'),
                     $p->confidence !== null ? 'confidence '.number_format($p->confidence, 2) : null, $p->language ? 'language '.$p->language : null]))
                 <p><small>{{ implode('; ', $facts) }}
                     @if($k === 'transcript' && $p->instantiation); {{ __('of') }} <a href="{{ route('instantiations.show', $p->instantiation) }}">{{ $p->instantiation->described('instantiation-title', ['en']) ?? __('the instantiation') }}</a> @endif
@@ -87,7 +87,7 @@
                     </form>
                     <p></p>
                 @else
-                    <p>{{ $p->status->label(\App\Support\Vocab::languages()) }} by {{ $p->reviewedBy?->name }}, {{ $p->reviewed_at?->format('Y-m-d H:i') }}{{ $p->review_note ? ': '.$p->review_note : '' }}</p>
+                    <p>{{ $p->status->label(\App\Support\Vocab::languages()) }} by {{ $p->reviewedBy?->name }}, {{ $p->reviewed_at?->timezone(config('workspace.timezone'))->format('Y-m-d H:i') }}{{ $p->review_note ? ': '.$p->review_note : '' }}</p>
                 @endif
             </section>
         @empty
@@ -106,7 +106,7 @@
                     {{ $a->relation->phrase() }}
                     @if($to)<a href="{{ \App\Relations\EntityKinds::route($to) }}">{{ \App\Relations\EntityKinds::label($to) }}</a>@endif
                 </h3>
-                <p><small>{{ __('Proposed by :name, :date', ['name' => $a->asserter(), 'date' => $a->asserted_at->format('Y-m-d H:i')]) }} @if($record), {{ __('from') }} <a href="{{ route('records.show', $record) }}">{{ \App\Relations\EntityKinds::label($record) }}</a>@endif</small></p>
+                <p><small>{{ __('Proposed by :name, :date', ['name' => $a->asserter(), 'date' => $a->asserted_at->timezone(config('workspace.timezone'))->format('Y-m-d H:i')]) }} @if($record), {{ __('from') }} <a href="{{ route('records.show', $record) }}">{{ \App\Relations\EntityKinds::label($record) }}</a>@endif</small></p>
                 @if($a->basis)<p style="white-space: pre-line"><strong>{{ __('Basis') }}:</strong> {{ $a->basis }}</p>@endif
                 @if($a->status->notation === 'proposed')
                     <form method="post" action="{{ route('proposals.relation', $a) }}" style="display: flex; gap: .5rem">
@@ -116,7 +116,7 @@
                     </form>
                     <p></p>
                 @else
-                    <p>{{ $a->status->label(\App\Support\Vocab::languages()) }} by {{ $a->reviewer?->name }}, {{ $a->reviewed_at?->format('Y-m-d H:i') }}</p>
+                    <p>{{ $a->status->label(\App\Support\Vocab::languages()) }} by {{ $a->reviewer?->name }}, {{ $a->reviewed_at?->timezone(config('workspace.timezone'))->format('Y-m-d H:i') }}</p>
                 @endif
             </section>
         @empty

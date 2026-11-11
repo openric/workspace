@@ -65,6 +65,6 @@
     @if($settings->annif_project && $settings->annif_vocabulary_id)<form method="post" action="{{ route('ai.annif-trial') }}">@csrf<button type="submit">{{ __('Try Annif now') }}</button></form>@endif
     @if($annifTrials->isEmpty())<p>{{ __('None yet.') }}</p>@else
     <table><thead><tr><th scope="col">{{ __('When') }}</th><th scope="col">{{ __('Project') }}</th><th scope="col">{{ __('Records') }}</th><th scope="col">{{ __('Precision') }}</th><th scope="col">{{ __('Recall') }}</th></tr></thead>
-        <tbody>@foreach($annifTrials as $t)<tr><td>{{ \Illuminate\Support\Carbon::parse($t->run_at)->format('Y-m-d H:i') }}</td><td>{{ $t->project }}</td><td>{{ $t->records }}</td><td>{{ number_format($t->precision, 2) }}</td><td>{{ number_format($t->recall, 2) }}</td></tr>@endforeach</tbody></table>
+        <tbody>@foreach($annifTrials as $t)<tr><td>{{ \Illuminate\Support\Carbon::parse($t->run_at)->timezone(config('workspace.timezone'))->format('Y-m-d H:i') }}</td><td>{{ $t->project }}</td><td>{{ $t->records }}</td><td>{{ number_format($t->precision, 2) }}</td><td>{{ number_format($t->recall, 2) }}</td></tr>@endforeach</tbody></table>
     @endif
 @endsection

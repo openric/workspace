@@ -17,7 +17,7 @@
     <details><summary>{{ __('Add a webhook') }}</summary><form method="post" action="{{ route('webhooks.store') }}">@csrf @include('webhooks._fields', ['h' => null, 'x' => 'hn'])<button type="submit">{{ __('Add') }}</button></form></details>
     <h2>{{ __('Deliveries') }}</h2>
     <table><thead><tr><th scope="col">{{ __('When') }}</th><th scope="col">{{ __('Webhook') }}</th><th scope="col">{{ __('Event') }}</th><th scope="col">{{ __('Entity') }}</th><th scope="col">{{ __('Status') }}</th></tr></thead>
-        <tbody>@forelse($deliveries as $d)<tr><td>{{ $d->created_at->timezone($tz)->format('Y-m-d H:i:s') }}</td><td>{{ $d->webhook->name }}</td><td>{{ $d->event->label($lang) }}</td>
+        <tbody>@forelse($deliveries as $d)<tr><td>{{ $d->created_at->timezone($tz)->timezone(config('workspace.timezone'))->format('Y-m-d H:i:s') }}</td><td>{{ $d->webhook->name }}</td><td>{{ $d->event->label($lang) }}</td>
             <td>{{ $d->entity_kind }} <code>{{ $d->payload['iri'] ?? $d->entity_id }}</code></td>
             <td>{{ $d->status->label($lang) }}@if($d->response_code) · {{ $d->response_code }}@endif · {{ trans_choice(':count attempt|:count attempts', $d->attempt_count, ['count' => $d->attempt_count]) }}@if($d->next_retry_at) · {{ __('next :time', ['time' => $d->next_retry_at->timezone($tz)->format('H:i')]) }}@endif</td></tr>
         @empty<tr><td colspan="5">{{ __('None yet.') }}</td></tr>@endforelse</tbody></table>

@@ -16,7 +16,7 @@
         <br><strong>{{ __('Service level') }}:</strong> {{ $sla['label'] }} ({{ __('due :date', ['date' => $sla['due_at']->toDateString()]) }}; {{ $sla['policy'] }})
         · <strong>{{ __('Queue') }}:</strong> {{ $task->queue?->name ?? __('none') }} · <a href="{{ route('workflow.tasks.diagram', $task) }}">{{ __('Diagram') }}</a>
         <br><strong>{{ __('Assigned to') }}:</strong> {{ $task->assignedTo?->name ?? __('nobody') }} · <strong>{{ __('Submitted by') }}:</strong> {{ $task->submittedBy?->name ?? __('unknown') }}
-        @if($task->decision->notation !== 'pending')<br><strong>{{ __('Decision') }}:</strong> {{ $task->decision->label($lang) }}, {{ $task->decisionBy?->name }} {{ $task->decision_at?->setTimezone(config('workspace.timezone'))->format('Y-m-d H:i') }}@if($task->decision_comment): {{ $task->decision_comment }}@endif @endif
+        @if($task->decision->notation !== 'pending')<br><strong>{{ __('Decision') }}:</strong> {{ $task->decision->label($lang) }}, {{ $task->decisionBy?->name }} {{ $task->decision_at?->setTimezone(config('workspace.timezone'))->timezone(config('workspace.timezone'))->format('Y-m-d H:i') }}@if($task->decision_comment): {{ $task->decision_comment }}@endif @endif
         @if($task->retry_count > 0)<br><strong>{{ __('Returned') }}:</strong> {{ trans_choice(':count time|:count times', $task->retry_count, ['count' => $task->retry_count]) }}@endif</p>
     @if($task->workflow->description)<p class="meta">{{ $task->workflow->description }}</p>@endif
     @if($task->step->instructions)<h2>{{ __('Instructions') }}</h2><p style="white-space: pre-line">{{ $task->step->instructions }}</p>@endif
@@ -95,7 +95,7 @@
 
     <h2>{{ __('History') }}</h2>
     @forelse($task->history as $e)
-        <p style="margin: .2rem 0"><strong>{{ $e->performed_at->setTimezone(config('workspace.timezone'))->format('Y-m-d H:i') }}</strong> {{ $e->action->label($lang) }}@if($e->fromStatus || $e->toStatus) ({{ collect([$e->fromStatus?->label($lang), $e->toStatus?->label($lang)])->filter()->join(' > ') }})@endif
+        <p style="margin: .2rem 0"><strong>{{ $e->performed_at->setTimezone(config('workspace.timezone'))->timezone(config('workspace.timezone'))->format('Y-m-d H:i') }}</strong> {{ $e->action->label($lang) }}@if($e->fromStatus || $e->toStatus) ({{ collect([$e->fromStatus?->label($lang), $e->toStatus?->label($lang)])->filter()->join(' > ') }})@endif
             @if($e->performedBy), {{ $e->performedBy->name }}@endif @if($e->comment)- {{ $e->comment }}@endif</p>
     @empty
         <p>{{ __('None.') }}</p>

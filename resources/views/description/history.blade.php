@@ -12,7 +12,7 @@
         @php($after = json_decode((string) $row->after, true) ?: [])
         @php($what = $parts[$row->subject_table] ?? __('record'))
         @php($fields = collect(array_keys($after ?: $before))->reject(fn ($k) => in_array($k, ['id', 'iri', 'institution_id', 'created_at', 'updated_at', 'subject_table', 'subject_id'], true)))
-        <p style="margin: .4rem 0"><strong>{{ \Carbon\CarbonImmutable::parse($row->occurred_at)->format('Y-m-d H:i') }}</strong>, {{ $row->actor ?? __('the system') }}:
+        <p style="margin: .4rem 0"><strong>{{ \Carbon\CarbonImmutable::parse($row->occurred_at)->timezone(config('workspace.timezone'))->format('Y-m-d H:i') }}</strong>, {{ $row->actor ?? __('the system') }}:
             {{ $row->action }} {{ $what }}@if($fields->isNotEmpty()) <small>({{ $fields->take(8)->join(', ') }})</small>@endif
             @if(isset($after['value']) || isset($before['value']))<br><small>{{ isset($before['value']) ? \Illuminate\Support\Str::limit((string) $before['value'], 120).' → ' : '' }}{{ isset($after['value']) ? \Illuminate\Support\Str::limit((string) $after['value'], 120) : 'removed' }}</small>@endif</p>
     @empty

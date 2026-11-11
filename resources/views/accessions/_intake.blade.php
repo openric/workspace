@@ -1,7 +1,7 @@
 {{-- OpenRiC Workspace - an accession's intake: its status and the steps it may take, assignment and priority, the checklist, attachments and timeline (PSIS's accessionIntake queue detail, checklist, attachments and timeline). Needs $accession, $intake (blockers, progress, transitions, accounts, templates, categories, priorities), $canUpdate. Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems. SPDX-License-Identifier: AGPL-3.0-or-later --}}
 @php($lang = \App\Support\Vocab::languages())
 @php($label = fn ($c) => $c?->label($lang))
-@php($when = fn ($t) => $t?->setTimezone(config('workspace.timezone'))->format('Y-m-d H:i'))
+@php($when = fn ($t) => $t?->setTimezone(config('workspace.timezone'))->timezone(config('workspace.timezone'))->format('Y-m-d H:i'))
 <section id="intake">
     <h2>{{ __('Intake') }}</h2>
     <p><strong>{{ __('Intake status') }}:</strong> {{ $label($accession->intakeStatus) }}

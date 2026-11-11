@@ -23,7 +23,7 @@
 
     <h2>{{ __('Dialogue') }}</h2>
     @forelse($messages as $m)
-        <p><strong>{{ $m->author_name ?: __('Unnamed') }}</strong> · {{ $m->role->label($lang) }} · {{ $m->visibility->label($lang) }} · {{ $m->created_at->format('Y-m-d H:i') }}<br><span style="white-space: pre-line">{{ $m->body }}</span></p>
+        <p><strong>{{ $m->author_name ?: __('Unnamed') }}</strong> · {{ $m->role->label($lang) }} · {{ $m->visibility->label($lang) }} · {{ $m->created_at->timezone(config('workspace.timezone'))->format('Y-m-d H:i') }}<br><span style="white-space: pre-line">{{ $m->body }}</span></p>
     @empty<p>{{ __('No messages yet.') }}</p>@endforelse
     <form method="post" action="{{ route('repatriation.message', $claim) }}">@csrf
         <p><label for="rm-body">{{ __('Add to the dialogue') }}</label><br><textarea id="rm-body" name="body" required rows="4" cols="70"></textarea></p>

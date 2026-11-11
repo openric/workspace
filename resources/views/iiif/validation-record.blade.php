@@ -8,7 +8,7 @@
     @if(session('status'))<p role="status">{{ session('status') }}</p>@endif
     <form method="post" action="{{ route('iiif-validation.validate', $unit) }}">@csrf<button type="submit">{{ __('Check now') }}</button></form>
     @forelse($runs as $results)
-        <h2>{{ $results->first()->validated_at->format('Y-m-d H:i') }}</h2>
+        <h2>{{ $results->first()->validated_at->timezone(config('workspace.timezone'))->format('Y-m-d H:i') }}</h2>
         <table>
             <thead><tr><th scope="col">{{ __('Check') }}</th><th scope="col">{{ __('Outcome') }}</th><th scope="col">{{ __('Details') }}</th></tr></thead>
             <tbody>@foreach($results as $r)<tr><td>{{ $r->check->label($lang) }}</td><td>{{ $r->status->label($lang) }}</td><td>{{ $r->details }}</td></tr>@endforeach</tbody>

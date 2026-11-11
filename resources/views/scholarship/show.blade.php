@@ -11,7 +11,7 @@
     @if($refusal)<p class="meta">{{ $refusal }}</p>@else<form method="post" action="{{ route('scholarship.discover', $record) }}">@csrf<button type="submit">{{ $discovery ? __('Discover again') : __('Discover connections') }}</button></form>@endif
     @if($discovery)
         <h2>{{ __('What the model found') }}</h2>
-        <p>{{ __(\App\Scholarship\Scholarship::band($discovery->confidence)['label']) }} ({{ $discovery->confidence }}) · {{ $discovery->generated_at->format('Y-m-d H:i') }}@if($discovery->inference) · <a href="{{ route('ai.inference', $discovery->inference) }}">{{ __('Receipt') }}</a>@endif</p>
+        <p>{{ __(\App\Scholarship\Scholarship::band($discovery->confidence)['label']) }} ({{ $discovery->confidence }}) · {{ $discovery->generated_at->timezone(config('workspace.timezone'))->format('Y-m-d H:i') }}@if($discovery->inference) · <a href="{{ route('ai.inference', $discovery->inference) }}">{{ __('Receipt') }}</a>@endif</p>
         @if($discovery->evidence['insights'] ?? [])<ul>@foreach($discovery->evidence['insights'] as $i)<li>{{ $i }}</li>@endforeach</ul>@else<p>{{ $discovery->summary }}</p>@endif
         <h2>{{ __('The verified links') }}</h2>
         @include('scholarship._connections', ['evidence' => $discovery->evidence])
@@ -20,7 +20,7 @@
     <h2>{{ __('Across federation peers') }}</h2>
     <form method="post" action="{{ route('scholarship.federated', $record) }}">@csrf<button type="submit">{{ $federated ? __('Search the peers again') : __('Search the federation peers') }}</button></form>
     @if($federated)
-        <p class="meta">{{ __('Searched for: :terms', ['terms' => implode('; ', $federated->terms)]) }} · {{ $federated->generated_at->format('Y-m-d H:i') }}</p>
+        <p class="meta">{{ __('Searched for: :terms', ['terms' => implode('; ', $federated->terms)]) }} · {{ $federated->generated_at->timezone(config('workspace.timezone'))->format('Y-m-d H:i') }}</p>
         <ul>@foreach($federated->connections as $c)<li>@if($c['url'])<a href="{{ $c['url'] }}" rel="noopener nofollow">{{ $c['title'] }}</a>@else{{ $c['title'] }}@endif · {{ $c['peer_name'] }}
             @if($c['shared'])<br><small>{{ __('Shared access points: :terms', ['terms' => implode('; ', $c['shared'])]) }}</small>@endif @if($c['rationale'])<br><small>{{ $c['rationale'] }}</small>@endif</li>@endforeach</ul>
     @endif

@@ -4,7 +4,7 @@
 @section('content')
     <p>@if($disposal)<a href="{{ route('disposals.show', $disposal) }}">{{ __('The disposal') }}</a>@endif</p>
     <h1>{{ __('Certificate of destruction') }}</h1>
-    <p><strong>{{ $institution->name }}</strong> · {{ __('Number') }}: <strong>{{ $certificate->number }}</strong> · {{ __('Destroyed on :date', ['date' => $certificate->destroyed_at->format('Y-m-d H:i')]) }}</p>
+    <p><strong>{{ $institution->name }}</strong> · {{ __('Number') }}: <strong>{{ $certificate->number }}</strong> · {{ __('Destroyed on :date', ['date' => $certificate->destroyed_at->timezone(config('workspace.timezone'))->format('Y-m-d H:i')]) }}</p>
     <table>
         <tbody>
             <tr><th scope="row">{{ __('Record') }}</th><td>{{ $certificate->record_title }}</td></tr>

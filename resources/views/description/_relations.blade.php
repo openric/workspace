@@ -33,7 +33,7 @@
         @php($current = $relation->currentAssertions()->pluck('id')->all())
         <ul>
         @foreach($relation->assertions as $assertion)
-            <li>{{ $assertion->status->label(\App\Support\Vocab::languages()) }}: {{ $assertion->asserter() }} ({{ mb_strtolower($assertion->origin->label(\App\Support\Vocab::languages())) }}), {{ $assertion->asserted_at->format('Y-m-d H:i') }}
+            <li>{{ $assertion->status->label(\App\Support\Vocab::languages()) }}: {{ $assertion->asserter() }} ({{ mb_strtolower($assertion->origin->label(\App\Support\Vocab::languages())) }}), {{ $assertion->asserted_at->timezone(config('workspace.timezone'))->format('Y-m-d H:i') }}
                 @if($assertion->basis), {{ __('on the basis:') }} <span lang="{{ $assertion->basis_language }}">{{ $assertion->basis }}</span>@endif
                 @if($assertion->reviewer); {{ __('reviewed by :name, :date', ['name' => $assertion->reviewer->name, 'date' => $assertion->reviewed_at->format('Y-m-d')]) }}@endif
                 @unless(in_array($assertion->id, $current, true)); {{ __('superseded') }} @endunless
@@ -70,7 +70,7 @@
                     <label for="{{ $section }}a{{ $loop->index }}-supersedes">{{ __('Supersedes (optional)') }}</label> @include('description._ric', ['term' => null])
                     <select id="{{ $section }}a{{ $loop->index }}-supersedes" name="supersedes" style="font: inherit; padding: .5rem">
                         <option value="">{{ __('Nothing; it stands beside the others') }}</option>
-                        @foreach($relation->currentAssertions() as $assertion)<option value="{{ $assertion->id }}">{{ $assertion->asserter() }}, {{ $assertion->asserted_at->format('Y-m-d H:i') }}</option>@endforeach
+                        @foreach($relation->currentAssertions() as $assertion)<option value="{{ $assertion->id }}">{{ $assertion->asserter() }}, {{ $assertion->asserted_at->timezone(config('workspace.timezone'))->format('Y-m-d H:i') }}</option>@endforeach
                     </select>
                     <button type="submit">{{ __('Record assertion') }}</button>
                 </form>

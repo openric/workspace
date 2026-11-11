@@ -42,7 +42,7 @@ class FavouritesExport
                 fputcsv($out, [__('Title'), __('Reference Code'), __('Type'), __('IRI'), __('Notes'), __('Folder'), __('Date Added')]);
                 foreach ($items as $i) {
                     fputcsv($out, [$i['title'], $i['reference'], $i['kind'], $i['entity']?->getAttribute('iri') ?? $i['url'], $i['favourite']->notes,
-                        $i['favourite']->folder?->name, $i['favourite']->created_at->format('Y-m-d H:i')]);
+                        $i['favourite']->folder?->name, $i['favourite']->created_at->timezone(config('workspace.timezone'))->format('Y-m-d H:i')]);
                 }
                 fclose($out);
             }, "$name.csv", ['Content-Type' => 'text/csv; charset=utf-8']),

@@ -14,5 +14,5 @@
     <h2>{{ __('Usage events') }}</h2>
     <table><tbody>@forelse($events as $status => $n)<tr><th scope="row">{{ $status }}</th><td>{{ $n }}</td></tr>@empty<tr><td>{{ __('None yet.') }}</td></tr>@endforelse</tbody></table>
     <h2>{{ __('What DataCite refused') }}</h2>
-    <ul>@forelse($failures as $f)<li>{{ \Illuminate\Support\Carbon::parse($f->performed_at)->format('Y-m-d H:i') }}: {{ json_decode($f->details, true)['error'] ?? '' }}</li>@empty<li>{{ __('None.') }}</li>@endforelse</ul>
+    <ul>@forelse($failures as $f)<li>{{ \Illuminate\Support\Carbon::parse($f->performed_at)->timezone(config('workspace.timezone'))->format('Y-m-d H:i') }}: {{ json_decode($f->details, true)['error'] ?? '' }}</li>@empty<li>{{ __('None.') }}</li>@endforelse</ul>
 @endsection

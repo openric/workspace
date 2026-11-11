@@ -35,7 +35,7 @@
 
     <h2>{{ __('Files made') }}</h2>
     @if($archives->isEmpty())<p>{{ __('None.') }}</p>@else
-        <ul>@foreach($archives as $archive)<li><a href="{{ route('reports.builder.archive', [$report, $archive]) }}">{{ $archive->generated_at->setTimezone(config('workspace.timezone'))->format('Y-m-d H:i') }}, {{ strtoupper($archive->format) }}</a>
+        <ul>@foreach($archives as $archive)<li><a href="{{ route('reports.builder.archive', [$report, $archive]) }}">{{ $archive->generated_at->setTimezone(config('workspace.timezone'))->timezone(config('workspace.timezone'))->format('Y-m-d H:i') }}, {{ strtoupper($archive->format) }}</a>
             <span class="meta">{{ \Illuminate\Support\Number::fileSize($archive->size_bytes, 1) }} · {{ trans_choice(':count entity|:count entities', $archive->entities) }}@if($archive->schedule_id) · {{ __('scheduled') }}@endif</span></li>@endforeach</ul>
     @endif
     @if($mayEdit)
@@ -50,7 +50,7 @@
         @if($schedules->isEmpty())<p>{{ __('None.') }}</p>@else
             <ul>@foreach($schedules as $schedule)
                 <li>{{ $schedule->frequency->label($lang) }}, {{ substr($schedule->time_of_day, 0, 5) }}, {{ strtoupper($schedule->format) }}, {{ trans_choice(':count recipient|:count recipients', count($schedule->recipients)) }}
-                    <span class="meta">{{ __('next') }} {{ $schedule->next_run_at->setTimezone(config('workspace.timezone'))->format('Y-m-d H:i') }}</span>
+                    <span class="meta">{{ __('next') }} {{ $schedule->next_run_at->setTimezone(config('workspace.timezone'))->timezone(config('workspace.timezone'))->format('Y-m-d H:i') }}</span>
                     <form method="post" action="{{ route('reports.builder.schedules.destroy', [$report, $schedule]) }}" style="display: inline">@csrf<button type="submit">{{ __('Remove') }}</button></form></li>
             @endforeach</ul>
         @endif
@@ -87,7 +87,7 @@
         <h2>{{ __('Versions') }}</h2>
         @if($versions->isEmpty())<p>{{ __('None.') }}</p>@else
             <ul>@foreach($versions as $version)
-                <li>{{ __('Version :number', ['number' => $version->number]) }}, {{ $version->created_at->format('Y-m-d H:i') }}, {{ $version->author?->name }}@if($version->summary): {{ $version->summary }}@endif
+                <li>{{ __('Version :number', ['number' => $version->number]) }}, {{ $version->created_at->timezone(config('workspace.timezone'))->format('Y-m-d H:i') }}, {{ $version->author?->name }}@if($version->summary): {{ $version->summary }}@endif
                     <form method="post" action="{{ route('reports.builder.versions.restore', [$report, $version]) }}" style="display: inline">@csrf<button type="submit">{{ __('Restore') }}</button></form></li>
             @endforeach</ul>
         @endif

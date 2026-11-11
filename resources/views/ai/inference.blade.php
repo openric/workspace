@@ -7,7 +7,7 @@
     <table><tbody>
         <tr><th scope="row">{{ __('Service') }}</th><td>{{ $inference->service->label(\App\Support\Vocab::languages()) }}</td></tr>
         <tr><th scope="row">{{ __('Model') }}</th><td><code>{{ $inference->model }}</code> {{ $inference->model_version !== 'unknown' ? $inference->model_version : '' }}</td></tr>
-        <tr><th scope="row">{{ __('When') }}</th><td>{{ $inference->occurred_at->format('Y-m-d H:i:s') }}, {{ __(':ms ms', ['ms' => $inference->elapsed_ms]) }}</td></tr>
+        <tr><th scope="row">{{ __('When') }}</th><td>{{ $inference->occurred_at->timezone(config('workspace.timezone'))->format('Y-m-d H:i:s') }}, {{ __(':ms ms', ['ms' => $inference->elapsed_ms]) }}</td></tr>
         <tr><th scope="row">{{ __('Asked by') }}</th><td>{{ $inference->user?->name ?? __('the Workspace') }}</td></tr>
         <tr><th scope="row">{{ __('About') }}</th><td>@if($subject instanceof \App\Models\Instantiation)<a href="{{ route('instantiations.show', $subject) }}">{{ __('An instantiation of :title', ['title' => $subject->record->described('title', ['en'])]) }}</a>@elseif($subject instanceof \App\Models\RecordResource)<a href="{{ route('records.show', $subject) }}">{{ $subject->described('title', ['en']) }}</a>@else{{ $inference->subject_table }}@endif{{ $inference->field ? ', '.$inference->field : '' }}</td></tr>
         <tr><th scope="row">{{ __('Answered') }}</th><td>{{ $inference->succeeded ? __('Yes') : __('No').': '.$inference->error }}</td></tr>

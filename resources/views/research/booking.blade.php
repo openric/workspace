@@ -41,7 +41,7 @@
         <section style="border-top: 1px solid var(--line); padding: .4rem 0">
             <p><strong>{{ \App\Relations\EntityKinds::label($m->record, $lang) }}</strong>@if($code = $m->record->referenceCode()) <span class="meta">{{ $code }}</span>@endif ·
                 {{ $m->status->label($lang) }} · {{ $m->priority->label($lang) }}
-                @if($m->retrieval_scheduled_for) · {{ __('fetched in the run of :time', ['time' => $m->retrieval_scheduled_for->format('Y-m-d H:i')]) }}@endif
+                @if($m->retrieval_scheduled_for) · {{ __('fetched in the run of :time', ['time' => $m->retrieval_scheduled_for->timezone(config('workspace.timezone'))->format('Y-m-d H:i')]) }}@endif
                 @if($m->unavailable_reason)<br>{{ __('Unavailable: :reason', ['reason' => $m->unavailable_reason]) }}@endif
                 @if($staff && ($m->location_code || $m->box_number || $m->shelf_location))<br><small>{{ collect([$m->location_code, $m->shelf_location, $m->box_number ? __('box :n', ['n' => $m->box_number]) : null, $m->folder_number ? __('folder :n', ['n' => $m->folder_number]) : null])->filter()->join(' · ') }}</small>@endif
                 @if($m->handling_instructions)<br><small>{{ __('Handling') }}: {{ $m->handling_instructions }}</small>@endif</p>
@@ -63,17 +63,17 @@
                         <button type="submit">{{ __('Save') }}</button></form>
                 </details>
                 <details><summary>{{ __('Custody') }}</summary>
-                    @foreach($m->handoffs as $h)<p><small>{{ $h->created_at->format('Y-m-d H:i') }} · {{ $h->handoffType->label($lang) }}@if($h->condition) · {{ $h->condition->label($lang) }}@endif @if($h->condition_notes) · {{ $h->condition_notes }}@endif @if($h->signature_confirmed) · {{ __('signed') }}@endif</small></p>@endforeach
+                    @foreach($m->handoffs as $h)<p><small>{{ $h->created_at->timezone(config('workspace.timezone'))->format('Y-m-d H:i') }} · {{ $h->handoffType->label($lang) }}@if($h->condition) · {{ $h->condition->label($lang) }}@endif @if($h->condition_notes) · {{ $h->condition_notes }}@endif @if($h->signature_confirmed) · {{ __('signed') }}@endif</small></p>@endforeach
                     <form method="post" action="{{ route('reading-room.requests.step', [$m, 'handoff']) }}">@csrf
                         <label for="ho-t-{{ $m->id }}">{{ __('Hand-over') }}</label> <select id="ho-t-{{ $m->id }}" name="handoff_type">@foreach(\App\Models\Concept::choices(\App\Support\Vocab::BASE.'custody-handoff-type/')->get() as $t)<option value="{{ $t->notation }}">{{ $t->label($lang) }}</option>@endforeach</select>
                         <label for="ho-c-{{ $m->id }}">{{ __('Condition') }}</label> <select id="ho-c-{{ $m->id }}" name="condition"><option value="">-</option>@foreach(\App\Models\Concept::choices(\App\Support\Vocab::BASE.'container-condition/')->get() as $c)<option value="{{ $c->notation }}">{{ $c->label($lang) }}</option>@endforeach</select>
                         <input name="condition_notes" size="24" aria-label="{{ __('Condition notes') }}" placeholder="{{ __('Condition notes') }}">
                         <label><input type="checkbox" name="signature_confirmed" value="1"> {{ __('Signed for') }}</label> <button type="submit">{{ __('Record') }}</button></form>
                 </details>
-                <details><summary>{{ __('History') }}</summary>@foreach($m->statusChanges as $c)<p><small>{{ $c->created_at->format('Y-m-d H:i') }} · {{ $c->old_status ? __(':from to :to', ['from' => $c->old_status, 'to' => $c->new_status]) : $c->new_status }}@if($c->changedBy) · {{ $c->changedBy->name }}@endif @if($c->notes) · {{ $c->notes }}@endif</small></p>@endforeach</details>
+                <details><summary>{{ __('History') }}</summary>@foreach($m->statusChanges as $c)<p><small>{{ $c->created_at->timezone(config('workspace.timezone'))->format('Y-m-d H:i') }} · {{ $c->old_status ? __(':from to :to', ['from' => $c->old_status, 'to' => $c->new_status]) : $c->new_status }}@if($c->changedBy) · {{ $c->changedBy->name }}@endif @if($c->notes) · {{ $c->notes }}@endif</small></p>@endforeach</details>
             @endif
             @foreach($m->messages->filter(fn ($msg) => $staff || ! $msg->is_internal) as $msg)
-                <p style="margin-left: 1rem"><small>{{ $msg->created_at->format('Y-m-d H:i') }} · {{ $msg->sender?->name }}@if($msg->is_internal) · <strong>{{ __('staff only') }}</strong>@endif</small><br>@if($msg->subject)<strong>{{ $msg->subject }}</strong><br>@endif<span style="white-space: pre-line">{{ $msg->body }}</span>
+                <p style="margin-left: 1rem"><small>{{ $msg->created_at->timezone(config('workspace.timezone'))->format('Y-m-d H:i') }} · {{ $msg->sender?->name }}@if($msg->is_internal) · <strong>{{ __('staff only') }}</strong>@endif</small><br>@if($msg->subject)<strong>{{ $msg->subject }}</strong><br>@endif<span style="white-space: pre-line">{{ $msg->body }}</span>
                     @if($msg->attachment)<br><a href="{{ route('research.files.show', $msg->attachment) }}">{{ $msg->attachment->original_name }}</a>@endif</p>
             @endforeach
             <details><summary>{{ __('Write about it') }}</summary>

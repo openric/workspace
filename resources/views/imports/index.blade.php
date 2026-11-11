@@ -14,10 +14,10 @@
             @foreach($imports as $import)
                 @php($actions = $import->report['actions'] ?? null)
                 <tr>
-                    <td><a href="{{ route('imports.show', $import) }}">{{ $import->created_at->format('Y-m-d H:i') }}</a></td>
+                    <td><a href="{{ route('imports.show', $import) }}">{{ $import->created_at->timezone(config('workspace.timezone'))->format('Y-m-d H:i') }}</a></td>
                     <td>{{ $import->file_name }}</td><td>{{ $import->source }}</td><td>{{ $import->user->name }}</td>
                     <td>{{ \App\Exchange\Import\ImportService::FORMATS[$import->format] ?? $import->format }}</td>
-                    <td>{{ $import->committed_at ? 'Imported '.$import->committed_at->format('Y-m-d H:i') : 'Dry run' }}</td>
+                    <td>{{ $import->committed_at ? 'Imported '.$import->committed_at->timezone(config('workspace.timezone'))->format('Y-m-d H:i') : 'Dry run' }}</td>
                     <td>@if($actions){{ __(':created new, :updated updated, :unchanged unchanged, :rejected not imported', $actions) }} @endif</td>
                 </tr>
             @endforeach

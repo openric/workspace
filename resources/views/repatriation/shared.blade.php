@@ -21,7 +21,7 @@
     @include('repatriation._history', ['claim' => $claim])
     <h2>{{ __('Dialogue') }}</h2>
     @forelse($messages as $m)
-        <p><strong>{{ $m->author_name ?: __('Unnamed') }}</strong> · {{ $m->role->label($lang) }} · {{ $m->created_at->format('Y-m-d H:i') }}<br><span style="white-space: pre-line">{{ $m->body }}</span></p>
+        <p><strong>{{ $m->author_name ?: __('Unnamed') }}</strong> · {{ $m->role->label($lang) }} · {{ $m->created_at->timezone(config('workspace.timezone'))->format('Y-m-d H:i') }}<br><span style="white-space: pre-line">{{ $m->body }}</span></p>
     @empty<p>{{ __('No messages have been shared yet.') }}</p>@endforelse
     @if($share->can_message)
         <form method="post" action="{{ route('repatriation.shared.message', $token) }}">@csrf

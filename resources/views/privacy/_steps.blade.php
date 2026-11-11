@@ -29,8 +29,8 @@
     @case('compromises')
         @php($notice = app(\App\Privacy\PrivacyService::class)->regulatorNotice($entry))
         <p>{{ $notice['told'] ? __('The Regulator has been told.') : __('The Regulator has not been told.') }}
-            @if(! $notice['told'] && $entry->notification_required){{ $notice['deadline'] ? __('Due by :when.', ['when' => $notice['deadline']->format('Y-m-d H:i')]) : __('Due as soon as reasonably possible (POPIA s.22(2)).') }}@endif</p>
-        @if($entry->notices->isNotEmpty())<ul>@foreach($entry->notices as $n)<li>{{ $n->recipient->label($lang) }}@if($n->recipient_name) ({{ $n->recipient_name }})@endif, {{ $n->method->label($lang) }}, {{ $n->sent_at->format('Y-m-d H:i') }}</li>@endforeach</ul>@endif
+            @if(! $notice['told'] && $entry->notification_required){{ $notice['deadline'] ? __('Due by :when.', ['when' => $notice['deadline']->timezone(config('workspace.timezone'))->format('Y-m-d H:i')]) : __('Due as soon as reasonably possible (POPIA s.22(2)).') }}@endif</p>
+        @if($entry->notices->isNotEmpty())<ul>@foreach($entry->notices as $n)<li>{{ $n->recipient->label($lang) }}@if($n->recipient_name) ({{ $n->recipient_name }})@endif, {{ $n->method->label($lang) }}, {{ $n->sent_at->timezone(config('workspace.timezone'))->format('Y-m-d H:i') }}</li>@endforeach</ul>@endif
         <details><summary>{{ __('Record a notice') }}</summary>
             <form method="post" action="{{ $step('notify') }}">@csrf
                 <p><label for="nr">{{ __('To') }}</label> @include('description._ric', ['term' => null]) <select id="nr" name="recipient">@foreach(\App\Models\Concept::choices(\App\Support\Vocab::BASE.'notification-recipient/')->get() as $c)<option value="{{ $c->notation }}">{{ $c->label($lang) }}</option>@endforeach</select>
