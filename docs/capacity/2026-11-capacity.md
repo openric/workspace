@@ -84,6 +84,22 @@ No request failed but three of 77 public record pages at 25 users, which answere
 
 The first run of this test also found a fault in the test itself: k6 empties each user's cookies every iteration unless told not to, so the archivists, signed in once, were sent to the sign-in page from their second round on. `noCookiesReset` is now set.
 
+## The staff side, 11 November (v0.0.153, openric/workspace#8)
+
+The run of 9 November found the staff record page at 18 seconds and the staff tree of the widest fonds at 8: both loaded every unit inside the fonds, all 10,000, and checked each against the account's rights in PHP. v0.0.148 had already made the record page's lists of authority records one query. v0.0.153 reads the tree's branches, siblings and "has children" in order and stops as soon as a page is found (`RecordService::firstReadable()`); lists a record's units inside a hundred to a page, as the public page has since v0.0.146; and builds the hierarchy page from the units' titles, levels and reference codes read in three queries rather than their whole descriptions. The rights are still decided in PHP, a page's worth of them: where an account may read few of a branch's many units it reads the branch through, the ceiling marked in the code.
+
+| Page | 1 user, 9 Nov | 1 user, 11 Nov | 10 users, 9 Nov | 10 users, 11 Nov | 25 users, 9 Nov | 25 users, 11 Nov |
+| --- | --- | --- | --- | --- | --- | --- |
+| Staff record | 18,232 | 1,299 | 31,536 | 1,439 | 29,023 | 963 |
+| Hierarchy of the widest fonds | 8,525 | 4,811 | 9,708 | 4,262 | 11,454 | 4,134 |
+| Staff search | 694 | 988 | 1,368 | 818 | 1,888 | 714 |
+| Record form | 241 | 349 | 379 | 387 | 543 | 278 |
+| Staff authority record | 327 | 642 | 423 | 619 | 755 | 430 |
+
+: The staff pages at 100,000 units, 95th percentile in milliseconds, `bin/capacity pages`
+
+No request failed at any load. The staff record now meets the target at 25 users and is 0.4 seconds over it at 10. The hierarchy page is the one still over: it lists all 10,000 units of the widest fonds on one page by design, and would need paging too to come under a second. Staff search can still show a short page where results the account may not read are dropped after paging, as its code notes.
+
 ## Search (phase 25a)
 
 | Search | Found | Time |

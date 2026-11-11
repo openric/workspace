@@ -155,8 +155,15 @@
             @endif
         </div>
     @empty
-        <p>{{ __('None yet.') }}</p>
+        @if($insidePage === 1)<p>{{ __('None yet.') }}</p>@endif
     @endforelse
+    @if($insidePage > 1 || $moreInside)
+        <nav aria-label="{{ __('Units inside') }}"><p>
+            @if($insidePage > 1)<a href="{{ route('records.show', [$record, 'inside' => $insidePage - 1]) }}" rel="prev">{{ __('Previous page') }}</a>@endif
+            @if($insidePage > 1 && $moreInside) · @endif
+            @if($moreInside)<a href="{{ route('records.show', [$record, 'inside' => $insidePage + 1]) }}" rel="next">{{ __('Next page') }}</a>@endif
+        </p></nav>
+    @endif
     @if($withTree)</div></div>@endif
     @include('custom-fields._panel', ['entity' => $record, 'kind' => 'records'])
 @endsection

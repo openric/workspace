@@ -6,8 +6,9 @@
     <h1>{{ __('Hierarchy of :name', ['name' => $top->described('title', ['en'])]) }}</h1>
     <p>{{ __('The arrangement (rico:hasOrHadPart), in order. Move units, or change their order, from each unit\'s page.') }}</p>
     @php
-        $line = fn ($u) => (($u->id === $record->id) ? '<strong aria-current="page">' : '').'<a href="'.e(route('records.show', $u)).'">'.e($u->described('title', [app()->getLocale(), 'en'])).'</a>'.(($u->id === $record->id) ? '</strong>' : '')
-            .' <small>'.e(collect([$u->level->label(\App\Support\Vocab::languages()), $u->identifier])->filter()->join(', ')).'</small>';
+        $levels = []; // each level's label once, not once a line
+        $line = function ($u) use (&$levels, $titles, $codes, $top, $record) { return (($u->id === $record->id) ? '<strong aria-current="page">' : '').'<a href="'.e(route('records.show', $u)).'">'.e($titles[$u->id] ?? $u->described('title', [app()->getLocale(), 'en']) ?? '[Untitled]').'</a>'.(($u->id === $record->id) ? '</strong>' : '')
+            .' <small>'.e(collect([$levels[$u->level_id] ??= $u->level->label(\App\Support\Vocab::languages()), $codes[$u->id] ?? ($u->is($top) ? $u->identifier : null)])->filter()->join(', ')).'</small>'; };
         $branch = function ($parentId) use (&$branch, $byParent, $line) {
             $out = '';
             foreach ($byParent[$parentId] ?? [] as $unit) {

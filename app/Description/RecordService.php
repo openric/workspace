@@ -18,6 +18,7 @@ use App\Models\RecordWatermark;
 use App\Models\Repository;
 use App\Models\User;
 use App\Support\Vocab;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -229,6 +230,64 @@ class RecordService
             ->with(self::DESCRIBED)->orderBy('position')->orderBy('id')->get()
             ->filter(fn (RecordResource $r) => $user->may('read', 'description', $r))
             ->groupBy('parent_id');
+    }
+
+    /** Units a staff page lists inside another at once, as the public record page does since v0.0.146 (#8). */
+    public const INSIDE_PAGE = 100;
+
+    /**
+     * The first $count units of an ordered query that $readable allows, after skipping $skip of them, and whether there are
+     * more: read a chunk at a time and stopped as soon as they are found, so a branch of 10,000 costs a page's checks (#8).
+     * ponytail: where the account may read few of a branch's many units, it still reads the branch through; the upgrade is
+     * the account's read rights in SQL, as PublicCatalogue::ids() decides the public's.
+     *
+     * @param  Builder<RecordResource>  $query  ordered
+     * @param  callable(RecordResource): bool  $readable
+     * @return array{0: Collection<int, RecordResource>, 1: bool}
+     */
+    public static function firstReadable(Builder $query, callable $readable, int $count, int $skip = 0): array
+    {
+        $found = collect();
+        foreach ($query->lazy(max(20, min($count + 1, 200))) as $unit) {
+            if (! $readable($unit)) {
+                continue;
+            }
+            if ($skip > 0) {
+                $skip--;
+
+                continue;
+            }
+            if ($found->count() === $count) {
+                return [$found, true];
+            }
+            $found->push($unit);
+        }
+
+        return [$found, false];
+    }
+
+    /**
+     * The hierarchy as its outline needs it, for a fonds of thousands (#8): the units the account may read, as hierarchy()
+     * decides them but without loading their descriptions, grouped by parent, each with its title in the first of the
+     * languages that has one (as described() picks it) and its local reference code, both read in one query.
+     *
+     * @param  list<string>  $languages
+     * @return array{0: Collection<string, Collection<int, RecordResource>>, 1: array<string, string>, 2: array<string, string>}
+     */
+    public function outline(RecordResource $top, User $user, array $languages): array
+    {
+        $units = RecordResource::whereKey($ids = $top->descendantIds())->whereNull('deleted_at')->with('level.labels')->orderBy('position')->orderBy('id')->get()
+            ->filter(fn (RecordResource $r) => $user->may('read', 'description', $r));
+        $list = '{'.implode(',', array_map(fn ($l) => '"'.$l.'"', $languages)).'}';
+        $titles = collect(DB::select('SELECT e.id, n.value FROM unnest(?::uuid[]) e(id)
+            JOIN LATERAL (SELECT value FROM names WHERE subject_table = ? AND subject_id = e.id AND name_type_id = (SELECT id FROM concepts WHERE iri = ?)
+                ORDER BY array_position(?::text[], language::text) NULLS LAST, created_at LIMIT 1) n ON true',
+            ['{'.implode(',', $ids).'}', 'record_resources', Vocab::NAME_TYPES.config('workspace.name_elements.title'), $list]))->pluck('value', 'id')->all();
+        $codes = DB::table('identifiers')->where('subject_table', 'record_resources')->whereIn('subject_id', $ids)
+            ->where('identifier_type_id', Concept::where('iri', Vocab::IDENTIFIER_TYPES.'local')->value('id'))->orderBy('created_at')->get(['subject_id', 'value'])
+            ->unique('subject_id')->pluck('value', 'subject_id')->all();
+
+        return [$units->groupBy('parent_id'), $titles, $codes];
     }
 
     /** What reading a unit's description needs loaded. */

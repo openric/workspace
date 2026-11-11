@@ -169,7 +169,9 @@ class RecordController extends Controller
         $this->own($request, $record);
         $top = $record->ancestors()[0] ?? $record;
 
-        return view('records.tree', ['record' => $record, 'top' => $top, 'byParent' => $this->records->hierarchy($top, $request->user())]);
+        [$byParent, $titles, $codes] = $this->records->outline($top, $request->user(), [app()->getLocale(), 'en']);
+
+        return view('records.tree', ['record' => $record, 'top' => $top, 'byParent' => $byParent, 'titles' => $titles, 'codes' => $codes]);
     }
 
     /** Every unit inside this one, in order, with its reference code, level, dates and extent. */
@@ -238,15 +240,20 @@ class RecordController extends Controller
         $this->own($request, $record);
         $user = $request->user();
         $record->load('descriptionValues.element.labels', 'descriptionValues.state.labels', 'names.nameType.labels', 'names.state.labels', 'names.dates.property', 'identifiers.identifierType.labels', 'level.labels', 'repository.descriptionValues.element', 'repository.names.nameType',
-            'children.descriptionValues.element', 'children.names.nameType', 'children.identifiers.identifierType', 'children.level.labels', 'dates.property.labels', 'dates.dateType.labels', 'dates.qualifier.labels',
+            'dates.property.labels', 'dates.dateType.labels', 'dates.qualifier.labels',
             'instantiations.files.use', 'instantiations.names.nameType', 'instantiations.carrierType.labels', 'instantiations.availability.labels', 'displayStandard', 'resourceTypes.type.labels');
 
-        $record->setRelation('children', $record->children->filter(fn ($child) => $user->may('read', 'description', $child))->values());
+        // The units inside, a hundred to a page, read until the page is full (#8): a fonds of 10,000 no longer loads them all.
+        $insidePage = max(1, (int) $request->query('inside', 1));
+        [$children, $moreInside] = RecordService::firstReadable(
+            $record->children()->getQuery()->whereNull('deleted_at')->with(['names.nameType', 'names.state', 'identifiers.identifierType', 'level.labels'])->orderBy('position')->orderBy('id'),
+            fn (RecordResource $child) => $user->may('read', 'description', $child), RecordService::INSIDE_PAGE, ($insidePage - 1) * RecordService::INSIDE_PAGE);
+        $record->setRelation('children', $children);
 
         return view('records.show', ['record' => $record, 'elements' => Elements::of($record->standard()), 'dateChoices' => app(DateService::class)->choices('record'), 'relations' => app(RelationService::class)->of($record),
             'drafts' => $user->may('view-draft', 'description', $record), 'canUpdate' => $user->may('update', 'description', $record),
             'canCreateInside' => $user->may('create', 'description', $record), 'childThumbnails' => $this->childThumbnails($record, $user),
-            'tree' => (new TreeService($user))->window($record)]);
+            'tree' => (new TreeService($user))->window($record), 'insidePage' => $insidePage, 'moreInside' => $moreInside]);
     }
 
     /**

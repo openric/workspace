@@ -16,6 +16,7 @@ namespace App\Description;
 use App\Api\PublicCatalogue;
 use App\Models\RecordResource;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
 class TreeService
@@ -45,14 +46,12 @@ class TreeService
             $moreBefore = $at > self::PAGE;
             $moreAfter = $total > $at + 1 + self::PAGE;
         } elseif ($children['items'] === [] && $unit->parent_id !== null) {
-            $siblings = $this->visibleChildren($unit->parent_id)->values();
-            $at = $siblings->search(fn ($s) => $s->id === $unit->id);
-            if ($at !== false) {
-                $before = $siblings->slice(max(0, $at - self::PAGE), min($at, self::PAGE))->map(fn ($s) => $this->node($s))->values()->all();
-                $after = $siblings->slice($at + 1, self::PAGE)->map(fn ($s) => $this->node($s))->values()->all();
-                $moreBefore = $at > self::PAGE;
-                $moreAfter = $siblings->count() > $at + 1 + self::PAGE;
-            }
+            // Signed in: the readable siblings either side, read outward from the unit until a page and one more are found.
+            $siblings = fn () => RecordResource::where('parent_id', $unit->parent_id)->whereNull('deleted_at')->with(self::WITH);
+            [$earlier, $moreBefore] = $this->firstReadable($siblings()->whereRaw('(position, id) < (?, ?)', [$unit->position, $unit->id])->orderByDesc('position')->orderByDesc('id'), self::PAGE);
+            [$later, $moreAfter] = $this->firstReadable($siblings()->whereRaw('(position, id) > (?, ?)', [$unit->position, $unit->id])->orderBy('position')->orderBy('id'), self::PAGE);
+            $before = $earlier->reverse()->map(fn ($s) => $this->node($s))->values()->all();
+            $after = $later->map(fn ($s) => $this->node($s))->values()->all();
         }
 
         return ['ancestors' => array_map(fn ($a) => $this->node($a), $ancestors), 'current' => $this->node($unit), 'children' => $children['items'],
@@ -69,9 +68,9 @@ class TreeService
 
             return ['items' => $this->nodes($page->take(self::PAGE)), 'more' => $page->count() > self::PAGE];
         }
-        $all = $this->visibleChildren($parentId)->values();
+        [$page, $more] = $this->firstReadable($this->childrenOf($parentId), self::PAGE, $offset);
 
-        return ['items' => $all->slice($offset, self::PAGE)->map(fn ($c) => $this->node($c))->values()->all(), 'more' => $all->count() > $offset + self::PAGE];
+        return ['items' => $page->map(fn ($c) => $this->node($c))->values()->all(), 'more' => $more];
     }
 
     /** @return array{id: string, title: string, meta: string, url: string, hasChildren: bool} */
@@ -84,7 +83,7 @@ class TreeService
             'url' => $this->public ? route('discover.record', $unit->id) : route('records.show', $unit),
             // Most units have nothing inside them, which an index answers at once; only those that do ask what the public may read.
             'hasChildren' => $this->public ? RecordResource::where('parent_id', $unit->id)->whereNull('deleted_at')->exists() && $this->public->query('records')->where('e.parent_id', $unit->id)->exists()
-                : $this->visibleChildren($unit->id)->isNotEmpty(),
+                : $this->firstReadable($this->childrenOf($unit->id), 1)[0]->isNotEmpty(),
         ];
     }
 
@@ -94,16 +93,16 @@ class TreeService
         return collect($units)->filter(fn ($u) => $this->readable($u))->map(fn ($u) => $this->node($u))->values()->all();
     }
 
-    /**
-     * A signed-in reader's children of a unit, each checked against the account's rights.
-     * ponytail: loads every child to check it; a branch of thousands wants the staff read check in SQL too.
-     *
-     * @return Collection<int, RecordResource>
-     */
-    private function visibleChildren(string $parentId): Collection
+    /** A unit's children in the arrangement's order (position, then id). */
+    private function childrenOf(string $parentId): Builder
     {
-        return RecordResource::where('parent_id', $parentId)->whereNull('deleted_at')->with(self::WITH)
-            ->orderBy('position')->orderBy('id')->get()->filter(fn ($u) => $this->readable($u));
+        return RecordResource::where('parent_id', $parentId)->whereNull('deleted_at')->with(self::WITH)->orderBy('position')->orderBy('id');
+    }
+
+    /** @return array{0: Collection<int, RecordResource>, 1: bool} */
+    private function firstReadable(Builder $query, int $count, int $skip = 0): array
+    {
+        return RecordService::firstReadable($query, fn (RecordResource $u) => $this->readable($u), $count, $skip);
     }
 
     private function readable(RecordResource $unit): bool
