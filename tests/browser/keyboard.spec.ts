@@ -85,7 +85,10 @@ test('the main steps of the demonstration scenario need no mouse', async ({ page
   await page.goto('/discover/records/' + id, { waitUntil: 'domcontentloaded' });
   await expect(page.locator('main'), 'published, so the public sees it').toContainText('Changed by keyboard alone.');
 
-  // And out (no keyboard trap on the way: every stop above was reached by Tab alone).
+  // And out (no keyboard trap on the way: every stop above was reached by Tab alone). Log out is in the account's menu
+  // (phase 26): Tab to its initial, Enter opens it, then Tab to Log out.
+  await tabTo(page, (el) => el.tagName === 'SUMMARY' && !!el.closest('details.user-menu'));
+  await page.keyboard.press('Enter');
   await tabTo(page, (el) => el.tagName === 'BUTTON' && !!el.closest('form[action$="/sign-out"]'));
   await enter(page);
   expect(await page.locator('form[action$="/sign-out"]').count(), 'signed out').toBe(0);
