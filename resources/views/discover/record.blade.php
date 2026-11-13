@@ -10,7 +10,28 @@
     @if($ancestors)<nav aria-label="{{ __('Hierarchy') }}" class="meta">@foreach($ancestors as $above)<a href="{{ route('discover.record', $above->id) }}">{{ $view->label($above) }}</a> / @endforeach</nav>@endif
     @php($alsoIn = $unit->memberships()->with('recordSet')->get()->filter(fn ($m) => $view->readable($m->recordSet)))
     @if($alsoIn->isNotEmpty())<p class="meta">{{ __('Also in') }}: @foreach($alsoIn as $m)<a href="{{ route('discover.record', $m->record_set_id) }}">{{ $view->label($m->recordSet) }}</a>@if(! $loop->last), @endif @endforeach</p>@endif
-    {{-- The images first, as AtoM shows the digital object above the description. --}}
+    {{-- Phase 26: its title and what can be done with it above the images, as the approved mock-up, then three boxes after The National Archives' record pages. --}}
+    @php([$title, $titleLanguage] = $view->valueWithLanguage($unit, 'title') ?? ['', 'en'])
+    <h1 class="title" lang="{{ $titleLanguage }}">{{ $title }}</h1>
+    <div class="actions no-print">
+    @if($display->allows($profile, 'clipboard'))@include('clipboard._button', ['type' => 'records', 'id' => $unit->id])@endif
+    @if($display->allows($profile, 'favourites'))@include('favourites._button', ['entity' => $unit])@endif
+    @if($display->allows($profile, 'order') && \App\Support\Modules::on('shop'))@include('shop._add', ['unit' => $unit])@endif
+    @if($display->allows($profile, 'cite'))<a href="{{ route('cite', $unit->id) }}" class="button-tertiary">{{ __('Cite') }}</a>@endif
+    {{-- Its DOI, once findable (phase 20c). --}}
+    @php($unitDoi = \App\Models\RecordDoi::where('record_resource_id', $unit->id)->whereHas('state', fn ($q) => $q->where('notation', 'findable'))->first())
+    @if($unitDoi)<span style="font-size: .85rem"> · DOI <a href="{{ $unitDoi->url() }}">{{ $unitDoi->doi }}</a></span>@endif
+    @if($display->allows($profile, 'feedback'))<a href="{{ route('feedback.create', ['record' => $unit->id]) }}" class="button-tertiary">{{ __('Feedback on this record') }}</a>@endif
+    {{-- Repatriation (phase 17d2): the claims about it, where the register is shown, and lodging one, where the institution allows it. --}}
+    @php($repatriation = \App\Models\RepatriationSetting::for($institution->id))
+    @if($repatriation->public_register && \App\Support\Modules::on('repatriation'))@foreach(\App\Models\RepatriationClaim::where('record_resource_id', $unit->id)->get() as $rc)<a href="{{ route('discover.repatriation.show', $rc->id) }}" class="no-print" style="font-size: .85rem">{{ __('Virtual return') }}</a> @endforeach @endif
+    {{-- Languages and research leads (phase 17d4). --}}
+    @module('scholarship')<a href="{{ route('discover.transcribe', $unit->id) }}" class="no-print" style="font-size: .85rem">{{ __('Transcribe or translate') }}</a>@endmodule
+    @php($publishedLead = \App\Models\ResearchLead::where(['record_resource_id' => $unit->id, 'status_id' => \App\Scholarship\ResearchLeads::status('published')])->first())
+    @if($publishedLead && \App\Support\Modules::on('scholarship'))<a href="{{ route('discover.research-leads.show', $publishedLead->id) }}" class="no-print" style="font-size: .85rem">{{ __('Research lead') }}</a>@endif
+    @if($repatriation->public_lodging && \App\Support\Modules::on('repatriation'))<a href="{{ route('discover.repatriation.lodge', $unit->id) }}" class="no-print" style="font-size: .85rem">{{ __('Lodge a repatriation claim') }}</a>@endif
+    </div>
+    {{-- The images under the title and above the description, as AtoM shows the digital object. --}}
     {{-- Heratio's imageflow: the pictures of the units inside, each opening its unit. --}}
     @if($childThumbnails->isNotEmpty() && $thumb !== 0)
         <section aria-label="{{ __('Pictures of the units inside') }}" class="imageflow">
@@ -43,27 +64,6 @@
         </section>
     @endif
 
-    {{-- Phase 26: under the images, its title and what can be done with it, then three boxes after The National Archives' record pages. --}}
-    @php([$title, $titleLanguage] = $view->valueWithLanguage($unit, 'title') ?? ['', 'en'])
-    <h1 class="title" lang="{{ $titleLanguage }}">{{ $title }}</h1>
-    <div class="actions no-print">
-    @if($display->allows($profile, 'clipboard'))@include('clipboard._button', ['type' => 'records', 'id' => $unit->id])@endif
-    @if($display->allows($profile, 'favourites'))@include('favourites._button', ['entity' => $unit])@endif
-    @if($display->allows($profile, 'order') && \App\Support\Modules::on('shop'))@include('shop._add', ['unit' => $unit])@endif
-    @if($display->allows($profile, 'cite'))<a href="{{ route('cite', $unit->id) }}" class="button-tertiary">{{ __('Cite') }}</a>@endif
-    {{-- Its DOI, once findable (phase 20c). --}}
-    @php($unitDoi = \App\Models\RecordDoi::where('record_resource_id', $unit->id)->whereHas('state', fn ($q) => $q->where('notation', 'findable'))->first())
-    @if($unitDoi)<span style="font-size: .85rem"> · DOI <a href="{{ $unitDoi->url() }}">{{ $unitDoi->doi }}</a></span>@endif
-    @if($display->allows($profile, 'feedback'))<a href="{{ route('feedback.create', ['record' => $unit->id]) }}" class="button-tertiary">{{ __('Feedback on this record') }}</a>@endif
-    {{-- Repatriation (phase 17d2): the claims about it, where the register is shown, and lodging one, where the institution allows it. --}}
-    @php($repatriation = \App\Models\RepatriationSetting::for($institution->id))
-    @if($repatriation->public_register && \App\Support\Modules::on('repatriation'))@foreach(\App\Models\RepatriationClaim::where('record_resource_id', $unit->id)->get() as $rc)<a href="{{ route('discover.repatriation.show', $rc->id) }}" class="no-print" style="font-size: .85rem">{{ __('Virtual return') }}</a> @endforeach @endif
-    {{-- Languages and research leads (phase 17d4). --}}
-    @module('scholarship')<a href="{{ route('discover.transcribe', $unit->id) }}" class="no-print" style="font-size: .85rem">{{ __('Transcribe or translate') }}</a>@endmodule
-    @php($publishedLead = \App\Models\ResearchLead::where(['record_resource_id' => $unit->id, 'status_id' => \App\Scholarship\ResearchLeads::status('published')])->first())
-    @if($publishedLead && \App\Support\Modules::on('scholarship'))<a href="{{ route('discover.research-leads.show', $publishedLead->id) }}" class="no-print" style="font-size: .85rem">{{ __('Research lead') }}</a>@endif
-    @if($repatriation->public_lodging && \App\Support\Modules::on('repatriation'))<a href="{{ route('discover.repatriation.lodge', $unit->id) }}" class="no-print" style="font-size: .85rem">{{ __('Lodge a repatriation claim') }}</a>@endif
-    </div>
     {{-- About these records, size and reference, can I see them: the questions a visitor comes with (phase 26, after TNA Discovery). --}}
     @php($access = $view->value($unit, 'conditions-governing-access'))
     @php($extent = $view->value($unit, 'extent'))

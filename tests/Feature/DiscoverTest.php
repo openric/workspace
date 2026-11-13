@@ -126,10 +126,10 @@ class DiscoverTest extends TestCase
         $page->assertSee('Names the witness at the marriage.')->assertDontSee('Draft note, not yet reviewed.')->assertSee('Botha, Jan (parish clerk)')
             ->assertSee('Marriages')->assertSee('Documents')->assertSee('rico:scopeAndContent')->assertSee('Scan of the letter');
         $this->assertStringNotContainsString('Closed personnel file', $this->get("/discover/records/{$this->fonds->id}")->getContent());
-        // The image comes first, above the title, on the public page and on the staff page.
-        $page->assertSeeInOrder([route('discover.file', $this->scan->file('reference')), '<h1'], false);
+        // The title comes first, then the image, then the description (phase 26), on the public page and on the staff page.
+        $page->assertSeeInOrder(['<h1', route('discover.file', $this->scan->file('reference')), 'About these records'], false);
         $this->actingAs($this->editor)->get(route('records.show', $this->item))->assertOk()
-            ->assertSeeInOrder(['aria-label="Digital copies"', route('files.show', $this->scan->file('reference')), '<h1'], false);
+            ->assertSeeInOrder(['<h1', 'aria-label="Digital copies"', route('files.show', $this->scan->file('reference')), 'aria-label="Summary"'], false);
         auth()->logout();
 
         // The reference copy reaches the public; the master does not (the Public role has no read-master).

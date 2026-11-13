@@ -6,34 +6,7 @@
     @if($withTree)<div class="with-tree"><aside class="tree-aside">@include('records._tree', ['tree' => $tree, 'branch' => 'records.tree-branch'])</aside><div class="with-tree-main">@endif
     <nav aria-label="{{ __('Hierarchy') }}"><a href="{{ route('records.index') }}">{{ __('Archival descriptions') }}</a>
         @foreach($record->ancestors() as $ancestor) / <a href="{{ route('records.show', $ancestor) }}">{{ $ancestor->described('title', ['en']) }}</a>@endforeach</nav>
-    @php
-        // Each instantiation's files this account may receive, by use, for its viewer.
-        $preview = $record->instantiations->map(fn ($i) => [$i, $i->files->filter(fn ($f) => app(\App\Description\InstantiationService::class)->deliverable(auth()->user(), $f->setRelation('instantiation', $i)))
-            ->keyBy(fn ($f) => $f->use->notation)])->filter(fn ($p) => $p[1]->isNotEmpty());
-    @endphp
-    {{-- Heratio's imageflow: the pictures of the units inside, each opening its unit. --}}
-    @if($childThumbnails['tiles']->isNotEmpty())
-        <section aria-label="{{ __('Pictures of the units inside') }}" style="margin: 1rem 0; padding: .6rem; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius)">
-            <ul style="display: flex; gap: .6rem; overflow-x: auto; list-style: none; margin: 0; padding: 0 0 .3rem">
-                @foreach($childThumbnails['tiles'] as ['unit' => $child, 'file' => $file])
-                    <li style="flex: none; width: 128px; margin: 0"><a href="{{ route('records.show', $child) }}" title="{{ $child->described('title', ['en']) }}" style="display: block; text-decoration: none; font-size: .8rem; text-align: center; color: var(--muted-2)">
-                        <img src="{{ route('files.show', $file) }}" alt="" width="{{ $file->width }}" height="{{ $file->height }}" loading="lazy" style="width: 128px; height: 96px; object-fit: cover; border-radius: 6px; border: 1px solid var(--line); display: block; margin-bottom: .25rem">
-                        {{ \Illuminate\Support\Str::limit((string) $child->described('title', ['en']), 28) }}</a></li>
-                @endforeach
-            </ul>
-            @if($childThumbnails['total'] > $childThumbnails['tiles']->count())<p class="meta">{{ __('Showing :shown of :total pictures of the units inside.', ['shown' => $childThumbnails['tiles']->count(), 'total' => $childThumbnails['total']]) }}</p>@endif
-        </section>
-    @endif
-    @if($preview->isNotEmpty())
-        {{-- The images first, as AtoM shows the digital object above the description; the instantiations are managed below. --}}
-        <section aria-label="{{ __('Digital copies') }}" style="display: flex; gap: 1rem; flex-wrap: wrap; margin: 1rem 0">
-            @foreach($preview as [$instantiation, $files])
-                <div style="flex: 1 1 100%; min-width: 0">@include('description._viewer', ['instantiation' => $instantiation, 'files' => $files, 'title' => $instantiation->described('instantiation-title', [app()->getLocale(), 'en']),
-                    'alt' => $instantiation->described('instantiation-alt-text', [app()->getLocale(), 'en']), 'fileRoute' => 'files.show'])</div>
-            @endforeach
-        </section>
-    @endif
-    {{-- Phase 26: where it stands, its title, the two actions most used, the rest under More, then what it is at a glance. --}}
+    {{-- Phase 26: where it stands, its title, the two actions most used, the rest under More, then what it is at a glance. Above the images, as the mock-up Dr Johan Pieterse approved (13 November 2026), so the actions are seen first. --}}
     @php
         $states = collect(app(\App\Description\PublicationService::class)->summary($record))->flatMap(fn ($byState) => array_keys($byState))->unique();
         $embargo = app(\App\Rights\Embargoes::class)->inForce($record);
@@ -83,6 +56,33 @@
         </details>
         @include('layouts._ric-switch')
     </div>
+    @php
+        // Each instantiation's files this account may receive, by use, for its viewer.
+        $preview = $record->instantiations->map(fn ($i) => [$i, $i->files->filter(fn ($f) => app(\App\Description\InstantiationService::class)->deliverable(auth()->user(), $f->setRelation('instantiation', $i)))
+            ->keyBy(fn ($f) => $f->use->notation)])->filter(fn ($p) => $p[1]->isNotEmpty());
+    @endphp
+    {{-- Heratio's imageflow: the pictures of the units inside, each opening its unit. --}}
+    @if($childThumbnails['tiles']->isNotEmpty())
+        <section aria-label="{{ __('Pictures of the units inside') }}" style="margin: 1rem 0; padding: .6rem; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius)">
+            <ul style="display: flex; gap: .6rem; overflow-x: auto; list-style: none; margin: 0; padding: 0 0 .3rem">
+                @foreach($childThumbnails['tiles'] as ['unit' => $child, 'file' => $file])
+                    <li style="flex: none; width: 128px; margin: 0"><a href="{{ route('records.show', $child) }}" title="{{ $child->described('title', ['en']) }}" style="display: block; text-decoration: none; font-size: .8rem; text-align: center; color: var(--muted-2)">
+                        <img src="{{ route('files.show', $file) }}" alt="" width="{{ $file->width }}" height="{{ $file->height }}" loading="lazy" style="width: 128px; height: 96px; object-fit: cover; border-radius: 6px; border: 1px solid var(--line); display: block; margin-bottom: .25rem">
+                        {{ \Illuminate\Support\Str::limit((string) $child->described('title', ['en']), 28) }}</a></li>
+                @endforeach
+            </ul>
+            @if($childThumbnails['total'] > $childThumbnails['tiles']->count())<p class="meta">{{ __('Showing :shown of :total pictures of the units inside.', ['shown' => $childThumbnails['tiles']->count(), 'total' => $childThumbnails['total']]) }}</p>@endif
+        </section>
+    @endif
+    @if($preview->isNotEmpty())
+        {{-- The images under the title and above the description, as AtoM shows the digital object; the instantiations are managed below. --}}
+        <section aria-label="{{ __('Digital copies') }}" style="display: flex; gap: 1rem; flex-wrap: wrap; margin: 1rem 0">
+            @foreach($preview as [$instantiation, $files])
+                <div style="flex: 1 1 100%; min-width: 0">@include('description._viewer', ['instantiation' => $instantiation, 'files' => $files, 'title' => $instantiation->described('instantiation-title', [app()->getLocale(), 'en']),
+                    'alt' => $instantiation->described('instantiation-alt-text', [app()->getLocale(), 'en']), 'fileRoute' => 'files.show'])</div>
+            @endforeach
+        </section>
+    @endif
     <section class="panel" aria-label="{{ __('Summary') }}">
         <dl class="summary">
             <div><dt>{{ __('Level') }}</dt><dd>{{ $record->level->label(\App\Support\Vocab::languages()) }} @include('description._ric', ['term' => \App\Relations\EntityKinds::ricClass($record)])</dd></div>
