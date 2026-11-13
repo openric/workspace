@@ -52,7 +52,8 @@ class SiteAdminController extends Controller
     public function savePage(Request $request, ?StaticPage $page = null): RedirectResponse
     {
         $page && $this->own($request, $page->institution_id);
-        $data = $request->validate(['slug' => ['required', 'string', 'max:255'], 'title' => ['required', 'string', 'max:1024'], 'content' => ['nullable', 'string', 'max:200000']]);
+        $data = $request->validate(['slug' => ['required', 'string', 'max:255'], 'title' => ['required', 'string', 'max:1024'], 'content' => ['nullable', 'string', 'max:200000'],
+            'footer_position' => ['nullable', 'integer', 'min:1', 'max:99']]);
         try {
             $page = app(StaticPages::class)->save($request->user()->institution, $data, $this->language($request), $request->user(), $page);
         } catch (InvalidArgumentException $e) {

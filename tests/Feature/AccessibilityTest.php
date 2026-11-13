@@ -83,8 +83,8 @@ class AccessibilityTest extends TestCase
     {
         $this->install();
         $html = $this->actingAs(User::where('email', 'admin@demo.invalid')->sole())->get('/records')->assertOk()->getContent();
-        $body = substr($html, strpos($html, '<body>'));
-        $this->assertMatchesRegularExpression('~^<body>\s*(\{\{--.*?--\}\}\s*)?<a class="skip" href="#content">~s', $body);
+        $body = substr($html, strpos($html, '<body'));
+        $this->assertMatchesRegularExpression('~^<body[^>]*>\s*(\{\{--.*?--\}\}\s*)?<a class="skip" href="#content">~s', $body);
         $this->assertStringContainsString('<main id="content" tabindex="-1">', $html);
     }
 }

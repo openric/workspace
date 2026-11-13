@@ -129,7 +129,7 @@ class DiscoverTest extends TestCase
         // The image comes first, above the title, on the public page and on the staff page.
         $page->assertSeeInOrder([route('discover.file', $this->scan->file('reference')), '<h1'], false);
         $this->actingAs($this->editor)->get(route('records.show', $this->item))->assertOk()
-            ->assertSeeInOrder(['aria-label="Digital copies"', route('files.show', $this->scan->file('reference')), '<h1>'], false);
+            ->assertSeeInOrder(['aria-label="Digital copies"', route('files.show', $this->scan->file('reference')), '<h1'], false);
         auth()->logout();
 
         // The reference copy reaches the public; the master does not (the Public role has no read-master).

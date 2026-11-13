@@ -32,37 +32,29 @@
 </head>
 <body>
 <a class="skip" href="#content">{{ __('Skip to the content') }}</a>
-<header>
-    <a href="{{ route('discover.home') }}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: .75rem">
+{{-- The institution's own band (phase 26): its colour (Settings), its name, the search, then the visitor's links. --}}
+<header class="public-band" style="--band: {{ $institution->brand_colour ?? '#0f3e75' }}">
+    <a href="{{ route('discover.home') }}" class="brand">
         @if($institution->logo_path)<img src="{{ route('branding.logo') }}?v={{ md5($institution->logo_path) }}" alt="" style="max-height: 48px; max-width: 160px">@endif
-        <strong>{{ $institution->headerTitle() }}</strong>
+        <span><strong class="title">{{ $institution->headerTitle() }}</strong><span class="band-sub">{{ __('The catalogue') }}</span></span>
     </a>
-    <form method="get" action="{{ route('discover.home') }}" role="search" style="display: flex; gap: .5rem; align-items: center">
-        <label for="site-q" style="margin: 0; position: absolute; left: -999px">{{ __('Search the catalogue') }}</label>
-        <input id="site-q" name="q" value="{{ request('q') }}" placeholder="{{ __('Search the catalogue') }}" style="max-width: 16rem">
-        <button type="submit" style="margin: 0">{{ __('Search') }}</button>
-        {{-- The catalogue's assistant, where the institution offers it (phase 17f). --}}
-        @if($institution && app(\App\Ai\Gateway::class)->available($institution->id) && app(\App\Ai\Gateway::class)->settings($institution->id)->chatbot_public)<a href="{{ route('discover.ask') }}" style="white-space: nowrap">{{ __('Ask the catalogue') }}</a>@endif
-        @guest<a href="{{ route('clipboard.index') }}" style="white-space: nowrap">{{ __('Clipboard') }} ({{ app(\App\Clipboard\ClipboardService::class)->count() }})</a>@module('shop')<a href="{{ route('shop.cart') }}" style="white-space: nowrap">{{ __('Cart') }} ({{ app(\App\Research\Shop::class)->count(null) }})</a>@endmodule<a href="{{ route('sign-in') }}" style="white-space: nowrap">{{ __('Log in') }}</a>@endguest
+    <form method="get" action="{{ route('discover.home') }}" role="search" class="band-search">
+        <label for="site-q" class="visually-hidden">{{ __('Search the catalogue') }}</label>
+        <input id="site-q" name="q" type="search" value="{{ request('q') }}" placeholder="{{ __('Search the catalogue') }}">
+        <button type="submit">{{ __('Search') }}</button>
     </form>
-    @include('layouts._account')
-    @include('layouts._language')
+    <div class="band-links">
+        {{-- The catalogue's assistant, where the institution offers it (phase 17f). --}}
+        @if($institution && app(\App\Ai\Gateway::class)->available($institution->id) && app(\App\Ai\Gateway::class)->settings($institution->id)->chatbot_public)<a href="{{ route('discover.ask') }}">{{ __('Ask the catalogue') }}</a>@endif
+        @guest<a href="{{ route('clipboard.index') }}">{{ __('Clipboard') }} ({{ app(\App\Clipboard\ClipboardService::class)->count() }})</a>@module('shop')<a href="{{ route('shop.cart') }}">{{ __('Cart') }} ({{ app(\App\Research\Shop::class)->count(null) }})</a>@endmodule<a href="{{ route('sign-in') }}">{{ __('Log in') }}</a>@endguest
+        @include('layouts._account')
+        @include('layouts._language')
+    </div>
 </header>
 @include('layouts._staff-nav')
 <main id="content">
     @yield('content')
 </main>
-<footer style="max-width: 60rem; margin: 2rem auto; padding: 1rem; border-top: 1px solid var(--line)" class="meta">
-    {{-- The institution's about, privacy and terms pages and its articles, where it has them (phase 20a), and the Help Center (phase 20b). --}}
-    @php($sitePages = app(\App\Site\StaticPages::class)->footer($institution))
-    @php($hasArticles = app(\App\Site\Articles::class)->published($institution)->exists())
-        <nav aria-label="{{ __('About the institution') }}" style="margin-bottom: .6rem; display: flex; gap: 1rem; flex-wrap: wrap">
-            @foreach($sitePages as $sitePage)<a href="{{ route('site.'.$sitePage->slug) }}">{{ $sitePage->translation(\App\Support\Vocab::languages())?->title }}</a>@endforeach
-            @if($hasArticles && \App\Support\Modules::on('articles'))<a href="{{ route('site.articles-public') }}">{{ __('Articles') }}</a>@endif
-            <a href="{{ route('help.index') }}">{{ __('Help') }}</a>
-            <a href="{{ route('accessibility.statement') }}">{{ __('Accessibility') }}</a>
-        </nav>
-    {!! __('Described in RiC (Records in Contexts). The data is open through the :api and :oai.', ['api' => '<a href="'.e(route('api.service')).'">'.e(__('OpenRiC API')).'</a>', 'oai' => '<a href="'.e(route('api.oai')).'?verb=Identify">OAI-PMH</a>']) !!}
-</footer>
+@include('layouts._footer', ['institution' => $institution])
 </body>
 </html>

@@ -17,6 +17,9 @@
         <p class="meta">{{ __('Lower-case letters, digits and hyphens. about, privacy and terms are served at /about, /privacy and /terms; any other at /pages/ and its address.') }}</p>
         <label for="pt">{{ __('Title') }} ({{ $language }})</label><input id="pt" name="title" required maxlength="1024" value="{{ old('title', $text?->title) }}">
         <label for="pc">{{ __('Text') }} ({{ __('Markdown') }})</label><textarea id="pc" name="content" rows="18">{{ old('content', $text?->content) }}</textarea>
+        <label for="pf">{{ __('Place in the footer') }}</label>
+        <input id="pf" name="footer_position" type="number" min="1" max="99" value="{{ old('footer_position', $page?->footer_position) }}" aria-describedby="pf-help" style="max-width: 6rem">
+        <p class="meta" id="pf-help">{{ __('A number puts a link to this page in the footer of every page, the lowest first; leave it empty to keep the page out of the footer.') }}</p>
         <button type="submit">{{ __('Save') }}</button>
     </form>
     @if($page)<form method="post" action="{{ route('site.pages.destroy', $page) }}" onsubmit="return confirm(@json(__('Delete this page in every language?')))">@csrf @method('DELETE')<button type="submit">{{ __('Delete page') }}</button></form>@endif

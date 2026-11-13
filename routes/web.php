@@ -52,6 +52,7 @@ use App\Http\Controllers\FunctionsDocsController;
 use App\Http\Controllers\HelpController;
 use App\Http\Controllers\HeritageController;
 use App\Http\Controllers\HistoryController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\IdentifierController;
 use App\Http\Controllers\IiifAuthController;
 use App\Http\Controllers\IiifCollectionController;
@@ -201,7 +202,7 @@ Route::post('/language', function (Request $request) {
     return redirect(str_starts_with($back, '/') && ! str_starts_with($back, '//') ? $back : '/');
 })->middleware('throttle:60,1')->name('language');
 
-Route::get('/', fn () => auth()->check() ? view('home') : redirect()->route('discover.home'))->middleware(['web', 'active'])->name('home');
+Route::get('/', HomeController::class)->middleware(['web', 'active'])->name('home');
 
 // The public catalogue (WS-009): no sign-in; DiscoverController shows only what the Public role may read and is published.
 // Sitemaps, robots.txt naming them, and an Atom feed of what was published last (roadmap phase 22c).

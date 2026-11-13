@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['institution_id', 'slug', 'source_language', 'created_by_id'])]
+#[Fillable(['institution_id', 'slug', 'source_language', 'created_by_id', 'footer_position'])]
 class StaticPage extends Model
 {
     use Audited, HasUuids;

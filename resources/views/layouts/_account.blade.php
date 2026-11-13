@@ -1,14 +1,18 @@
-{{-- OpenRiC Workspace - the signed-in account in the header: search, the clipboard, its own pages under its name, and log out. Shared by the staff and public layouts. Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems. SPDX-License-Identifier: AGPL-3.0-or-later --}}
+{{-- OpenRiC Workspace - the signed-in account in the header: the clipboard and help as icons, its own pages and log out under its name. Shared by the staff and public layouts. Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems. SPDX-License-Identifier: AGPL-3.0-or-later --}}
     @auth
-        <form method="post" action="{{ route('sign-out') }}">
-            @csrf
-            <a href="{{ route('search') }}">{{ __('Search') }}</a>
-            <a href="{{ route('clipboard.index') }}">{{ __('Clipboard') }} ({{ app(\App\Clipboard\ClipboardService::class)->count() }})</a>
-            @module('shop')<a href="{{ route('shop.cart') }}">{{ __('Cart') }} ({{ app(\App\Research\Shop::class)->count(auth()->user()) }})</a>@endmodule
+        {{-- The account's tools (phase 26): the clipboard and cart, help for this page and the public catalogue as icons, each named for
+             screen readers; the account's own pages, and logging out, under its name. --}}
+        <div class="account-tools">
+            <a class="icon-button" href="{{ route('clipboard.index') }}"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="7" y="4" width="10" height="4" rx="1"/><path d="M7 6H5v15h14V6h-2"/></svg><span class="visually-hidden">{{ __('Clipboard') }} </span><span class="count">({{ app(\App\Clipboard\ClipboardService::class)->count() }})</span></a>
+            @module('shop')<a class="icon-button" href="{{ route('shop.cart') }}"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 4h2l2.4 11h10.2L20 7H6.2"/><circle cx="9" cy="19.5" r="1.3"/><circle cx="17" cy="19.5" r="1.3"/></svg><span class="visually-hidden">{{ __('Cart') }} </span><span class="count">({{ app(\App\Research\Shop::class)->count(auth()->user()) }})</span></a>@endmodule
+            <a class="icon-button" href="{{ route('help.context', ['route' => request()->route()?->getName()]) }}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14"/><path d="M12 17.5v.5"/></svg><span class="visually-hidden">{{ __('Help for this page (opens in a new tab)') }}</span></a>
             {{-- The account's own pages, under its name. --}}
             <details class="user-menu" name="main-nav">
-                <summary @class(['here' => request()->routeIs('account.*', 'access-requests.*', 'jobs.*', 'favourites.*', 'research.*', 'shop.orders.mine')])>{{ auth()->user()->name }}</summary>
+                {{-- The account as its initial, its name for screen readers; the language switch, for staff, inside (phase 26). --}}
+                <summary @class(['here' => request()->routeIs('account.*', 'access-requests.*', 'jobs.*', 'favourites.*', 'research.*', 'shop.orders.mine')]) title="{{ auth()->user()->name }}"><span aria-hidden="true">{{ mb_strtoupper(mb_substr((string) preg_replace('/^((dr|prof|mr|mrs|ms|mx|rev)\.?\s+)+/i', '', trim((string) auth()->user()->name)), 0, 1)) }}</span><span class="visually-hidden">{{ auth()->user()->name }}</span></summary>
                 <ul>
+                    <li class="account-name">{{ auth()->user()->name }}</li>
+                    @if(request()->routeIs('discover.*') === false)<li class="account-language">@include('layouts._language')</li>@endif
                     <li><a href="{{ route('account.profile') }}" @if(request()->routeIs('account.profile')) aria-current="page" @endif>{{ __('Profile') }}</a></li>
                     <li><a href="{{ route('jobs.index') }}" @if(request()->routeIs('jobs.*')) aria-current="page" @endif>{{ __('Jobs') }}</a></li>
                     @module('research')<li><a href="{{ route('research.profile') }}" @if(request()->routeIs('research.profile', 'research.book', 'research.bookings.*')) aria-current="page" @endif>{{ __('Researcher') }}</a></li>@endmodule
@@ -37,8 +41,8 @@
                     <li><a href="{{ route('favourites.index') }}" @if(request()->routeIs('favourites.*')) aria-current="page" @endif>{{ __('Favourites') }}</a></li>
                     <li><a href="{{ route('access-requests.mine') }}" @if(request()->routeIs('access-requests.mine')) aria-current="page" @endif>{{ __('My access requests') }}</a></li>
                     @if(auth()->user()->mayAnywhere('review-access-requests', 'description'))<li><a href="{{ route('access-requests.index') }}" @if(request()->routeIs('access-requests.index')) aria-current="page" @endif>{{ __('Access requests') }}</a></li>@endif
+                    <li class="sign-out"><form method="post" action="{{ route('sign-out') }}">@csrf<button type="submit">{{ __('Log out') }}</button></form></li>
                 </ul>
             </details>
-            <button type="submit">{{ __('Log out') }}</button>
-        </form>
+        </div>
     @endauth

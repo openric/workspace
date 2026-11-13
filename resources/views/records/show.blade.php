@@ -33,25 +33,73 @@
             @endforeach
         </section>
     @endif
-    <h1>{{ $record->described('title', ['en']) }}</h1>
-    @include('clipboard._button', ['type' => 'records', 'id' => $record->id])
-    @include('favourites._button', ['entity' => $record])
-    <a href="{{ route('cite', $record->id) }}" class="no-print" style="font-size: .85rem">{{ __('Cite') }}</a>
+    {{-- Phase 26: where it stands, its title, the two actions most used, the rest under More, then what it is at a glance. --}}
+    @php
+        $states = collect(app(\App\Description\PublicationService::class)->summary($record))->flatMap(fn ($byState) => array_keys($byState))->unique();
+        $embargo = app(\App\Rights\Embargoes::class)->inForce($record);
+        $waiting = \App\Models\Proposal::where('record_resource_id', $record->id)->whereHas('status', fn ($q) => $q->where('iri', \App\Support\Vocab::ASSERTION_STATUSES.'proposed'))->count();
+    @endphp
+    <div class="badges">
+        @if($states->contains('published'))<span class="badge ok">{{ __('Published') }}</span>@else<span class="badge">{{ __('Not published') }}</span>@endif
+        @if($record->descriptionStatus)<span class="badge">{{ $record->descriptionStatus->label(\App\Support\Vocab::languages()) }}</span>@endif
+        @if($embargo)<span class="badge warn">{{ __('Embargo in force') }}</span>@endif
+        @if($waiting)<a class="badge warn" href="{{ route('proposals.index') }}">{{ trans_choice(':count proposal waiting|:count proposals waiting', $waiting) }}</a>@endif
+    </div>
+    <h1 class="title">{{ $record->described('title', ['en']) }}</h1>
     @if(session('status'))<p role="status">{{ session('status') }}</p>@endif
     @if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $e)<p>{{ $e }}</p>@endforeach</div>@endif
-    <p>{{ $record->level->label(\App\Support\Vocab::languages()) }} @include('description._ric', ['term' => \App\Relations\EntityKinds::ricClass($record)])@if($record->referenceCode()), {{ $record->referenceCode() }}@endif{{ __('. Held by') }} <a href="{{ route('repositories.show', $record->repository) }}">{{ $record->repository->described('authorised-name', ['en']) }}</a>.<br>
-       <strong>{{ __('Persistent IRI') }}:</strong> <code>{{ $record->iri }}</code></p>
-    <p><a href="{{ route('records.tree', $record) }}">{{ __('Hierarchy') }}</a> · <a href="{{ route('records.inventory', $record) }}">{{ __('Inventory') }}</a> · <a href="{{ route('records.finding-aid', $record) }}">{{ __('Finding aid') }}</a> · <a href="{{ route('records.print', $record) }}">{{ __('Print view') }}</a> · <a href="{{ route('records.export', $record) }}">{{ __('Export') }}</a>@if(auth()->user()->hasPermission(\App\Support\Vocab::permission('manage-institution'))) · <a href="{{ route('packages.index', $record) }}">{{ __('Information packages') }}</a>@endif @if(auth()->user()->may('update', 'description', $record))@module('research') · <a href="{{ route('research.rights-policies', $record) }}">{{ __('Rights policies for researchers') }}</a>@endmodule @endif
-       @unless($canUpdate) · <a href="{{ route('access-requests.new', ['record' => $record->id, 'scope' => in_array($record->level->notation, \App\AccessRequests\AccessRequestService::COLLECTION_LEVELS, true) ? 'collection' : 'item']) }}">{{ __('Ask for access') }}</a>@endunless
-       @if($canUpdate) · <a href="{{ route('history', ['records', $record->id]) }}">{{ __('History') }}</a>
-           · <form method="post" action="{{ route('records.calculate-dates', $record) }}" style="display: inline">@csrf<button type="submit" style="margin-top: 0; padding: .1rem .5rem">{{ __('Calculate dates from the units inside') }}</button></form>@endif</p>
-    <p>@if($canUpdate)<a href="{{ route('records.move-form', $record) }}">{{ __('Move') }}</a>@endif
-       @if($canUpdate && $canCreateInside) · @endif
-       @if($canCreateInside)<a href="{{ route('records.create', ['parent' => $record->id]) }}">{{ __('Add a unit inside') }}</a> · <a href="{{ route('imports.create', ['parent' => $record->id]) }}">{{ __('Import units into it') }}</a> · <a href="{{ route('imports.grid', ['parent' => $record->id]) }}">{{ __('Enter units in a grid') }}</a>@endif
-       · <a href="{{ route('labels.print', ['kind' => 'records', 'ids' => [$record->id]]) }}">{{ __('Label') }}</a> · <a href="{{ route('labels.print', ['kind' => 'records', 'ids' => [$record->id], 'inside' => 1]) }}">{{ __('Labels for what is inside') }}</a>@if(auth()->user()->may('update', 'description', $record)) · <a href="{{ route('versions.index', ['records', $record->id]) }}">{{ __('Versions') }}</a>@endif</p>
-    @if($canUpdate || auth()->user()->may('translate', 'description', $record))
-        @include('description._actions', ['subject' => $record, 'editRoute' => 'records.edit', 'required' => 'title'])
-    @endif
+    <div class="actions no-print">
+        @if($canUpdate || auth()->user()->may('translate', 'description', $record))
+            @include('description._actions', ['subject' => $record, 'editRoute' => 'records.edit', 'required' => 'title'])
+        @endif
+        <details class="more">
+            <summary class="button-tertiary">{{ __('More') }}</summary>
+            <ul>
+                <li>@include('clipboard._button', ['type' => 'records', 'id' => $record->id, 'inMenu' => true])</li>
+                <li>@include('favourites._button', ['entity' => $record, 'inMenu' => true])</li>
+                <li><a href="{{ route('records.tree', $record) }}">{{ __('Hierarchy') }}</a></li>
+                <li><a href="{{ route('records.inventory', $record) }}">{{ __('Inventory') }}</a></li>
+                <li><a href="{{ route('records.finding-aid', $record) }}">{{ __('Finding aid') }}</a></li>
+                <li><a href="{{ route('records.print', $record) }}">{{ __('Print view') }}</a></li>
+                <li><a href="{{ route('records.export', $record) }}">{{ __('Export') }}</a></li>
+                <li><a href="{{ route('cite', $record->id) }}">{{ __('Cite') }}</a></li>
+                @if(auth()->user()->hasPermission(\App\Support\Vocab::permission('manage-institution')))<li><a href="{{ route('packages.index', $record) }}">{{ __('Information packages') }}</a></li>@endif
+                @if(auth()->user()->may('update', 'description', $record))@module('research')<li><a href="{{ route('research.rights-policies', $record) }}">{{ __('Rights policies for researchers') }}</a></li>@endmodule @endif
+                @unless($canUpdate)<li><a href="{{ route('access-requests.new', ['record' => $record->id, 'scope' => in_array($record->level->notation, \App\AccessRequests\AccessRequestService::COLLECTION_LEVELS, true) ? 'collection' : 'item']) }}">{{ __('Ask for access') }}</a></li>@endunless
+                @if($canUpdate)
+                    <li><a href="{{ route('history', ['records', $record->id]) }}">{{ __('History') }}</a></li>
+                    <li><form method="post" action="{{ route('records.calculate-dates', $record) }}">@csrf<button type="submit">{{ __('Calculate dates from the units inside') }}</button></form></li>
+                    <li><a href="{{ route('records.move-form', $record) }}">{{ __('Move') }}</a></li>
+                @endif
+                @if($canCreateInside)
+                    <li><a href="{{ route('records.create', ['parent' => $record->id]) }}">{{ __('Add a unit inside') }}</a></li>
+                    <li><a href="{{ route('imports.create', ['parent' => $record->id]) }}">{{ __('Import units into it') }}</a></li>
+                    <li><a href="{{ route('imports.grid', ['parent' => $record->id]) }}">{{ __('Enter units in a grid') }}</a></li>
+                @endif
+                <li><a href="{{ route('labels.print', ['kind' => 'records', 'ids' => [$record->id]]) }}">{{ __('Label') }}</a></li>
+                <li><a href="{{ route('labels.print', ['kind' => 'records', 'ids' => [$record->id], 'inside' => 1]) }}">{{ __('Labels for what is inside') }}</a></li>
+                @if(auth()->user()->may('update', 'description', $record))<li><a href="{{ route('versions.index', ['records', $record->id]) }}">{{ __('Versions') }}</a></li>@endif
+            </ul>
+        </details>
+        @include('layouts._ric-switch')
+    </div>
+    <section class="panel" aria-label="{{ __('Summary') }}">
+        <dl class="summary">
+            <div><dt>{{ __('Level') }}</dt><dd>{{ $record->level->label(\App\Support\Vocab::languages()) }} @include('description._ric', ['term' => \App\Relations\EntityKinds::ricClass($record)])</dd></div>
+            @if($record->referenceCode())<div><dt>{{ __('Reference code') }}</dt><dd>{{ $record->referenceCode() }}</dd></div>@endif
+            @if($record->dates->isNotEmpty())<div><dt>{{ __('Dates') }}</dt><dd>{{ $record->dates->map(fn ($d) => $d->display())->join('; ') }}</dd></div>@endif
+            @if($extent = $record->described('extent', ['en']))<div><dt>{{ __('Extent') }}</dt><dd>{{ \Illuminate\Support\Str::limit((string) $extent, 80) }}</dd></div>@endif
+            <div><dt>{{ __('Held by') }}</dt><dd><a href="{{ route('repositories.show', $record->repository) }}">{{ $record->repository->described('authorised-name', ['en']) }}</a></dd></div>
+        </dl>
+        <p class="meta" style="margin: .9rem 0 0"><strong>{{ __('Persistent IRI') }}:</strong> <code style="overflow-wrap: anywhere">{{ $record->iri }}</code></p>
+    </section>
+    <nav class="sections no-print" aria-label="{{ __('Sections of this description') }}">
+        <a href="#rights">{{ __('Rights') }}</a>
+        <a href="#embargoes">{{ __('Embargoes') }}</a>
+        <a href="#instantiations">{{ __('Instantiations') }}</a>
+        <a href="#custody">{{ __('Provenance') }}</a>
+        <a href="#inside">{{ __('Units inside') }}</a>
+    </nav>
     {{-- Phase 17b1: a model finds names or summarises the pages, through the AI gateway; what it answers waits for review. --}}
     @if($canUpdate && app(\App\Ai\Gateway::class)->available($record->institution_id))
         <div class="no-print">
@@ -144,7 +192,7 @@
         @endforeach
     @endif
 
-    <h2>{{ __('Units inside') }}</h2>
+    <h2 id="inside">{{ __('Units inside') }}</h2>
     @forelse($record->children as $child)
         <div>
             <a href="{{ route('records.show', $child) }}">{{ $child->described('title', ['en']) }}</a> ({{ $child->level->label(\App\Support\Vocab::languages()) }})

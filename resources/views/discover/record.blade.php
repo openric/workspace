@@ -42,16 +42,19 @@
         @endforeach
         </section>
     @endif
+
+    {{-- Phase 26: under the images, its title and what can be done with it, then three boxes after The National Archives' record pages. --}}
     @php([$title, $titleLanguage] = $view->valueWithLanguage($unit, 'title') ?? ['', 'en'])
-    <h1 lang="{{ $titleLanguage }}">{{ $title }}</h1>
+    <h1 class="title" lang="{{ $titleLanguage }}">{{ $title }}</h1>
+    <div class="actions no-print">
     @if($display->allows($profile, 'clipboard'))@include('clipboard._button', ['type' => 'records', 'id' => $unit->id])@endif
     @if($display->allows($profile, 'favourites'))@include('favourites._button', ['entity' => $unit])@endif
     @if($display->allows($profile, 'order') && \App\Support\Modules::on('shop'))@include('shop._add', ['unit' => $unit])@endif
-    @if($display->allows($profile, 'cite'))<a href="{{ route('cite', $unit->id) }}" class="no-print" style="font-size: .85rem">{{ __('Cite') }}</a>@endif
+    @if($display->allows($profile, 'cite'))<a href="{{ route('cite', $unit->id) }}" class="button-tertiary">{{ __('Cite') }}</a>@endif
     {{-- Its DOI, once findable (phase 20c). --}}
     @php($unitDoi = \App\Models\RecordDoi::where('record_resource_id', $unit->id)->whereHas('state', fn ($q) => $q->where('notation', 'findable'))->first())
     @if($unitDoi)<span style="font-size: .85rem"> · DOI <a href="{{ $unitDoi->url() }}">{{ $unitDoi->doi }}</a></span>@endif
-    @if($display->allows($profile, 'feedback'))<a href="{{ route('feedback.create', ['record' => $unit->id]) }}" class="no-print" style="font-size: .85rem">{{ __('Feedback on this record') }}</a>@endif
+    @if($display->allows($profile, 'feedback'))<a href="{{ route('feedback.create', ['record' => $unit->id]) }}" class="button-tertiary">{{ __('Feedback on this record') }}</a>@endif
     {{-- Repatriation (phase 17d2): the claims about it, where the register is shown, and lodging one, where the institution allows it. --}}
     @php($repatriation = \App\Models\RepatriationSetting::for($institution->id))
     @if($repatriation->public_register && \App\Support\Modules::on('repatriation'))@foreach(\App\Models\RepatriationClaim::where('record_resource_id', $unit->id)->get() as $rc)<a href="{{ route('discover.repatriation.show', $rc->id) }}" class="no-print" style="font-size: .85rem">{{ __('Virtual return') }}</a> @endforeach @endif
@@ -60,11 +63,33 @@
     @php($publishedLead = \App\Models\ResearchLead::where(['record_resource_id' => $unit->id, 'status_id' => \App\Scholarship\ResearchLeads::status('published')])->first())
     @if($publishedLead && \App\Support\Modules::on('scholarship'))<a href="{{ route('discover.research-leads.show', $publishedLead->id) }}" class="no-print" style="font-size: .85rem">{{ __('Research lead') }}</a>@endif
     @if($repatriation->public_lodging && \App\Support\Modules::on('repatriation'))<a href="{{ route('discover.repatriation.lodge', $unit->id) }}" class="no-print" style="font-size: .85rem">{{ __('Lodge a repatriation claim') }}</a>@endif
-    <p class="meta">{{ $unit->level->label(\App\Support\Vocab::languages()) }} @include('description._ric', ['term' => \App\Relations\EntityKinds::ricClass($unit)])
-        @if($unit->referenceCode()) · {{ $unit->referenceCode() }}@endif
-        @if($unit->repository && $view->readable($unit->repository)) · {{ __('Held by') }} <a href="{{ route('discover.repository', $unit->repository->id) }}">{{ $view->label($unit->repository) }}</a>@endif</p>
-    @foreach($unit->dates as $date)<p><strong>{{ $date->property->label(\App\Support\Vocab::languages()) }}:</strong> {{ $date->display() }} @include('description._ric', ['term' => $date->property])</p>@endforeach
-    <p><a href="{{ route('discover.graph', ['records', $unit->id]) }}">{{ __('See it in the relationship graph') }}</a></p>
+    </div>
+    {{-- About these records, size and reference, can I see them: the questions a visitor comes with (phase 26, after TNA Discovery). --}}
+    @php($access = $view->value($unit, 'conditions-governing-access'))
+    @php($extent = $view->value($unit, 'extent'))
+    <div class="record-boxes">
+        <section class="panel">
+            <h2>{{ __('About these records') }}</h2>
+            <dl class="summary">
+                <div><dt>{{ __('Level') }}</dt><dd>{{ $unit->level->label(\App\Support\Vocab::languages()) }} @include('description._ric', ['term' => \App\Relations\EntityKinds::ricClass($unit)])</dd></div>
+                @foreach($unit->dates as $date)<div><dt>{{ $date->property->label(\App\Support\Vocab::languages()) }}</dt><dd>{{ $date->display() }} @include('description._ric', ['term' => $date->property])</dd></div>@endforeach
+            </dl>
+            <p style="margin-bottom: 0"><a href="{{ route('discover.graph', ['records', $unit->id]) }}">{{ __('See it in the relationship graph') }}</a></p>
+        </section>
+        <section class="panel">
+            <h2>{{ __('Size and reference') }}</h2>
+            <dl class="summary">
+                @if($unit->referenceCode())<div><dt>{{ __('Reference code') }}</dt><dd>{{ $unit->referenceCode() }}</dd></div>@endif
+                @if($extent)<div><dt>{{ __('Extent') }}</dt><dd>{{ \Illuminate\Support\Str::limit($extent, 120) }}</dd></div>@endif
+                @if($unit->repository && $view->readable($unit->repository))<div><dt>{{ __('Held by') }}</dt><dd><a href="{{ route('discover.repository', $unit->repository->id) }}">{{ $view->label($unit->repository) }}</a></dd></div>@endif
+            </dl>
+        </section>
+        <section class="panel">
+            <h2>{{ __('Can I see them?') }}</h2>
+            @if($embargo)<p><span class="badge warn">{{ __('Under embargo') }}</span></p>@endif
+            <p style="margin-bottom: 0">{{ $access ? \Illuminate\Support\Str::limit($access, 240) : __('Ask the institution that holds them how to consult them.') }}</p>
+        </section>
+    </div>
 
     @php($creators = $view->creators($unit))
     @if($creators->isNotEmpty())
@@ -96,7 +121,7 @@
     @include('search._related', ['unit' => $unit, 'public' => true, 'route' => 'discover.record'])
     <h2>{{ __('Cite and reuse') }}</h2>
     <p>{{ collect([$title, $unit->referenceCode(), $unit->repository ? $view->label($unit->repository) : null])->filter()->join(', ') }}. <code>{{ $unit->iri }}</code></p>
-    <p class="meta">{{ __('This description as RiC-O') }}: <a href="{{ route('api.record', $unit->id) }}">JSON-LD</a> · <a href="{{ route('api.export', [$unit->id, 'format' => 'ttl']) }}">Turtle</a> · <a href="{{ route('api.export', [$unit->id, 'format' => 'rdf']) }}">RDF/XML</a></p>
+    <p class="meta">{{ __('This description as RiC-O') }}: <a class="chip" href="{{ route('api.record', $unit->id) }}">JSON-LD</a> <a class="chip" href="{{ route('api.export', [$unit->id, 'format' => 'ttl']) }}">Turtle</a> <a class="chip" href="{{ route('api.export', [$unit->id, 'format' => 'rdf']) }}">RDF/XML</a></p>
     @if($iiif)<p class="meta">{{ __('Its images as IIIF') }}: <a href="{{ route('discover.iiif', $unit->id) }}">{{ __('Open in Mirador') }}</a> · <a href="{{ route('iiif.manifest', $unit->id) }}">{{ __('IIIF manifest') }}</a></p>@endif
     @if($withTree)</div></div>@endif
     @include('custom-fields._panel', ['entity' => $unit, 'kind' => $kind ?? 'records', 'public' => true])

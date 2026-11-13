@@ -15,7 +15,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['name', 'base_iri', 'header_title', 'logo_path', 'logo_mime', 'catalogue_introduction', 'catalogue_credits', 'registration_open', 'interface_languages',
+#[Fillable(['name', 'base_iri', 'header_title', 'brand_colour', 'footer_text', 'logo_path', 'logo_mime', 'catalogue_introduction', 'catalogue_credits', 'registration_open', 'interface_languages',
     'watermark_type_id', 'watermark_position_id', 'watermark_opacity', 'watermark_min_size', 'watermark_image_path', 'accession_numbering_mask',
     'agreement_numbering_mask', 'accession_auto_assign', 'accession_requires_agreement', 'accession_default_priority_id', 'accession_checklist_template_id',
     'accession_requires_appraisal', 'accession_container_barcodes', 'accession_rights_inheritance', 'catalogue_heading', 'catalogue_show_counts', 'workflow_required_for_publish',

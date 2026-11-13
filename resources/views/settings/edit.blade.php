@@ -30,6 +30,12 @@
         <label for="catalogue_credits">{{ __('Credits for data reused from others') }}</label>
         <small id="credits-help">{{ __('Shown on the catalogue\'s home page. Many open-data licences require a credit with each reuse: give the author, the dataset, its version and date, and a link.') }}</small>
         <textarea id="catalogue_credits" name="catalogue_credits" rows="6" aria-describedby="credits-help">{{ old('catalogue_credits', $institution->catalogue_credits) }}</textarea>
+        <label for="brand_colour">{{ __('Colour of the public catalogue') }}</label>
+        <small id="colour-help">{{ __('The band at the top of the public catalogue\'s pages, behind white text, so choose a dark colour. Empty: the OpenRiC navy.') }}</small>
+        <input id="brand_colour" name="brand_colour" type="color" value="{{ old('brand_colour', $institution->brand_colour ?? '#0f3e75') }}" aria-describedby="colour-help" style="width: 4rem; height: 2.6rem; padding: .2rem">
+        <label for="footer_text">{{ __('Text in the footer') }}</label>
+        <small id="footer-help">{{ __('Shown in the footer of every page: an address, contact details, opening hours. Plain text; a new line starts a new line. The footer\'s links are the static pages given a place in it, under Public site, Static pages.') }}</small>
+        <textarea id="footer_text" name="footer_text" rows="4" aria-describedby="footer-help">{{ old('footer_text', $institution->footer_text) }}</textarea>
         <h2>{{ __('Images') }}</h2>
         <p><a href="{{ route('watermark.edit') }}">{{ __('Watermark on the reference copies of images') }}</a></p>
         <h2>{{ __('Users') }}</h2>

@@ -95,6 +95,7 @@
             ],
             // The institution's own pages on its public site, and each user's dashboards (roadmap phase 20a).
             'Public site' => [
+                'discover.home' => [__('Public catalogue'), true, 'discover.home'],
                 'site.pages' => [__('Static pages'), $user->mayAnywhere('publish', 'description'), 'site.pages*'],
                 'site.articles' => [__('Articles'), $user->mayAnywhere('publish', 'description'), 'site.articles*|site.attachments.*|site.links.*'],
                 'site.comments' => [__('Article comments'), $user->mayAnywhere('publish', 'description'), 'site.comments*'],
@@ -128,21 +129,6 @@
                 'settings.edit' => [__('Settings'), $may('manage-institution'), 'settings.*'],
             ],
         ]));
-        // An icon beside each main item, drawn here (24 by 24, stroked); the word stays, so the icon is hidden from screen readers.
-        $icons = [
-            'Home' => '<path d="M3 11l9-8 9 8"/><path d="M5 9.5V21h5v-6h4v6h5V9.5"/>',
-            'Describe' => '<path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5"/><path d="M9 13h7M9 17h5"/>',
-            'Manage' => '<path d="M3 4h18v5H3z"/><path d="M5 9v11h14V9"/><path d="M10 13h4"/>',
-            'Workflow' => '<path d="M4 6h6v4H4zM14 14h6v4h-6z"/><path d="M7 10v4a2 2 0 0 0 2 2h5"/>',
-            'Import and export' => '<path d="M7 4v13M3 13l4 4 4-4"/><path d="M17 20V7M13 11l4-4 4 4"/>',
-            'Reports' => '<path d="M4 20V10M10 20V4M16 20v-7M2 20h20"/>',
-            'Research' => '<path d="M2 5c3-1.5 7-1.5 10 1 3-2.5 7-2.5 10-1v14c-3-1.5-7-1.5-10 1-3-2.5-7-2.5-10-1z"/><path d="M12 6v14"/>',
-            'Public site' => '<path d="M3 5h18v14H3z"/><path d="M3 9h18M8 13h8M8 16h5"/>',
-            'Help' => '<circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14"/><path d="M12 17.5v.5"/>',
-            'Admin' => '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/>',
-            'Public catalogue' => '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3.5 3.5 3.5 14.5 0 18M12 3c-3.5 3.5-3.5 14.5 0 18"/>',
-        ];
-        $icon = fn (string $item) => new \Illuminate\Support\HtmlString('<svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">'.$icons[$item].'</svg>');
         $current = function (array $item): bool {
             $patterns = collect(explode('|', $item[2]));
             $not = $patterns->filter(fn ($p) => str_starts_with($p, '!'))->map(fn ($p) => substr($p, 1));
@@ -151,13 +137,13 @@
                 && ! $not->contains(fn ($p) => request()->routeIs($p));
         };
     @endphp
+    {{-- In the header's one row (phase 26): the logo is the way home, so no Home item; the groups without icons, to fit. --}}
     <nav aria-label="Main" class="main-nav">
         <ul>
-            <li><a href="{{ route('home') }}" @if(request()->routeIs('home')) aria-current="page" @endif>{{ $icon('Home') }}{{ __('Home') }}</a></li>
             @foreach($nav as $group => $items)
                 @php($open = collect($items)->contains($current))
                 <li><details name="main-nav">
-                    <summary @class(['here' => $open])>{{ $icon($group) }}{{ __($group) }}</summary>
+                    <summary @class(['here' => $open])>{{ __($group) }}</summary>
                     <ul>
                         @foreach($items as $name => $item)
                             <li><a href="{{ route($name) }}" @if($current($item)) aria-current="page" @endif>{{ $item[0] }}</a></li>
@@ -165,9 +151,6 @@
                     </ul>
                 </details></li>
             @endforeach
-            <li><a href="{{ route('discover.home') }}">{{ $icon('Public catalogue') }}{{ __('Public catalogue') }}</a></li>
-            {{-- Help for the screen in hand, in a new tab (Heratio's contextual help; phase 20b). --}}
-            <li><a href="{{ route('help.context', ['route' => request()->route()?->getName()]) }}" target="_blank" rel="noopener" aria-label="{{ __('Help for this page (opens in a new tab)') }}">{{ $icon('Help') }}{{ __('Help') }}</a></li>
         </ul>
     </nav>
     <script>

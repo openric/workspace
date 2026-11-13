@@ -42,8 +42,15 @@ class StaticPages
         $title !== '' || throw new InvalidArgumentException(__('A page has a title.'));
 
         return AuditLog::actingAs($actor, fn () => DB::transaction(function () use ($institution, $slug, $language, $title, $data, $actor, $page) {
+            $new = $page === null;
             $page ??= StaticPage::create(['institution_id' => $institution->id, 'slug' => $slug, 'source_language' => $language, 'created_by_id' => $actor->id]);
-            $page->update(['slug' => $slug]);
+            // A place in the footer (phase 26): a number orders the footer's links; none leaves the page out of it.
+            $position = array_key_exists('footer_position', $data) ? (($data['footer_position'] ?? '') === '' || $data['footer_position'] === null ? null : (int) $data['footer_position']) : $page->footer_position;
+            // About, privacy and terms, which the footer always listed, start in it in that order; their place can be cleared later.
+            if ($new && $position === null && in_array($slug, self::NAMED, true)) {
+                $position = array_search($slug, self::NAMED, true) + 1;
+            }
+            $page->update(['slug' => $slug, 'footer_position' => $position]);
             $page->translations()->updateOrCreate(['language' => $language], ['title' => $title, 'content' => trim((string) ($data['content'] ?? '')) ?: null]);
             $page->touch();
 
@@ -56,9 +63,9 @@ class StaticPages
         AuditLog::actingAs($actor, fn () => $page->delete());
     }
 
-    /** The named pages the institution has, for the foot of its public pages. */
+    /** The pages the institution has given a place in its footer, in that order (phase 26; about, privacy and terms to start with). */
     public function footer(Institution $institution): array
     {
-        return StaticPage::where('institution_id', $institution->id)->whereIn('slug', self::NAMED)->with('translations')->get()->sortBy(fn ($p) => array_search($p->slug, self::NAMED, true))->values()->all();
+        return StaticPage::where('institution_id', $institution->id)->whereNotNull('footer_position')->with('translations')->orderBy('footer_position')->orderBy('slug')->get()->all();
     }
 }

@@ -42,6 +42,8 @@ class SettingsController extends Controller
             'catalogue_show_counts' => ['nullable', 'boolean'],
             'catalogue_introduction' => ['nullable', 'string', 'max:5000'],
             'catalogue_credits' => ['nullable', 'string', 'max:5000'],
+            'brand_colour' => ['nullable', 'regex:/^#[0-9a-fA-F]{6}$/'],
+            'footer_text' => ['nullable', 'string', 'max:2000'],
             'registration_open' => ['nullable', 'boolean'],
             'logo' => ['nullable', 'file', 'mimes:png,jpg,jpeg,webp', 'mimetypes:image/png,image/jpeg,image/webp', 'max:1024', 'dimensions:max_width=4000,max_height=4000'],
             'remove_logo' => ['nullable', 'boolean'],
@@ -56,6 +58,7 @@ class SettingsController extends Controller
         $blank = fn (string $key) => trim((string) ($data[$key] ?? '')) === '' ? null : trim((string) $data[$key]);
         $changes = ['name' => $data['name'], 'header_title' => $blank('header_title'),
             'catalogue_heading' => $blank('catalogue_heading'), 'catalogue_introduction' => $blank('catalogue_introduction'), 'catalogue_credits' => $blank('catalogue_credits'),
+            'brand_colour' => $blank('brand_colour') ? strtolower($blank('brand_colour')) : null, 'footer_text' => $blank('footer_text'),
             'catalogue_show_counts' => $request->has('catalogue_show_counts') ? $request->boolean('catalogue_show_counts') : $institution->catalogue_show_counts,
             'registration_open' => $request->boolean('registration_open'),
             'interface_languages' => array_values(array_unique(['en', ...($data['interface_languages'] ?? [])]))];

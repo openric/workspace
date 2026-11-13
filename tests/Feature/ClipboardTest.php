@@ -57,7 +57,7 @@ class ClipboardTest extends TestCase
         $this->actingAs($this->editor)->post('/clipboard/add', ['type' => 'records', 'id' => $this->published->id])->assertRedirect();
         $this->actingAs($this->editor)->post('/clipboard/add', ['type' => 'records', 'id' => $this->draft->id]);
         $this->actingAs($this->editor)->post('/clipboard/add', ['type' => 'agents', 'id' => $agent->id]);
-        $this->actingAs($this->editor)->get("/records/{$this->published->id}")->assertSee('On the clipboard: remove')->assertSee('Clipboard (3)');
+        $this->actingAs($this->editor)->get("/records/{$this->published->id}")->assertSee('On the clipboard: remove')->assertSee('<span class="count">(3)</span>', false);
         $this->actingAs($this->editor)->get('/clipboard')->assertOk()->assertSee('Archival descriptions (2)')->assertSee('Closed personnel files')->assertSee('Botha, Jan');
 
         $csv = $this->actingAs($this->editor)->get('/clipboard/export')->assertOk()->assertHeader('Content-Type', 'text/csv; charset=utf-8')->getContent();

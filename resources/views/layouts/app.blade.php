@@ -8,22 +8,32 @@
     @include('layouts._style')
     @stack('head')
 </head>
-<body>
+<body class="staff">
 {{-- WCAG 2.4.1: past the header and the menu to the page's own content, as the public layout already does. --}}
 <a class="skip" href="#content">{{ __('Skip to the content') }}</a>
-<header>
+{{-- One row (phase 26): the institution and the way home, the menus, a search, then the account's tools. --}}
+<header class="site-header">
     @php $brand = \App\Models\Institution::current(); @endphp
-    <a href="{{ route('discover.home') }}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: .75rem">
-        @if($brand?->logo_path)<img src="{{ route('branding.logo') }}?v={{ md5($brand->logo_path) }}" alt="" style="max-height: 48px; max-width: 160px">@endif
+    <a class="brand" href="{{ route('home') }}">
+        @if($brand?->logo_path)<img src="{{ route('branding.logo') }}?v={{ md5($brand->logo_path) }}" alt="" style="max-height: 40px; max-width: 150px">@endif
         <strong>{{ $brand?->headerTitle() ?? config('app.name') }}</strong>
         @unless(str_contains($brand?->headerTitle() ?? config('app.name'), 'Workspace'))<span class="product">Workspace</span>@endunless
     </a>
-    @include('layouts._account')
-    @include('layouts._language')
+    @include('layouts._staff-nav')
+    <div class="header-tools">
+        @auth
+            <form method="get" action="{{ route('search') }}" role="search" class="header-search">
+                <label for="staff-q" class="visually-hidden">{{ __('Search') }}</label>
+                <input id="staff-q" name="q" type="search" value="{{ request()->routeIs('search') ? request('q') : '' }}" placeholder="{{ __('Search') }}">
+            </form>
+        @endauth
+        @include('layouts._account')
+        @guest @include('layouts._language') @endguest
+    </div>
 </header>
-@include('layouts._staff-nav')
 <main id="content" tabindex="-1">
     @yield('content')
 </main>
+@include('layouts._footer')
 </body>
 </html>

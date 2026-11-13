@@ -92,13 +92,14 @@ class SettingsAndScreensTest extends TestCase
 
     public function test_every_page_has_the_main_navigation(): void
     {
-        // The logo opens the public catalogue, as on every OpenRiC surface.
-        $this->actingAs($this->admin)->get('/repositories')->assertSee('<a href="'.route('discover.home').'" style="color: inherit', false);
+        // The institution's name opens the dashboard; the public catalogue is under Public site (phase 26).
+        $this->actingAs($this->admin)->get('/repositories')->assertSee('<a class="brand" href="'.route('home').'">', false)
+            ->assertSee('href="'.route('discover.home').'"', false);
         $this->actingAs($this->admin)->get('/repositories')->assertSee('aria-label="Main"', false)
-            ->assertSee('</svg>Home<', false)->assertSee('>Settings<', false)->assertSee('aria-current="page"', false)
+            ->assertSee('>Settings<', false)->assertSee('aria-current="page"', false)
             // Grouped in submenus, and the group holding the page is marked.
-            ->assertSeeInOrder(['<summary class="here">', '</svg>Describe</summary>', '>Repositories<', '</svg>Manage</summary>', '>Taxonomies<', '>Containers<',
-                '>Duplicate authority records<', '</svg>Import and export</summary>', '>Import<', '>Export descriptions<', '</svg>Reports</summary>', '>Overview<', '>Data quality<', '</svg>Admin</summary>', '>Users<', '>Audit log<', '>Settings<'], false);
+            ->assertSeeInOrder(['<summary class="here">Describe</summary>', '>Repositories<', '>Manage</summary>', '>Taxonomies<', '>Containers<',
+                '>Duplicate authority records<', '>Import and export</summary>', '>Import<', '>Export descriptions<', '>Reports</summary>', '>Overview<', '>Data quality<', '>Admin</summary>', '>Users<', '>Audit log<', '>Settings<'], false);
         // The account's own pages are under its name, not in the main menu.
         $page = $this->actingAs($this->admin)->get('/repositories')->getContent();
         preg_match('~<details class="user-menu".*?</details>~s', $page, $menu);
@@ -128,11 +129,13 @@ class SettingsAndScreensTest extends TestCase
             ->assertSee('Edit description')->assertSee('Add a translation');
     }
 
-    public function test_the_main_menu_items_carry_an_icon_hidden_from_screen_readers(): void
+    public function test_the_main_menu_is_words_without_icons_so_it_fits_one_row(): void
     {
+        // Phase 26: the menus carry no icons, and help, the clipboard and the account sit at the right as small tools.
         $page = $this->actingAs($this->admin)->get('/')->assertOk()->getContent();
         preg_match('~<nav aria-label="Main".*?</nav>~s', $page, $nav);
-        $this->assertSame(11, substr_count($nav[0], '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">'), 'Home, Describe, Manage, Workflow, Import and export, Reports, Research, Public site, Admin, the public catalogue and help');
-        $this->assertStringContainsString('</svg>Describe</summary>', $nav[0]);
+        $this->assertStringNotContainsString('<svg', $nav[0]);
+        $this->assertStringContainsString('>Describe</summary>', $nav[0]);
+        $this->assertStringContainsString('class="account-tools"', $page);
     }
 }
