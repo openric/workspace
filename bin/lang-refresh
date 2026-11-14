@@ -60,6 +60,9 @@ def heratio(lang):
 
 
 english = list(json.load(open(f'{ROOT}/lang/af.json', encoding='utf-8')).keys())
+# Source strings known to be wrong, skipped until their source is corrected: Afrikaans left in Heratio's de.json (found 14
+# November 2026). ponytail: a hand list; when Heratio fixes them the entries do nothing and can go.
+WRONG = {('de', 'Your cart is empty.'), ('de', 'Clearance revoked.')}
 behind = []
 print('lang     before  after  psis  heratio  kept  machine')
 for path in sorted(glob.glob(f'{ROOT}/lang/*.json')):
@@ -75,7 +78,7 @@ for path in sorted(glob.glob(f'{ROOT}/lang/*.json')):
     for k in english:
         if k in p and keeps_placeholders(k, p[k]):
             new[k] = DASH.sub('-', p[k]); count[0] += 1
-        elif isinstance(h.get(k), str) and h[k].strip() and h[k] != k and keeps_placeholders(k, h[k]):
+        elif isinstance(h.get(k), str) and h[k].strip() and h[k] != k and keeps_placeholders(k, h[k]) and (lang, k) not in WRONG:
             new[k] = DASH.sub('-', h[k]); count[1] += 1
         elif k in old and not MARKUP.search(old[k]):
             new[k] = old[k]; count[2] += 1

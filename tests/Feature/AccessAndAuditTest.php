@@ -77,6 +77,16 @@ class AccessAndAuditTest extends TestCase
         $this->assertSame(['create', 'grant-role', 'sign-in', 'sign-out'], array_slice($this->auditActions(), -4));
     }
 
+    public function test_a_signed_in_page_is_not_kept_by_the_browser(): void
+    {
+        // After a timeout or Log out, Back must not show a staff page from the browser's store; the public catalogue may be kept.
+        $user = $this->account('editor');
+        $this->assertStringContainsString('no-store', (string) $this->actingAs($user)->get('/account/password')->assertOk()->headers->get('Cache-Control'));
+        $this->assertStringContainsString('no-store', (string) $this->actingAs($user)->get('/')->headers->get('Cache-Control'));
+        auth()->logout();
+        $this->assertStringNotContainsString('no-store', (string) $this->get(route('discover.home'))->assertOk()->headers->get('Cache-Control'));
+    }
+
     public function test_a_wrong_password_is_refused_and_audited_without_the_password(): void
     {
         $this->account('editor');

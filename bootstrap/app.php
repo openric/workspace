@@ -3,6 +3,7 @@
 use App\Accounts\AccountException;
 use App\Api\Problem;
 use App\Http\Middleware\EnsureAccountActive;
+use App\Http\Middleware\NoStoreWhenSignedIn;
 use App\Http\Middleware\RequireAccess;
 use App\Http\Middleware\RequireModule;
 use App\Http\Middleware\SetLocale;
@@ -28,6 +29,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->appendToGroup('web', SetLocale::class);
         // An experimental module the installation does not offer answers 404 (MODULES.md, roadmap R1 hardening).
         $middleware->appendToGroup('web', RequireModule::class);
+        // A page sent to a signed-in account is not kept by the browser, so Back shows nothing after a timeout or Log out.
+        $middleware->appendToGroup('web', NoStoreWhenSignedIn::class);
         $middleware->appendToGroup('api', RequireModule::class);
         // PayFast's notification comes from PayFast, with no CSRF token; the shop verifies it (roadmap phase 19a). A SWORD
         // deposit comes from Archivematica, signed in with an API key on each request (phase 15d).
