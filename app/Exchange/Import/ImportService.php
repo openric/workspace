@@ -1275,7 +1275,11 @@ class ImportService
                     ? 'the source disputes this relation: linked, for review here' : 'not a certainty the Workspace knows; linked without it', 'note');
                 $certainty = null;
             }
-            $fields = array_filter(['from' => $relation['from'] ?? null, 'to' => $relation['to'] ?? null, 'certainty' => $certainty, 'role' => $relation['role'] ?? null]);
+            // The relation's own source and description keep their language; a file that gives none says und (undetermined).
+            $said = ($relation['source'] ?? null) !== null || ($relation['description'] ?? null) !== null;
+            $fields = array_filter(['from' => $relation['from'] ?? null, 'to' => $relation['to'] ?? null, 'certainty' => $certainty, 'role' => $relation['role'] ?? null,
+                'source_of_information' => $relation['source'] ?? null, 'description' => $relation['description'] ?? null,
+                'language' => $said ? ($relation['language'] ?? 'und') : null]);
             // Made already, by the entry's own reading (a unit's creators) or from its other end: what this adds is added to it.
             $made = $this->relate($draft, $source, $type, $target, $fields) ?? $this->qualify($source, $type, $target, $fields);
             foreach ($made ? $relation['evidence'] ?? [] : [] as $iri) {

@@ -17,6 +17,7 @@ use App\Description\RecordService;
 use App\Description\RepositoryService;
 use App\Federation\SparnaturalConfig;
 use App\Federation\TripleStore;
+use App\Http\Controllers\SparqlController;
 use App\Models\Deprecation;
 use App\Models\Institution;
 use App\Models\User;
@@ -116,6 +117,12 @@ class SparqlAndResourceSyncTest extends TestCase
         [$graphs, $ask] = collect($this->sent)->where(0, 'QUERY')->values()->all();
         $this->assertNull($graphs[2], 'GRAPH ?g: the named graphs as they are');
         $this->assertSame('urn:x-arq:UnionGraph', $ask[2], 'no graph named: all of them');
+        // A variable or IRI that only spells from or graph names no graph: the query is still asked of the union.
+        foreach (['SELECT ?from ?to WHERE { ?d <https://www.ica.org/standards/RiC/ontology#beginningDate> ?from }',
+            'SELECT * WHERE { ?s <https://example.org/graph/from> $graph } # FROM nothing'] as $query) {
+            $this->assertFalse(SparqlController::namesGraphs($query), $query);
+        }
+        $this->assertTrue(SparqlController::namesGraphs('select * from <urn:x> where { ?s ?p ?o }'));
 
         $this->get('/discover/explore')->assertOk()->assertSee('<spar-natural', false)->assertSee(route('sparnatural.config'), false);
         $this->get('/discover/explore')->assertSee('element.expandSparql(event.detail.queryString)', false);

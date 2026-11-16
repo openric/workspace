@@ -26,8 +26,12 @@ class SparqlController extends Controller
 
     private const UPDATE = '/\b(INSERT|DELETE|LOAD|CLEAR|CREATE|DROP|COPY|MOVE|ADD)\s+(DATA|WHERE|GRAPH|SILENT|DEFAULT|NAMED|ALL|\{|<)/i';
 
-    /** A query that chooses its graphs itself: FROM, FROM NAMED or GRAPH. */
-    private const NAMES_GRAPHS = '/\b(FROM|GRAPH)\b/i';
+    /**
+     * A query that chooses its graphs itself: the keywords FROM, FROM NAMED or GRAPH. Read on the query with its IRIs,
+     * strings and comments taken out, and never as a variable (?from, $graph) or in a prefixed name (ex:from, graph:x):
+     * a variable named ?from once sent a query to the empty default graph instead of the union, and it answered nothing.
+     */
+    private const NAMES_GRAPHS = '/(?<![?$:\w-])(FROM|GRAPH)(?![\w:-])/i';
 
     /** Apache Jena's name for the union of a dataset's named graphs. */
     private const UNION_GRAPH = 'urn:x-arq:UnionGraph';
@@ -49,13 +53,21 @@ class SparqlController extends Controller
                     // Each entity is a named graph of its own (TripleStore), so a query that names no graph is asked of all of
                     // them together, Jena's union graph; the dataset's own default graph is empty. A query with FROM or GRAPH
                     // keeps the graphs it names.
-                    ...(preg_match(self::NAMES_GRAPHS, $query) ? [] : ['default-graph-uri' => self::UNION_GRAPH])]);
+                    ...(self::namesGraphs($query) ? [] : ['default-graph-uri' => self::UNION_GRAPH])]);
         } catch (Throwable) {
             return response(__('The SPARQL endpoint did not answer in time.'), 504, ['Content-Type' => 'text/plain; charset=utf-8']);
         }
 
         return response($answer->body(), $answer->status(), ['Content-Type' => $answer->header('Content-Type') ?: 'application/sparql-results+json',
             'Access-Control-Allow-Origin' => '*', 'Cache-Control' => 'public, max-age=60']);
+    }
+
+    /** Whether the query names its graphs itself (FROM or GRAPH as keywords), not counting IRIs, strings and comments. */
+    public static function namesGraphs(string $query): bool
+    {
+        $bare = preg_replace(['/<[^<>\s"]*>/', '/"(?:[^"\\\\]|\\\\.)*"/s', "/'(?:[^'\\\\]|\\\\.)*'/s", '/#[^\n]*/'], ' ', $query) ?? $query;
+
+        return (bool) preg_match(self::NAMES_GRAPHS, $bare);
     }
 
     public function config(): Response

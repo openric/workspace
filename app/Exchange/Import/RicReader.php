@@ -320,7 +320,7 @@ class RicReader
     /**
      * The entry's relations: each property of the relation types' mapping (relation_types.ric_property from the source,
      * ric_inverse from the target), with what its qualified node (rico:thingIsSourceOfRelation) adds: dates, certainty,
-     * evidence and the agent's role.
+     * source and description (with their language), evidence and the agent's role.
      */
     private function relationsOf(Resource $node): array
     {
@@ -337,6 +337,9 @@ class RicReader
             $role = $relation->getResource('<'.self::X.'relationHasAgentRole>')?->getUri();
             $qualified[$target][] = ['class' => $this->classes($relation)[0] ?? 'Relation', 'from' => $from === '..' ? null : $from, 'to' => $to === '..' ? null : $to,
                 'certainty' => ($c = $relation->getLiteral('<'.self::RICO.'relationCertainty>')) ? $this->lexical($c) : null,
+                'source' => ($s = $relation->getLiteral('<'.self::RICO.'relationSource>')) ? $this->lexical($s) : null,
+                'description' => ($d = $relation->getLiteral('<'.self::RICO.'generalDescription>')) ? $this->lexical($d) : null,
+                'language' => ($s ?? $d ?? null)?->getLang() ?: null,
                 'evidence' => array_map(fn ($r) => $r->getUri(), $relation->allResources('<'.self::RICO.'isEvidencedBy>')),
                 'role' => $role !== null ? basename($role) : null];
         }
@@ -345,20 +348,23 @@ class RicReader
             if (! isset($this->properties[$property])) {
                 continue;
             }
-            // What the entry reads itself (a unit's creators) comes again here only to bring its qualified node.
+            // What the entry reads itself (a unit's creators) comes again here only to bring its qualified node, and only for
+            // those that have one: an unqualified creator re-read here would come back as a second relation (an accumulator
+            // is a rico:hasCreator too).
+            $others = $node->allResources('<'.$property.'>');
             if (in_array($this->short($property), self::OWN, true)) {
-                $q = array_filter($node->allResources('<'.$property.'>'), fn ($o) => isset($qualified[$o->getUri()]));
-                if ($q === []) {
+                $others = array_values(array_filter($others, fn ($o) => isset($qualified[$o->getUri()])));
+                if ($others === []) {
                     continue;
                 }
             }
             $this->read[$property] = true;
-            foreach ($node->allResources('<'.$property.'>') as $other) {
+            foreach ($others as $other) {
                 $ends = $this->properties[$property];
                 $q = $qualified[$other->getUri()] ?? [];
                 $match = collect($q)->first(fn ($x) => collect($ends)->contains(fn ($e) => RelationTypes::get($e[0], null)['ric_class'] === 'rico:'.$x['class'])) ?? ($q[0] ?? []);
                 $relations[] = ['types' => array_map(fn ($e) => $e[0], $ends), 'end' => $ends[0][1], 'iri' => $other->getUri(), 'label' => '',
-                    'from' => $match['from'] ?? null, 'to' => $match['to'] ?? null, 'description' => null, 'certainty' => $match['certainty'] ?? null,
+                    'from' => $match['from'] ?? null, 'to' => $match['to'] ?? null, 'description' => $match['description'] ?? null, 'source' => $match['source'] ?? null, 'language' => $match['language'] ?? null, 'certainty' => $match['certainty'] ?? null,
                     'evidence' => $match['evidence'] ?? [], 'role' => $match['role'] ?? null];
             }
         }

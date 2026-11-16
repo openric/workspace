@@ -38,7 +38,6 @@ use App\Relations\RelationService;
 use App\Relations\RelationTypes;
 use App\Rights\Embargoes;
 use App\Rights\PublicRights;
-use App\Support\Vocab;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 
@@ -258,17 +257,24 @@ class JsonLd
      * (EGAD), Records in Contexts users list, 6 November 2026: an authority record may be judged a record in its own
      * right, its documentary form set and the activity it documents named. Nothing where the control area is empty.
      */
+    /** The authority record form in the ICA's RiC documentary form types vocabulary. */
+    private const ICA_AUTHORITY_RECORD = 'https://www.ica.org/standards/RiC/vocabularies/documentaryFormTypes#AuthorityRecord';
+
     private function authorityRecord(Agent $agent, mixed $title): ?array
     {
-        $notes = collect(['agent-institution-identifiers', 'agent-languages-scripts', 'agent-sources', 'agent-maintenance-notes'])
+        $notes = collect(['agent-institution-identifiers', 'agent-languages-scripts', 'agent-maintenance-notes'])
             ->map(fn ($n) => $this->text($agent, $n))->filter()->flatMap(fn ($v) => isset($v['@value']) ? [$v] : $v);
+        // Its sources (ISAAR(CPF) 5.4.8), one value per source, a paragraph each, so a consumer can ask which authority
+        // records cite a given source, as the Archives nationales publish theirs.
+        $sources = collect(($v = $this->text($agent, 'agent-sources')) && isset($v['@value']) ? [$v] : ($v ?? []))
+            ->flatMap(fn ($s) => collect(preg_split('/\n\s*\n/', $s['@value']))->map('trim')->filter()->map(fn ($p) => ['@value' => $p] + $s))->values();
         if ($agent->descriptionDetail) {
             $notes->push(['@value' => 'Level of detail: '.$agent->descriptionDetail->label(['en']), '@language' => 'en']);
         }
         $rules = $this->text($agent, 'agent-rules-conventions');
         $dates = $this->text($agent, 'agent-description-dates');
         $maintainer = $agent->maintainer && $this->view->readable($agent->maintainer) ? ['@id' => $agent->maintainer->iri] : null;
-        if ($notes->isEmpty() && ! $rules && ! $dates && ! $maintainer && ! $agent->description_identifier && ! $agent->descriptionStatus) {
+        if ($notes->isEmpty() && $sources->isEmpty() && ! $rules && ! $dates && ! $maintainer && ! $agent->description_identifier && ! $agent->descriptionStatus) {
             return null;
         }
         $iri = $agent->iri.'#authority-record';
@@ -281,8 +287,18 @@ class JsonLd
             'rico:isAssociatedWithDate' => ['@type' => 'rico:Date'] + ($dates ? ['rico:expressedDate' => $dates] : ['rico:normalizedDateValue' => $agent->created_at?->toDateString()])]);
 
         return array_filter(['@id' => $iri, '@type' => 'rico:Record', 'rico:title' => $title,
-            'rico:hasDocumentaryFormType' => ['@id' => Vocab::BASE.'record-documentary-form/authority-record'],
+            // The ICA's own term for the form (the RiC documentary form types vocabulary), which the Archives nationales
+            // also use, so one query finds authority records in both; the Workspace's own concept is its local match.
+            'rico:hasDocumentaryFormType' => ['@id' => self::ICA_AUTHORITY_RECORD],
             'rico:describesOrDescribed' => ['@id' => $agent->iri], 'rico:identifier' => $agent->description_identifier,
+            // Who made it and when, as dates a machine can compare: the maintaining repository; the day the Workspace's
+            // record of it was made and last changed. The dates as written (5.4.6) stay below.
+            // Typed and named here, as the OpenRiC shapes ask of a creator: a repository is a rico:CorporateBody.
+            'rico:hasCreator' => $maintainer ? $maintainer + ['@type' => 'rico:CorporateBody']
+                + $this->strings('rico:name', $agent->maintainer->namesOfType('authorised')) : null,
+            'rico:creationDate' => $agent->created_at ? ['@value' => $agent->created_at->toDateString(), '@type' => 'xsd:date'] : null,
+            'rico:lastModificationDate' => $agent->updated_at ? ['@value' => $agent->updated_at->toDateString(), '@type' => 'xsd:date'] : null,
+            'rico:recordResourceSourceOfInformation' => $sources->isEmpty() ? null : ($sources->count() === 1 ? $sources->first() : $sources->all()),
             'rico:hasRecordState' => $agent->descriptionStatus ? ['@id' => $agent->descriptionStatus->iri] : null,
             'rico:hasOrHadHolder' => $maintainer, 'rico:isOrWasRegulatedBy' => $activity['rico:isOrWasRegulatedBy'] ?? null,
             'rico:hasModificationDate' => $dates ? ['@type' => 'rico:Date', 'rico:expressedDate' => $dates] : null,
@@ -578,10 +594,15 @@ class JsonLd
         [$begin, $end] = [$relation->datedAs('beginning'), $relation->datedAs('end')];
         $range = $begin || $end ? array_filter(['@type' => 'openricx:DateRange', 'rico:beginningDate' => $begin ? $this->literal($begin, true) : null,
             'rico:endDate' => $end ? $this->literal($end, false) : null]) : ($span ? ($this->dates(collect([$span]))['openricx:hasDateRangeSet'][0] ?? null) : null);
+        // The relation's own source and description (RiC-CM RiC-RA05 and RiC-RA03), in the language they were written in.
+        $said = fn (?string $value) => $value === null || trim($value) === '' ? null
+            : ($relation->language ? ['@value' => $value, '@language' => $relation->language] : $value);
         $qualifiers = array_filter([
             'openricx:hasDateRangeSet' => $range ? [$range] : null,
             // A relation whose assertions disagree is disputed, not flattened into a fact (gap assessment scenario S3).
             'rico:relationCertainty' => $relation->standing() === 'disputed' ? 'disputed' : $relation->certainty?->notation,
+            'rico:relationSource' => $said($relation->source_of_information),
+            'rico:generalDescription' => $said($relation->description),
             'rico:isEvidencedBy' => $evidence ?: null,
             'openricx:relationHasAgentRole' => $relation->role ? ['@id' => $relation->role->iri] : null,
             'prov:wasGeneratedBy' => $this->inferredBy($relation),

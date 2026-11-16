@@ -70,7 +70,7 @@ class ShaclGateTest extends TestCase
         $council = app(AgentService::class)->create($institution, 'corporate-body', 'Riverside Parish Council', 'en');
         // Its authority record, from its ISAAR(CPF) control area: a rico:Record of its own (6 November 2026).
         app(AgentService::class)->describe($council, ['agent-rules-conventions' => 'ISAAR(CPF), second edition', 'agent-description-dates' => 'Created 12 May 2026.',
-            'agent-sources' => 'Council minute books, 1902-1960.'], 'en');
+            'agent-sources' => "Council minute books, 1902-1960.\n\nThe town's annual reports."], 'en');
         $council->update(['description_identifier' => 'RA-AR-001', 'maintainer_id' => $holder->id,
             'description_status_id' => Concept::where('iri', 'https://workspace.openric.org/vocab/description-status/final')->value('id')]);
         $person = app(AgentService::class)->create($institution, 'person', 'Engelbrecht, Johanna', 'en');
@@ -115,9 +115,13 @@ class ShaclGateTest extends TestCase
         ];
         // The council's authority record is a rico:Record of the documentary form Authority record, resulting from describing it.
         $record = json_decode($documents['corporate body'], true)['rico:isOrWasDescribedBy'];
-        $this->assertSame(['rico:Record', 'https://workspace.openric.org/vocab/record-documentary-form/authority-record', $council->iri, 'RA-AR-001', $holder->iri, 'rico:Activity'],
+        // The form is the ICA's own term, as the Archives nationales use (Florence Clavaud, RiC users list, 16 November 2026).
+        $this->assertSame(['rico:Record', 'https://www.ica.org/standards/RiC/vocabularies/documentaryFormTypes#AuthorityRecord', $council->iri, 'RA-AR-001', $holder->iri, $holder->iri, 'rico:Activity'],
             [$record['@type'], $record['rico:hasDocumentaryFormType']['@id'], $record['rico:describesOrDescribed']['@id'], $record['rico:identifier'], $record['rico:hasOrHadHolder']['@id'],
-                $record['rico:resultsOrResultedFrom']['@type']]);
+                $record['rico:hasCreator']['@id'], $record['rico:resultsOrResultedFrom']['@type']]);
+        // Each source its own value, not a note; the dates a machine can compare.
+        $this->assertSame(['Council minute books, 1902-1960.', "The town's annual reports."], array_column($record['rico:recordResourceSourceOfInformation'], '@value'));
+        $this->assertSame([now()->toDateString(), 'xsd:date'], [$record['rico:creationDate']['@value'], $record['rico:lastModificationDate']['@type']]);
         $this->assertSame('ISAAR(CPF), second edition', $record['rico:isOrWasRegulatedBy']['rico:name']['@value']);
         $this->assertArrayNotHasKey('rico:isOrWasDescribedBy', json_decode($documents['person'], true), 'no control area, no authority record');
         $this->assertContains(['@id' => 'https://openric.org/ns/ext/v1#'], $this->get(self::API.'/dataset')->json('void:vocabulary'));

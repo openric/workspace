@@ -83,7 +83,9 @@ class PortabilityTest extends TestCase
         $this->clerk = $agents->create($this->institution, 'person', 'Engelbrecht, Johanna', 'en');
         app(DateService::class)->add($this->clerk, ['property' => 'birth', 'normalized' => '1871']);
         app(DateService::class)->add($this->clerk, ['property' => 'death', 'normalized' => '1949-03-02']);
-        app(RelationService::class)->create($this->fonds, 'creation', $this->council, [], $this->editor);
+        // A relation with its own certainty, source and description (RiC-CM RiC-RA01, RA05, RA03): all three travel in RiC-O.
+        app(RelationService::class)->create($this->fonds, 'creation', $this->council, ['certainty' => 'probable',
+            'source_of_information' => 'Minute book, 1902', 'description' => 'The council kept its own minutes.', 'language' => 'en'], $this->editor);
         // An accumulator is a creator in RiC-O too: it must not come back as a second relation.
         app(RelationService::class)->create($this->fonds, 'accumulation', $this->clerk, [], $this->editor);
         foreach ([$this->holder, $this->council, $this->clerk, $this->fonds, $series] as $entity) {
@@ -135,8 +137,20 @@ class PortabilityTest extends TestCase
                 $new->identifier, $new->level->notation]);
         $this->assertSame($this->holder->id, $new->repository_id, 'held by the repository with the IRI it names');
         $this->assertEqualsCanonicalizing(['1902/1950-06', '1950'], $new->dates()->pluck('normalized_value')->all());
-        $this->assertTrue(Relation::where(['source_id' => $new->id, 'target_id' => $this->council->id])->exists(), 'created by the council, found by its IRI');
+        $byCouncil = Relation::where(['source_id' => $new->id, 'target_id' => $this->council->id])->with('certainty')->first();
+        $this->assertNotNull($byCouncil, 'created by the council, found by its IRI');
+        $this->assertSame(['probable', 'Minute book, 1902', 'The council kept its own minutes.', 'en'],
+            [$byCouncil->certainty?->notation, $byCouncil->source_of_information, $byCouncil->description, $byCouncil->language], 'the relation keeps its certainty, source and description');
         $this->assertTrue(Relation::where(['source_id' => $new->id, 'target_id' => $this->clerk->id])->exists());
+    }
+
+    public function test_a_relation_exports_its_source_and_description_in_their_language(): void
+    {
+        $doc = $this->getJson(self::API.'/records/'.$this->fonds->id)->assertOk()->json();
+        $node = collect($doc['rico:thingIsSourceOfRelation'] ?? [])->firstWhere('rico:relationHasTarget.@id', $this->council->iri);
+        $this->assertSame('probable', $node['rico:relationCertainty']);
+        $this->assertSame(['@value' => 'Minute book, 1902', '@language' => 'en'], $node['rico:relationSource']);
+        $this->assertSame(['@value' => 'The council kept its own minutes.', '@language' => 'en'], $node['rico:generalDescription']);
     }
 
     public function test_what_the_import_has_no_place_for_is_listed(): void
