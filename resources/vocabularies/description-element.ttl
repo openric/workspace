@@ -374,7 +374,7 @@ v:place-history a skos:Concept ;
     skos:inScheme v: ;
     skos:broader v:place ;
     skos:prefLabel "History"@en ;
-    skos:scopeNote "RiC-CM 1.0.1 RiC-A21. Not exported: RiC-O 1.1 gives rico:history to agents only, and on a place it would make the place an agent; raised with openric/spec (roadmap phase 23b)."@en ;
+    skos:scopeNote "RiC-CM 1.0.1 RiC-A21. Exported as rico:history, whose domain in RiC-O 1.1 includes rico:Place (from v0.0.161; earlier releases held it back on a mistaken reading of the ontology, corrected in openric/spec#73)."@en ;
     skos:definition "How the place developed over time, such as changes of boundary or jurisdiction."@en .
 
 v:place-location a skos:Concept ;

@@ -78,6 +78,7 @@ class ShaclGateTest extends TestCase
         app(RelationService::class)->create($fonds, 'creation', $council, [], $editor);
         // Authority & Context and Graph Traversal (roadmap phase 23b): a place, a mandate and an activity, related.
         $town = app(PlaceService::class)->create($institution, 'Riverside', 'en');
+        app(PlaceService::class)->describe($town, ['place-history' => 'Laid out in 1902.'], 'en');
         $mandate = app(RuleService::class)->create($institution, 'Local Government Ordinance 17 of 1939', 'en', Concept::where('iri', Rule::TYPES.'mandate')->value('id'));
         app(RuleService::class)->describe($mandate, ['rule-description' => 'Section 12: the town clerk keeps the minutes.'], 'en');
         $meetings = app(ActivityService::class)->create($institution, 'Council meetings', 'en', Concept::where('iri', Activity::TYPES.'production')->value('id'));
@@ -124,6 +125,8 @@ class ShaclGateTest extends TestCase
         $this->assertSame([now()->toDateString(), 'xsd:date'], [$record['rico:creationDate']['@value'], $record['rico:lastModificationDate']['@type']]);
         $this->assertSame('ISAAR(CPF), second edition', $record['rico:isOrWasRegulatedBy']['rico:name']['@value']);
         $this->assertArrayNotHasKey('rico:isOrWasDescribedBy', json_decode($documents['person'], true), 'no control area, no authority record');
+        // A place's history is rico:history, which RiC-O 1.1 allows on a place (openric/spec#73).
+        $this->assertSame('Laid out in 1902.', json_decode($documents['place'], true)['rico:history']['@value']);
         $this->assertContains(['@id' => 'https://openric.org/ns/ext/v1#'], $this->get(self::API.'/dataset')->json('void:vocabulary'));
         foreach ($documents as $what => $json) {
             $data = tempnam(sys_get_temp_dir(), 'shacl').'.jsonld';

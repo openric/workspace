@@ -354,7 +354,7 @@ class JsonLd
      * A place (Authority & Context 3.1; RiC-CM 1.0.1 section 4.8): its names, description, identifiers, location, type,
      * coordinates, the place it lies in, its dates and relations. RiC-O 1.1 puts latitude, longitude and altitude on a
      * rico:Coordinates node; the profile's schema puts latitude and longitude on the place, so both are written.
-     * History is not: RiC-O 1.1 gives rico:history to agents only.
+     * Its history (RiC-A21) as rico:history, whose domain in RiC-O 1.1 includes rico:Place.
      */
     public function place(Place $place, bool $withContext = true): array
     {
@@ -370,6 +370,9 @@ class JsonLd
         }
         if ($description = $this->text($place, 'place-description')) {
             $out += ['rico:generalDescription' => $description, 'openricx:description' => $description];
+        }
+        if ($history = $this->text($place, 'place-history')) {
+            $out['rico:history'] = $history;
         }
         if ($location = $this->text($place, 'place-location')) {
             $out += ['rico:location' => $location, 'openricx:streetAddress' => (string) ($location[0]['@value'] ?? $location['@value'] ?? '')];
