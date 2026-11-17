@@ -5,7 +5,8 @@
     .collections-carousel { position: relative; margin: 1rem 0 2rem; }
     .collections-track { display: flex; gap: 1.25rem; overflow-x: auto; scroll-behavior: smooth; scroll-snap-type: x mandatory; scrollbar-width: none; padding: 2px 2px 1rem; }
     .collections-track::-webkit-scrollbar { display: none; }
-    .collection-card { flex: 0 0 auto; width: 320px; scroll-snap-align: start; background: var(--bg); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow); color: var(--ink); text-decoration: none !important; transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease; }
+    /* position: relative holds each card's hidden "n of total" inside the card, so inside the track's scrolling box: placed against the carousel, the labels of the later cards made the whole page as wide as the track. */
+    .collection-card { position: relative; flex: 0 0 auto; width: 320px; scroll-snap-align: start; background: var(--bg); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow); color: var(--ink); text-decoration: none !important; transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease; }
     .collection-card:hover, .collection-card:focus-visible { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: var(--link); }
     .collection-card img { display: block; width: 100%; height: 220px; object-fit: cover; background: var(--surface-2); }
     .collection-card-body { padding: .9rem 1.1rem 1rem; }
