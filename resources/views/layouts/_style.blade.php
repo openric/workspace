@@ -220,6 +220,9 @@
             .main-nav details ul { position: static; box-shadow: none; border: 0; border-left: 2px solid var(--line); border-radius: 0; margin: .25rem 0 .25rem .6rem; }
             .main-nav > ul > li > a, .main-nav summary { padding: .55rem .6rem; }
             .main-nav details a { padding: .55rem .7rem; }
+            /* "More" and "Translate" open below their button, full width: dropped down to the left, the list ran off the screen. */
+            details.more[open] { flex-basis: 100%; }
+            details.more > ul { position: static; min-width: 0; margin-top: .35rem; box-shadow: none; }
             button, input, select { min-height: 2.75rem; }
             /* The header's search takes a line of its own, so its field is not cut short. */
             header { flex-wrap: wrap; gap: .5rem; }
