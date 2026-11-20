@@ -43,6 +43,7 @@ use App\Http\Controllers\EmailController;
 use App\Http\Controllers\EmbargoController;
 use App\Http\Controllers\EuropeanaLoanController;
 use App\Http\Controllers\ExploreController;
+use App\Http\Controllers\ExplorerController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\FavouritesController;
 use App\Http\Controllers\FederationController;
@@ -321,6 +322,9 @@ Route::middleware(ServeDiscovery::class)->prefix('discover')->name('discover.')-
     Route::get('/places/{id}', [DiscoverController::class, 'place'])->name('place');
     Route::get('/activities/{id}', [DiscoverController::class, 'activity'])->name('activity');
     Route::get('/rules/{id}', [DiscoverController::class, 'rule'])->name('rule');
+    // A record set's name-first explorer (roadmap phase 27).
+    Route::get('/records/{id}/explorer', [ExplorerController::class, 'show'])->whereUuid('id')->name('explorer');
+    Route::get('/records/{id}/explorer/text/{instantiation}', [ExplorerController::class, 'text'])->whereUuid(['id', 'instantiation'])->name('explorer.text');
     Route::get('/graph/{kind}/{id}', [DiscoverController::class, 'graph'])->where('kind', 'records|agents|repositories|places|activities|rules')->name('graph');
     Route::get('/files/{file}', [DiscoverController::class, 'file'])->name('file');
     Route::get('/captions/{track}', [DiscoverController::class, 'caption'])->whereUuid('track')->name('caption');
@@ -501,6 +505,9 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/{record}/provenance/documents/{document}', [ProvenanceController::class, 'document'])->whereUuid('document')->name('provenance.documents.show');
         Route::post('/{record}/provenance/documents/{document}/remove', [ProvenanceController::class, 'removeDocument'])->whereUuid('document')->name('provenance.documents.destroy');
     });
+
+    // A record set's explorer settings (roadmap phase 27); the controller checks the unit's permissions.
+    Route::post('/records/{record}/explorer-settings', [ExplorerController::class, 'save'])->name('explorer.settings');
 
     // Instantiations and their files (rico:Instantiation, WS-007); the controller checks the unit's permissions.
     Route::post('/records/{record}/instantiations', [InstantiationController::class, 'store'])->name('instantiations.store');

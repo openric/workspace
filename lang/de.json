@@ -1,4 +1,5 @@
 {
+    ":from to :to": ":from bis :to",
     "API keys": "API-Schlüssel",
     "Accept": "Akzeptieren",
     "Access": "Zugriff",
@@ -266,6 +267,7 @@
     "What happened": "Was ist passiert",
     "When": "Wenn",
     "Where": "Wo",
+    "Why (optional)": "Warum (optional)",
     "Work queue": "Arbeitswarteschlange",
     "Yes": "Ja",
     "Your API keys": "Ihre API-Schlüssel",
@@ -760,6 +762,7 @@
     "Done.": "Fertig.",
     "Due": "fällig",
     "Expires on": "Ablaufdatum am",
+    "Months": "Monate",
     "Number": "Nummer",
     "Reference": "Verweis",
     "Retain permanently": "Dauerhaft aufbewahren",
@@ -904,7 +907,7 @@
     "First name": "Vorname",
     "Purpose": "Zweck",
     "Research topic": "Forschungsthema",
-    "Check in": "Anchecken",
+    "Check in": "Einchecken",
     "Confirm": "Bestätigen",
     "Book": "Buch",
     "Register": "Registrieren",
@@ -1247,6 +1250,7 @@
     "Required": "Erforderlich",
     "any": "beliebig",
     "Finds": "Finden",
+    "What changed": "Was geändert wurde",
     "Values": "Werte",
     "Of": "von",
     "Deliveries": "Lieferungen",
@@ -1609,6 +1613,7 @@
     "an unnamed record": "ein unbenanntes Aufzeichnung",
     "Precision": "Präzision",
     "Recall": "Erinnern Sie sich",
+    "Made": "Erstellt",
     "Mode": "Modus",
     "Play": "Spiele",
     "No saved views yet": "No gespeicherte Ansichten noch",
@@ -1652,5 +1657,8 @@
     "Flagged for review.": "markiert zur Überprüfung.",
     "Your question": "Ihre Frage",
     "Staff": "Mitarbeiter",
-    "Demonstration": "Demo"
+    "Demonstration": "Demo",
+    "Fit": "Passend",
+    "Close": "Schließen",
+    "(untitled)": "(ohne Titel)"
 }

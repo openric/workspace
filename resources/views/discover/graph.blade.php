@@ -3,7 +3,7 @@
 @php($root = $graph->describe($entity->getAttribute('iri')))
 @section('title', __('Graph: :name', ['name' => $root['label']]))
 @section('content')
-    <p><a href="{{ $root['url'] }}">{{ __('Back to :name', ['name' => $root['label']]) }}</a></p>
+    <p><a href="{{ $root['url'] }}">{{ __('Back to :name', ['name' => $root['label']]) }}</a>@if($kind === 'records' && \App\Models\RecordResource::where('parent_id', $entity->getKey())->whereNull('deleted_at')->exists()) · <a href="{{ route('discover.explorer', $entity->getKey()) }}">{{ __('Explore the people, places and events in it') }}</a>@endif</p>
     <h1 id="graph-title">{{ __('Relationships of :name', ['name' => $root['label']]) }}</h1>
     <p>@if($depth === 1){{ __('One step out') }} · <a href="{{ route('discover.graph', [$kind, $entity->getKey(), 'depth' => 2]) }}">{{ __('Two steps out') }}</a>@else<a href="{{ route('discover.graph', [$kind, $entity->getKey()]) }}">{{ __('One step out') }}</a> · {{ __('Two steps out') }} @endif
         · <a href="#as-a-list">{{ __('The graph as a list') }}</a></p>

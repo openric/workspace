@@ -1,4 +1,5 @@
 {
+    ":from to :to": ":from até :to",
     "API keys": "Chaves de API",
     "Accept": "Aceitar",
     "Access": "Acesso",
@@ -237,6 +238,7 @@
     "What": "O quê",
     "When": "Quando",
     "Where": "Onde",
+    "Why (optional)": "Por quê (opcional)",
     "Yes": "Sim",
     "Your name": "Seu nome",
     "Zoom in": "Zoomar",
@@ -486,6 +488,7 @@
     "Numbering": "Numeração",
     "Rejected": "Rejeitado",
     "Rejection reason": "Motivo da rejeição",
+    "Saved.": "Salvo.",
     "Submit for review": "Submeter para revisão",
     "Submitted": "Submetido",
     "Timeline": "Linha do Tempo",
@@ -639,6 +642,7 @@
     "Disposals": "Eliminações",
     "Due": "Devido",
     "Expires on": "Expira em",
+    "Months": "Meses",
     "Number": "Número",
     "Reference": "Referência",
     "Retain permanently": "Manter permanentemente",
@@ -757,6 +761,7 @@
     "First name": "Nome de frente",
     "Organisation": "Organização",
     "Purpose": "Propósito",
+    "Check in": "Devolver",
     "Confirm": "Confirma",
     "Book": "Livro",
     "Register": "Registar",
@@ -1006,6 +1011,7 @@
     "Required": "Obrigatório",
     "any": "qualquer",
     "Finds": "Encontra",
+    "What changed": "O que mudou",
     "Values": "Valores",
     "Deliveries": "Entregas",
     "Event": "Evento",
@@ -1311,6 +1317,7 @@
     "an unnamed record": "um registo sem nome",
     "Precision": "Precisão",
     "Recall": "Lembre-se",
+    "Made": "Feito",
     "Mode": "Modo",
     "Play": "Jogar",
     "No saved views yet": "Ainda não há vistas salvas",
@@ -1354,5 +1361,8 @@
     "You": "Você",
     "Your question": "A sua pergunta",
     "Staff": "Funcionários",
-    "Demonstration": "Demonstração"
+    "Demonstration": "Demonstração",
+    "Fit": "Ajustar",
+    "Close": "Fechar",
+    "(untitled)": "(sem título)"
 }

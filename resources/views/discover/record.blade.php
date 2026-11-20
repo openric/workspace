@@ -74,6 +74,7 @@
                 <div><dt>{{ __('Level') }}</dt><dd>{{ $unit->level->label(\App\Support\Vocab::languages()) }} @include('description._ric', ['term' => \App\Relations\EntityKinds::ricClass($unit)])</dd></div>
                 @foreach($unit->dates as $date)<div><dt>{{ $date->property->label(\App\Support\Vocab::languages()) }}</dt><dd>{{ $date->display() }} @include('description._ric', ['term' => $date->property])</dd></div>@endforeach
             </dl>
+            @if($childTotal > 0)<p style="margin-bottom: .25rem"><a href="{{ route('discover.explorer', $unit->id) }}"><strong>{{ __('Explore the people, places and events in it') }}</strong></a></p>@endif
             <p style="margin-bottom: 0"><a href="{{ route('discover.graph', ['records', $unit->id]) }}">{{ __('See it in the relationship graph') }}</a></p>
         </section>
         <section class="panel">
