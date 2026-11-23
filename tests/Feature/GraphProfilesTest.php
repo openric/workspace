@@ -194,4 +194,21 @@ class GraphProfilesTest extends TestCase
         $this->getJson(self::API.'/activities/'.$this->e['meetings']->id)->assertNotFound();
         $this->assertSame(0, $this->getJson(self::API.'/activities')->json('openric:total'));
     }
+
+    public function test_an_activity_may_result_in_an_instantiation_but_not_in_a_place(): void
+    {
+        // The photographs a survey or digitisation made are what it resulted in (Provenance and Event profile 0.9.0;
+        // RiC-O 1.1 gives rico:resultsOrResultedIn the range rico:Thing). A place is still not a result.
+        $editor = User::where('email', 'editor@example.org')->sole();
+        $paper = app(InstantiationService::class)->create($this->e['minutes'], 'The minute book on paper', 'en', 'paper', 'on-request', $editor);
+        app(RelationService::class)->create($this->e['meetings'], 'result', $paper, [], $editor);
+        app(PublicationService::class)->apply($paper, 'publish', null, false, $editor);
+
+        $results = $this->getJson(self::API.'/activities/'.$this->e['meetings']->id)->assertOk()->json('rico:resultsOrResultedIn');
+        $this->assertEqualsCanonicalizing([$this->e['minutes']->iri, $paper->iri], array_column($results, '@id'));
+        $this->assertEqualsCanonicalizing(['rico:RecordSet', 'rico:Instantiation'], array_column($results, '@type'));
+
+        $this->expectException(\InvalidArgumentException::class);
+        app(RelationService::class)->create($this->e['meetings'], 'result', $this->e['town'], [], $editor);
+    }
 }

@@ -14,7 +14,7 @@ A relation joins two entities and says how: this person created that series, thi
 
 On the page of any entity, open its relations and choose **Add a relation**:
 
-1. Choose the **relation type**. Each type joins particular kinds of entity: a creation relation joins a unit of description to an agent, a place relation joins one to a place. The list offers only those that fit.
+1. Choose the **relation type**. Each type joins particular kinds of entity: a creation relation joins a unit of description to an agent, a place relation joins one to a place. An activity's result (`rico:resultsOrResultedIn`) joins it to a unit of description, or to an instantiation: the photographs a digitisation or a survey made are what it resulted in, since photographing a record makes copies of it, not a record. The list offers only those that fit.
 2. **Find the other entity** by name or identifier. If it does not exist yet, give its authorised name and the Workspace makes it as a draft.
 3. Add its dates, if the relation held only for a time, and a note.
 4. Save.

@@ -48,5 +48,8 @@ class RicMappingTest extends TestCase
         }
         $this->assertSame(['rico:DerivationRelation', 'rico:hasOrHadDerivedInstantiation'], [$types['derivation']['ric_class'], $types['derivation']['ric_property']]);
         $this->assertSame([['instantiation', 'instantiation']], $types['derivation']['pairs']);
+        // An activity results in a record, or in an instantiation such as the photographs a digitisation made
+        // (Provenance and Event profile 0.9.0, as RiC-O 1.1's range rico:Thing allows).
+        $this->assertSame([['activity', 'record'], ['accession', 'record'], ['activity', 'instantiation']], $types['result']['pairs']);
     }
 }
