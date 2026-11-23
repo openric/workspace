@@ -156,7 +156,10 @@ jobs:
           # GitHub's list filtered by status as well as commit can miss a run that passed (v0.0.117): filter it here instead.
           passed=$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/ci.yml/runs?head_sha=$commit" --jq '[.workflow_runs[] | select(.head_branch == "main" and .conclusion == "success")] | length')
           [ "$passed" -gt 0 ] || { echo "CI has not passed on main for $commit"; exit 1; }
-          echo "$GITHUB_REF_NAME: signed, and $commit passed on main"
+          # The Workspace reports VERSION (health, API, backups); it stood at 0.0.159 for releases 0.0.160 to 0.0.164.
+          version=$(gh api "repos/$GITHUB_REPOSITORY/contents/VERSION?ref=$commit" --jq .content | base64 -d | tr -d '[:space:]')
+          [ "v$version" = "$GITHUB_REF_NAME" ] || { echo "VERSION says $version, the tag is $GITHUB_REF_NAME"; exit 1; }
+          echo "$GITHUB_REF_NAME: signed, VERSION matches, and $commit passed on main"
 
   # Roadmap phase 23 (hardening): known vulnerabilities in the locked dependencies, secrets anywhere in the history,
   # and a software bill of materials kept with every run, so each release tag has its own.

@@ -14,7 +14,7 @@ Records in Contexts (RiC) is the International Council on Archives' standard for
 
 A traditional catalogue is a tree of descriptions, with names and places typed into fields. In RiC, the person who created a series is an authority record of their own, joined to the series by a relation that says how, and since when. Describe them once and every record they touch shows them, every search for them finds those records, and the relation itself can carry its dates, its evidence and who asserted it.
 
-You still describe in the terms you know. The forms follow ISAD(G), ISAAR(CPF) and ISDIAH, area by area. What changes is underneath: each field is stored as the RiC term it is, and each screen shows that term next to the field, so you can see what you are recording.
+What the Workspace stores is RiC: RiC-CM 1.0.1 is its model and RiC-O 1.1 its ontology. ISAD(G), ISAAR(CPF) and ISDIAH are not its foundation; they are a familiar way in. The forms are laid out area by area as those standards are, so you can still describe in the terms you know, but each field is stored as the RiC term it is, and each screen can show that term next to the field (Show RiC terms), so you can see what you are recording. The same standards come back out as exports and views, mapped from the RiC data.
 
 ## The entities
 

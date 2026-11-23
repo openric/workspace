@@ -54,6 +54,7 @@ return [
     ['label' => 'Discover', 'sub' => 'The public catalogue and site', 'help' => 'discovery-user-guide', 'children' => [
         ['label' => 'Search', 'sub' => 'Full text, facets and saved searches', 'help' => 'search-user-guide'],
         ['label' => 'The public site', 'sub' => 'Static pages, articles and landing pages', 'help' => 'landing-page-user-guide'],
+        ['label' => 'The record set explorer', 'sub' => 'A set\'s people, places and events, name first', 'help' => 'record-set-explorer-user-guide'],
         ['label' => 'The graph', 'sub' => 'SPARQL and Sparnatural over the published RiC-O', 'help' => 'graph-explorer-user-guide'],
     ]],
     ['label' => 'Share', 'sub' => 'Open data, exchange and federation', 'help' => 'federation-user-guide', 'children' => [

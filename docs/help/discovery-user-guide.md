@@ -32,6 +32,8 @@ Authority records, repositories, places, activities and rules have pages of thei
 
 Every page links to the entity's **graph**: the entity and what it is related to, one step out or two. See [Records in Contexts in the Workspace](/help/article/ric-user-guide).
 
+A record set with units inside it also links to its **explorer**: its people, places and events, name first. See [The record set explorer](/help/article/record-set-explorer-user-guide).
+
 ## Withdrawn records
 
 A record that is withdrawn is not simply gone. Its address answers that it has been withdrawn, with when and why, and where it was merged into another or replaced, a link to that one. Anyone who cited it can still find out what happened to it.
