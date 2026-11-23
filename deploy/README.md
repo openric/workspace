@@ -4,6 +4,12 @@ To install the Workspace on a new server, follow `INSTALL.md` first. The live in
 
 ## Release and deploy
 
+Every release goes through `bin/release VERSION KIND [KM-NOTE]`, run from the development clone on `main` by the owner of the live directory, with the release commit (`vVERSION ...`, its `VERSION` file the same) at HEAD. It does the three steps below in order and stops at the first that fails: pushes the commit, waits for CI on `main`, tags and signs it, waits for the tag's job, deploys, verifies the object store and the log of inferences, publishes the release's evidence with the tag, and drops the note for KM.
+
+Before it changes anything it applies the feature freeze set by Dr Johan Pieterse on 23 November 2026: while `openric` is listed in `/var/lib/workbench/release-freeze`, it calls the workbench's `release-freeze-check`, refuses a release whose KIND is not `defect`, `security`, `hardening` or `conformance`, and refuses a commit subject that names a roadmap phase ("phase 27") or something new. A refused release prints `RELEASE REFUSED` and leaves `VERSION`, the commits and the tags as they were. Only Dr Johan Pieterse lifts the freeze.
+
+By hand, the steps are:
+
 1. Merge to `main`, and wait for every CI job to pass on that commit: the tests, accessibility, and dependencies, secrets and SBOM.
 2. Tag it, signed with a key listed in `deploy/allowed_signers`: `git tag -s vX.Y.Z -m "what changed" && git push origin vX.Y.Z`, and wait for the tag's own job ("The tag is signed and its commit passed on main").
 3. Deploy: `cd /usr/share/nginx/openric-workspace-live && sudo deploy/deploy.sh vX.Y.Z`. As root, the script runs git, composer and `pg_dump` as the owner of the live directory and artisan as `www-data`, so nothing it writes belongs to root.
