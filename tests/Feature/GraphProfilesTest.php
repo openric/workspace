@@ -211,4 +211,22 @@ class GraphProfilesTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         app(RelationService::class)->create($this->e['meetings'], 'result', $this->e['town'], [], $editor);
     }
+
+    public function test_a_repositorys_access_conditions_are_a_rule_and_a_functions_classification_an_activity_type(): void
+    {
+        // RiC-O 1.1 allows rico:conditionsOfAccess only on a record resource or instantiation, and rico:classification
+        // only on a record resource (RiC-AG disposition D-1, D-2; mapping 7.4 and 7.6, spec v0.61.0).
+        $editor = User::where('email', 'editor@example.org')->sole();
+        app(RepositoryService::class)->describe($this->e['holder'], ['access-conditions' => 'By appointment.'], 'en', $editor);
+        app(PublicationService::class)->apply($this->e['holder'], 'publish', null, false, $editor);
+        $rules = $this->getJson(self::API.'/repositories/'.$this->e['holder']->id)->assertOk()->json('rico:isOrWasRegulatedBy');
+        $this->assertSame(['rico:Rule', 'Conditions of access', 'https://openric.org/vocab/rule-type/access-rule', 'By appointment.'],
+            [$rules[0]['@type'], $rules[0]['rico:title']['@value'], $rules[0]['rico:hasOrHadRuleType']['@id'], $rules[0]['rico:generalDescription']['@value']]);
+
+        app(ActivityService::class)->describe($this->e['meetings'], ['activity-classification' => 'isdf:5.2.1'], 'en', $editor);
+        app(ActivityService::class)->updateFunction($this->e['meetings'], true, $editor);
+        app(PublicationService::class)->apply($this->e['meetings'], 'publish', null, false, $editor);
+        $type = $this->getJson(self::API.'/functions/'.$this->e['meetings']->id)->assertOk()->json('rico:hasActivityType');
+        $this->assertSame(['rico:ActivityType', 'isdf:5.2.1'], [$type['@type'], $type['rico:name']['@value']]);
+    }
 }

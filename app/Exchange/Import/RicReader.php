@@ -286,7 +286,9 @@ class RicReader
         $this->strings($node, 'openricx:description', fn ($lang, $text) => $draft->value($lang, $prefix.'-description', $text));
         $this->strings($node, 'rico:generalDescription', fn ($lang, $text) => $draft->values[$lang][$prefix.'-description'] ?? $draft->value($lang, $prefix.'-description', $text));
         if ($table === 'activities') {
-            $draft->typeIri = $this->resource($node, 'rico:hasActivityType')?->getUri();
+            // A named concept; a function's classification is a node with only a code (mapping 7.6), not a vocabulary term.
+            $activityType = $this->resource($node, 'rico:hasActivityType');
+            $draft->typeIri = $activityType && ! $activityType->isBNode() ? $activityType->getUri() : null;
         }
         if ($table === 'places') {
             $this->strings($node, 'openricx:alternativeForm', fn ($lang, $text) => $this->name($draft, $lang, 'place-parallel-name', $text));

@@ -343,7 +343,19 @@ class JsonLd
                 'openricx:telephone' => $contact->telephone, 'openricx:email' => $contact->email], fn ($v) => $v !== null && $v !== '');
         }
 
-        return $out + $this->relations($repository);
+        $relations = $this->relations($repository);
+        // A repository's conditions of access are a Rule it is regulated by (ISDIAH 5.4.2, mapping 7.4, spec v0.61.0).
+        // ponytail: rico:conditionsOfAccess, outside its RiC-O domain here, stays beside it for one further minor
+        // release of the specification (change control's deprecation period); remove it with that release.
+        if (isset($out['rico:conditionsOfAccess'])) {
+            $relations['rico:isOrWasRegulatedBy'] = [...($relations['rico:isOrWasRegulatedBy'] ?? []), [
+                '@type' => 'rico:Rule', 'rico:title' => ['@value' => 'Conditions of access', '@language' => 'en'],
+                'rico:hasOrHadRuleType' => ['@id' => 'https://openric.org/vocab/rule-type/access-rule'],
+                'rico:generalDescription' => $out['rico:conditionsOfAccess'],
+            ]];
+        }
+
+        return $out + $relations;
     }
 
     /**
@@ -522,6 +534,11 @@ class JsonLd
             if ($value = $this->text($function, $notation)) {
                 $out[$property] = $value;
             }
+        }
+        // ISDF 5.1.5 is an Activity Type in RiC-AG (mapping 7.6, spec v0.61.0). ponytail: rico:classification, outside
+        // its RiC-O domain here, stays beside it for one further minor release of the specification; remove it then.
+        if (isset($out['rico:classification'])) {
+            $out['rico:hasActivityType'] = ['@type' => 'rico:ActivityType', 'rico:name' => $out['rico:classification']];
         }
         if ($function->activityType) {
             $out['openric:localType'] = (string) $function->activityType->notation;
