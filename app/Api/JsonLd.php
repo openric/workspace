@@ -736,7 +736,13 @@ class JsonLd
         // second literal for the same entity wherever documents are merged, and break its one-title shapes.
         $names = method_exists($entity, 'namesOfType') ? $this->strings($name, $entity->namesOfType('authorised'))[$name] ?? null : null;
 
-        return array_filter(['@id' => $entity->getAttribute('iri'), '@type' => $this->type($entity), $name => $names ?? $this->view->label($entity)], fn ($v) => $v !== null);
+        // An instantiation typed here must say what it is carried on, or the core shape takes it for an empty shell.
+        $carried = $entity instanceof Instantiation ? [
+            'rico:hasCarrierType' => $entity->carrierType ? ['@id' => $entity->carrierType->iri] : null,
+            'openricx:hasMimeType' => ($entity->files->firstWhere(fn ($f) => $f->use?->notation === 'master') ?? $entity->files->first())?->mime_type,
+        ] : [];
+
+        return array_filter(['@id' => $entity->getAttribute('iri'), '@type' => $this->type($entity), $name => $names ?? $this->view->label($entity), ...$carried], fn ($v) => $v !== null);
     }
 
     /** Digital (a digital-file carrier, or files kept), analogue (any other carrier), or null when neither is known. */

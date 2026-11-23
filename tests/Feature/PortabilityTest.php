@@ -180,7 +180,7 @@ class PortabilityTest extends TestCase
     public function test_the_dataset_descriptor_and_the_change_feed(): void
     {
         $response = $this->get(self::API.'/dataset')->assertOk();
-        $result = (new Validator)->validate(json_decode($response->getContent()), file_get_contents(base_path('tests/Fixtures/openric-0.56.0/dataset.schema.json')));
+        $result = (new Validator)->validate(json_decode($response->getContent()), file_get_contents(base_path('tests/Fixtures/openric-0.61.0/dataset.schema.json')));
         $this->assertTrue($result->isValid(), json_encode($result->isValid() ? [] : (new ErrorFormatter)->format($result->error())));
         $dataset = $response->json();
         $this->assertSame(['application/ld+json', 'application/ld+json', 'text/turtle', 'application/rdf+xml', 'application/xml'], array_column($dataset['dcat:distribution'], 'dcat:mediaType'));

@@ -7,7 +7,7 @@
   "required": ["entity_id", "outgoing", "incoming", "total"],
   "properties": {
     "entity_id": {
-      "type": "integer",
+      "type": ["integer", "string"],
       "description": "The entity the relations are listed from."
     },
     "outgoing": {
@@ -30,9 +30,9 @@
       "type": "object",
       "required": ["id", "target_id", "rico_predicate"],
       "properties": {
-        "id":               { "type": "integer" },
+        "id":               { "type": ["integer", "string"] },
         "direction":        { "enum": ["outgoing", "incoming"] },
-        "target_id":        { "type": "integer" },
+        "target_id":        { "type": ["integer", "string"] },
         "target_name":      { "type": ["string", "null"] },
         "target_type":      { "type": ["string", "null"] },
         "rico_predicate":   { "type": "string", "description": "Canonical RiC-O property, e.g. rico:hasOrHadSubject, rico:isAssociatedWithPlace." },

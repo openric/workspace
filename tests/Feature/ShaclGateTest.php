@@ -5,7 +5,7 @@
 // Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
 // SPDX-License-Identifier: AGPL-3.0-or-later
 //
-// tests/Fixtures/openric-0.56.0/shapes holds the SHACL shapes of the OpenRiC specification 0.56.0 (CC BY 4.0).
+// tests/Fixtures/openric-0.61.0/shapes holds the SHACL shapes of the OpenRiC specification 0.61.0 (CC BY 4.0).
 // pySHACL checks them (PYSHACL, else pyshacl on the path). CI installs it and sets SHACL_REQUIRED, so there a missing
 // validator fails the build; elsewhere the test is skipped and says why.
 
@@ -60,7 +60,7 @@ class ShaclGateTest extends TestCase
         $editor = app(AccountService::class)->create($institution, 'Editor', 'editor@example.org', 'correct horse battery staple');
         app(AccountService::class)->grantTemplateRole($editor, 'editor');
         $holder = app(RepositoryService::class)->create($institution, 'Riverside Archives', 'en', 'RA');
-        app(RepositoryService::class)->describe($holder, ['history' => 'Founded in 1960.'], 'en');
+        app(RepositoryService::class)->describe($holder, ['history' => 'Founded in 1960.', 'access-conditions' => 'By appointment.'], 'en');
         app(ContactPointService::class)->save($holder, ['label' => 'Main', 'city' => 'Riverside', 'country_code' => 'ZA', 'is_primary' => true]);
         $records = app(RecordService::class);
         $fonds = $records->create($institution, self::LEVEL.'fonds', 'Riverside Parish Council records', 'en', null, $holder, 'RPC');
@@ -91,10 +91,13 @@ class ShaclGateTest extends TestCase
         $relations->create($town, 'place', $meetings, [], $editor);
         // Digital Object Linkage (roadmap phase 24): a carrier on paper, and a function.
         $paper = app(InstantiationService::class)->create($item, 'The minute book on paper', 'en', 'paper', 'on-request', $editor);
+        // Provenance and Event 0.9.0: an activity may result in an instantiation.
+        $relations->create($meetings, 'result', $paper, [], $editor);
         $keeping = app(ActivityService::class)->create($institution, 'Keeping the council minutes', 'en');
+        app(ActivityService::class)->describe($keeping, ['activity-classification' => 'isdf:5.2.1'], 'en');
         app(ActivityService::class)->updateFunction($keeping, true, $editor);
         $gone = $records->create($institution, self::LEVEL.'fonds', 'Withdrawn fonds', 'en', null, $holder, 'W');
-        foreach ([$holder, $council, $person, $fonds, $item, $gone, $town, $mandate, $meetings, $keeping] as $entity) {
+        foreach ([$holder, $council, $person, $fonds, $item, $paper, $gone, $town, $mandate, $meetings, $keeping] as $entity) {
             app(PublicationService::class)->apply($entity, 'publish', null, false, $editor);
         }
         $this->actingAs($editor)->post("/records/{$gone->id}/delete", ['reason' => 'Withdrawn.', 'replaced_by' => $fonds->iri])->assertRedirect();
@@ -133,7 +136,7 @@ class ShaclGateTest extends TestCase
             file_put_contents($data, $json);
             foreach (self::SHAPES as $shapes) {
                 // A warning is advice (sh:Warning); a violation fails the gate.
-                $result = Process::run([$validator, '--allow-warnings', '-s', base_path("tests/Fixtures/openric-0.56.0/shapes/$shapes.shacl.ttl"), '-df', 'json-ld', '-sf', 'turtle', $data]);
+                $result = Process::run([$validator, '--allow-warnings', '-s', base_path("tests/Fixtures/openric-0.61.0/shapes/$shapes.shacl.ttl"), '-df', 'json-ld', '-sf', 'turtle', $data]);
                 $this->assertTrue($result->successful(), "the $what conforms to $shapes.shacl.ttl:\n".mb_substr($result->output().$result->errorOutput(), 0, 3000));
             }
             unlink($data);
@@ -147,7 +150,7 @@ class ShaclGateTest extends TestCase
             ->map(fn ($d) => collect($d)->except('@context')->all())->values()->all()];
         $data = tempnam(sys_get_temp_dir(), 'shacl').'.jsonld';
         file_put_contents($data, json_encode($graph));
-        $result = Process::run([$validator, '--allow-warnings', '-s', base_path('tests/Fixtures/openric-0.56.0/shapes/graph-traversal.shacl.ttl'), '-df', 'json-ld', '-sf', 'turtle', $data]);
+        $result = Process::run([$validator, '--allow-warnings', '-s', base_path('tests/Fixtures/openric-0.61.0/shapes/graph-traversal.shacl.ttl'), '-df', 'json-ld', '-sf', 'turtle', $data]);
         unlink($data);
         preg_match_all('/Source Shape: :(\w+)/', $result->output(), $shapes);
         $this->assertSame([], array_values(array_diff(array_unique($shapes[1]), ['OrphanedRecordShape', 'UnlinkedAgentShape', 'InstantiationLinkedFromRecordShape', 'DuplicateIdentifierShape', 'RelationConsistencyShape'])),

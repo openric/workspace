@@ -74,7 +74,7 @@
     ] ;
 
     sh:property [
-        sh:path rico:classification ;
+        sh:path rico:hasActivityType ;
         sh:severity sh:Info ;
-        sh:message "Function should have a classification (ISDF §5.2)"
+        sh:message "Function should have a classification (ISDF 5.1.5), as rico:hasActivityType; rico:classification applies only to a Record Resource and is deprecated here from v0.61.0"
     ] .

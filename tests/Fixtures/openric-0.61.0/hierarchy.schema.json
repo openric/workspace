@@ -6,7 +6,7 @@
   "type": "object",
   "required": ["entity_id"],
   "properties": {
-    "entity_id": { "type": "integer" },
+    "entity_id": { "type": ["integer", "string"], "description": "An integer row id or a string key such as a UUID (openric/spec#67)." },
     "class": {
       "type": ["string", "null"],
       "description": "RiC-O class of the subject entity."
@@ -31,7 +31,7 @@
       "type": "object",
       "required": ["id"],
       "properties": {
-        "id":       { "type": "integer" },
+        "id":       { "type": ["integer", "string"] },
         "name":     { "type": ["string", "null"] },
         "slug":     { "type": ["string", "null"] },
         "type_id":  { "type": ["string", "null"] },

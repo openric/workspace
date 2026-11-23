@@ -43,7 +43,10 @@
     "rico:name":             { "$ref": "#/$defs/langString" },
     "openricx:description":      { "$ref": "#/$defs/langString" },
     "openricx:descriptiveNote":  { "$ref": "#/$defs/langString" },
-    "rico:hasOrHadRuleType":         { "type": "string" },
+    "rico:hasOrHadRuleType": {
+      "description": "The IRI of a concept in https://openric.org/vocab/rule-type/ or a local rule-type vocabulary, as a string or as a reference; rico:hasOrHadRuleType is an object property in RiC-O 1.1, so a bare word such as \"law\" is a literal in RDF and links to nothing (openric/spec#70).",
+      "anyOf": [ { "type": "string" }, { "$ref": "#/$defs/ref" } ]
+    },
     "dcterms:source":        { "$ref": "#/$defs/langString" },
 
     "openric:localType":     { "type": "string" },

@@ -70,9 +70,9 @@
 :InstantiationLinkedFromRecordShape a sh:NodeShape ;
     sh:targetClass rico:Instantiation ;
     sh:name "Instantiation-Record Link Check" ;
+    sh:severity sh:Warning ;
     sh:sparql [
         sh:message "Instantiation should be linked from a Record via rico:hasOrHadInstantiation" ;
-        sh:severity sh:Warning ;
         sh:select """
             SELECT $this WHERE {
                 $this a rico:Instantiation .
@@ -87,9 +87,9 @@
 :OrphanedRecordShape a sh:NodeShape ;
     sh:targetClass rico:Record ;
     sh:name "Orphaned Record Detection" ;
+    sh:severity sh:Warning ;
     sh:sparql [
         sh:message "Record has no parent and is not a top-level fonds" ;
-        sh:severity sh:Warning ;
         sh:select """
             SELECT $this WHERE {
                 $this a rico:Record .
@@ -102,9 +102,9 @@
 :UnlinkedAgentShape a sh:NodeShape ;
     sh:targetClass rico:Person, rico:CorporateBody, rico:Family ;
     sh:name "Unlinked Agent Detection" ;
+    sh:severity sh:Info ;
     sh:sparql [
         sh:message "Agent is not linked to any records or activities" ;
-        sh:severity sh:Info ;
         sh:select """
             SELECT $this WHERE {
                 { $this a rico:Person } UNION
@@ -125,9 +125,9 @@
 :DuplicateIdentifierShape a sh:NodeShape ;
     sh:targetClass rico:RecordSet, rico:Record ;
     sh:name "Duplicate Identifier Detection" ;
+    sh:severity sh:Warning ;
     sh:sparql [
         sh:message "Multiple records share the same identifier" ;
-        sh:severity sh:Warning ;
         sh:select """
             SELECT $this WHERE {
                 $this rico:identifier ?id .

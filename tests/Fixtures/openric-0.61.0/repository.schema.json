@@ -66,7 +66,7 @@
       ]
     },
 
-    "rico:authorizingMandate":           { "type": ["array", "object"] },
+    "rico:authorizingMandate":           { "type": ["array", "object", "string"] },
     "openricx:hasOrHadPolicy":       { "type": ["array", "object"] },
     "openricx:hasInternalStructure": { "$ref": "#/$defs/langString" },
 
@@ -74,7 +74,7 @@
     "rico:isOrWasDescribedBy":        { "type": ["array", "object"] },
 
     "openricx:contact":              { "type": "object" },
-    "rico:conditionsOfAccess":   { "type": "string" }
+    "rico:conditionsOfAccess":   { "type": ["string", "object", "array"], "deprecated": true, "description": "Outside the RiC-O 1.1 domain on a repository; deprecated in v0.61.0. Use rico:isOrWasRegulatedBy to a rico:Rule." }
   },
 
   "additionalProperties": true,

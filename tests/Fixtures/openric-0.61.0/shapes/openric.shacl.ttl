@@ -431,9 +431,9 @@
     ] ;
 
     sh:property [
-        sh:path rico:classification ;
+        sh:path rico:hasActivityType ;
         sh:severity sh:Info ;
-        sh:message "Function should have a classification (ISDF §5.2)"
+        sh:message "Function should have a classification (ISDF 5.1.5), as rico:hasActivityType; rico:classification applies only to a Record Resource and is deprecated here from v0.61.0"
     ] .
 
 
@@ -467,6 +467,30 @@
         sh:message "Creator must be a Person, CorporateBody, or Family"
     ] .
 
+
+# ============================================================================
+# RiC-O 1.1's specific relations beside the broad ones (spec v0.56.17)
+# ============================================================================
+# Noted, not required: as the Archives nationales de France's RiC-O converter gives them, so data from the two can be
+# read together.
+
+:SpecificInstantiationShape a sh:NodeShape ;
+    sh:targetSubjectsOf rico:hasOrHadInstantiation ;
+    sh:or (
+        [ sh:path rico:hasOrHadDigitalInstantiation ; sh:minCount 1 ]
+        [ sh:path rico:hasOrHadAnalogueInstantiation ; sh:minCount 1 ]
+    ) ;
+    sh:severity sh:Info ;
+    sh:message "RiC-O 1.1 can say whether an instantiation is digital or analogue (rico:hasOrHadDigitalInstantiation, rico:hasOrHadAnalogueInstantiation); give it where the carrier is known." .
+
+:DirectInclusionShape a sh:NodeShape ;
+    sh:targetSubjectsOf rico:includesOrIncluded ;
+    sh:property [
+        sh:path rico:directlyIncludes ;
+        sh:minCount 1 ;
+        sh:severity sh:Info ;
+        sh:message "RiC-O 1.1 says a record set's current, direct members with rico:directlyIncludes; give it beside rico:includesOrIncluded for those."
+    ] .
 
 # ============================================================================
 # Cross-entity SPARQL shapes were moved to shapes/full-graph.shacl.ttl

@@ -24,6 +24,7 @@
 @prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
 @prefix rico: <https://www.ica.org/standards/RiC/ontology#> .
 @prefix openricx: <https://openric.org/ns/ext/v1#> .
+@prefix openric:  <https://openric.org/ns/v1#> .
 @prefix :     <https://openric.org/shapes#> .
 
 
@@ -156,9 +157,9 @@
     ] ;
 
     sh:property [
-        sh:path openricx:jurisdiction ;
+        sh:path openric:jurisdiction ;
         sh:severity sh:Info ;
-        sh:message "Rule should specify the jurisdiction it applies to"
+        sh:message "Rule should specify the jurisdiction it applies to (openric:jurisdiction, as rule.schema.json has it; openricx:jurisdiction is deprecated, openric/spec#71)"
     ] ;
 
     sh:or (

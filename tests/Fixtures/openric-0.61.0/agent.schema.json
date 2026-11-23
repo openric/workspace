@@ -74,7 +74,7 @@
     },
 
     "rico:isAssociatedWithPlace":             { "type": ["array", "object"] },
-    "rico:authorizingMandate":           { "type": ["array", "object"] },
+    "rico:authorizingMandate":           { "type": ["array", "object", "string"] },
     "rico:performsOrPerformed":             { "type": ["array", "object"] },
     "openricx:hasOccupation":    { "$ref": "#/$defs/langString" },
 

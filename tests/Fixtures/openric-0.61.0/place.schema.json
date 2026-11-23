@@ -46,6 +46,14 @@
     "rico:latitude":  { "type": ["number", "null"], "minimum": -90,  "maximum": 90 },
     "rico:longitude": { "type": ["number", "null"], "minimum": -180, "maximum": 180 },
 
+    "rico:hasOrHadCoordinates": {
+      "description": "The place's coordinates as a rico:Coordinates node, the RiC-O 1.1 form, with rico:latitude, rico:longitude and rico:altitude on the node. The flat rico:latitude and rico:longitude on the place are a deprecated shorthand (openric/spec#72).",
+      "anyOf": [
+        { "type": "object", "properties": { "@type": { "const": "rico:Coordinates" }, "rico:latitude": { "type": "number", "minimum": -90, "maximum": 90 }, "rico:longitude": { "type": "number", "minimum": -180, "maximum": 180 }, "rico:altitude": { "type": "number" } } },
+        { "type": "array", "items": { "type": "object" } }
+      ]
+    },
+
     "owl:sameAs": {
       "anyOf": [
         { "type": "string", "format": "uri" },

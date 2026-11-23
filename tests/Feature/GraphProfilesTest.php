@@ -6,7 +6,7 @@
 // Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
 // SPDX-License-Identifier: AGPL-3.0-or-later
 //
-// tests/Fixtures/openric-0.56.0 holds the JSON Schemas of the OpenRiC specification 0.56.0 (CC BY 4.0). The
+// tests/Fixtures/openric-0.61.0 holds the JSON Schemas of the OpenRiC specification 0.61.0 (CC BY 4.0). The
 // relation-list, relations-for and hierarchy schemas give ids as integers; the Workspace's ids are UUIDs, so those
 // three are read here with string ids allowed (conformance/README.md, departures).
 
@@ -89,7 +89,7 @@ class GraphProfilesTest extends TestCase
     /** The response, valid against the schema; $uuids lets ids be strings, as the Workspace's are. */
     private function valid(TestResponse $response, string $schema, bool $uuids = false): array
     {
-        $text = file_get_contents(base_path("tests/Fixtures/openric-0.56.0/$schema.schema.json"));
+        $text = file_get_contents(base_path("tests/Fixtures/openric-0.61.0/$schema.schema.json"));
         if ($uuids) {
             $text = preg_replace('/("(?:id|subject_id|object_id|entity_id|target_id)"\s*:\s*\{[^{}]*?"type"\s*:\s*)"integer"/', '$1["integer", "string"]', $text);
         }

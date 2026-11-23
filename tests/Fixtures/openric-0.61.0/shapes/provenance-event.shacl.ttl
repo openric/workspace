@@ -153,7 +153,7 @@
 :ResultTypeShape a sh:NodeShape ;
     sh:targetSubjectsOf rico:resultsOrResultedIn ;
     sh:name "Result Type Check" ;
-    sh:description "A resultsOrResultedIn target must be a Record or RecordSet. Linking to an Agent or Place is a mapping error — that is a different predicate (tookPlaceAt, hasOrHadParticipant)." ;
+    sh:description "A resultsOrResultedIn target must be a RecordSet, Record, RecordPart or Instantiation (Instantiation accepted from profile 0.9.0, spec v0.60.0). Linking to an Agent or Place is a mapping error — that is a different predicate (tookPlaceAt, hasOrHadParticipant)." ;
 
     sh:property [
         sh:path rico:resultsOrResultedIn ;
@@ -161,6 +161,7 @@
             [ sh:class rico:RecordSet ]
             [ sh:class rico:Record ]
             [ sh:class rico:RecordPart ]
+            [ sh:class rico:Instantiation ]
         ) ;
-        sh:message "rico:resultsOrResultedIn target MUST be a RecordSet, Record, or RecordPart"
+        sh:message "rico:resultsOrResultedIn target MUST be a RecordSet, Record, RecordPart or Instantiation"
     ] .

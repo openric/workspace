@@ -12,9 +12,9 @@
         "type": "object",
         "required": ["id", "subject_id", "object_id", "rico_predicate"],
         "properties": {
-          "id":                 { "type": "integer" },
-          "subject_id":         { "type": "integer" },
-          "object_id":          { "type": "integer" },
+          "id":                 { "type": ["integer", "string"] },
+          "subject_id":         { "type": ["integer", "string"] },
+          "object_id":          { "type": ["integer", "string"] },
           "subject_class":      { "type": ["string", "null"] },
           "object_class":       { "type": ["string", "null"] },
           "rico_predicate":     { "type": "string" },

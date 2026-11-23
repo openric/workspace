@@ -4,8 +4,8 @@
 // Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
 // SPDX-License-Identifier: AGPL-3.0-or-later
 //
-// tests/Fixtures/openric-0.56.0 holds the JSON Schemas of the OpenRiC
-// specification 0.56.0, unchanged since 0.55.0 (https://openric.org/schemas/, CC BY 4.0).
+// tests/Fixtures/openric-0.61.0 holds the JSON Schemas of the OpenRiC
+// specification 0.61.0 (https://openric.org/schemas/, CC BY 4.0).
 
 namespace Tests\Feature;
 
@@ -92,7 +92,7 @@ class ApiTest extends TestCase
     private function valid(TestResponse $response, string $schema): array
     {
         $json = $response->getContent();
-        $result = (new Validator)->validate(json_decode($json), file_get_contents(base_path("tests/Fixtures/openric-0.56.0/$schema.schema.json")));
+        $result = (new Validator)->validate(json_decode($json), file_get_contents(base_path("tests/Fixtures/openric-0.61.0/$schema.schema.json")));
         $this->assertTrue($result->isValid(), "valid against $schema.schema.json: ".json_encode($result->isValid() ? [] : (new ErrorFormatter)->format($result->error())));
 
         return json_decode($json, true);
