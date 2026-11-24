@@ -31,6 +31,8 @@ What is supported and what is experimental, off until named, is in [MODULES.md](
 - **The OpenRiC specification** ([openric/spec](https://github.com/openric/spec), [openric.org](https://openric.org)) is independent of this application. The Workspace implements its published, versioned profiles and takes any gap to openric/spec first; its needs do not redefine the standard. Implementation began before the Standard Acceptance Gate, by decision ([ADR 0003](architecture/adr/0003-implementation-before-the-s-gate.md)). Every decision is also published at [openric.org/application/decisions](https://openric.org/application/decisions/).
 - **Heratio** ([heratio.theahg.co.za](https://heratio.theahg.co.za)) is a separate GLAM platform with RiC built in. Much of the Workspace's code is Heratio's, copied and rewritten onto RiC, each file recorded in the provenance ledger; the Workspace has its own schema and never depends on Heratio at run time. Both have the same copyright holder and licence, so the reuse changes neither. A migration from Heratio is parked until an export with a full sample exists.
 
+How we use AI: see [AI-STATEMENT.md](AI-STATEMENT.md).
+
 ## Licence
 
 AGPL-3.0-or-later; see [LICENSE](LICENSE). Third-party code that comes with Heratio's is checked file by file before it is brought in.
