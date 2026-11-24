@@ -9,7 +9,7 @@ What the OpenRiC Workspace's published Linked Data means, and how that changes. 
 | Records model | RiC-O | 1.1 (2025-05-22) | Every class and property in the RiC-O namespace the Workspace writes is defined by RiC-O 1.1. |
 | Vocabularies | SKOS | W3C Recommendation (2009) | The Workspace's vocabularies, at `/vocab/{scheme}.ttl`. |
 | OpenRiC extensions | `openricx:` = `https://openric.org/ns/ext/v1#` | extension ontology 1.6.0 | Terms RiC-O does not define. The same namespace in JSON-LD, Turtle and RDF/XML. |
-| OpenRiC | specification | v0.56.0 | The profiles the service description declares, and the mapping. |
+| OpenRiC | specification | v0.61.0 | The profiles the service description declares, and the mapping. |
 
 PROV-O and CIDOC-CRM are not pinned: the Workspace does not publish them. A RiC-O version change is a governed change, never an automatic upgrade.
 

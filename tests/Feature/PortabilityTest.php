@@ -192,7 +192,7 @@ class PortabilityTest extends TestCase
 
         $feed = $this->get(self::API.'/changelog')->assertOk()->json();
         $this->assertSame(['dataset_version', 'openric_spec_version', 'pinned_standards', 'governance_pin', 'deprecated_entities', 'changes'], array_keys($feed));
-        $this->assertSame('0.56.0', $feed['openric_spec_version']);
+        $this->assertSame('0.61.0', $feed['openric_spec_version']);
         $versions = array_column($feed['changes'], 'version');
         $newestFirst = $versions;
         usort($newestFirst, fn ($a, $b) => version_compare($b, $a));

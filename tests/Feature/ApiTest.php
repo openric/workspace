@@ -1,6 +1,6 @@
 <?php
 
-// OpenRiC Workspace - the read API: Core Discovery 0.7.0, checked against the spec's JSON Schemas (spec 0.56.0).
+// OpenRiC Workspace - the read API: Core Discovery 0.7.0, checked against the spec's JSON Schemas (spec 0.61.0).
 // Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
 // SPDX-License-Identifier: AGPL-3.0-or-later
 //
@@ -101,11 +101,11 @@ class ApiTest extends TestCase
     public function test_the_service_description_health_and_vocabulary(): void
     {
         $service = $this->valid($this->get(self::API.'/')->assertOk()->assertHeader('Vary', 'Accept')->assertHeader('Access-Control-Allow-Origin', '*'), 'service-description');
-        $this->assertSame(['spec_version' => '0.56.0', 'profiles' => [['id' => 'core-discovery', 'version' => '0.7.0', 'conformance' => 'full'],
+        $this->assertSame(['spec_version' => '0.61.0', 'profiles' => [['id' => 'core-discovery', 'version' => '0.7.0', 'conformance' => 'full'],
             ['id' => 'export-only', 'version' => '0.10.0', 'conformance' => 'full'], ['id' => 'portability', 'version' => '0.43.0', 'conformance' => 'full'],
-            ['id' => 'governance', 'version' => '0.45.0', 'conformance' => 'full'], ['id' => 'authority-context', 'version' => '0.4.0', 'conformance' => 'full'],
-            ['id' => 'graph-traversal', 'version' => '0.6.0', 'conformance' => 'full'], ['id' => 'digital-object-linkage', 'version' => '0.7.0', 'conformance' => 'full'],
-            ['id' => 'provenance-event', 'version' => '0.8.0', 'conformance' => 'full']]], $service['openric_conformance']);
+            ['id' => 'governance', 'version' => '0.45.0', 'conformance' => 'full'], ['id' => 'authority-context', 'version' => '0.5.0', 'conformance' => 'full'],
+            ['id' => 'graph-traversal', 'version' => '0.7.0', 'conformance' => 'full'], ['id' => 'digital-object-linkage', 'version' => '0.8.0', 'conformance' => 'full'],
+            ['id' => 'provenance-event', 'version' => '0.10.0', 'conformance' => 'full']]], $service['openric_conformance']);
         $this->assertSame(trim(file_get_contents(base_path('VERSION'))), $service['version']);
         $this->get(self::API.'/health')->assertOk()->assertExactJson(['status' => 'ok']);
         $vocabulary = $this->valid($this->get(self::API.'/vocabulary')->assertOk(), 'vocabulary');

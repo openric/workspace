@@ -1,6 +1,6 @@
 <?php
 
-// OpenRiC Workspace - the OpenRiC read API, Core Discovery profile 0.7.0 (spec 0.56.0).
+// OpenRiC Workspace - the OpenRiC read API, Core Discovery profile 0.7.0 (spec 0.61.0).
 // Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
 // SPDX-License-Identifier: AGPL-3.0-or-later
 //
@@ -39,8 +39,8 @@ class DiscoveryController extends Controller
     /** The profiles this service declares, with the versions it implements. */
     public const PROFILES = [['id' => 'core-discovery', 'version' => '0.7.0', 'conformance' => 'full'], ['id' => 'export-only', 'version' => '0.10.0', 'conformance' => 'full'],
         ['id' => 'portability', 'version' => '0.43.0', 'conformance' => 'full'], ['id' => 'governance', 'version' => '0.45.0', 'conformance' => 'full'],
-        ['id' => 'authority-context', 'version' => '0.4.0', 'conformance' => 'full'], ['id' => 'graph-traversal', 'version' => '0.6.0', 'conformance' => 'full'],
-        ['id' => 'digital-object-linkage', 'version' => '0.7.0', 'conformance' => 'full'], ['id' => 'provenance-event', 'version' => '0.8.0', 'conformance' => 'full']];
+        ['id' => 'authority-context', 'version' => '0.5.0', 'conformance' => 'full'], ['id' => 'graph-traversal', 'version' => '0.7.0', 'conformance' => 'full'],
+        ['id' => 'digital-object-linkage', 'version' => '0.8.0', 'conformance' => 'full'], ['id' => 'provenance-event', 'version' => '0.10.0', 'conformance' => 'full']];
 
     /** The list type of each list. */
     private const LISTS = ['records' => 'openricx:RecordList', 'agents' => 'openricx:AgentList', 'repositories' => 'openricx:RepositoryList',
