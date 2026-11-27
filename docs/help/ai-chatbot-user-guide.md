@@ -34,7 +34,7 @@ Under each answer is **Report this answer as wrong**, with room to say what is w
 
 ## Conversations
 
-A reader's conversation lasts the browser session; **Start a new conversation** begins another. Conversations are deleted after the institution's retention period (30 days for an institution set up from 27 November 2026, unless an administrator sets another in **Admin > AI**; an institution set up before keeps the period it has, 90 days unless changed), every night by `php artisan workspace:chat:prune`. The log of inferences keeps only hashes of what was sent and what came back, never the words.
+A reader's conversation lasts the browser session; **Start a new conversation** begins another. Conversations are deleted after the institution's retention period (90 days unless an administrator sets another in **Admin > AI**; the server's operator can change that default for institutions set up later with `AI_CHAT_RETENTION_DAYS`), every night by `php artisan workspace:chat:prune`. The log of inferences keeps only hashes of what was sent and what came back, never the words.
 
 ## What the assistant cannot do
 

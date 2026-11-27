@@ -7,7 +7,8 @@
 // ask over drafts they may see; a flagged answer is reviewed, and wrong answers raise an incident; a halted system is
 // never called; the register, risks, incidents, models, Annex IV and attestations; old conversations are deleted. From
 // AHG-AIIA-003 (27 November 2026): a word held only in a draft or a closed unit reaches no model; a question that tries
-// to change the assistant is refused; the public assistant stops at its daily cap; the public page warns what masking misses.
+// to change the assistant is refused; the public assistant stops at its daily cap; the public page warns what masking misses;
+// a new institution's conversations are kept the configured days, 90 unless set.
 // Copyright (C) 2026 Johan Pieterse / Plain Sailing Information Systems
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
@@ -296,14 +297,18 @@ class ChatbotAndComplianceTest extends TestCase
         $this->assertCount(2, $this->sent);
     }
 
-    public function test_the_public_page_says_what_masking_misses_and_a_new_institution_keeps_conversations_30_days(): void
+    public function test_the_public_page_says_what_masking_misses_and_a_new_institution_keeps_conversations_the_configured_days(): void
     {
         $this->offer();
         $this->get(route('discover.ask'))->assertSee('names, addresses and short numbers are not');
         $other = Institution::create(['name' => 'Hillside Archives', 'base_iri' => 'https://hillside.example.org']);
         $settings = AiSetting::create(['institution_id' => $other->id, 'enabled' => true])->refresh();
-        $this->assertSame(30, $settings->chatbot_retention_days);
+        $this->assertSame(90, $settings->chatbot_retention_days, 'the default, unless AI_CHAT_RETENTION_DAYS says otherwise');
         $this->assertSame(200, $settings->chatbot_daily_cap);
+
+        config(['workspace.ai.chat_retention_days' => 45]);
+        $third = Institution::create(['name' => 'Valley Archives', 'base_iri' => 'https://valley.example.org']);
+        $this->assertSame(45, AiSetting::create(['institution_id' => $third->id, 'enabled' => true])->refresh()->chatbot_retention_days);
     }
 
     public function test_old_conversations_are_deleted(): void

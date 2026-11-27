@@ -18,6 +18,12 @@ class AiSetting extends Model
 {
     use Audited, HasUuids;
 
+    /** A new institution's conversations are kept for the configured default, 90 days unless AI_CHAT_RETENTION_DAYS says otherwise. */
+    protected static function booted(): void
+    {
+        static::creating(fn (self $setting) => $setting->chatbot_retention_days ??= (int) config('workspace.ai.chat_retention_days'));
+    }
+
     protected function casts(): array
     {
         return ['enabled' => 'boolean', 'monthly_limit' => 'integer', 'translation_elements' => 'array', 'annif_limit' => 'integer', 'annif_threshold' => 'float', 'annif_learned_at' => 'immutable_datetime', 'chatbot_public' => 'boolean', 'chatbot_retention_days' => 'integer', 'chatbot_daily_cap' => 'integer'];

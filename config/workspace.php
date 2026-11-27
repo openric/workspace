@@ -285,6 +285,8 @@ return [
     // key, every AI feature says it is not set up. The vision models read printed pages unless an institution names others.
     'ai' => ['gateway_url' => rtrim((string) env('AI_GATEWAY_URL', 'https://ai.theahg.co.za/ai/v1'), '/'), 'gateway_key' => (string) env('AI_GATEWAY_KEY', ''),
         'timeout' => (int) env('AI_GATEWAY_TIMEOUT', 180), 'ocr_model' => env('AI_OCR_MODEL', 'qwen2.5vl:7b-ctx16k'), 'ocr_fallback_model' => env('AI_OCR_FALLBACK_MODEL', 'qwen3.6:27b'), 'chat_model' => env('AI_CHAT_MODEL', 'qwen3:8b'),
+        // How long the catalogue assistant's conversations are kept, for an institution that has not set its own period (Dr Johan Pieterse, 27 November 2026: 90 days).
+        'chat_retention_days' => (int) env('AI_CHAT_RETENTION_DAYS', 90),
         // The languages a description may be translated into through the gateway's NLLB-200 route (Heratio's
         // LanguageOptions::translationTargets): South Africa's eleven official languages, two more of the region, and seven others.
         'translation_targets' => ['en', 'af', 'zu', 'xh', 'st', 'tn', 'nso', 'ts', 'ss', 've', 'nr', 'nd', 'sn', 'nl', 'fr', 'de', 'es', 'pt', 'sw', 'ar', 'it']],

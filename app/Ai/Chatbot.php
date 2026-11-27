@@ -129,7 +129,7 @@ TXT;
     {
         $deleted = 0;
         foreach (Institution::all() as $institution) {
-            $days = (int) ($this->gateway->settings($institution->id)->chatbot_retention_days ?: 30);
+            $days = (int) ($this->gateway->settings($institution->id)->chatbot_retention_days ?: (int) config('workspace.ai.chat_retention_days'));
             $deleted += ChatConversation::where('institution_id', $institution->id)->where('last_message_at', '<', now()->subDays($days))->delete();
         }
 
