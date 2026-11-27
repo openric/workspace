@@ -43,6 +43,30 @@ class Guardrails
     }
 
     /**
+     * A question that tries to change what the assistant is (AHG-AIIA-003, ASK-R3): told to ignore or reveal its
+     * instructions, or to become something else. Such a question is answered with a refusal and never reaches a model.
+     * ponytail: a short list of patterns, English and Afrikaans; it stops the plain attempts, not a determined one, and
+     * the fixed sources and the published-only search remain the real limits.
+     *
+     * @return string|null the kind of request refused, or null
+     */
+    public function refused(string $question): ?string
+    {
+        $q = mb_strtolower($question);
+        foreach ([
+            'instructions' => '/\b(ignore|disregard|forget|override|bypass|ignoreer|vergeet)\b.{0,60}\b(instructions?|rules|prompt|guidelines|instruksies|reëls)\b/u',
+            'reveal' => '/\b(system prompt|your (instructions|rules|prompt)|jou (instruksies|reëls))\b/u',
+            'role' => '/\b(you are now|from now on you are|pretend (to be|you are)|jailbreak|developer mode|jy is nou)\b/u',
+        ] as $kind => $pattern) {
+            if (preg_match($pattern, $q)) {
+                return $kind;
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * How far an answer is grounded in its sources: the share of its significant words found in them. Too few words to
      * judge counts as grounded, as in Heratio.
      *

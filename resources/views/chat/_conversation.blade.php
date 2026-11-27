@@ -4,6 +4,7 @@
 @if(session('status'))<p role="status">{{ session('status') }}</p>@endif
 <p class="meta">{{ __('The assistant answers from the records you may read and cites them. Its answers are written by AI and may be wrong: check them against the records.') }}
     <a href="{{ route('accessibility.statement') }}">{{ __('Accessibility') }}</a></p>
+@if($public)<p class="meta">{{ __('Do not type personal details. Email addresses and long numbers are removed before your question is answered, but names, addresses and short numbers are not.') }}</p>@endif
 <ol class="chat" aria-label="{{ __('The conversation') }}" style="list-style: none; padding: 0">
     @forelse($messages as $m)
         @php($assistant = $m->role->notation === 'assistant')

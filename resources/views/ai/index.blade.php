@@ -43,7 +43,8 @@
         <fieldset id="assistant"><legend>{{ __('The catalogue\'s assistant') }}</legend>
             <p class="meta">{{ __('Answers questions from the records the reader may read, citing them; its answers are marked as written by AI, and readers may flag one as wrong for review.') }}</p>
             <p><label><input type="checkbox" name="chatbot_public" value="1" @checked($settings->chatbot_public)> {{ __('Offer it in the public catalogue') }}</label></p>
-            <label for="ai-chat-days">{{ __('Delete a conversation so many days after its last message') }}</label><input id="ai-chat-days" name="chatbot_retention_days" type="number" min="1" max="3650" value="{{ $settings->chatbot_retention_days ?? 90 }}">
+            <label for="ai-chat-days">{{ __('Delete a conversation so many days after its last message') }}</label><input id="ai-chat-days" name="chatbot_retention_days" type="number" min="1" max="3650" value="{{ $settings->chatbot_retention_days ?? 30 }}">
+            <label for="ai-chat-cap">{{ __('Public questions answered with the model each day (0 stops it)') }}</label><input id="ai-chat-cap" name="chatbot_daily_cap" type="number" min="0" max="100000" value="{{ $settings->chatbot_daily_cap ?? 200 }}">
             <label for="ai-chat-rules">{{ __('Instructions to the assistant (empty: the Workspace\'s own)') }}</label>
             <textarea id="ai-chat-rules" name="chatbot_instructions" rows="6" maxlength="5000" placeholder="{{ \Illuminate\Support\Str::limit(\App\Ai\Chatbot::RULES, 300) }}">{{ $settings->chatbot_instructions }}</textarea>
             <p><a href="{{ route('ai.compliance') }}">{{ __('AI register and compliance') }}</a> · <a href="{{ route('ai.answers') }}">{{ __('Flagged answers') }}</a></p>

@@ -80,6 +80,9 @@ TXT;
         [$masked, $piiMasked] = $this->guardrails->maskPii($question);
         $history = $conversation->messages()->with('role')->orderByDesc('created_at')->limit(self::HISTORY)->get()->reverse()->values();
         $this->say($conversation, 'user', $masked);
+        if ($refused = $this->guardrails->refused($masked)) {
+            return $this->say($conversation, 'assistant', __('I can only answer questions about the collection from its records. Ask about the records, their creators, places or dates.'), [], null, ['pii_masked' => $piiMasked, 'refused' => $refused]);
+        }
 
         $sources = $conversation->public ? $this->publicSources($institution, $masked) : $this->staffSources($institution, $user, $masked);
         if ($sources === []) {
@@ -87,6 +90,11 @@ TXT;
         }
 
         $settings = $this->gateway->settings($institution->id);
+        // The public questions answered with the model today, counted from the answers kept (AHG-AIIA-003, ASK-R3).
+        if ($conversation->public && ChatMessage::whereNotNull('inference_id')->where('created_at', '>=', now()->startOfDay())
+            ->whereHas('conversation', fn ($q) => $q->where(['institution_id' => $institution->id, 'public' => true]))->count() >= (int) ($settings->chatbot_daily_cap ?? 200)) {
+            return $this->say($conversation, 'assistant', __('The assistant has answered as many questions as it may today. Try again tomorrow, or use the search.'), [], null, ['pii_masked' => $piiMasked, 'daily_cap' => true]);
+        }
         $model = $settings->chat_model ?: (string) config('workspace.ai.chat_model');
         $system = trim($settings->chatbot_instructions ?: self::RULES)."\n\nSOURCES:\n".collect($sources)
             ->map(fn ($s, $i) => '['.($i + 1).'] '.$s['label']."\n    ".Str::limit($s['text'], 900))->join("\n");
@@ -121,7 +129,7 @@ TXT;
     {
         $deleted = 0;
         foreach (Institution::all() as $institution) {
-            $days = (int) ($this->gateway->settings($institution->id)->chatbot_retention_days ?: 90);
+            $days = (int) ($this->gateway->settings($institution->id)->chatbot_retention_days ?: 30);
             $deleted += ChatConversation::where('institution_id', $institution->id)->where('last_message_at', '<', now()->subDays($days))->delete();
         }
 

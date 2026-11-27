@@ -7274,5 +7274,9 @@
     "The explorer settings are saved.": "Die verkenner-instellings is gestoor.",
     "No account has that email address: give --as.": "Geen rekening het daardie e-posadres nie: gee --as.",
     "Not taken in: no unit :key that this account may describe.": "Nie opgeneem nie: geen eenheid :key wat hierdie rekening mag beskryf nie.",
-    ":queued names proposed, :existing already there, :skipped not taken in.": ":queued name voorgestel, :existing reeds daar, :skipped nie opgeneem nie."
+    ":queued names proposed, :existing already there, :skipped not taken in.": ":queued name voorgestel, :existing reeds daar, :skipped nie opgeneem nie.",
+    "I can only answer questions about the collection from its records. Ask about the records, their creators, places or dates.": "Ek kan slegs vrae oor die versameling uit sy rekords beantwoord. Vra oor die rekords, hul skeppers, plekke of datums.",
+    "The assistant has answered as many questions as it may today. Try again tomorrow, or use the search.": "Die assistent het vandag soveel vrae beantwoord as wat dit mag. Probeer môre weer, of gebruik die soektog.",
+    "Public questions answered with the model each day (0 stops it)": "Openbare vrae wat elke dag met die model beantwoord word (0 stop dit)",
+    "Do not type personal details. Email addresses and long numbers are removed before your question is answered, but names, addresses and short numbers are not.": "Moenie persoonlike besonderhede tik nie. E-posadresse en lang nommers word verwyder voordat u vraag beantwoord word, maar name, adresse en kort nommers nie."
 }
